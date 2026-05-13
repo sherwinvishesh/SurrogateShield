@@ -92,25 +92,36 @@ class Conversation:
     """
     Full conversation state including history and metadata.
 
+    Two separate message lists are maintained:
+        messages     — display history with REAL values restored (shown to user,
+                       persisted for human readability)
+        api_messages — API history with SURROGATE values only (sent to Claude,
+                       never contains real PII)
+
+    This separation is the core privacy guarantee for multi-turn conversations.
     Attributes:
-        id:       Unique conversation identifier (UUID).
-        messages: Ordered list of turns in the conversation.
-        created:  ISO timestamp of conversation creation.
-        rag_mode: Whether RAG mode is active for this conversation.
+        id:           Unique conversation identifier (UUID).
+        messages:     Display history (real values, for the user).
+        api_messages: API history (surrogates only, sent to Claude).
+        created:      ISO timestamp of conversation creation.
+        rag_mode:     Whether RAG mode is active for this conversation.
     """
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     messages: List[ConversationMessage] = field(default_factory=list)
+    api_messages: List[ConversationMessage] = field(default_factory=list)
     created: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     rag_mode: bool = False
 
     def to_api_history(self) -> list:
         """
-        Convert conversation messages to the list format expected by the Claude API.
+        Return the sanitised API history for sending to Claude.
+
+        Uses api_messages (surrogate values) — never the display messages.
 
         Returns:
             List of dicts with 'role' and 'content' keys.
         """
-        return [{"role": m.role, "content": m.content} for m in self.messages]
+        return [{"role": m.role, "content": m.content} for m in self.api_messages]
 
 
 # ─────────────────────────────────────────────

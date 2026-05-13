@@ -60,6 +60,24 @@ def _get_nlp():
 
 _TARGET_LABELS = {"PERSON", "GPE", "LOC", "ORG", "FAC"}
 
+# Words that spaCy frequently mis-classifies as named entities.
+# e.g. "SSN" → ORG, "DOB" → PERSON, "ID" → ORG.
+# Replacing these produces nonsense surrogates that confuse the LLM.
+_ENTITY_BLOCKLIST = {
+    # PII field labels
+    "ssn", "dob", "pin", "id", "uid", "email", "phone", "fax",
+    "address", "zip", "postcode", "passport", "iban", "bic",
+    "cvv", "cvc", "expiry",
+    # Titles that are not identifying on their own
+    "mr", "mrs", "ms", "dr", "prof", "jr", "sr",
+    # Month/day abbreviations
+    "mon", "tue", "wed", "thu", "fri", "sat", "sun",
+    "jan", "feb", "mar", "apr", "jun", "jul", "aug",
+    "sep", "oct", "nov", "dec",
+    # Timezone / unit abbreviations
+    "am", "pm", "gmt", "utc", "est", "pst",
+}
+
 
 # ─────────────────────────────────────────────
 # Main trace function
@@ -107,14 +125,26 @@ def trace(
         if ent.label_ not in _TARGET_LABELS:
             continue
 
-        # spaCy en_core_web_lg does not always populate ent.kb_id / ent.sent.end_score
-        # Use ent._.score if available (from component), otherwise default to 0.85
-        # to represent reasonable NER confidence from the lg model.
+        # Skip common PII label words that spaCy mis-classifies as entities
+        # (e.g. "SSN" detected as ORG, "DOB" detected as PERSON)
+        if ent.text.lower().strip() in _ENTITY_BLOCKLIST:
+            logger.debug(f"[EntityTrace] Skipping blocklisted token: {ent.text!r}")
+            continue
+
+        # spaCy en_core_web_lg does not expose per-entity confidence scores
+        # natively. We assign type-specific defaults that reflect real-world
+        # ambiguity: PERSON/GPE are usually unambiguous (confirmed); LOC/FAC
+        # are often ambiguous (borderline), giving ContextGuard something to do.
+        _TYPE_DEFAULTS = {
+            "PERSON": 0.88,   # confirmed — names are usually clear
+            "GPE":    0.85,   # confirmed — countries/cities usually clear
+            "ORG":    0.82,   # confirmed — organisations usually unambiguous
+            "LOC":    0.74,   # borderline — generic locations often ambiguous
+            "FAC":    0.70,   # borderline — facilities most ambiguous
+        }
         score: float = getattr(ent, "score_", None)
         if score is None:
-            # en_core_web_lg doesn't expose per-entity scores natively;
-            # use a sensible default that places it in the "confirmed" bucket.
-            score = 0.85
+            score = _TYPE_DEFAULTS.get(ent.label_, 0.80)
 
         candidate = DetectedEntity(
             text=ent.text,

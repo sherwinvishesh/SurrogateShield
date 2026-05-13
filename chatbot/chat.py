@@ -24,6 +24,24 @@ from util import Conversation, ConversationMessage, get_logger, new_conversation
 
 logger = get_logger(__name__)
 
+# ─────────────────────────────────────────────
+# System prompt — tells Claude it is working
+# with anonymised aliases, not real identities.
+# Prevents security warnings and stops the model
+# from treating PII label words ("SSN", "DOB")
+# as meaningful context signals.
+# ─────────────────────────────────────────────
+
+SYSTEM_PROMPT = (
+    "You are a helpful assistant. The names, email addresses, phone numbers, "
+    "and other personal details in this conversation are anonymised aliases — "
+    "placeholders for the user's real information. Treat every alias as you "
+    "would treat real information: answer helpfully and naturally. Do not "
+    "comment on the aliases, do not flag them as unusual, and do not issue "
+    "security warnings about them. The user's privacy is already protected "
+    "by the system they are using."
+)
+
 
 class ClaudeChat:
     """
@@ -56,36 +74,37 @@ class ClaudeChat:
         """
         Send a sanitised message to Claude and return the raw API response.
 
-        The caller (pipeline.py) is responsible for:
-          - Sanitising the message BEFORE calling this method
-          - Reconstructing originals AFTER this method returns
+        Maintains two separate histories:
+          - api_messages: sanitised text (surrogates) — sent to Claude every turn
+          - messages:     display text (real values) — updated by pipeline after
+                          ResolvePass runs, never sent to the API
 
-        This method only handles API communication and history management.
-        The history stored here uses the sanitised text (so the API sees
-        consistent context across turns).
+        This separation is what prevents real PII from leaking into the
+        multi-turn context window on subsequent turns.
 
         Args:
-            sanitised_message: User message with PII replaced by surrogates.
+            sanitised_message: User message with PII already replaced by surrogates.
 
         Returns:
             Raw assistant response text (still containing surrogates).
         """
-        # Append user turn to history
-        self.conversation.messages.append(
+        # Append sanitised user turn to the API history
+        self.conversation.api_messages.append(
             ConversationMessage(role="user", content=sanitised_message)
         )
 
-        # Build API message list from full history
-        api_messages = [
+        # Build API payload — ALWAYS from api_messages, never from messages
+        api_payload = [
             {"role": m.role, "content": m.content}
-            for m in self.conversation.messages
+            for m in self.conversation.api_messages
         ]
 
         try:
             response = self._client.messages.create(
                 model=CLAUDE_MODEL,
                 max_tokens=4096,
-                messages=api_messages,
+                system=SYSTEM_PROMPT,
+                messages=api_payload,
             )
             assistant_text: str = response.content[0].text
         except anthropic.APIConnectionError as exc:
@@ -98,7 +117,16 @@ class ClaudeChat:
             logger.error(f"[ClaudeChat] API call failed: {exc}")
             raise
 
-        # Append assistant turn (raw — surrogates still present)
+        # Append raw assistant response (surrogates) to API history
+        self.conversation.api_messages.append(
+            ConversationMessage(role="assistant", content=assistant_text)
+        )
+
+        # Append a placeholder to display history — pipeline will restore
+        # real values and call update_last_assistant_message() immediately after
+        self.conversation.messages.append(
+            ConversationMessage(role="user", content=sanitised_message)
+        )
         self.conversation.messages.append(
             ConversationMessage(role="assistant", content=assistant_text)
         )
@@ -107,14 +135,15 @@ class ClaudeChat:
 
     def update_last_assistant_message(self, restored_text: str) -> None:
         """
-        Replace the last assistant message content with the restored text.
+        Replace the last assistant message in the DISPLAY history with
+        the restored (real-values) text.
 
-        Called by pipeline.py after ResolvePass runs so the conversation
-        history reflects real values (not surrogates) for display purposes.
-        Note: The API history keeps sanitised text for consistency.
+        The API history (api_messages) is intentionally NOT touched here —
+        it must always retain surrogate values so future turns never send
+        real PII to Claude.
 
         Args:
-            restored_text: Response text with originals restored.
+            restored_text: Response text with originals restored by ResolvePass.
         """
         for msg in reversed(self.conversation.messages):
             if msg.role == "assistant":
@@ -123,25 +152,28 @@ class ClaudeChat:
 
     def save(self) -> None:
         """
-        Persist the conversation history to conversations/<conv_id>.json.
+        Persist both display and API histories to conversations/<conv_id>.json.
 
-        Creates the conversations/ directory if it does not exist.
+        Two lists are saved:
+          messages     — display history (real values, for the user to read)
+          api_messages — API history (surrogates only, for Claude context)
         """
         try:
             Path(SHADOWMAP_DIR).mkdir(parents=True, exist_ok=True)
             path = Path(SHADOWMAP_DIR) / f"{self.conversation.id}.json"
+
+            def _serialise(msgs):
+                return [
+                    {"role": m.role, "content": m.content, "timestamp": m.timestamp}
+                    for m in msgs
+                ]
+
             data = {
                 "id": self.conversation.id,
                 "created": self.conversation.created,
                 "rag_mode": self.conversation.rag_mode,
-                "messages": [
-                    {
-                        "role": m.role,
-                        "content": m.content,
-                        "timestamp": m.timestamp,
-                    }
-                    for m in self.conversation.messages
-                ],
+                "messages": _serialise(self.conversation.messages),
+                "api_messages": _serialise(self.conversation.api_messages),
             }
             path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
             logger.debug(f"[ClaudeChat] Saved conversation → {path}")
@@ -169,23 +201,34 @@ class ClaudeChat:
             )
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-            messages = [
-                ConversationMessage(
-                    role=m["role"],
-                    content=m["content"],
-                    timestamp=m.get("timestamp", ""),
-                )
-                for m in data.get("messages", [])
-            ]
+
+            def _deserialise(raw_list):
+                return [
+                    ConversationMessage(
+                        role=m["role"],
+                        content=m["content"],
+                        timestamp=m.get("timestamp", ""),
+                    )
+                    for m in raw_list
+                ]
+
+            messages     = _deserialise(data.get("messages", []))
+            api_messages = _deserialise(data.get("api_messages", []))
+
+            # Back-compat: old files only have "messages"; treat as api_messages too
+            if not api_messages and messages:
+                api_messages = list(messages)
+
             conv = Conversation(
                 id=data["id"],
                 messages=messages,
+                api_messages=api_messages,
                 created=data.get("created", ""),
                 rag_mode=data.get("rag_mode", False),
             )
             logger.info(
                 f"[ClaudeChat] Loaded conversation {conversation_id} "
-                f"({len(messages)} messages)"
+                f"({len(messages)} display msgs, {len(api_messages)} api msgs)"
             )
             return cls(conversation=conv)
         except (json.JSONDecodeError, KeyError) as exc:
