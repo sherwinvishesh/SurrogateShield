@@ -18,6 +18,9 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import typer
 from rich.console import Console
 from rich.panel import Panel
