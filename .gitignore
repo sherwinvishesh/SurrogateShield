@@ -1,0 +1,60 @@
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environments ───────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# ── SurrogateShield runtime data ──────────────────────────────────
+# Encrypted ShadowMap files (contain derived key material)
+conversations/*.shadowmap
+
+# Conversation history (may contain sanitised PII surrogates)
+conversations/*.json
+
+# Device secret — NEVER commit this
+~/.surrogateshield/
+.surrogateshield/
+
+# ── Secrets / credentials ─────────────────────────────────────────
+.env
+.env.*
+*.key
+*.pem
+*.p12
+
+# ── IDE / editor ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Testing & coverage ────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# ── ChromaDB local vector store ───────────────────────────────────
+chroma/
+chroma_db/
+*.chroma
+
+# ── Jupyter ───────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Logs ──────────────────────────────────────────────────────────
+*.log
