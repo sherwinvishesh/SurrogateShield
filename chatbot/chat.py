@@ -215,9 +215,18 @@ class ClaudeChat:
             messages     = _deserialise(data.get("messages", []))
             api_messages = _deserialise(data.get("api_messages", []))
 
-            # Back-compat: old files only have "messages"; treat as api_messages too
-            if not api_messages and messages:
-                api_messages = list(messages)
+            # Back-compat: old files only have "messages" (pre-dual-history format).
+            # Do NOT copy display messages into api_messages — those display messages
+            # may contain real PII values (from before the history privacy fix).
+            # Starting with an empty api_messages is safe: Claude will lose old context
+            # but will never receive real PII. The display history remains readable.
+            if not api_messages:
+                logger.warning(
+                    f"[ClaudeChat] Old-format conversation {conversation_id!r} has no "
+                    "api_messages. Starting fresh API context to prevent PII leakage. "
+                    "Display history is preserved."
+                )
+                api_messages = []
 
             conv = Conversation(
                 id=data["id"],

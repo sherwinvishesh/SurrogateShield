@@ -146,11 +146,40 @@ def trace(
         if score is None:
             score = _TYPE_DEFAULTS.get(ent.label_, 0.80)
 
+        # ── Context-aware type correction ──────────────────────────────
+        # spaCy frequently misclassifies abbreviated or informal place names
+        # (e.g. "Phili" for Philadelphia, "Cali" for California, "Frisco"
+        # for San Francisco) as ORG instead of GPE.
+        # If an ORG entity immediately follows a location preposition, it
+        # is almost certainly a place — reclassify it as GPE so MimicGen
+        # generates a city surrogate instead of a company name.
+        effective_label = ent.label_
+        if ent.label_ == "ORG":
+            _LOCATION_PREPS = {
+                # Strong location-only prepositions — "from" and "near" are
+                # unambiguous. "in" is strong (live in X). "at" removed —
+                # too ambiguous (work at Apple vs live at Tempe).
+                "from", "in", "near", "visit", "visited",
+                "live", "lives", "lived", "grew", "born", "moved",
+                "relocate", "relocated", "residing", "reside",
+                "hometown", "hometown:", "birthplace",
+            }
+            # Grab the 50 characters immediately before this entity
+            context_before = text[max(0, ent.start_char - 50): ent.start_char].lower()
+            context_words  = set(context_before.split())
+            if context_words & _LOCATION_PREPS:
+                effective_label = "GPE"
+                score = _TYPE_DEFAULTS["GPE"]
+                logger.debug(
+                    f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r} "
+                    f"(location preposition in context)"
+                )
+
         candidate = DetectedEntity(
             text=ent.text,
             start=ent.start_char,
             end=ent.end_char,
-            type=ent.label_,
+            type=effective_label,
             score=score,
             source="ner",
         )

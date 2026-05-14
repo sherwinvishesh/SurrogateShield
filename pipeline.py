@@ -7,22 +7,18 @@ Orchestrates the end-to-end message flow for every turn:
         │
         ▼
     SentinelLayer (PatternScan → EntityTrace → ContextGuard)
-        │  confirmed_entities, needs_confirmation
-        ▼
-    User confirmation for borderline entities (if any)
-        │  final_entities
+        │
         ▼
     MimicGen → generate surrogates
-        │  surrogate_map: {original: surrogate}
+        │
         ▼
     Apply substitutions → sanitised_message
         │
         ▼
-    ShadowMap.update({surrogate: original})
-    ShadowMap.save()
+    ShadowMap.update({surrogate: original}) + save
         │
         ▼
-    [Optional] RAG query → build context prompt
+    [Optional] RAG query → prepend context
         │
         ▼
     Claude API → raw_response (surrogates)
@@ -31,15 +27,19 @@ Orchestrates the end-to-end message flow for every turn:
     ResolvePass → restored_response (originals back)
         │
         ▼
+    [Optional] Transparency panel — what was sent / received / restored
+        │
+        ▼
     Display to user
-
-The chatbot/ sub-package has NO knowledge of detection, generation,
-storage, or reconstruction — this file is the only connector.
 """
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+
+from rich.console import Console
+from rich.panel import Panel
+from rich.rule import Rule
 
 from util import (
     DetectedEntity,
@@ -52,9 +52,81 @@ from generation.logic import MimicGen
 from storage.logic import ShadowMap
 from reconstruction.logic import ResolvePass
 from chatbot.chat import ClaudeChat
-from chatbot.rag import RAGStore
+
+if TYPE_CHECKING:
+    from chatbot.rag import RAGStore
 
 logger = get_logger(__name__)
+_console = Console()
+
+
+# ─────────────────────────────────────────────
+# Transparency display
+# ─────────────────────────────────────────────
+
+def _show_transparency(
+    sanitised: str,
+    raw_response: str,
+    restored: str,
+) -> None:
+    """
+    Print a three-section panel showing the full API round-trip.
+
+    Sent to Anthropic    — sanitised message (surrogates, no real PII)
+    Received from Claude — raw API response  (still contains surrogates)
+    Final output         — restored response (real values back)
+
+    Args:
+        sanitised:    Message actually sent to the API.
+        raw_response: Unmodified API response text.
+        restored:     Response after ResolvePass swap-back.
+    """
+    _console.print()
+    _console.print(Rule("[dim]API Transparency[/dim]", style="dim blue"))
+
+    # Trim long messages for display
+    def _trim(s: str, n: int = 300) -> str:
+        return s if len(s) <= n else s[:n] + f"… [dim]({len(s) - n} chars omitted)[/dim]"
+
+    _console.print(
+        Panel(
+            f"[dim]Sent to Anthropic:[/dim]\n[blue]{_trim(sanitised)}[/blue]\n\n"
+            f"[dim]Received from Claude:[/dim]\n[yellow]{_trim(raw_response)}[/yellow]\n\n"
+            f"[dim]Final output (real values restored):[/dim]\n[green]{_trim(restored)}[/green]",
+            border_style="dim blue",
+            padding=(0, 2),
+        )
+    )
+    _console.print()
+
+
+# ─────────────────────────────────────────────
+# Standalone anonymiser (no API key required)
+# ─────────────────────────────────────────────
+
+def anonymise_text(text: str, mimic: Optional[MimicGen] = None) -> Tuple[str, Dict[str, str]]:
+    """
+    Detect and replace PII in *text* without constructing a ClaudeChat.
+
+    Used by add-doc to anonymise documents before indexing — no API key needed.
+
+    Args:
+        text:  Raw text that may contain PII.
+        mimic: Existing MimicGen to reuse (for collision avoidance). If None,
+               a fresh one is created.
+
+    Returns:
+        Tuple of (sanitised_text, {original: surrogate} mapping).
+    """
+    if mimic is None:
+        mimic = MimicGen()
+    confirmed, _ = sentinel_layer.run_cascade(text)
+    confirmed = sentinel_layer.deduplicate(confirmed)
+    surrogate_map = mimic.generate_all(confirmed) if confirmed else {}
+    sanitised = text
+    for orig in sorted(surrogate_map, key=len, reverse=True):
+        sanitised = sanitised.replace(orig, surrogate_map[orig])
+    return sanitised, surrogate_map
 
 
 # ─────────────────────────────────────────────
@@ -65,71 +137,59 @@ class Pipeline:
     """
     End-to-end SurrogateShield pipeline for a single conversation.
 
-    Holds all stateful components for one conversation session:
-    MimicGen (session-level surrogate collision avoidance),
-    ShadowMap (persistent encrypted mapping), ResolvePass,
-    ClaudeChat API handler, and optional RAGStore.
-
     Attributes:
-        chat:     Claude API handler.
-        shadow:   Encrypted surrogate↔original mapping store.
-        mimic:    Surrogate generator.
-        resolve:  Response reconstructor.
-        rag:      Optional RAG vector store.
+        chat:    Claude API handler.
+        shadow:  Encrypted surrogate↔original mapping store.
+        mimic:   Surrogate generator (seeded from ShadowMap on resume).
+        resolve: Response reconstructor.
+        rag:     Optional RAG vector store.
     """
 
     def __init__(
         self,
         chat: ClaudeChat,
-        rag: Optional[RAGStore] = None,
+        rag=None,   # Optional[RAGStore] — lazy import avoids chromadb crash
     ) -> None:
         """
-        Initialise the pipeline with a chat handler.
+        Initialise the pipeline.
 
         Args:
             chat: ClaudeChat instance (new or loaded conversation).
-            rag:  Optional RAGStore for RAG-mode conversations.
+            rag:  Optional RAGStore. Import is lazy — missing chromadb will
+                  never crash a standard non-RAG chat session.
         """
-        self.chat = chat
-        self.rag = rag
+        self.chat   = chat
         self.shadow = ShadowMap(chat.conversation.id)
-        self.mimic = MimicGen()
         self.resolve = ResolvePass()
+
+        # Bug fix: seed MimicGen with surrogates already in the ShadowMap.
+        # Without this, a resumed conversation can generate a duplicate surrogate
+        # that maps to a different original value — silently corrupting PII.
+        self.mimic = MimicGen()
+        existing_surrogates = set(self.shadow.all_mappings().keys())
+        if existing_surrogates:
+            self.mimic.used_surrogates.update(existing_surrogates)
+            logger.debug(
+                f"[Pipeline] Seeded MimicGen with {len(existing_surrogates)} "
+                "existing surrogates from ShadowMap"
+            )
+
+        # Lazy RAG: only validate import when rag is actually provided.
+        if rag is not None:
+            from chatbot.rag import RAGStore  # noqa: F401 — validates type at runtime
+        self.rag = rag
 
     # ── Internal helpers ────────────────────────────────────────
 
-    def _apply_surrogates(
-        self,
-        text: str,
-        surrogate_map: Dict[str, str],
-    ) -> str:
-        """
-        Replace all original PII values in *text* with their surrogates.
-
-        Args:
-            text:          Original text with real PII.
-            surrogate_map: Dict mapping original_text → surrogate_text.
-
-        Returns:
-            Sanitised text with surrogates substituted in.
-        """
+    def _apply_surrogates(self, text: str, surrogate_map: Dict[str, str]) -> str:
+        """Replace original PII values with surrogates. Longest-first to avoid substring conflicts."""
         result = text
-        # Sort by length descending to avoid substring replacement conflicts
         for original in sorted(surrogate_map, key=len, reverse=True):
-            surrogate = surrogate_map[original]
-            result = result.replace(original, surrogate)
+            result = result.replace(original, surrogate_map[original])
         return result
 
     def _invert_map(self, surrogate_map: Dict[str, str]) -> Dict[str, str]:
-        """
-        Invert {original: surrogate} → {surrogate: original} for ShadowMap.
-
-        Args:
-            surrogate_map: Dict mapping original → surrogate.
-
-        Returns:
-            Inverted dict mapping surrogate → original.
-        """
+        """Invert {original: surrogate} → {surrogate: original} for ShadowMap storage."""
         return {v: k for k, v in surrogate_map.items()}
 
     # ── Main turn handler ────────────────────────────────────────
@@ -142,27 +202,15 @@ class Pipeline:
         """
         Process a single conversation turn end-to-end.
 
-        Steps:
-          1. Detect PII via SentinelLayer cascade
-          2. [optional] Prompt user to confirm borderline entities
-          3. Generate surrogates for all confirmed entities
-          4. Substitute surrogates into the message
-          5. Update and save ShadowMap
-          6. [optional] RAG retrieval
-          7. Send to Claude API
-          8. Reconstruct originals in the response
-
         Args:
             user_message: Raw user message (may contain PII).
-            interactive:  If True, ask user to confirm borderline entities.
-                          Set to False for batch/programmatic use.
+            interactive:  If True, prompt user to confirm borderline entities.
 
         Returns:
-            Tuple of:
-                restored_response  — final response with real values
-                confirmed_entities — entities that were replaced
-                surrogate_map      — {original: surrogate} mapping used
+            Tuple of (restored_response, confirmed_entities, surrogate_map).
         """
+        from config import SHOW_API_TRANSPARENCY
+
         # ── Step 1: Detection ──────────────────────────────────
         logger.info("[Pipeline] Running SentinelLayer cascade")
         confirmed, needs_confirmation = sentinel_layer.run_cascade(user_message)
@@ -178,7 +226,6 @@ class Pipeline:
         surrogate_map: Dict[str, str] = {}
         if confirmed:
             surrogate_map = self.mimic.generate_all(confirmed)
-            # Display detection table in terminal
             print_detection_table(confirmed, surrogate_map)
         else:
             logger.info("[Pipeline] No PII detected — message sent as-is")
@@ -188,8 +235,7 @@ class Pipeline:
 
         # ── Step 5: Update ShadowMap ────────────────────────────
         if surrogate_map:
-            inverted = self._invert_map(surrogate_map)
-            self.shadow.update(inverted)
+            self.shadow.update(self._invert_map(surrogate_map))
             self.shadow.save()
 
         # ── Step 6: RAG context retrieval ──────────────────────
@@ -208,13 +254,20 @@ class Pipeline:
         all_mappings = self.shadow.all_mappings()
         restored_response = self.resolve.resolve(raw_response, all_mappings)
 
-        # Update the stored assistant message to the restored version
         self.chat.update_last_assistant_message(restored_response)
-
-        # Persist conversation
         self.chat.save()
 
+        # ── Step 9: Transparency panel ──────────────────────────
+        if SHOW_API_TRANSPARENCY:
+            _show_transparency(
+                sanitised=sanitised,
+                raw_response=raw_response,
+                restored=restored_response,
+            )
+
         return restored_response, confirmed, surrogate_map
+
+    # ── RAG document indexing ────────────────────────────────────
 
     def add_rag_document(
         self,
@@ -224,27 +277,59 @@ class Pipeline:
         """
         Anonymise and index a document into the RAG store.
 
+        Uses the shared MimicGen and ShadowMap so surrogate→original
+        mappings for indexed content are persisted across sessions via
+        the global RAG ShadowMap.
+
         Args:
-            raw_text:  Document text that may contain PII.
-            metadata:  Optional metadata for the document.
+            raw_text: Document text that may contain PII.
+            metadata: Optional metadata dict.
 
         Returns:
             Number of chunks indexed.
-
-        Raises:
-            RuntimeError: If no RAG store is initialised.
         """
         if self.rag is None:
-            raise RuntimeError("RAG is not enabled for this pipeline. Use --rag flag.")
+            raise RuntimeError("RAG is not enabled. Use --rag flag.")
 
-        # Anonymise before indexing
-        confirmed, _ = sentinel_layer.run_cascade(raw_text)
-        surrogate_map = self.mimic.generate_all(confirmed) if confirmed else {}
-        sanitised = self._apply_surrogates(raw_text, surrogate_map)
+        sanitised, surrogate_map = anonymise_text(raw_text, mimic=self.mimic)
 
-        # Update ShadowMap for any PII found in documents
         if surrogate_map:
             self.shadow.update(self._invert_map(surrogate_map))
             self.shadow.save()
 
         return self.rag.add_document(sanitised, metadata=metadata)
+
+
+# ─────────────────────────────────────────────
+# Convenience: anonymise without any chat handler
+# (used by main.py add-doc — no API key needed)
+# ─────────────────────────────────────────────
+
+def anonymise_for_rag(raw_text: str, rag_store) -> Tuple[int, ShadowMap]:
+    """
+    Anonymise *raw_text* and index it into *rag_store* without a ClaudeChat.
+
+    This function exists so `add-doc` never requires ANTHROPIC_API_KEY —
+    indexing is a purely local operation that only runs PatternScan + NER.
+
+    Args:
+        raw_text:  Raw document text.
+        rag_store: Initialised RAGStore instance.
+
+    Returns:
+        Tuple of (n_chunks_indexed, rag_global_shadowmap).
+    """
+    mimic = MimicGen()
+    rag_shadow = ShadowMap("rag_global")
+    # Seed MimicGen from existing RAG ShadowMap to avoid collisions
+    mimic.used_surrogates.update(rag_shadow.all_mappings().keys())
+
+    sanitised, surrogate_map = anonymise_text(raw_text, mimic=mimic)
+
+    if surrogate_map:
+        inverted = {v: k for k, v in surrogate_map.items()}
+        rag_shadow.update(inverted)
+        rag_shadow.save()
+
+    n = rag_store.add_document(sanitised)
+    return n, rag_shadow

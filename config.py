@@ -53,8 +53,21 @@ HKDF_INFO: bytes = b"shadowmap"                  # HKDF derivation info label
 AES_NONCE_SIZE: int = 12                         # GCM nonce length in bytes
 
 # ─────────────────────────────────────────────
+# Detection (fallback)
+# ─────────────────────────────────────────────
+
+# When ContextGuard is disabled, borderline NER entities above this score
+# are promoted to confirmed rather than silently dropped.
+# Catches LOC (0.74) and FAC (0.70) entities in the default configuration.
+ENTITY_TRACE_FALLBACK_THRESHOLD: float = 0.65
+
+# ─────────────────────────────────────────────
 # Logging / display
 # ─────────────────────────────────────────────
 
 LOG_LEVEL: str = "INFO"
 SHOW_DETECTION_TABLE: bool = True                # Print detection results in chat mode
+
+# Show a transparency panel after each turn: what was sent to Anthropic,
+# what raw response came back, and what the final restored output is.
+SHOW_API_TRANSPARENCY: bool = True

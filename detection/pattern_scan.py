@@ -54,7 +54,9 @@ def _luhn_valid(number: str) -> bool:
 _PATTERNS: list = [
     (
         "ssn",
-        re.compile(r"\b(\d{3}-\d{2}-\d{4}|\d{9})\b"),
+        # Only match the dashed format — \d{9} has too many false positives
+        # (order IDs, phone numbers, zip codes with extension, etc.)
+        re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
         None,
     ),
     (
@@ -130,7 +132,7 @@ _PATTERNS: list = [
             r"|ghp_[A-Za-z0-9]{20,}"             # GitHub personal access token
             r"|gho_[A-Za-z0-9]{20,}"             # GitHub OAuth token
             r"|AKIA[0-9A-Z]{16}"                # AWS access key ID
-            r"|[A-Za-z0-9+/]{40}={0,2}"         # Generic base64 secret (>=40 chars)
+            # Generic base64 removed — too many false positives (hashes, IDs, etc.)
             r")"
         ),
         None,

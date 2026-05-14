@@ -52,7 +52,10 @@ class RAGStore:
         """
         try:
             import chromadb
-            self._client = chromadb.Client()
+            # PersistentClient stores data to disk so indexed documents
+            # survive process restarts. In-memory chromadb.Client() resets
+            # every session — requiring add-doc to be re-run each time.
+            self._client = chromadb.PersistentClient(path="./chroma_db")
             self._collection = self._client.get_or_create_collection(
                 name=RAG_COLLECTION_NAME,
                 metadata={"hnsw:space": "cosine"},
