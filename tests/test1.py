@@ -1,7 +1,7 @@
 """
 test1.py — SurrogateShield test suite
 Run from inside the SurrogateShield/ directory:
-    python test1.py
+    python tests/test1.py
 """
 
 import sys
@@ -167,26 +167,32 @@ print("\n[5] ShadowMap encrypt / decrypt")
 from storage.logic import ShadowMap
 
 sm = ShadowMap("runtest-conv-abc")
-sm.add("FakeName", "RealName")
-sm.add("fake@mail.com", "real@mail.com")
-sm.save()
-
-sm2 = ShadowMap("runtest-conv-abc")
-check("Name round-trips through disk",  sm2.get("FakeName") == "RealName")
-check("Email round-trips through disk", sm2.get("fake@mail.com") == "real@mail.com")
-check("len() correct",                  len(sm2) == 2)
-check("Missing key returns None",       sm2.get("nothere") is None)
-
-sm2.delete()
-sm3 = ShadowMap("runtest-conv-abc")
-check("After delete → empty mapping",   len(sm3) == 0)
-
-# Missing file is graceful (no crash)
 try:
-    ShadowMap("conv-that-never-existed-xyz999")
-    check("Missing .shadowmap file is graceful", True)
-except Exception:
-    check("Missing .shadowmap file is graceful", False)
+    sm.add("FakeName", "RealName")
+    sm.add("fake@mail.com", "real@mail.com")
+    sm.save()
+
+    sm2 = ShadowMap("runtest-conv-abc")
+    check("Name round-trips through disk",  sm2.get("FakeName") == "RealName")
+    check("Email round-trips through disk", sm2.get("fake@mail.com") == "real@mail.com")
+    check("len() correct",                  len(sm2) == 2)
+    check("Missing key returns None",       sm2.get("nothere") is None)
+
+    sm2.delete()
+    sm3 = ShadowMap("runtest-conv-abc")
+    check("After delete → empty mapping",   len(sm3) == 0)
+
+    # Missing file is graceful (no crash)
+    try:
+        ShadowMap("conv-that-never-existed-xyz999")
+        check("Missing .shadowmap file is graceful", True)
+    except Exception:
+        check("Missing .shadowmap file is graceful", False)
+
+finally:
+    # Always clean up test files, even if an assertion above failed
+    sm.delete()
+    ShadowMap("runtest-conv-abc").delete()
 
 
 # ─────────────────────────────────────────────────────────────
@@ -252,17 +258,19 @@ fake_response = f"Nice to meet you, {name_fake}! Your email {email_fake} is note
 # Restore
 shadow_inv = {v: k for k, v in surrogate_map.items()}
 sm_rt      = ShadowMap("roundtrip-test-999")
-sm_rt.update(shadow_inv)
-sm_rt.save()
+try:
+    sm_rt.update(shadow_inv)
+    sm_rt.save()
 
-rp_rt   = ResolvePass()
-restored = rp_rt.resolve(fake_response, sm_rt.all_mappings())
+    rp_rt   = ResolvePass()
+    restored = rp_rt.resolve(fake_response, sm_rt.all_mappings())
 
-check("Real name restored in response",  "Sarah Mitchell" in restored)
-check("Real email restored in response", "sarah@gmail.com" in restored)
-check("Fake name not in final response", name_fake not in restored)
-
-sm_rt.delete()
+    check("Real name restored in response",  "Sarah Mitchell" in restored)
+    check("Real email restored in response", "sarah@gmail.com" in restored)
+    check("Fake name not in final response", name_fake not in restored)
+finally:
+    sm_rt.delete()
+    ShadowMap("roundtrip-test-999").delete()
 
 print("\nDetails:")
 print(f"  Original  : {msg}")
