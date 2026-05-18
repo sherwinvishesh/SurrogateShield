@@ -13,7 +13,7 @@ Every match returns a DetectedEntity with score = 1.0 (deterministic).
 from __future__ import annotations
 
 import re
-from typing import List
+from typing import List, Optional, Set
 
 from util import DetectedEntity, get_logger
 
@@ -157,19 +157,30 @@ _PATTERNS: list = [
 # Main scan function
 # ─────────────────────────────────────────────
 
-def scan(text: str) -> List[DetectedEntity]:
+def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEntity]:
     """
     Run all regex patterns against *text* and return detected entities.
 
     Overlapping matches for the same span are deduplicated (first match
     wins). All returned entities carry score = 1.0.
 
+    The *skip_values* parameter prevents re-detection of surrogates that
+    were generated in a previous turn. MimicGen produces realistic values
+    (e.g. SSN-formatted strings) that PatternScan would otherwise flag as
+    new PII — generating a second surrogate on top of the first and making
+    the original value unrecoverable.  Pass the current ShadowMap keys as
+    skip_values to prevent this double-wrapping.
+
     Args:
-        text: The raw user message to scan.
+        text:        The raw user message to scan.
+        skip_values: Set of strings to skip even if they match a pattern.
+                     Typically the set of surrogates already in the ShadowMap.
 
     Returns:
         List of DetectedEntity objects, sorted by start position.
     """
+    _skip: Set[str] = skip_values or set()
+
     results: List[DetectedEntity] = []
     occupied_spans: List[tuple] = []  # (start, end) already claimed
 
@@ -188,12 +199,22 @@ def scan(text: str) -> List[DetectedEntity]:
             if not _span_free(start, end):
                 continue
 
+            matched_text = match.group().strip()
+
+            # Skip known surrogate values — prevents double-wrapping when a
+            # user quotes a surrogate back in a follow-up message.
+            if matched_text in _skip:
+                logger.debug(
+                    f"[PatternScan] Skipping known surrogate: {matched_text!r}"
+                )
+                continue
+
             # Run optional post-validator (e.g. Luhn for credit cards)
             if validator is not None and not validator(match):
                 continue
 
             entity = DetectedEntity(
-                text=match.group().strip(),
+                text=matched_text,
                 start=start,
                 end=end,
                 type=entity_type,

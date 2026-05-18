@@ -3,6 +3,11 @@ util.py — SurrogateShield Shared Utilities
 
 Logging setup, shared dataclasses (DetectedEntity, Conversation),
 text utilities, and Rich console helpers used across the project.
+
+Note: logging.basicConfig() is intentionally NOT called here.
+It is called once at startup in main.py. Modules that call
+get_logger() before main.py initialises will use the root logger
+with default settings (which is harmless for tests).
 """
 
 from __future__ import annotations
@@ -14,11 +19,8 @@ from datetime import datetime
 from typing import List, Optional
 
 from rich.console import Console
-from rich.logging import RichHandler
 from rich.table import Table
 from rich.text import Text
-
-from config import LOG_LEVEL
 
 # ─────────────────────────────────────────────
 # Rich console — shared singleton
@@ -33,20 +35,20 @@ console = Console()
 
 def get_logger(name: str) -> logging.Logger:
     """
-    Return a logger configured with Rich handler.
+    Return a named logger.
+
+    Logging configuration (handlers, level, format) is set up once
+    in main.py at startup via logging.basicConfig(). This function
+    simply returns the named logger — it does NOT call basicConfig()
+    itself, avoiding the anti-pattern of re-configuring the root
+    logger on every module import.
 
     Args:
         name: Logger name (typically __name__ of the calling module).
 
     Returns:
-        Configured logging.Logger instance.
+        logging.Logger instance.
     """
-    logging.basicConfig(
-        level=getattr(logging, LOG_LEVEL, logging.INFO),
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(console=console, rich_tracebacks=True, markup=True)],
-    )
     return logging.getLogger(name)
 
 
@@ -99,6 +101,7 @@ class Conversation:
                        never contains real PII)
 
     This separation is the core privacy guarantee for multi-turn conversations.
+
     Attributes:
         id:           Unique conversation identifier (UUID).
         messages:     Display history (real values, for the user).

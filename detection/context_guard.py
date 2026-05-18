@@ -1,95 +1,84 @@
 """
 detection/context_guard.py — ContextGuard
 
-Local SLM-based detection of implicit and quasi-identifier PII using
-Ollama (phi3:mini). This module contains ONLY the SLM logic.
+NER-based detection of named entities using a local HuggingFace model
+(dslim/distilbert-NER, ~250 MB). Replaces the previous Ollama phi3:mini
+implementation — no external server required.
+
+The model is downloaded from HuggingFace Hub on first use and cached
+locally by the transformers library. Subsequent runs are fully offline.
 
 ContextGuard is called ONLY with:
   1. Borderline entities from EntityTrace (to verify or upgrade)
   2. The remaining_text after PatternScan and EntityTrace have run
 
-It does NOT process the full original message.
-
-Graceful degradation: if Ollama is unavailable, logs a warning and
-returns empty lists — the pipeline continues without crashing.
-
-Returns structured JSON parsed into DetectedEntity objects.
+Graceful degradation: if transformers or torch are unavailable, logs a
+warning and returns empty lists — the pipeline continues without crashing.
 """
 
 from __future__ import annotations
 
-import json
 from typing import List, Tuple
 
-from config import CONTEXT_GUARD_MODEL, CONTEXT_GUARD_CONFIDENCE_THRESHOLD
+from config import (
+    CONTEXT_GUARD_MODEL,
+    CONTEXT_GUARD_ENABLED,
+    CONTEXT_GUARD_CONFIDENCE_THRESHOLD,
+)
 from util import DetectedEntity, get_logger
 
 logger = get_logger(__name__)
 
-# ─────────────────────────────────────────────
-# System prompt for the SLM
-# ─────────────────────────────────────────────
-
-_SYSTEM_PROMPT = """You are a privacy detection assistant. Your task is to identify
-personally identifiable information (PII) and quasi-identifiers in text fragments.
-
-You will receive either:
-1. Text fragments that previous detectors were unsure about (borderline cases)
-2. Remaining text after structured PII has already been removed
-
-Identify:
-- Implicit PII: information that could identify a person even without a name
-  (e.g. "the only surgeon at Springfield General", "my ZIP code is near the stadium")
-- Quasi-identifiers: combinations of fields that together enable re-identification
-  (e.g. age + employer + city)
-- Ambiguous named entities that pattern matching missed
-
-Respond ONLY with a valid JSON object. No explanation, no preamble, no markdown.
-Use exactly this schema:
-{
-  "detected": [
-    {
-      "text": "exact text span from input",
-      "type": "implicit_location|implicit_person|quasi_identifier|PERSON|GPE|LOC|ORG",
-      "confidence": 0.0,
-      "reason": "brief reason"
-    }
-  ]
-}
-If nothing is found, respond with: {"detected": []}"""
+# Module-level cache — expensive to load, so we load it exactly once
+# and reuse across all calls in a session.
+_ner_pipeline = None
 
 
-def _build_user_prompt(
-    remaining_text: str,
-    borderline_entities: List[DetectedEntity],
-) -> str:
+def _get_ner():
     """
-    Construct the user-facing prompt for the SLM.
-
-    Args:
-        remaining_text:     Text after PatternScan and EntityTrace processing.
-        borderline_entities: Entities EntityTrace was uncertain about.
+    Lazy-load and cache the HuggingFace NER pipeline.
 
     Returns:
-        Formatted prompt string.
+        The loaded pipeline callable, or None on failure.
     """
-    parts = []
+    global _ner_pipeline
+    if _ner_pipeline is not None:
+        return _ner_pipeline
+    try:
+        from transformers import pipeline as hf_pipeline
+        _ner_pipeline = hf_pipeline(
+            "ner",
+            model=CONTEXT_GUARD_MODEL,
+            aggregation_strategy="simple",
+            device=-1,   # CPU — change to 0 for GPU
+        )
+        logger.info(f"[ContextGuard] Loaded NER model: {CONTEXT_GUARD_MODEL}")
+    except ImportError:
+        logger.warning(
+            "[ContextGuard] transformers not installed — skipping. "
+            "Run: pip install transformers torch"
+        )
+        _ner_pipeline = None
+    except Exception as exc:
+        logger.warning(f"[ContextGuard] Failed to load NER model: {exc}")
+        _ner_pipeline = None
+    return _ner_pipeline
 
-    if borderline_entities:
-        parts.append("BORDERLINE ENTITIES TO VERIFY:")
-        for ent in borderline_entities:
-            parts.append(
-                f"  - text={ent.text!r}, type={ent.type}, "
-                f"score={ent.score:.2f}"
-            )
 
-    if remaining_text and remaining_text.strip():
-        clean = remaining_text.replace("█", " ").strip()
-        if clean:
-            parts.append("\nTEXT FRAGMENT TO ANALYSE:")
-            parts.append(clean)
+# ── Label mappings ────────────────────────────────────────────────────────────
 
-    return "\n".join(parts) if parts else "No input provided."
+# Map HuggingFace entity group labels to SurrogateShield types
+_LABEL_MAP = {
+    "PER":    "PERSON",
+    "PERSON": "PERSON",
+    "ORG":    "ORG",
+    "LOC":    "LOC",
+    "GPE":    "GPE",
+    "MISC":   "MISC",
+}
+
+# Entity types worth keeping (skip MISC — too noisy for privacy purposes)
+_KEEP_LABELS = {"PER", "PERSON", "ORG", "LOC", "GPE"}
 
 
 # ─────────────────────────────────────────────
@@ -101,106 +90,88 @@ def guard(
     borderline_entities: List[DetectedEntity],
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
-    Run the SLM context analysis on remaining text and borderline entities.
+    Run NER on remaining_text and verify borderline_entities.
 
-    Calls Ollama with phi3:mini. On any failure (connection error, JSON
-    parse error, model unavailable) logs a warning and returns empty
-    lists — the pipeline continues gracefully.
+    Borderline entities from EntityTrace (score in [LOW, HIGH)) are
+    re-evaluated using the confidence threshold: those that meet or
+    exceed CONTEXT_GUARD_CONFIDENCE_THRESHOLD are confirmed, the rest
+    remain uncertain.  The NER model then runs on any remaining text to
+    catch entities missed by spaCy.
 
     Args:
-        remaining_text:      Text not covered by PatternScan / EntityTrace.
-        borderline_entities: Entities EntityTrace flagged as uncertain.
+        remaining_text:      Text not covered by PatternScan / EntityTrace
+                             (may contain █ mask characters).
+        borderline_entities: Entities EntityTrace was uncertain about.
 
     Returns:
         Tuple of (confirmed_entities, needs_user_confirmation_entities).
-        Both lists contain DetectedEntity objects with source='slm'.
+        Both lists contain DetectedEntity objects.
     """
     confirmed: List[DetectedEntity] = []
     uncertain: List[DetectedEntity] = []
 
-    # Nothing to send → skip
-    has_text = remaining_text and remaining_text.replace("█", "").strip()
-    if not borderline_entities and not has_text:
-        logger.debug("[ContextGuard] Nothing to analyse — skipping")
-        return confirmed, uncertain
-
-    # Build prompt
-    user_prompt = _build_user_prompt(remaining_text, borderline_entities)
-
-    try:
-        import ollama
-        response = ollama.chat(
-            model=CONTEXT_GUARD_MODEL,
-            messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt},
-            ],
-        )
-        raw_content: str = response["message"]["content"]
-    except ImportError:
-        logger.warning(
-            "[ContextGuard] ollama package not installed — skipping SLM stage"
-        )
-        return confirmed, uncertain
-    except Exception as exc:
-        logger.warning(
-            f"[ContextGuard] Ollama unavailable or call failed: {exc}. "
-            "Continuing without SLM detection."
-        )
-        return confirmed, uncertain
-
-    # Parse JSON response
-    try:
-        # Strip any accidental markdown fences
-        cleaned = raw_content.strip()
-        if cleaned.startswith("```"):
-            cleaned = "\n".join(cleaned.split("\n")[1:])
-        if cleaned.endswith("```"):
-            cleaned = "\n".join(cleaned.split("\n")[:-1])
-
-        parsed = json.loads(cleaned)
-        detections = parsed.get("detected", [])
-    except json.JSONDecodeError as exc:
-        logger.warning(
-            f"[ContextGuard] Failed to parse SLM JSON response: {exc}. "
-            f"Raw content: {raw_content[:200]!r}"
-        )
-        return confirmed, uncertain
-
-    # Convert parsed detections to DetectedEntity objects
-    for item in detections:
-        try:
-            text = str(item.get("text", "")).strip()
-            entity_type = str(item.get("type", "implicit_unknown")).strip()
-            confidence = float(item.get("confidence", 0.0))
-            # reason = item.get("reason", "")  # available for logging/taxonomy
-
-            if not text:
-                continue
-
-            entity = DetectedEntity(
-                text=text,
-                start=0,   # SLM doesn't return character offsets
-                end=len(text),
-                type=entity_type,
-                score=confidence,
-                source="slm",
+    # ── Verify borderline entities from EntityTrace ───────────────────
+    for ent in borderline_entities:
+        if ent.score >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
+            confirmed.append(ent)
+            logger.debug(
+                f"[ContextGuard] Verified borderline: {ent.text!r} ({ent.type}, "
+                f"score={ent.score:.2f})"
             )
+        else:
+            uncertain.append(ent)
 
-            if confidence >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
-                confirmed.append(entity)
-                logger.debug(
-                    f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {confidence:.2f})"
-                )
-            else:
-                uncertain.append(entity)
-                logger.debug(
-                    f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {confidence:.2f})"
-                )
+    # ── Run NER on remaining text ─────────────────────────────────────
+    # Replace mask placeholders with spaces so the model sees clean text
+    clean = remaining_text.replace("█", " ").strip()
+    if not clean:
+        return confirmed, uncertain
 
-        except (KeyError, ValueError, TypeError) as exc:
-            logger.debug(f"[ContextGuard] Skipping malformed detection item: {exc}")
+    ner = _get_ner()
+    if ner is None:
+        return confirmed, uncertain
+
+    try:
+        results = ner(clean)
+    except Exception as exc:
+        logger.warning(f"[ContextGuard] NER inference failed: {exc}")
+        return confirmed, uncertain
+
+    for r in results:
+        label = r.get("entity_group", r.get("entity", ""))
+        if label not in _KEEP_LABELS:
             continue
+
+        entity_type = _LABEL_MAP.get(label, label)
+        score = float(r.get("score", 0.0))
+        text = r.get("word", "").strip()
+        if not text or len(text) < 2:
+            continue
+
+        # Remove HuggingFace subword tokenisation artefacts (## prefix)
+        text = text.replace("##", "").strip()
+        if not text:
+            continue
+
+        entity = DetectedEntity(
+            text=text,
+            start=r.get("start", 0),
+            end=r.get("end", len(text)),
+            type=entity_type,
+            score=score,
+            source="slm",
+        )
+
+        if score >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
+            confirmed.append(entity)
+            logger.debug(
+                f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})"
+            )
+        else:
+            uncertain.append(entity)
+            logger.debug(
+                f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})"
+            )
 
     logger.info(
         f"[ContextGuard] confirmed={len(confirmed)}, uncertain={len(uncertain)}"

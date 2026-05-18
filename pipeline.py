@@ -6,7 +6,12 @@ Orchestrates the end-to-end message flow for every turn:
     User message
         │
         ▼
+    [ServiceQueryDetector] — if service query, fuzz addresses minimally
+        │
+        ▼
     SentinelLayer (PatternScan → EntityTrace → ContextGuard)
+    (PatternScan receives existing surrogate keys as skip_values to
+     prevent re-detection of surrogates quoted back by the user)
         │
         ▼
     MimicGen → generate surrogates
@@ -48,10 +53,12 @@ from util import (
     print_needs_confirmation,
 )
 from detection import logic as sentinel_layer
+from detection.service_query import is_service_query, fuzz_addresses
 from generation.logic import MimicGen
 from storage.logic import ShadowMap
 from reconstruction.logic import ResolvePass
 from chatbot.chat import ClaudeChat
+from config import SERVICE_QUERY_DETECTION_ENABLED
 
 if TYPE_CHECKING:
     from chatbot.rag import RAGStore
@@ -211,9 +218,38 @@ class Pipeline:
         """
         from config import SHOW_API_TRANSPARENCY
 
+        # ── Service query check ────────────────────────────────
+        # For messages that are service/knowledge queries (e.g. "restaurants near
+        # 1126 E Apache Blvd"), apply minimal address fuzzing instead of full
+        # surrogate replacement.  Full replacement would remove the street name
+        # and city, making the LLM's answer useless.  Fuzzed addresses are stored
+        # in the ShadowMap (fuzzed→original) so ResolvePass can restore them.
+        service_addr_map: Dict[str, str] = {}
+        if SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_message):
+            from config import SERVICE_QUERY_VERIFY_ADDRESSES
+            fuzzed_message, service_addr_map = fuzz_addresses(
+                user_message, verify=SERVICE_QUERY_VERIFY_ADDRESSES
+            )
+            if service_addr_map:
+                # Store fuzzed→original mappings so ResolvePass can restore them
+                self.shadow.update({v: k for k, v in service_addr_map.items()})
+                self.shadow.save()
+                logger.info(
+                    f"[Pipeline] Service query: fuzzed {len(service_addr_map)} address(es)"
+                )
+                # Continue pipeline with the fuzzed message
+                user_message = fuzzed_message
+
         # ── Step 1: Detection ──────────────────────────────────
+        # Pass existing surrogate keys to PatternScan so it doesn't re-detect
+        # surrogate values a user quotes back in a follow-up message.  Without
+        # this, a surrogate SSN/credit card would trigger a new detection and
+        # generate a second surrogate on top of the first.
         logger.info("[Pipeline] Running SentinelLayer cascade")
-        confirmed, needs_confirmation = sentinel_layer.run_cascade(user_message)
+        existing_surrogates = set(self.shadow.all_mappings().keys())
+        confirmed, needs_confirmation = sentinel_layer.run_cascade(
+            user_message, skip_values=existing_surrogates
+        )
 
         # ── Step 2: User confirmation for borderlines ──────────
         if interactive and needs_confirmation:

@@ -15,6 +15,7 @@ Or use direct commands:
 
 from __future__ import annotations
 
+import logging
 import sys
 import time
 from datetime import datetime
@@ -23,6 +24,21 @@ from typing import Optional
 
 from dotenv import load_dotenv
 load_dotenv()
+
+# ── Logging setup ─────────────────────────────────────────────────────────────
+# Must be configured here (once, at startup) before any module calls get_logger().
+# util.get_logger() deliberately does NOT call basicConfig() — that anti-pattern
+# would re-configure the root logger on every module import.
+from rich.logging import RichHandler
+from rich.console import Console as _LogConsole
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler(console=_LogConsole(), rich_tracebacks=True, markup=True)],
+)
+# ─────────────────────────────────────────────────────────────────────────────
 
 import typer
 from rich.align import Align

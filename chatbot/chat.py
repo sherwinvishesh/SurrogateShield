@@ -93,11 +93,8 @@ class ClaudeChat:
             ConversationMessage(role="user", content=sanitised_message)
         )
 
-        # Build API payload — ALWAYS from api_messages, never from messages
-        api_payload = [
-            {"role": m.role, "content": m.content}
-            for m in self.conversation.api_messages
-        ]
+        # Build API payload using to_api_history() — uses api_messages (surrogates only)
+        api_payload = self.conversation.to_api_history()
 
         try:
             response = self._client.messages.create(

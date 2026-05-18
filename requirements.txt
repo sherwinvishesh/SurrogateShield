@@ -1,6 +1,7 @@
 anthropic>=0.25.0
 python-dotenv>=1.0.0
 spacy>=3.7.0
+# ollama is optional — required only when CONTEXT_GUARD_FALLBACK_TO_OLLAMA=True
 ollama>=0.1.8
 faker>=24.0.0
 cryptography>=42.0.0
@@ -9,3 +10,6 @@ typer>=0.12.0
 rich>=13.7.0
 chromadb>=0.4.0
 sentence-transformers>=2.7.0
+# ContextGuard local NER (replaces Ollama phi3:mini — no server needed)
+transformers>=4.40.0
+torch>=2.0.0

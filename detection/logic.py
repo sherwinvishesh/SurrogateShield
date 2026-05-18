@@ -29,7 +29,7 @@ Returns:
 
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import List, Optional, Set, Tuple
 
 from dataclasses import replace as _dc_replace
 from util import DetectedEntity, get_logger, mask_spans
@@ -41,6 +41,8 @@ _LOCATION_PREPS = {
     "grew", "born", "moved", "relocate", "relocated",
     "residing", "reside", "hometown", "birthplace",
 }
+
+logger = get_logger(__name__)
 
 
 def _reclassify_location_orgs(
@@ -75,15 +77,21 @@ def _reclassify_location_orgs(
         result.append(ent)
     return result
 
-logger = get_logger(__name__)
 
-
-def run_cascade(text: str) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
+def run_cascade(
+    text: str,
+    skip_values: Optional[Set[str]] = None,
+) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full three-stage SentinelLayer detection cascade.
 
     Args:
-        text: Raw user message to analyse.
+        text:        Raw user message to analyse.
+        skip_values: Set of strings to skip in PatternScan even if they match
+                     a pattern.  Pass the current ShadowMap surrogate keys here
+                     to prevent re-detection of surrogates a user quotes back in
+                     a follow-up message (which would generate a second layer of
+                     fake data over an already-replaced value).
 
     Returns:
         Tuple of:
@@ -95,7 +103,7 @@ def run_cascade(text: str) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
 
     # ── Stage 1: PatternScan ─────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 1: PatternScan")
-    pattern_results = pattern_scan.scan(text)
+    pattern_results = pattern_scan.scan(text, skip_values=skip_values)
     confirmed.extend(pattern_results)
 
     # Mask pattern-matched spans so downstream stages don't double-detect

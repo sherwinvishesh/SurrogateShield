@@ -5,10 +5,12 @@ Post-response surrogate-to-original reconstruction.
 
 Three passes in sequence:
     1. Exact string replacement — fast, handles the majority of cases.
-    2. Component matching — for multi-word surrogates (e.g. "Ashley Wise"),
-       tries each word individually at word boundaries. Catches the common
-       case where Claude uses only the first name ("Hi Ashley!") even when
-       the surrogate was the full name.
+    2. Component matching — for multi-word surrogates that are UNRESOLVED
+       after Pass 1.  Tries each component word at word boundaries.
+       IMPORTANT: only processes surrogates in the `unresolved` set —
+       running component matching on already-resolved surrogates caused
+       silent corruption (e.g. "Ashley" from resolved "Ashley Wise" wrongly
+       replacing "Ashley" in "Ashley County" in the same response).
     3. Fuzzy match — for any surrogate still unresolved, uses
        rapidfuzz.fuzz.partial_ratio with threshold 85.
 
@@ -21,7 +23,7 @@ Every failure is logged with its failure type for the research taxonomy:
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 from config import FUZZY_MATCH_THRESHOLD
 from util import get_logger
@@ -62,6 +64,8 @@ class ResolvePass:
     Uses three passes:
       1. Exact replacement
       2. Component matching (first/last name split for multi-word surrogates)
+         — scoped to UNRESOLVED surrogates only, to prevent component words
+         of already-resolved surrogates from corrupting unrelated text.
       3. Fuzzy matching via rapidfuzz
 
     Attributes:
@@ -89,7 +93,7 @@ class ResolvePass:
         result = response
         unresolved: Dict[str, str] = {}
 
-        # ── Pass 1: Exact string replacement ──────────────────────
+        # ── Pass 1: Exact string replacement ──────────────────────────
         for surrogate, original in shadow_map.items():
             if surrogate in result:
                 result = result.replace(surrogate, original)
@@ -106,18 +110,28 @@ class ResolvePass:
                     )
                 )
 
-        # ── Pass 2: Component matching ─────────────────────────────
-        # Run on ALL multi-word surrogates — not just unresolved ones.
-        # Reason: Claude may use the full name once ("Ashley Wise") AND
-        # the first name alone ("Hi Ashley!") in the same response.
-        # Pass 1 handles the full name but leaves the partial match.
+        if not unresolved:
+            return result
+
+        # ── Pass 2: Component matching (UNRESOLVED surrogates only) ───
         #
-        # For each multi-word surrogate we try matching each component
-        # word at a word boundary and replace it with the corresponding
-        # word from the original value.
-        # Example: surrogate="Ashley Wise", original="Sherwin Vishesh"
-        #   "Ashley" → "Sherwin", "Wise" → "Vishesh"
-        for surrogate, original in shadow_map.items():
+        # We intentionally iterate over `unresolved` rather than `shadow_map`.
+        #
+        # Rationale: if "Ashley Wise" was fully resolved in Pass 1, re-running
+        # component matching on it would find the word "Ashley" anywhere in the
+        # response — including in unrelated tokens like "Ashley County" — and
+        # replace it with the original's first name.  This is silent data
+        # corruption. By limiting Pass 2 to surrogates that Pass 1 could NOT
+        # find, we only handle the legitimate case where Claude used just the
+        # first name of a surrogate it was given in full.
+        #
+        # Trade-off: the case where Claude uses BOTH the full surrogate AND just
+        # the first name in the same response is not handled.  This is an
+        # acceptable trade-off — the correctness gain from preventing corruption
+        # outweighs the marginal resolution loss.
+        component_resolved: Set[str] = set()
+
+        for surrogate, original in list(unresolved.items()):
             surrogate_words = surrogate.split()
             original_words  = original.split()
 
@@ -132,18 +146,21 @@ class ResolvePass:
                         f"[ResolvePass] Component hit: {s_word!r} → {o_word!r} "
                         f"(surrogate: {surrogate!r})"
                     )
-                    # If this was in the unresolved list, reclassify as a hit
-                    if surrogate in unresolved:
-                        for f in reversed(self.failures):
-                            if f.surrogate == surrogate and f.failure_type == "exact_miss":
-                                f.failure_type = "fuzzy_hit"
-                                break
-                        del unresolved[surrogate]
+                    component_resolved.add(surrogate)
+                    # Reclassify the failure log entry for this surrogate
+                    for f in reversed(self.failures):
+                        if f.surrogate == surrogate and f.failure_type == "exact_miss":
+                            f.failure_type = "fuzzy_hit"
+                            break
+
+        # Remove component-resolved surrogates from the unresolved set
+        for surrogate in component_resolved:
+            del unresolved[surrogate]
 
         if not unresolved:
             return result
 
-        # ── Pass 3: Fuzzy matching ─────────────────────────────────
+        # ── Pass 3: Fuzzy matching ─────────────────────────────────────
         try:
             from rapidfuzz import fuzz
         except ImportError:
@@ -171,8 +188,7 @@ class ResolvePass:
 
         for surrogate, original in final_unresolved.items():
             logger.warning(
-                f"[ResolvePass] Fuzzy miss (best score unavailable): "
-                f"Could not resolve surrogate {surrogate!r}"
+                f"[ResolvePass] Fuzzy miss: could not resolve surrogate {surrogate!r}"
             )
             self.failures.append(
                 ResolutionFailure(
@@ -210,6 +226,11 @@ def _find_fuzzy_span(
     """
     Slide a window over *text* to find the best fuzzy match for *query*.
 
+    The step size is query_len // 8 (previously // 4).  The finer step
+    ensures matches that start at non-multiple-of-4 positions are found:
+    e.g. for a 16-character surrogate the old step=4 would skip positions
+    2, 6, 10, 14; the new step=2 catches all of them.
+
     Args:
         text:              Text to search within.
         query:             Surrogate string to find.
@@ -230,7 +251,10 @@ def _find_fuzzy_span(
     best_start = -1
     best_end = -1
 
-    step = max(1, query_len // 4)
+    # Finer step (//8 instead of //4) so matches at any starting position
+    # within the text are reliably found.
+    step = max(1, query_len // 8)
+
     for start in range(0, max(1, len(text) - query_len + 1), step):
         end = min(start + window_size, len(text))
         window = text[start:end]
