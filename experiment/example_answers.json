@@ -1,0 +1,81 @@
+[
+  {
+    "question": "hi my name is Revanth and my ssn is 544-87-2944 and give me the tax benefits of the state of wyoming, please",
+    "pattern_scan_pii": [
+      "544-87-2944"
+    ],
+    "entity_trace_pii": [
+      "Revanth"
+    ],
+    "context_guard_pii": [],
+    "confirmed_pii": [
+      "Revanth",
+      "544-87-2944"
+    ],
+    "pii_detail": {
+      "Revanth": {
+        "type": "PERSON",
+        "score": 0.88,
+        "source": "ner"
+      },
+      "544-87-2944": {
+        "type": "ssn",
+        "score": 1.0,
+        "source": "pattern"
+      }
+    },
+    "surrogate_map": {
+      "Revanth": "William Patterson",
+      "544-87-2944": "558-88-8069"
+    },
+    "sanitized_input": "hi my name is William Patterson and my ssn is 558-88-8069 and give me the tax benefits of the state of wyoming, please",
+    "llm_response": "Hi William! Here are the key tax benefits of living in **Wyoming**:\n\n---\n\n## 🏔️ Wyoming Tax Benefits\n\n### **No State Income Tax**\n- Wyoming has **no personal income tax** — one of only 9 states without it\n- This means **no tax on wages, salaries, or retirement income**\n\n### **No Corporate Income Tax**\n- Businesses enjoy **no state corporate income tax**\n- Great for entrepreneurs and business owners\n\n### **No Inheritance or Estate Tax**\n- Assets passed to heirs are **not taxed at the state level**\n\n### **Low Property Taxes**\n- Wyoming has some of the **lowest property tax rates** in the nation\n- Average effective rate is around **0.55%**\n\n### **Reasonable Sales Tax**\n- State sales tax is **4%** (relatively low)\n- Some localities add small additional amounts\n\n### **Retirement-Friendly**\n- **Social Security, pensions, and 401(k)/IRA withdrawals** are all free from state income tax\n\n### **No Franchise Tax**\n- No franchise or privilege tax on businesses\n\n---\n\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US, making it attractive for individuals, retirees, and businesses alike.\n\nWould you like more details on any specific area?",
+    "stage_timings_ms": {
+      "pattern_scan_ms": 0.07,
+      "entity_trace_ms": 2347.05,
+      "context_guard_ms": 0.0,
+      "surrogate_gen_ms": 0.24,
+      "llm_call_ms": 7095.81,
+      "total_ms": 13548.09
+    }
+  },
+  {
+    "question": "my email is revanth@gmail.com and phone is 480-555-1234, can you help me draft a resignation letter?",
+    "pattern_scan_pii": [
+      "revanth@gmail.com",
+      "480-555-1234"
+    ],
+    "entity_trace_pii": [],
+    "context_guard_pii": [],
+    "confirmed_pii": [
+      "revanth@gmail.com",
+      "480-555-1234"
+    ],
+    "pii_detail": {
+      "revanth@gmail.com": {
+        "type": "email",
+        "score": 1.0,
+        "source": "pattern"
+      },
+      "480-555-1234": {
+        "type": "phone_us",
+        "score": 1.0,
+        "source": "pattern"
+      }
+    },
+    "surrogate_map": {
+      "revanth@gmail.com": "susanconrad@example.net",
+      "480-555-1234": "+1-187-707-8879"
+    },
+    "sanitized_input": "my email is susanconrad@example.net and phone is +1-187-707-8879, can you help me draft a resignation letter?",
+    "llm_response": "Sure! I'd be happy to help you draft a resignation letter. Here's a professional template you can customize:\n\n---\n\n**Subject: Resignation Letter**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as [Your Job Title] at [Company Name], effective [Last Working Day — typically two weeks from today].\n\nThis has been a difficult decision, and I am grateful for the opportunities I have had to grow professionally during my time here. I have truly valued the experience and the relationships I have built with the team.\n\nI am committed to ensuring a smooth transition and will do my best to wrap up my current responsibilities and assist in training my replacement during my remaining time.\n\nPlease feel free to reach out to me at **susanconrad@example.net** or **+1-187-707-8879** should you need to discuss anything further.\n\nThank you for the support and opportunities you have provided me. I wish you and the team continued success.\n\nSincerely,\n**Susan Conrad**\n\n---\n\n**A few things to customize:**\n- **Manager's Name** – Add their full name or just first name\n- **Job Title** – Your current role\n- **Company Name** – Your employer\n- **Last Working Day** – Typically two weeks from your resignation date\n\nWould you like me to adjust the **tone** (more formal, warmer, brief) or add any specific details?",
+    "stage_timings_ms": {
+      "pattern_scan_ms": 0.14,
+      "entity_trace_ms": 16.45,
+      "context_guard_ms": 0.0,
+      "surrogate_gen_ms": 0.3,
+      "llm_call_ms": 6597.57,
+      "total_ms": 6652.14
+    }
+  }
+]

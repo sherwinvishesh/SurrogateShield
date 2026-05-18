@@ -192,6 +192,7 @@ def _print_menu(has_convs: bool) -> None:
             ("[bold blue]1 – 9[/bold blue]",   "Open conversation by number"),
             ("[bold blue]D1 – D9[/bold blue]", "Delete conversation by number"),
         ]
+    rows.append(("[bold blue]J[/bold blue]", "JSON Test  — batch evaluation from a JSON file"))
     rows.append(("[bold blue]S[/bold blue]", "Settings"))
     rows.append(("[bold blue]Q[/bold blue]", "Quit"))
     for key, desc in rows:
@@ -322,6 +323,167 @@ def _run_pii_finder() -> None:
             border_style="dim blue", padding=(0, 2),
         ))
         console.print()
+
+
+# ─── JSON Test ────────────────────────────────────────────────────────────────
+
+def _run_json_test() -> None:
+    """Three-screen JSON batch testing flow."""
+    import json as _json
+    from json_tester import EXPERIMENT_DIR, OUTPUT_FIELDS, DEFAULT_FIELDS, run_batch
+
+    EXPERIMENT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # ── Screen 1: Enter filename ──────────────────────────────────────────────
+    console.print(Panel(
+        "[bold blue]JSON Test[/bold blue]  "
+        "[dim]· Batch-process questions through the full pipeline[/dim]\n\n"
+        "  [dim]Place your input file in:[/dim]  [cyan]experiment/<name>.json[/cyan]\n"
+        "  [dim]Output will be saved to:[/dim]  [cyan]experiment/<name>_answers.json[/cyan]\n\n"
+        "[dim]Input format:[/dim]\n"
+        "  [cyan][ {\"input\": \"question 1\"}, {\"input\": \"question 2\"}, … ][/cyan]\n\n"
+        "[dim]Results are saved every 25 questions — safe to interrupt and resume.[/dim]",
+        border_style="blue", padding=(1, 2),
+    ))
+    console.print()
+
+    try:
+        filename = console.input(
+            "  [dim]experiment/[/dim][bold blue]filename › [/bold blue]"
+        ).strip()
+    except (EOFError, KeyboardInterrupt):
+        return
+
+    if not filename or filename.upper() == "B":
+        return
+    if not filename.endswith(".json"):
+        filename += ".json"
+
+    in_path = EXPERIMENT_DIR / filename
+    if not in_path.exists():
+        console.print(f"\n  [red]File not found:[/red] experiment/{filename}")
+        time.sleep(1.5)
+        return
+
+    try:
+        questions = _json.loads(in_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        console.print(f"\n  [red]Invalid JSON:[/red] {exc}")
+        time.sleep(1.5)
+        return
+
+    total = len(questions)
+    stem  = in_path.stem
+    out_path = EXPERIMENT_DIR / f"{stem}_answers.json"
+
+    existing = 0
+    if out_path.exists():
+        try:
+            existing = len(_json.loads(out_path.read_text(encoding="utf-8")))
+        except Exception:
+            existing = 0
+
+    # ── Screen 2: Field selection ─────────────────────────────────────────────
+    fields = DEFAULT_FIELDS.copy()
+
+    while True:
+        console.clear()
+        _print_compact_banner()
+
+        resume_note = (
+            f"  [green]Resuming:[/green] {existing}/{total} already answered"
+            f" — will start from question {existing + 1}\n\n"
+            if existing > 0 else ""
+        )
+
+        console.print(Panel(
+            f"[bold blue]Field Selection[/bold blue]  "
+            f"[dim]· {filename}  ({total} question{'s' if total != 1 else ''})[/dim]\n\n"
+            f"{resume_note}"
+            "[dim]Press a number to toggle. Press [bold white]Enter[/bold white] to run.[/dim]",
+            border_style="blue", padding=(1, 2),
+        ))
+        console.print()
+
+        for i, (key, label) in enumerate(OUTPUT_FIELDS, 1):
+            mark = "[green]✓[/green]" if fields[key] else "[dim]□[/dim]"
+            console.print(f"  [bold blue]{i}[/bold blue]  {mark}  [white]{label}[/white]")
+
+        console.print()
+        console.print(Rule(style="dim blue"))
+        console.print(f"\n  [dim]Enter[/dim] → Run  ·  [bold blue]B[/bold blue] → Back\n")
+
+        try:
+            raw = console.input("[bold blue]›[/bold blue]  ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            return
+
+        if raw == "B":
+            return
+        if raw == "":
+            break
+        if raw.isdigit() and 1 <= int(raw) <= len(OUTPUT_FIELDS):
+            key = OUTPUT_FIELDS[int(raw) - 1][0]
+            fields[key] = not fields[key]
+
+    # ── Screen 3: Run ─────────────────────────────────────────────────────────
+    console.clear()
+    _print_compact_banner()
+    console.print(Panel(
+        f"[bold blue]JSON Test Running[/bold blue]  [dim]· {filename}[/dim]\n\n"
+        f"  [dim]Output →[/dim] [cyan]{out_path}[/cyan]\n"
+        f"  [dim]Total  :[/dim] {total} questions"
+        + (f"  [dim](resuming from {existing + 1})[/dim]" if existing else ""),
+        border_style="blue", padding=(0, 2),
+    ))
+    console.print()
+    console.print(Rule(style="blue"))
+    console.print()
+
+    logging.getLogger().setLevel(logging.WARNING)
+
+    errors = 0
+
+    def _on_progress(i: int, total: int, question: str, status: str, elapsed: float) -> None:
+        nonlocal errors
+        short_q = (question[:68] + "…") if len(question) > 68 else question
+        idx     = f"[dim]{i + 1:>{len(str(total))}}/{total}[/dim]"
+
+        if status == "running":
+            console.print(f"  [dim blue]⟳[/dim blue]  {idx}  [dim]{short_q}[/dim]")
+        elif status == "ok":
+            save_note = "  [dim blue]💾 saved[/dim blue]" if (i + 1 - existing) % 25 == 0 or (i + 1) == total else ""
+            console.print(f"  [green]✓[/green]  {idx}  [dim]{elapsed:.1f}s[/dim]{save_note}")
+        elif status == "error":
+            errors += 1
+            console.print(f"  [red]✗[/red]  {idx}  [red]error — see output file[/red]")
+
+    try:
+        out = run_batch(filename, fields, progress_cb=_on_progress)
+        new_count = total - existing
+
+        console.print()
+        console.print(Rule(style="green"))
+        console.print()
+        console.print(
+            f"  [green bold]Done![/green bold]  "
+            f"{new_count} new question{'s' if new_count != 1 else ''} processed."
+        )
+        if errors:
+            console.print(f"  [yellow]{errors} error{'s' if errors != 1 else ''}[/yellow] — details in the output file.")
+        console.print(f"  [dim]Saved to:[/dim] [cyan]{out}[/cyan]")
+
+    except EnvironmentError as exc:
+        console.print(f"\n  [red bold]Configuration error:[/red bold] {exc}")
+        console.print("  [dim]Go to Settings (S) to configure your LLM provider.[/dim]")
+    except Exception as exc:
+        console.print(f"\n  [red bold]Error:[/red bold] {exc}")
+
+    console.print()
+    try:
+        console.input("  [dim]Press Enter to return to dashboard…[/dim]")
+    except (EOFError, KeyboardInterrupt):
+        pass
 
 
 # ─── Settings ─────────────────────────────────────────────────────────────────
@@ -588,6 +750,8 @@ def _run_dashboard() -> None:
             console.clear(); _print_compact_banner(); _start_chat(rag=True); continue
         if upper == "P":
             console.clear(); _print_compact_banner(); _run_pii_finder(); continue
+        if upper == "J":
+            console.clear(); _print_compact_banner(); _run_json_test(); continue
         if upper == "S":
             _run_settings(); continue
 

@@ -165,7 +165,13 @@ class Pipeline:
         from settings_manager import load_settings
         _s = load_settings()
         detailed = _s.get("detailed_view", False)
-        provider = _s.get("llm_provider", "claude").title()
+        _PROVIDER_NAMES = {
+            "claude":  "Claude",
+            "gemini":  "Gemini",
+            "chatgpt": "ChatGPT",
+            "local":   "Local LLM",
+        }
+        provider = _PROVIDER_NAMES.get(_s.get("llm_provider", "claude"), "LLM")
 
         # ── Service query check ───────────────────────────────────────────────
         # Service queries (e.g. "restaurants near 1126 E Apache Blvd, Tempe, AZ")
