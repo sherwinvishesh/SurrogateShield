@@ -1,68 +1,44 @@
 """
 detection/logic.py — SentinelLayer
 
-Cascade: PatternScan → EntityTrace → ContextGuard, followed by a
-model-driven geographic entity filter.
+Cascade: PatternScan → EntityTrace → ContextGuard, followed by four
+model-output-driven post-processing passes.
 
-The geographic filter — purely model-output driven
-───────────────────────────────────────────────────
-No hardcoded lists of states, countries, or city names.
-The decision is based entirely on the entity TYPES that spaCy and
-distilbert returned and on whether each sub-clause is a personal
-statement or a knowledge/service request.
+Post-processing passes (all use model outputs + linguistic structure,
+no keyword lists):
 
-Algorithm
-─────────
-1. Split the text into sub-clauses at ALL clause boundaries:
-       sentence endings  .  !  ?
-       conjunctions      and  or  but  because  while  when  since  …
-       commas / semicolons
+  Pass A — Structural ORG detection
+      Regex: "[the/a/an] <name> [corporation|company|corp|inc|ltd|llc…]"
+      emits <name> as ORG.  The organisational suffix is the signal that
+      the preceding word is a company name, regardless of capitalisation.
+      This is structural detection (like PatternScan's address pattern),
+      not a list of company names.
 
-2. Classify each sub-clause as "query" or "personal":
-     • Query  — starts with a request/interrogative frame
-                  "give me …", "tell me …", "what is …", "how do …",
-                  "find me …", "please …", "can you …", etc.
-     • Personal — everything else (personal disclosures, descriptions)
+  Pass B — Email-username → PERSON reclassification
+      If an ORG entity's text is a prefix of a detected email username
+      (e.g. "Sherwin" is prefix of "sherwinvishesh"), the NER mis-labelling
+      is corrected to PERSON.  Decision is made from pattern-detection output.
 
-3. For each GPE or LOC entity:
-     a. If it appears in a QUERY sub-clause  → it is the TOPIC of the
-        request, not the user's personal data → DROP (do not replace).
-     b. Else (it is only in PERSONAL sub-clauses):
-        • If any PERSONAL sub-clause in the same SENTENCE also contains a
-          PERSON entity → the geo entity is personal location context → KEEP.
-        • Otherwise → no person anywhere in the sentence → DROP.
+  Pass C — PERSON component deduplication
+      When entity A ("Mitchell") is a word-component of entity B
+      ("Sarah Mitchell"), both PERSON, A is removed.  ResolvePass
+      component matching handles standalone surname occurrences from the
+      full-name surrogate, giving consistent replacement.
 
-Why this handles all the key cases (entity-type decisions, no keyword lists)
-─────────────────────────────────────────────────────────────────────────────
-"give me the tax benefits of wyoming"
-    sub-clause: "give me the tax benefits of wyoming" → QUERY
-    Wyoming in QUERY → dropped ✓
+  Pass D — Topical geo-entity filter (revised)
+      A GPE/LOC is dropped ONLY if it appears exclusively in query
+      sub-clauses.  Appearing in any non-query sub-clause → always kept,
+      regardless of whether a PERSON is present.
 
-"my name is Revanth and give me tax benefits of wyoming"
-    sub-clauses: "my name is Revanth" (personal),
-                 "give me tax benefits of wyoming" (QUERY)
-    Wyoming in QUERY → dropped ✓  |  Revanth kept ✓
-
-"Revanth lives in Wyoming"
-    one personal sub-clause; sentence has PERSON (Revanth) → Wyoming kept ✓
-
-"I am Emma and I live in Seattle"
-    sub-clauses: "I am Emma" (personal), "I live in Seattle" (personal)
-    Seattle in personal sub-clause; sentence has PERSON (Emma) → kept ✓
-
-"I am Emma but give me California tax rates"
-    sub-clauses: "I am Emma" (personal), "give me California tax rates" (QUERY)
-    California in QUERY → dropped ✓
-
-"What is the weather in Arizona?"
-    sub-clause: "What is the weather in Arizona?" → QUERY
-    Arizona dropped ✓
+      Additionally: mid-sentence lowercase geo entities (common-noun
+      usages like "phoenix bird" or "springfield field team") are skipped
+      via a capitalisation check — proper place names are capitalised in
+      English.
 """
 
 from __future__ import annotations
 
 import re
-from collections import defaultdict
 from typing import Dict, List, Optional, Set, Tuple
 
 from dataclasses import replace as _dc_replace
@@ -73,92 +49,215 @@ logger = get_logger(__name__)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Sub-clause splitting
+# Pass A — Structural ORG detection
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Split at ALL grammatical clause boundaries, including coordinating "and/or".
-# We split at "and" here so that "give me X and tell me Y" cleanly separates
-# the two requests.  Personal coordinated clauses ("I am Emma and I live in
-# Seattle") still work because neither sub-clause matches the QUERY frame.
-_CLAUSE_SPLIT = re.compile(
-    r'[.!?]+\s+'                                      # sentence endings
-    r'|\s+(?:and|or|but|however|yet|because|since|although|while|when'
-    r'|therefore|whereas|unless|though|despite|nevertheless|so)\s+'
-    r'|,\s+',                                         # comma
+_STRUCTURAL_ORG_PATTERN = re.compile(
+    r'\b(?:the|a|an)\s+'
+    r'([A-Za-z][A-Za-z]*(?:\s+[A-Za-z]+){0,3}?)'
+    r'\s+(?:corporation|company|corp|inc|ltd|llc|group|firm|enterprise'
+    r'|organization|organisation|associates|holdings|ventures|solutions)\b',
     re.IGNORECASE,
 )
 
-# Sentence-only split (used to scope "does this sentence have a PERSON?")
-_SENTENCE_SPLIT = re.compile(r'(?<=[.!?])\s+')
+
+def _detect_structural_orgs(
+    text: str,
+    existing_entities: List[DetectedEntity],
+) -> List[DetectedEntity]:
+    """
+    Emit ORG entities for company names identified by organisational suffixes.
+
+    The structural suffix (corporation, company, etc.) signals that the
+    preceding word is used as a company name regardless of capitalisation.
+    This catches "target corporation", "the phoenix group", etc. without
+    any list of known company names.
+
+    The detected span covers ONLY the name (e.g. "target"), not the suffix,
+    so the surrogate replaces only "target" and "corporation" is preserved,
+    giving "The RetailHoldings corporation announced…" as expected.
+    """
+    occupied = {(e.start, e.end) for e in existing_entities}
+    new_ents: List[DetectedEntity] = []
+
+    for m in _STRUCTURAL_ORG_PATTERN.finditer(text):
+        name_text  = m.group(1).strip()
+        name_start = m.start(1)
+        name_end   = m.end(1)
+
+        # Skip if overlaps with an already-detected entity
+        if any(not (name_end <= os or name_start >= oe) for os, oe in occupied):
+            continue
+
+        ent = DetectedEntity(
+            text=name_text,
+            start=name_start,
+            end=name_end,
+            type="ORG",
+            score=0.90,
+            source="pattern",
+        )
+        new_ents.append(ent)
+        occupied.add((name_start, name_end))
+        logger.debug(
+            f"[SentinelLayer] Pass A structural ORG: {name_text!r}"
+        )
+
+    return new_ents
+
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Query-frame classifier
+# Pass B — Email-username → PERSON reclassification
 # ─────────────────────────────────────────────────────────────────────────────
 
-# A sub-clause is a "query clause" if it starts with (optionally preceded by
-# polite markers like "please" / "could you") an imperative or interrogative
-# opener that signals a request for information rather than a personal disclosure.
-#
-# Why a regex here and not a model?
-#   • The regex matches STRUCTURAL sentence openers (imperative / wh-word),
-#     not topic keywords.  "give me the tax benefits of [anything]" is a query
-#     regardless of what [anything] is — the request structure matters, not the
-#     geographic content.
-#   • This is different from a geo whitelist: the regex has no knowledge of
-#     states, countries, or cities.
+def _reclassify_email_username_orgs(
+    entities: List[DetectedEntity],
+) -> List[DetectedEntity]:
+    """
+    Reclassify ORG entities whose text is a name-prefix of a detected email.
+
+    spaCy sees masked text after PatternScan — the email is hidden — so it
+    sometimes labels the standalone first name as ORG.  This pass uses the
+    email detection output (from PatternScan) to correct that labelling.
+
+    Example: "sherwinvishesh@gmail.com" detected → username "sherwinvishesh"
+             "Sherwin" detected as ORG → "sherwin" is prefix of username
+             → reclassify "Sherwin" as PERSON
+    """
+    email_usernames: Set[str] = set()
+    for ent in entities:
+        if ent.type == "email" and "@" in ent.text:
+            email_usernames.add(ent.text.split("@")[0].lower())
+
+    if not email_usernames:
+        return entities
+
+    result = []
+    for ent in entities:
+        if ent.type == "ORG" and len(ent.text) >= 3:
+            ent_lower = ent.text.lower()
+            for username in email_usernames:
+                if username.startswith(ent_lower):
+                    ent = _dc_replace(ent, type="PERSON", score=0.88)
+                    logger.debug(
+                        f"[SentinelLayer] Pass B ORG→PERSON (email prefix): "
+                        f"{ent.text!r}"
+                    )
+                    break
+        result.append(ent)
+    return result
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pass C — PERSON component deduplication
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _deduplicate_person_components(
+    entities: List[DetectedEntity],
+) -> List[DetectedEntity]:
+    """
+    Remove PERSON entities that are word-components of longer PERSON entities.
+
+    When "Mitchell" and "Sarah Mitchell" are both detected:
+      • Keep "Sarah Mitchell"
+      • Remove "Mitchell" (ResolvePass component matching will handle
+        standalone "Mitchell" occurrences using the full-name surrogate,
+        giving consistent output like "Clark" from "Jessica Clark")
+
+    Decision is purely structural (word-set containment), no name lists.
+    """
+    persons = [e for e in entities if e.type == "PERSON"]
+    others  = [e for e in entities if e.type != "PERSON"]
+
+    to_remove: Set[str] = set()
+    for short in persons:
+        short_words = set(short.text.split())
+        for long_ent in persons:
+            if short.text != long_ent.text:
+                long_words = set(long_ent.text.split())
+                if short_words <= long_words:
+                    to_remove.add(short.text)
+                    logger.debug(
+                        f"[SentinelLayer] Pass C removing component PERSON "
+                        f"{short.text!r} (subset of {long_ent.text!r})"
+                    )
+                    break
+
+    return others + [e for e in persons if e.text not in to_remove]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pass D — Topical geo-entity filter
+# ─────────────────────────────────────────────────────────────────────────────
+
+_CLAUSE_SPLIT = re.compile(
+    r'[.!?]+\s+'
+    r'|\s+(?:and|or|but|however|yet|because|since|although|while|when'
+    r'|therefore|whereas|unless|though|despite|nevertheless|so)\s+'
+    r'|,\s+',
+    re.IGNORECASE,
+)
+
 _QUERY_FRAME = re.compile(
     r'^\s*'
-    # Optional polite prefix
     r'(?:please\s+|could\s+you\s+(?:please\s+)?|can\s+you\s+(?:please\s+)?'
     r'|would\s+you\s+(?:please\s+)?)?'
     r'(?:'
-    # Imperatives
     r'give\s+me|tell\s+me|show\s+me|find\s+me|help\s+me|get\s+me'
-    r'|look\s+up|search\s+for|look\s+for|explain\s+to\s+me|explain'
-    r'|list\s+(?:the|all|some)?|describe|summarize|summarise|compare'
-    r'|recommend|suggest|advise|help'
-    r'|'
-    # Wh-questions and auxiliaries
-    r'what\s+(?:is|are|was|were|would|can|do|does|did|are\s+the|is\s+the)'
-    r'|how\s+(?:do|does|did|can|much|many|to|would|come)'
-    r'|which\s+(?:is|are|was|were|would|one|ones)'
-    r'|where\s+(?:is|are|can|do|should|would|to\s+find)'
+    r'|look\s+up|search\s+for|look\s+for|explain|list|describe'
+    r'|summarize|summarise|compare|recommend|suggest|advise'
+    r'|what\s+(?:is|are|was|were|would|can|do|does|did)'
+    r'|how\s+(?:do|does|did|can|much|many|to|would)'
+    r'|which\s+(?:is|are|was|were|would)'
+    r'|where\s+(?:is|are|can|do|should|would)'
     r'|when\s+(?:is|are|was|were|do|does|did|can)'
     r'|who\s+(?:is|are|was|were|can|would|do|does)'
     r'|why\s+(?:is|are|was|were|do|does|did|would|should)'
-    r'|is\s+there|are\s+there|was\s+there|were\s+there'
-    r'|do\s+you\s+know|can\s+you\s+tell\s+me'
-    r'|'
-    # "I want/need to know" patterns
-    r'i\s+(?:want|need|would\s+like|\'d\s+like)\s+(?:to\s+know|to\s+find\s+out'
-    r'|to\s+learn|to\s+understand|information|details|advice|help)'
+    r'|is\s+there|are\s+there'
+    r'|i\s+(?:want|need|would\s+like|\'d\s+like)\s+(?:to\s+know|to\s+find|'
+    r'to\s+learn|to\s+understand|information|details|advice|help)'
     r')',
     re.IGNORECASE,
 )
 
+_GEO_FILTERABLE = {"GPE", "LOC"}
+
 
 def _all_sub_clauses(text: str) -> List[str]:
-    """Split text into all sub-clauses at every grammatical boundary."""
     parts = _CLAUSE_SPLIT.split(text)
     return [p.strip() for p in parts if p.strip()]
 
 
-def _sentences(text: str) -> List[str]:
-    """Split text into sentences at [.!?] boundaries."""
-    parts = _SENTENCE_SPLIT.split(text)
-    return [p.strip() for p in parts if p.strip()]
-
-
 def _contains_entity(entity_text: str, clause: str) -> bool:
-    """Return True if entity_text appears in clause (case-insensitive)."""
     return entity_text.lower() in clause.lower()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# The model-driven geographic entity filter
-# ─────────────────────────────────────────────────────────────────────────────
+def _is_proper_capitalized(entity_text: str, text: str) -> bool:
+    """
+    Return True if this entity should be treated as a proper noun.
 
-_GEO_FILTERABLE = {"GPE", "LOC"}
+    English proper nouns are capitalised.  A geo entity whose surface form
+    starts with a lowercase letter and appears mid-sentence is almost
+    certainly a common-noun usage ("phoenix bird", "springfield field team"),
+    not the name of a place.
+
+    This is a linguistic structure rule — it uses no geographic keyword lists.
+    """
+    if entity_text[0].isupper():
+        return True  # capitalised → proper noun ✓
+
+    # Lowercase entity — check if it's at the start of a sentence/clause
+    idx = text.find(entity_text)
+    if idx == -1:
+        idx = text.lower().find(entity_text.lower())
+    if idx == -1:
+        return True  # not found → conservative: keep
+
+    prefix = text[:idx].rstrip()
+    if not prefix or prefix[-1] in ".!?;":
+        return True  # sentence-start → might be proper noun despite lowercase
+
+    return False  # lowercase, mid-sentence → common noun usage → skip
 
 
 def _filter_topical_geo_entities(
@@ -166,100 +265,62 @@ def _filter_topical_geo_entities(
     text: str,
 ) -> List[DetectedEntity]:
     """
-    Remove GPE/LOC entities that are query topics rather than personal data.
+    Remove GPE/LOC entities that are query topics rather than personal refs.
 
-    Decision is made from entity types the NER models detected + whether
-    each sub-clause is a personal statement or a knowledge request.
-    No geographic keyword lists are used.
+    Revised rule (no PERSON co-occurrence requirement):
+      • Geo entity appears ONLY in query sub-clauses → topical → DROPPED
+      • Geo entity appears in any non-query sub-clause → personal/narrative
+        → KEPT regardless of whether a PERSON entity is present
 
-    See module docstring for the full algorithm and worked examples.
+    This means:
+      "give me tax benefits of Wyoming"         → query only → dropped
+      "from the ashes of Phoenix"               → non-query  → kept ✓
+      "The city of Springfield is beautiful"    → non-query  → kept ✓
+      "What restaurants are near London?"       → query only → dropped ✓
+      "Revanth lives in Wyoming"                → non-query  → kept ✓
+
+    The capitalisation check (_is_proper_capitalized) additionally filters
+    mid-sentence lowercase usages ("phoenix bird", "springfield field team").
     """
-    geo_ents  = [e for e in entities if e.type in _GEO_FILTERABLE]
+    geo_ents   = [e for e in entities if e.type in _GEO_FILTERABLE]
     other_ents = [e for e in entities if e.type not in _GEO_FILTERABLE]
 
     if not geo_ents:
         return entities
 
-    # ── Build sub-clause metadata ─────────────────────────────────────────────
-    all_clauses = _all_sub_clauses(text)
-    all_sents   = _sentences(text) or [text]
-
-    # For each sub-clause: is it a query clause?
+    all_clauses     = _all_sub_clauses(text)
     clause_is_query = [bool(_QUERY_FRAME.match(c)) for c in all_clauses]
 
-    # For each sentence: which sub-clauses (indices) belong to it?
-    # We map by text presence since we don't have character offsets after splitting.
-    def sent_for_clause(clause: str) -> int:
-        for i, s in enumerate(all_sents):
-            if clause.lower() in s.lower():
-                return i
-        return 0  # fallback: first sentence
-
-    sent_of_clause: List[int] = [sent_for_clause(c) for c in all_clauses]
-
-    # For each sentence: does it have a PERSON entity in a PERSONAL sub-clause?
-    sent_has_person_in_personal: Dict[int, bool] = defaultdict(bool)
-    for i, clause in enumerate(all_clauses):
-        if clause_is_query[i]:
-            continue  # skip query clauses
-        sent_idx = sent_of_clause[i]
-        for ent in other_ents:
-            if ent.type == "PERSON" and _contains_entity(ent.text, clause):
-                sent_has_person_in_personal[sent_idx] = True
-
-    # ── Decide each geo entity ────────────────────────────────────────────────
     result = list(other_ents)
 
     for geo_ent in geo_ents:
-        in_query  = False
+        # Capitalisation check: lowercase mid-sentence = common noun → skip
+        if not _is_proper_capitalized(geo_ent.text, text):
+            logger.debug(
+                f"[SentinelLayer] Pass D: lowercase geo skipped (not proper noun): "
+                f"{geo_ent.text!r}"
+            )
+            continue
+
+        # Query-clause filter
+        in_query    = False
         in_personal = False
 
         for i, clause in enumerate(all_clauses):
-            if not _contains_entity(geo_ent.text, clause):
-                continue
-            if clause_is_query[i]:
-                in_query = True
-                logger.debug(
-                    f"[SentinelLayer] {geo_ent.text!r} found in query sub-clause: "
-                    f"{clause[:60]!r}"
-                )
-            else:
-                in_personal = True
+            if _contains_entity(geo_ent.text, clause):
+                if clause_is_query[i]:
+                    in_query = True
+                else:
+                    in_personal = True
 
-        if in_query:
-            # Entity appears in at least one QUERY clause → it is the topic,
-            # not personal data → do NOT replace
+        if in_query and not in_personal:
             logger.debug(
-                f"[SentinelLayer] Topical geo (query sub-clause): {geo_ent.text!r} → skip"
+                f"[SentinelLayer] Pass D: topical geo (query-only): {geo_ent.text!r}"
             )
             continue
 
-        if in_personal:
-            # Entity is only in personal clauses — keep it only if a PERSON
-            # entity co-occurs in the same sentence's personal clauses.
-            any_sent = next(
-                (sent_of_clause[i] for i, c in enumerate(all_clauses)
-                 if _contains_entity(geo_ent.text, c) and not clause_is_query[i]),
-                0,
-            )
-            if sent_has_person_in_personal[any_sent]:
-                logger.debug(
-                    f"[SentinelLayer] Personal geo (PERSON co-occurs in sentence): "
-                    f"{geo_ent.text!r} → keep"
-                )
-                result.append(geo_ent)
-            else:
-                logger.debug(
-                    f"[SentinelLayer] Topical geo (no PERSON in sentence): "
-                    f"{geo_ent.text!r} → skip"
-                )
-            continue
-
-        # Entity not found in any clause (e.g. ContextGuard entity on masked text)
-        # → conservative: keep it
         logger.debug(
-            f"[SentinelLayer] Geo entity not found in any clause → keep (conservative): "
-            f"{geo_ent.text!r}"
+            f"[SentinelLayer] Pass D: geo kept (non-query context): {geo_ent.text!r}"
         )
         result.append(geo_ent)
 
@@ -271,11 +332,8 @@ def _filter_topical_geo_entities(
 # ─────────────────────────────────────────────────────────────────────────────
 
 _LOCATION_PREPS = {
-    "in", "near",
-    "live", "lives", "lived",
-    "grew", "born", "raised",
-    "moved", "relocate", "relocated",
-    "residing", "reside",
+    "in", "near", "live", "lives", "lived", "grew", "born", "raised",
+    "moved", "relocate", "relocated", "residing", "reside",
     "hometown", "birthplace", "based",
 }
 
@@ -307,8 +365,7 @@ def run_cascade(
     skip_location_entities: bool = False,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
-    Execute the full SentinelLayer cascade then apply the model-driven
-    geographic entity filter.
+    Execute the full SentinelLayer cascade then apply post-processing passes.
 
     Args:
         text:                   Raw user message.
@@ -318,11 +375,13 @@ def run_cascade(
     confirmed: List[DetectedEntity] = []
     needs_confirmation: List[DetectedEntity] = []
 
+    # ── Stage 1: PatternScan ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 1: PatternScan")
     pattern_results = pattern_scan.scan(text, skip_values=skip_values)
     confirmed.extend(pattern_results)
     remaining_text = mask_spans(text, pattern_results)
 
+    # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
     ner_confirmed, ner_borderline = entity_trace.trace(
         remaining_text, existing_entities=confirmed,
@@ -337,6 +396,7 @@ def run_cascade(
     confirmed.extend(ner_confirmed)
     remaining_text = mask_spans(remaining_text, ner_confirmed)
 
+    # ── Stage 3: ContextGuard ─────────────────────────────────────────────────
     from config import CONTEXT_GUARD_ENABLED, ENTITY_TRACE_FALLBACK_THRESHOLD
     if CONTEXT_GUARD_ENABLED:
         logger.info("[SentinelLayer] Stage 3: ContextGuard")
@@ -356,11 +416,24 @@ def run_cascade(
         ]
         if promoted:
             confirmed.extend(promoted)
-            logger.debug(
-                f"[SentinelLayer] ContextGuard disabled — promoted {len(promoted)}"
-            )
 
-    # Model-driven geo filter (Stage 4)
+    # ── Pass A: Structural ORG detection ─────────────────────────────────────
+    structural_orgs = _detect_structural_orgs(text, confirmed)
+    if structural_orgs:
+        logger.info(
+            f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
+        )
+        confirmed.extend(structural_orgs)
+
+    # ── Pass B: Email-username → PERSON reclassification ─────────────────────
+    confirmed          = _reclassify_email_username_orgs(confirmed)
+    needs_confirmation = _reclassify_email_username_orgs(needs_confirmation)
+
+    # ── Pass C: PERSON component deduplication ────────────────────────────────
+    confirmed          = _deduplicate_person_components(confirmed)
+    needs_confirmation = _deduplicate_person_components(needs_confirmation)
+
+    # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
         confirmed          = _filter_topical_geo_entities(confirmed,          text)
         needs_confirmation = _filter_topical_geo_entities(needs_confirmation, text)
@@ -374,6 +447,7 @@ def run_cascade(
 
 
 def deduplicate(entities: List[DetectedEntity]) -> List[DetectedEntity]:
+    """Remove duplicate entities by text, keeping the highest-scored one."""
     seen: dict = {}
     for ent in entities:
         key = ent.text.strip()
