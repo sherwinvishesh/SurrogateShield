@@ -2,18 +2,19 @@
 detection/context_guard.py — ContextGuard
 
 NER-based detection of named entities using a local HuggingFace model
-(dslim/distilbert-NER, ~250 MB). Replaces the previous Ollama phi3:mini
-implementation — no external server required.
+(dslim/distilbert-NER, ~250 MB).
 
-Geographic pass-through:
-  The same GEO_PASS_THROUGH whitelist used by EntityTrace is applied here —
-  US states, major countries, and major cities are never emitted as entities
-  worth replacing, even when distilbert detects them with high confidence.
+This module detects named entities in the text that PatternScan and
+EntityTrace missed.  It does NOT decide whether a geographic entity is
+PII — that decision is made in detection/logic.py by analysing the
+entity type co-occurrence across the full set of detected entities.
 
 Tokenization artefact handling:
-  distilbert word-piece tokenisation sometimes produces tokens starting with
-  ". " or "##".  This module strips such artefacts and applies a blocklist of
-  titles / short tokens (e.g. "Dr" alone, "DE", "Mr") that are never PII.
+  distilbert word-piece tokenisation sometimes produces tokens like ". Sun"
+  (a period attached to the next word when "Dr. Sun" is split) or "##wick"
+  (a subword continuation prefix).  Both are stripped before emitting entities.
+  Titles and very short tokens are also filtered to avoid false positives
+  like "Dr" alone or "DE" being detected as PERSON/ORG.
 """
 
 from __future__ import annotations
@@ -27,7 +28,6 @@ from config import (
     CONTEXT_GUARD_CONFIDENCE_THRESHOLD,
 )
 from util import DetectedEntity, get_logger
-from detection.geo_data import GEO_PASS_THROUGH
 
 logger = get_logger(__name__)
 
@@ -60,8 +60,6 @@ def _get_ner():
     return _ner_pipeline
 
 
-# ── Label mappings ────────────────────────────────────────────────────────────
-
 _LABEL_MAP = {
     "PER":    "PERSON",
     "PERSON": "PERSON",
@@ -73,7 +71,8 @@ _LABEL_MAP = {
 
 _KEEP_LABELS = {"PER", "PERSON", "ORG", "LOC", "GPE"}
 
-# Titles and short tokens distilbert frequently fires on incorrectly
+# Titles and short tokens distilbert commonly fires on incorrectly.
+# These are NEVER meaningful PII on their own.
 _CG_BLOCKLIST: frozenset = frozenset({
     "dr", "mr", "mrs", "ms", "prof", "professor", "rev", "sr", "jr",
     "sir", "lord", "dame", "capt", "lt", "sgt", "col", "gen",
@@ -86,18 +85,14 @@ def _clean_token(raw: str) -> str:
     Strip HuggingFace word-piece artefacts and leading punctuation.
 
     Examples:
-        "##wick"  → "wick"
-        ". Sun"   → "Sun"    (leading period from "Dr. Sun" split)
-        " Smith"  → "Smith"
+        "##wick"  → "wick"       (subword continuation prefix)
+        ". Sun"   → "Sun"        (leading period from "Dr. Sun" split)
+        " Smith"  → "Smith"      (leading whitespace)
     """
     text = raw.replace("##", "")
     text = re.sub(r'^[^A-Za-z0-9]+', '', text)
     return text.strip()
 
-
-# ─────────────────────────────────────────────
-# Main guard function
-# ─────────────────────────────────────────────
 
 def guard(
     remaining_text: str,
@@ -106,9 +101,9 @@ def guard(
     """
     Run NER on remaining_text and verify borderline_entities.
 
-    Geographic pass-through: GPE/LOC entities matching GEO_PASS_THROUGH
-    (US states, major countries, major cities) are silently dropped — they
-    are not PII and replacing them destroys answer utility.
+    Returns entities as detected.  The decision of whether a geographic
+    entity is PII in context is deferred to detection/logic.py which
+    analyses the full entity set across the whole message.
 
     Args:
         remaining_text:      Text not covered by PatternScan / EntityTrace.
@@ -120,24 +115,18 @@ def guard(
     confirmed: List[DetectedEntity] = []
     uncertain: List[DetectedEntity] = []
 
-    # ── Verify borderline entities from EntityTrace ───────────────────────────
+    # Verify borderline entities from EntityTrace against the threshold
     for ent in borderline_entities:
-        # Apply geo whitelist to borderline entities too
-        if ent.type in {"GPE", "LOC"} and ent.text.lower().strip() in GEO_PASS_THROUGH:
-            logger.debug(
-                f"[ContextGuard] Borderline entity is on geo whitelist, skipping: {ent.text!r}"
-            )
-            continue
         if ent.score >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
             confirmed.append(ent)
             logger.debug(
-                f"[ContextGuard] Verified borderline: {ent.text!r} ({ent.type}, "
-                f"score={ent.score:.2f})"
+                f"[ContextGuard] Verified borderline: {ent.text!r} "
+                f"({ent.type}, score={ent.score:.2f})"
             )
         else:
             uncertain.append(ent)
 
-    # ── Run NER on remaining text ─────────────────────────────────────────────
+    # Run NER on remaining text
     clean = remaining_text.replace("█", " ").strip()
     if not clean:
         return confirmed, uncertain
@@ -160,25 +149,20 @@ def guard(
         entity_type = _LABEL_MAP.get(label, label)
         score = float(r.get("score", 0.0))
 
-        # Clean subword artefacts and leading punctuation
+        # Strip word-piece artefacts and leading punctuation
         raw_word = r.get("word", "")
         text = _clean_token(raw_word)
 
-        # Require at least 3 characters after cleaning
+        # Minimum 3 characters after cleaning (blocks "Dr", "DE", "Mr", etc.)
         if len(text) < 3:
-            logger.debug(f"[ContextGuard] Skipping too-short entity: {raw_word!r} → {text!r}")
-            continue
-
-        # Blocklist check — titles and common abbreviations
-        if text.lower() in _CG_BLOCKLIST:
-            logger.debug(f"[ContextGuard] Skipping blocklisted entity: {text!r}")
-            continue
-
-        # Geographic pass-through — US states, major countries, major cities
-        if entity_type in {"GPE", "LOC"} and text.lower() in GEO_PASS_THROUGH:
             logger.debug(
-                f"[ContextGuard] Skipping broad geo entity (whitelist): {text!r}"
+                f"[ContextGuard] Skipping too-short token: {raw_word!r} → {text!r}"
             )
+            continue
+
+        # Title / abbreviation blocklist
+        if text.lower() in _CG_BLOCKLIST:
+            logger.debug(f"[ContextGuard] Skipping blocklisted token: {text!r}")
             continue
 
         entity = DetectedEntity(
@@ -192,10 +176,14 @@ def guard(
 
         if score >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
             confirmed.append(entity)
-            logger.debug(f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})")
+            logger.debug(
+                f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})"
+            )
         else:
             uncertain.append(entity)
-            logger.debug(f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})")
+            logger.debug(
+                f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})"
+            )
 
     logger.info(
         f"[ContextGuard] confirmed={len(confirmed)}, uncertain={len(uncertain)}"

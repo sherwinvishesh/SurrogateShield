@@ -6,11 +6,10 @@ spaCy-based Named Entity Recognition (NER) detection.
 Loads en_core_web_lg and extracts PERSON, GPE, LOC, ORG, FAC entities.
 Skips any span already covered by PatternScan results.
 
-Geographic pass-through:
-  US states, major countries, and major world cities (population > ~500k)
-  are NEVER detected as PII here.  They are too broad to be identifying
-  under any k-anonymity threshold and replacing them destroys answer utility
-  without any privacy gain.  See detection/geo_data.py for the full list.
+This module does NOT decide whether a geographic entity is PII or not —
+that decision is made downstream in detection/logic.py by analysing the
+entity type co-occurrence within each clause of the text.  This module
+only detects and scores entities.
 
 Returns:
     confirmed  — entities with spaCy score >= ENTITY_TRACE_HIGH_THRESHOLD
@@ -23,13 +22,8 @@ from typing import List, Optional, Tuple
 
 from config import ENTITY_TRACE_HIGH_THRESHOLD, ENTITY_TRACE_LOW_THRESHOLD, SPACY_MODEL
 from util import DetectedEntity, get_logger, remove_span_overlap
-from detection.geo_data import GEO_PASS_THROUGH
 
 logger = get_logger(__name__)
-
-# ─────────────────────────────────────────────
-# Lazy-load spaCy model (expensive; load once)
-# ─────────────────────────────────────────────
 
 _nlp = None
 
@@ -54,13 +48,9 @@ def _get_nlp():
     return _nlp
 
 
-# ─────────────────────────────────────────────
-# Entity types to capture
-# ─────────────────────────────────────────────
-
 _TARGET_LABELS = {"PERSON", "GPE", "LOC", "ORG", "FAC"}
 
-# Tokens that spaCy frequently mis-classifies as named entities
+# Tokens spaCy frequently mis-classifies — never real entities
 _ENTITY_BLOCKLIST = {
     "ssn", "dob", "pin", "id", "uid", "email", "phone", "fax",
     "address", "zip", "postcode", "passport", "iban", "bic",
@@ -72,11 +62,9 @@ _ENTITY_BLOCKLIST = {
     "am", "pm", "gmt", "utc", "est", "pst",
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Location prepositions for ORG→GPE reclassification
-# ─────────────────────────────────────────────────────────────────────────────
-# "from" and "visit/visited" were removed — they caused false positives on
-# company names ("offer from Google", "site visit to Amazon").
+# Location prepositions for ORG→GPE reclassification.
+# Intentionally narrow — "from" and "visit" removed to avoid false positives
+# on company names ("offer from Google", "site visit to Amazon").
 _LOCATION_PREPS = {
     "in", "near",
     "live", "lives", "lived",
@@ -87,10 +75,6 @@ _LOCATION_PREPS = {
 }
 
 
-# ─────────────────────────────────────────────
-# Main trace function
-# ─────────────────────────────────────────────
-
 def trace(
     text: str,
     existing_entities: Optional[List[DetectedEntity]] = None,
@@ -98,13 +82,14 @@ def trace(
     """
     Run spaCy NER on *text* and return confirmed and borderline entities.
 
-    Geographic pass-through: GPE/LOC entities whose text (case-insensitive)
-    appears in GEO_PASS_THROUGH are silently skipped — US states, major
-    countries, and major cities are never treated as PII.
+    Note: geographic entities (GPE/LOC) are returned as-is here.
+    The decision of whether a geographic entity is personally identifying
+    is made in detection/logic.py using clause-level entity co-occurrence
+    analysis across all detection stages.
 
     Args:
         text:              Text to analyse.
-        existing_entities: Already-confirmed entities to avoid overlap.
+        existing_entities: Already-confirmed entities (avoid overlap).
 
     Returns:
         Tuple of (confirmed_entities, borderline_entities).
@@ -128,22 +113,10 @@ def trace(
         if ent.label_ not in _TARGET_LABELS:
             continue
 
-        # Common PII label words mis-classified as entities
         if ent.text.lower().strip() in _ENTITY_BLOCKLIST:
             logger.debug(f"[EntityTrace] Skipping blocklisted token: {ent.text!r}")
             continue
 
-        # ── Geographic pass-through ─────────────────────────────────────────
-        # US states, major countries, and major cities are NEVER PII.
-        # Replacing "Wyoming" or "Phoenix" or "Germany" provides no privacy
-        # benefit and destroys answer utility.
-        if ent.label_ in {"GPE", "LOC"} and ent.text.lower().strip() in GEO_PASS_THROUGH:
-            logger.debug(
-                f"[EntityTrace] Skipping broad geo entity (whitelist): {ent.text!r}"
-            )
-            continue
-
-        # Type-specific default confidence scores
         _TYPE_DEFAULTS = {
             "PERSON": 0.88,
             "GPE":    0.85,
@@ -155,25 +128,14 @@ def trace(
         if score is None:
             score = _TYPE_DEFAULTS.get(ent.label_, 0.80)
 
-        # ── Context-aware ORG→GPE reclassification ──────────────────────────
-        # Catches informal city abbreviations spaCy labels as ORG
-        # (e.g. "Phili", "Cali", "Frisco") near residential prepositions.
+        # ORG→GPE reclassification for informal place abbreviations
         effective_label = ent.label_
         if ent.label_ == "ORG":
             context_before = text[max(0, ent.start_char - 50): ent.start_char].lower()
-            context_words  = set(context_before.split())
-            if context_words & _LOCATION_PREPS:
+            if _LOCATION_PREPS & set(context_before.split()):
                 effective_label = "GPE"
                 score = _TYPE_DEFAULTS["GPE"]
-                logger.debug(
-                    f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r}"
-                )
-                # After reclassification, check the geo whitelist again
-                if ent.text.lower().strip() in GEO_PASS_THROUGH:
-                    logger.debug(
-                        f"[EntityTrace] Reclassified entity is on whitelist, skipping: {ent.text!r}"
-                    )
-                    continue
+                logger.debug(f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r}")
 
         candidate = DetectedEntity(
             text=ent.text,
@@ -185,27 +147,17 @@ def trace(
         )
 
         if remove_span_overlap(candidate, existing):
-            logger.debug(
-                f"[EntityTrace] Skipping '{ent.text}' — overlaps with existing entity"
-            )
+            logger.debug(f"[EntityTrace] Skipping '{ent.text}' — overlaps existing")
             continue
 
         if score >= ENTITY_TRACE_HIGH_THRESHOLD:
             confirmed.append(candidate)
-            logger.debug(
-                f"[EntityTrace] Confirmed: '{ent.text}' ({effective_label}, {score:.2f})"
-            )
+            logger.debug(f"[EntityTrace] Confirmed: '{ent.text}' ({effective_label}, {score:.2f})")
         elif score >= ENTITY_TRACE_LOW_THRESHOLD:
             borderline.append(candidate)
-            logger.debug(
-                f"[EntityTrace] Borderline: '{ent.text}' ({effective_label}, {score:.2f})"
-            )
+            logger.debug(f"[EntityTrace] Borderline: '{ent.text}' ({effective_label}, {score:.2f})")
         else:
-            logger.debug(
-                f"[EntityTrace] Discarded (low score): '{ent.text}' ({score:.2f})"
-            )
+            logger.debug(f"[EntityTrace] Discarded (low score): '{ent.text}' ({score:.2f})")
 
-    logger.info(
-        f"[EntityTrace] confirmed={len(confirmed)}, borderline={len(borderline)}"
-    )
+    logger.info(f"[EntityTrace] confirmed={len(confirmed)}, borderline={len(borderline)}")
     return confirmed, borderline
