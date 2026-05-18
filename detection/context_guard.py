@@ -5,19 +5,20 @@ NER-based detection of named entities using a local HuggingFace model
 (dslim/distilbert-NER, ~250 MB). Replaces the previous Ollama phi3:mini
 implementation — no external server required.
 
-The model is downloaded from HuggingFace Hub on first use and cached
-locally by the transformers library. Subsequent runs are fully offline.
+Geographic pass-through:
+  The same GEO_PASS_THROUGH whitelist used by EntityTrace is applied here —
+  US states, major countries, and major cities are never emitted as entities
+  worth replacing, even when distilbert detects them with high confidence.
 
-ContextGuard is called ONLY with:
-  1. Borderline entities from EntityTrace (to verify or upgrade)
-  2. The remaining_text after PatternScan and EntityTrace have run
-
-Graceful degradation: if transformers or torch are unavailable, logs a
-warning and returns empty lists — the pipeline continues without crashing.
+Tokenization artefact handling:
+  distilbert word-piece tokenisation sometimes produces tokens starting with
+  ". " or "##".  This module strips such artefacts and applies a blocklist of
+  titles / short tokens (e.g. "Dr" alone, "DE", "Mr") that are never PII.
 """
 
 from __future__ import annotations
 
+import re
 from typing import List, Tuple
 
 from config import (
@@ -26,21 +27,15 @@ from config import (
     CONTEXT_GUARD_CONFIDENCE_THRESHOLD,
 )
 from util import DetectedEntity, get_logger
+from detection.geo_data import GEO_PASS_THROUGH
 
 logger = get_logger(__name__)
 
-# Module-level cache — expensive to load, so we load it exactly once
-# and reuse across all calls in a session.
 _ner_pipeline = None
 
 
 def _get_ner():
-    """
-    Lazy-load and cache the HuggingFace NER pipeline.
-
-    Returns:
-        The loaded pipeline callable, or None on failure.
-    """
+    """Lazy-load and cache the HuggingFace NER pipeline."""
     global _ner_pipeline
     if _ner_pipeline is not None:
         return _ner_pipeline
@@ -50,7 +45,7 @@ def _get_ner():
             "ner",
             model=CONTEXT_GUARD_MODEL,
             aggregation_strategy="simple",
-            device=-1,   # CPU — change to 0 for GPU
+            device=-1,
         )
         logger.info(f"[ContextGuard] Loaded NER model: {CONTEXT_GUARD_MODEL}")
     except ImportError:
@@ -67,7 +62,6 @@ def _get_ner():
 
 # ── Label mappings ────────────────────────────────────────────────────────────
 
-# Map HuggingFace entity group labels to SurrogateShield types
 _LABEL_MAP = {
     "PER":    "PERSON",
     "PERSON": "PERSON",
@@ -77,8 +71,28 @@ _LABEL_MAP = {
     "MISC":   "MISC",
 }
 
-# Entity types worth keeping (skip MISC — too noisy for privacy purposes)
 _KEEP_LABELS = {"PER", "PERSON", "ORG", "LOC", "GPE"}
+
+# Titles and short tokens distilbert frequently fires on incorrectly
+_CG_BLOCKLIST: frozenset = frozenset({
+    "dr", "mr", "mrs", "ms", "prof", "professor", "rev", "sr", "jr",
+    "sir", "lord", "dame", "capt", "lt", "sgt", "col", "gen",
+    "de", "le", "la", "el", "al", "van", "von",
+})
+
+
+def _clean_token(raw: str) -> str:
+    """
+    Strip HuggingFace word-piece artefacts and leading punctuation.
+
+    Examples:
+        "##wick"  → "wick"
+        ". Sun"   → "Sun"    (leading period from "Dr. Sun" split)
+        " Smith"  → "Smith"
+    """
+    text = raw.replace("##", "")
+    text = re.sub(r'^[^A-Za-z0-9]+', '', text)
+    return text.strip()
 
 
 # ─────────────────────────────────────────────
@@ -92,26 +106,28 @@ def guard(
     """
     Run NER on remaining_text and verify borderline_entities.
 
-    Borderline entities from EntityTrace (score in [LOW, HIGH)) are
-    re-evaluated using the confidence threshold: those that meet or
-    exceed CONTEXT_GUARD_CONFIDENCE_THRESHOLD are confirmed, the rest
-    remain uncertain.  The NER model then runs on any remaining text to
-    catch entities missed by spaCy.
+    Geographic pass-through: GPE/LOC entities matching GEO_PASS_THROUGH
+    (US states, major countries, major cities) are silently dropped — they
+    are not PII and replacing them destroys answer utility.
 
     Args:
-        remaining_text:      Text not covered by PatternScan / EntityTrace
-                             (may contain █ mask characters).
+        remaining_text:      Text not covered by PatternScan / EntityTrace.
         borderline_entities: Entities EntityTrace was uncertain about.
 
     Returns:
         Tuple of (confirmed_entities, needs_user_confirmation_entities).
-        Both lists contain DetectedEntity objects.
     """
     confirmed: List[DetectedEntity] = []
     uncertain: List[DetectedEntity] = []
 
-    # ── Verify borderline entities from EntityTrace ───────────────────
+    # ── Verify borderline entities from EntityTrace ───────────────────────────
     for ent in borderline_entities:
+        # Apply geo whitelist to borderline entities too
+        if ent.type in {"GPE", "LOC"} and ent.text.lower().strip() in GEO_PASS_THROUGH:
+            logger.debug(
+                f"[ContextGuard] Borderline entity is on geo whitelist, skipping: {ent.text!r}"
+            )
+            continue
         if ent.score >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
             confirmed.append(ent)
             logger.debug(
@@ -121,8 +137,7 @@ def guard(
         else:
             uncertain.append(ent)
 
-    # ── Run NER on remaining text ─────────────────────────────────────
-    # Replace mask placeholders with spaces so the model sees clean text
+    # ── Run NER on remaining text ─────────────────────────────────────────────
     clean = remaining_text.replace("█", " ").strip()
     if not clean:
         return confirmed, uncertain
@@ -144,13 +159,26 @@ def guard(
 
         entity_type = _LABEL_MAP.get(label, label)
         score = float(r.get("score", 0.0))
-        text = r.get("word", "").strip()
-        if not text or len(text) < 2:
+
+        # Clean subword artefacts and leading punctuation
+        raw_word = r.get("word", "")
+        text = _clean_token(raw_word)
+
+        # Require at least 3 characters after cleaning
+        if len(text) < 3:
+            logger.debug(f"[ContextGuard] Skipping too-short entity: {raw_word!r} → {text!r}")
             continue
 
-        # Remove HuggingFace subword tokenisation artefacts (## prefix)
-        text = text.replace("##", "").strip()
-        if not text:
+        # Blocklist check — titles and common abbreviations
+        if text.lower() in _CG_BLOCKLIST:
+            logger.debug(f"[ContextGuard] Skipping blocklisted entity: {text!r}")
+            continue
+
+        # Geographic pass-through — US states, major countries, major cities
+        if entity_type in {"GPE", "LOC"} and text.lower() in GEO_PASS_THROUGH:
+            logger.debug(
+                f"[ContextGuard] Skipping broad geo entity (whitelist): {text!r}"
+            )
             continue
 
         entity = DetectedEntity(
@@ -164,14 +192,10 @@ def guard(
 
         if score >= CONTEXT_GUARD_CONFIDENCE_THRESHOLD:
             confirmed.append(entity)
-            logger.debug(
-                f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})"
-            )
+            logger.debug(f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})")
         else:
             uncertain.append(entity)
-            logger.debug(
-                f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})"
-            )
+            logger.debug(f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})")
 
     logger.info(
         f"[ContextGuard] confirmed={len(confirmed)}, uncertain={len(uncertain)}"

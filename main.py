@@ -26,9 +26,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── Logging setup ─────────────────────────────────────────────────────────────
-# Must be configured here (once, at startup) before any module calls get_logger().
-# util.get_logger() deliberately does NOT call basicConfig() — that anti-pattern
-# would re-configure the root logger on every module import.
+# Called ONCE here, before any module imports get_logger().
+# util.get_logger() does NOT call basicConfig() itself.
 from rich.logging import RichHandler
 from rich.console import Console as _LogConsole
 
@@ -183,16 +182,25 @@ def _print_menu(has_convs: bool) -> None:
 # ─── PII Finder ───────────────────────────────────────────────────────────────
 
 def _run_pii_finder() -> None:
-    """Interactive PII detection sandbox — no API calls, no credits spent."""
+    """
+    Interactive PII detection sandbox — no API calls, no credits spent.
+
+    Shows the SAME logic that process_turn() would apply, including the
+    service-query path (address fuzzing + location suppression).
+    """
     from detection.logic import run_cascade, deduplicate
+    from detection.service_query import is_service_query, fuzz_addresses
     from generation.logic import MimicGen
+    from config import SERVICE_QUERY_DETECTION_ENABLED
 
     mimic = MimicGen()
 
     console.print(Panel(
         "[bold blue]PII Finder[/bold blue]  [dim]· No API calls · No credits spent[/dim]\n\n"
         "[dim]Type any message to see what SurrogateShield would detect.\n"
-        "Type [bold white]reset[/bold white] to generate fresh surrogates.\n"
+        "Service queries (restaurants near X, directions to Y) trigger minimal\n"
+        "address fuzzing instead of full replacement — just like the real pipeline.\n\n"
+        "Type [bold white]reset[/bold white] to clear surrogate memory.\n"
         "Type [bold white]exit[/bold white] to return to the dashboard.[/dim]",
         border_style="blue", padding=(1, 2),
     ))
@@ -207,17 +215,44 @@ def _run_pii_finder() -> None:
 
         if not user_input:
             continue
-
         if user_input.lower() in {"exit", "quit", "back"}:
             console.print("[dim]Returning to dashboard...[/dim]")
             time.sleep(0.3)
             break
-
         if user_input.lower() == "reset":
             mimic = MimicGen()
-            console.print("[green]Surrogate session reset — fresh fakes on next detection.[/green]\n")
+            console.print("[green]Surrogate session reset.[/green]\n")
             continue
 
+        # ── Service query path ────────────────────────────────────────────────
+        if SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_input):
+            fuzzed, addr_map = fuzz_addresses(user_input, verify=False)
+
+            if addr_map:
+                addr_lines = "\n".join(
+                    f"  [red]{orig}[/red]  →  [green]{fuzz}[/green]"
+                    for orig, fuzz in addr_map.items()
+                )
+                console.print(Panel(
+                    "[bold blue]Service query[/bold blue]  "
+                    "[dim]· House number ±1, city/state unchanged[/dim]\n\n"
+                    f"{addr_lines}\n\n"
+                    f"[dim]Would send to Claude:[/dim]\n[blue]{fuzzed}[/blue]",
+                    border_style="blue", padding=(1, 2),
+                ))
+            else:
+                console.print(Panel(
+                    "[bold blue]Service query[/bold blue]  "
+                    "[dim]· No specific street address found[/dim]\n\n"
+                    "[dim]Location names are not PII in service queries — "
+                    "message would be sent unchanged.[/dim]\n\n"
+                    f"[dim]Would send to Claude:[/dim]\n[blue]{user_input}[/blue]",
+                    border_style="blue", padding=(1, 2),
+                ))
+            console.print()
+            continue
+
+        # ── Standard PII detection path ───────────────────────────────────────
         confirmed, needs_confirmation = run_cascade(user_input)
         confirmed = deduplicate(confirmed)
 
@@ -292,13 +327,10 @@ def _run_dashboard() -> None:
         if upper == "Q":
             console.print("\n[dim]Goodbye.[/dim]")
             sys.exit(0)
-
         if upper == "N":
             console.clear(); _print_compact_banner(); _start_chat(rag=False); continue
-
         if upper == "R":
             console.clear(); _print_compact_banner(); _start_chat(rag=True); continue
-
         if upper == "P":
             console.clear(); _print_compact_banner(); _run_pii_finder(); continue
 
@@ -307,8 +339,8 @@ def _run_dashboard() -> None:
             if 0 <= idx < len(conversations):
                 uid = conversations[idx]["id"]
                 console.print(
-                    f"\n[yellow]Delete [bold]{uid[:8]}...{uid[-4:]}[/bold]?[/yellow] [dim](y / N)[/dim] ",
-                    end="",
+                    f"\n[yellow]Delete [bold]{uid[:8]}...{uid[-4:]}[/bold]?[/yellow] "
+                    "[dim](y / N)[/dim] ", end="",
                 )
                 try:
                     confirm = console.input("").strip().lower()
@@ -384,7 +416,10 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
     if effective_rag:
         try:
             rag_store = _get_rag()
-            console.print(f"[blue]RAG enabled[/blue]  [dim]{rag_store.document_count()} chunks indexed[/dim]")
+            console.print(
+                f"[blue]RAG enabled[/blue]  "
+                f"[dim]{rag_store.document_count()} chunks indexed[/dim]"
+            )
         except Exception as exc:
             console.print(f"[yellow]RAG unavailable:[/yellow] {exc}")
             rag_store = None
@@ -396,7 +431,10 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
     conv_id  = pipeline.chat.conversation.id
     mode_tag = "  [dim blue]· RAG[/dim blue]" if rag_mode else ""
     console.print()
-    console.print(f"[dim]ID [/dim][blue]{conv_id}[/blue]{mode_tag}[dim]  ·  type [bold]exit[/bold] to return to dashboard[/dim]")
+    console.print(
+        f"[dim]ID [/dim][blue]{conv_id}[/blue]{mode_tag}"
+        "[dim]  ·  type [bold]exit[/bold] to return to dashboard[/dim]"
+    )
     console.print(Rule(style="blue"))
     console.print()
 
@@ -415,12 +453,19 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
         try:
             response, _, _ = pipeline.process_turn(user_input, interactive=True)
         except EnvironmentError:
-            console.print("[red]API key error.[/red]  [dim]Check ANTHROPIC_API_KEY.[/dim]"); break
+            console.print(
+                "[red]API key error.[/red]  [dim]Check ANTHROPIC_API_KEY.[/dim]"
+            ); break
         except Exception as exc:
             console.print(f"[red bold]Error:[/red bold] {exc}"); continue
 
         console.print()
-        console.print(Panel(response, title="[bold blue]Claude[/bold blue]", border_style="blue", padding=(1, 2)))
+        console.print(Panel(
+            response,
+            title="[bold blue]Claude[/bold blue]",
+            border_style="blue",
+            padding=(1, 2),
+        ))
         console.print()
 
 
@@ -478,12 +523,17 @@ def add_document(
     except Exception as exc:
         console.print(f"[red]Could not read file:[/red] {exc}"); raise typer.Exit(1)
 
-    console.print(f"[blue]Indexing[/blue]  [white]{path.name}[/white]  [dim]{len(raw_text):,} chars[/dim]")
+    console.print(
+        f"[blue]Indexing[/blue]  [white]{path.name}[/white]  [dim]{len(raw_text):,} chars[/dim]"
+    )
     try:
         from pipeline import anonymise_for_rag
         rag_store = _get_rag()
         n, _ = anonymise_for_rag(raw_text, rag_store)
-        console.print(f"[green]✓[/green]  {n} chunks indexed  [dim](total: {rag_store.document_count()})[/dim]")
+        console.print(
+            f"[green]✓[/green]  {n} chunks indexed  "
+            f"[dim](total: {rag_store.document_count()})[/dim]"
+        )
     except Exception as exc:
         console.print(f"[red]Indexing failed:[/red] {exc}"); raise typer.Exit(1)
 

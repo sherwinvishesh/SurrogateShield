@@ -1,11 +1,16 @@
 """
 detection/entity_trace.py — EntityTrace
 
-spaCy-based Named Entity Recognition (NER) detection. This module contains
-ONLY the NER logic. It does not run regex or call Ollama.
+spaCy-based Named Entity Recognition (NER) detection.
 
 Loads en_core_web_lg and extracts PERSON, GPE, LOC, ORG, FAC entities.
 Skips any span already covered by PatternScan results.
+
+Geographic pass-through:
+  US states, major countries, and major world cities (population > ~500k)
+  are NEVER detected as PII here.  They are too broad to be identifying
+  under any k-anonymity threshold and replacing them destroys answer utility
+  without any privacy gain.  See detection/geo_data.py for the full list.
 
 Returns:
     confirmed  — entities with spaCy score >= ENTITY_TRACE_HIGH_THRESHOLD
@@ -18,6 +23,7 @@ from typing import List, Optional, Tuple
 
 from config import ENTITY_TRACE_HIGH_THRESHOLD, ENTITY_TRACE_LOW_THRESHOLD, SPACY_MODEL
 from util import DetectedEntity, get_logger, remove_span_overlap
+from detection.geo_data import GEO_PASS_THROUGH
 
 logger = get_logger(__name__)
 
@@ -29,12 +35,6 @@ _nlp = None
 
 
 def _get_nlp():
-    """
-    Load and cache the spaCy pipeline.
-
-    Returns:
-        spaCy Language object, or None if the model is unavailable.
-    """
     global _nlp
     if _nlp is not None:
         return _nlp
@@ -60,22 +60,30 @@ def _get_nlp():
 
 _TARGET_LABELS = {"PERSON", "GPE", "LOC", "ORG", "FAC"}
 
-# Words that spaCy frequently mis-classifies as named entities.
-# e.g. "SSN" → ORG, "DOB" → PERSON, "ID" → ORG.
-# Replacing these produces nonsense surrogates that confuse the LLM.
+# Tokens that spaCy frequently mis-classifies as named entities
 _ENTITY_BLOCKLIST = {
-    # PII field labels
     "ssn", "dob", "pin", "id", "uid", "email", "phone", "fax",
     "address", "zip", "postcode", "passport", "iban", "bic",
     "cvv", "cvc", "expiry",
-    # Titles that are not identifying on their own
     "mr", "mrs", "ms", "dr", "prof", "jr", "sr",
-    # Month/day abbreviations
     "mon", "tue", "wed", "thu", "fri", "sat", "sun",
     "jan", "feb", "mar", "apr", "jun", "jul", "aug",
     "sep", "oct", "nov", "dec",
-    # Timezone / unit abbreviations
     "am", "pm", "gmt", "utc", "est", "pst",
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Location prepositions for ORG→GPE reclassification
+# ─────────────────────────────────────────────────────────────────────────────
+# "from" and "visit/visited" were removed — they caused false positives on
+# company names ("offer from Google", "site visit to Amazon").
+_LOCATION_PREPS = {
+    "in", "near",
+    "live", "lives", "lived",
+    "grew", "born", "raised",
+    "moved", "relocate", "relocated",
+    "residing", "reside",
+    "hometown", "birthplace", "based",
 }
 
 
@@ -90,17 +98,12 @@ def trace(
     """
     Run spaCy NER on *text* and return confirmed and borderline entities.
 
-    Skips any span that overlaps with an entity in *existing_entities*
-    (i.e. spans already caught by PatternScan).
-
-    Threshold rules:
-        score >= ENTITY_TRACE_HIGH_THRESHOLD  → confirmed
-        ENTITY_TRACE_LOW_THRESHOLD <= score < HIGH → borderline
-        score < ENTITY_TRACE_LOW_THRESHOLD    → discarded
+    Geographic pass-through: GPE/LOC entities whose text (case-insensitive)
+    appears in GEO_PASS_THROUGH are silently skipped — US states, major
+    countries, and major cities are never treated as PII.
 
     Args:
-        text:             Text to analyse (may be the partially-masked
-                          remaining_text after PatternScan ran).
+        text:              Text to analyse.
         existing_entities: Already-confirmed entities to avoid overlap.
 
     Returns:
@@ -125,55 +128,52 @@ def trace(
         if ent.label_ not in _TARGET_LABELS:
             continue
 
-        # Skip common PII label words that spaCy mis-classifies as entities
-        # (e.g. "SSN" detected as ORG, "DOB" detected as PERSON)
+        # Common PII label words mis-classified as entities
         if ent.text.lower().strip() in _ENTITY_BLOCKLIST:
             logger.debug(f"[EntityTrace] Skipping blocklisted token: {ent.text!r}")
             continue
 
-        # spaCy en_core_web_lg does not expose per-entity confidence scores
-        # natively. We assign type-specific defaults that reflect real-world
-        # ambiguity: PERSON/GPE are usually unambiguous (confirmed); LOC/FAC
-        # are often ambiguous (borderline), giving ContextGuard something to do.
+        # ── Geographic pass-through ─────────────────────────────────────────
+        # US states, major countries, and major cities are NEVER PII.
+        # Replacing "Wyoming" or "Phoenix" or "Germany" provides no privacy
+        # benefit and destroys answer utility.
+        if ent.label_ in {"GPE", "LOC"} and ent.text.lower().strip() in GEO_PASS_THROUGH:
+            logger.debug(
+                f"[EntityTrace] Skipping broad geo entity (whitelist): {ent.text!r}"
+            )
+            continue
+
+        # Type-specific default confidence scores
         _TYPE_DEFAULTS = {
-            "PERSON": 0.88,   # confirmed — names are usually clear
-            "GPE":    0.85,   # confirmed — countries/cities usually clear
-            "ORG":    0.85,   # confirmed — organisations usually unambiguous
-            "LOC":    0.74,   # borderline — generic locations often ambiguous
-            "FAC":    0.70,   # borderline — facilities most ambiguous
+            "PERSON": 0.88,
+            "GPE":    0.85,
+            "ORG":    0.85,
+            "LOC":    0.74,
+            "FAC":    0.70,
         }
         score: float = getattr(ent, "score_", None)
         if score is None:
             score = _TYPE_DEFAULTS.get(ent.label_, 0.80)
 
-        # ── Context-aware type correction ──────────────────────────────
-        # spaCy frequently misclassifies abbreviated or informal place names
-        # (e.g. "Phili" for Philadelphia, "Cali" for California, "Frisco"
-        # for San Francisco) as ORG instead of GPE.
-        # If an ORG entity immediately follows a location preposition, it
-        # is almost certainly a place — reclassify it as GPE so MimicGen
-        # generates a city surrogate instead of a company name.
+        # ── Context-aware ORG→GPE reclassification ──────────────────────────
+        # Catches informal city abbreviations spaCy labels as ORG
+        # (e.g. "Phili", "Cali", "Frisco") near residential prepositions.
         effective_label = ent.label_
         if ent.label_ == "ORG":
-            _LOCATION_PREPS = {
-                # Strong location-only prepositions — "from" and "near" are
-                # unambiguous. "in" is strong (live in X). "at" removed —
-                # too ambiguous (work at Apple vs live at Tempe).
-                "from", "in", "near", "visit", "visited",
-                "live", "lives", "lived", "grew", "born", "moved",
-                "relocate", "relocated", "residing", "reside",
-                "hometown", "hometown:", "birthplace",
-            }
-            # Grab the 50 characters immediately before this entity
             context_before = text[max(0, ent.start_char - 50): ent.start_char].lower()
             context_words  = set(context_before.split())
             if context_words & _LOCATION_PREPS:
                 effective_label = "GPE"
                 score = _TYPE_DEFAULTS["GPE"]
                 logger.debug(
-                    f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r} "
-                    f"(location preposition in context)"
+                    f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r}"
                 )
+                # After reclassification, check the geo whitelist again
+                if ent.text.lower().strip() in GEO_PASS_THROUGH:
+                    logger.debug(
+                        f"[EntityTrace] Reclassified entity is on whitelist, skipping: {ent.text!r}"
+                    )
+                    continue
 
         candidate = DetectedEntity(
             text=ent.text,
@@ -184,7 +184,6 @@ def trace(
             source="ner",
         )
 
-        # Skip spans already covered by PatternScan
         if remove_span_overlap(candidate, existing):
             logger.debug(
                 f"[EntityTrace] Skipping '{ent.text}' — overlaps with existing entity"
@@ -194,12 +193,12 @@ def trace(
         if score >= ENTITY_TRACE_HIGH_THRESHOLD:
             confirmed.append(candidate)
             logger.debug(
-                f"[EntityTrace] Confirmed: '{ent.text}' ({ent.label_}, {score:.2f})"
+                f"[EntityTrace] Confirmed: '{ent.text}' ({effective_label}, {score:.2f})"
             )
         elif score >= ENTITY_TRACE_LOW_THRESHOLD:
             borderline.append(candidate)
             logger.debug(
-                f"[EntityTrace] Borderline: '{ent.text}' ({ent.label_}, {score:.2f})"
+                f"[EntityTrace] Borderline: '{ent.text}' ({effective_label}, {score:.2f})"
             )
         else:
             logger.debug(
