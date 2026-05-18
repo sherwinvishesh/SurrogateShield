@@ -52,11 +52,10 @@ def _luhn_valid(number: str) -> bool:
 
 # Each entry: (entity_type, compiled_regex, post_validator_or_None)
 _PATTERNS: list = [
-    (
+(
         "ssn",
-        # Only match the dashed format — \d{9} has too many false positives
-        # (order IDs, phone numbers, zip codes with extension, etc.)
-        re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
+        # Matches both XXX-XX-XXXX and raw XXXXXXXXX formats
+        re.compile(r"\b\d{3}-\d{2}-\d{4}\b|\b\d{9}\b"),
         None,
     ),
     (
@@ -127,12 +126,11 @@ _PATTERNS: list = [
         "api_key",
         re.compile(
             r"(?:"
-            r"sk-[A-Za-z0-9\-_]{16,}"           # OpenAI / Anthropic style
+            r"sk[-_][A-Za-z0-9\-_]{16,}"         # Support sk- and sk_ style
             r"|Bearer\s+[A-Za-z0-9\-_.]{16,}"   # Bearer token
             r"|ghp_[A-Za-z0-9]{20,}"             # GitHub personal access token
             r"|gho_[A-Za-z0-9]{20,}"             # GitHub OAuth token
             r"|AKIA[0-9A-Z]{16}"                # AWS access key ID
-            # Generic base64 removed — too many false positives (hashes, IDs, etc.)
             r")"
         ),
         None,

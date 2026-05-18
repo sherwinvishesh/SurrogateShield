@@ -66,8 +66,8 @@ _ADDRESS_PATTERN = re.compile(
     r"(?:Street|St|Avenue|Ave|Boulevard|Blvd|Road|Rd|"
     r"Drive|Dr|Lane|Ln|Way|Court|Ct|Place|Pl|"
     r"Parkway|Pkwy|Highway|Hwy|Freeway|Fwy|"
-    r"Terrace|Terr|Circle|Cir|Loop|Trail|Trl)\.?)"        # street suffix
-    r"(?:\s*,\s*([A-Za-z\s]+?))??"                         # optional city (lazy, group 3)
+    r"Terrace|Terr|Circle|Cir|Loop|Trail|Trl)\b\.?)"       # street suffix (added word boundary)
+    r"(?:\s*,\s*([A-Za-z\s]+?))?"                          # optional city (greedy optional on outside, group 3)
     r"(?:\s*,\s*([A-Z]{2}))?"                              # optional 2-letter state (group 4)
     r"\b",
     re.IGNORECASE,

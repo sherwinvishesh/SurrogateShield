@@ -138,7 +138,7 @@ def trace(
         _TYPE_DEFAULTS = {
             "PERSON": 0.88,   # confirmed — names are usually clear
             "GPE":    0.85,   # confirmed — countries/cities usually clear
-            "ORG":    0.82,   # confirmed — organisations usually unambiguous
+            "ORG":    0.85,   # confirmed — organisations usually unambiguous
             "LOC":    0.74,   # borderline — generic locations often ambiguous
             "FAC":    0.70,   # borderline — facilities most ambiguous
         }
