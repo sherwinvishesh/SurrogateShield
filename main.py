@@ -16,6 +16,7 @@ Or use direct commands:
 from __future__ import annotations
 
 import logging
+import os
 import sys
 import time
 from datetime import datetime
@@ -52,13 +53,28 @@ console = Console()
 
 app = typer.Typer(
     name="surrogateshield",
-    help="Privacy-preserving CLI proxy for Claude — PII never leaves your device.",
+    help="Privacy-preserving CLI proxy for LLMs — PII never leaves your device.",
     add_completion=False,
 )
 
 _rag_store = None
 VERSION = "v1.0"
-TAGLINE = "Privacy-preserving proxy for Claude  ·  PII never leaves your device"
+TAGLINE = "Privacy-preserving proxy for LLMs  ·  PII never leaves your device"
+
+# (slug, display name, short description)
+_PROVIDERS = [
+    ("claude",  "Claude",    "Anthropic  ·  claude-sonnet-4-6"),
+    ("gemini",  "Gemini",    "Google     ·  gemini-1.5-flash"),
+    ("chatgpt", "ChatGPT",   "OpenAI     ·  gpt-4o-mini"),
+    ("local",   "Local LLM", "Ollama     ·  runs fully offline"),
+]
+
+
+def _current_provider_name() -> str:
+    """Return the display name of the currently configured LLM provider."""
+    from settings_manager import load_settings
+    slug = load_settings().get("llm_provider", "claude")
+    return next((n for s, n, _ in _PROVIDERS if s == slug), "LLM")
 
 
 # ─── Banners ──────────────────────────────────────────────────────────────────
@@ -96,13 +112,16 @@ def _print_compact_banner() -> None:
 # ─── Pipeline overview ────────────────────────────────────────────────────────
 
 def _print_how_it_works() -> None:
+    from settings_manager import load_settings
+    provider_slug = load_settings().get("llm_provider", "claude")
+    provider_name = next((n for s, n, _ in _PROVIDERS if s == provider_slug), "LLM")
     steps = [
-        ("PatternScan",  "Regex — SSNs, emails, phones, cards, API keys"),
-        ("EntityTrace",  "spaCy NER — names, places, organisations"),
-        ("MimicGen",     "Realistic fake values per PII type (Faker)"),
-        ("ShadowMap",    "AES-256-GCM encrypted map — stays on device"),
-        ("Claude API",   "Receives surrogates — never real values"),
-        ("ResolvePass",  "Swaps fakes back to real values in response"),
+        ("PatternScan",       "Regex — SSNs, emails, phones, cards, API keys"),
+        ("EntityTrace",       "spaCy NER — names, places, organisations"),
+        ("MimicGen",          "Realistic fake values per PII type (Faker)"),
+        ("ShadowMap",         "AES-256-GCM encrypted map — stays on device"),
+        (f"{provider_name} API", "Receives surrogates — never real values"),
+        ("ResolvePass",       "Swaps fakes back to real values in response"),
     ]
     console.print(Rule("[bold blue]Pipeline[/bold blue]", style="blue"))
     console.print()
@@ -173,6 +192,7 @@ def _print_menu(has_convs: bool) -> None:
             ("[bold blue]1 – 9[/bold blue]",   "Open conversation by number"),
             ("[bold blue]D1 – D9[/bold blue]", "Delete conversation by number"),
         ]
+    rows.append(("[bold blue]S[/bold blue]", "Settings"))
     rows.append(("[bold blue]Q[/bold blue]", "Quit"))
     for key, desc in rows:
         console.print(f"  {key}    [dim]{desc}[/dim]")
@@ -182,6 +202,9 @@ def _print_menu(has_convs: bool) -> None:
 # ─── PII Finder ───────────────────────────────────────────────────────────────
 
 def _run_pii_finder() -> None:
+    from settings_manager import load_settings as _ls
+    _detailed = _ls().get("detailed_view", False)
+    logging.getLogger().setLevel(logging.INFO if _detailed else logging.ERROR)
     """
     Interactive PII detection sandbox — no API calls, no credits spent.
 
@@ -237,7 +260,7 @@ def _run_pii_finder() -> None:
                     "[bold blue]Service query[/bold blue]  "
                     "[dim]· House number ±1, city/state unchanged[/dim]\n\n"
                     f"{addr_lines}\n\n"
-                    f"[dim]Would send to Claude:[/dim]\n[blue]{fuzzed}[/blue]",
+                    f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{fuzzed}[/blue]",
                     border_style="blue", padding=(1, 2),
                 ))
             else:
@@ -246,7 +269,7 @@ def _run_pii_finder() -> None:
                     "[dim]· No specific street address found[/dim]\n\n"
                     "[dim]Location names are not PII in service queries — "
                     "message would be sent unchanged.[/dim]\n\n"
-                    f"[dim]Would send to Claude:[/dim]\n[blue]{user_input}[/blue]",
+                    f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{user_input}[/blue]",
                     border_style="blue", padding=(1, 2),
                 ))
             console.print()
@@ -259,7 +282,7 @@ def _run_pii_finder() -> None:
         if not confirmed and not needs_confirmation:
             console.print(Panel(
                 "[green]No PII detected.[/green]\n"
-                "[dim]This message would be sent to Claude unchanged.[/dim]",
+                f"[dim]This message would be sent to {_current_provider_name()} unchanged.[/dim]",
                 border_style="green", padding=(0, 2),
             ))
             console.print()
@@ -295,10 +318,242 @@ def _run_pii_finder() -> None:
             sanitised = sanitised.replace(orig, surrogate_map[orig])
 
         console.print(Panel(
-            "[dim]Would send to Claude:[/dim]\n[blue]" + sanitised + "[/blue]",
+            f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{sanitised}[/blue]",
             border_style="dim blue", padding=(0, 2),
         ))
         console.print()
+
+
+# ─── Settings ─────────────────────────────────────────────────────────────────
+
+_PROVIDER_INSTRUCTIONS: dict = {
+    "claude": [
+        "1. Visit [blue]console.anthropic.com[/blue] and sign in.",
+        "2. Go to [bold white]API Keys[/bold white] and create a new key.",
+        "3. Add to your [bold white].env[/bold white] file:\n\n"
+        "       [cyan]ANTHROPIC_API_KEY=sk-ant-...[/cyan]",
+        "4. Press [bold white]T[/bold white] to test your current key.",
+    ],
+    "gemini": [
+        "1. Visit [blue]aistudio.google.com[/blue] and sign in.",
+        "2. Click [bold white]Get API Key[/bold white] to generate a key.",
+        "3. Add to your [bold white].env[/bold white] file:\n\n"
+        "       [cyan]GEMINI_API_KEY=AIza...[/cyan]",
+        "4. Install the SDK:\n\n"
+        "       [cyan]pip install google-generativeai[/cyan]",
+        "5. Press [bold white]T[/bold white] to test your current key.",
+    ],
+    "chatgpt": [
+        "1. Visit [blue]platform.openai.com[/blue] and sign in.",
+        "2. Go to [bold white]API Keys[/bold white] and create a new secret key.",
+        "3. Add to your [bold white].env[/bold white] file:\n\n"
+        "       [cyan]OPENAI_API_KEY=sk-...[/cyan]",
+        "4. Install the SDK:\n\n"
+        "       [cyan]pip install openai[/cyan]",
+        "5. Press [bold white]T[/bold white] to test your current key.",
+    ],
+    "local": [
+        "1. Download and install Ollama from [blue]ollama.ai[/blue].",
+        "2. Pull a model, e.g.:\n\n"
+        "       [cyan]ollama pull llama3.2[/cyan]",
+        "3. Start the Ollama server:\n\n"
+        "       [cyan]ollama serve[/cyan]",
+        "4. (Optional) Add to your [bold white].env[/bold white] file:\n\n"
+        "       [cyan]LOCAL_LLM_HOST=http://localhost:11434[/cyan]\n"
+        "       [cyan]LOCAL_LLM_MODEL=llama3.2[/cyan]",
+        "5. Press [bold white]T[/bold white] to test the connection.",
+    ],
+}
+
+
+def _test_provider(slug: str, name: str) -> None:
+    """Make a minimal API call to verify the provider is reachable."""
+    load_dotenv(override=True)  # pick up any keys just added to .env
+    console.print(f"\n  [dim]Testing {name} connection…[/dim]")
+    try:
+        if slug == "claude":
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
+            if not api_key:
+                console.print("  [red]✗[/red]  ANTHROPIC_API_KEY not set in .env")
+                time.sleep(1.5); return
+            import anthropic as _ant
+            r = _ant.Anthropic(api_key=api_key).messages.create(
+                model="claude-haiku-4-5-20251001", max_tokens=5,
+                messages=[{"role": "user", "content": "Hi"}],
+            )
+            _ = r.content[0].text
+
+        elif slug == "gemini":
+            api_key = os.environ.get("GEMINI_API_KEY")
+            if not api_key:
+                console.print("  [red]✗[/red]  GEMINI_API_KEY not set in .env")
+                time.sleep(1.5); return
+            import google.generativeai as genai
+            genai.configure(api_key=api_key)
+            _ = genai.GenerativeModel("gemini-1.5-flash").generate_content("Hi").text
+
+        elif slug == "chatgpt":
+            api_key = os.environ.get("OPENAI_API_KEY")
+            if not api_key:
+                console.print("  [red]✗[/red]  OPENAI_API_KEY not set in .env")
+                time.sleep(1.5); return
+            import openai as _oai
+            r = _oai.OpenAI(api_key=api_key).chat.completions.create(
+                model="gpt-4o-mini", max_tokens=5,
+                messages=[{"role": "user", "content": "Hi"}],
+            )
+            _ = r.choices[0].message.content
+
+        elif slug == "local":
+            import ollama as _ol
+            host  = os.environ.get("LOCAL_LLM_HOST", "http://localhost:11434")
+            model = os.environ.get("LOCAL_LLM_MODEL", "llama3.2")
+            r = _ol.Client(host=host).chat(
+                model=model, messages=[{"role": "user", "content": "Hi"}]
+            )
+            _ = r.message.content
+
+        console.print(f"  [green]✓[/green]  [green]{name} connection successful![/green]")
+    except ImportError as exc:
+        console.print(f"  [red]✗[/red]  Package not installed: {exc}")
+    except Exception as exc:
+        console.print(f"  [red]✗[/red]  {exc}")
+    time.sleep(1.8)
+
+
+def _run_provider_setup(slug: str, name: str) -> None:
+    """Show setup instructions for a provider and allow testing / activation."""
+    from settings_manager import load_settings, save_settings
+
+    steps = _PROVIDER_INSTRUCTIONS.get(slug, [])
+
+    while True:
+        console.clear()
+        _print_compact_banner()
+        settings = load_settings()
+        is_active = settings["llm_provider"] == slug
+        status = "[green]Active[/green]" if is_active else "[dim]Inactive[/dim]"
+
+        console.print(Panel(
+            f"[bold blue]{name}[/bold blue]  ·  {status}",
+            border_style="blue", padding=(0, 2),
+        ))
+        console.print()
+        console.print(Rule("[blue]Setup Instructions[/blue]", style="blue"))
+        console.print()
+        for step in steps:
+            console.print(f"  {step}")
+            console.print()
+        console.print(Rule(style="dim blue"))
+        console.print()
+        console.print(f"  [bold blue]T[/bold blue]    Test connection")
+        if not is_active:
+            console.print(f"  [bold blue]A[/bold blue]    Set as active provider")
+        console.print(f"  [bold blue]B[/bold blue]    Back")
+        console.print()
+
+        try:
+            choice = console.input("[bold blue]›[/bold blue]  ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if choice == "B":
+            break
+        elif choice == "T":
+            _test_provider(slug, name)
+        elif choice == "A" and not is_active:
+            settings["llm_provider"] = slug
+            save_settings(settings)
+            console.print(f"\n  [green]✓[/green]  Provider set to [bold white]{name}[/bold white].")
+            time.sleep(0.8)
+            break  # go back to provider list so checkmark updates
+
+
+def _run_llm_provider_settings() -> None:
+    """Provider selection screen."""
+    from settings_manager import load_settings
+
+    while True:
+        console.clear()
+        _print_compact_banner()
+        current = load_settings()["llm_provider"]
+
+        console.print(Panel(
+            "[bold blue]LLM Provider[/bold blue]  "
+            "[dim]· Choose which model handles your conversations[/dim]",
+            border_style="blue", padding=(0, 2),
+        ))
+        console.print()
+        for i, (slug, name, desc) in enumerate(_PROVIDERS, 1):
+            marker = "[green]✓[/green]" if slug == current else " "
+            tag    = "  [dim](default)[/dim]" if slug == "claude" else ""
+            console.print(
+                f"  [bold blue]{i}[/bold blue]  {marker}  [white]{name:<12}[/white]"
+                f"  [dim]{desc}[/dim]{tag}"
+            )
+        console.print()
+        console.print(Rule(style="dim blue"))
+        console.print(f"\n  [bold blue]B[/bold blue]    Back\n")
+
+        try:
+            choice = console.input("[bold blue]›[/bold blue]  ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if choice == "B":
+            break
+        elif choice in ("1", "2", "3", "4"):
+            slug, name, _ = _PROVIDERS[int(choice) - 1]
+            _run_provider_setup(slug, name)
+
+
+def _run_settings() -> None:
+    """Top-level settings screen."""
+    from settings_manager import load_settings, save_settings
+
+    _provider_label = {s: n for s, n, _ in _PROVIDERS}
+
+    while True:
+        console.clear()
+        _print_compact_banner()
+        settings   = load_settings()
+        cur_label  = _provider_label.get(settings["llm_provider"], settings["llm_provider"].title())
+        dv_on      = settings.get("detailed_view", False)
+        dv_label   = "[green]On[/green]" if dv_on else "[dim]Off[/dim]"
+
+        console.print(Panel(
+            "[bold blue]Settings[/bold blue]",
+            border_style="blue", padding=(0, 2),
+        ))
+        console.print()
+        console.print(
+            f"  [bold blue]L[/bold blue]    [white]LLM Provider[/white]"
+            f"    [dim]Current: {cur_label}[/dim]"
+        )
+        console.print()
+        console.print(
+            f"  [bold blue]D[/bold blue]    [white]Detailed View[/white]"
+            f"    {dv_label}  [dim]— show pipeline logs, PII table & transparency panel[/dim]"
+        )
+        console.print()
+        console.print(Rule(style="dim blue"))
+        console.print(f"\n  [bold blue]B[/bold blue]    Back\n")
+
+        try:
+            choice = console.input("[bold blue]›[/bold blue]  ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if choice == "B":
+            break
+        elif choice == "L":
+            _run_llm_provider_settings()
+        elif choice == "D":
+            settings["detailed_view"] = not dv_on
+            save_settings(settings)
+            new_label = "[green]On[/green]" if settings["detailed_view"] else "[dim]Off[/dim]"
+            console.print(f"\n  [green]✓[/green]  Detailed View set to {new_label}.")
+            time.sleep(0.6)
 
 
 # ─── Dashboard ────────────────────────────────────────────────────────────────
@@ -333,6 +588,8 @@ def _run_dashboard() -> None:
             console.clear(); _print_compact_banner(); _start_chat(rag=True); continue
         if upper == "P":
             console.clear(); _print_compact_banner(); _run_pii_finder(); continue
+        if upper == "S":
+            _run_settings(); continue
 
         if upper.startswith("D") and upper[1:].isdigit():
             idx = int(upper[1:]) - 1
@@ -407,9 +664,9 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
             console.print("[green]New conversation started.[/green]")
     except FileNotFoundError as exc:
         console.print(f"[red]Not found:[/red] {exc}"); return
-    except EnvironmentError:
-        console.print("[red bold]API key missing.[/red bold]")
-        console.print("[dim]Run:  export ANTHROPIC_API_KEY=your_key_here[/dim]"); return
+    except EnvironmentError as exc:
+        console.print(f"[red bold]Configuration error:[/red bold] {exc}")
+        console.print("[dim]Press S from the dashboard to configure your LLM provider.[/dim]"); return
 
     rag_store = None
     effective_rag = rag or bool(load and chat_handler.conversation.rag_mode)
@@ -428,6 +685,14 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
 
 
 def _run_chat_loop(pipeline, rag_mode: bool) -> None:
+    from settings_manager import load_settings as _ls
+    _settings = _ls()
+    _detailed = _settings.get("detailed_view", False)
+    logging.getLogger().setLevel(logging.INFO if _detailed else logging.ERROR)
+
+    provider_slug = getattr(pipeline.chat, "_provider", "claude")
+    provider_name = next((n for s, n, _ in _PROVIDERS if s == provider_slug), "LLM")
+
     conv_id  = pipeline.chat.conversation.id
     mode_tag = "  [dim blue]· RAG[/dim blue]" if rag_mode else ""
     console.print()
@@ -452,17 +717,16 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
 
         try:
             response, _, _ = pipeline.process_turn(user_input, interactive=True)
-        except EnvironmentError:
-            console.print(
-                "[red]API key error.[/red]  [dim]Check ANTHROPIC_API_KEY.[/dim]"
-            ); break
+        except EnvironmentError as exc:
+            console.print(f"[red]Configuration error.[/red]  [dim]{exc}[/dim]")
+            break
         except Exception as exc:
             console.print(f"[red bold]Error:[/red bold] {exc}"); continue
 
         console.print()
         console.print(Panel(
             response,
-            title="[bold blue]Claude[/bold blue]",
+            title=f"[bold blue]{provider_name}[/bold blue]",
             border_style="blue",
             padding=(1, 2),
         ))

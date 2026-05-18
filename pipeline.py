@@ -76,7 +76,7 @@ _console = Console()
 # Transparency display
 # ─────────────────────────────────────────────
 
-def _show_transparency(sanitised: str, raw_response: str, restored: str) -> None:
+def _show_transparency(sanitised: str, raw_response: str, restored: str, provider: str = "LLM") -> None:
     _console.print()
     _console.print(Rule("[dim]API Transparency[/dim]", style="dim blue"))
 
@@ -85,8 +85,8 @@ def _show_transparency(sanitised: str, raw_response: str, restored: str) -> None
 
     _console.print(
         Panel(
-            f"[dim]Sent to Anthropic:[/dim]\n[blue]{_trim(sanitised)}[/blue]\n\n"
-            f"[dim]Received from Claude:[/dim]\n[yellow]{_trim(raw_response)}[/yellow]\n\n"
+            f"[dim]Sent to {provider}:[/dim]\n[blue]{_trim(sanitised)}[/blue]\n\n"
+            f"[dim]Received from {provider}:[/dim]\n[yellow]{_trim(raw_response)}[/yellow]\n\n"
             f"[dim]Final output (real values restored):[/dim]\n[green]{_trim(restored)}[/green]",
             border_style="dim blue",
             padding=(0, 2),
@@ -162,6 +162,10 @@ class Pipeline:
             Tuple of (restored_response, confirmed_entities, surrogate_map).
         """
         from config import SHOW_API_TRANSPARENCY
+        from settings_manager import load_settings
+        _s = load_settings()
+        detailed = _s.get("detailed_view", False)
+        provider = _s.get("llm_provider", "claude").title()
 
         # ── Service query check ───────────────────────────────────────────────
         # Service queries (e.g. "restaurants near 1126 E Apache Blvd, Tempe, AZ")
@@ -207,7 +211,8 @@ class Pipeline:
         surrogate_map: Dict[str, str] = {}
         if confirmed:
             surrogate_map = self.mimic.generate_all(confirmed)
-            print_detection_table(confirmed, surrogate_map)
+            if detailed:
+                print_detection_table(confirmed, surrogate_map)
         else:
             logger.info("[Pipeline] No PII detected — message sent as-is")
 
@@ -227,8 +232,8 @@ class Pipeline:
                 sanitised = context_prefix + sanitised
                 logger.info(f"[Pipeline] RAG: prepended {len(chunks)} chunks")
 
-        # ── Step 7: Send to Claude API ────────────────────────────────────────
-        logger.info("[Pipeline] Sending sanitised message to Claude API")
+        # ── Step 7: Send to LLM API ──────────────────────────────────────────
+        logger.info(f"[Pipeline] Sending sanitised message to {provider} API")
         raw_response = self.chat.send(sanitised)
 
         # ── Step 8: Reconstruct originals ─────────────────────────────────────
@@ -239,11 +244,12 @@ class Pipeline:
         self.chat.save()
 
         # ── Step 9: Transparency panel ────────────────────────────────────────
-        if SHOW_API_TRANSPARENCY:
+        if SHOW_API_TRANSPARENCY and detailed:
             _show_transparency(
                 sanitised=sanitised,
                 raw_response=raw_response,
                 restored=restored_response,
+                provider=provider,
             )
 
         return restored_response, confirmed, surrogate_map

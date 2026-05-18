@@ -25,6 +25,10 @@ CONTEXT_GUARD_ENABLED: bool = True            # always on — no Ollama required
 CONTEXT_GUARD_FALLBACK_TO_OLLAMA: bool = False  # set True to use phi3:mini instead
 
 CLAUDE_MODEL: str = "claude-sonnet-4-6"          # Claude API model
+GEMINI_MODEL: str = "gemini-1.5-flash"            # Gemini API model
+OPENAI_MODEL: str = "gpt-4o-mini"                 # OpenAI API model
+LOCAL_LLM_MODEL: str = "llama3.2"                 # Default Ollama model
+LOCAL_LLM_HOST: str = "http://localhost:11434"     # Default Ollama server host
 EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"        # sentence-transformers for RAG
 SPACY_MODEL: str = "en_core_web_lg"              # spaCy NER model
 
