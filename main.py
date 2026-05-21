@@ -314,6 +314,15 @@ def _run_pii_finder() -> None:
 
         console.print(tbl)
 
+        if _detailed:
+            from detection.quasi_identifier import format_warning as _qi_fmt
+            qi_matches = getattr(confirmed, "_qi_matches", [])
+            if qi_matches:
+                console.print(f"[bold yellow]{_qi_fmt(qi_matches)}[/bold yellow]")
+            else:
+                console.print("[dim green]✓  No quasi-identifier combination risk detected.[/dim green]")
+            console.print()
+
         sanitised = user_input
         for orig in sorted(surrogate_map, key=len, reverse=True):
             sanitised = sanitised.replace(orig, surrogate_map[orig])

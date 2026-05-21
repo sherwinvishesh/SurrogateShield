@@ -151,6 +151,7 @@ class MimicGen:
         "LOC":               "_gen_loc",
         "ORG":               "_gen_org",
         "FAC":               "_gen_fac",
+        "gender_indicator":  "_gen_default",
     }
 
     def generate(self, entity: DetectedEntity) -> str:

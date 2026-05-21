@@ -44,8 +44,14 @@ from typing import Dict, List, Optional, Set, Tuple
 from dataclasses import replace as _dc_replace
 from util import DetectedEntity, get_logger, mask_spans
 from detection import pattern_scan, entity_trace, context_guard
+from detection.quasi_identifier import score as qi_score
 
 logger = get_logger(__name__)
+
+
+class _TaggedList(list):
+    """list subclass that allows attribute assignment (used for _qi_matches)."""
+    pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -438,6 +444,17 @@ def run_cascade(
         confirmed          = _filter_topical_geo_entities(confirmed,          text)
         needs_confirmation = _filter_topical_geo_entities(needs_confirmation, text)
 
+    # ── Quasi-identifier combination scoring ──────────────────────────────────
+    confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
+    qi_matches = qi_score(confirmed)
+    if qi_matches:
+        for match in qi_matches:
+            logger.info(
+                f"[SentinelLayer] Quasi-ID risk: {match.combination_name} "
+                f"(fields: {match.matched_fields}, risk: {match.risk_level})"
+            )
+    confirmed._qi_matches = qi_matches
+
     logger.info(
         f"[SentinelLayer] Final → "
         f"confirmed={len(confirmed)}, "
@@ -453,6 +470,8 @@ def deduplicate(entities: List[DetectedEntity]) -> List[DetectedEntity]:
         key = ent.text.strip()
         if key not in seen or ent.score > seen[key].score:
             seen[key] = ent
-    result = list(seen.values())
+    result = _TaggedList(seen.values())
     result.sort(key=lambda e: e.start)
+    if hasattr(entities, "_qi_matches"):
+        result._qi_matches = entities._qi_matches
     return result

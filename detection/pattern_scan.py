@@ -203,6 +203,22 @@ _PATTERNS: list = [
         None,
     ),
 
+    # ── Gender indicator ───────────────────────────────────────────────────────
+    # Catches explicit gender declarations: "gender: female", "I am a man",
+    # "she/her" pronouns.  Required for the ZIP + DOB + Gender quasi-ID combo.
+    (
+        "gender_indicator",
+        re.compile(
+            r'\b(?:'
+            r'(?:gender|sex)\s*[:=]\s*(?:male|female|m|f|man|woman|boy|girl|non-binary|nb)'
+            r'|(?:i\s+am\s+a|i\'m\s+a)\s+(?:male|female|man|woman|boy|girl)'
+            r'|(?:he/him|she/her|they/them)'
+            r')\b',
+            re.IGNORECASE,
+        ),
+        None,
+    ),
+
     # ── UK postcode ────────────────────────────────────────────────────────────
     (
         "postcode_uk",

@@ -59,6 +59,7 @@ from util import (
 )
 from detection import logic as sentinel_layer
 from detection.service_query import is_service_query, fuzz_addresses
+from detection.quasi_identifier import format_warning as _qi_format_warning
 from generation.logic import MimicGen
 from storage.logic import ShadowMap
 from reconstruction.logic import ResolvePass
@@ -219,6 +220,11 @@ class Pipeline:
             surrogate_map = self.mimic.generate_all(confirmed)
             if detailed:
                 print_detection_table(confirmed, surrogate_map)
+                qi_matches = getattr(confirmed, "_qi_matches", [])
+                if qi_matches:
+                    _console.print(f"[bold yellow]{_qi_format_warning(qi_matches)}[/bold yellow]")
+                else:
+                    _console.print("[dim green]✓  No quasi-identifier combination risk detected.[/dim green]")
         else:
             logger.info("[Pipeline] No PII detected — message sent as-is")
 
