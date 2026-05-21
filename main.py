@@ -196,6 +196,7 @@ def _print_menu(has_convs: bool) -> None:
     rows.append(("[bold blue]J[/bold blue]", "JSON Test  — batch evaluation from a JSON file"))
     rows.append(("[bold blue]E[/bold blue]", "Evaluation  — score pipeline quality from JSON files"))
     rows.append(("[bold blue]S[/bold blue]", "Settings"))
+    rows.append(("[bold blue]H[/bold blue]", "Help"))
     rows.append(("[bold blue]Q[/bold blue]", "Quit"))
     for key, desc in rows:
         console.print(f"  {key}    [dim]{desc}[/dim]")
@@ -1299,6 +1300,22 @@ def _run_settings() -> None:
             time.sleep(0.6)
 
 
+# ─── Help ─────────────────────────────────────────────────────────────────────
+
+def _run_help() -> None:
+    from help_screen import print_help
+
+    console.clear()
+    _print_compact_banner()
+    print_help(console)
+    console.print(Rule(style="blue"))
+    console.print()
+    try:
+        console.input("  [dim]Press Enter to return to dashboard…[/dim]")
+    except (EOFError, KeyboardInterrupt):
+        pass
+
+
 # ─── Dashboard ────────────────────────────────────────────────────────────────
 
 def _run_dashboard() -> None:
@@ -1337,6 +1354,8 @@ def _run_dashboard() -> None:
             console.clear(); _print_compact_banner(); _run_evaluation(); continue
         if upper == "S":
             _run_settings(); continue
+        if upper == "H":
+            _run_help(); continue
 
         if upper.startswith("D") and upper[1:].isdigit():
             idx = int(upper[1:]) - 1
