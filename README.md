@@ -70,7 +70,7 @@ Three detectors run in sequence. Each masks spans it claims so downstream detect
 Regex-based structural detection. Runs first so structured PII is masked before any NER model sees it.
 
 | Pattern | Examples |
-|||
+|---|---|
 | Street address |  `99 Cathedral Close` |
 | SSN | `544-87-2944` |
 | Email | `user@example.com` |
@@ -102,7 +102,7 @@ Includes ORG→GPE reclassification when location prepositions appear before an 
 Four additional passes run on the combined entity set:
 
 | Pass | What it does |
-|||
+|---|---|
 | A — Structural ORG | Regex for `[the/a/an] <name> [corporation|company|corp|inc|ltd|llc…]`; no name lists |
 | B — Email-username reclassification | Corrects ORG→PERSON when the entity text is a prefix of a detected email username |
 | C — PERSON component dedup | Removes standalone surnames that are sub-components of already-detected full names |
@@ -122,7 +122,7 @@ Identifies messages like "restaurants near 1126 E Apache Blvd, Tempe, AZ" and ap
 Based on Sweeney's k-anonymity research. Detects risky entity-type combinations and issues warnings:
 
 | Combination | Risk |
-|||
+|---|---|
 | ZIP + DOB + Gender | High — 87% of US population uniquely identifiable (Sweeney 2000) |
 | Postcode + DOB | High |
 | Name + Employer + Location | Medium |
@@ -135,7 +135,7 @@ Based on Sweeney's k-anonymity research. Detects risky entity-type combinations 
 Generates type-consistent surrogates using [Faker](https://faker.readthedocs.io/). Guarantees no collisions within a session via a `used_surrogates` set. Every surrogate is unique and realistic for its type:
 
 | Entity type | Generated surrogate looks like |
-|||
+|---|---|
 | `PERSON` | `Sarah Mitchell` |
 | `email` | `jdoe@example.net` |
 | `ssn` | `XXX-XX-XXXX` (valid format) |
@@ -158,7 +158,7 @@ Generates type-consistent surrogates using [Faker](https://faker.readthedocs.io/
 An encrypted, per-conversation mapping of `surrogate → original`.
 
 | Property | Detail |
-|||
+|---|---|
 | Encryption | AES-256-GCM with a fresh 12-byte nonce per save |
 | Key derivation | HKDF-SHA256 with device secret as IKM and conversation ID as salt |
 | Device secret | Generated once at `~/.surrogateshield/device.key` with `0o600` permissions |
@@ -194,7 +194,7 @@ Local Retrieval-Augmented Generation backed by [ChromaDB](https://www.trychroma.
 ## Supported LLM Providers
 
 | Provider | Model | Env var required |
-||||
+|---|---|---|
 | Claude (default) | `claude-sonnet-4-6` | `ANTHROPIC_API_KEY` |
 | Gemini | `gemini-1.5-flash` | `GEMINI_API_KEY` |
 | ChatGPT | `gpt-4o-mini` | `OPENAI_API_KEY` |
@@ -207,7 +207,7 @@ Switch providers from the **Settings** menu inside the dashboard (press `S`).
 ## PII Types Detected
 
 | Category | Types |
-|||
+|---|---|
 | Structural (regex) | SSN, email, phone (US/UK/international), credit card, street address, DOB, IPv4, API keys/secrets, US ZIP, UK postcode |
 | Named entities (NER) | PERSON, GPE (geo-political entity), LOC, ORG, FAC (facility) |
 | Inferred | Gender indicator, implicit location |
@@ -329,7 +329,7 @@ OPENAI_API_KEY=sk-...              # Required for ChatGPT
 These are changed interactively from inside the app and persist across sessions in `~/.surrogateshield/settings.json`.
 
 | Key | Default | What it controls |
-||||
+|---|---|---|
 | `llm_provider` | `claude` | Active LLM backend — Claude / Gemini / ChatGPT / Local |
 | `detailed_view` | `true` | Show pipeline stage logs, per-entity PII table, and the API transparency panel in each chat turn |
 | `presidio_comparison` | `false` | Show the Presidio side-by-side panel below each PII Finder result. **Off by default** — requires `presidio-analyzer`, `presidio-anonymizer`, and `python -m spacy download en_core_web_lg` to be installed first (see *Enabling the Presidio comparison panel* above) |
@@ -339,7 +339,7 @@ These are changed interactively from inside the app and persist across sessions 
 Hard-coded thresholds and flags. Edit the file directly to change them; no restart required for PII Finder (restart required for chat sessions).
 
 | Setting | Default | Description |
-||||
+|---|---|---|
 | `ENTITY_TRACE_HIGH_THRESHOLD` | `0.85` | spaCy score above which an entity is immediately confirmed |
 | `ENTITY_TRACE_LOW_THRESHOLD` | `0.60` | spaCy score above which an entity is forwarded to ContextGuard |
 | `CONTEXT_GUARD_CONFIDENCE_THRESHOLD` | `0.70` | distilbert score required to confirm a borderline entity |
@@ -382,7 +382,7 @@ python main.py add-doc path/to/document.txt
 ### Dashboard Keyboard Shortcuts
 
 | Key | Action |
-|||
+|---|---|
 | `N` | New conversation |
 | `R` | New conversation with RAG mode |
 | `P` | PII Finder — test detection without any API call |
@@ -471,6 +471,12 @@ SurrogateShield/
 ├── reconstruction/
 │   └── logic.py             # ResolvePass — three-pass surrogate→original restoration
 │
+├── presidio/                # Presidio integration layer (optional comparison feature)
+│   ├── __init__.py
+│   ├── engine.py            # Lazy singleton AnalyzerEngine wrapper
+│   ├── detect.py            # detect(text) → list[PresidioEntity]
+│   └── redact.py            # redact(text, entities) → [TYPE]-placeholder string
+│
 ├── chatbot/
 │   ├── chat.py              # Multi-provider LLM conversation handler (Claude/Gemini/OpenAI/Ollama)
 │   └── rag.py               # RAGStore — ChromaDB + sentence-transformers vector store
@@ -493,7 +499,7 @@ SurrogateShield/
 ## Security Design
 
 | Component | Mechanism |
-|||
+|---|---|
 | Device secret | 32-byte random key at `~/.surrogateshield/device.key`, `0o600` permissions |
 | Per-conversation key | HKDF-SHA256 with device secret as IKM and conversation ID as salt |
 | ShadowMap encryption | AES-256-GCM with fresh 12-byte nonce per write |
