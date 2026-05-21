@@ -254,7 +254,7 @@ _PATTERNS: list = [
         "crypto",
         re.compile(
             r"(?:"
-            r"\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b"   # BTC legacy P2PKH/P2SH
+            r"\b[13][a-km-zA-HJ-NP-Z1-9]{25,36}\b"   # BTC legacy P2PKH/P2SH
             r"|\bbc1[ac-hj-np-z02-9]{6,87}\b"          # BTC Bech32
             r"|\b0x[0-9a-fA-F]{40}\b"                   # Ethereum
             r")"
@@ -281,10 +281,11 @@ _PATTERNS: list = [
     (
         "us_driver_license",
         re.compile(
-            r"(?i)(?:driver'?s?\s+licen[sc]e|license\s*(?:number|no|#|num)"
+            r"(?:driver'?s?\s+licen[sc]e(?:\s+(?:number|no|num|#))?"
+            r"|licen[sc]e\s*(?:number|no|#|num)"
             r"|\bDL\b|\bD\.L\.\b)"
-            r"[\s:\-#]*"
-            r"([A-Z0-9]{5,20})\b",
+            r"[\s:\-#]*(?:is\s+|was\s+)?"
+            r"(?-i:([A-Z0-9]{5,20}))\b",
             re.IGNORECASE,
         ),
         None,
