@@ -194,6 +194,7 @@ def _print_menu(has_convs: bool) -> None:
             ("[bold blue]D1 – D9[/bold blue]", "Delete conversation by number"),
         ]
     rows.append(("[bold blue]J[/bold blue]", "JSON Test  — batch evaluation from a JSON file"))
+    rows.append(("[bold blue]E[/bold blue]", "Evaluation  — score pipeline quality from JSON files"))
     rows.append(("[bold blue]S[/bold blue]", "Settings"))
     rows.append(("[bold blue]Q[/bold blue]", "Quit"))
     for key, desc in rows:
@@ -496,6 +497,246 @@ def _run_json_test() -> None:
         pass
 
 
+# ─── Evaluation ───────────────────────────────────────────────────────────────
+
+def _run_evaluation() -> None:
+    """Four-screen pipeline evaluation flow."""
+    import json as _json
+    from evaluator import EXPERIMENT_DIR, EVAL_FIELDS, run_evaluation
+
+    EXPERIMENT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # ── Screen 1: File inputs ─────────────────────────────────────────────────
+    console.print(Panel(
+        "[bold blue]Evaluation[/bold blue]  "
+        "[dim]· Score pipeline quality from JSON files[/dim]\n\n"
+        "Compare pipeline output against ground-truth keys to measure\n"
+        "detection quality, sanitization accuracy, and ResolvePass effectiveness.\n\n"
+        "[dim]All files are read from:[/dim]  [cyan]experiment/[/cyan]",
+        border_style="blue", padding=(1, 2),
+    ))
+    console.print()
+
+    def _ask_file(prompt: str):
+        try:
+            fn = console.input(f"  [dim]experiment/[/dim][bold blue]{prompt}[/bold blue]").strip()
+        except (EOFError, KeyboardInterrupt):
+            return None
+        if not fn or fn.upper() == "B":
+            return None
+        if not fn.endswith(".json"):
+            fn += ".json"
+        return fn
+
+    questions_file = _ask_file("questions file  › ")
+    if questions_file is None:
+        return
+    answers_file = _ask_file("answers file    › ")
+    if answers_file is None:
+        return
+    key_file = _ask_file("key file        › ")
+    if key_file is None:
+        return
+
+    missing = [fn for fn in (questions_file, answers_file, key_file)
+               if not (EXPERIMENT_DIR / fn).exists()]
+    if missing:
+        for fn in missing:
+            console.print(f"\n  [red]File not found:[/red] experiment/{fn}")
+        time.sleep(1.5)
+        return
+
+    try:
+        _q = _json.loads((EXPERIMENT_DIR / questions_file).read_text(encoding="utf-8"))
+        _a = _json.loads((EXPERIMENT_DIR / answers_file).read_text(encoding="utf-8"))
+        _k = _json.loads((EXPERIMENT_DIR / key_file).read_text(encoding="utf-8"))
+    except Exception as exc:
+        console.print(f"\n  [red]Invalid JSON:[/red] {exc}")
+        time.sleep(1.5)
+        return
+
+    if not (len(_q) == len(_a) == len(_k)):
+        console.print(
+            f"\n  [red]Length mismatch:[/red] "
+            f"questions={len(_q)}, answers={len(_a)}, keys={len(_k)}\n"
+            "  [dim]All three files must have the same number of entries.[/dim]"
+        )
+        time.sleep(2.0)
+        return
+
+    total = len(_q)
+
+    # ── Screen 2: Field selection ─────────────────────────────────────────────
+    fields = {key: True for key, _ in EVAL_FIELDS}
+
+    while True:
+        console.clear()
+        _print_compact_banner()
+
+        console.print(Panel(
+            f"[bold blue]Field Selection[/bold blue]  "
+            f"[dim]· {questions_file}  ({total} question{'s' if total != 1 else ''})[/dim]\n\n"
+            "[dim]Press a number to toggle. Press [bold white]Enter[/bold white] to run.[/dim]",
+            border_style="blue", padding=(1, 2),
+        ))
+        console.print()
+
+        for i, (key, label) in enumerate(EVAL_FIELDS, 1):
+            mark = "[green]✓[/green]" if fields[key] else "[dim]□[/dim]"
+            console.print(f"  [bold blue]{i}[/bold blue]  {mark}  [white]{label}[/white]")
+
+        console.print()
+        console.print(Rule(style="dim blue"))
+        console.print(f"\n  [dim]Enter[/dim] → Run  ·  [bold blue]B[/bold blue] → Back\n")
+
+        try:
+            raw = console.input("[bold blue]›[/bold blue]  ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            return
+
+        if raw == "B":
+            return
+        if raw == "":
+            break
+        if raw.isdigit() and 1 <= int(raw) <= len(EVAL_FIELDS):
+            key = EVAL_FIELDS[int(raw) - 1][0]
+            fields[key] = not fields[key]
+
+    # ── Screen 3: Run ─────────────────────────────────────────────────────────
+    console.clear()
+    _print_compact_banner()
+    console.print(Panel(
+        f"[bold blue]Evaluation Running[/bold blue]  [dim]· {questions_file}[/dim]",
+        border_style="blue", padding=(0, 2),
+    ))
+    console.print()
+    console.print(Rule(style="blue"))
+    console.print()
+
+    def _on_progress(i: int, total: int, status: str) -> None:
+        idx = f"[dim]{i + 1:>{len(str(total))}}/{total}[/dim]"
+        if status == "ok":
+            console.print(f"  [green]✓[/green]  {idx}  [dim]0.0ms[/dim]")
+        elif status == "error":
+            console.print(f"  [red]✗[/red]  {idx}  [red]error[/red]")
+
+    try:
+        metrics = run_evaluation(
+            questions_file, answers_file, key_file,
+            fields, progress_cb=_on_progress,
+        )
+    except Exception as exc:
+        console.print(f"\n  [red bold]Error:[/red bold] {exc}")
+        console.print()
+        try:
+            console.input("  [dim]Press Enter to return to dashboard…[/dim]")
+        except (EOFError, KeyboardInterrupt):
+            pass
+        return
+
+    # ── Screen 4: Results ─────────────────────────────────────────────────────
+    console.clear()
+    _print_compact_banner()
+
+    table = Table(
+        title=f"[bold blue]Evaluation Results[/bold blue]  [dim]· {questions_file}[/dim]",
+        box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1),
+    )
+    table.add_column("Metric", style="white",    no_wrap=True)
+    table.add_column("Value",  style="bold blue", justify="right")
+
+    def _fmt(key: str, val) -> str:
+        if isinstance(val, int):
+            return str(val)
+        if isinstance(val, float):
+            if key in {
+                "answer_rate", "precision_surrogates", "recall_surrogates",
+                "accuracy_surrogates", "error_surrogates",
+                "resolve_leak_rate", "precision_resolve", "error_resolve",
+                "pii_leak_rate", "accuracy_sanitization", "error_sanitization",
+            }:
+                return f"{val * 100:.2f}%"
+            if key in {
+                "avg_pattern_scan_ms", "avg_entity_trace_ms",
+                "avg_context_guard_ms", "avg_surrogate_gen_ms",
+            }:
+                return f"{val:.2f} ms"
+            return f"{val:.2f}"
+        return str(val)
+
+    any_rows = False
+
+    def _add_group(rows: list) -> None:
+        nonlocal any_rows
+        visible = [(k, lbl) for k, lbl in rows if k in metrics]
+        if not visible:
+            return
+        if any_rows:
+            table.add_section()
+        for k, lbl in visible:
+            table.add_row(lbl, _fmt(k, metrics[k]))
+        any_rows = True
+
+    _add_group([
+        ("no_of_questions",     "Questions"),
+        ("no_of_answers",       "Non-empty answers"),
+        ("no_of_answers_empty", "Empty answers / errors"),
+        ("answer_rate",         "Answer rate"),
+    ])
+    _add_group([
+        ("no_surrogates_found",               "Surrogates found (total)"),
+        ("no_surrogates_in_key",              "Surrogates in key (total)"),
+        ("avg_surrogates_per_question_found",  "Avg surrogates found / question"),
+        ("avg_surrogates_per_question_in_key", "Avg surrogates in key / question"),
+    ])
+    _add_group([
+        ("precision_surrogates", "Surrogate precision"),
+        ("recall_surrogates",    "Surrogate recall"),
+        ("accuracy_surrogates",  "Surrogate accuracy (Jaccard)"),
+        ("error_surrogates",     "Surrogate error (miss rate)"),
+    ])
+    _add_group([
+        ("avg_pattern_scan_ms",  "Avg PatternScan time"),
+        ("avg_entity_trace_ms",  "Avg EntityTrace time"),
+        ("avg_context_guard_ms", "Avg ContextGuard time"),
+        ("avg_surrogate_gen_ms", "Avg SurrogateGen time"),
+    ])
+    _add_group([
+        ("total_resolve_leaks",            "Questions with surrogate leaks"),
+        ("total_individual_resolve_leaks", "Individual surrogates leaked"),
+        ("resolve_leak_rate",              "Surrogate leak rate"),
+        ("precision_resolve",              "ResolvePass accuracy"),
+        ("error_resolve",                  "ResolvePass error rate"),
+    ])
+    _add_group([
+        ("total_pii_leaks_to_llm",     "Questions with PII sent to LLM"),
+        ("total_individual_pii_leaks", "Individual PII values leaked to LLM"),
+        ("pii_leak_rate",              "PII leak rate to LLM"),
+        ("accuracy_sanitization",      "Sanitization accuracy"),
+        ("error_sanitization",         "Sanitization error rate"),
+    ])
+
+    console.print(table)
+    console.print()
+    console.print(f"  [bold blue]S[/bold blue]    [dim]Save results as JSON[/dim]")
+    console.print(f"  [bold blue]B[/bold blue]    [dim]Back to dashboard[/dim]")
+    console.print()
+
+    while True:
+        try:
+            choice = console.input("[bold blue]›[/bold blue]  ").strip().upper()
+        except (EOFError, KeyboardInterrupt):
+            return
+
+        if choice in ("B", ""):
+            return
+        if choice == "S":
+            stem     = Path(questions_file).stem
+            out_path = EXPERIMENT_DIR / f"{stem}_eval_results.json"
+            out_path.write_text(_json.dumps(metrics, indent=2), encoding="utf-8")
+            console.print(f"\n  [green]✓[/green]  Saved to [cyan]{out_path}[/cyan]\n")
+
+
 # ─── Settings ─────────────────────────────────────────────────────────────────
 
 _PROVIDER_INSTRUCTIONS: dict = {
@@ -762,6 +1003,8 @@ def _run_dashboard() -> None:
             console.clear(); _print_compact_banner(); _run_pii_finder(); continue
         if upper == "J":
             console.clear(); _print_compact_banner(); _run_json_test(); continue
+        if upper == "E":
+            console.clear(); _print_compact_banner(); _run_evaluation(); continue
         if upper == "S":
             _run_settings(); continue
 
