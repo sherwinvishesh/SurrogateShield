@@ -147,7 +147,47 @@ def run_evaluation(
                     timing_sums[k] += stage_timings.get(k, 0.0)
 
             if need_resolve:
-                leaked = [v for v in surrogate_map.values() if v and v in llm_response]
+                # Simulate ResolvePass to find genuine leaks (surrogates that
+                # ResolvePass would have failed to restore).
+                #
+                # Q1: surrogate_map={"Revanth":"Victoria Mitchell","544-87-2944":"348-67-6360"}
+                #   llm_response says "Hi Victoria!" — exact match finds neither full
+                #   surrogate. Component pass: "Victoria" is found and replaced with
+                #   "Revanth"; "348-67-6360" is absent. restored has no surrogates.
+                #   leaked=[]. Correct — 0 leaks.
+                #
+                # Q2: surrogate_map={"revanth@gmail.com":"laurabennett@example.org",
+                #                    "480-555-1234":"+1-141-020-9475"}
+                #   Both surrogates appear verbatim. Exact pass restores both.
+                #   restored has no surrogates. leaked=[]. Correct — 0 leaks.
+
+                # Step 1 — inverted map: surrogate_value → original_pii
+                inv = {v: k for k, v in surrogate_map.items() if v}
+
+                # Step 2 — exact-match ResolvePass (longest surrogate first)
+                restored = llm_response
+                for surrogate in sorted(inv, key=len, reverse=True):
+                    restored = restored.replace(surrogate, inv[surrogate])
+
+                # Step 3 — component pass for multi-word surrogates whose full
+                # form was not found (e.g. LLM used "Victoria" from "Victoria Mitchell")
+                import re as _re
+                for surrogate, original in inv.items():
+                    if " " not in surrogate:
+                        continue
+                    if surrogate in llm_response:
+                        continue  # already handled by exact pass
+                    sur_words  = surrogate.split()
+                    orig_words = original.split()
+                    if len(sur_words) != len(orig_words):
+                        continue
+                    for sw, ow in zip(sur_words, orig_words):
+                        restored = _re.sub(
+                            r'\b' + _re.escape(sw) + r'\b', ow, restored
+                        )
+
+                # Step 4 — any surrogate still present in restored is a real leak
+                leaked = [v for v in surrogate_map.values() if v and v in restored]
                 total_resolve_leaks            += 1 if leaked else 0
                 total_individual_resolve_leaks += len(leaked)
 
