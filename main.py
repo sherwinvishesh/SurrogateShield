@@ -701,7 +701,7 @@ def _run_evaluation() -> None:
     console.print(ov)
     console.print()
 
-    # ── Section 2: Surrogate Detection | Stage Timings ────────────────────────
+    # ── Section 2: Surrogate Detection | Detection Quality  +  Stage Timings ──
     sd = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
     sd.add_column("Metric",  style="white", no_wrap=True)
     sd.add_column("Value",   justify="right")
@@ -715,19 +715,29 @@ def _run_evaluation() -> None:
         if k in metrics:
             sd.add_row(lbl, _fmt(k, metrics[k]))
             sd_rows += 1
-    quality_rows = [(k, lbl) for k, lbl in [
+    pr_rows = [(k, lbl) for k, lbl in [
         ("precision_surrogates", "Precision"),
         ("recall_surrogates",    "Recall"),
-        ("f1_surrogates",        "F1 Score"),
-        ("accuracy_surrogates",  "Accuracy (Jaccard)"),
-        ("error_surrogates",     "Error (miss rate)"),
     ] if k in metrics]
-    if quality_rows:
+    if pr_rows:
         if sd_rows:
             sd.add_section()
-        for k, lbl in quality_rows:
+        for k, lbl in pr_rows:
             sd.add_row(lbl, _color_surr(k, metrics[k]))
-        sd_rows += len(quality_rows)
+        sd_rows += len(pr_rows)
+
+    dq = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
+    dq.add_column("Metric", style="white", no_wrap=True)
+    dq.add_column("Value",  justify="right")
+    dq_rows = 0
+    for k, lbl in [
+        ("f1_surrogates",       "F1 Score"),
+        ("accuracy_surrogates", "Accuracy (Jaccard)"),
+        ("error_surrogates",    "Error (miss rate)"),
+    ]:
+        if k in metrics:
+            dq.add_row(lbl, _color_surr(k, metrics[k]))
+            dq_rows += 1
 
     st = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
     st.add_column("Stage",    style="white", no_wrap=True)
@@ -745,15 +755,18 @@ def _run_evaluation() -> None:
             st.add_row(lbl, cell)
             st_rows += 1
 
-    left2  = Panel(sd, title="[bold blue]Surrogate Detection[/bold blue]", border_style="blue", padding=(1, 2)) if sd_rows else None
-    right2 = Panel(st, title="[bold blue]Stage Timings[/bold blue]",       border_style="blue", padding=(1, 2)) if st_rows else None
+    left2  = Panel(sd, title="[bold blue]Surrogate Detection[/bold blue]", border_style="blue", padding=(1, 2), expand=True) if sd_rows else None
+    right2 = Panel(dq, title="[bold blue]Detection Quality[/bold blue]",   border_style="blue", padding=(1, 2), expand=True) if dq_rows else None
+    stage2 = Panel(st, title="[bold blue]Stage Timings[/bold blue]",        border_style="blue", padding=(1, 2), expand=True) if st_rows else None
     if left2 and right2:
         console.print(_Columns([left2, right2], equal=True, expand=True))
     elif left2:
         console.print(left2)
     elif right2:
         console.print(right2)
-    if left2 or right2:
+    if stage2:
+        console.print(stage2)
+    if left2 or right2 or stage2:
         console.print()
 
     # ── Section 3: ResolvePass Quality | Sanitization Quality ─────────────────
@@ -797,8 +810,8 @@ def _run_evaluation() -> None:
             sq.add_row(lbl, _color_pipe(k, metrics[k]))
             sq_rows += 1
 
-    left3  = Panel(rp, title="[bold blue]ResolvePass Quality[/bold blue]",  border_style="blue", padding=(1, 2)) if rp_rows else None
-    right3 = Panel(sq, title="[bold blue]Sanitization Quality[/bold blue]", border_style="blue", padding=(1, 2)) if sq_rows else None
+    left3  = Panel(rp, title="[bold blue]ResolvePass Quality[/bold blue]",  border_style="blue", padding=(1, 2), expand=True) if rp_rows else None
+    right3 = Panel(sq, title="[bold blue]Sanitization Quality[/bold blue]", border_style="blue", padding=(1, 2), expand=True) if sq_rows else None
     if left3 and right3:
         console.print(_Columns([left3, right3], equal=True, expand=True))
     elif left3:
@@ -824,8 +837,34 @@ def _run_evaluation() -> None:
     console.print()
 
     # ── Section 5: Per-Entity-Type Breakdown ──────────────────────────────────
-    per_type_data = metrics.get("per_entity_type")
-    if per_type_data:
+    if "per_entity_type" in metrics:
+        per_type_data = metrics.get("per_entity_type") or {}
+        # NER-based types (from EntityTrace + ContextGuard)
+        ALL_ENTITY_TYPES_NER = [
+            "PERSON",
+            "GPE",
+            "LOC",
+            "ORG",
+            "FAC",
+        ]
+        # Pattern-based types (from PatternScan)
+        # phone consolidates: phone_us, phone_uk, phone_intl (Presidio: PHONE_NUMBER)
+        # postal_code consolidates: zip_us, postcode_uk (Presidio has no equivalent)
+        ALL_ENTITY_TYPES_PATTERN = [
+            "email",
+            "phone",          # consolidated from phone_us + phone_uk + phone_intl
+            "ssn",
+            "address",
+            "dob",
+            "credit_card",
+            "ip_address",
+            "api_key",
+            "postal_code",    # consolidated from zip_us + postcode_uk
+            "gender_indicator",
+        ]
+        ALL_ENTITY_TYPES = ALL_ENTITY_TYPES_NER + ALL_ENTITY_TYPES_PATTERN
+        _NER_BOUNDARY = "email"  # first PatternScan type — add section separator before it
+
         pet = Table(
             title="[bold blue]Per-Entity-Type Breakdown[/bold blue]",
             box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1),
@@ -838,24 +877,67 @@ def _run_evaluation() -> None:
         pet.add_column("Recall",      style="white",  width=11, justify="right")
         pet.add_column("F1",          style="bold",   width=11, justify="right")
 
-        sorted_types = sorted(per_type_data.items(), key=lambda x: x[1]["f1"], reverse=True)
-        for etype, stats in sorted_types:
-            f1  = stats["f1"]
-            p   = stats["precision"]
-            r   = stats["recall"]
-            tp  = stats["tp"]
-            fp  = stats["fp"]
-            fn  = stats["fn"]
-            pct_p  = f"{p * 100:.2f}%"
-            pct_r  = f"{r * 100:.2f}%"
-            pct_f1 = f"{f1 * 100:.2f}%"
-            if f1 >= 0.90:
-                f1_cell = f"[bold green]{pct_f1}[/bold green]"
-            elif f1 >= 0.70:
-                f1_cell = f"[yellow]{pct_f1}[/yellow]"
+        for etype in ALL_ENTITY_TYPES:
+            if etype == _NER_BOUNDARY:
+                pet.add_section()
+            if etype in per_type_data:
+                stats  = per_type_data[etype]
+                f1     = stats["f1"]
+                p      = stats["precision"]
+                r      = stats["recall"]
+                tp     = stats["tp"]
+                fp     = stats["fp"]
+                fn     = stats["fn"]
+                pct_p  = f"{p  * 100:.2f}%"
+                pct_r  = f"{r  * 100:.2f}%"
+                pct_f1 = f"{f1 * 100:.2f}%"
+                if f1 >= 0.90:
+                    color = "bold green"
+                elif f1 >= 0.70:
+                    color = "yellow"
+                else:
+                    color = "red"
+                pet.add_row(
+                    etype,
+                    str(tp), str(fp), str(fn),
+                    f"[{color}]{pct_p}[/{color}]",
+                    f"[{color}]{pct_r}[/{color}]",
+                    f"[{color}]{pct_f1}[/{color}]",
+                )
             else:
-                f1_cell = f"[red]{pct_f1}[/red]"
-            pet.add_row(etype, str(tp), str(fp), str(fn), pct_p, pct_r, f1_cell)
+                pet.add_row(
+                    etype,
+                    "[dim]—[/dim]", "[dim]—[/dim]", "[dim]—[/dim]",
+                    "[dim]—[/dim]", "[dim]—[/dim]", "[dim]—[/dim]",
+                )
+
+        extra_types = sorted(set(per_type_data.keys()) - set(ALL_ENTITY_TYPES))
+        if extra_types:
+            pet.add_section()
+            for etype in extra_types:
+                stats  = per_type_data[etype]
+                f1     = stats["f1"]
+                p      = stats["precision"]
+                r      = stats["recall"]
+                tp     = stats["tp"]
+                fp     = stats["fp"]
+                fn     = stats["fn"]
+                pct_p  = f"{p  * 100:.2f}%"
+                pct_r  = f"{r  * 100:.2f}%"
+                pct_f1 = f"{f1 * 100:.2f}%"
+                if f1 >= 0.90:
+                    color = "bold green"
+                elif f1 >= 0.70:
+                    color = "yellow"
+                else:
+                    color = "red"
+                pet.add_row(
+                    etype,
+                    str(tp), str(fp), str(fn),
+                    f"[{color}]{pct_p}[/{color}]",
+                    f"[{color}]{pct_r}[/{color}]",
+                    f"[{color}]{pct_f1}[/{color}]",
+                )
 
         console.print(pet)
         console.print()

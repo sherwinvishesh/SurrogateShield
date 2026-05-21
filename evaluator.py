@@ -16,10 +16,10 @@ KEY_TYPE_MAP = {
     "person":         "PERSON",
     "PERSON":         "PERSON",
     "email":          "email",
-    "phone":          "phone_us",
-    "phone_us":       "phone_us",
-    "phone_uk":       "phone_uk",
-    "phone_intl":     "phone_intl",
+    "phone":          "phone",
+    "phone_us":       "phone",
+    "phone_uk":       "phone",
+    "phone_intl":     "phone",
     "ssn":            "ssn",
     "address":        "address",
     "dob":            "dob",
@@ -36,13 +36,21 @@ KEY_TYPE_MAP = {
     "api_key":        "api_key",
     "ip_address":     "ip_address",
     "ip":             "ip_address",
-    "zip":            "zip_us",
-    "zip_us":         "zip_us",
-    "postcode":       "postcode_uk",
-    "postcode_uk":    "postcode_uk",
+    "zip":            "postal_code",
+    "zip_us":         "postal_code",
+    "postcode":       "postal_code",
+    "postcode_uk":    "postal_code",
     "gender":         "gender_indicator",
     "fac":            "FAC",
     "FAC":            "FAC",
+}
+
+NORMALIZE_TYPE = {
+    "phone_us":    "phone",
+    "phone_uk":    "phone",
+    "phone_intl":  "phone",
+    "zip_us":      "postal_code",
+    "postcode_uk": "postal_code",
 }
 
 EXPERIMENT_DIR = Path(__file__).parent / "experiment"
@@ -280,7 +288,8 @@ def run_evaluation(
                 for detected_val, detail in pii_detail.items():
                     if detected_val.lower() not in key_all_lower:
                         raw_type = detail.get("type", "other") if isinstance(detail, dict) else "other"
-                        type_stats[raw_type]["fp"] += 1
+                        normalized_type = NORMALIZE_TYPE.get(raw_type, raw_type)
+                        type_stats[normalized_type]["fp"] += 1
 
         except Exception:
             status = "error"
