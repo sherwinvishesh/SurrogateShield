@@ -206,7 +206,9 @@ def _print_menu(has_convs: bool) -> None:
 
 def _run_pii_finder() -> None:
     from settings_manager import load_settings as _ls
-    _detailed = _ls().get("detailed_view", False)
+    _settings  = _ls()
+    _detailed  = _settings.get("detailed_view", False)
+    _show_pres = _settings.get("presidio_comparison", True)
     logging.getLogger().setLevel(logging.INFO if _detailed else logging.ERROR)
     """
     Interactive PII detection sandbox — no API calls, no credits spent.
@@ -221,16 +223,103 @@ def _run_pii_finder() -> None:
 
     mimic = MimicGen()
 
+    # ── Initialize Presidio once upfront ─────────────────────────────
+    # Always import the names so _show_presidio_panel's closure is valid
+    # regardless of whether _show_pres is True or False.
+    # These imports are instant — no presidio_analyzer load happens here.
+    from presidio.engine import is_available, unavailability_reason
+    from presidio.detect import detect as presidio_detect
+    from presidio.redact import redact as presidio_redact
+
+    if _show_pres:
+        console.print("[dim]Initializing Presidio comparison engine...[/dim]", end="\r")
+        _presidio_ready = is_available()   # triggers the lazy load (3-5s first time)
+        if _presidio_ready:
+            console.print("[dim green]✓  Presidio ready[/dim green]                              ")
+        else:
+            console.print(
+                f"[dim yellow]⚠  Presidio unavailable: {unavailability_reason()}[/dim yellow]"
+                "                    "
+            )
+        console.print()
+    else:
+        _presidio_ready = False
+
     console.print(Panel(
         "[bold blue]PII Finder[/bold blue]  [dim]· No API calls · No credits spent[/dim]\n\n"
         "[dim]Type any message to see what SurrogateShield would detect.\n"
         "Service queries (restaurants near X, directions to Y) trigger minimal\n"
         "address fuzzing instead of full replacement — just like the real pipeline.\n\n"
         "Type [bold white]reset[/bold white] to clear surrogate memory.\n"
-        "Type [bold white]exit[/bold white] to return to the dashboard.[/dim]",
+        "Type [bold white]exit[/bold white] to return to the dashboard.[/dim]"
+        + ("\n[dim]Presidio comparison shown below each result.[/dim]" if _presidio_ready else ""),
         border_style="blue", padding=(1, 2),
     ))
     console.print()
+
+    def _show_presidio_panel(original_text: str) -> None:
+        """Show Presidio detection table and redacted text."""
+        if not _show_pres:
+            return
+        if not _presidio_ready:
+            console.print(Panel(
+                f"[dim]Presidio unavailable: {unavailability_reason()}[/dim]",
+                title="[dim]Presidio Comparison[/dim]",
+                border_style="dim",
+                padding=(0, 2),
+            ))
+            console.print()
+            return
+
+        entities = presidio_detect(original_text)
+
+        if entities is None:
+            console.print(Panel(
+                "[dim]Presidio detection failed.[/dim]",
+                title="[dim]Presidio Comparison[/dim]",
+                border_style="dim",
+                padding=(0, 2),
+            ))
+            console.print()
+            return
+
+        if not entities:
+            console.print(Panel(
+                "[dim green]Presidio detected no PII.[/dim green]\n"
+                f"[dim]Would send to LLM unchanged:[/dim]\n[blue]{original_text}[/blue]",
+                title="[bold]Presidio Comparison[/bold]",
+                border_style="dim blue",
+                padding=(0, 2),
+            ))
+            console.print()
+            return
+
+        # Build detection table
+        tbl = Table(
+            title="[bold]Presidio — Detected PII[/bold]",
+            box=box.ROUNDED,
+            border_style="dim blue",
+            show_lines=True,
+            padding=(0, 1),
+        )
+        tbl.add_column("Detected Value", style="red bold",  no_wrap=True)
+        tbl.add_column("Type",           style="yellow",    width=22)
+        tbl.add_column("Score",          style="dim white", width=6, justify="right")
+
+        for ent in entities:
+            tbl.add_row(ent.text, ent.entity_type, f"{ent.score:.2f}")
+
+        console.print(tbl)
+
+        # Redacted text panel
+        redacted = presidio_redact(original_text, entities)
+        console.print(Panel(
+            f"[dim]Would send to LLM (Presidio — placeholder redaction):[/dim]\n"
+            f"[blue]{redacted}[/blue]",
+            border_style="dim blue",
+            padding=(0, 2),
+        ))
+        console.print()
 
     while True:
         try:
@@ -276,6 +365,7 @@ def _run_pii_finder() -> None:
                     border_style="blue", padding=(1, 2),
                 ))
             console.print()
+            _show_presidio_panel(user_input)
             continue
 
         # ── Standard PII detection path ───────────────────────────────────────
@@ -289,6 +379,7 @@ def _run_pii_finder() -> None:
                 border_style="green", padding=(0, 2),
             ))
             console.print()
+            _show_presidio_panel(user_input)
             continue
 
         surrogate_map = mimic.generate_all(confirmed) if confirmed else {}
@@ -334,6 +425,7 @@ def _run_pii_finder() -> None:
             border_style="dim blue", padding=(0, 2),
         ))
         console.print()
+        _show_presidio_panel(user_input)
 
 
 # ─── JSON Test ────────────────────────────────────────────────────────────────
@@ -1158,6 +1250,8 @@ def _run_settings() -> None:
         cur_label  = _provider_label.get(settings["llm_provider"], settings["llm_provider"].title())
         dv_on      = settings.get("detailed_view", False)
         dv_label   = "[green]On[/green]" if dv_on else "[dim]Off[/dim]"
+        pc_on      = settings.get("presidio_comparison", True)
+        pc_label   = "[green]On[/green]" if pc_on else "[dim]Off[/dim]"
 
         console.print(Panel(
             "[bold blue]Settings[/bold blue]",
@@ -1172,6 +1266,11 @@ def _run_settings() -> None:
         console.print(
             f"  [bold blue]D[/bold blue]    [white]Detailed View[/white]"
             f"    {dv_label}  [dim]— show pipeline logs, PII table & transparency panel[/dim]"
+        )
+        console.print()
+        console.print(
+            f"  [bold blue]C[/bold blue]    [white]Presidio Comparison[/white]"
+            f"    {pc_label}  [dim]— show Presidio side-by-side panel in PII Finder[/dim]"
         )
         console.print()
         console.print(Rule(style="dim blue"))
@@ -1191,6 +1290,12 @@ def _run_settings() -> None:
             save_settings(settings)
             new_label = "[green]On[/green]" if settings["detailed_view"] else "[dim]Off[/dim]"
             console.print(f"\n  [green]✓[/green]  Detailed View set to {new_label}.")
+            time.sleep(0.6)
+        elif choice == "C":
+            settings["presidio_comparison"] = not pc_on
+            save_settings(settings)
+            new_label = "[green]On[/green]" if settings["presidio_comparison"] else "[dim]Off[/dim]"
+            console.print(f"\n  [green]✓[/green]  Presidio Comparison set to {new_label}.")
             time.sleep(0.6)
 
 

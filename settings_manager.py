@@ -14,8 +14,9 @@ _SETTINGS_DIR = Path.home() / ".surrogateshield"
 _SETTINGS_FILE = _SETTINGS_DIR / "settings.json"
 
 DEFAULT_SETTINGS: dict = {
-    "llm_provider": "claude",
-    "detailed_view": True,
+    "llm_provider":        "claude",
+    "detailed_view":       True,
+    "presidio_comparison": False,
 }
 
 

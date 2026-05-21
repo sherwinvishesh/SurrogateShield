@@ -53,6 +53,7 @@ Display to user
 - **Quasi-identifier risk detection** — warns when combinations like ZIP+DOB+gender risk re-identification (Sweeney k-anonymity)
 - **Privacy-aware RAG** — documents are anonymised before indexing; surrogates are used in all vector store operations
 - **PII Finder mode** — test detection on any text with zero API calls
+- **Presidio comparison** — side-by-side Microsoft Presidio results in PII Finder show the difference between placeholder `[ENTITY_TYPE]` redaction and SurrogateShield's surrogate approach
 - **Batch evaluation** — precision, recall, F1, and per-entity-type breakdown against ground-truth answer keys
 - **API Transparency panel** — see exactly what was sent, what was received, and the final restored output
 
@@ -216,20 +217,30 @@ Switch providers from the **Settings** menu inside the dashboard (press `S`).
 
 ## Quick Start
 
+> **You must activate a virtual environment before installing or running.**
+> Installing into the system or base conda Python is the most common cause of
+> "package not found" errors at runtime.
+
 ```bash
 # Clone
 git clone <repo-url>
 cd SurrogateShield
 
-# Create virtual environment
+# Create and activate a virtual environment  ← required
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Download spaCy model
+# Download the spaCy model
+# Required by EntityTrace (stage 2 NER detection).
+# Also required by the Presidio comparison panel if you enable it.
 python -m spacy download en_core_web_lg
+
+# ContextGuard (stage 3 NER) downloads its model automatically from
+# HuggingFace Hub on first use — no manual command needed.
+# Model: dslim/distilbert-NER (~250 MB, cached after the first run).
 
 # Set your API key
 echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
@@ -239,6 +250,28 @@ echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
 ```
 
 The first run downloads the distilbert-NER model (~250 MB) from HuggingFace Hub and caches it locally. Subsequent runs are instant.
+
+> **Troubleshooting — Presidio shows "not installed":** this almost always means
+> the packages were installed into a different Python than the one running the app.
+> Fix: activate your venv first, then re-run `pip install -r requirements.txt`
+> and `python -m spacy download en_core_web_lg` from inside the venv.
+
+### Enabling the Presidio comparison panel
+
+The Presidio comparison panel is **off by default**. It adds a side-by-side
+Microsoft Presidio result below every PII Finder detection, which is useful for
+research comparisons but adds latency and screen noise during normal use.
+
+To enable it:
+
+1. Make sure the packages and model are installed **inside your venv**:
+   ```bash
+   pip install presidio-analyzer presidio-anonymizer
+   python -m spacy download en_core_web_lg   # also used by EntityTrace
+   ```
+2. Open the app and press **S → C** (Settings → Presidio Comparison) to toggle it on.
+
+To disable it again, press **S → C** from the dashboard.
 
 
 
@@ -252,21 +285,30 @@ The first run downloads the distilbert-NER model (~250 MB) from HuggingFace Hub 
 ### Dependencies
 
 ```
-anthropic>=0.25.0       # Claude API client
-python-dotenv>=1.0.0    # .env file loading
-spacy>=3.7.0            # EntityTrace NER
-faker>=24.0.0           # Surrogate generation
-cryptography>=42.0.0    # AES-256-GCM, HKDF
-rapidfuzz>=3.6.0        # Fuzzy reconstruction matching
-typer>=0.12.0           # CLI framework
-rich>=13.7.0            # Terminal UI
-chromadb>=0.4.0         # RAG vector store
+anthropic>=0.25.0           # Claude API client
+python-dotenv>=1.0.0        # .env file loading
+spacy>=3.7.0                # EntityTrace NER + Presidio NLP backend
+faker>=24.0.0               # Surrogate generation
+cryptography>=42.0.0        # AES-256-GCM, HKDF
+rapidfuzz>=3.6.0            # Fuzzy reconstruction matching
+typer>=0.12.0               # CLI framework
+rich>=13.7.0                # Terminal UI
+chromadb>=0.4.0             # RAG vector store
 sentence-transformers>=2.7.0  # RAG embeddings
-transformers>=4.40.0    # ContextGuard (distilbert-NER)
-torch>=2.0.0            # ContextGuard inference
-requests>=2.31.0        # Address verification (Nominatim)
-ollama>=0.1.8           # Local LLM (optional)
+transformers>=4.40.0        # ContextGuard (distilbert-NER)
+torch>=2.0.0                # ContextGuard inference
+requests>=2.31.0            # Address verification (Nominatim)
+ollama>=0.1.8               # Local LLM (optional)
+presidio-analyzer>=2.2.0    # Presidio comparison panel in PII Finder
+presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
 ```
+
+> **spaCy model:** `en_core_web_lg` is required by EntityTrace (always) and by
+> the optional Presidio comparison panel. One download covers both:
+> `python -m spacy download en_core_web_lg`.
+>
+> **ContextGuard model:** `dslim/distilbert-NER` (~250 MB) is downloaded
+> automatically from HuggingFace Hub on the first run — no manual command needed.
 
 ### Environment Variables
 
@@ -282,22 +324,32 @@ OPENAI_API_KEY=sk-...              # Required for ChatGPT
 
 ## Configuration
 
-All constants live in [config.py](config.py). Key settings:
+### Runtime settings (Dashboard → S → Settings)
+
+These are changed interactively from inside the app and persist across sessions in `~/.surrogateshield/settings.json`.
+
+| Key | Default | What it controls |
+||||
+| `llm_provider` | `claude` | Active LLM backend — Claude / Gemini / ChatGPT / Local |
+| `detailed_view` | `true` | Show pipeline stage logs, per-entity PII table, and the API transparency panel in each chat turn |
+| `presidio_comparison` | `false` | Show the Presidio side-by-side panel below each PII Finder result. **Off by default** — requires `presidio-analyzer`, `presidio-anonymizer`, and `python -m spacy download en_core_web_lg` to be installed first (see *Enabling the Presidio comparison panel* above) |
+
+### Advanced constants (`config.py`)
+
+Hard-coded thresholds and flags. Edit the file directly to change them; no restart required for PII Finder (restart required for chat sessions).
 
 | Setting | Default | Description |
 ||||
-| `ENTITY_TRACE_HIGH_THRESHOLD` | `0.85` | spaCy score above which an entity is confirmed |
-| `ENTITY_TRACE_LOW_THRESHOLD` | `0.60` | spaCy score above which an entity is sent to ContextGuard |
-| `CONTEXT_GUARD_CONFIDENCE_THRESHOLD` | `0.70` | distilbert score to confirm a borderline entity |
-| `FUZZY_MATCH_THRESHOLD` | `85` | rapidfuzz `partial_ratio` threshold for reconstruction |
-| `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Enable the service-query path |
-| `SERVICE_QUERY_VERIFY_ADDRESSES` | `True` | Verify fuzzed addresses via OpenStreetMap |
-| `SHOW_API_TRANSPARENCY` | `True` | Show sent/received/restored panel after each turn |
+| `ENTITY_TRACE_HIGH_THRESHOLD` | `0.85` | spaCy score above which an entity is immediately confirmed |
+| `ENTITY_TRACE_LOW_THRESHOLD` | `0.60` | spaCy score above which an entity is forwarded to ContextGuard |
+| `CONTEXT_GUARD_CONFIDENCE_THRESHOLD` | `0.70` | distilbert score required to confirm a borderline entity |
+| `FUZZY_MATCH_THRESHOLD` | `85` | rapidfuzz `partial_ratio` threshold for ResolvePass reconstruction |
+| `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Enable the lightweight address-fuzzing path for location queries |
+| `SERVICE_QUERY_VERIFY_ADDRESSES` | `True` | Verify fuzzed addresses via OpenStreetMap Nominatim (disable for offline use) |
+| `SHOW_API_TRANSPARENCY` | `True` | Show the sent / received / restored transparency panel after each chat turn |
 | `CLAUDE_MODEL` | `claude-sonnet-4-6` | Claude model identifier |
-| `SPACY_MODEL` | `en_core_web_lg` | spaCy model to load |
-| `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | sentence-transformers model for RAG |
-
-User preferences (provider choice, detailed view) are stored in `~/.surrogateshield/settings.json` and persist across sessions.
+| `SPACY_MODEL` | `en_core_web_lg` | spaCy model used by EntityTrace and Presidio |
+| `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | sentence-transformers model for RAG embeddings |
 
 
 
