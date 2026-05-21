@@ -637,14 +637,9 @@ def _run_evaluation() -> None:
     # ── Screen 4: Results ─────────────────────────────────────────────────────
     console.clear()
     _print_compact_banner()
+    from rich.columns import Columns as _Columns
 
-    table = Table(
-        title=f"[bold blue]Evaluation Results[/bold blue]  [dim]· {questions_file}[/dim]",
-        box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1),
-    )
-    table.add_column("Metric", style="white",    no_wrap=True)
-    table.add_column("Value",  style="bold blue", justify="right")
-
+    # ── Formatting helpers ────────────────────────────────────────────────────
     def _fmt(key: str, val) -> str:
         if isinstance(val, int):
             return str(val)
@@ -664,60 +659,170 @@ def _run_evaluation() -> None:
             return f"{val:.2f}"
         return str(val)
 
-    any_rows = False
+    def _color_surr(key: str, val: float) -> str:
+        """3-tier color for Surrogate Detection quality metrics."""
+        pct = f"{val * 100:.2f}%"
+        if key == "error_surrogates":
+            if val == 0.0:   return f"[bold green]{pct}[/bold green]"
+            if val <= 0.10:  return f"[yellow]{pct}[/yellow]"
+            return f"[red]{pct}[/red]"
+        if val >= 0.90:      return f"[bold green]{pct}[/bold green]"
+        if val >= 0.70:      return f"[yellow]{pct}[/yellow]"
+        return f"[red]{pct}[/red]"
 
-    def _add_group(rows: list) -> None:
-        nonlocal any_rows
-        visible = [(k, lbl) for k, lbl in rows if k in metrics]
-        if not visible:
-            return
-        if any_rows:
-            table.add_section()
-        for k, lbl in visible:
-            table.add_row(lbl, _fmt(k, metrics[k]))
-        any_rows = True
+    def _color_pipe(key: str, val: float) -> str:
+        """Binary color for ResolvePass / Sanitization metrics."""
+        pct = f"{val * 100:.2f}%"
+        if key in {"precision_resolve", "accuracy_sanitization"}:
+            return f"[bold green]{pct}[/bold green]" if val >= 0.90 else f"[red]{pct}[/red]"
+        return f"[bold green]{pct}[/bold green]" if val <= 0.10 else f"[red]{pct}[/red]"
 
-    _add_group([
-        ("no_of_questions",     "Questions"),
-        ("no_of_answers",       "Non-empty answers"),
-        ("no_of_answers_empty", "Empty answers / errors"),
-        ("answer_rate",         "Answer rate"),
-    ])
-    _add_group([
-        ("no_surrogates_found",               "Surrogates found (total)"),
-        ("no_surrogates_in_key",              "Surrogates in key (total)"),
-        ("avg_surrogates_per_question_found",  "Avg surrogates found / question"),
-        ("avg_surrogates_per_question_in_key", "Avg surrogates in key / question"),
-    ])
-    _add_group([
-        ("precision_surrogates", "Surrogate precision"),
-        ("recall_surrogates",    "Surrogate recall"),
-        ("accuracy_surrogates",  "Surrogate accuracy (Jaccard)"),
-        ("error_surrogates",     "Surrogate error (miss rate)"),
-    ])
-    _add_group([
-        ("avg_pattern_scan_ms",  "Avg PatternScan time"),
-        ("avg_entity_trace_ms",  "Avg EntityTrace time"),
-        ("avg_context_guard_ms", "Avg ContextGuard time"),
-        ("avg_surrogate_gen_ms", "Avg SurrogateGen time"),
-    ])
-    _add_group([
-        ("total_resolve_leaks",            "Questions with surrogate leaks"),
-        ("total_individual_resolve_leaks", "Individual surrogates leaked"),
-        ("resolve_leak_rate",              "Surrogate leak rate"),
-        ("precision_resolve",              "ResolvePass accuracy"),
-        ("error_resolve",                  "ResolvePass error rate"),
-    ])
-    _add_group([
-        ("total_pii_leaks_to_llm",     "Questions with PII sent to LLM"),
-        ("total_individual_pii_leaks", "Individual PII values leaked to LLM"),
-        ("pii_leak_rate",              "PII leak rate to LLM"),
-        ("accuracy_sanitization",      "Sanitization accuracy"),
-        ("error_sanitization",         "Sanitization error rate"),
-    ])
-
-    console.print(table)
+    console.print(Rule(
+        f"[bold blue]Evaluation Results[/bold blue]  [dim]· {questions_file}[/dim]",
+        style="blue",
+    ))
     console.print()
+
+    # ── Section 1: Overview (full-width 4-column table) ───────────────────────
+    ov = Table(
+        title="[bold blue]Overview[/bold blue]",
+        box=box.ROUNDED, border_style="blue", padding=(0, 2), expand=True,
+    )
+    ov.add_column("Questions",   style="white",     justify="center")
+    ov.add_column("Answered",    style="white",     justify="center")
+    ov.add_column("Empty",       style="white",     justify="center")
+    ov.add_column("Answer Rate", style="bold blue", justify="center")
+    ov.add_row(
+        str(metrics.get("no_of_questions", total)),
+        str(metrics.get("no_of_answers",       "—")),
+        str(metrics.get("no_of_answers_empty", "—")),
+        _fmt("answer_rate", metrics["answer_rate"]) if "answer_rate" in metrics else "—",
+    )
+    console.print(ov)
+    console.print()
+
+    # ── Section 2: Surrogate Detection | Stage Timings ────────────────────────
+    sd = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
+    sd.add_column("Metric",  style="white", no_wrap=True)
+    sd.add_column("Value",   justify="right")
+    sd_rows = 0
+    for k, lbl in [
+        ("no_surrogates_found",               "Found (total)"),
+        ("no_surrogates_in_key",              "In key (total)"),
+        ("avg_surrogates_per_question_found",  "Avg found / question"),
+        ("avg_surrogates_per_question_in_key", "Avg in key / question"),
+    ]:
+        if k in metrics:
+            sd.add_row(lbl, _fmt(k, metrics[k]))
+            sd_rows += 1
+    quality_rows = [(k, lbl) for k, lbl in [
+        ("precision_surrogates", "Precision"),
+        ("recall_surrogates",    "Recall"),
+        ("accuracy_surrogates",  "Accuracy (Jaccard)"),
+        ("error_surrogates",     "Error (miss rate)"),
+    ] if k in metrics]
+    if quality_rows:
+        if sd_rows:
+            sd.add_section()
+        for k, lbl in quality_rows:
+            sd.add_row(lbl, _color_surr(k, metrics[k]))
+        sd_rows += len(quality_rows)
+
+    st = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
+    st.add_column("Stage",    style="white", no_wrap=True)
+    st.add_column("Avg Time", justify="right")
+    st_rows = 0
+    for k, lbl in [
+        ("avg_pattern_scan_ms",  "PatternScan"),
+        ("avg_entity_trace_ms",  "EntityTrace"),
+        ("avg_context_guard_ms", "ContextGuard"),
+        ("avg_surrogate_gen_ms", "SurrogateGen"),
+    ]:
+        if k in metrics:
+            val = metrics[k]
+            cell = f"[yellow]{val:.2f} ms[/yellow]" if k == "avg_entity_trace_ms" and val > 500 else f"{val:.2f} ms"
+            st.add_row(lbl, cell)
+            st_rows += 1
+
+    left2  = Panel(sd, title="[bold blue]Surrogate Detection[/bold blue]", border_style="blue", padding=(1, 2)) if sd_rows else None
+    right2 = Panel(st, title="[bold blue]Stage Timings[/bold blue]",       border_style="blue", padding=(1, 2)) if st_rows else None
+    if left2 and right2:
+        console.print(_Columns([left2, right2], equal=True, expand=True))
+    elif left2:
+        console.print(left2)
+    elif right2:
+        console.print(right2)
+    if left2 or right2:
+        console.print()
+
+    # ── Section 3: ResolvePass Quality | Sanitization Quality ─────────────────
+    rp = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
+    rp.add_column("Metric", style="white", no_wrap=True)
+    rp.add_column("Value",  justify="right")
+    rp_rows = 0
+    for k, lbl in [
+        ("total_resolve_leaks",            "Questions with leaks"),
+        ("total_individual_resolve_leaks", "Individual leaked"),
+    ]:
+        if k in metrics:
+            rp.add_row(lbl, _fmt(k, metrics[k]))
+            rp_rows += 1
+    for k, lbl in [
+        ("resolve_leak_rate", "Leak rate"),
+        ("precision_resolve", "Accuracy"),
+        ("error_resolve",     "Error rate"),
+    ]:
+        if k in metrics:
+            rp.add_row(lbl, _color_pipe(k, metrics[k]))
+            rp_rows += 1
+
+    sq = Table(box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1), expand=True)
+    sq.add_column("Metric", style="white", no_wrap=True)
+    sq.add_column("Value",  justify="right")
+    sq_rows = 0
+    for k, lbl in [
+        ("total_pii_leaks_to_llm",     "Questions with PII leaked"),
+        ("total_individual_pii_leaks", "Individual PII leaked"),
+    ]:
+        if k in metrics:
+            sq.add_row(lbl, _fmt(k, metrics[k]))
+            sq_rows += 1
+    for k, lbl in [
+        ("pii_leak_rate",         "PII leak rate"),
+        ("accuracy_sanitization", "Accuracy"),
+        ("error_sanitization",    "Error rate"),
+    ]:
+        if k in metrics:
+            sq.add_row(lbl, _color_pipe(k, metrics[k]))
+            sq_rows += 1
+
+    left3  = Panel(rp, title="[bold blue]ResolvePass Quality[/bold blue]",  border_style="blue", padding=(1, 2)) if rp_rows else None
+    right3 = Panel(sq, title="[bold blue]Sanitization Quality[/bold blue]", border_style="blue", padding=(1, 2)) if sq_rows else None
+    if left3 and right3:
+        console.print(_Columns([left3, right3], equal=True, expand=True))
+    elif left3:
+        console.print(left3)
+    elif right3:
+        console.print(right3)
+    if left3 or right3:
+        console.print()
+
+    # ── Section 4: Summary Banner ─────────────────────────────────────────────
+    san_acc = metrics.get("accuracy_sanitization", 1.0)
+    res_acc = metrics.get("precision_resolve",      1.0)
+    if san_acc == 1.0 and res_acc == 1.0:
+        summary_style = "green"
+        summary_msg   = "✓  Pipeline fully clean — no PII leaked to LLM, all surrogates restored"
+    elif san_acc > 0.80 and res_acc > 0.80:
+        summary_style = "yellow"
+        summary_msg   = "⚠  Minor issues detected — review leak details above"
+    else:
+        summary_style = "red"
+        summary_msg   = "✗  Significant leaks detected — pipeline needs attention"
+    console.print(Panel(summary_msg, border_style=summary_style, padding=(0, 2)))
+    console.print()
+
+    # ── Actions ───────────────────────────────────────────────────────────────
     console.print(f"  [bold blue]S[/bold blue]    [dim]Save results as JSON[/dim]")
     console.print(f"  [bold blue]B[/bold blue]    [dim]Back to dashboard[/dim]")
     console.print()
