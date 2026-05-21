@@ -18,7 +18,7 @@ EVAL_FIELDS = [
     ("no_of_answers_empty",  "No. of empty answers (errors/failures)"),
     ("answer_rate",          "Answer rate  (non-empty / total)"),
     ("surrogate_counts",     "Surrogate counts  (found vs key totals + averages)"),
-    ("surrogate_quality",    "Surrogate quality  (precision / recall / accuracy / error)"),
+    ("surrogate_quality",    "Surrogate quality  (precision / recall / F1 / accuracy / error)"),
     ("timing",               "Stage timings  (avg ms per stage)"),
     ("resolve_quality",      "ResolvePass quality  (surrogate leak rate + accuracy)"),
     ("sanitization_quality", "Sanitization quality  (PII leak to LLM rate + accuracy)"),
@@ -92,6 +92,7 @@ def run_evaluation(
 
     precisions = []
     recalls    = []
+    f1s        = []
     accuracies = []
     q_errors   = []
 
@@ -136,8 +137,11 @@ def run_evaluation(
                 tp = len(found_set & key_set)
                 fp = len(found_set - key_set)
                 fn = len(key_set - found_set)
-                precisions.append(tp / (tp + fp) if (tp + fp) > 0 else 1.0)
-                recalls.append(   tp / (tp + fn) if (tp + fn) > 0 else 1.0)
+                p  = tp / (tp + fp) if (tp + fp) > 0 else 1.0
+                r  = tp / (tp + fn) if (tp + fn) > 0 else 1.0
+                precisions.append(p)
+                recalls.append(r)
+                f1s.append((2 * p * r / (p + r)) if (p + r) > 0 else 0.0)
                 accuracies.append(tp / (tp + fp + fn) if (tp + fp + fn) > 0 else 1.0)
                 q_errors.append(  fn / (tp + fn) if (tp + fn) > 0 else 0.0)
 
@@ -233,6 +237,7 @@ def run_evaluation(
         n = len(precisions) or 1
         result["precision_surrogates"] = _r(sum(precisions) / n)
         result["recall_surrogates"]    = _r(sum(recalls)    / n)
+        result["f1_surrogates"]        = _r(sum(f1s)        / n)
         result["accuracy_surrogates"]  = _r(sum(accuracies) / n)
         result["error_surrogates"]     = _r(sum(q_errors)   / n)
 

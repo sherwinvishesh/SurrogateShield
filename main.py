@@ -646,7 +646,7 @@ def _run_evaluation() -> None:
         if isinstance(val, float):
             if key in {
                 "answer_rate", "precision_surrogates", "recall_surrogates",
-                "accuracy_surrogates", "error_surrogates",
+                "f1_surrogates", "accuracy_surrogates", "error_surrogates",
                 "resolve_leak_rate", "precision_resolve", "error_resolve",
                 "pii_leak_rate", "accuracy_sanitization", "error_sanitization",
             }:
@@ -718,6 +718,7 @@ def _run_evaluation() -> None:
     quality_rows = [(k, lbl) for k, lbl in [
         ("precision_surrogates", "Precision"),
         ("recall_surrogates",    "Recall"),
+        ("f1_surrogates",        "F1 Score"),
         ("accuracy_surrogates",  "Accuracy (Jaccard)"),
         ("error_surrogates",     "Error (miss rate)"),
     ] if k in metrics]
