@@ -1035,6 +1035,164 @@ def _run_evaluation() -> None:
         console.print(pet)
         console.print()
 
+    # ── Section 6: Presidio Comparison ───────────────────────────────────────
+
+    def _f1_color(val):
+        if val is None:
+            return "[dim]—[/dim]"
+        pct = val * 100
+        color = "bold green" if pct >= 90 else ("yellow" if pct >= 70 else "red")
+        return f"[{color}]{pct:.2f}%[/{color}]"
+
+    def _pct(val):
+        if val is None:
+            return "[dim]—[/dim]"
+        return f"{val * 100:.2f}%"
+
+    def _render_presidio_tables(cmp_data, console, box, Table, Panel,
+                                _pct, _f1_color):
+        """Render the comparable types table, SS-only table, and
+        Presidio-only note."""
+        COMPARABLE_ORDER = [
+            "PERSON", "email", "phone", "ssn",
+            "credit_card", "ip_address", "dob", "GPE",
+        ]
+
+        cmp_table = Table(
+            title="[bold blue]Comparable Entity Types[/bold blue]",
+            box=box.ROUNDED, border_style="blue",
+            show_lines=True, padding=(0, 1),
+        )
+        cmp_table.add_column("Entity Type", style="white",      no_wrap=True, width=16)
+        cmp_table.add_column("SS P",        style="dim white",  width=8,  justify="right")
+        cmp_table.add_column("SS R",        style="dim white",  width=8,  justify="right")
+        cmp_table.add_column("SS F1",       style="bold",       width=9,  justify="right")
+        cmp_table.add_column("Presidio P",  style="dim white",  width=11, justify="right")
+        cmp_table.add_column("Presidio R",  style="dim white",  width=11, justify="right")
+        cmp_table.add_column("Presidio F1", style="bold",       width=12, justify="right")
+
+        per_type = cmp_data.get("per_type", {})
+
+        for etype in COMPARABLE_ORDER:
+            data = per_type.get(etype, {})
+            ss  = data.get("ss")
+            prs = data.get("presidio")
+
+            label = etype
+            if etype in ("dob", "GPE"):
+                label = etype + " *"
+
+            cmp_table.add_row(
+                label,
+                _pct(ss["precision"]  if ss  else None),
+                _pct(ss["recall"]     if ss  else None),
+                _f1_color(ss["f1"]    if ss  else None),
+                _pct(prs["precision"] if prs else None),
+                _pct(prs["recall"]    if prs else None),
+                _f1_color(prs["f1"]   if prs else None),
+            )
+
+        cmp_table.add_section()
+        ss_ov  = cmp_data.get("ss_overall",      {})
+        prs_ov = cmp_data.get("presidio_overall", {})
+        cmp_table.add_row(
+            "[bold]Overall[/bold]",
+            _pct(ss_ov.get("precision")),
+            _pct(ss_ov.get("recall")),
+            _f1_color(ss_ov.get("f1")),
+            _pct(prs_ov.get("precision")),
+            _pct(prs_ov.get("recall")),
+            _f1_color(prs_ov.get("f1")),
+        )
+
+        console.print(cmp_table)
+        console.print(
+            "  [dim]* dob vs DATE_TIME and GPE vs LOCATION "
+            "are approximate comparisons[/dim]"
+        )
+        console.print()
+
+        ss_only = cmp_data.get("ss_only_types", {})
+        if ss_only:
+            ss_only_table = Table(
+                title="[bold blue]SS-Only Detection "
+                      "(Presidio Cannot Detect These)[/bold blue]",
+                box=box.ROUNDED, border_style="blue",
+                show_lines=True, padding=(0, 1),
+            )
+            ss_only_table.add_column("Entity Type", style="white",     no_wrap=True)
+            ss_only_table.add_column("SS P",         style="dim white", width=8,  justify="right")
+            ss_only_table.add_column("SS R",         style="dim white", width=8,  justify="right")
+            ss_only_table.add_column("SS F1",        style="bold",      width=9,  justify="right")
+            ss_only_table.add_column("Presidio",     style="dim",       width=12, justify="right")
+
+            for etype, stats in ss_only.items():
+                ss_only_table.add_row(
+                    etype,
+                    _pct(stats["precision"]),
+                    _pct(stats["recall"]),
+                    _f1_color(stats["f1"]),
+                    "[dim]Not supported[/dim]",
+                )
+
+            console.print(ss_only_table)
+            console.print()
+
+        p_only = cmp_data.get("presidio_only_counts", {})
+        if p_only:
+            types_str = ", ".join(
+                f"{t} ({n})" for t, n in
+                sorted(p_only.items(), key=lambda x: x[1], reverse=True)
+            )
+            console.print(Panel(
+                f"[dim]Presidio also detected these types that "
+                f"SurrogateShield does not cover:\n{types_str}[/dim]",
+                border_style="dim blue", padding=(0, 2),
+            ))
+            console.print()
+
+    cmp_data = metrics.get("presidio_comparison")
+    if cmp_data:
+
+        console.print()
+        console.print(Rule(
+            "[bold blue]SurrogateShield vs Presidio — Table 1[/bold blue]",
+            style="blue"
+        ))
+        console.print()
+
+        data_status = cmp_data.get("data_status", "no_data")
+        data_count  = cmp_data.get("data_count",  0)
+        total_count = cmp_data.get("total_count", 0)
+
+        # ── Branch 1: no Presidio data at all ────────────────────────
+        if data_status == "no_data":
+            console.print(Panel(
+                "[yellow]No Presidio data found in answers file.[/yellow]\n\n"
+                "[dim]To generate this comparison:\n"
+                "  1. Go to JSON Test  [bold blue]J[/bold blue]\n"
+                "  2. Enable [bold white]Presidio found PIIs[/bold white] field\n"
+                "  3. Re-run on your questions file\n"
+                "  4. Return here and run Evaluation again[/dim]",
+                border_style="yellow",
+                padding=(1, 2),
+            ))
+            console.print()
+
+        # ── Branch 2: partial Presidio data ──────────────────────────
+        elif data_status == "partial":
+            console.print(
+                f"  [yellow]⚠  Partial data — Presidio scores based on "
+                f"{data_count} of {total_count} questions. "
+                f"Results may not be representative.[/yellow]"
+            )
+            console.print()
+            _render_presidio_tables(cmp_data, console, box, Table, Panel, _pct, _f1_color)
+
+        # ── Branch 3: full data ───────────────────────────────────────
+        else:
+            _render_presidio_tables(cmp_data, console, box, Table, Panel, _pct, _f1_color)
+
     # ── Actions ───────────────────────────────────────────────────────────────
     console.print(f"  [bold blue]S[/bold blue]    [dim]Save results as JSON[/dim]")
     console.print(f"  [bold blue]B[/bold blue]    [dim]Back to dashboard[/dim]")

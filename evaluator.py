@@ -53,6 +53,27 @@ NORMALIZE_TYPE = {
     "postcode_uk": "postal_code",
 }
 
+# Maps Presidio's native entity type strings to SurrogateShield's
+# comparable consolidated types for fair side-by-side comparison.
+# Types not in this map are Presidio-only (no SS equivalent).
+PRESIDIO_TO_COMPARABLE = {
+    "PERSON":        "PERSON",
+    "EMAIL_ADDRESS": "email",
+    "PHONE_NUMBER":  "phone",
+    "US_SSN":        "ssn",
+    "CREDIT_CARD":   "credit_card",
+    "IP_ADDRESS":    "ip_address",
+    "DATE_TIME":     "dob",    # approximate: Presidio detects all
+                               # datetime; SS focuses on DOB only
+    "LOCATION":      "GPE",    # approximate: both NER-based location
+}
+
+# Types SS detects that Presidio cannot — shown separately in table
+SS_ONLY_TYPES = [
+    "api_key", "address", "postal_code", "gender_indicator",
+    "ORG", "FAC",
+]
+
 EXPERIMENT_DIR = Path(__file__).parent / "experiment"
 
 EVAL_FIELDS = [
@@ -63,6 +84,8 @@ EVAL_FIELDS = [
     ("surrogate_counts",     "Surrogate counts  (found vs key totals + averages)"),
     ("surrogate_quality",    "Surrogate quality  (precision / recall / F1 / accuracy / error)"),
     ("per_entity_type",      "Per-entity-type breakdown  (F1 / precision / recall per PII type)"),
+    ("presidio_comparison",
+     "Presidio comparison  (SS vs Presidio — side-by-side Table 1 for paper)"),
     ("timing",               "Stage timings  (avg ms per stage)"),
     ("resolve_quality",      "ResolvePass quality  (surrogate leak rate + accuracy)"),
     ("sanitization_quality", "Sanitization quality  (PII leak to LLM rate + accuracy)"),
@@ -149,7 +172,8 @@ def run_evaluation(
     need_timing  = fields.get("timing", False)
     need_resolve = fields.get("resolve_quality", False)
     need_sanit    = fields.get("sanitization_quality", False)
-    need_per_type = fields.get("per_entity_type", False)
+    need_per_type     = fields.get("per_entity_type", False)
+    need_presidio_cmp = fields.get("presidio_comparison", False)
 
     no_answers       = 0
     no_answers_empty = 0
@@ -175,6 +199,15 @@ def run_evaluation(
     leakage_errors     = []
 
     type_stats = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
+
+    # Per-type stats for Presidio (comparable types only)
+    presidio_type_stats = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
+    presidio_only_counts = defaultdict(int)  # types with no SS equivalent
+    presidio_questions_with_data = 0         # questions that had presidio_found_piis
+
+    # SS comparable-type stats (computed independently for comparison,
+    # regardless of whether per_entity_type toggle is on)
+    ss_cmp_type_stats = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
 
     for i in range(total):
         status = "ok"
@@ -291,6 +324,70 @@ def run_evaluation(
                         normalized_type = NORMALIZE_TYPE.get(raw_type, raw_type)
                         type_stats[normalized_type]["fp"] += 1
 
+            if need_presidio_cmp:
+                p_found = a_entry.get("presidio_found_piis")
+
+                # ── SS comparable-type stats (always computed for comparison) ──
+                if key_typed:
+                    found_lower   = {k.lower() for k in surrogate_map.keys()}
+                    key_all_lower = {v.lower() for v in key_pii_list}
+
+                    for internal_type, vals in key_typed.items():
+                        cmp_type = NORMALIZE_TYPE.get(internal_type, internal_type)
+                        for val in vals:
+                            if val.lower() in found_lower:
+                                ss_cmp_type_stats[cmp_type]["tp"] += 1
+                            else:
+                                ss_cmp_type_stats[cmp_type]["fn"] += 1
+
+                    pii_detail = a_entry.get("pii_detail") or {}
+                    for detected_val, detail in pii_detail.items():
+                        if detected_val.lower() not in key_all_lower:
+                            raw_type = detail.get("type", "other") if isinstance(detail, dict) else "other"
+                            cmp_type = NORMALIZE_TYPE.get(raw_type, raw_type)
+                            ss_cmp_type_stats[cmp_type]["fp"] += 1
+
+                # ── Presidio stats ─────────────────────────────────────────────
+                if p_found is None:
+                    pass  # Presidio was unavailable for this question — skip
+                else:
+                    presidio_questions_with_data += 1
+
+                    if key_typed:
+                        key_all_lower = {v.lower() for v in key_pii_list}
+                        presidio_detected_lower = {
+                            e["value"].lower()
+                            for e in p_found
+                            if isinstance(e, dict) and e.get("value")
+                        }
+
+                        # TPs and FNs — iterate over typed key
+                        for internal_type, vals in key_typed.items():
+                            cmp_type = NORMALIZE_TYPE.get(internal_type, internal_type)
+                            # Only count types that are in PRESIDIO_TO_COMPARABLE
+                            # (types SS has but Presidio cannot detect are SS-only)
+                            if cmp_type not in PRESIDIO_TO_COMPARABLE.values():
+                                continue
+                            for val in vals:
+                                if val.lower() in presidio_detected_lower:
+                                    presidio_type_stats[cmp_type]["tp"] += 1
+                                else:
+                                    presidio_type_stats[cmp_type]["fn"] += 1
+
+                        # FPs — Presidio detected but not in key
+                        for e in p_found:
+                            if not isinstance(e, dict):
+                                continue
+                            val   = e.get("value", "")
+                            etype = e.get("type", "")
+                            comparable = PRESIDIO_TO_COMPARABLE.get(etype)
+                            if comparable is None:
+                                # Presidio-only type (URL, CRYPTO, etc.)
+                                presidio_only_counts[etype] += 1
+                                continue
+                            if val.lower() not in key_all_lower:
+                                presidio_type_stats[comparable]["fp"] += 1
+
         except Exception:
             status = "error"
 
@@ -366,5 +463,66 @@ def run_evaluation(
 
     if need_per_type:
         result["per_entity_type"] = per_type_result
+
+    if need_presidio_cmp:
+        def _compute_metrics(stats_dict):
+            """Compute precision/recall/F1 from a type_stats defaultdict."""
+            result_types = {}
+            total_tp = total_fp = total_fn = 0
+            for etype, counts in stats_dict.items():
+                tp, fp, fn = counts["tp"], counts["fp"], counts["fn"]
+                p  = tp / (tp + fp) if (tp + fp) > 0 else 1.0
+                r  = tp / (tp + fn) if (tp + fn) > 0 else 1.0
+                f1 = (2 * p * r / (p + r)) if (p + r) > 0 else 0.0
+                result_types[etype] = {
+                    "precision": _r(p),
+                    "recall":    _r(r),
+                    "f1":        _r(f1),
+                    "tp": tp, "fp": fp, "fn": fn,
+                }
+                total_tp += tp
+                total_fp += fp
+                total_fn += fn
+            overall_p  = total_tp / (total_tp + total_fp) if (total_tp + total_fp) > 0 else 1.0
+            overall_r  = total_tp / (total_tp + total_fn) if (total_tp + total_fn) > 0 else 1.0
+            overall_f1 = (2 * overall_p * overall_r / (overall_p + overall_r)) if (overall_p + overall_r) > 0 else 0.0
+            overall = {
+                "precision": _r(overall_p),
+                "recall":    _r(overall_r),
+                "f1":        _r(overall_f1),
+            }
+            return result_types, overall
+
+        ss_per_type, ss_overall   = _compute_metrics(ss_cmp_type_stats)
+        prs_per_type, prs_overall = _compute_metrics(presidio_type_stats)
+
+        result["presidio_comparison"] = {
+            "presidio_questions_with_data": presidio_questions_with_data,
+            "data_status": (
+                "no_data"  if presidio_questions_with_data == 0
+                else "partial" if presidio_questions_with_data < total
+                else "full"
+            ),
+            "data_count":  presidio_questions_with_data,
+            "total_count": total,
+            "ss_overall":       ss_overall,
+            "presidio_overall": prs_overall,
+            "per_type": {
+                etype: {
+                    "ss":      ss_per_type.get(etype),
+                    "presidio": prs_per_type.get(etype),
+                }
+                for etype in sorted(
+                    set(ss_per_type.keys()) | set(prs_per_type.keys())
+                )
+            },
+            "ss_only_types": {
+                etype: ss_per_type[etype]
+                for etype in SS_ONLY_TYPES
+                if etype in ss_per_type
+            },
+            "presidio_only_counts": dict(presidio_only_counts),
+            "approximate_note": "DATE_TIME/dob and LOCATION/GPE are approximate comparisons",
+        }
 
     return result
