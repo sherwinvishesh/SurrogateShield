@@ -26,6 +26,7 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
     ("context_guard_pii", "ContextGuard PIIs       (distilbert stage)"),
     ("confirmed_pii",     "Confirmed PIIs          (final combined list)"),
     ("pii_detail",        "PII detail              (type, score, source per entity)"),
+    ("quasi_id_risks",    "Quasi-ID risks          (combination re-identification risks)"),
     ("surrogate_map",     "Surrogate map           (original → replacement)"),
     ("sanitized_input",   "Sanitized input         (text sent to LLM)"),
     ("llm_response",      "LLM response            (raw text received)"),
@@ -118,6 +119,19 @@ def _process_one(
             }
             for e in confirmed
         }
+
+    if fields.get("quasi_id_risks"):
+        qi_matches = getattr(confirmed, "_qi_matches", [])
+        answer["quasi_id_risks"] = [
+            {
+                "combination":        m.combination_name,
+                "matched_fields":     m.matched_fields,
+                "risk_level":         m.risk_level,
+                "all_fields_matched": m.all_fields_matched,
+                "reference":          m.reference if m.all_fields_matched else m.partial_reference,
+            }
+            for m in qi_matches
+        ]
 
     # ── Surrogate generation ──────────────────────────────────────────────────
     need_surrogates = any(

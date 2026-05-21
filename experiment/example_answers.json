@@ -24,19 +24,31 @@
         "source": "pattern"
       }
     },
+    "quasi_id_risks": [
+      {
+        "combination": "Name + SSN",
+        "matched_fields": [
+          "ssn",
+          "PERSON"
+        ],
+        "risk_level": "high",
+        "all_fields_matched": true,
+        "reference": "Name + SSN combination enables direct identity theft and financial fraud"
+      }
+    ],
     "surrogate_map": {
-      "Revanth": "William Patterson",
-      "544-87-2944": "558-88-8069"
+      "Revanth": "Victoria Mitchell",
+      "544-87-2944": "348-67-6360"
     },
-    "sanitized_input": "hi my name is William Patterson and my ssn is 558-88-8069 and give me the tax benefits of the state of wyoming, please",
-    "llm_response": "Hi William! Here are the key tax benefits of living in **Wyoming**:\n\n---\n\n## 🏔️ Wyoming Tax Benefits\n\n### **No State Income Tax**\n- Wyoming has **no personal income tax** — one of only 9 states without it\n- This means **no tax on wages, salaries, or retirement income**\n\n### **No Corporate Income Tax**\n- Businesses enjoy **no state corporate income tax**\n- Great for entrepreneurs and business owners\n\n### **No Inheritance or Estate Tax**\n- Assets passed to heirs are **not taxed at the state level**\n\n### **Low Property Taxes**\n- Wyoming has some of the **lowest property tax rates** in the nation\n- Average effective rate is around **0.55%**\n\n### **Reasonable Sales Tax**\n- State sales tax is **4%** (relatively low)\n- Some localities add small additional amounts\n\n### **Retirement-Friendly**\n- **Social Security, pensions, and 401(k)/IRA withdrawals** are all free from state income tax\n\n### **No Franchise Tax**\n- No franchise or privilege tax on businesses\n\n---\n\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US, making it attractive for individuals, retirees, and businesses alike.\n\nWould you like more details on any specific area?",
+    "sanitized_input": "hi my name is Victoria Mitchell and my ssn is 348-67-6360 and give me the tax benefits of the state of wyoming, please",
+    "llm_response": "Hi Victoria! Here are the key **tax benefits of Wyoming**:\n\n---\n\n## 🏔️ Wyoming Tax Benefits\n\n### **No State Income Tax**\n- Wyoming has **no personal income tax**\n- This applies to wages, salaries, and retirement income\n\n### **No Corporate Income Tax**\n- Businesses benefit from **no state corporate tax**\n\n### **No Inheritance or Estate Tax**\n- Assets passed to heirs are **not taxed at the state level**\n\n### **Low Property Taxes**\n- Wyoming has some of the **lowest property tax rates** in the nation\n- Residential property is assessed at only **9.5% of fair market value**\n\n### **Low Sales Tax**\n- State sales tax is **4%** (one of the lowest in the US)\n- Some counties add a small local tax\n\n### **Retirement-Friendly**\n- **No tax on Social Security** benefits\n- **No tax on pension income**\n- Great for retirees overall\n\n### **Business-Friendly**\n- No franchise tax\n- No personal property tax on financial assets\n\n---\n\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US, which makes it attractive for individuals, retirees, and businesses alike.\n\nWould you like more details on any specific area? 😊",
     "stage_timings_ms": {
-      "pattern_scan_ms": 0.07,
-      "entity_trace_ms": 2347.05,
+      "pattern_scan_ms": 0.18,
+      "entity_trace_ms": 3092.24,
       "context_guard_ms": 0.0,
-      "surrogate_gen_ms": 0.24,
-      "llm_call_ms": 7095.81,
-      "total_ms": 13548.09
+      "surrogate_gen_ms": 0.26,
+      "llm_call_ms": 6927.86,
+      "total_ms": 14058.36
     }
   },
   {
@@ -63,19 +75,20 @@
         "source": "pattern"
       }
     },
+    "quasi_id_risks": [],
     "surrogate_map": {
-      "revanth@gmail.com": "susanconrad@example.net",
-      "480-555-1234": "+1-187-707-8879"
+      "revanth@gmail.com": "laurabennett@example.org",
+      "480-555-1234": "+1-141-020-9475"
     },
-    "sanitized_input": "my email is susanconrad@example.net and phone is +1-187-707-8879, can you help me draft a resignation letter?",
-    "llm_response": "Sure! I'd be happy to help you draft a resignation letter. Here's a professional template you can customize:\n\n---\n\n**Subject: Resignation Letter**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as [Your Job Title] at [Company Name], effective [Last Working Day — typically two weeks from today].\n\nThis has been a difficult decision, and I am grateful for the opportunities I have had to grow professionally during my time here. I have truly valued the experience and the relationships I have built with the team.\n\nI am committed to ensuring a smooth transition and will do my best to wrap up my current responsibilities and assist in training my replacement during my remaining time.\n\nPlease feel free to reach out to me at **susanconrad@example.net** or **+1-187-707-8879** should you need to discuss anything further.\n\nThank you for the support and opportunities you have provided me. I wish you and the team continued success.\n\nSincerely,\n**Susan Conrad**\n\n---\n\n**A few things to customize:**\n- **Manager's Name** – Add their full name or just first name\n- **Job Title** – Your current role\n- **Company Name** – Your employer\n- **Last Working Day** – Typically two weeks from your resignation date\n\nWould you like me to adjust the **tone** (more formal, warmer, brief) or add any specific details?",
+    "sanitized_input": "my email is laurabennett@example.org and phone is +1-141-020-9475, can you help me draft a resignation letter?",
+    "llm_response": "Sure, I'd be happy to help you draft a resignation letter! Here's a professional template you can customize:\n\n---\n\n**Subject: Resignation Letter**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as [Your Job Title] at [Company Name], effective [Last Working Day — typically two weeks from today].\n\nThis has been a difficult decision, and I am grateful for the opportunities I have had to grow and develop during my time here. I have genuinely valued my experience working with the team and appreciate the support you have provided throughout my tenure.\n\nTo ensure a smooth transition, I am committed to completing any outstanding projects and am happy to assist in training my replacement or handing over my responsibilities before my departure.\n\nPlease feel free to reach out to me at **laurabennett@example.org** or **+1-141-020-9475** should you need to discuss anything further.\n\nThank you again for the opportunity to be part of [Company Name]. I wish the team continued success.\n\nYours sincerely,\n**Laura Bennett**\n\n---\n\n**A few things to consider:**\n- Fill in your **job title**, **company name**, and **last working day**\n- You can add a **reason for leaving** if you feel comfortable\n- Keep the tone **positive** regardless of your circumstances\n\nWould you like me to adjust the tone, length, or any specific details?",
     "stage_timings_ms": {
-      "pattern_scan_ms": 0.14,
-      "entity_trace_ms": 16.45,
+      "pattern_scan_ms": 0.22,
+      "entity_trace_ms": 10.78,
       "context_guard_ms": 0.0,
       "surrogate_gen_ms": 0.3,
-      "llm_call_ms": 6597.57,
-      "total_ms": 6652.14
+      "llm_call_ms": 6930.42,
+      "total_ms": 6978.83
     }
   }
 ]

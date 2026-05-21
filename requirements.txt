@@ -13,3 +13,4 @@ sentence-transformers>=2.7.0
 # ContextGuard local NER (replaces Ollama phi3:mini — no server needed)
 transformers>=4.40.0
 torch>=2.0.0
+requests>=2.31.0

@@ -129,6 +129,20 @@ class MimicGen:
     def _gen_default(self) -> str:
         return _fake.bothify("??##??##")
 
+    def _gen_gender(self) -> str:
+        """
+        Generate a gender indicator surrogate that preserves grammatical
+        structure. Replaces detected gender with a different valid gender
+        expression so sentences like 'I am a female nurse' remain readable
+        as 'I am a male nurse' rather than breaking into 'I am a xy42ab98 nurse'.
+        """
+        options = [
+            "male", "female", "non-binary",
+            "he/him", "she/her", "they/them",
+            "gender: male", "gender: female", "sex: male", "sex: female",
+        ]
+        return random.choice(options)
+
     # ── Dispatch table ─────────────────────────────────────────────────────────
 
     _GENERATORS: Dict[str, str] = {
@@ -151,10 +165,18 @@ class MimicGen:
         "LOC":               "_gen_loc",
         "ORG":               "_gen_org",
         "FAC":               "_gen_fac",
-        "gender_indicator":  "_gen_default",
+        "gender_indicator":  "_gen_gender",
     }
 
     def generate(self, entity: DetectedEntity) -> str:
+        # Gender indicator gets a direct random replacement — not unique-wrapped
+        # because the pool is small and uniqueness is less important than
+        # producing a grammatically valid gender expression.
+        if entity.type == "gender_indicator":
+            surrogate = self._gen_gender()
+            logger.debug(f"[MimicGen] gender_indicator: {entity.text!r} → {surrogate!r}")
+            return surrogate
+
         method_name = self._GENERATORS.get(entity.type, "_gen_default")
         method = getattr(self, method_name)
         surrogate = self._unique(method)
