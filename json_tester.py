@@ -35,6 +35,8 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
      "Presidio sanitized  (Presidio [TYPE] redaction — baseline for BERTScore)"),
     ("presidio_found_piis",
      "Presidio found PIIs  (raw detected entities — type, value, score)"),
+    ("recognized_not_replaced",
+     "Recognized not replaced  (detected as PII but intentionally skipped)"),
     ("bertscore_ss",
      "BERTScore SS       (original vs SS sanitized — utility score)"),
     ("bertscore_presidio",
@@ -44,6 +46,7 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
 DEFAULT_FIELDS: Dict[str, bool] = {key: True for key, _ in OUTPUT_FIELDS}
 DEFAULT_FIELDS["presidio_sanitized_input"] = False
 DEFAULT_FIELDS["presidio_found_piis"] = False
+DEFAULT_FIELDS["recognized_not_replaced"] = True
 DEFAULT_FIELDS["bertscore_ss"]       = False
 DEFAULT_FIELDS["bertscore_presidio"] = False
 
@@ -100,30 +103,52 @@ def _process_one(
             timings["context_guard_ms"] = _ms(t)
 
     # ── Detection (authoritative results with all post-processing passes) ──────
-    confirmed, _ = run_cascade(question)
+    from detection.service_query import is_service_query, fuzz_addresses
+    from config import SERVICE_QUERY_DETECTION_ENABLED
+
+    is_svc = SERVICE_QUERY_DETECTION_ENABLED and is_service_query(question)
+    fuzzed_addresses: dict = {}
+    working_question = question
+
+    if is_svc:
+        from config import SERVICE_QUERY_VERIFY_ADDRESSES
+        working_question, fuzzed_addresses = fuzz_addresses(
+            question, verify=SERVICE_QUERY_VERIFY_ADDRESSES
+        )
+
+    confirmed, _ = run_cascade(
+        working_question,
+        skip_location_entities=is_svc,
+    )
     confirmed = deduplicate(confirmed)
+
+    # Collect recognized-but-not-replaced entities
+    skipped_entities = getattr(confirmed, '_skipped_entities', [])
+
+    # Combine for display — confirmed (will get surrogates) + skipped (detected, no surrogate)
+    all_detected_for_display = list(confirmed) + list(skipped_entities)
 
     # Per-stage breakdowns (filter by source set by each detector)
     if fields.get("pattern_scan_pii"):
         answer["pattern_scan_pii"] = [
-            e.text for e in confirmed if e.source == "pattern"
+            e.text for e in all_detected_for_display if e.source == "pattern"
         ]
 
     if fields.get("entity_trace_pii"):
         answer["entity_trace_pii"] = [
-            e.text for e in confirmed if e.source == "ner"
+            e.text for e in all_detected_for_display if e.source == "ner"
         ]
 
     if fields.get("context_guard_pii"):
         answer["context_guard_pii"] = [
-            e.text for e in confirmed if e.source == "slm"
+            e.text for e in all_detected_for_display if e.source == "slm"
         ]
 
     if fields.get("confirmed_pii"):
-        answer["confirmed_pii"] = [e.text for e in confirmed]
+        answer["confirmed_pii"] = [e.text for e in all_detected_for_display]
 
     if fields.get("pii_detail"):
-        answer["pii_detail"] = {
+        detail: dict = {
             e.text: {
                 "type":   e.type,
                 "score":  round(e.score, 4),
@@ -131,6 +156,27 @@ def _process_one(
             }
             for e in confirmed
         }
+        _skip_reason = (
+            "service_query_location_suppressed" if is_svc else "topical_geo_filtered"
+        )
+        for e in skipped_entities:
+            detail[e.text] = {
+                "type":             e.type,
+                "score":            round(e.score, 4),
+                "source":           e.source,
+                "surrogate_status": "skipped",
+                "skip_reason":      _skip_reason,
+            }
+        for original_addr, fuzzed_addr in fuzzed_addresses.items():
+            detail[original_addr] = {
+                "type":             "address",
+                "score":            1.0,
+                "source":           "pattern",
+                "surrogate_status": "fuzzed",
+                "skip_reason":      "service_query_fuzzed",
+                "fuzzed_to":        fuzzed_addr,
+            }
+        answer["pii_detail"] = detail
 
     if fields.get("quasi_id_risks"):
         qi_matches = getattr(confirmed, "_qi_matches", [])
@@ -169,6 +215,31 @@ def _process_one(
 
     if fields.get("sanitized_input"):
         answer["sanitized_input"] = sanitized
+
+    # ── Recognized-but-not-replaced entities ──────────────────────────────────
+    if fields.get("recognized_not_replaced"):
+        rnr_list = []
+
+        for ent in skipped_entities:
+            rnr_list.append({
+                "value":  ent.text,
+                "type":   ent.type,
+                "reason": (
+                    "service_query_location_suppressed"
+                    if is_svc
+                    else "topical_geo_filtered"
+                ),
+            })
+
+        for original_addr, fuzzed_addr in fuzzed_addresses.items():
+            rnr_list.append({
+                "value":     original_addr,
+                "type":      "address",
+                "reason":    "service_query_fuzzed",
+                "fuzzed_to": fuzzed_addr,
+            })
+
+        answer["recognized_not_replaced"] = rnr_list
 
     # ── LLM call (single-turn, no conversation history) ───────────────────────
     if want_timings:

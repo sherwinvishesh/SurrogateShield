@@ -245,7 +245,12 @@ def run_evaluation(
                 total_surrogates_in_key += len(key_pii_list)
 
             if need_quality:
-                found_set = {k.lower() for k in surrogate_map}
+                rnr_set = {
+                    r["value"].lower()
+                    for r in (a_entry.get("recognized_not_replaced") or [])
+                    if isinstance(r, dict) and r.get("value")
+                }
+                found_set = {k.lower() for k in surrogate_map} | rnr_set
                 key_set   = {v.lower() for v in key_pii_list}
                 tp = len(found_set & key_set)
                 fp = len(found_set - key_set)
@@ -309,8 +314,16 @@ def run_evaluation(
                 total_individual_resolve_leaks += len(leaked)
 
             if need_sanit and key_pii_list:
+                rnr_set = {
+                    r["value"].lower()
+                    for r in (a_entry.get("recognized_not_replaced") or [])
+                    if isinstance(r, dict) and r.get("value")
+                }
                 si_lower   = sanitized_input.lower()
-                leaked_pii = [v for v in key_pii_list if v.lower() in si_lower]
+                leaked_pii = [
+                    v for v in key_pii_list
+                    if v.lower() in si_lower and v.lower() not in rnr_set
+                ]
                 total_pii_leaks_to_llm     += 1 if leaked_pii else 0
                 total_individual_pii_leaks += len(leaked_pii)
                 le = len(leaked_pii) / len(key_pii_list)
@@ -318,7 +331,12 @@ def run_evaluation(
                 leakage_accuracies.append(1.0 - le)
 
             if need_per_type and key_typed:
-                found_lower   = {k.lower() for k in surrogate_map.keys()}
+                rnr_set = {
+                    r["value"].lower()
+                    for r in (a_entry.get("recognized_not_replaced") or [])
+                    if isinstance(r, dict) and r.get("value")
+                }
+                found_lower   = {k.lower() for k in surrogate_map.keys()} | rnr_set
                 key_all_lower = {v.lower() for v in key_pii_list}
 
                 for internal_type, vals in key_typed.items():
@@ -331,6 +349,8 @@ def run_evaluation(
                 pii_detail = a_entry.get("pii_detail") or {}
                 for detected_val, detail in pii_detail.items():
                     if detected_val.lower() not in key_all_lower:
+                        if detected_val.lower() in rnr_set:
+                            continue
                         raw_type = detail.get("type", "other") if isinstance(detail, dict) else "other"
                         normalized_type = NORMALIZE_TYPE.get(raw_type, raw_type)
                         type_stats[normalized_type]["fp"] += 1
@@ -340,7 +360,12 @@ def run_evaluation(
 
                 # ── SS comparable-type stats (always computed for comparison) ──
                 if key_typed:
-                    found_lower   = {k.lower() for k in surrogate_map.keys()}
+                    rnr_set = {
+                        r["value"].lower()
+                        for r in (a_entry.get("recognized_not_replaced") or [])
+                        if isinstance(r, dict) and r.get("value")
+                    }
+                    found_lower   = {k.lower() for k in surrogate_map.keys()} | rnr_set
                     key_all_lower = {v.lower() for v in key_pii_list}
 
                     for internal_type, vals in key_typed.items():
@@ -354,6 +379,8 @@ def run_evaluation(
                     pii_detail = a_entry.get("pii_detail") or {}
                     for detected_val, detail in pii_detail.items():
                         if detected_val.lower() not in key_all_lower:
+                            if detected_val.lower() in rnr_set:
+                                continue
                             raw_type = detail.get("type", "other") if isinstance(detail, dict) else "other"
                             cmp_type = NORMALIZE_TYPE.get(raw_type, raw_type)
                             ss_cmp_type_stats[cmp_type]["fp"] += 1

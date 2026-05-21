@@ -269,7 +269,7 @@ def _is_proper_capitalized(entity_text: str, text: str) -> bool:
 def _filter_topical_geo_entities(
     entities: List[DetectedEntity],
     text: str,
-) -> List[DetectedEntity]:
+) -> tuple[List, List]:
     """
     Remove GPE/LOC entities that are query topics rather than personal refs.
 
@@ -287,16 +287,20 @@ def _filter_topical_geo_entities(
 
     The capitalisation check (_is_proper_capitalized) additionally filters
     mid-sentence lowercase usages ("phoenix bird", "springfield field team").
+
+    Returns:
+        (kept_entities, skipped_entities)
     """
     geo_ents   = [e for e in entities if e.type in _GEO_FILTERABLE]
     other_ents = [e for e in entities if e.type not in _GEO_FILTERABLE]
 
     if not geo_ents:
-        return entities
+        return entities, []
 
     all_clauses     = _all_sub_clauses(text)
     clause_is_query = [bool(_QUERY_FRAME.match(c)) for c in all_clauses]
 
+    skipped: List[DetectedEntity] = []
     result = list(other_ents)
 
     for geo_ent in geo_ents:
@@ -306,6 +310,7 @@ def _filter_topical_geo_entities(
                 f"[SentinelLayer] Pass D: lowercase geo skipped (not proper noun): "
                 f"{geo_ent.text!r}"
             )
+            skipped.append(geo_ent)
             continue
 
         # Query-clause filter
@@ -323,6 +328,7 @@ def _filter_topical_geo_entities(
             logger.debug(
                 f"[SentinelLayer] Pass D: topical geo (query-only): {geo_ent.text!r}"
             )
+            skipped.append(geo_ent)
             continue
 
         logger.debug(
@@ -330,7 +336,7 @@ def _filter_topical_geo_entities(
         )
         result.append(geo_ent)
 
-    return result
+    return result, skipped
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -380,6 +386,7 @@ def run_cascade(
     """
     confirmed: List[DetectedEntity] = []
     needs_confirmation: List[DetectedEntity] = []
+    all_skipped: List[DetectedEntity] = []
 
     # ── Stage 1: PatternScan ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 1: PatternScan")
@@ -396,8 +403,12 @@ def run_cascade(
     ner_borderline = _reclassify_location_orgs(ner_borderline, text)
 
     if skip_location_entities:
+        ner_confirmed_filtered  = [e for e in ner_confirmed  if e.type in _GEO_TYPES]
+        ner_borderline_filtered = [e for e in ner_borderline if e.type in _GEO_TYPES]
         ner_confirmed  = [e for e in ner_confirmed  if e.type not in _GEO_TYPES]
         ner_borderline = [e for e in ner_borderline if e.type not in _GEO_TYPES]
+        all_skipped.extend(ner_confirmed_filtered)
+        all_skipped.extend(ner_borderline_filtered)
 
     confirmed.extend(ner_confirmed)
     remaining_text = mask_spans(remaining_text, ner_confirmed)
@@ -441,8 +452,9 @@ def run_cascade(
 
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
-        confirmed          = _filter_topical_geo_entities(confirmed,          text)
-        needs_confirmation = _filter_topical_geo_entities(needs_confirmation, text)
+        confirmed,          skipped_confirmed = _filter_topical_geo_entities(confirmed,          text)
+        needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text)
+        all_skipped = skipped_confirmed + skipped_nc
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
@@ -454,6 +466,7 @@ def run_cascade(
                 f"(fields: {match.matched_fields}, risk: {match.risk_level})"
             )
     confirmed._qi_matches = qi_matches
+    confirmed._skipped_entities = all_skipped
 
     logger.info(
         f"[SentinelLayer] Final → "
@@ -474,4 +487,6 @@ def deduplicate(entities: List[DetectedEntity]) -> List[DetectedEntity]:
     result.sort(key=lambda e: e.start)
     if hasattr(entities, "_qi_matches"):
         result._qi_matches = entities._qi_matches
+    if hasattr(entities, "_skipped_entities"):
+        result._skipped_entities = entities._skipped_entities
     return result

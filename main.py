@@ -366,14 +366,44 @@ def _run_pii_finder() -> None:
                     border_style="blue", padding=(1, 2),
                 ))
             console.print()
+
+            sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
+            sq_confirmed = deduplicate(sq_confirmed)
+            sq_skipped   = getattr(sq_confirmed, '_skipped_entities', [])
+            sq_surrogate_map = mimic.generate_all(sq_confirmed) if sq_confirmed else {}
+
+            if sq_confirmed or sq_skipped:
+                sq_tbl = Table(
+                    title="[bold blue]SentinelLayer — Detected PII[/bold blue]",
+                    box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1),
+                )
+                sq_tbl.add_column("Original",  style="red bold",  no_wrap=True)
+                sq_tbl.add_column("Type",      style="yellow",    width=14)
+                sq_tbl.add_column("Score",     style="white",     width=6,  justify="right")
+                sq_tbl.add_column("Source",    style="dim",       width=8)
+                sq_tbl.add_column("Surrogate", style="green bold")
+                for ent in sq_confirmed:
+                    sq_tbl.add_row(
+                        ent.text, ent.type, f"{ent.score:.2f}", ent.source,
+                        sq_surrogate_map.get(ent.text, "[dim]—[/dim]"),
+                    )
+                for ent in sq_skipped:
+                    sq_tbl.add_row(
+                        ent.text, ent.type, f"{ent.score:.2f}", ent.source,
+                        "[dim yellow]skipped — service query[/dim yellow]",
+                    )
+                console.print(sq_tbl)
+                console.print()
+
             _show_presidio_panel(user_input)
             continue
 
         # ── Standard PII detection path ───────────────────────────────────────
         confirmed, needs_confirmation = run_cascade(user_input)
         confirmed = deduplicate(confirmed)
+        skipped   = getattr(confirmed, '_skipped_entities', [])
 
-        if not confirmed and not needs_confirmation:
+        if not confirmed and not needs_confirmation and not skipped:
             console.print(Panel(
                 "[green]No PII detected.[/green]\n"
                 f"[dim]This message would be sent to {_current_provider_name()} unchanged.[/dim]",
@@ -404,6 +434,11 @@ def _run_pii_finder() -> None:
             tbl.add_row(
                 ent.text, ent.type, f"{ent.score:.2f}", ent.source,
                 "[dim yellow]needs confirmation[/dim yellow]",
+            )
+        for ent in skipped:
+            tbl.add_row(
+                ent.text, ent.type, f"{ent.score:.2f}", ent.source,
+                "[dim yellow]skipped — topical query[/dim yellow]",
             )
 
         console.print(tbl)
