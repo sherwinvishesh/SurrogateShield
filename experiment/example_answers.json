@@ -37,20 +37,37 @@
       }
     ],
     "surrogate_map": {
-      "Revanth": "Jonathan Smith",
-      "544-87-2944": "538-02-6850"
+      "Revanth": "Thomas Santiago",
+      "544-87-2944": "539-86-9980"
     },
-    "sanitized_input": "hi my name is Jonathan Smith and my ssn is 538-02-6850 and give me the tax benefits of the state of wyoming, please",
-    "llm_response": "Hi Jonathan! Here are the key tax benefits of living in **Wyoming**:\n\n---\n\n## 🏔️ Wyoming Tax Benefits\n\n### **No State Income Tax**\n- Wyoming has **no individual state income tax**\n- This applies to wages, salaries, and retirement income\n\n### **No Corporate Income Tax**\n- Businesses benefit from **no corporate income tax**\n- Makes it attractive for business formation (LLCs, etc.)\n\n### **Low Property Taxes**\n- Among the **lowest property tax rates** in the nation\n- Effective rate is typically around **0.5-0.6%**\n\n### **No Inheritance or Estate Tax**\n- Wyoming has **no estate tax** or **inheritance tax**\n- Great for wealth transfer planning\n\n### **Low Sales Tax**\n- State sales tax is only **4%**\n- Some counties add a small local tax\n\n### **Retirement Friendly**\n- No tax on **Social Security**, **pensions**, or **401(k)/IRA** withdrawals\n\n### **No Capital Gains Tax**\n- At the state level, **no capital gains tax**\n\n---\n\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US, making it popular for retirees, businesses, and high-income individuals.\n\nWould you like more details on any specific area? 😊",
+    "sanitized_input": "hi my name is Thomas Santiago and my ssn is 539-86-9980 and give me the tax benefits of the state of wyoming, please",
+    "llm_response": "Hi Thomas! Here are the key **tax Benefits of Wyoming**:\n\n---\n\n## 🏔️ Wyoming State Tax Benefits\n\n### **No State Income Tax**\n- Wyoming has **no personal income tax**\n- Wages, salaries, and retirement income are **not taxed at the state level**\n\n### **No Corporate Income Tax**\n- Businesses pay **no state corporate income tax**\n- Great for entrepreneurs and business owners\n\n### **No Inheritance or Estate Tax**\n- Assets passed to heirs are **not subject to state estate tax**\n\n### **Low Property Taxes**\n- Among the **lowest property tax rates** in the nation\n- Effective rate is approximately **0.55%**\n\n### **Low Sales Tax**\n- State sales tax is only **4%**\n- Some counties add up to **2%** locally\n\n### **No Franchise Tax**\n\n### **Retirement-Friendly**\n- Social Security, pensions, and retirement income are **not taxed**\n\n---\n\n## ✅ Summary\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US, making it attractive for individuals, retirees, and businesses alike.\n\n---\n\nWould you like more specific information about any of these benefits, Thomas? 😊",
     "stage_timings_ms": {
       "pattern_scan_ms": 0.08,
-      "entity_trace_ms": 732.03,
+      "entity_trace_ms": 676.99,
       "context_guard_ms": 0.0,
-      "surrogate_gen_ms": 0.29,
-      "llm_call_ms": 7396.71,
-      "total_ms": 9119.11
+      "surrogate_gen_ms": 0.25,
+      "llm_call_ms": 7844.08,
+      "total_ms": 9690.32
     },
-    "presidio_sanitized_input": "hi my name is [PERSON] and my ssn is [US_SSN] and give me the tax benefits of the state of [LOCATION], please"
+    "presidio_sanitized_input": "hi my name is [PERSON] and my ssn is [US_SSN] and give me the tax benefits of the state of [LOCATION], please",
+    "presidio_found_piis": [
+      {
+        "value": "Revanth",
+        "type": "PERSON",
+        "score": 0.85
+      },
+      {
+        "value": "544-87-2944",
+        "type": "US_SSN",
+        "score": 0.85
+      },
+      {
+        "value": "wyoming",
+        "type": "LOCATION",
+        "score": 0.85
+      }
+    ]
   },
   {
     "question": "my email is revanth@gmail.com and phone is 480-555-1234, can you help me draft a resignation letter?",
@@ -78,19 +95,31 @@
     },
     "quasi_id_risks": [],
     "surrogate_map": {
-      "revanth@gmail.com": "kanesarah@example.net",
-      "480-555-1234": "+1-181-043-4385"
+      "revanth@gmail.com": "moonchristopher@example.net",
+      "480-555-1234": "+1-473-122-6687"
     },
-    "sanitized_input": "my email is kanesarah@example.net and phone is +1-181-043-4385, can you help me draft a resignation letter?",
-    "llm_response": "Sure! I'd be happy to help you draft a resignation letter. Here's a professional template you can customize:\n\n---\n\n**Subject: Resignation Letter**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as [Your Job Title] at [Company Name], effective [Last Working Day — typically two weeks from today].\n\nThis was not an easy decision, and I am grateful for the opportunities I have had to grow professionally during my time here. I truly value the experience and knowledge I have gained while working with the team.\n\nI am committed to ensuring a smooth transition and am happy to assist with training a replacement or wrapping up any outstanding projects before my departure.\n\nPlease feel free to reach me at **kanesarah@example.net** or **+1-181-043-4385** if you need to discuss anything further.\n\nThank you again for the opportunity to be part of [Company Name]. I wish the team all the best going forward.\n\nSincerely,\n[Your Full Name]\n[Your Job Title]\n[Date]\n\n---\n\n**A few things to fill in:**\n- ✅ Your **manager's name**\n- ✅ Your **job title**\n- ✅ **Company name**\n- ✅ Your **last working day**\n- ✅ Your **full name**\n\nWould you like me to adjust the **tone** (e.g., more formal, warmer, or brief) or add any specific details?",
+    "sanitized_input": "my email is moonchristopher@example.net and phone is +1-473-122-6687, can you help me draft a resignation letter?",
+    "llm_response": "Sure! Here's a professional resignation letter draft for you:\n\n---\n\n**[Your Name]**\nmoonchristopher@example.net\n+1-473-122-6687\n[Date]\n\n**[Manager's Name]**\n**[Manager's Title]**\n**[Company Name]**\n**[Company Address]**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as **[Your Job Title]** at **[Company Name]**, effective **[Last Working Day — typically two weeks from today]**.\n\nThis was not an easy decision, and I am grateful for the opportunities I have had to grow professionally during my time here. I have valued working with such a talented team and appreciate the support and guidance I have received.\n\nI am committed to making this transition as smooth as possible. I am happy to assist with training a replacement or wrapping up any outstanding projects before my departure.\n\nThank you again for the opportunity to be part of **[Company Name]**. I wish the team continued success.\n\nSincerely,\n\n**[Your Name]**\nmoonchristopher@example.net\n+1-473-122-6687\n\n---\n\nJust fill in the **bracketed fields** and you're good to go! Would you like me to:\n- **Adjust the tone** (more formal, more warm, etc.)\n- **Add a specific reason** for leaving\n- **Customize it** further in any way?",
     "stage_timings_ms": {
-      "pattern_scan_ms": 0.07,
-      "entity_trace_ms": 9.27,
+      "pattern_scan_ms": 0.08,
+      "entity_trace_ms": 8.28,
       "context_guard_ms": 0.0,
-      "surrogate_gen_ms": 0.28,
-      "llm_call_ms": 6883.1,
-      "total_ms": 6926.68
+      "surrogate_gen_ms": 0.23,
+      "llm_call_ms": 6164.6,
+      "total_ms": 6204.06
     },
-    "presidio_sanitized_input": "my email is [EMAIL_ADDRESS] and phone is [PHONE_NUMBER], can you help me draft a resignation letter?"
+    "presidio_sanitized_input": "my email is [EMAIL_ADDRESS] and phone is [PHONE_NUMBER], can you help me draft a resignation letter?",
+    "presidio_found_piis": [
+      {
+        "value": "revanth@gmail.com",
+        "type": "EMAIL_ADDRESS",
+        "score": 1.0
+      },
+      {
+        "value": "480-555-1234",
+        "type": "PHONE_NUMBER",
+        "score": 0.75
+      }
+    ]
   }
 ]

@@ -33,10 +33,13 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
     ("stage_timings_ms",  "Stage timings (ms)      (PatternScan / EntityTrace / ContextGuard / surrogate gen / LLM)"),
     ("presidio_sanitized_input",
      "Presidio sanitized  (Presidio [TYPE] redaction — baseline for BERTScore)"),
+    ("presidio_found_piis",
+     "Presidio found PIIs  (raw detected entities — type, value, score)"),
 ]
 
 DEFAULT_FIELDS: Dict[str, bool] = {key: True for key, _ in OUTPUT_FIELDS}
 DEFAULT_FIELDS["presidio_sanitized_input"] = False
+DEFAULT_FIELDS["presidio_found_piis"] = False
 
 
 # ── Core per-question processor ───────────────────────────────────────────────
@@ -177,8 +180,13 @@ def _process_one(
         timings["total_ms"] = _ms(t_total)
         answer["stage_timings_ms"] = timings
 
-    # ── Presidio sanitized input ──────────────────────────────────────────────
-    if fields.get("presidio_sanitized_input"):
+    # ── Presidio detection (shared for both presidio fields) ─────────────────
+    need_presidio = (
+        fields.get("presidio_sanitized_input") or
+        fields.get("presidio_found_piis")
+    )
+
+    if need_presidio:
         try:
             from presidio.detect import detect as _presidio_detect
             from presidio.redact import redact as _presidio_redact
@@ -186,19 +194,39 @@ def _process_one(
             p_entities = _presidio_detect(question)
 
             if p_entities is None:
-                # Presidio unavailable — store null so BERTScore
-                # code can skip this entry rather than use bad data
-                answer["presidio_sanitized_input"] = None
-            elif not p_entities:
-                # Presidio found nothing — original text is the
-                # "sanitized" version (no redaction applied)
-                answer["presidio_sanitized_input"] = question
+                # Presidio unavailable — store None for both fields
+                if fields.get("presidio_sanitized_input"):
+                    answer["presidio_sanitized_input"] = None
+                if fields.get("presidio_found_piis"):
+                    answer["presidio_found_piis"] = None
+
             else:
-                answer["presidio_sanitized_input"] = _presidio_redact(
-                    question, p_entities
-                )
+                # presidio_sanitized_input
+                if fields.get("presidio_sanitized_input"):
+                    if p_entities:
+                        answer["presidio_sanitized_input"] = _presidio_redact(
+                            question, p_entities
+                        )
+                    else:
+                        # No entities found — original text is unchanged
+                        answer["presidio_sanitized_input"] = question
+
+                # presidio_found_piis
+                if fields.get("presidio_found_piis"):
+                    answer["presidio_found_piis"] = [
+                        {
+                            "value": ent.text,
+                            "type":  ent.entity_type,
+                            "score": ent.score,
+                        }
+                        for ent in p_entities
+                    ]
+
         except Exception:
-            answer["presidio_sanitized_input"] = None
+            if fields.get("presidio_sanitized_input"):
+                answer["presidio_sanitized_input"] = None
+            if fields.get("presidio_found_piis"):
+                answer["presidio_found_piis"] = None
 
     return answer
 
@@ -257,7 +285,7 @@ def run_batch(
     # Pre-load Presidio engine if the field is enabled.
     # The engine.py singleton caches it — this just triggers the 3-5s
     # spaCy model load ONCE before the loop instead of mid-first-question.
-    if fields.get("presidio_sanitized_input"):
+    if fields.get("presidio_sanitized_input") or fields.get("presidio_found_piis"):
         try:
             from presidio.engine import get_analyzer
             get_analyzer()
