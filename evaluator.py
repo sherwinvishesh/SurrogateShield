@@ -7,8 +7,43 @@ No UI, no Rich, no LLM calls.
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Callable, Optional
+
+KEY_TYPE_MAP = {
+    "name":           "PERSON",
+    "person":         "PERSON",
+    "PERSON":         "PERSON",
+    "email":          "email",
+    "phone":          "phone_us",
+    "phone_us":       "phone_us",
+    "phone_uk":       "phone_uk",
+    "phone_intl":     "phone_intl",
+    "ssn":            "ssn",
+    "address":        "address",
+    "dob":            "dob",
+    "date_of_birth":  "dob",
+    "org":            "ORG",
+    "ORG":            "ORG",
+    "organization":   "ORG",
+    "gpe":            "GPE",
+    "GPE":            "GPE",
+    "location":       "GPE",
+    "loc":            "LOC",
+    "LOC":            "LOC",
+    "credit_card":    "credit_card",
+    "api_key":        "api_key",
+    "ip_address":     "ip_address",
+    "ip":             "ip_address",
+    "zip":            "zip_us",
+    "zip_us":         "zip_us",
+    "postcode":       "postcode_uk",
+    "postcode_uk":    "postcode_uk",
+    "gender":         "gender_indicator",
+    "fac":            "FAC",
+    "FAC":            "FAC",
+}
 
 EXPERIMENT_DIR = Path(__file__).parent / "experiment"
 
@@ -19,26 +54,49 @@ EVAL_FIELDS = [
     ("answer_rate",          "Answer rate  (non-empty / total)"),
     ("surrogate_counts",     "Surrogate counts  (found vs key totals + averages)"),
     ("surrogate_quality",    "Surrogate quality  (precision / recall / F1 / accuracy / error)"),
+    ("per_entity_type",      "Per-entity-type breakdown  (F1 / precision / recall per PII type)"),
     ("timing",               "Stage timings  (avg ms per stage)"),
     ("resolve_quality",      "ResolvePass quality  (surrogate leak rate + accuracy)"),
     ("sanitization_quality", "Sanitization quality  (PII leak to LLM rate + accuracy)"),
 ]
 
 
-def parse_key_entry(entry: str) -> list[str]:
-    """Parse a raw Answer-Key string into a list of clean PII values.
-
-    Handles values wrapped in quotes, values without quotes, extra whitespace,
-    and empty strings gracefully.
+def parse_key_entry(answer_key) -> tuple[list[str], dict[str, list[str]]]:
     """
-    if not entry or not entry.strip():
-        return []
-    result = []
-    for token in entry.split(","):
-        cleaned = token.strip().strip('"').strip("'").strip()
-        if cleaned:
-            result.append(cleaned)
-    return result
+    Parse an Answer-Key value into:
+      - flat list of all PII values (strings, for overall metrics)
+      - typed dict mapping internal_system_type -> list of values
+
+    Handles:
+      1. New dict format: {"name": "Revanth", "ssn": "544-87-2944"}
+      2. New dict format with list values: {"name": ["John", "Jane"], "email": "j@x.com"}
+      3. Old string format: '"Revanth", "544-87-2944"' (backward compat, returns empty typed dict)
+      4. None or empty input: returns ([], {})
+    """
+    if not answer_key:
+        return [], {}
+
+    if isinstance(answer_key, dict):
+        typed: dict[str, list[str]] = {}
+        flat: list[str] = []
+        for label, val in answer_key.items():
+            internal_type = KEY_TYPE_MAP.get(label, "other")
+            vals = val if isinstance(val, list) else [val]
+            vals = [v.strip() for v in vals if v and str(v).strip()]
+            if vals:
+                typed.setdefault(internal_type, []).extend(vals)
+                flat.extend(vals)
+        return flat, typed
+
+    if isinstance(answer_key, str):
+        flat = []
+        for token in answer_key.split(","):
+            cleaned = token.strip().strip('"').strip("'").strip()
+            if cleaned:
+                flat.append(cleaned)
+        return flat, {}
+
+    return [], {}
 
 
 def run_evaluation(
@@ -82,7 +140,8 @@ def run_evaluation(
     need_quality = fields.get("surrogate_quality", False)
     need_timing  = fields.get("timing", False)
     need_resolve = fields.get("resolve_quality", False)
-    need_sanit   = fields.get("sanitization_quality", False)
+    need_sanit    = fields.get("sanitization_quality", False)
+    need_per_type = fields.get("per_entity_type", False)
 
     no_answers       = 0
     no_answers_empty = 0
@@ -107,6 +166,8 @@ def run_evaluation(
     leakage_accuracies = []
     leakage_errors     = []
 
+    type_stats = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
+
     for i in range(total):
         status = "ok"
         try:
@@ -118,8 +179,8 @@ def run_evaluation(
             llm_response    = a_entry.get("llm_response") or ""
             stage_timings   = a_entry.get("stage_timings_ms")
 
-            raw_key      = k_entry.get("Answer-Key", "")
-            key_pii_list = parse_key_entry(raw_key) if raw_key else []
+            raw_key = k_entry.get("Answer-Key", "")
+            key_pii_list, key_typed = parse_key_entry(raw_key) if raw_key else ([], {})
 
             if need_answers:
                 if llm_response:
@@ -204,11 +265,42 @@ def run_evaluation(
                 leakage_errors.append(le)
                 leakage_accuracies.append(1.0 - le)
 
+            if need_per_type and key_typed:
+                found_lower   = {k.lower() for k in surrogate_map.keys()}
+                key_all_lower = {v.lower() for v in key_pii_list}
+
+                for internal_type, vals in key_typed.items():
+                    for val in vals:
+                        if val.lower() in found_lower:
+                            type_stats[internal_type]["tp"] += 1
+                        else:
+                            type_stats[internal_type]["fn"] += 1
+
+                pii_detail = a_entry.get("pii_detail") or {}
+                for detected_val, detail in pii_detail.items():
+                    if detected_val.lower() not in key_all_lower:
+                        raw_type = detail.get("type", "other") if isinstance(detail, dict) else "other"
+                        type_stats[raw_type]["fp"] += 1
+
         except Exception:
             status = "error"
 
         if progress_cb:
             progress_cb(i, total, status)
+
+    per_type_result: dict = {}
+    if need_per_type:
+        for etype, counts in type_stats.items():
+            tp, fp, fn = counts["tp"], counts["fp"], counts["fn"]
+            p  = tp / (tp + fp) if (tp + fp) > 0 else 1.0
+            r  = tp / (tp + fn) if (tp + fn) > 0 else 1.0
+            f1 = (2 * p * r / (p + r)) if (p + r) > 0 else 0.0
+            per_type_result[etype] = {
+                "precision": round(p, 4),
+                "recall":    round(r, 4),
+                "f1":        round(f1, 4),
+                "tp": tp, "fp": fp, "fn": fn,
+            }
 
     def _r(x: float) -> float:
         return round(x, 4)
@@ -262,5 +354,8 @@ def run_evaluation(
         result["pii_leak_rate"]              = _r(total_pii_leaks_to_llm / total) if total > 0 else 0.0
         result["accuracy_sanitization"]      = _r(sum(leakage_accuracies) / n)
         result["error_sanitization"]         = _r(sum(leakage_errors)     / n)
+
+    if need_per_type:
+        result["per_entity_type"] = per_type_result
 
     return result

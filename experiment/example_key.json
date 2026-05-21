@@ -1,4 +1,16 @@
 [
-  {"Answer-Key": "\"Revanth\", \"544-87-2944\""},
-  {"Answer-Key": "\"revanth@gmail.com\", \"480-555-1234\""}
+  {
+    "Question": "hi my name is Revanth and my ssn is 544-87-2944 and give me the tax benefits of the state of wyoming, please",
+    "Answer-Key": {
+      "name": "Revanth",
+      "ssn": "544-87-2944"
+    }
+  },
+  {
+    "Question": "my email is revanth@gmail.com and phone is 480-555-1234, can you help me draft a resignation letter?",
+    "Answer-Key": {
+      "email": "revanth@gmail.com",
+      "phone": "480-555-1234"
+    }
+  }
 ]

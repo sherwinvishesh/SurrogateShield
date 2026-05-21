@@ -823,6 +823,43 @@ def _run_evaluation() -> None:
     console.print(Panel(summary_msg, border_style=summary_style, padding=(0, 2)))
     console.print()
 
+    # ── Section 5: Per-Entity-Type Breakdown ──────────────────────────────────
+    per_type_data = metrics.get("per_entity_type")
+    if per_type_data:
+        pet = Table(
+            title="[bold blue]Per-Entity-Type Breakdown[/bold blue]",
+            box=box.ROUNDED, border_style="blue", show_lines=True, padding=(0, 1),
+        )
+        pet.add_column("Entity Type", style="white",  no_wrap=True)
+        pet.add_column("TP",          style="dim",    width=5,  justify="right")
+        pet.add_column("FP",          style="dim",    width=5,  justify="right")
+        pet.add_column("FN",          style="dim",    width=5,  justify="right")
+        pet.add_column("Precision",   style="white",  width=11, justify="right")
+        pet.add_column("Recall",      style="white",  width=11, justify="right")
+        pet.add_column("F1",          style="bold",   width=11, justify="right")
+
+        sorted_types = sorted(per_type_data.items(), key=lambda x: x[1]["f1"], reverse=True)
+        for etype, stats in sorted_types:
+            f1  = stats["f1"]
+            p   = stats["precision"]
+            r   = stats["recall"]
+            tp  = stats["tp"]
+            fp  = stats["fp"]
+            fn  = stats["fn"]
+            pct_p  = f"{p * 100:.2f}%"
+            pct_r  = f"{r * 100:.2f}%"
+            pct_f1 = f"{f1 * 100:.2f}%"
+            if f1 >= 0.90:
+                f1_cell = f"[bold green]{pct_f1}[/bold green]"
+            elif f1 >= 0.70:
+                f1_cell = f"[yellow]{pct_f1}[/yellow]"
+            else:
+                f1_cell = f"[red]{pct_f1}[/red]"
+            pet.add_row(etype, str(tp), str(fp), str(fn), pct_p, pct_r, f1_cell)
+
+        console.print(pet)
+        console.print()
+
     # ── Actions ───────────────────────────────────────────────────────────────
     console.print(f"  [bold blue]S[/bold blue]    [dim]Save results as JSON[/dim]")
     console.print(f"  [bold blue]B[/bold blue]    [dim]Back to dashboard[/dim]")
