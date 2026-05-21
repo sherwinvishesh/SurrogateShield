@@ -1228,6 +1228,121 @@ def _run_evaluation() -> None:
         else:
             _render_presidio_tables(cmp_data, console, box, Table, Panel, _pct, _f1_color)
 
+    # ── Section 7: BERTScore Utility Preservation ─────────────────────────────
+    bs_data = metrics.get("bertscore_comparison")
+    if bs_data:
+
+        console.print()
+        console.print(Rule(
+            "[bold blue]BERTScore — Utility Preservation  (Table 2)[/bold blue]",
+            style="blue"
+        ))
+        console.print()
+
+        ss_info  = bs_data.get("ss",       {})
+        prs_info = bs_data.get("presidio", {})
+        total_q  = bs_data.get("total_questions", 0)
+
+        ss_status  = ss_info.get("data_status",  "no_data")
+        prs_status = prs_info.get("data_status", "no_data")
+
+        if ss_status == "no_data":
+            console.print(Panel(
+                "[yellow]No BERTScore data found in answers file.[/yellow]\n\n"
+                "[dim]To generate this comparison:\n"
+                "  1. Go to JSON Test  [bold blue]J[/bold blue]\n"
+                "  2. Enable [bold white]BERTScore SS[/bold white] "
+                "(and optionally BERTScore Presidio)\n"
+                "  3. Re-run on your questions file\n"
+                "  4. Return here and run Evaluation again[/dim]",
+                border_style="yellow",
+                padding=(1, 2),
+            ))
+            console.print()
+
+        else:
+            if ss_status == "partial":
+                console.print(
+                    f"  [yellow]⚠  SS BERTScore: partial data — "
+                    f"{ss_info['data_count']} of {total_q} questions[/yellow]"
+                )
+            if prs_status == "partial":
+                console.print(
+                    f"  [yellow]⚠  Presidio BERTScore: partial data — "
+                    f"{prs_info['data_count']} of {total_q} questions[/yellow]"
+                )
+            if prs_status == "no_data":
+                console.print(
+                    "  [yellow]⚠  Presidio BERTScore not available — "
+                    "enable BERTScore Presidio in JSON Test (J) "
+                    "and re-run.[/yellow]"
+                )
+            console.print()
+
+            bs_table = Table(
+                title="[bold blue]Semantic Utility Preservation "
+                      "(higher = better)[/bold blue]",
+                box=box.ROUNDED, border_style="blue",
+                show_lines=True, padding=(0, 1),
+            )
+            bs_table.add_column("Approach",
+                style="white", no_wrap=True, width=36)
+            bs_table.add_column("Precision",
+                style="dim white", width=11, justify="right")
+            bs_table.add_column("Recall",
+                style="dim white", width=11, justify="right")
+            bs_table.add_column("F1",
+                style="bold", width=11, justify="right")
+
+            def _bs_f1_color(val):
+                if val is None:
+                    return "[dim]—[/dim]"
+                pct = val * 100
+                color = (
+                    "bold green" if pct >= 90
+                    else "yellow" if pct >= 80
+                    else "red"
+                )
+                return f"[{color}]{pct:.2f}%[/{color}]"
+
+            def _bs_pct(val):
+                if val is None:
+                    return "[dim]—[/dim]"
+                return f"{val * 100:.2f}%"
+
+            bs_table.add_row(
+                "No anonymization (baseline)",
+                "100.00%", "100.00%",
+                "[bold green]100.00%[/bold green]",
+            )
+            bs_table.add_row(
+                "SurrogateShield  (realistic surrogates)",
+                _bs_pct(ss_info.get("precision")),
+                _bs_pct(ss_info.get("recall")),
+                _bs_f1_color(ss_info.get("f1")),
+            )
+            if prs_status == "no_data":
+                bs_table.add_row(
+                    "Presidio  (placeholder redaction)",
+                    "[dim]—[/dim]", "[dim]—[/dim]",
+                    "[dim]not computed[/dim]",
+                )
+            else:
+                bs_table.add_row(
+                    "Presidio  (placeholder redaction)",
+                    _bs_pct(prs_info.get("precision")),
+                    _bs_pct(prs_info.get("recall")),
+                    _bs_f1_color(prs_info.get("f1")),
+                )
+
+            console.print(bs_table)
+            console.print(
+                "  [dim]BERTScore uses roberta-large contextual embeddings. "
+                "Higher F1 = query meaning better preserved after "
+                "anonymization.[/dim]"
+            )
+            console.print()
+
     # ── Actions ───────────────────────────────────────────────────────────────
     console.print(f"  [bold blue]S[/bold blue]    [dim]Save results as JSON[/dim]")
     console.print(f"  [bold blue]B[/bold blue]    [dim]Back to dashboard[/dim]")

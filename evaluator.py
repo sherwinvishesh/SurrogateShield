@@ -86,6 +86,8 @@ EVAL_FIELDS = [
     ("per_entity_type",      "Per-entity-type breakdown  (F1 / precision / recall per PII type)"),
     ("presidio_comparison",
      "Presidio comparison  (SS vs Presidio — side-by-side Table 1 for paper)"),
+    ("bertscore_comparison",
+     "BERTScore comparison  (utility preservation — Table 2 for paper)"),
     ("timing",               "Stage timings  (avg ms per stage)"),
     ("resolve_quality",      "ResolvePass quality  (surrogate leak rate + accuracy)"),
     ("sanitization_quality", "Sanitization quality  (PII leak to LLM rate + accuracy)"),
@@ -172,8 +174,9 @@ def run_evaluation(
     need_timing  = fields.get("timing", False)
     need_resolve = fields.get("resolve_quality", False)
     need_sanit    = fields.get("sanitization_quality", False)
-    need_per_type     = fields.get("per_entity_type", False)
-    need_presidio_cmp = fields.get("presidio_comparison", False)
+    need_per_type      = fields.get("per_entity_type", False)
+    need_presidio_cmp  = fields.get("presidio_comparison", False)
+    need_bertscore_cmp = fields.get("bertscore_comparison", False)
 
     no_answers       = 0
     no_answers_empty = 0
@@ -208,6 +211,14 @@ def run_evaluation(
     # SS comparable-type stats (computed independently for comparison,
     # regardless of whether per_entity_type toggle is on)
     ss_cmp_type_stats = defaultdict(lambda: {"tp": 0, "fp": 0, "fn": 0})
+
+    ss_bs_precisions  = []
+    ss_bs_recalls     = []
+    ss_bs_f1s         = []
+
+    prs_bs_precisions = []
+    prs_bs_recalls    = []
+    prs_bs_f1s        = []
 
     for i in range(total):
         status = "ok"
@@ -388,6 +399,20 @@ def run_evaluation(
                             if val.lower() not in key_all_lower:
                                 presidio_type_stats[comparable]["fp"] += 1
 
+            if need_bertscore_cmp:
+                bs_ss  = a_entry.get("bertscore_ss")
+                bs_prs = a_entry.get("bertscore_presidio")
+
+                if isinstance(bs_ss, dict):
+                    ss_bs_precisions.append(bs_ss.get("precision", 0))
+                    ss_bs_recalls.append(   bs_ss.get("recall",    0))
+                    ss_bs_f1s.append(       bs_ss.get("f1",        0))
+
+                if isinstance(bs_prs, dict):
+                    prs_bs_precisions.append(bs_prs.get("precision", 0))
+                    prs_bs_recalls.append(   bs_prs.get("recall",    0))
+                    prs_bs_f1s.append(       bs_prs.get("f1",        0))
+
         except Exception:
             status = "error"
 
@@ -523,6 +548,37 @@ def run_evaluation(
             },
             "presidio_only_counts": dict(presidio_only_counts),
             "approximate_note": "DATE_TIME/dob and LOCATION/GPE are approximate comparisons",
+        }
+
+    if need_bertscore_cmp:
+
+        def _mean(lst):
+            return _r(sum(lst) / len(lst)) if lst else None
+
+        def _bs_status(count, total):
+            if count == 0:     return "no_data"
+            if count < total:  return "partial"
+            return "full"
+
+        ss_count  = len(ss_bs_f1s)
+        prs_count = len(prs_bs_f1s)
+
+        result["bertscore_comparison"] = {
+            "total_questions": total,
+            "ss": {
+                "precision":   _mean(ss_bs_precisions),
+                "recall":      _mean(ss_bs_recalls),
+                "f1":          _mean(ss_bs_f1s),
+                "data_count":  ss_count,
+                "data_status": _bs_status(ss_count, total),
+            },
+            "presidio": {
+                "precision":   _mean(prs_bs_precisions),
+                "recall":      _mean(prs_bs_recalls),
+                "f1":          _mean(prs_bs_f1s),
+                "data_count":  prs_count,
+                "data_status": _bs_status(prs_count, total),
+            },
         }
 
     return result
