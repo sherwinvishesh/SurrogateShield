@@ -58,6 +58,26 @@ def _luhn_valid(number: str) -> bool:
 
 
 # ─────────────────────────────────────────────
+# ABA routing number checksum
+# ─────────────────────────────────────────────
+
+def _aba_routing_valid(number: str) -> bool:
+    """
+    Validate a 9-digit ABA routing number using the standard checksum.
+    Formula: (3*d0 + 7*d1 + d2 + 3*d3 + 7*d4 + d5 + 3*d6 + 7*d7 + d8) % 10 == 0
+    """
+    if len(number) != 9 or not number.isdigit():
+        return False
+    digits = [int(c) for c in number]
+    checksum = (
+        3 * digits[0] + 7 * digits[1] + digits[2] +
+        3 * digits[3] + 7 * digits[4] + digits[5] +
+        3 * digits[6] + 7 * digits[7] + digits[8]
+    )
+    return checksum % 10 == 0
+
+
+# ─────────────────────────────────────────────
 # Pattern definitions
 # ─────────────────────────────────────────────
 
@@ -226,6 +246,50 @@ _PATTERNS: list = [
         None,
     ),
 
+    # ── Cryptocurrency wallet address ────────────────────────────────────────
+    # Bitcoin P2PKH (starts with 1), P2SH (starts with 3),
+    # Bech32 (starts with bc1), Ethereum (0x + 40 hex chars).
+    # Patterns are highly distinctive — no validator needed.
+    (
+        "crypto",
+        re.compile(
+            r"(?:"
+            r"\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b"   # BTC legacy P2PKH/P2SH
+            r"|\bbc1[ac-hj-np-z02-9]{6,87}\b"          # BTC Bech32
+            r"|\b0x[0-9a-fA-F]{40}\b"                   # Ethereum
+            r")"
+        ),
+        None,
+    ),
+
+    # ── US ABA routing number ────────────────────────────────────────────────
+    # Exactly 9 digits, validated by ABA checksum algorithm.
+    # Must come BEFORE zip_us to claim 9-digit spans before zip claims them.
+    (
+        "us_bank_number",
+        re.compile(r"(?<!\d)\d{9}(?!\d)"),
+        lambda m: _aba_routing_valid(m.group().strip()),
+    ),
+
+    # ── US Driver's License ──────────────────────────────────────────────────
+    # Context-gated: only fires when preceded by a license keyword within
+    # 60 characters. Catches the most common state formats:
+    #   • Letter + 7 digits  (CA, VA, WA, OR, CO, etc.)
+    #   • Letter + 12 digits (FL)
+    #   • 1-2 letters + 5-9 digits (many other states)
+    # Uses a context validator rather than a look-behind (more flexible).
+    (
+        "us_driver_license",
+        re.compile(
+            r"(?i)(?:driver'?s?\s+licen[sc]e|license\s*(?:number|no|#|num)"
+            r"|\bDL\b|\bD\.L\.\b)"
+            r"[\s:\-#]*"
+            r"([A-Z0-9]{5,20})\b",
+            re.IGNORECASE,
+        ),
+        None,
+    ),
+
     # ── US ZIP code — MUST come after phone_intl ───────────────────────────────
     (
         "zip_us",
@@ -283,7 +347,14 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
             if not _span_free(start, end):
                 continue
 
-            matched_text = match.group().strip()
+            if entity_type == "us_driver_license":
+                matched_text = (match.group(1) or "").strip()
+                if not matched_text:
+                    continue
+                start = match.start(1)
+                end   = match.end(1)
+            else:
+                matched_text = match.group().strip()
 
             if _should_skip(matched_text):
                 logger.debug(f"[PatternScan] Skipping (skip_values): {matched_text!r}")

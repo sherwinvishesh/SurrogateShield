@@ -41,8 +41,22 @@ KEY_TYPE_MAP = {
     "postcode":       "postal_code",
     "postcode_uk":    "postal_code",
     "gender":         "gender_indicator",
-    "fac":            "FAC",
-    "FAC":            "FAC",
+    "fac":              "FAC",
+    "FAC":              "FAC",
+    "crypto":           "crypto",
+    "bitcoin":          "crypto",
+    "ethereum":         "crypto",
+    "wallet":           "crypto",
+    "bank_number":      "us_bank_number",
+    "bank_account":     "us_bank_number",
+    "us_bank_number":   "us_bank_number",
+    "routing_number":   "us_bank_number",
+    "routing":          "us_bank_number",
+    "driver_license":   "us_driver_license",
+    "us_driver_license": "us_driver_license",
+    "drivers_license":  "us_driver_license",
+    "dl":               "us_driver_license",
+    "license":          "us_driver_license",
 }
 
 NORMALIZE_TYPE = {
@@ -63,9 +77,12 @@ PRESIDIO_TO_COMPARABLE = {
     "US_SSN":        "ssn",
     "CREDIT_CARD":   "credit_card",
     "IP_ADDRESS":    "ip_address",
-    "DATE_TIME":     "dob",    # approximate: Presidio detects all
-                               # datetime; SS focuses on DOB only
-    "LOCATION":      "GPE",    # approximate: both NER-based location
+    "DATE_TIME":         "dob",    # approximate: Presidio detects all
+                                   # datetime; SS focuses on DOB only
+    "LOCATION":          "GPE",    # approximate: both NER-based location
+    "CRYPTO":            "crypto",
+    "US_BANK_NUMBER":    "us_bank_number",
+    "US_DRIVER_LICENSE": "us_driver_license",
 }
 
 # Types SS detects that Presidio cannot — shown separately in table

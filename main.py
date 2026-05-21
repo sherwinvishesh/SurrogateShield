@@ -1026,6 +1026,9 @@ def _run_evaluation() -> None:
             "credit_card",
             "ip_address",
             "api_key",
+            "crypto",              # Bitcoin/Ethereum wallet addresses
+            "us_bank_number",      # ABA routing numbers
+            "us_driver_license",   # driver's license numbers
             "postal_code",    # consolidated from zip_us + postcode_uk
             "gender_indicator",
         ]

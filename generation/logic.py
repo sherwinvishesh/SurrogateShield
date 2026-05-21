@@ -26,6 +26,16 @@ _fake = Faker()
 Faker.seed(None)
 
 
+def _aba_check(number: str) -> bool:
+    """Used by _gen_us_bank_number to verify generated routing numbers."""
+    digits = [int(c) for c in number]
+    return (
+        3 * digits[0] + 7 * digits[1] + digits[2] +
+        3 * digits[3] + 7 * digits[4] + digits[5] +
+        3 * digits[6] + 7 * digits[7] + digits[8]
+    ) % 10 == 0
+
+
 class MimicGen:
     """
     Generates realistic, collision-resistant surrogates for detected PII.
@@ -126,6 +136,40 @@ class MimicGen:
     def _gen_fac(self) -> str:
         return _fake.company() + " Building"
 
+    def _gen_crypto(self) -> str:
+        """Generate a realistic-looking Bitcoin address (P2PKH format)."""
+        import random as _rand
+        b58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+        length = _rand.randint(26, 34)
+        return "1" + "".join(_rand.choices(b58, k=length - 1))
+
+    def _gen_us_bank_number(self) -> str:
+        """
+        Generate a valid 9-digit ABA routing number that passes the checksum.
+        Uses the ABA formula to compute the 9th check digit.
+        """
+        import random as _rand
+        weights = [3, 7, 1, 3, 7, 1, 3, 7]
+        for _ in range(100):
+            digits = [_rand.randint(0, 9) for _ in range(8)]
+            digits[0] = _rand.choice([0, 1, 2, 3])
+            partial = sum(w * d for w, d in zip(weights, digits))
+            check = (10 - (partial % 10)) % 10
+            result = "".join(str(d) for d in digits) + str(check)
+            if _aba_check(result):
+                return result
+        return "021000021"  # known valid fallback (Federal Reserve Bank of NY)
+
+    def _gen_us_driver_license(self) -> str:
+        """
+        Generate a realistic driver's license number.
+        Uses California format (letter + 7 digits) as the most common template.
+        """
+        import random as _rand
+        letter = _rand.choice("ABCDEFGHJKLMNPRSTUVWXYZ")
+        digits = _fake.numerify("#######")
+        return f"{letter}{digits}"
+
     def _gen_default(self) -> str:
         return _fake.bothify("??##??##")
 
@@ -159,8 +203,11 @@ class MimicGen:
         "ip_address":        "_gen_ip",
         "zip_us":            "_gen_zip_us",
         "postcode_uk":       "_gen_postcode_uk",
-        "api_key":           "_gen_api_key",
-        "implicit_location": "_gen_implicit_location",
+        "api_key":            "_gen_api_key",
+        "crypto":             "_gen_crypto",
+        "us_bank_number":     "_gen_us_bank_number",
+        "us_driver_license":  "_gen_us_driver_license",
+        "implicit_location":  "_gen_implicit_location",
         "GPE":               "_gen_gpe",
         "LOC":               "_gen_loc",
         "ORG":               "_gen_org",
