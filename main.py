@@ -370,7 +370,10 @@ def _run_pii_finder() -> None:
             sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
             sq_confirmed = deduplicate(sq_confirmed)
             sq_skipped   = getattr(sq_confirmed, '_skipped_entities', [])
-            sq_surrogate_map = mimic.generate_all(sq_confirmed) if sq_confirmed else {}
+            # Addresses in service queries are fuzzed (not surrogate-replaced).
+            # Only generate surrogates for non-address entities (e.g. names).
+            sq_non_addr      = [e for e in sq_confirmed if e.type != "address"]
+            sq_surrogate_map = mimic.generate_all(sq_non_addr) if sq_non_addr else {}
 
             if sq_confirmed or sq_skipped:
                 sq_tbl = Table(
@@ -383,10 +386,11 @@ def _run_pii_finder() -> None:
                 sq_tbl.add_column("Source",    style="dim",       width=8)
                 sq_tbl.add_column("Surrogate", style="green bold")
                 for ent in sq_confirmed:
-                    sq_tbl.add_row(
-                        ent.text, ent.type, f"{ent.score:.2f}", ent.source,
-                        sq_surrogate_map.get(ent.text, "[dim]—[/dim]"),
-                    )
+                    if ent.type == "address":
+                        surrogate_cell = "[dim yellow]fuzzed — service query[/dim yellow]"
+                    else:
+                        surrogate_cell = sq_surrogate_map.get(ent.text, "[dim]—[/dim]")
+                    sq_tbl.add_row(ent.text, ent.type, f"{ent.score:.2f}", ent.source, surrogate_cell)
                 for ent in sq_skipped:
                     sq_tbl.add_row(
                         ent.text, ent.type, f"{ent.score:.2f}", ent.source,
