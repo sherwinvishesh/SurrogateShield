@@ -35,11 +35,17 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
      "Presidio sanitized  (Presidio [TYPE] redaction — baseline for BERTScore)"),
     ("presidio_found_piis",
      "Presidio found PIIs  (raw detected entities — type, value, score)"),
+    ("bertscore_ss",
+     "BERTScore SS       (original vs SS sanitized — utility score)"),
+    ("bertscore_presidio",
+     "BERTScore Presidio (original vs Presidio sanitized — baseline)"),
 ]
 
 DEFAULT_FIELDS: Dict[str, bool] = {key: True for key, _ in OUTPUT_FIELDS}
 DEFAULT_FIELDS["presidio_sanitized_input"] = False
 DEFAULT_FIELDS["presidio_found_piis"] = False
+DEFAULT_FIELDS["bertscore_ss"]       = False
+DEFAULT_FIELDS["bertscore_presidio"] = False
 
 
 # ── Core per-question processor ───────────────────────────────────────────────
@@ -323,5 +329,151 @@ def run_batch(
         if progress_cb:
             progress_cb(i, total, question, status, elapsed)
 
+    # ── Post-loop: BERTScore batch computation ────────────────────────
+    need_bs_ss  = fields.get("bertscore_ss",       False)
+    need_bs_prs = fields.get("bertscore_presidio", False)
+
+    if need_bs_ss or need_bs_prs:
+        _run_bertscore_batch(
+            answers=answers,
+            questions=questions,
+            need_ss=need_bs_ss,
+            need_presidio=need_bs_prs,
+            progress_cb=progress_cb,
+            total=total,
+        )
+        # BERTScore done — _run_bertscore_batch updates answers in-place
+        # The final _flush() below saves everything including scores
+
     _flush()
     return str(out_path)
+
+
+def _run_bertscore_batch(
+    answers: list,
+    questions: list,
+    need_ss: bool,
+    need_presidio: bool,
+    progress_cb,
+    total: int,
+) -> None:
+    """
+    Compute BERTScore for all questions in one batch pass.
+    Updates answers in-place. Never raises — errors stored as None.
+
+    Signals to progress_cb using sentinel index -1 and special statuses:
+        "bertscore_start"    — batch computation beginning
+        "bertscore_done"     — batch computation complete
+        "bertscore_skipped"  — bert-score not installed
+        "bertscore_warn"     — partial data warning
+    """
+    import time as _time
+
+    # ── Check bert-score is installed ────────────────────────────────
+    try:
+        from bert_score import score as _bs_score
+    except ImportError:
+        if progress_cb:
+            progress_cb(-1, total, "", "bertscore_skipped", 0.0)
+        for ans in answers:
+            if need_ss:
+                ans["bertscore_ss"] = None
+            if need_presidio:
+                ans["bertscore_presidio"] = None
+        return
+
+    if progress_cb:
+        progress_cb(-1, total, "", "bertscore_start", 0.0)
+
+    t0 = _time.time()
+
+    # ── Collect SS pairs ──────────────────────────────────────────────
+    if need_ss:
+        ss_indices    = []
+        ss_candidates = []   # sanitized_input values
+        ss_references = []   # original questions
+
+        for i, (ans, q_entry) in enumerate(zip(answers, questions)):
+            original   = q_entry.get("input", "")
+            sanitized  = ans.get("sanitized_input")
+            if original and sanitized:
+                ss_indices.append(i)
+                ss_candidates.append(sanitized)
+                ss_references.append(original)
+
+        if ss_indices:
+            try:
+                P, R, F1 = _bs_score(
+                    cands=ss_candidates,
+                    refs=ss_references,
+                    lang="en",
+                    model_type="roberta-large",
+                    batch_size=16,
+                    verbose=False,
+                )
+                for rank, idx in enumerate(ss_indices):
+                    answers[idx]["bertscore_ss"] = {
+                        "precision": round(P[rank].item(),  4),
+                        "recall":    round(R[rank].item(),  4),
+                        "f1":        round(F1[rank].item(), 4),
+                    }
+            except Exception:
+                for idx in ss_indices:
+                    answers[idx]["bertscore_ss"] = None
+
+        # Mark questions that had no sanitized_input as None
+        for i, ans in enumerate(answers):
+            if need_ss and "bertscore_ss" not in ans:
+                ans["bertscore_ss"] = None
+
+    # ── Collect Presidio pairs ────────────────────────────────────────
+    if need_presidio:
+        prs_indices    = []
+        prs_candidates = []   # presidio_sanitized_input values
+        prs_references = []   # original questions
+        null_count     = 0
+
+        for i, (ans, q_entry) in enumerate(zip(answers, questions)):
+            original           = q_entry.get("input", "")
+            presidio_sanitized = ans.get("presidio_sanitized_input")
+
+            if presidio_sanitized is None:
+                null_count += 1
+                continue
+            if original and presidio_sanitized:
+                prs_indices.append(i)
+                prs_candidates.append(presidio_sanitized)
+                prs_references.append(original)
+
+        # Warn if presidio_sanitized_input was missing for some questions
+        if null_count > 0 and progress_cb:
+            progress_cb(-1, total, "", "bertscore_warn", float(null_count))
+
+        if prs_indices:
+            try:
+                P, R, F1 = _bs_score(
+                    cands=prs_candidates,
+                    refs=prs_references,
+                    lang="en",
+                    model_type="roberta-large",
+                    batch_size=16,
+                    verbose=False,
+                )
+                for rank, idx in enumerate(prs_indices):
+                    answers[idx]["bertscore_presidio"] = {
+                        "precision": round(P[rank].item(),  4),
+                        "recall":    round(R[rank].item(),  4),
+                        "f1":        round(F1[rank].item(), 4),
+                    }
+            except Exception:
+                for idx in prs_indices:
+                    answers[idx]["bertscore_presidio"] = None
+
+        # Mark remaining questions as None
+        for i, ans in enumerate(answers):
+            if need_presidio and "bertscore_presidio" not in ans:
+                ans["bertscore_presidio"] = None
+
+    elapsed = _time.time() - t0
+    if progress_cb:
+        progress_cb(-1, total, "", "bertscore_done", elapsed)

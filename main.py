@@ -550,6 +550,41 @@ def _run_json_test() -> None:
 
     def _on_progress(i: int, total: int, question: str, status: str, elapsed: float) -> None:
         nonlocal errors
+
+        if i < 0:
+            # Sentinel status — handle below, do not format as a question row
+            if status == "bertscore_start":
+                console.print()
+                console.print(
+                    "  [dim blue]⟳[/dim blue]  "
+                    "[dim]Computing BERTScore (roberta-large)  "
+                    "— may take 15–30 min on CPU...[/dim]"
+                )
+            elif status == "bertscore_done":
+                console.print(
+                    f"  [green]✓[/green]  "
+                    f"[dim]BERTScore complete  ({elapsed:.1f}s)[/dim]"
+                )
+                console.print()
+            elif status == "bertscore_skipped":
+                console.print()
+                console.print(
+                    "  [yellow]⚠[/yellow]  "
+                    "[yellow]bert-score not installed — BERTScore skipped.[/yellow]\n"
+                    "  [dim]Run: pip install bert-score  then re-run this batch.[/dim]"
+                )
+                console.print()
+            elif status == "bertscore_warn":
+                missing = int(elapsed)   # elapsed repurposed to carry null_count
+                console.print(
+                    f"  [yellow]⚠[/yellow]  "
+                    f"[yellow]Presidio BERTScore: {missing} question(s) had no "
+                    f"presidio_sanitized_input — skipped.[/yellow]\n"
+                    "  [dim]Enable 'Presidio sanitized' field in JSON Test "
+                    "and re-run for full coverage.[/dim]"
+                )
+            return
+
         short_q = (question[:68] + "…") if len(question) > 68 else question
         idx     = f"[dim]{i + 1:>{len(str(total))}}/{total}[/dim]"
 
