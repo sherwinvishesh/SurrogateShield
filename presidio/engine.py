@@ -24,16 +24,50 @@ def get_analyzer():
         return _analyzer
     _load_attempted = True
     try:
-        from presidio_analyzer import AnalyzerEngine
-        from presidio_analyzer.nlp_engine import NlpEngineProvider
+        import logging
+
+        # Suppress Presidio's non-English recognizer warnings and spaCy
+        # entity mapping warnings before loading anything
+        logging.getLogger("presidio_analyzer").setLevel(logging.ERROR)
+        logging.getLogger("presidio_analyzer.nlp_engine.spacy_nlp_engine"
+                          ).setLevel(logging.ERROR)
+        logging.getLogger("presidio_analyzer.recognizer_registry"
+                          ).setLevel(logging.ERROR)
+
+        from presidio_analyzer import AnalyzerEngine, RecognizerRegistry
+        from presidio_analyzer.nlp_engine import (
+            NlpEngineProvider,
+            NerModelConfiguration,
+        )
+
+        # Only load English-language recognizers — prevents the
+        # "Recognizer not added to registry" warnings for es/it/pl
+        registry = RecognizerRegistry()
+        registry.load_predefined_recognizers(languages=["en"])
+
+        # Tell Presidio to silently ignore spaCy labels it has no
+        # mapping for — prevents PRODUCT/CARDINAL/ORDINAL warnings
+        ner_model_config = NerModelConfiguration(
+            labels_to_ignore=[
+                "CARDINAL", "ORDINAL", "PRODUCT", "EVENT",
+                "LANGUAGE", "MONEY", "QUANTITY", "TIME",
+                "PERCENT", "WORK_OF_ART", "LAW",
+            ]
+        )
 
         configuration = {
             "nlp_engine_name": "spacy",
-            "models": [{"lang_code": "en", "model_name": "en_core_web_lg"}],
+            "models": [{
+                "lang_code":        "en",
+                "model_name":       "en_core_web_lg",
+                "ner_model_config": ner_model_config,
+            }],
         }
-        provider = NlpEngineProvider(nlp_configuration=configuration)
+        provider   = NlpEngineProvider(nlp_configuration=configuration)
         nlp_engine = provider.create_engine()
+
         _analyzer = AnalyzerEngine(
+            registry=registry,
             nlp_engine=nlp_engine,
             supported_languages=["en"],
         )

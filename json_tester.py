@@ -371,6 +371,16 @@ def _run_bertscore_batch(
 
     # ── Check bert-score is installed ────────────────────────────────
     try:
+        import logging
+        import warnings
+
+        # Suppress transformers load report and HuggingFace Hub warnings
+        logging.getLogger("transformers").setLevel(logging.ERROR)
+        logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
+        logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+        warnings.filterwarnings("ignore", message=".*unauthenticated.*")
+        warnings.filterwarnings("ignore", message=".*HF_TOKEN.*")
+
         from bert_score import score as _bs_score
     except ImportError:
         if progress_cb:
