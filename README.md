@@ -5,6 +5,7 @@
 SurrogateShield intercepts your messages before they reach any LLM API, detects all personally identifiable information (PII), replaces it with realistic fake surrogates, sends the sanitised message, and restores your real values in the response. All cryptographic operations run locally. Nothing sensitive is ever transmitted.
 
 
+
 ## How It Works
 
 ```
@@ -46,15 +47,15 @@ Display to user
 ## Features
 
 - **Three-stage PII detection cascade** — regex patterns → spaCy NER → distilbert-NER
-- **Realistic surrogate generation** — fake names look like names, fake SSNs pass format checks
+- **Realistic surrogate generation** — fake names look like names, fake SSNs pass format checks, fake Bitcoin addresses match Base58 format
 - **AES-256-GCM encrypted ShadowMap** — surrogate-to-original mappings never stored in plaintext
 - **Multi-provider support** — Claude, Gemini, ChatGPT, or fully offline via Ollama
 - **Service-query intelligence** — location queries (restaurants near X) get minimal address fuzzing instead of full replacement, preserving answer quality
 - **Quasi-identifier risk detection** — warns when combinations like ZIP+DOB+gender risk re-identification (Sweeney k-anonymity)
 - **Privacy-aware RAG** — documents are anonymised before indexing; surrogates are used in all vector store operations
 - **PII Finder mode** — test detection on any text with zero API calls
-- **Presidio comparison** — side-by-side Microsoft Presidio results in PII Finder show the difference between placeholder `[ENTITY_TYPE]` redaction and SurrogateShield's surrogate approach
-- **Batch evaluation** — precision, recall, F1, and per-entity-type breakdown against ground-truth answer keys
+- **Presidio comparison** — side-by-side Microsoft Presidio results in PII Finder and Evaluation, including per-entity-type F1/precision/recall
+- **Batch evaluation** — precision, recall, F1, per-entity-type breakdown, ResolvePass leak rate, sanitisation quality, BERTScore utility preservation, and Presidio side-by-side comparison against ground-truth answer keys
 - **API Transparency panel** — see exactly what was sent, what was received, and the final restored output
 
 
@@ -67,22 +68,32 @@ Three detectors run in sequence. Each masks spans it claims so downstream detect
 
 #### PatternScan (`detection/pattern_scan.py`)
 
-Regex-based structural detection. Runs first so structured PII is masked before any NER model sees it.
+Regex-based structural detection. Runs first so structured PII is masked before any NER model sees it. Validators (Luhn, ABA checksum) reject false positives before any entity is emitted.
 
-| Pattern | Examples |
-|---|---|
-| Street address |  `99 Cathedral Close` |
-| SSN | `544-87-2944` |
-| Email | `user@example.com` |
-| Phone US | `+1-480-555-1234` |
-| Phone UK | `+44 7911 123456` |
-| Phone (international) | `+49 8234 927461` |
-| Credit card (Luhn-validated) | `4111 1111 1111 1111` |
-| Date of birth | `01/15/1990` |
-| IPv4 | `192.168.1.100` |
-| API key / secret | `sk-ant-...`, `Bearer ...` |
-| US ZIP code | `85281` |
-| UK postcode | `SW1A 1AA` |
+| Pattern | Examples | Validator |
+|---|---|---|
+| Street address | `99 Cathedral Close`, `456 Innovation Plaza` | — |
+| SSN | `544-87-2944` | — |
+| Email | `user@example.com` | — |
+| Phone US | `+1-480-555-1234` | — |
+| Phone UK | `+44 7911 123456` | — |
+| Phone (international) | `+49 8234 927461` | — |
+| Credit card | `4111 1111 1111 1111` | Luhn algorithm |
+| Date of birth | `01/15/1990`, `March 14 1990` | — |
+| IPv4 | `192.168.1.100` | — |
+| API key / secret | `sk-ant-...`, `Bearer ...`, `ghp_...`, `AKIA...`, `AIzaSy...` | — |
+| Gender indicator | `gender: female`, `she/her`, `I am a man` | — |
+| UK postcode | `SW1A 1AA` | — |
+| US ZIP code | `85281`, `85281-1234` | — |
+| **Crypto wallet** *(new)* | Bitcoin P2PKH/P2SH/Bech32, Ethereum `0x...` | — |
+| **ABA routing number** *(new)* | `021000021`, `122105155` | ABA 9-digit checksum |
+| **US driver's license** *(new)* | `B7654321`, `F123456789012` | Context-gated (keyword required) |
+
+Pattern order matters — patterns claim character spans; later patterns cannot overlap earlier ones. In particular: `crypto` and `us_bank_number` run before `zip_us` so that 9-digit routing numbers and long hex strings are claimed before the ZIP pattern can fragment them.
+
+**ABA checksum** (`_aba_routing_valid`): `(3·d₀ + 7·d₁ + d₂ + 3·d₃ + 7·d₄ + d₅ + 3·d₆ + 7·d₇ + d₈) mod 10 = 0`. Eliminates false positives — random 9-digit numbers almost always fail.
+
+**Driver's license** is context-gated: the regex requires a keyword (`driver's license`, `license number`, `DL`, `D.L.`) within the same phrase. Only the license value itself (captured in group 1) is marked as an entity — the keyword prefix is left in the sanitised text.
 
 #### EntityTrace (`detection/entity_trace.py`)
 
@@ -150,6 +161,9 @@ Generates type-consistent surrogates using [Faker](https://faker.readthedocs.io/
 | `api_key` | `sk-` + 32 random chars |
 | `GPE` / `LOC` / `ORG` / `FAC` | Faker city/company names |
 | `gender_indicator` | Grammatically valid gender expression |
+| **`crypto`** *(new)* | Bitcoin P2PKH format — `1` + Base58 chars, 26–35 chars |
+| **`us_bank_number`** *(new)* | Valid 9-digit ABA routing number (passes checksum) |
+| **`us_driver_license`** *(new)* | CA-format: letter + 7 digits (e.g. `B4923817`) |
 
 
 
@@ -208,10 +222,18 @@ Switch providers from the **Settings** menu inside the dashboard (press `S`).
 
 | Category | Types |
 |---|---|
-| Structural (regex) | SSN, email, phone (US/UK/international), credit card, street address, DOB, IPv4, API keys/secrets, US ZIP, UK postcode |
+| Structural (regex) | SSN, email, phone (US/UK/international), credit card, street address, DOB, IPv4, API keys/secrets, gender indicator, US ZIP, UK postcode, **crypto wallet** (Bitcoin/Ethereum), **ABA routing number**, **US driver's license** |
 | Named entities (NER) | PERSON, GPE (geo-political entity), LOC, ORG, FAC (facility) |
-| Inferred | Gender indicator, implicit location |
+| Inferred | Implicit location |
 | Combination risk | Quasi-identifier sets per Sweeney k-anonymity |
+
+### New in recent release
+
+| Type | Description | Detection mechanism |
+|---|---|---|
+| `crypto` | Bitcoin P2PKH (`1…`), P2SH (`3…`), Bech32 (`bc1…`), Ethereum (`0x` + 40 hex) | Regex — highly distinctive character sets, no validator needed |
+| `us_bank_number` | US ABA routing numbers (9 digits) | Regex + ABA checksum: `(3·d₀ + 7·d₁ + d₂ + …) mod 10 = 0` |
+| `us_driver_license` | State DL numbers — letter + 7 digits (CA), letter + 12 digits (FL), etc. | Context-gated regex — fires only when preceded by a license keyword |
 
 
 
@@ -298,6 +320,7 @@ sentence-transformers>=2.7.0  # RAG embeddings
 transformers>=4.40.0        # ContextGuard (distilbert-NER)
 torch>=2.0.0                # ContextGuard inference
 requests>=2.31.0            # Address verification (Nominatim)
+bert-score>=0.3.13          # Utility preservation scoring (BERTScore comparison)
 ollama>=0.1.8               # Local LLM (optional)
 presidio-analyzer>=2.2.0    # Presidio comparison panel in PII Finder
 presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
@@ -309,6 +332,10 @@ presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
 >
 > **ContextGuard model:** `dslim/distilbert-NER` (~250 MB) is downloaded
 > automatically from HuggingFace Hub on the first run — no manual command needed.
+>
+> **BERTScore:** `bert-score` and its `roberta-large` model (~1.4 GB) are only
+> needed if you enable BERTScore fields in JSON Test. The model is downloaded
+> automatically on first use.
 
 ### Environment Variables
 
@@ -331,7 +358,7 @@ These are changed interactively from inside the app and persist across sessions 
 | Key | Default | What it controls |
 |---|---|---|
 | `llm_provider` | `claude` | Active LLM backend — Claude / Gemini / ChatGPT / Local |
-| `detailed_view` | `true` | Show pipeline stage logs, per-entity PII table, and the API transparency panel in each chat turn |
+| `detailed_view` | `false` | Show pipeline stage logs, per-entity PII table, and the API transparency panel in each chat turn |
 | `presidio_comparison` | `false` | Show the Presidio side-by-side panel below each PII Finder result. **Off by default** — requires `presidio-analyzer`, `presidio-anonymizer`, and `python -m spacy download en_core_web_lg` to be installed first (see *Enabling the Presidio comparison panel* above) |
 
 ### Advanced constants (`config.py`)
@@ -343,10 +370,13 @@ Hard-coded thresholds and flags. Edit the file directly to change them; no resta
 | `ENTITY_TRACE_HIGH_THRESHOLD` | `0.85` | spaCy score above which an entity is immediately confirmed |
 | `ENTITY_TRACE_LOW_THRESHOLD` | `0.60` | spaCy score above which an entity is forwarded to ContextGuard |
 | `CONTEXT_GUARD_CONFIDENCE_THRESHOLD` | `0.70` | distilbert score required to confirm a borderline entity |
+| `ENTITY_TRACE_FALLBACK_THRESHOLD` | `0.65` | Score used when ContextGuard is disabled to promote borderline entities |
 | `FUZZY_MATCH_THRESHOLD` | `85` | rapidfuzz `partial_ratio` threshold for ResolvePass reconstruction |
 | `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Enable the lightweight address-fuzzing path for location queries |
 | `SERVICE_QUERY_VERIFY_ADDRESSES` | `True` | Verify fuzzed addresses via OpenStreetMap Nominatim (disable for offline use) |
 | `SHOW_API_TRANSPARENCY` | `True` | Show the sent / received / restored transparency panel after each chat turn |
+| `RAG_TOP_K` | `3` | Number of document chunks retrieved per RAG query |
+| `RAG_CHUNK_SIZE` | `512` | Characters per chunk when splitting indexed documents |
 | `CLAUDE_MODEL` | `claude-sonnet-4-6` | Claude model identifier |
 | `SPACY_MODEL` | `en_core_web_lg` | spaCy model used by EntityTrace and Presidio |
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | sentence-transformers model for RAG embeddings |
@@ -391,6 +421,7 @@ python main.py add-doc path/to/document.txt
 | `J` | JSON Test — batch-process a question file |
 | `E` | Evaluation — score pipeline quality against ground-truth |
 | `S` | Settings (provider, view mode) |
+| `H` | Help |
 | `Q` | Quit |
 
 
@@ -410,7 +441,28 @@ Place a question file in `experiment/<name>.json`:
 
 Press `J` in the dashboard, enter the filename, select which fields to capture, and run. Output is saved to `experiment/<name>_answers.json` with progress flushed every 25 questions — safe to interrupt and resume.
 
-Captured fields include: detected PII at each stage, surrogate map, sanitised input, LLM response, and per-stage timings in milliseconds.
+#### Available output fields
+
+| Field | What it captures |
+|---|---|
+| `question` | The original question text |
+| `pattern_scan_pii` | Entities detected by PatternScan (regex stage) |
+| `entity_trace_pii` | Entities detected by EntityTrace (spaCy NER) |
+| `context_guard_pii` | Entities detected by ContextGuard (distilbert-NER) |
+| `confirmed_pii` | Final combined confirmed entity list |
+| `pii_detail` | Per-entity type, score, and source |
+| `quasi_id_risks` | Quasi-identifier combination risks detected |
+| `surrogate_map` | Mapping of original → surrogate for every replaced entity |
+| `sanitized_input` | The exact text sent to the LLM |
+| `llm_response` | Raw LLM response (surrogates, before restoration) |
+| `stage_timings_ms` | PatternScan / EntityTrace / ContextGuard / surrogate gen / LLM latency in ms |
+| `recognized_not_replaced` | Entities detected as PII but intentionally skipped (e.g. topical geo in service queries) |
+| `presidio_sanitized_input` | Presidio `[TYPE]`-placeholder redaction (baseline for BERTScore comparison) |
+| `presidio_found_piis` | Presidio raw detected entities — type, value, score |
+| `bertscore_ss` | BERTScore of original vs SurrogateShield sanitised input |
+| `bertscore_presidio` | BERTScore of original vs Presidio sanitised input |
+
+By default, `presidio_sanitized_input`, `presidio_found_piis`, `bertscore_ss`, and `bertscore_presidio` are **off** — enable them in the field selection screen to generate data for the Presidio comparison and BERTScore tables in Evaluation.
 
 ### Evaluation (Precision / Recall / F1)
 
@@ -428,14 +480,106 @@ Pair your question file with an answer-key file at `experiment/<name>_key.json`:
 ]
 ```
 
-Press `E` in the dashboard to score a completed answers file against its key. The evaluator reports:
+Press `E` in the dashboard to score a completed answers file against its key.
 
-- Overall precision, recall, F1, and accuracy
-- Per-entity-type breakdown (PERSON, email, SSN, phone, address, etc.)
-- Answer rate (non-empty LLM responses)
-- Average stage timings
-- ResolvePass surrogate leak rate
-- Sanitisation quality (PII leak rate to LLM)
+#### Supported answer-key labels
+
+The evaluator maps flexible label names to internal types:
+
+| Label(s) in key file | Internal type |
+|---|---|
+| `name`, `person`, `PERSON` | `PERSON` |
+| `email` | `email` |
+| `phone`, `phone_us`, `phone_uk`, `phone_intl` | `phone` |
+| `ssn` | `ssn` |
+| `address` | `address` |
+| `dob`, `date_of_birth` | `dob` |
+| `org`, `ORG`, `organization` | `ORG` |
+| `gpe`, `GPE`, `location` | `GPE` |
+| `credit_card` | `credit_card` |
+| `api_key` | `api_key` |
+| `ip`, `ip_address` | `ip_address` |
+| `zip`, `zip_us`, `postcode`, `postcode_uk` | `postal_code` |
+| `gender` | `gender_indicator` |
+| `fac`, `FAC` | `FAC` |
+| **`crypto`, `bitcoin`, `ethereum`, `wallet`** *(new)* | `crypto` |
+| **`bank_number`, `bank_account`, `us_bank_number`, `routing_number`, `routing`** *(new)* | `us_bank_number` |
+| **`driver_license`, `us_driver_license`, `drivers_license`, `dl`, `license`** *(new)* | `us_driver_license` |
+
+#### Evaluation metrics reported
+
+| Metric | Description |
+|---|---|
+| Questions / Answered / Empty | Total count, non-empty responses, failures |
+| Answer rate | Fraction of questions with non-empty LLM responses |
+| Surrogate counts | Total found vs key total; averages per question |
+| Precision / Recall / F1 / Accuracy | Overall surrogate detection quality |
+| Error (miss rate) | Fraction of key PII values not detected |
+| Stage timings | Average ms per pipeline stage |
+| ResolvePass leak rate | Fraction of responses where a surrogate was not restored |
+| Sanitisation quality | Fraction of questions where real PII reached the LLM |
+| Per-entity-type breakdown | F1 / precision / recall per PII type |
+| Presidio comparison (Table 1) | SS vs Presidio side-by-side per comparable type + overall |
+| BERTScore comparison (Table 2) | Semantic utility preservation: SS vs Presidio vs no-anonymisation baseline |
+
+#### Presidio comparison table
+
+The per-type comparison covers all types both systems can detect. Types SS detects that Presidio cannot are shown in a separate SS-Only table.
+
+**Comparable types** (both SS and Presidio):
+
+| Type | SS source | Presidio source |
+|---|---|---|
+| PERSON | EntityTrace / ContextGuard | Presidio NER |
+| email | PatternScan | Presidio regex |
+| phone | PatternScan | Presidio regex |
+| ssn | PatternScan | Presidio regex |
+| credit_card | PatternScan (Luhn) | Presidio regex (Luhn) |
+| ip_address | PatternScan | Presidio regex |
+| dob *(approximate)* | PatternScan | Presidio DATE_TIME |
+| GPE *(approximate)* | EntityTrace | Presidio LOCATION |
+| **crypto** *(new)* | PatternScan | Presidio CRYPTO |
+| **us_bank_number** *(new)* | PatternScan (ABA checksum) | Presidio US_BANK_NUMBER |
+| **us_driver_license** *(new)* | PatternScan (context-gated) | Presidio US_DRIVER_LICENSE |
+
+**SS-Only types** (Presidio cannot detect these):
+
+| Type | Notes |
+|---|---|
+| `api_key` | SK/Bearer/GHP/AKIA/AIzaSy prefixes |
+| `address` | Structural street-address regex |
+| `postal_code` | US ZIP + UK postcode |
+| `gender_indicator` | Explicit gender declarations |
+| `ORG` | Organisation names (NER) |
+| `FAC` | Facility names (NER) |
+
+#### BERTScore utility preservation (Table 2)
+
+BERTScore (`roberta-large`) measures how well the semantic meaning of the original message is preserved after anonymisation. Higher F1 = better utility.
+
+| Approach | Expected BERTScore F1 |
+|---|---|
+| No anonymisation (baseline) | 100% |
+| SurrogateShield (realistic surrogates) | ~92–97% — type-consistent replacements preserve sentence structure |
+| Presidio (placeholder redaction) | ~80–88% — `[ENTITY_TYPE]` tokens break semantic continuity |
+
+Enable the `BERTScore SS` and `BERTScore Presidio` fields in JSON Test to generate data for this table. The `roberta-large` model (~1.4 GB) is downloaded automatically on first use and can take 15–30 minutes to score on CPU.
+
+
+
+## Running the Tests
+
+```bash
+# Activate your venv first
+source .venv/bin/activate
+
+# Unit + integration tests (no API key required)
+python tests/test1.py
+python tests/test2.py
+python tests/test3.py
+```
+
+`test1.py` covers PatternScan, EntityTrace, SentinelLayer cascade, MimicGen, ShadowMap, ResolvePass, and a full no-API pipeline round-trip. All tests run without an API key.
 
 
 
@@ -448,7 +592,7 @@ SurrogateShield/
 ├── config.py                # All constants and thresholds (single source of truth)
 ├── util.py                  # Shared dataclasses (DetectedEntity, Conversation), logging helpers
 ├── settings_manager.py      # Persistent user settings (~/.surrogateshield/settings.json)
-├── evaluator.py             # Precision/recall/F1 evaluation logic
+├── evaluator.py             # Precision/recall/F1 evaluation logic + Presidio/BERTScore comparison
 ├── json_tester.py           # Batch JSON question processing
 ├── run.sh                   # Launcher script (venv activation, .env loading)
 ├── requirements.txt
@@ -472,7 +616,6 @@ SurrogateShield/
 │   └── logic.py             # ResolvePass — three-pass surrogate→original restoration
 │
 ├── presidio/                # Presidio integration layer (optional comparison feature)
-│   ├── __init__.py
 │   ├── engine.py            # Lazy singleton AnalyzerEngine wrapper
 │   ├── detect.py            # detect(text) → list[PresidioEntity]
 │   └── redact.py            # redact(text, entities) → [TYPE]-placeholder string
@@ -486,12 +629,14 @@ SurrogateShield/
 │   ├── example_key.json     # Sample ground-truth answer key
 │   └── example_answers.json # Sample output from JSON Test
 │
-├── tests/                   # Unit and integration tests
-│   ├── test1.py
-│   ├── test2.py
-│   └── test3.py
+├── tests/                   # Test suite (no API key required)
+│   ├── test1.py             # PatternScan, EntityTrace, cascade, MimicGen, ShadowMap, ResolvePass, round-trip
+│   ├── test2.py             # Additional detection and generation tests
+│   └── test3.py             # Additional pipeline and storage tests
 │
-└── conversations/           # Runtime: encrypted .shadowmap + conversation .json files
+└── conversations/           # Runtime — auto-created on first use
+    ├── <conv_id>.json        # Conversation history (surrogate text only, not originals)
+    └── <conv_id>.shadowmap   # AES-256-GCM encrypted surrogate→original mapping
 ```
 
 
@@ -503,11 +648,10 @@ SurrogateShield/
 | Device secret | 32-byte random key at `~/.surrogateshield/device.key`, `0o600` permissions |
 | Per-conversation key | HKDF-SHA256 with device secret as IKM and conversation ID as salt |
 | ShadowMap encryption | AES-256-GCM with fresh 12-byte nonce per write |
+| ShadowMap format | `nonce (12 bytes) ‖ AES-GCM ciphertext` — unreadable without device key |
 | API transmission | Only surrogates sent — real values never leave the device |
-| Conversation history | Stored locally in `conversations/`; conversation JSON holds surrogate text, not originals |
-| `.gitignore` | `*.shadowmap`, `conversations/*.json`, `device.key`, `.env` all excluded |
-
-The ShadowMap file format is: `nonce (12 bytes) || AES-GCM ciphertext`. Without the device key, the mapping is unreadable even if the file is obtained.
+| Conversation history | Stored locally in `conversations/`; JSON holds surrogate text, not originals |
+| `.gitignore` | `*.shadowmap`, `conversations/*.json`, `device.key`, `.env` excluded |
 
 
 
@@ -518,3 +662,4 @@ The ShadowMap file format is: `nonce (12 bytes) || AES-GCM ciphertext`. Without 
 - **Geographic generality is preserved.** US states, countries, and major cities are never replaced — they provide no meaningful re-identification risk and destroying them would break answer quality.
 - **Quasi-identifier risks are surfaced.** If your message contains combinations like ZIP+DOB+gender that are statistically re-identifying even without traditional PII, you are warned before the message is sent.
 - **RAG documents are anonymised at index time.** Real PII never enters the vector store. Retrieval and context injection all operate on surrogates.
+- **Financial and identity credentials are protected.** Bitcoin/Ethereum wallet addresses, ABA routing numbers, and driver's license numbers are detected and replaced alongside traditional PII.
