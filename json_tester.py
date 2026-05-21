@@ -31,9 +31,12 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
     ("sanitized_input",   "Sanitized input         (text sent to LLM)"),
     ("llm_response",      "LLM response            (raw text received)"),
     ("stage_timings_ms",  "Stage timings (ms)      (PatternScan / EntityTrace / ContextGuard / surrogate gen / LLM)"),
+    ("presidio_sanitized_input",
+     "Presidio sanitized  (Presidio [TYPE] redaction — baseline for BERTScore)"),
 ]
 
 DEFAULT_FIELDS: Dict[str, bool] = {key: True for key, _ in OUTPUT_FIELDS}
+DEFAULT_FIELDS["presidio_sanitized_input"] = False
 
 
 # ── Core per-question processor ───────────────────────────────────────────────
@@ -174,6 +177,29 @@ def _process_one(
         timings["total_ms"] = _ms(t_total)
         answer["stage_timings_ms"] = timings
 
+    # ── Presidio sanitized input ──────────────────────────────────────────────
+    if fields.get("presidio_sanitized_input"):
+        try:
+            from presidio.detect import detect as _presidio_detect
+            from presidio.redact import redact as _presidio_redact
+
+            p_entities = _presidio_detect(question)
+
+            if p_entities is None:
+                # Presidio unavailable — store null so BERTScore
+                # code can skip this entry rather than use bad data
+                answer["presidio_sanitized_input"] = None
+            elif not p_entities:
+                # Presidio found nothing — original text is the
+                # "sanitized" version (no redaction applied)
+                answer["presidio_sanitized_input"] = question
+            else:
+                answer["presidio_sanitized_input"] = _presidio_redact(
+                    question, p_entities
+                )
+        except Exception:
+            answer["presidio_sanitized_input"] = None
+
     return answer
 
 
@@ -221,6 +247,22 @@ def run_batch(
     if fields.get("llm_response"):
         from chatbot.chat import ClaudeChat
         chat = ClaudeChat()
+
+    # Suppress presidio_sanitized_input when Presidio Comparison is off in
+    # settings — even if the user toggled it on in the field-select screen.
+    from settings_manager import load_settings as _load_settings
+    if not _load_settings().get("presidio_comparison", False):
+        fields = {**fields, "presidio_sanitized_input": False}
+
+    # Pre-load Presidio engine if the field is enabled.
+    # The engine.py singleton caches it — this just triggers the 3-5s
+    # spaCy model load ONCE before the loop instead of mid-first-question.
+    if fields.get("presidio_sanitized_input"):
+        try:
+            from presidio.engine import get_analyzer
+            get_analyzer()
+        except Exception:
+            pass   # graceful — _process_one handles unavailability per question
 
     def _flush():
         out_path.write_text(
