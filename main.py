@@ -118,6 +118,7 @@ def _print_how_it_works() -> None:
     steps = [
         ("PatternScan",       "Regex — SSNs, emails, phones, cards, API keys"),
         ("EntityTrace",       "spaCy NER — names, places, organisations"),
+        ("ContextGuard",      "distilbert-NER — borderline entity resolution"),
         ("MimicGen",          "Realistic fake values per PII type (Faker)"),
         ("ShadowMap",         "AES-256-GCM encrypted map — stays on device"),
         (f"{provider_name} API", "Receives surrogates — never real values"),

@@ -19,11 +19,15 @@ from typing import List, Optional
 
 import anthropic
 
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
 from config import (
     CLAUDE_MODEL, SHADOWMAP_DIR,
     GEMINI_MODEL, OPENAI_MODEL, LOCAL_LLM_MODEL, LOCAL_LLM_HOST,
+    AES_NONCE_SIZE,
 )
 from settings_manager import load_settings
+from storage.logic import _derive_key
 from util import Conversation, ConversationMessage, get_logger, new_conversation_id
 
 logger = get_logger(__name__)
@@ -244,6 +248,10 @@ class ClaudeChat:
         Two lists are saved:
           messages     — display history (real values, for the user to read)
           api_messages — API history (surrogates only, for Claude context)
+
+        The file is AES-256-GCM encrypted (same scheme as ShadowMap):
+          nonce (12 bytes) || ciphertext
+        Key is derived via HKDF-SHA256 from device secret + conversation_id.
         """
         try:
             Path(SHADOWMAP_DIR).mkdir(parents=True, exist_ok=True)
@@ -262,7 +270,11 @@ class ClaudeChat:
                 "messages": _serialise(self.conversation.messages),
                 "api_messages": _serialise(self.conversation.api_messages),
             }
-            path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+            plaintext = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
+            key = _derive_key(self.conversation.id)
+            nonce = os.urandom(AES_NONCE_SIZE)
+            ciphertext = AESGCM(key).encrypt(nonce, plaintext, None)
+            path.write_bytes(nonce + ciphertext)
             logger.debug(f"[ClaudeChat] Saved conversation → {path}")
         except OSError as exc:
             logger.error(f"[ClaudeChat] Failed to save conversation: {exc}")
@@ -287,7 +299,24 @@ class ClaudeChat:
                 f"Conversation '{conversation_id}' not found at {path}"
             )
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
+            raw = path.read_bytes()
+            data = None
+            # Try encrypted format first (nonce || ciphertext)
+            if len(raw) > AES_NONCE_SIZE:
+                try:
+                    key = _derive_key(conversation_id)
+                    nonce, ct = raw[:AES_NONCE_SIZE], raw[AES_NONCE_SIZE:]
+                    plaintext = AESGCM(key).decrypt(nonce, ct, None)
+                    data = json.loads(plaintext.decode("utf-8"))
+                except Exception:
+                    pass
+            # Backward compat: old plaintext JSON files
+            if data is None:
+                logger.warning(
+                    f"[ClaudeChat] Conversation {conversation_id!r} is unencrypted "
+                    "(legacy format) — loading as plaintext."
+                )
+                data = json.loads(raw.decode("utf-8"))
 
             def _deserialise(raw_list):
                 return [
@@ -368,7 +397,18 @@ class ClaudeChat:
         results = []
         for json_file in sorted(conv_dir.glob("*.json")):
             try:
-                data = json.loads(json_file.read_text(encoding="utf-8"))
+                raw = json_file.read_bytes()
+                data = None
+                if len(raw) > AES_NONCE_SIZE:
+                    try:
+                        key = _derive_key(json_file.stem)
+                        nonce, ct = raw[:AES_NONCE_SIZE], raw[AES_NONCE_SIZE:]
+                        plaintext = AESGCM(key).decrypt(nonce, ct, None)
+                        data = json.loads(plaintext.decode("utf-8"))
+                    except Exception:
+                        pass
+                if data is None:
+                    data = json.loads(raw.decode("utf-8"))
                 results.append({
                     "id": data.get("id", json_file.stem),
                     "created": data.get("created", "unknown"),
