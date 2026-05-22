@@ -5,12 +5,14 @@
       "544-87-2944"
     ],
     "entity_trace_pii": [
-      "Revanth"
+      "Revanth",
+      "wyoming"
     ],
     "context_guard_pii": [],
     "confirmed_pii": [
       "Revanth",
-      "544-87-2944"
+      "544-87-2944",
+      "wyoming"
     ],
     "pii_detail": {
       "Revanth": {
@@ -22,14 +24,21 @@
         "type": "ssn",
         "score": 1.0,
         "source": "pattern"
+      },
+      "wyoming": {
+        "type": "GPE",
+        "score": 0.85,
+        "source": "ner",
+        "surrogate_status": "skipped",
+        "skip_reason": "topical_geo_filtered"
       }
     },
     "quasi_id_risks": [
       {
         "combination": "Name + SSN",
         "matched_fields": [
-          "PERSON",
-          "ssn"
+          "ssn",
+          "PERSON"
         ],
         "risk_level": "high",
         "all_fields_matched": true,
@@ -37,10 +46,10 @@
       }
     ],
     "surrogate_map": {
-      "Revanth": "Linda Holmes",
-      "544-87-2944": "616-75-1361"
+      "Revanth": "Stacey Hawkins",
+      "544-87-2944": "450-91-7488"
     },
-    "sanitized_input": "hi my name is Linda Holmes and my ssn is 616-75-1361 and give me the tax benefits of the state of wyoming, please",
+    "sanitized_input": "hi my name is Stacey Hawkins and my ssn is 450-91-7488 and give me the tax benefits of the state of wyoming, please",
     "recognized_not_replaced": [
       {
         "value": "wyoming",
@@ -48,14 +57,14 @@
         "reason": "topical_geo_filtered"
       }
     ],
-    "llm_response": "Hi Linda! Here's an overview of the **tax benefits of living in Wyoming**:\n\n---\n\n## 🏔️ Wyoming Tax Benefits\n\n### ✅ No State Income Tax\n- Wyoming has **no personal income tax**\n- This means wages, salaries, and retirement income are **not taxed at the state level**\n\n### ✅ No Corporate Income Tax\n- Great for **business owners and entrepreneurs**\n\n### ✅ Low Property Taxes\n- Wyoming has some of the **lowest property tax rates** in the nation\n- Average effective property tax rate is around **0.55%**\n\n### ✅ No Inheritance or Estate Tax\n- Assets passed to heirs are **not subject to state-level estate or inheritance taxes**\n\n### ✅ Low Sales Tax\n- State sales tax is **4%**, which is relatively low\n- Some counties add a small local tax\n\n### ✅ Retirement-Friendly\n- **Social Security, pensions, and 401(k)/IRA distributions** are not taxed at the state level\n\n### ✅ Business-Friendly Environment\n- No franchise tax\n- Strong asset protection laws\n\n---\n\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US.\n\nWould you like more details on any specific area? 😊",
+    "llm_response": "Hi Stacey! Here are the key tax benefits of living in **Wyoming**:\n\n---\n\n## 🏔️ Wyoming Tax Benefits\n\n### **No State Income Tax**\n- Wyoming has **no individual state income tax**\n- This applies to wages, salaries, and retirement income\n\n### **No Corporate Income Tax**\n- Businesses benefit from **no state corporate income tax**\n\n### **No Inheritance or Estate Tax**\n- Heirs pay **no state-level inheritance or estate tax**\n\n### **Low Property Taxes**\n- Wyoming has some of the **lowest property tax rates** in the nation\n- Effective rate is typically around **0.55%**\n\n### **Low Sales Tax**\n- State sales tax is **4%** (relatively low)\n- Some counties add a small local tax\n\n### **Retirement-Friendly**\n- Social Security, pension, and retirement income are **not taxed** at the state level\n\n### **Business-Friendly**\n- No franchise tax\n- Strong asset protection laws\n- Popular for LLC formation\n\n---\n\nWyoming is consistently ranked as one of the **most tax-friendly states** in the US, making it attractive for both individuals and businesses.\n\nIs there anything specific about Wyoming taxes you'd like to know more about?",
     "stage_timings_ms": {
-      "pattern_scan_ms": 0.07,
-      "entity_trace_ms": 649.34,
+      "pattern_scan_ms": 0.12,
+      "entity_trace_ms": 824.04,
       "context_guard_ms": 0.0,
-      "surrogate_gen_ms": 0.32,
-      "llm_call_ms": 7294.76,
-      "total_ms": 9264.62
+      "surrogate_gen_ms": 0.22,
+      "llm_call_ms": 6758.0,
+      "total_ms": 8828.89
     },
     "presidio_sanitized_input": "hi my name is [PERSON] and my ssn is [US_SSN] and give me the tax benefits of the state of [LOCATION], please",
     "presidio_found_piis": [
@@ -76,9 +85,9 @@
       }
     ],
     "bertscore_ss": {
-      "precision": 0.9598,
-      "recall": 0.9609,
-      "f1": 0.9604
+      "precision": 0.9601,
+      "recall": 0.9601,
+      "f1": 0.9601
     },
     "bertscore_presidio": {
       "precision": 0.8938,
@@ -112,19 +121,19 @@
     },
     "quasi_id_risks": [],
     "surrogate_map": {
-      "revanth@gmail.com": "tmcmahon@example.com",
-      "480-555-1234": "+1-264-083-4278"
+      "revanth@gmail.com": "campbellkenneth@example.org",
+      "480-555-1234": "+1-382-633-6944"
     },
-    "sanitized_input": "my email is tmcmahon@example.com and phone is +1-264-083-4278, can you help me draft a resignation letter?",
+    "sanitized_input": "my email is campbellkenneth@example.org and phone is +1-382-633-6944, can you help me draft a resignation letter?",
     "recognized_not_replaced": [],
-    "llm_response": "Sure, I'd be happy to help you draft a resignation letter! Here's a professional template using your details:\n\n---\n\n**Subject: Resignation Letter**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as [Your Job Title] at [Company Name], effective [Last Working Day — typically two weeks from today].\n\nThis was not an easy decision, and I am grateful for the opportunities I have had to grow and develop during my time here. I have truly valued my experience working with such a dedicated team.\n\nTo ensure a smooth transition, I am committed to:\n- Completing any outstanding projects\n- Training or assisting in the onboarding of my replacement\n- Documenting my current responsibilities\n\nPlease feel free to reach out to me at **tmcmahon@example.com** or **+1-264-083-4278** if you need anything during the transition period.\n\nThank you for the support and opportunities provided to me during my tenure. I wish the company and team continued success.\n\nSincerely,\n[Your Full Name]\n\n---\n\nTo personalise this further, just let me know:\n- Your **job title**\n- Your **manager's name**\n- The **company name**\n- Your **intended last day**\n- Any specific **reason** you'd like to mention (optional)",
+    "llm_response": "Sure, I'd be happy to help you draft a resignation letter! Here's a professional template you can customize:\n\n---\n\n**Subject: Resignation Letter**\n\nDear [Manager's Name],\n\nI am writing to formally notify you of my resignation from my position as [Your Job Title] at [Company Name], effective [Last Working Day — typically two weeks from today].\n\nI am grateful for the opportunities I have had to grow both professionally and personally during my time here. I have truly valued the experience and the relationships I have built with the team.\n\nI am committed to ensuring a smooth transition and am happy to assist with training a replacement or handing over my responsibilities during my notice period.\n\nPlease feel free to reach out to me at **campbellkenneth@example.org** or **+1-382-633-6944** if you need to discuss anything further.\n\nThank you again for the opportunity to be part of the team.\n\nSincerely,\n[Your Full Name]\n[Your Job Title]\n[Date]\n\n---\n\nTo make this more personalized, it would help to know:\n\n1. **Your name and job title**\n2. **Your manager's name**\n3. **The company name**\n4. **Your intended last day**\n5. **Any specific reason you'd like to mention** (optional)\n\nLet me know and I'll refine it for you!",
     "stage_timings_ms": {
-      "pattern_scan_ms": 0.08,
-      "entity_trace_ms": 8.33,
+      "pattern_scan_ms": 0.13,
+      "entity_trace_ms": 8.7,
       "context_guard_ms": 0.0,
-      "surrogate_gen_ms": 0.19,
-      "llm_call_ms": 6703.43,
-      "total_ms": 6745.32
+      "surrogate_gen_ms": 0.23,
+      "llm_call_ms": 6469.14,
+      "total_ms": 6521.83
     },
     "presidio_sanitized_input": "my email is [EMAIL_ADDRESS] and phone is [PHONE_NUMBER], can you help me draft a resignation letter?",
     "presidio_found_piis": [
@@ -140,9 +149,9 @@
       }
     ],
     "bertscore_ss": {
-      "precision": 0.9204,
-      "recall": 0.9465,
-      "f1": 0.9333
+      "precision": 0.9178,
+      "recall": 0.9495,
+      "f1": 0.9334
     },
     "bertscore_presidio": {
       "precision": 0.8738,

@@ -510,10 +510,10 @@ def run_evaluation(
 
     if need_timing:
         tc = timing_count or 1
-        result["avg_pattern_scan_ms"]  = _r(timing_sums["pattern_scan_ms"]  / tc)
-        result["avg_entity_trace_ms"]  = _r(timing_sums["entity_trace_ms"]  / tc)
-        result["avg_context_guard_ms"] = _r(timing_sums["context_guard_ms"] / tc)
-        result["avg_surrogate_gen_ms"] = _r(timing_sums["surrogate_gen_ms"] / tc)
+        result["avg_pattern_scan_ms"]  = round(timing_sums["pattern_scan_ms"]  / tc, 6)
+        result["avg_entity_trace_ms"]  = round(timing_sums["entity_trace_ms"]  / tc, 6)
+        result["avg_context_guard_ms"] = round(timing_sums["context_guard_ms"] / tc, 6)
+        result["avg_surrogate_gen_ms"] = round(timing_sums["surrogate_gen_ms"] / tc, 6)
 
     if need_resolve:
         result["total_resolve_leaks"]            = total_resolve_leaks

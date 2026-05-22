@@ -822,7 +822,7 @@ def _run_evaluation() -> None:
                 "avg_pattern_scan_ms", "avg_entity_trace_ms",
                 "avg_context_guard_ms", "avg_surrogate_gen_ms",
             }:
-                return f"{val:.2f} ms"
+                return f"{val:.6f} ms"
             return f"{val:.2f}"
         return str(val)
 
@@ -918,7 +918,7 @@ def _run_evaluation() -> None:
     ]:
         if k in metrics:
             val = metrics[k]
-            cell = f"[yellow]{val:.2f} ms[/yellow]" if k == "avg_entity_trace_ms" and val > 500 else f"{val:.2f} ms"
+            cell = f"[yellow]{val:.6f} ms[/yellow]" if k == "avg_entity_trace_ms" and val > 500 else f"{val:.6f} ms"
             st.add_row(lbl, cell)
             st_rows += 1
 
