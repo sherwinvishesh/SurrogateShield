@@ -105,6 +105,8 @@ EVAL_FIELDS = [
      "Presidio comparison  (SS vs Presidio — side-by-side Table 1 for paper)"),
     ("bertscore_comparison",
      "BERTScore comparison  (utility preservation — Table 2 for paper)"),
+    ("ablation_study",
+     "Ablation study  (per-stage contribution — Table 4 for paper)"),
     ("timing",               "Stage timings  (avg ms per stage)"),
     ("resolve_quality",      "ResolvePass quality  (surrogate leak rate + accuracy)"),
     ("sanitization_quality", "Sanitization quality  (PII leak to LLM rate + accuracy)"),
@@ -194,6 +196,7 @@ def run_evaluation(
     need_per_type      = fields.get("per_entity_type", False)
     need_presidio_cmp  = fields.get("presidio_comparison", False)
     need_bertscore_cmp = fields.get("bertscore_comparison", False)
+    need_ablation      = fields.get("ablation_study", False)
 
     no_answers       = 0
     no_answers_empty = 0
@@ -236,6 +239,28 @@ def run_evaluation(
     prs_bs_precisions = []
     prs_bs_recalls    = []
     prs_bs_f1s        = []
+
+    from collections import defaultdict as _dd
+
+    abl_configs = {
+        "ps_only": _dd(lambda: {"tp": 0, "fp": 0, "fn": 0}),
+        "ps_et":   _dd(lambda: {"tp": 0, "fp": 0, "fn": 0}),
+        "ps_cg":   _dd(lambda: {"tp": 0, "fp": 0, "fn": 0}),
+        "full":    _dd(lambda: {"tp": 0, "fp": 0, "fn": 0}),
+    }
+
+    abl_overall = {
+        "ps_only": {"tp": 0, "fp": 0, "fn": 0},
+        "ps_et":   {"tp": 0, "fp": 0, "fn": 0},
+        "ps_cg":   {"tp": 0, "fp": 0, "fn": 0},
+        "full":    {"tp": 0, "fp": 0, "fn": 0},
+    }
+
+    stage_counts = {"pattern": 0, "ner": 0, "slm": 0}
+
+    questions_needing_et    = 0
+    questions_needing_cg    = 0
+    abl_questions_with_data = 0
 
     for i in range(total):
         status = "ok"
@@ -457,6 +482,74 @@ def run_evaluation(
                     prs_bs_recalls.append(   bs_prs.get("recall",    0))
                     prs_bs_f1s.append(       bs_prs.get("f1",        0))
 
+            if need_ablation:
+                ps_pii  = [v.lower() for v in (a_entry.get("pattern_scan_pii")  or [])]
+                et_pii  = [v.lower() for v in (a_entry.get("entity_trace_pii")  or [])]
+                cg_pii  = [v.lower() for v in (a_entry.get("context_guard_pii") or [])]
+                all_pii = [v.lower() for v in (a_entry.get("confirmed_pii")     or [])]
+
+                has_stage_data = (
+                    a_entry.get("pattern_scan_pii") is not None or
+                    a_entry.get("entity_trace_pii") is not None
+                )
+                if not has_stage_data or not key_pii_list:
+                    pass
+                else:
+                    abl_questions_with_data += 1
+                    key_lower = {v.lower() for v in key_pii_list}
+
+                    stage_counts["pattern"] += len(ps_pii)
+                    stage_counts["ner"]     += len(et_pii)
+                    stage_counts["slm"]     += len(cg_pii)
+
+                    detected = {
+                        "ps_only": set(ps_pii),
+                        "ps_et":   set(ps_pii) | set(et_pii),
+                        "ps_cg":   set(ps_pii) | set(cg_pii),
+                        "full":    set(all_pii),
+                    }
+
+                    for cfg_name, det_set in detected.items():
+                        tp = len(det_set & key_lower)
+                        fp = len(det_set - key_lower)
+                        fn = len(key_lower - det_set)
+                        abl_overall[cfg_name]["tp"] += tp
+                        abl_overall[cfg_name]["fp"] += fp
+                        abl_overall[cfg_name]["fn"] += fn
+
+                    pii_detail = a_entry.get("pii_detail") or {}
+
+                    val_to_type: dict = {}
+                    for val, detail in pii_detail.items():
+                        if isinstance(detail, dict):
+                            raw_type = detail.get("type", "other")
+                            normalized = NORMALIZE_TYPE.get(raw_type, raw_type)
+                            val_to_type[val.lower()] = normalized
+
+                    key_val_to_type: dict = {}
+                    for etype, vals in key_typed.items():
+                        for v in vals:
+                            key_val_to_type[v.lower()] = etype
+
+                    for cfg_name, det_set in detected.items():
+                        for kval in key_lower:
+                            ktype = key_val_to_type.get(kval, "other")
+                            if kval in det_set:
+                                abl_configs[cfg_name][ktype]["tp"] += 1
+                            else:
+                                abl_configs[cfg_name][ktype]["fn"] += 1
+                        for dval in det_set:
+                            if dval not in key_lower:
+                                dtype = val_to_type.get(dval, "other")
+                                abl_configs[cfg_name][dtype]["fp"] += 1
+
+                    if set(et_pii) & key_lower:
+                        if set(ps_pii) & key_lower != key_lower:
+                            questions_needing_et += 1
+                    if set(cg_pii) & key_lower:
+                        if (set(ps_pii) | set(et_pii)) & key_lower != key_lower:
+                            questions_needing_cg += 1
+
         except Exception:
             status = "error"
 
@@ -623,6 +716,59 @@ def run_evaluation(
                 "data_count":  prs_count,
                 "data_status": _bs_status(prs_count, total),
             },
+        }
+
+    if need_ablation:
+
+        def _abl_metrics(tp, fp, fn):
+            p  = tp / (tp + fp) if (tp + fp) > 0 else 1.0
+            r  = tp / (tp + fn) if (tp + fn) > 0 else 1.0
+            f1 = (2*p*r/(p+r)) if (p+r) > 0 else 0.0
+            return {"precision": _r(p), "recall": _r(r), "f1": _r(f1),
+                    "tp": tp, "fp": fp, "fn": fn}
+
+        CONFIG_LABELS = {
+            "ps_only": "PatternScan only",
+            "ps_et":   "PatternScan + EntityTrace",
+            "ps_cg":   "PatternScan + ContextGuard",
+            "full":    "Full cascade (all three)",
+        }
+
+        overall_metrics = {}
+        for cfg, counts in abl_overall.items():
+            overall_metrics[cfg] = {
+                "label": CONFIG_LABELS[cfg],
+                **_abl_metrics(counts["tp"], counts["fp"], counts["fn"])
+            }
+
+        per_type_by_config = {}
+        all_types_seen = set()
+        for cfg, type_dict in abl_configs.items():
+            per_type_by_config[cfg] = {}
+            for etype, counts in type_dict.items():
+                per_type_by_config[cfg][etype] = _abl_metrics(
+                    counts["tp"], counts["fp"], counts["fn"]
+                )
+                all_types_seen.add(etype)
+
+        result["ablation_study"] = {
+            "questions_with_data":  abl_questions_with_data,
+            "total_questions":      total,
+            "stage_entity_counts": {
+                "pattern_scan":  stage_counts["pattern"],
+                "entity_trace":  stage_counts["ner"],
+                "context_guard": stage_counts["slm"],
+                "total":         sum(stage_counts.values()),
+            },
+            "stage_necessity": {
+                "questions_needing_entity_trace":  questions_needing_et,
+                "questions_needing_context_guard": questions_needing_cg,
+                "pct_needing_entity_trace":  _r(questions_needing_et  / max(abl_questions_with_data, 1)),
+                "pct_needing_context_guard": _r(questions_needing_cg  / max(abl_questions_with_data, 1)),
+            },
+            "configurations":    overall_metrics,
+            "per_type":          per_type_by_config,
+            "entity_types_seen": sorted(all_types_seen),
         }
 
     return result

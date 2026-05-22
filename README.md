@@ -55,7 +55,7 @@ Display to user
 - **Privacy-aware RAG** — documents are anonymised before indexing; surrogates are used in all vector store operations
 - **PII Finder mode** — test detection on any text with zero API calls
 - **Presidio comparison** — side-by-side Microsoft Presidio results in PII Finder and Evaluation, including per-entity-type F1/precision/recall
-- **Batch evaluation** — precision, recall, F1, per-entity-type breakdown, ResolvePass leak rate, sanitisation quality, BERTScore utility preservation, and Presidio side-by-side comparison against ground-truth answer keys
+- **Batch evaluation** — precision, recall, F1, per-entity-type breakdown, ResolvePass leak rate, sanitisation quality, BERTScore utility preservation, Presidio side-by-side comparison, and **ablation study** against ground-truth answer keys
 - **API Transparency panel** — see exactly what was sent, what was received, and the final restored output
 
 
@@ -521,6 +521,7 @@ The evaluator maps flexible label names to internal types:
 | Per-entity-type breakdown | F1 / precision / recall per PII type |
 | Presidio comparison (Table 1) | SS vs Presidio side-by-side per comparable type + overall |
 | BERTScore comparison (Table 2) | Semantic utility preservation: SS vs Presidio vs no-anonymisation baseline |
+| Ablation study (Table 4) | Per-stage F1 contribution across four pipeline configurations |
 
 #### Presidio comparison table
 
@@ -565,6 +566,37 @@ BERTScore (`roberta-large`) measures how well the semantic meaning of the origin
 
 Enable the `BERTScore SS` and `BERTScore Presidio` fields in JSON Test to generate data for this table. The `roberta-large` model (~1.4 GB) is downloaded automatically on first use and can take 15–30 minutes to score on CPU.
 
+#### Ablation study (Table 4)
+
+The ablation study quantifies how much each detection stage contributes to overall F1. It is computed **post-hoc from the existing answers file** — no pipeline re-run needed. Each answer already records which stage detected each entity via the `source` field in `pii_detail`.
+
+Four pipeline configurations are simulated by combining stage contributions:
+
+| Configuration | Detected set |
+|---|---|
+| PatternScan only | `pattern_scan_pii` |
+| PatternScan + EntityTrace | `pattern_scan_pii` ∪ `entity_trace_pii` |
+| PatternScan + ContextGuard | `pattern_scan_pii` ∪ `context_guard_pii` |
+| Full cascade (all three) | `confirmed_pii` |
+
+For each configuration, precision / recall / F1 are computed overall **and per entity type**. The evaluation screen shows:
+
+- **Entity Detection Attribution panel** — how many entities each stage contributed and the percentage of cases where EntityTrace or ContextGuard were strictly necessary (i.e., PatternScan alone would have missed at least one key entity)
+- **Overall Performance by Configuration table** — precision, recall, F1, TP/FP/FN for all four configs with delta-F1 annotations showing each stage's incremental gain
+- **F1 Per Entity Type by Configuration table** — per-type breakdown with a *Key stage* column indicating which configuration first achieves ≥80% F1 for that type (PatternScan for structured types like `ssn` and `email`; EntityTrace for `PERSON`, `GPE`, `ORG`)
+- **Ablation Summary panel** — absolute F1 improvements from adding each stage
+
+To generate ablation data, enable the following fields in JSON Test before running:
+
+| Field | Required for |
+|---|---|
+| `pattern_scan_pii` | Stage 1 contribution |
+| `entity_trace_pii` | Stage 2 contribution |
+| `context_guard_pii` | Stage 3 contribution |
+| `confirmed_pii` | Full cascade (baseline) |
+
+All four are **on by default** in JSON Test. If the answers file pre-dates the ablation feature, re-run JSON Test with those fields enabled.
+
 
 
 ## Running the Tests
@@ -592,7 +624,7 @@ SurrogateShield/
 ├── config.py                # All constants and thresholds (single source of truth)
 ├── util.py                  # Shared dataclasses (DetectedEntity, Conversation), logging helpers
 ├── settings_manager.py      # Persistent user settings (~/.surrogateshield/settings.json)
-├── evaluator.py             # Precision/recall/F1 evaluation logic + Presidio/BERTScore comparison
+├── evaluator.py             # Precision/recall/F1 evaluation logic + Presidio/BERTScore/ablation study
 ├── json_tester.py           # Batch JSON question processing
 ├── run.sh                   # Launcher script (venv activation, .env loading)
 ├── requirements.txt

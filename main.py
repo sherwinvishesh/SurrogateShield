@@ -1385,6 +1385,248 @@ def _run_evaluation() -> None:
             )
             console.print()
 
+    # ── Section 8: Ablation Study ─────────────────────────────────────────────
+    abl = metrics.get("ablation_study")
+    if abl:
+
+        console.print()
+        console.print(Rule(
+            "[bold blue]Ablation Study — Stage Contribution Analysis  "
+            "(Table 4)[/bold blue]",
+            style="blue"
+        ))
+        console.print()
+
+        n_with_data = abl.get("questions_with_data", 0)
+        n_total     = abl.get("total_questions", 0)
+
+        if n_with_data < n_total:
+            console.print(
+                f"  [yellow]⚠  Stage data available for {n_with_data} of "
+                f"{n_total} questions. Enable pattern_scan_pii, "
+                f"entity_trace_pii, context_guard_pii fields in JSON "
+                f"Test (J) for full coverage.[/yellow]"
+            )
+            console.print()
+
+        # ── Stage entity count summary panel ─────────────────────────
+        sc = abl.get("stage_entity_counts", {})
+        sn = abl.get("stage_necessity", {})
+        total_ents = sc.get("total", 1) or 1
+
+        ps_pct  = sc.get("pattern_scan",  0) / total_ents * 100
+        et_pct  = sc.get("entity_trace",  0) / total_ents * 100
+        cg_pct  = sc.get("context_guard", 0) / total_ents * 100
+
+        console.print(Panel(
+            f"[bold white]Entity Detection Attribution[/bold white]\n\n"
+            f"  [cyan]PatternScan [/cyan]    "
+            f"[bold]{sc.get('pattern_scan', 0):>5}[/bold] entities  "
+            f"[dim]({ps_pct:.1f}% of all detections)[/dim]\n"
+            f"  [cyan]EntityTrace [/cyan]    "
+            f"[bold]{sc.get('entity_trace', 0):>5}[/bold] entities  "
+            f"[dim]({et_pct:.1f}% of all detections)[/dim]\n"
+            f"  [cyan]ContextGuard[/cyan]    "
+            f"[bold]{sc.get('context_guard', 0):>5}[/bold] entities  "
+            f"[dim]({cg_pct:.1f}% of all detections)[/dim]\n\n"
+            f"  [dim]EntityTrace was necessary in  "
+            f"[bold white]{sn.get('questions_needing_entity_trace', 0)}[/bold white] "
+            f"questions ({sn.get('pct_needing_entity_trace', 0)*100:.1f}%)[/dim]\n"
+            f"  [dim]ContextGuard was necessary in "
+            f"[bold white]{sn.get('questions_needing_context_guard', 0)}[/bold white] "
+            f"questions ({sn.get('pct_needing_context_guard', 0)*100:.1f}%)[/dim]",
+            border_style="blue", padding=(1, 2),
+        ))
+        console.print()
+
+        # ── Table 1: Overall F1 across configurations ─────────────────
+        cfg_order = ["ps_only", "ps_et", "ps_cg", "full"]
+        configs   = abl.get("configurations", {})
+
+        ov_tbl = Table(
+            title="[bold blue]Overall Performance by Configuration[/bold blue]",
+            box=box.ROUNDED, border_style="blue",
+            show_lines=True, padding=(0, 1),
+        )
+        ov_tbl.add_column("Configuration",
+            style="white", no_wrap=True, width=34)
+        ov_tbl.add_column("Precision",
+            style="dim white", width=11, justify="right")
+        ov_tbl.add_column("Recall",
+            style="dim white", width=11, justify="right")
+        ov_tbl.add_column("F1",
+            style="bold",      width=11, justify="right")
+        ov_tbl.add_column("TP",
+            style="dim",       width=6,  justify="right")
+        ov_tbl.add_column("FP",
+            style="dim",       width=6,  justify="right")
+        ov_tbl.add_column("FN",
+            style="dim",       width=6,  justify="right")
+
+        prev_f1 = None
+        for cfg_key in cfg_order:
+            cfg = configs.get(cfg_key, {})
+            if not cfg:
+                continue
+            f1  = cfg.get("f1", 0)
+            p   = cfg.get("precision", 0)
+            r   = cfg.get("recall", 0)
+            tp  = cfg.get("tp", 0)
+            fp  = cfg.get("fp", 0)
+            fn  = cfg.get("fn", 0)
+
+            f1_pct = f"{f1*100:.2f}%"
+            if f1 >= 0.90:   f1_str = f"[bold green]{f1_pct}[/bold green]"
+            elif f1 >= 0.70: f1_str = f"[yellow]{f1_pct}[/yellow]"
+            else:            f1_str = f"[red]{f1_pct}[/red]"
+
+            if prev_f1 is not None:
+                delta = (f1 - prev_f1) * 100
+                if delta > 0:
+                    delta_str = f"  [dim green](+{delta:.1f}%)[/dim green]"
+                else:
+                    delta_str = ""
+                f1_str = f1_str + delta_str
+
+            label = cfg.get("label", cfg_key)
+
+            if cfg_key == "full":
+                ov_tbl.add_section()
+                label = f"[bold]{label}[/bold]"
+
+            ov_tbl.add_row(
+                label,
+                f"{p*100:.2f}%",
+                f"{r*100:.2f}%",
+                f1_str,
+                str(tp), str(fp), str(fn),
+            )
+            prev_f1 = f1
+
+        console.print(ov_tbl)
+        console.print()
+
+        # ── Table 2: Per-entity-type F1 across configurations ─────────
+        ABLATION_TYPE_ORDER = [
+            "PERSON", "GPE", "LOC", "ORG", "FAC",
+            "email", "phone", "ssn", "address", "dob",
+            "credit_card", "ip_address", "api_key",
+            "postal_code", "gender_indicator",
+            "crypto", "us_bank_number", "us_driver_license",
+        ]
+
+        per_type = abl.get("per_type", {})
+
+        visible_types = [
+            t for t in ABLATION_TYPE_ORDER
+            if any(
+                per_type.get(cfg, {}).get(t, {}).get("tp", 0) +
+                per_type.get(cfg, {}).get(t, {}).get("fp", 0) +
+                per_type.get(cfg, {}).get(t, {}).get("fn", 0) > 0
+                for cfg in cfg_order
+            )
+        ]
+        extra = sorted(set(abl.get("entity_types_seen", [])) - set(ABLATION_TYPE_ORDER))
+        visible_types += [t for t in extra if any(
+            per_type.get(cfg, {}).get(t, {}).get("tp", 0) +
+            per_type.get(cfg, {}).get(t, {}).get("fp", 0) +
+            per_type.get(cfg, {}).get(t, {}).get("fn", 0) > 0
+            for cfg in cfg_order
+        )]
+
+        if visible_types:
+            pt_tbl = Table(
+                title="[bold blue]F1 Per Entity Type by Configuration[/bold blue]",
+                box=box.ROUNDED, border_style="blue",
+                show_lines=True, padding=(0, 1),
+            )
+            pt_tbl.add_column("Entity Type",
+                style="white",     no_wrap=True, width=18)
+            pt_tbl.add_column("PS only",
+                style="bold",      width=10, justify="right")
+            pt_tbl.add_column("PS + ET",
+                style="bold",      width=10, justify="right")
+            pt_tbl.add_column("PS + CG",
+                style="bold",      width=10, justify="right")
+            pt_tbl.add_column("Full",
+                style="bold",      width=10, justify="right")
+            pt_tbl.add_column("Key stage",
+                style="dim cyan",  width=14, justify="left")
+
+            def _f1cell(val):
+                if val is None: return "[dim]—[/dim]"
+                pct = val * 100
+                if pct >= 90:   return f"[bold green]{pct:.0f}%[/bold green]"
+                if pct >= 70:   return f"[yellow]{pct:.0f}%[/yellow]"
+                if pct > 0:     return f"[red]{pct:.0f}%[/red]"
+                return "[dim]0%[/dim]"
+
+            ner_types     = ["PERSON", "GPE", "LOC", "ORG", "FAC"]
+            section_added = False
+
+            for etype in visible_types:
+                if etype not in ner_types and not section_added:
+                    pt_tbl.add_section()
+                    section_added = True
+
+                f1s = {}
+                for cfg in cfg_order:
+                    m = per_type.get(cfg, {}).get(etype)
+                    f1s[cfg] = m["f1"] if m else None
+
+                key_stage = ""
+                if (f1s.get("ps_only") or 0) >= 0.80:
+                    key_stage = "PatternScan"
+                elif (f1s.get("ps_et") or 0) >= 0.80 and (f1s.get("ps_only") or 0) < 0.80:
+                    key_stage = "EntityTrace"
+                elif (f1s.get("ps_cg") or 0) >= 0.80 and (f1s.get("ps_only") or 0) < 0.80:
+                    key_stage = "ContextGuard"
+                elif (f1s.get("full") or 0) >= 0.80:
+                    key_stage = "All stages"
+
+                pt_tbl.add_row(
+                    etype,
+                    _f1cell(f1s.get("ps_only")),
+                    _f1cell(f1s.get("ps_et")),
+                    _f1cell(f1s.get("ps_cg")),
+                    _f1cell(f1s.get("full")),
+                    f"[dim cyan]{key_stage}[/dim cyan]" if key_stage else "",
+                )
+
+            console.print(pt_tbl)
+            console.print(
+                "  [dim]PS = PatternScan  ·  ET = EntityTrace  ·  "
+                "CG = ContextGuard  ·  Key stage = first config achieving ≥80% F1[/dim]"
+            )
+            console.print()
+
+        # ── Summary insight panel ─────────────────────────────────────
+        full_f1  = configs.get("full",    {}).get("f1", 0)
+        ps_f1    = configs.get("ps_only", {}).get("f1", 0)
+        ps_et_f1 = configs.get("ps_et",  {}).get("f1", 0)
+
+        et_gain  = (ps_et_f1 - ps_f1)   * 100
+        cg_gain  = (full_f1  - ps_et_f1) * 100
+
+        console.print(Panel(
+            "[bold white]Key Findings[/bold white]\n\n"
+            f"  PatternScan alone achieves  "
+            f"[bold]{ps_f1*100:.1f}%[/bold] F1  "
+            f"[dim](structured PII: emails, phones, SSNs, credit cards)[/dim]\n\n"
+            f"  Adding EntityTrace gives    "
+            f"[bold green]+{et_gain:.1f}%[/bold green] F1 improvement  "
+            f"[dim](adds names, locations, organisations)[/dim]\n\n"
+            f"  Adding ContextGuard gives   "
+            f"[bold green]+{cg_gain:.1f}%[/bold green] F1 improvement  "
+            f"[dim](resolves borderline entities EntityTrace was uncertain about)[/dim]\n\n"
+            f"  Full cascade achieves       "
+            f"[bold]{full_f1*100:.1f}%[/bold] F1  "
+            f"[dim](all three stages working together)[/dim]",
+            border_style="blue", padding=(1, 2),
+            title="[bold blue]Ablation Summary[/bold blue]",
+        ))
+        console.print()
+
     # ── Actions ───────────────────────────────────────────────────────────────
     console.print(f"  [bold blue]S[/bold blue]    [dim]Save results as JSON[/dim]")
     console.print(f"  [bold blue]B[/bold blue]    [dim]Back to dashboard[/dim]")
