@@ -10,13 +10,15 @@
     "Question": "Can you write an interview confirmation text message to Elena Rossi at her UK mobile number +44 7911 123456?",
     "Answer-Key": {
       "name": "Elena Rossi",
-      "phone": "+44 7911 123456"
+      "phone": "+44 7911 123456",
+      "gpe": "UK"
     }
   },
   {
     "Question": "I need to configure a recurring payment profile with a new corporate Mastercard account number: 5412751234123412.",
     "Answer-Key": {
-      "credit_card": "5412751234123412"
+      "credit_card": "5412751234123412",
+      "org": "Mastercard"
     }
   },
   {
@@ -30,7 +32,10 @@
   {
     "Question": "Draft an appointment reminder text for Fatima Malik's upcoming consultation. Her mobile number is +44 7911 123456.",
     "Answer-Key": {
-      "name": "Fatima Malik",
+      "name": [
+        "Fatima Malik",
+        "Fatima Malik's"
+      ],
       "phone": "+44 7911 123456"
     }
   },
@@ -68,7 +73,8 @@
   {
     "Question": "Please initiate an immediate billing correction workflow for a double transaction on my primary Visa account, which is 4222222222222222.",
     "Answer-Key": {
-      "credit_card": "4222222222222222"
+      "credit_card": "4222222222222222",
+      "org": "Visa"
     }
   },
   {
@@ -81,7 +87,11 @@
   {
     "Question": "I need to find a free legal aid clinic for undocumented immigrants near 6720 Palm Dr, Phoenix, AZ.",
     "Answer-Key": {
-      "address": "6720 Palm Dr, Phoenix, AZ"
+      "address": "6720 Palm Dr, Phoenix, AZ",
+      "gpe": [
+        "AZ",
+        "Phoenix"
+      ]
     }
   },
   {
@@ -95,7 +105,11 @@
   {
     "Question": "Which drug rehabilitation centers are closest to 41 Maple Ct, Trenton, NJ?",
     "Answer-Key": {
-      "address": "41 Maple Ct, Trenton, NJ"
+      "address": "41 Maple Ct, Trenton, NJ",
+      "gpe": [
+        "NJ",
+        "Trenton"
+      ]
     }
   },
   {
@@ -110,13 +124,20 @@
       "name": "Sofia Kovalev",
       "email": "sofia.k@cybersecure.ru",
       "phone": "+49 151 23456789",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
     "Question": "Write a patient recall reminder for Dr. Kim's office to send to Hana Fujikawa at 503-291-8847.",
     "Answer-Key": {
-      "name": "Hana Fujikawa",
+      "name": [
+        "Hana Fujikawa",
+        "Kim"
+      ],
       "phone": "503-291-8847"
     }
   },
@@ -132,13 +153,17 @@
     "Question": "Can you check why our automated deployment engine at Microsoft is returning access token errors when we supply the credential string sk-AbCdEf1234567890XyZ987654321vUtS to access protected internal API clusters?",
     "Answer-Key": {
       "api_key": "sk-AbCdEf1234567890XyZ987654321vUtS",
-      "org": "Microsoft"
+      "org": [
+        "Microsoft",
+        "API"
+      ]
     }
   },
   {
     "Question": "Which family medical clinic operating under the NHS network is currently accepting new adult patient registrations within the EC2A 4BH zone?",
     "Answer-Key": {
-      "postcode": "EC2A 4BH"
+      "postcode": "EC2A 4BH",
+      "org": "NHS"
     }
   },
   {
@@ -151,13 +176,18 @@
     "Question": "Please verify if the internal federal Social Security benefits master record for Zhou Yan matches the identity sequence 524-88-1102 in our compliance database.",
     "Answer-Key": {
       "name": "Zhou Yan",
-      "ssn": "524-88-1102"
+      "ssn": "524-88-1102",
+      "org": "Social Security"
     }
   },
   {
     "Question": "What are the closest electronics repair workshops near 1428 North Alpine Way, Flagstaff, AZ within driving distance?",
     "Answer-Key": {
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -172,7 +202,12 @@
     "Answer-Key": {
       "credit_card": "4111111111111111",
       "name": "Rajan Patel",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "org": "Visa",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -207,7 +242,8 @@
       "name": "Kwamane Diop",
       "email": "k.diop@innovation.ng",
       "phone": "+1-617-493-8820",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -215,12 +251,20 @@
     "Answer-Key": {
       "credit_card": "5105105105105100",
       "name": "Zhou Yan",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "org": "Mastercard",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
     "Question": "Explain the fundamental differences in improvisational structure between traditional Bebop and Modal Jazz compositions.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "name": "Bebop",
+      "org": "Modal Jazz"
+    }
   },
   {
     "Question": "How do I determine my local tax jurisdiction if my commercial property is situated completely inside ZIP code 90210?",
@@ -231,7 +275,8 @@
   {
     "Question": "Can you help me rewrite this JavaScript function? I accidentally left my active GitHub access token ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2 inside the initialization block.",
     "Answer-Key": {
-      "api_key": "ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2"
+      "api_key": "ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2",
+      "org": "GitHub"
     }
   },
   {
@@ -250,7 +295,11 @@
   {
     "Question": "Please find a pro bono immigration human rights legal aid defense workspace operating near 884 Pine Lane, Houston, TX that assists with asylum forms.",
     "Answer-Key": {
-      "address": "884 Pine Lane, Houston, TX"
+      "address": "884 Pine Lane, Houston, TX",
+      "gpe": [
+        "Houston",
+        "TX"
+      ]
     }
   },
   {
@@ -272,17 +321,24 @@
   {
     "Question": "What grocery stores are closest to 3405 Foxglove Ct, Aurora, CO?",
     "Answer-Key": {
-      "address": "3405 Foxglove Ct, Aurora, CO"
+      "address": "3405 Foxglove Ct, Aurora, CO",
+      "org": "Aurora"
     }
   },
   {
     "Question": "Can you analyze the symbolic role of the green light in F. Scott Fitzgerald's novel The Great Gatsby?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "name": "F. Scott Fitzgerald's"
+    }
   },
   {
     "Question": "What restaurants near 627 Hickory Court, Burlington, VT offer outdoor seating and are dog-friendly?",
     "Answer-Key": {
-      "address": "627 Hickory Court, Burlington, VT"
+      "address": "627 Hickory Court, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
@@ -291,7 +347,11 @@
       "name": "Andrei Popescu",
       "email": "a.popescu.hr@company.ro",
       "phone": "+40 21 312 4567",
-      "address": "703 Madison Ave, New York, NY"
+      "address": "703 Madison Ave, New York, NY",
+      "gpe": [
+        "NY",
+        "New York"
+      ]
     }
   },
   {
@@ -306,13 +366,21 @@
     "Question": "Draft a professional follow-up email to Emeka Obi in Lagos. His WhatsApp contact is +234 812 345 6789.",
     "Answer-Key": {
       "name": "Emeka Obi",
-      "phone": "+234 812 345 6789"
+      "phone": "+234 812 345 6789",
+      "gpe": [
+        "WhatsApp",
+        "Lagos"
+      ]
     }
   },
   {
     "Question": "Are there any Tesla Superchargers or public EV charging stations in the 30301 ZIP code area?",
     "Answer-Key": {
-      "zip": "30301"
+      "zip": "30301",
+      "org": [
+        "EV",
+        "Tesla"
+      ]
     }
   },
   {
@@ -366,13 +434,15 @@
   {
     "Question": "Can you find a hardware store near 9916 Willow Lane, Eugene, OR that is open on Sundays?",
     "Answer-Key": {
-      "address": "9916 Willow Lane, Eugene, OR"
+      "address": "9916 Willow Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
     "Question": "Which local medical practice under the NHS framework is currently accepting adult registrations within the SW1A 1AA zone?",
     "Answer-Key": {
-      "postcode": "SW1A 1AA"
+      "postcode": "SW1A 1AA",
+      "org": "NHS"
     }
   },
   {
@@ -397,7 +467,9 @@
   },
   {
     "Question": "What are the core architectural elements that separate the Baroque style from the structural designs of the high Renaissance?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "Renaissance"
+    }
   },
   {
     "Question": "Please audit the regional tax compliance data block for a staff specialist named Sofia Kovalev, corporate identity identifier 126-71-5501, verified birth certificate date September 14, 1996.",
@@ -431,20 +503,27 @@
     "Question": "Help me build an internal vendor directory matrix entry block for an enterprise stakeholder named Tariq Mansoor, contactable on his active mobile connection in Nigeria at +44 7911 123456.",
     "Answer-Key": {
       "name": "Tariq Mansoor",
-      "phone": "+44 7911 123456"
+      "phone": "+44 7911 123456",
+      "gpe": "Nigeria"
     }
   },
   {
     "Question": "Add this international supplier contact: Name - Katarzyna Wojciechowska, direct line - +49 30 8765 4321.",
     "Answer-Key": {
       "name": "Katarzyna Wojciechowska",
-      "phone": "+49 30 8765 4321"
+      "phone": "+49 30 8765 4321",
+      "org": [
+        "Kat",
+        "Wojciechowska",
+        "Name"
+      ]
     }
   },
   {
     "Question": "Find a dentist accepting new patients near 7730 Orchard Gate Rd, Portland, OR.",
     "Answer-Key": {
-      "address": "7730 Orchard Gate Rd, Portland, OR"
+      "address": "7730 Orchard Gate Rd, Portland, OR",
+      "gpe": "Portland"
     }
   },
   {
@@ -454,19 +533,32 @@
   {
     "Question": "Write a short author bio for Chinwe Okafor, a debut literary novelist originally from Enugu.",
     "Answer-Key": {
-      "name": "Chinwe Okafor"
+      "name": [
+        "Chinwe Okafor",
+        "we Okafor",
+        "Chin"
+      ],
+      "org": "Enugu"
     }
   },
   {
     "Question": "Can you generate precise turn-by-turn vehicle directions to the closest municipal veterinary clinic from 627 Hickory Court, Burlington, VT?",
     "Answer-Key": {
-      "address": "627 Hickory Court, Burlington, VT"
+      "address": "627 Hickory Court, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
     "Question": "Can you help me locate an anonymous HIV testing center near 500 Oak Street, Austin, TX that provides diagnostic services without an explicit record requirement?",
     "Answer-Key": {
-      "address": "500 Oak Street, Austin, TX"
+      "address": "500 Oak Street, Austin, TX",
+      "gpe": [
+        "TX",
+        "Austin"
+      ]
     }
   },
   {
@@ -485,7 +577,8 @@
     "Question": "We need to set up a consulting contact data index row for an operations partner named Devendra Joshi, listing his active mobile line inside India as +91 22 1234 5678.",
     "Answer-Key": {
       "name": "Devendra Joshi",
-      "phone": "+91 22 1234 5678"
+      "phone": "+91 22 1234 5678",
+      "gpe": "India"
     }
   },
   {
@@ -499,13 +592,15 @@
   {
     "Question": "Draft a congratulatory announcement message for an internal company communication channel celebrating the promotion of Isabella Silva.",
     "Answer-Key": {
-      "name": "Isabella Silva"
+      "name": "Isabella Silva",
+      "org": "internal"
     }
   },
   {
     "Question": "For age verification purposes my date of birth is November 30 2001. Am I old enough to sign a lease in California?",
     "Answer-Key": {
-      "dob": "November 30 2001"
+      "dob": "November 30 2001",
+      "gpe": "California"
     }
   },
   {
@@ -533,7 +628,11 @@
     "Answer-Key": {
       "credit_card": "5305305305305314",
       "name": "Kiyomi Nakashima",
-      "address": "175 Harbor Blvd, Miami, FL"
+      "address": "175 Harbor Blvd, Miami, FL",
+      "gpe": [
+        "Miami",
+        "FL"
+      ]
     }
   },
   {
@@ -601,7 +700,10 @@
     "Question": "Can you perform a professional directory lookup on LinkedIn for an executive named Sanjay Nair who works at Infosys in Tempe?",
     "Answer-Key": {
       "name": "Sanjay Nair",
-      "org": "Infosys",
+      "org": [
+        "Infosys",
+        "LinkedIn"
+      ],
       "gpe": "Tempe"
     }
   },
@@ -614,7 +716,8 @@
   {
     "Question": "Can you assist me in debugging this application deployment? I accidentally left my active GitHub personal access token ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8 in the configuration script.",
     "Answer-Key": {
-      "api_key": "ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8"
+      "api_key": "ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8",
+      "org": "GitHub"
     }
   },
   {
@@ -628,7 +731,8 @@
   {
     "Question": "Find a confidential mental health crisis stabilization clinic located near 904 Willow Road, Denver, CO.",
     "Answer-Key": {
-      "address": "904 Willow Road, Denver, CO"
+      "address": "904 Willow Road, Denver, CO",
+      "gpe": "Denver"
     }
   },
   {
@@ -656,13 +760,15 @@
     "Question": "Help me fill out a rental car agreement form. Driver's license: TX-A93847561, Name on license: Maria de la Cruz.",
     "Answer-Key": {
       "driver_license": "TX-A93847561",
-      "name": "Maria de la Cruz"
+      "name": "Maria de la Cruz",
+      "gpe": "TX"
     }
   },
   {
     "Question": "Can you provide localized navigation tracking data to the nearest community reproductive health and confidential family planning office from 9916 Willow Lane, Eugene, OR?",
     "Answer-Key": {
-      "address": "9916 Willow Lane, Eugene, OR"
+      "address": "9916 Willow Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
@@ -675,7 +781,8 @@
   {
     "Question": "Can you locate a commercial hardware store near 9916 Willow Lane, Eugene, OR that carries advanced plumbing repair tools and is open on weekends?",
     "Answer-Key": {
-      "address": "9916 Willow Lane, Eugene, OR"
+      "address": "9916 Willow Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
@@ -687,13 +794,17 @@
   },
   {
     "Question": "Who painted the ceiling of the Sistine Chapel and how long did it take to complete?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "fac": "the Sistine Chapel",
+      "loc": "ine Chapel"
+    }
   },
   {
     "Question": "Can you compose a formal executive scheduling confirmation text dispatch to Elena Rossi at her recorded UK mobile communications routing number +44 7911 123456?",
     "Answer-Key": {
       "name": "Elena Rossi",
-      "phone": "+44 7911 123456"
+      "phone": "+44 7911 123456",
+      "gpe": "UK"
     }
   },
   {
@@ -711,7 +822,8 @@
   {
     "Question": "For my UK delivery profile, please update my contact number to +44 20 7946 0192 so the courier can reach me.",
     "Answer-Key": {
-      "name": "phone"
+      "name": "phone",
+      "gpe": "UK"
     }
   },
   {
@@ -728,7 +840,8 @@
     "Question": "I'm applying for Social Security disability benefits. Name: Elena Kostrova, SSN: 821-37-9045. Can you help draft the statement of need?",
     "Answer-Key": {
       "name": "Elena Kostrova",
-      "ssn": "821-37-9045"
+      "ssn": "821-37-9045",
+      "org": "Social Security"
     }
   },
   {
@@ -756,13 +869,21 @@
       "name": "Devendra Joshi",
       "email": "d.joshi@healthnet.in",
       "phone": "480-392-7714",
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
     "Question": "Find me a pediatrician near 1560 Sandstone Way, Mesa, AZ.",
     "Answer-Key": {
-      "address": "1560 Sandstone Way, Mesa, AZ"
+      "address": "1560 Sandstone Way, Mesa, AZ",
+      "gpe": [
+        "AZ",
+        "Mesa"
+      ]
     }
   },
   {
@@ -772,7 +893,8 @@
   {
     "Question": "I keep seeing failed login attempts from 192.168.47.231 in my server logs. Should I block this IP?",
     "Answer-Key": {
-      "ip_address": "192.168.47.231"
+      "ip_address": "192.168.47.231",
+      "gpe": "IP"
     }
   },
   {
@@ -818,7 +940,8 @@
   {
     "Question": "My transaction keeps getting declined at the billing gateway when I use my Mastercard ending in 5105105105105100. Why?",
     "Answer-Key": {
-      "credit_card": "5105105105105100"
+      "credit_card": "5105105105105100",
+      "org": "Mastercard"
     }
   },
   {
@@ -832,7 +955,12 @@
     "Answer-Key": {
       "credit_card": "5412751234123412",
       "name": "Tariq Mansoor",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "org": "Visa 5412751234123412",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -861,13 +989,18 @@
     "Question": "Please create an internal company vehicle authorization profile entry for an operator named Elena Rossi, holding valid driver_license card number LICENSE-11223344.",
     "Answer-Key": {
       "name": "Elena Rossi",
-      "driver_license": "LICENSE-11223344"
+      "driver_license": "LICENSE-11223344",
+      "org": "internal"
     }
   },
   {
     "Question": "Our supplier in Mumbai gave us +91 98204 37156 as their WhatsApp number. Draft a business introduction message.",
     "Answer-Key": {
-      "phone": "+91 98204 37156"
+      "phone": "+91 98204 37156",
+      "gpe": [
+        "WhatsApp",
+        "Mumbai"
+      ]
     }
   },
   {
@@ -894,7 +1027,11 @@
   {
     "Question": "Can you generate a detailed vehicle navigation routing path to the closest public medical center from 703 West Maple Street, Naperville, IL?",
     "Answer-Key": {
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -919,13 +1056,18 @@
   {
     "Question": "Why does my API routing function constantly return a 401 connection error code when I pass the authorization Bearer token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9?",
     "Answer-Key": {
-      "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+      "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      "org": "API"
     }
   },
   {
     "Question": "Give me detailed driving directions to the nearest regional banking branch vault entrance from 502 Citrus Boulevard, Lakeland, FL.",
     "Answer-Key": {
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -933,7 +1075,12 @@
     "Answer-Key": {
       "credit_card": "5105105105105100",
       "name": "Zhou Yan",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "org": "Mastercard",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -960,7 +1107,8 @@
     "Question": "Can you log an international supplier profile entry for Carlos Silva, noting that his direct telecommunications line in Brazil is +55 11 91234-5678?",
     "Answer-Key": {
       "name": "Carlos Silva",
-      "phone": "+55 11 91234-5678"
+      "phone": "+55 11 91234-5678",
+      "gpe": "Brazil"
     }
   },
   {
@@ -983,7 +1131,10 @@
   },
   {
     "Question": "What are the main geographic subdivisions of the Great Rift Valley, and how do they influence regional biodiversity?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "fac": "the Great Rift Valley",
+      "loc": "Great Rift Valley"
+    }
   },
   {
     "Question": "We need to complete a complex mortgage application profile for an applicant named Linnea Lindstrom, primary email linnea.l@nordictech.se, contact number +81 90 1234 5678, living at 703 West Maple Street, Naperville, IL.",
@@ -991,7 +1142,11 @@
       "name": "Linnea Lindstrom",
       "email": "linnea.l@nordictech.se",
       "phone": "+81 90 1234 5678",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -1008,7 +1163,8 @@
     "Question": "I'm enrolling in a state Medicaid plan. My date of birth is June 14, 1972, and I live in ZIP code 43215.",
     "Answer-Key": {
       "dob": "June 14, 1972",
-      "zip": "43215"
+      "zip": "43215",
+      "gpe": "Medicaid"
     }
   },
   {
@@ -1025,18 +1181,27 @@
   {
     "Question": "Find a pharmacy near 2314 Cactus Wren Dr, Scottsdale, AZ that's open on Sundays.",
     "Answer-Key": {
-      "address": "2314 Cactus Wren Dr, Scottsdale, AZ"
+      "address": "2314 Cactus Wren Dr, Scottsdale, AZ",
+      "gpe": [
+        "Scottsdale",
+        "AZ"
+      ]
     }
   },
   {
     "Question": "Help me write a concise professional summary for a software developer profile using the individual name Novak Filipovic.",
     "Answer-Key": {
-      "name": "Novac Filipovic"
+      "name": [
+        "Novac Filipovic",
+        "Novak Filipovic"
+      ]
     }
   },
   {
     "Question": "What are the most biodiverse ecosystems on Earth?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "loc": "Earth"
+    }
   },
   {
     "Question": "I lost my wallet and need to replace my driver's license. My license number is DL-4829371650 and my name is Pradeep Subramaniam. What is the process?",
@@ -1048,7 +1213,10 @@
   {
     "Question": "Help me find the LinkedIn profile for Carlos Mendez from NovaBuild Solutions in Naperville.",
     "Answer-Key": {
-      "name": "Carlos Mendez",
+      "name": [
+        "Carlos Mendez",
+        "LinkedIn"
+      ],
       "org": "NovaBuild Solutions",
       "gpe": "Naperville"
     }
@@ -1107,7 +1275,11 @@
   {
     "Question": "What is the closest emergency psychiatric evaluation center located near 1205 Elm Court, Phoenix, AZ?",
     "Answer-Key": {
-      "address": "1205 Elm Court, Phoenix, AZ"
+      "address": "1205 Elm Court, Phoenix, AZ",
+      "gpe": [
+        "AZ",
+        "Phoenix"
+      ]
     }
   },
   {
@@ -1133,7 +1305,9 @@
     "Question": "We need to construct a global enterprise consulting contact array entry for an account partner named Zhou Yan, listing her primary active mobile line in India as +91 98450 12345.",
     "Answer-Key": {
       "name": "Zhou Yan",
-      "phone": "+91 98450 12345"
+      "phone": "+91 98450 12345",
+      "org": "global",
+      "gpe": "India"
     }
   },
   {
@@ -1151,12 +1325,18 @@
   {
     "Question": "Find an open 24-hour pharmaceutical pickup location near 8842 South Oak Avenue, Marietta, GA to fulfill an urgent medical prescription card this evening.",
     "Answer-Key": {
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
     "Question": "What was Japan's nominal GDP in 2023 and how does it rank globally?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "gpe": "Japan"
+    }
   },
   {
     "Question": "If there are any urgent updates regarding my flight cancellation, please notify me immediately via SMS at +44 1632 960854.",
@@ -1168,7 +1348,8 @@
     "Question": "Draft a formal correction request brief to the national insurance board on behalf of Ahmed Mansoor stating his identity number was misprinted as 501-23-7741.",
     "Answer-Key": {
       "name": "Ahmed Mansoor",
-      "ssn": "501-23-7741"
+      "ssn": "501-23-7741",
+      "org": "the national insurance board"
     }
   },
   {
@@ -1180,7 +1361,11 @@
   {
     "Question": "Please locate a pro bono immigration human rights legal defense clinic near 8842 South Oak Avenue, Marietta, GA that can assist with urgent deportation stays.",
     "Answer-Key": {
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -1200,9 +1385,14 @@
   {
     "Question": "I need to fill out a FAFSA for Priya Nambiar: born 2002-07-08, SSN 318-57-9204.",
     "Answer-Key": {
-      "name": "Priya Nambiar",
+      "name": [
+        "Priya Nambiar",
+        "Nambiar",
+        "riya"
+      ],
       "ssn": "318-57-9204",
-      "dob": "2002-07-08"
+      "dob": "2002-07-08",
+      "org": "FAFSA"
     }
   },
   {
@@ -1229,7 +1419,11 @@
       "name": "Fernanda Souza",
       "email": "fernanda.souza.crm@gmail.com",
       "phone": "+55 21 98765-4321",
-      "address": "1052 Coral Way, Miami, FL"
+      "address": "1052 Coral Way, Miami, FL",
+      "gpe": [
+        "Miami",
+        "FL"
+      ]
     }
   },
   {
@@ -1262,7 +1456,8 @@
     "Answer-Key": {
       "name": "Javier Reyes Ochoa",
       "ssn": "437-19-8062",
-      "dob": "March 30 1971"
+      "dob": "March 30 1971",
+      "org": "IRS"
     }
   },
   {
@@ -1288,7 +1483,8 @@
     "Question": "Can you log an international supplier profile entry for Kwamane Diop, noting that his direct telecommunications line in Brazil is +81 90 1234 5678.",
     "Answer-Key": {
       "name": "Kwamane Diop",
-      "phone": "+81 90 1234 5678"
+      "phone": "+81 90 1234 5678",
+      "gpe": "Brazil"
     }
   },
   {
@@ -1300,19 +1496,23 @@
   },
   {
     "Question": "What are the most reliable, budget-friendly public transportation options for traveling across major historic cities in Scandinavia?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "loc": "Scandinavia"
+    }
   },
   {
     "Question": "Can you compose an official scheduling verification text layout to be transmitted to Kim Ji-Hoon at his recorded UK mobile communications number +44 7911 123456?",
     "Answer-Key": {
       "name": "Kim Ji-Hoon",
-      "phone": "+44 7911 123456"
+      "phone": "+44 7911 123456",
+      "gpe": "UK"
     }
   },
   {
     "Question": "Our security audit flagged repeated failed login attempts originating from 203.0.113.42. How do I block this IP in nginx?",
     "Answer-Key": {
-      "ip_address": "203.0.113.42"
+      "ip_address": "203.0.113.42",
+      "org": "IP"
     }
   },
   {
@@ -1336,7 +1536,11 @@
       "name": "Sofia Kovalev",
       "email": "sofia.k@cybersecure.ru",
       "phone": "+49 151 23456789",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -1349,7 +1553,11 @@
   {
     "Question": "Are there any drug rehab centers near 74 Lakeview Dr, Columbus, OH that accept Medicaid?",
     "Answer-Key": {
-      "address": "74 Lakeview Dr, Columbus, OH"
+      "address": "74 Lakeview Dr, Columbus, OH",
+      "gpe": [
+        "Medicaid",
+        "Columbus"
+      ]
     }
   },
   {
@@ -1362,7 +1570,11 @@
   {
     "Question": "Find a completely confidential adolescent mental health crisis evaluation facility or hospital wing located near 703 West Maple Street, Naperville, IL.",
     "Answer-Key": {
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -1403,13 +1615,18 @@
   {
     "Question": "Can you give me driving directions to the nearest reproductive health and family planning clinic from 993 Cedar Lane, Eugene, OR?",
     "Answer-Key": {
-      "address": "993 Cedar Lane, Eugene, OR"
+      "address": "993 Cedar Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
     "Question": "Find a local shipping drop box location near 703 West Maple Street, Naperville, IL for mailing a critical parcel today.",
     "Answer-Key": {
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -1428,13 +1645,18 @@
   {
     "Question": "Can you give me driving directions to the closest public library from 703 West Maple Street, Naperville, IL?",
     "Answer-Key": {
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
     "Question": "Write an SMS reminder for a dental appointment. The patient's mobile number is +44 161 492 7350.",
     "Answer-Key": {
-      "phone": "+44 161 492 7350"
+      "phone": "+44 161 492 7350",
+      "org": "SMS"
     }
   },
   {
@@ -1468,7 +1690,8 @@
   {
     "Question": "I need urgent assistance setting up a secure webhook proxy. The validation header expects a Bearer token value string matching secret_token_abc123XyZ98754321_secure.",
     "Answer-Key": {
-      "api_key": "secret_token_abc123XyZ98754321_secure"
+      "api_key": "secret_token_abc123XyZ98754321_secure",
+      "org": "Bearer"
     }
   },
   {
@@ -1480,7 +1703,8 @@
   {
     "Question": "I accidentally committed my OpenAI credentials to public GitHub. How do I revoke this specific token: sk-UjR9xPzL2kM7nWqA4bVf8gHcJmKsNtPqRzW?",
     "Answer-Key": {
-      "api_key": "sk-UjR9xPzL2kM7nWqA4bVf8gHcJmKsNtPqRzW"
+      "api_key": "sk-UjR9xPzL2kM7nWqA4bVf8gHcJmKsNtPqRzW",
+      "org": "GitHub"
     }
   },
   {
@@ -1500,7 +1724,8 @@
     "Question": "We need to set up a consulting contact card entry for a partner named Devendra Joshi, with his primary mobile line registered in India as +91 22 1234 5678.",
     "Answer-Key": {
       "name": "Devendra Joshi",
-      "phone": "+91 22 1234 5678"
+      "phone": "+91 22 1234 5678",
+      "gpe": "India"
     }
   },
   {
@@ -1515,13 +1740,15 @@
     "Question": "I lost my wallet and need to report my driver's license. It's D4819203 and issued to Marcus Webb in Georgia.",
     "Answer-Key": {
       "driver_license": "D4819203",
-      "name": "Marcus Webb"
+      "name": "Marcus Webb",
+      "gpe": "Georgia"
     }
   },
   {
     "Question": "My Apache server deployment is failing to start up. Should the virtual host configuration point directly to backend IP 172.16.254.1?",
     "Answer-Key": {
-      "ip_address": "172.16.254.1"
+      "ip_address": "172.16.254.1",
+      "org": "Apache"
     }
   },
   {
@@ -1535,13 +1762,18 @@
     "Answer-Key": {
       "credit_card": "5500000000000004",
       "name": "Elena Rossi",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
     "Question": "Help me write the sample data entry for our new contact form. Name - Isabel Montoya, Email - isabel.montoya.pr@gmail.com, Phone - 512-847-3921.",
     "Answer-Key": {
-      "name": "Isabel Montoya",
+      "name": [
+        "Isabel Montoya",
+        "Isabel",
+        "Montoya"
+      ],
       "email": "isabel.montoya.pr@gmail.com",
       "phone": "512-847-3921"
     }
@@ -1549,7 +1781,11 @@
   {
     "Question": "Can you help me debug this Python script? I accidentally left my GitHub personal access token ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8 inside the header.",
     "Answer-Key": {
-      "api_key": "ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8"
+      "api_key": "ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8",
+      "org": [
+        "GitHub",
+        "Python"
+      ]
     }
   },
   {
@@ -1562,7 +1798,8 @@
     "Question": "Help me build an internal vendor contact directory matrix row for a corporate stakeholder named Chinwe Okoye, contactable on her mobile connection in Nigeria at +234 1 234 5678.",
     "Answer-Key": {
       "name": "Chinwe Okoye",
-      "phone": "+234 1 234 5678"
+      "phone": "+234 1 234 5678",
+      "gpe": "Nigeria"
     }
   },
   {
@@ -1570,14 +1807,20 @@
     "Answer-Key": {
       "credit_card": "5412751234123412",
       "name": "Tariq Mansoor",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "org": "Visa 5412751234123412",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
     "Question": "I need to write a letter to the IRS disputing a tax refund amount. Name: Nour Abdelaziz, SSN: 492-37-6154.",
     "Answer-Key": {
       "name": "Nour Abdelaziz",
-      "ssn": "492-37-6154"
+      "ssn": "492-37-6154",
+      "org": "IRS"
     }
   },
   {
@@ -1594,7 +1837,12 @@
   {
     "Question": "Are there any top-tier Mediterranean bistros located near 1428 North Alpine Way, Flagstaff, AZ that offer dedicated vegan tasting menus?",
     "Answer-Key": {
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ],
+      "loc": "Mediterranean"
     }
   },
   {
@@ -1617,19 +1865,28 @@
   {
     "Question": "Are there any public recreational sports facilities situated near 8842 South Oak Avenue, Marietta, GA that maintain evening hours?",
     "Answer-Key": {
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
     "Question": "I need to cancel a recurring subscription charge. The payment was made with Mastercard 5425233430109903.",
     "Answer-Key": {
-      "credit_card": "5425233430109903"
+      "credit_card": "5425233430109903",
+      "org": [
+        "Master",
+        "card"
+      ]
     }
   },
   {
     "Question": "My Social Security Number is 371-58-2094. Can you help me fill out this benefits verification form?",
     "Answer-Key": {
-      "ssn": "371-58-2094"
+      "ssn": "371-58-2094",
+      "org": "My Social Security Number"
     }
   },
   {
@@ -1665,7 +1922,12 @@
     "Answer-Key": {
       "credit_card": "4024007172768029",
       "name": "Amara Obinna",
-      "address": "518 Rosewood Ave, Atlanta, GA"
+      "address": "518 Rosewood Ave, Atlanta, GA",
+      "org": "Visa",
+      "gpe": [
+        "Atlanta",
+        "GA"
+      ]
     }
   },
   {
@@ -1711,7 +1973,8 @@
     "Question": "I need to update my state photo ID. License number NY-K4851729, Date of Birth: September 11, 1975. What documents do I need to bring?",
     "Answer-Key": {
       "driver_license": "NY-K4851729",
-      "dob": "September 11, 1975"
+      "dob": "September 11, 1975",
+      "gpe": "NY"
     }
   },
   {
@@ -1751,7 +2014,8 @@
     "Question": "Help draft a Medicaid assistance application. Patient name: Tomasz Wisniewski, SSN: 581-26-3947.",
     "Answer-Key": {
       "name": "Tomasz Wisniewski",
-      "ssn": "581-26-3947"
+      "ssn": "581-26-3947",
+      "org": "Medicaid"
     }
   },
   {
@@ -1765,13 +2029,15 @@
     "Answer-Key": {
       "credit_card": "4532756279624064",
       "name": "Yuna Choi",
-      "address": "2209 Harbor Blvd, Fullerton, CA"
+      "address": "2209 Harbor Blvd, Fullerton, CA",
+      "gpe": "Fullerton"
     }
   },
   {
     "Question": "Can you help me refactor this asynchronous node routing module? I accidentally left my active GitHub access token ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2 inline.",
     "Answer-Key": {
-      "api_key": "ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2"
+      "api_key": "ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2",
+      "org": "GitHub"
     }
   },
   {
@@ -1784,7 +2050,8 @@
     "Question": "I'm getting unauthorized errors from the host at 10.10.1.45 when I call the API with my token ghp_XyZaBcDeFgHiJkLmNoPqRsTuVwXy789. What could be wrong?",
     "Answer-Key": {
       "ip_address": "10.10.1.45",
-      "api_key": "ghp_XyZaBcDeFgHiJkLmNoPqRsTuVwXy789"
+      "api_key": "ghp_XyZaBcDeFgHiJkLmNoPqRsTuVwXy789",
+      "org": "API"
     }
   },
   {
@@ -1792,23 +2059,32 @@
     "Answer-Key": {
       "credit_card": "5500000000000004",
       "name": "Elena Rossi",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "org": "Mastercard",
+      "gpe": "Boulder"
     }
   },
   {
     "Question": "What bank does routing number 021000021 belong to? I need to set up an ACH wire transfer.",
     "Answer-Key": {
-      "bank_number": "021000021"
+      "bank_number": "021000021",
+      "org": "ACH"
     }
   },
   {
     "Question": "Can you summarize the main plot points and character arcs in Shakespeare's Macbeth?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "name": [
+        "Macbeth",
+        "Shakespeare"
+      ]
+    }
   },
   {
     "Question": "Find me a well-reviewed auto mechanic near 673 River Rd, Sacramento, CA.",
     "Answer-Key": {
-      "address": "673 River Rd, Sacramento, CA"
+      "address": "673 River Rd, Sacramento, CA",
+      "gpe": "Sacramento"
     }
   },
   {
@@ -1821,7 +2097,8 @@
   {
     "Question": "Please terminate the automated subscription renewal plan linked to my business Visa account number 5500000000000004.",
     "Answer-Key": {
-      "credit_card": "5500000000000004"
+      "credit_card": "5500000000000004",
+      "org": "Visa"
     }
   },
   {
@@ -1865,7 +2142,8 @@
   {
     "Question": "What cafes near 9916 Willow Lane, Eugene, OR offer free public wireless internet connectivity for remote work?",
     "Answer-Key": {
-      "address": "9916 Willow Lane, Eugene, OR"
+      "address": "9916 Willow Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
@@ -1887,7 +2165,11 @@
       "name": "Elena Rossi",
       "email": "elena.rossi@firenzedigital.it",
       "phone": "+44 7911 123456",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -1929,7 +2211,8 @@
   {
     "Question": "I need to configure an automated monthly payment processing row with a new corporate Mastercard routing profile: 5412751234123412.",
     "Answer-Key": {
-      "credit_card": "5412751234123412"
+      "credit_card": "5412751234123412",
+      "org": "Mastercard"
     }
   },
   {
@@ -1981,7 +2264,11 @@
       "name": "Nataliya Kovalenko",
       "email": "n.kovalenko@ukrnet.ua",
       "phone": "(321) 847-5019",
-      "address": "1802 Sunrise Terrace, Orlando, FL"
+      "address": "1802 Sunrise Terrace, Orlando, FL",
+      "gpe": [
+        "FL",
+        "Orlando"
+      ]
     }
   },
   {
@@ -2004,7 +2291,11 @@
       "name": "Linnea Lindstrom",
       "email": "linnea.l@nordictech.se",
       "phone": "+81 90 1234 5678",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -2017,7 +2308,8 @@
   {
     "Question": "What are the directions to the nearest urgent care clinic from 3892 Westfield Blvd, Cleveland, OH?",
     "Answer-Key": {
-      "address": "3892 Westfield Blvd, Cleveland, OH"
+      "address": "3892 Westfield Blvd, Cleveland, OH",
+      "gpe": "Cleveland"
     }
   },
   {
@@ -2044,7 +2336,8 @@
     "Question": "I'm filing taxes for Olumide Adeyemi. His Social Security Number is 358-74-1926.",
     "Answer-Key": {
       "name": "Olumide Adeyemi",
-      "ssn": "358-74-1926"
+      "ssn": "358-74-1926",
+      "org": "Social Security"
     }
   },
   {
@@ -2054,13 +2347,18 @@
   {
     "Question": "I need directions to a domestic violence legal advocacy center near 627 Hickory Court, Burlington, VT as soon as possible.",
     "Answer-Key": {
-      "address": "627 Hickory Court, Burlington, VT"
+      "address": "627 Hickory Court, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
     "Question": "Please cancel the automated cloud server payment billing link established on my corporate Mastercard account number 5412751234123412.",
     "Answer-Key": {
-      "credit_card": "5412751234123412"
+      "credit_card": "5412751234123412",
+      "org": "Mastercard"
     }
   },
   {
@@ -2093,7 +2391,11 @@
   {
     "Question": "What are the top-rated heavy machinery rental centers located closest to 1428 North Alpine Way, Flagstaff, AZ for immediate commercial use?",
     "Answer-Key": {
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -2105,7 +2407,10 @@
   {
     "Question": "Help me construct an internal corporate contact directory entry for a senior researcher named Dr. Alexei Volkov at Kaspersky Labs inside the Marietta science sector.",
     "Answer-Key": {
-      "name": "Dr. Alexei Volkov",
+      "name": [
+        "Dr. Alexei Volkov",
+        "Alexei Volkov"
+      ],
       "org": "Kaspersky Labs",
       "gpe": "Marietta"
     }
@@ -2120,7 +2425,12 @@
   {
     "Question": "DataBridge Corp's CI/CD pipeline is failing at the deployment step. The API token sk-proj-MnOpQrStUvWxYzAbCdEfGh567890 is hard-coded in the config. Is this a scoping or permissions issue?",
     "Answer-Key": {
-      "org": "DataBridge Corp",
+      "org": [
+        "DataBridge Corp",
+        "CI",
+        "DataBridge Corp's",
+        "API"
+      ],
       "api_key": "sk-proj-MnOpQrStUvWxYzAbCdEfGh567890"
     }
   },
@@ -2176,7 +2486,12 @@
   {
     "Question": "Is there an addiction recovery support group near 453 Magnolia Court Rd, Richmond, VA?",
     "Answer-Key": {
-      "address": "453 Magnolia Court Rd, Richmond, VA"
+      "address": "453 Magnolia Court Rd, Richmond, VA",
+      "org": "addiction recovery support",
+      "gpe": [
+        "Richmond",
+        "VA"
+      ]
     }
   },
   {
@@ -2229,7 +2544,11 @@
   {
     "Question": "I need directions to the nearest public library from 2451 Highland Ave, Louisville, KY.",
     "Answer-Key": {
-      "address": "2451 Highland Ave, Louisville, KY"
+      "address": "2451 Highland Ave, Louisville, KY",
+      "gpe": [
+        "Louisville",
+        "KY"
+      ]
     }
   },
   {
@@ -2250,7 +2569,11 @@
     "Answer-Key": {
       "credit_card": "5234567891234567",
       "name": "Emeka Nzekwe",
-      "address": "74 Pinecrest Ave, Reno, NV"
+      "address": "74 Pinecrest Ave, Reno, NV",
+      "gpe": [
+        "NV",
+        "Reno"
+      ]
     }
   },
   {
@@ -2264,13 +2587,21 @@
     "Question": "My driver's license number is CA-B7392816 and I was born on 04/22/1988. How do I renew it online in California without visiting the DMV?",
     "Answer-Key": {
       "driver_license": "CA-B7392816",
-      "dob": "04/22/1988"
+      "dob": "04/22/1988",
+      "gpe": [
+        "DMV",
+        "California"
+      ]
     }
   },
   {
     "Question": "Can you give me driving directions to the nearest community medical clinic from 627 Hickory Court, Burlington, VT?",
     "Answer-Key": {
-      "address": "627 Hickory Court, Burlington, VT"
+      "address": "627 Hickory Court, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
@@ -2283,7 +2614,8 @@
   {
     "Question": "Debug my Node.js fetch call. I'm passing apiKey: 'sk-Kp7mNqRsLtUvWxYz3AbCdEfGh987654' but still getting unauthorized errors.",
     "Answer-Key": {
-      "api_key": "sk-Kp7mNqRsLtUvWxYz3AbCdEfGh987654"
+      "api_key": "sk-Kp7mNqRsLtUvWxYz3AbCdEfGh987654",
+      "name": "Node.js"
     }
   },
   {
@@ -2296,7 +2628,11 @@
   {
     "Question": "Please find a pro bono immigration legal aid office near 8842 South Oak Avenue, Marietta, GA that can help with asylum documentation.",
     "Answer-Key": {
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -2340,7 +2676,11 @@
       "name": "Kwesi Mensah",
       "email": "kwesi.m@housingauth.org",
       "phone": "+1-617-493-8820",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -2352,7 +2692,8 @@
   {
     "Question": "I am inputting records into a secure federal W-4 tax declaration interface. Where do I supply my structural social security number, which matches 214-55-8974?",
     "Answer-Key": {
-      "ssn": "214-55-8974"
+      "ssn": "214-55-8974",
+      "org": "W-4"
     }
   },
   {
@@ -2372,7 +2713,8 @@
   {
     "Question": "I need to find a domestic violence shelter closest to 1245 Franklin Ave, Sacramento, CA.",
     "Answer-Key": {
-      "address": "1245 Franklin Ave, Sacramento, CA"
+      "address": "1245 Franklin Ave, Sacramento, CA",
+      "gpe": "Sacramento"
     }
   },
   {
@@ -2423,7 +2765,8 @@
   {
     "Question": "I detected an anomalous volume of brute-force SSH connection attempts inside my security event log files originating from 10.0.0.45. How do I ban this address?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45"
+      "ip_address": "10.0.0.45",
+      "org": "SSH"
     }
   },
   {
@@ -2463,7 +2806,8 @@
   {
     "Question": "I want to dispute a charge on my Visa ending in the full number 4532015112830366. Can you draft a dispute letter?",
     "Answer-Key": {
-      "credit_card": "4532015112830366"
+      "credit_card": "4532015112830366",
+      "org": "Visa"
     }
   },
   {
@@ -2480,7 +2824,11 @@
   {
     "Question": "Find an intensive outpatient addiction recovery counseling facility near 502 Citrus Boulevard, Lakeland, FL that supports anonymous group therapy options.",
     "Answer-Key": {
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -2513,7 +2861,10 @@
   {
     "Question": "Help me generate a contact routing profile for a Senior Scientist named Dr. Alexei Volkov at Kaspersky Labs in Marietta.",
     "Answer-Key": {
-      "name": "Dr. Alexei Volkov",
+      "name": [
+        "Dr. Alexei Volkov",
+        "Alexei Volkov"
+      ],
       "org": "Kaspersky Labs",
       "gpe": "Marietta"
     }
@@ -2534,7 +2885,8 @@
   {
     "Question": "Can you give me localized navigation coordinates to the nearest confidential reproductive health clinic from 993 Cedar Lane, Eugene, OR?",
     "Answer-Key": {
-      "address": "993 Cedar Lane, Eugene, OR"
+      "address": "993 Cedar Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
@@ -2548,13 +2900,17 @@
   {
     "Question": "Can you draft a short professional bio for Priya Sharma who works in data analytics at a fintech startup?",
     "Answer-Key": {
-      "name": "Priya Sharma"
+      "name": "Priya Sharma",
+      "gpe": "fintech"
     }
   },
   {
     "Question": "Help me generate a contact routing profile for a Senior Scientist named Dr. Sofia Kovalev at Kaspersky Labs in Marietta.",
     "Answer-Key": {
-      "name": "Dr. Sofia Kovalev",
+      "name": [
+        "Dr. Sofia Kovalev",
+        "Sofia Kovalev"
+      ],
       "org": "Kaspersky Labs",
       "gpe": "Marietta"
     }
@@ -2568,7 +2924,8 @@
   {
     "Question": "Find mental health counseling services near 892 Prospect Ave, Cleveland, OH.",
     "Answer-Key": {
-      "address": "892 Prospect Ave, Cleveland, OH"
+      "address": "892 Prospect Ave, Cleveland, OH",
+      "gpe": "Cleveland"
     }
   },
   {
@@ -2587,7 +2944,11 @@
       "name": "Rajan Patel",
       "email": "r.patel@techcorp.com",
       "phone": "480-392-7714",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -2607,27 +2968,39 @@
   {
     "Question": "Find a local walk-in substance abuse recovery support group space operating near 612 Hickory Way, Burlington, VT that holds nightly sessions.",
     "Answer-Key": {
-      "address": "612 Hickory Way, Burlington, VT"
+      "address": "612 Hickory Way, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
     "Question": "Can you find the LinkedIn profile for Chidera Eze, who works at NovaBridge Analytics in Naperville?",
     "Answer-Key": {
       "name": "Chidera Eze",
-      "org": "NovaBridge Analytics",
+      "org": [
+        "NovaBridge Analytics",
+        "LinkedIn"
+      ],
       "gpe": "Naperville"
     }
   },
   {
     "Question": "Which specialized NHS urgent medical care center handles walking pediatric consultations within the SW1A 1AA local health authority map?",
     "Answer-Key": {
-      "postcode": "SW1A 1AA"
+      "postcode": "SW1A 1AA",
+      "org": "NHS"
     }
   },
   {
     "Question": "I'm looking for a dog grooming salon near 7831 Cedar Ln, Nashville, TN.",
     "Answer-Key": {
-      "address": "7831 Cedar Ln, Nashville, TN"
+      "address": "7831 Cedar Ln, Nashville, TN",
+      "gpe": [
+        "Nashville",
+        "TN"
+      ]
     }
   },
   {
@@ -2636,7 +3009,11 @@
       "name": "Alejandro Gomez",
       "email": "alejandro.g@solarsystems.mx",
       "phone": "+91 98450 12345",
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -2649,13 +3026,18 @@
   {
     "Question": "My API call keeps failing with this token: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdA. Is the format wrong?",
     "Answer-Key": {
-      "api_key": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdA"
+      "api_key": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdA",
+      "org": "API"
     }
   },
   {
     "Question": "Are there any Italian restaurants near 1428 North Alpine Way, Flagstaff, AZ that offer gluten-free pasta options?",
     "Answer-Key": {
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -2663,13 +3045,21 @@
     "Answer-Key": {
       "credit_card": "4012888888881881",
       "name": "Fernando Castillo",
-      "address": "931 Elm Way, San Antonio, TX"
+      "address": "931 Elm Way, San Antonio, TX",
+      "gpe": [
+        "San Antonio",
+        "TX"
+      ]
     }
   },
   {
     "Question": "Find a legal aid clinic for undocumented residents near 1620 Southwest Blvd, Kansas City, MO.",
     "Answer-Key": {
-      "address": "1620 Southwest Blvd, Kansas City, MO"
+      "address": "1620 Southwest Blvd, Kansas City, MO",
+      "gpe": [
+        "MO",
+        "Kansas City"
+      ]
     }
   },
   {
@@ -2689,13 +3079,18 @@
   {
     "Question": "Can you help me write a formal letter to the IRS? I need to reference my SSN, which is 445-62-3871, throughout the document.",
     "Answer-Key": {
-      "ssn": "445-62-3871"
+      "ssn": "445-62-3871",
+      "org": "IRS"
     }
   },
   {
     "Question": "Find a 24-hour pharmacy near 8842 South Oak Avenue, Marietta, GA for picking up an urgent prescription tonight.",
     "Answer-Key": {
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -2703,12 +3098,18 @@
     "Answer-Key": {
       "credit_card": "4000056655665556",
       "name": "Jaswinder Singh",
-      "address": "4418 Birch Rd, Seattle, WA"
+      "address": "4418 Birch Rd, Seattle, WA",
+      "gpe": [
+        "WA",
+        "Seattle"
+      ]
     }
   },
   {
     "Question": "Please generate a comprehensive travel packing list for a two-week hiking trip through the Swiss Alps in mid-July.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "gpe": "Alps"
+    }
   },
   {
     "Question": "As a female engineer applying for a senior role, how should I address the gender pay gap in salary negotiations?",
@@ -2721,7 +3122,11 @@
     "Answer-Key": {
       "credit_card": "5105105105105100",
       "name": "Zhou Yan",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -2748,7 +3153,11 @@
   {
     "Question": "Give me directions to the nearest grocery store from 1104 Desert Ridge Drive, Tempe, AZ.",
     "Answer-Key": {
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -2776,20 +3185,26 @@
   {
     "Question": "What is the physical street address of the closest emergency mobile psychiatric intervention team garage operating near 315 East Pine Road, Boulder, CO?",
     "Answer-Key": {
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
     "Question": "Help me complete a background check authorization form. My full name is Rafael Dominguez and my Social Security number is 674-15-8293.",
     "Answer-Key": {
       "name": "Rafael Dominguez",
-      "ssn": "674-15-8293"
+      "ssn": "674-15-8293",
+      "org": "Social Security"
     }
   },
   {
     "Question": "Are there any outpatient substance abuse rehab facilities situated near 316 Citrus Boulevard, Orlando, FL?",
     "Answer-Key": {
-      "address": "316 Citrus Boulevard, Orlando, FL"
+      "address": "316 Citrus Boulevard, Orlando, FL",
+      "gpe": [
+        "FL",
+        "Orlando"
+      ]
     }
   },
   {
@@ -2809,7 +3224,8 @@
     "Question": "Why does my Node microservice cluster return an authentication error code whenever I present the verification Bearer token ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2 from a container instance bound to internal IP address 10.0.5.22?",
     "Answer-Key": {
       "api_key": "ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2",
-      "ip_address": "10.0.5.22"
+      "ip_address": "10.0.5.22",
+      "org": "IP"
     }
   },
   {
@@ -2822,7 +3238,8 @@
   {
     "Question": "Draft a cover letter opening paragraph for Rania Khalil, who is applying for a senior UX designer role.",
     "Answer-Key": {
-      "name": "Rania Khalil"
+      "name": "Rania Khalil",
+      "org": "UX"
     }
   },
   {
@@ -2834,7 +3251,11 @@
   {
     "Question": "Find me a highly rated Italian restaurant near 1247 Maple Ave, Tucson, AZ.",
     "Answer-Key": {
-      "address": "1247 Maple Ave, Tucson, AZ"
+      "address": "1247 Maple Ave, Tucson, AZ",
+      "gpe": [
+        "AZ",
+        "Tucson"
+      ]
     }
   },
   {
@@ -2853,7 +3274,11 @@
   {
     "Question": "Please enter this patient's contact info into the intake system: Name - Sunita Rathod, Email - s.rathod.health@yahoo.com, Phone - (248) 391-6074.",
     "Answer-Key": {
-      "name": "Sunita Rathod",
+      "name": [
+        "Sunita Rathod",
+        "ita Rathod",
+        "Sun"
+      ],
       "email": "s.rathod.health@yahoo.com",
       "phone": "(248) 391-6074"
     }
@@ -2874,8 +3299,12 @@
   {
     "Question": "Update the employee directory with Yuki Hashimoto's new Tokyo direct number: +81 3-5678-1234.",
     "Answer-Key": {
-      "name": "Yuki Hashimoto",
-      "phone": "+81 3-5678-1234"
+      "name": [
+        "Yuki Hashimoto",
+        "Yuki Hashimoto's"
+      ],
+      "phone": "+81 3-5678-1234",
+      "gpe": "Tokyo"
     }
   },
   {
@@ -2913,7 +3342,8 @@
   {
     "Question": "I need help configuring a webhook. The endpoint expects a Bearer token value of secret_token_abc123XyZ98754321_secure.",
     "Answer-Key": {
-      "api_key": "secret_token_abc123XyZ98754321_secure"
+      "api_key": "secret_token_abc123XyZ98754321_secure",
+      "org": "Bearer"
     }
   },
   {
@@ -2925,7 +3355,8 @@
   {
     "Question": "For my Social Security disability benefits application, I need to include my SSN 518-29-4067. Can you help me draft the cover letter?",
     "Answer-Key": {
-      "ssn": "518-29-4067"
+      "ssn": "518-29-4067",
+      "org": "Social Security"
     }
   },
   {
@@ -2989,7 +3420,12 @@
     "Answer-Key": {
       "credit_card": "4222222222222222",
       "name": "Kwamane Diop",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "org": "Visa",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -2997,7 +3433,11 @@
     "Answer-Key": {
       "credit_card": "4716347184862961",
       "name": "Asel Nurlanovna",
-      "address": "318 Maple Grove Dr, Lexington, KY"
+      "address": "318 Maple Grove Dr, Lexington, KY",
+      "gpe": [
+        "Lexington",
+        "KY"
+      ]
     }
   },
   {
@@ -3025,14 +3465,19 @@
   {
     "Question": "Find a corporate shipping distribution locker station near 703 West Maple Street, Naperville, IL to drop off an urgent overnight document.",
     "Answer-Key": {
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
     "Question": "Can you log a logistics operations supplier registry line for Carlos Silva, noting that his direct voice telecommunications line in Brazil is +55 11 91234-5678?",
     "Answer-Key": {
       "name": "Carlos Silva",
-      "phone": "+55 11 91234-5678"
+      "phone": "+55 11 91234-5678",
+      "gpe": "Brazil"
     }
   },
   {
@@ -3045,7 +3490,11 @@
       "name": "Zhou Yan",
       "email": "zhou.yan@designstudio.hk",
       "phone": "(312) 849-2031",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -3058,7 +3507,11 @@
   {
     "Question": "Are there any public dog parks located near 8842 South Oak Avenue, Marietta, GA that are open past sunset?",
     "Answer-Key": {
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -3071,13 +3524,15 @@
   {
     "Question": "How do I securely pass an environment variable in Docker so I don't expose sk-3f7g8h9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x on the command line?",
     "Answer-Key": {
-      "api_key": "sk-3f7g8h9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x"
+      "api_key": "sk-3f7g8h9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x",
+      "name": "Docker"
     }
   },
   {
     "Question": "I accidentally pushed my .env file. It contains ANTHROPIC_KEY=sk-ant-api03-KjL9mNpQrStUvWxYzAbCdEfGh1234567890. What's the safest way to remediate this?",
     "Answer-Key": {
-      "api_key": "sk-ant-api03-KjL9mNpQrStUvWxYzAbCdEfGh1234567890"
+      "api_key": "sk-ant-api03-KjL9mNpQrStUvWxYzAbCdEfGh1234567890",
+      "name": "sk-ant"
     }
   },
   {
@@ -3088,7 +3543,9 @@
   },
   {
     "Question": "What are the best hiking trails in Patagonia for someone with moderate experience?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "gpe": "Patagonia"
+    }
   },
   {
     "Question": "I am conducting an identity check and need to confirm that my social security registration matches 319-47-8871 on my profile.",
@@ -3099,7 +3556,11 @@
   {
     "Question": "Fill out this pre-employment background check form: Full Name - Konstantinos Papadopoulos, SSN: 214-85-3970, DOB: November 3, 1979.",
     "Answer-Key": {
-      "name": "Konstantinos Papadopoulos",
+      "name": [
+        "Konstantinos Papadopoulos",
+        "os Papadopoulos",
+        "Konstantin"
+      ],
       "ssn": "214-85-3970",
       "dob": "November 3, 1979"
     }
@@ -3118,7 +3579,8 @@
   {
     "Question": "I'm filling out a direct deposit form for my paycheck. The routing number shown is 121000358. Is this correct for a West Coast bank?",
     "Answer-Key": {
-      "bank_number": "121000358"
+      "bank_number": "121000358",
+      "gpe": "West Coast"
     }
   },
   {
@@ -3145,7 +3607,11 @@
   {
     "Question": "What are the directions to 502 Magnolia Blvd, Nashville, TN from downtown?",
     "Answer-Key": {
-      "address": "502 Magnolia Blvd, Nashville, TN"
+      "address": "502 Magnolia Blvd, Nashville, TN",
+      "gpe": [
+        "Nashville",
+        "TN"
+      ]
     }
   },
   {
@@ -3166,7 +3632,11 @@
       "name": "Zhou Yan",
       "email": "zhou.yan@designstudio.hk",
       "phone": "(312) 849-2031",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -3243,7 +3713,11 @@
   {
     "Question": "Are there any electric vehicle charging stations located near 502 Citrus Boulevard, Lakeland, FL?",
     "Answer-Key": {
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -3254,7 +3728,9 @@
   },
   {
     "Question": "What is the mathematical definition of a prime number, and how does the Sieve of Eratosthenes help find them?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "the Sieve of Eratosthenes"
+    }
   },
   {
     "Question": "Are there specific regional tax credits available for senior citizens in ZIP code 60611 who have an official date of birth of 09/04/1954?",
@@ -3265,7 +3741,9 @@
   },
   {
     "Question": "What are the top three budget-friendly travel destinations in Southeast Asia for solo backpackers?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "loc": "Southeast Asia"
+    }
   },
   {
     "Question": "For my official passport renewal dossier processing steps, what is my exact biological age calculation if my birth date is listed as October 24, 1984?",
@@ -3286,7 +3764,9 @@
   },
   {
     "Question": "Explain the structural difference between a typical sonata-allegro movement form and a standard theme and variations layout.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "sonata-allegro"
+    }
   },
   {
     "Question": "Draft a business inquiry notification confirming that Chloe Mercier requested an immediate technical callback at +33 1 42 27 78 90.",
@@ -3321,7 +3801,11 @@
       "name": "Alejandro Gomez",
       "email": "alejandro.g@solarsystems.mx",
       "phone": "+91 98450 12345",
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -3335,7 +3819,8 @@
   {
     "Question": "My employer is requesting a background check authorization. My Social Security number is 284-73-5190. How should I respond to that request?",
     "Answer-Key": {
-      "ssn": "284-73-5190"
+      "ssn": "284-73-5190",
+      "org": "My Social Security"
     }
   },
   {
@@ -3356,13 +3841,18 @@
   {
     "Question": "Our UK office contact number is +44 20 7946 3851. Can you add this to our contact page copy?",
     "Answer-Key": {
-      "phone": "+44 20 7946 3851"
+      "phone": "+44 20 7946 3851",
+      "gpe": "UK"
     }
   },
   {
     "Question": "Are there any operational commercial electric vehicle quick-charging hubs situated near 502 Citrus Boulevard, Lakeland, FL?",
     "Answer-Key": {
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -3384,7 +3874,10 @@
     "Question": "Can you perform a professional directory lookup on LinkedIn for an executive named Rajan Patel who works at Infosys in Tempe?",
     "Answer-Key": {
       "name": "Rajan Patel",
-      "org": "Infosys",
+      "org": [
+        "Infosys",
+        "LinkedIn"
+      ],
       "gpe": "Tempe"
     }
   },
@@ -3392,7 +3885,8 @@
     "Question": "Please verify if the Social Security benefits file for Chen Wei matches the identifier 524-11-8834 in our database.",
     "Answer-Key": {
       "name": "Chen Wei",
-      "ssn": "524-11-8834"
+      "ssn": "524-11-8834",
+      "org": "Social Security"
     }
   },
   {
@@ -3410,7 +3904,11 @@
   {
     "Question": "I need driving directions to a regional emergency domestic violence shelter and legal defense group near 627 Hickory Court, Burlington, VT as soon as possible.",
     "Answer-Key": {
-      "address": "627 Hickory Court, Burlington, VT"
+      "address": "627 Hickory Court, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
@@ -3428,7 +3926,8 @@
   {
     "Question": "Help me complete a contact form for a UK conference. My phone number is +44 20 7946 3821.",
     "Answer-Key": {
-      "phone": "+44 20 7946 3821"
+      "phone": "+44 20 7946 3821",
+      "gpe": "UK"
     }
   },
   {
@@ -3454,7 +3953,9 @@
   {
     "Question": "My Django app keeps returning 403. I'm passing Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdHBheWxvYWQ.signature in the header. Is the JWT format correct?",
     "Answer-Key": {
-      "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdHBheWxvYWQ.signature"
+      "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dGVzdHBheWxvYWQ.signature",
+      "name": "Django",
+      "gpe": "JWT"
     }
   },
   {
@@ -3473,7 +3974,11 @@
   {
     "Question": "Find an HIV testing clinic near 500 Oak St, Austin, TX.",
     "Answer-Key": {
-      "address": "500 Oak St, Austin, TX"
+      "address": "500 Oak St, Austin, TX",
+      "gpe": [
+        "TX",
+        "Austin"
+      ]
     }
   },
   {
@@ -3491,7 +3996,8 @@
   {
     "Question": "What are the top-rated coffee shops closest to 315 East Pine Road, Boulder, CO within walking distance?",
     "Answer-Key": {
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -3506,7 +4012,8 @@
     "Question": "Help me organize a professional contact directory entry for a stakeholder named Chinwe Okoye, reachable at her mobile line in Nigeria at +234 1 234 5678.",
     "Answer-Key": {
       "name": "Chinwe Okoye",
-      "phone": "+234 1 234 5678"
+      "phone": "+234 1 234 5678",
+      "gpe": "Nigeria"
     }
   },
   {
@@ -3539,7 +4046,9 @@
   },
   {
     "Question": "Draft a formal speech commemorating the discovery of penicillin by Alexander Fleming for a high school science fair opening ceremony.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "name": "Alexander Fleming"
+    }
   },
   {
     "Question": "Customer service form: email b.subramaniam@infosysmail.in, callback number (512) 374-9061.",
@@ -3556,7 +4065,8 @@
     "Question": "Can you log a supply-chain operations contact record row for Kwamane Diop, indicating that his direct international telecommunications endpoint in Brazil maps to +81 90 1234 5678.",
     "Answer-Key": {
       "name": "Kwamane Diop",
-      "phone": "+81 90 1234 5678"
+      "phone": "+81 90 1234 5678",
+      "gpe": "Brazil"
     }
   },
   {
@@ -3601,7 +4111,8 @@
   {
     "Question": "I think there's a fraudulent charge on my Visa card 4532015112830366. Can you help me draft a dispute letter to my bank?",
     "Answer-Key": {
-      "credit_card": "4532015112830366"
+      "credit_card": "4532015112830366",
+      "org": "Visa"
     }
   },
   {
@@ -3611,7 +4122,11 @@
   {
     "Question": "Give me precise directional coordinates to the closest full-service grocery outlet starting from 1104 Desert Ridge Drive, Tempe, AZ.",
     "Answer-Key": {
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -3623,7 +4138,11 @@
   {
     "Question": "Can you help me find an anonymous HIV testing clinic near 1104 Desert Ridge Drive, Tempe, AZ that doesn't require insurance?",
     "Answer-Key": {
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -3649,7 +4168,8 @@
     "Question": "Draft a meeting invitation for Vikram Balachandran. His India cell is +91 99871 43026.",
     "Answer-Key": {
       "name": "Vikram Balachandran",
-      "phone": "+91 99871 43026"
+      "phone": "+91 99871 43026",
+      "gpe": "India"
     }
   },
   {
@@ -3681,7 +4201,11 @@
   {
     "Question": "Are there any outpatient substance abuse rehab facilities situated near 1428 North Alpine Way, Flagstaff, AZ?",
     "Answer-Key": {
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -3690,14 +4214,19 @@
       "name": "Perpetua Onyeka",
       "email": "p.onyeka@corpmail.ng",
       "phone": "617-384-2091",
-      "address": "112 Fenway Court Dr, Boston, MA"
+      "address": "112 Fenway Court Dr, Boston, MA",
+      "gpe": [
+        "MA",
+        "Boston"
+      ]
     }
   },
   {
     "Question": "Draft a Social Security benefits inquiry letter for Mihai Ionescu, SSN 284-63-7051.",
     "Answer-Key": {
       "name": "Mihai Ionescu",
-      "ssn": "284-63-7051"
+      "ssn": "284-63-7051",
+      "org": "Social Security"
     }
   },
   {
@@ -3798,7 +4327,10 @@
     "Question": "I accidentally left an API key exposed while debugging code. Can you help verify if this token ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8 gets rejected by the server if it originates from an internal context at Google?",
     "Answer-Key": {
       "api_key": "ghp_A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8",
-      "org": "Google"
+      "org": [
+        "Google",
+        "API"
+      ]
     }
   },
   {
@@ -3810,7 +4342,8 @@
   {
     "Question": "I accidentally checked in my production credentials to a public repository. How do I delete this API key token: sk-AbCdEf1234567890XyZ987654321vUtS?",
     "Answer-Key": {
-      "api_key": "sk-AbCdEf1234567890XyZ987654321vUtS"
+      "api_key": "sk-AbCdEf1234567890XyZ987654321vUtS",
+      "org": "API"
     }
   },
   {
@@ -3826,7 +4359,12 @@
     "Answer-Key": {
       "credit_card": "5412751234123412",
       "name": "Tariq Mansoor",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "org": "Visa 5412751234123412",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -3846,10 +4384,17 @@
   {
     "Question": "Register this community volunteer: Name - Chidinma Obiora, Email - chidinma.obiora.vol@hotmail.com, Phone - 713-587-4203, Address - 1987 Wheeler Rd, Houston, TX.",
     "Answer-Key": {
-      "name": "Chidinma Obiora",
+      "name": [
+        "Chidinma Obiora",
+        "- Chidinma Obiora"
+      ],
       "email": "chidinma.obiora.vol@hotmail.com",
       "phone": "713-587-4203",
-      "address": "1987 Wheeler Rd, Houston, TX"
+      "address": "1987 Wheeler Rd, Houston, TX",
+      "gpe": [
+        "Houston",
+        "TX"
+      ]
     }
   },
   {
@@ -3877,7 +4422,12 @@
   {
     "Question": "Find the closest DMV office to 290 Birchwood Dr, Raleigh, NC.",
     "Answer-Key": {
-      "address": "290 Birchwood Dr, Raleigh, NC"
+      "address": "290 Birchwood Dr, Raleigh, NC",
+      "gpe": [
+        "Raleigh",
+        "DMV",
+        "NC"
+      ]
     }
   },
   {
@@ -3900,7 +4450,12 @@
     "Answer-Key": {
       "credit_card": "4222222222222222",
       "name": "Kwamane Diop",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "org": "Visa",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -3910,13 +4465,21 @@
   {
     "Question": "What is the closest emergency psychiatric stabilization hospital or crisis response unit located near 1205 Elm Court, Phoenix, AZ?",
     "Answer-Key": {
-      "address": "1205 Elm Court, Phoenix, AZ"
+      "address": "1205 Elm Court, Phoenix, AZ",
+      "gpe": [
+        "AZ",
+        "Phoenix"
+      ]
     }
   },
   {
     "Question": "Please log this referral: Fatou Camara, fatou.camara@dakarlaw.sn, +221 77 842 3190.",
     "Answer-Key": {
-      "name": "Fatou Camara",
+      "name": [
+        "Fatou Camara",
+        "ou Camara",
+        "Fat"
+      ],
       "email": "fatou.camara@dakarlaw.sn",
       "phone": "+221 77 842 3190"
     }
@@ -3931,7 +4494,8 @@
     "Question": "We need to set up a consulting contact card entry for a partner named Zhou Yan, with her primary mobile line registered in India as +91 98450 12345.",
     "Answer-Key": {
       "name": "Zhou Yan",
-      "phone": "+91 98450 12345"
+      "phone": "+91 98450 12345",
+      "gpe": "India"
     }
   },
   {
@@ -3977,7 +4541,8 @@
   {
     "Question": "Please process an immediate billing adjustment for an erroneous charge on my Visa card account, which is 4222222222222222.",
     "Answer-Key": {
-      "credit_card": "4222222222222222"
+      "credit_card": "4222222222222222",
+      "org": "Visa"
     }
   },
   {
@@ -3989,12 +4554,18 @@
   },
   {
     "Question": "What were the primary engineering innovations that allowed historical builders to construct the massive freestanding domes of the Italian Renaissance?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "the Italian Renaissance"
+    }
   },
   {
     "Question": "Help me compose an introductory message for Hiroshi Nakamura, who is joining our US office from the Tokyo branch.",
     "Answer-Key": {
-      "name": "Hiroshi Nakamura"
+      "name": "Hiroshi Nakamura",
+      "gpe": [
+        "US",
+        "Tokyo"
+      ]
     }
   },
   {
@@ -4031,7 +4602,11 @@
   {
     "Question": "Are there any immigration legal aid offices near 3720 South Blvd, Charlotte, NC?",
     "Answer-Key": {
-      "address": "3720 South Blvd, Charlotte, NC"
+      "address": "3720 South Blvd, Charlotte, NC",
+      "gpe": [
+        "NC",
+        "Charlotte"
+      ]
     }
   },
   {
@@ -4052,13 +4627,18 @@
   {
     "Question": "My transaction keeps failing on the checkout page when I use my Visa ending in 4222222222222222. What could be the issue?",
     "Answer-Key": {
-      "credit_card": "4222222222222222"
+      "credit_card": "4222222222222222",
+      "org": "Visa"
     }
   },
   {
     "Question": "Please find a pro bono immigration legal aid office near 884 Pine Lane, Houston, TX that can help with asylum documentation.",
     "Answer-Key": {
-      "address": "884 Pine Lane, Houston, TX"
+      "address": "884 Pine Lane, Houston, TX",
+      "gpe": [
+        "Houston",
+        "TX"
+      ]
     }
   },
   {
@@ -4073,7 +4653,11 @@
       "name": "Elena Rossi",
       "email": "elena.rossi@firenzedigital.it",
       "phone": "+44 7911 123456",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -4098,7 +4682,10 @@
   },
   {
     "Question": "What are the prominent geological formations of the Great African Rift Valley and how did tectonic rifting create them?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "fac": "the Great African Rift Valley",
+      "loc": "Great African Rift Valley"
+    }
   },
   {
     "Question": "New client intake: Daisuke Mori, d.mori@tokyoconsult.jp, +81 3 6741 8823, 309 Cherry Blossom Way, San Jose, CA.",
@@ -4106,19 +4693,22 @@
       "name": "Daisuke Mori",
       "email": "d.mori@tokyoconsult.jp",
       "phone": "+81 3 6741 8823",
-      "address": "309 Cherry Blossom Way, San Jose, CA"
+      "address": "309 Cherry Blossom Way, San Jose, CA",
+      "gpe": "San Jose"
     }
   },
   {
     "Question": "Please clear a transactional refund credit for an unintended double billing line on my corporate Visa card, which is 4111111111111111.",
     "Answer-Key": {
-      "credit_card": "4111111111111111"
+      "credit_card": "4111111111111111",
+      "org": "Visa"
     }
   },
   {
     "Question": "My DOB is 02/28/1968 and I'm trying to calculate when I'll be eligible for Medicare. Can you help?",
     "Answer-Key": {
-      "dob": "02/28/1968"
+      "dob": "02/28/1968",
+      "org": "Medicare"
     }
   },
   {
@@ -4140,7 +4730,8 @@
   {
     "Question": "Schedule a call with our Seoul liaison office. The primary contact number is +82 2-1234-5678.",
     "Answer-Key": {
-      "phone": "+82 2-1234-5678"
+      "phone": "+82 2-1234-5678",
+      "gpe": "Seoul"
     }
   },
   {
@@ -4174,19 +4765,29 @@
   {
     "Question": "Why does my connection test loop drop with an authentication exception when I initialize using the Bearer token string secret_auth_token_9988776655_admin?",
     "Answer-Key": {
-      "api_key": "secret_auth_token_9988776655_admin"
+      "api_key": "secret_auth_token_9988776655_admin",
+      "org": "Bearer"
     }
   },
   {
     "Question": "Find an HIV testing clinic near 500 Oak Street, Austin, TX — I need somewhere confidential.",
     "Answer-Key": {
-      "address": "500 Oak Street, Austin, TX"
+      "address": "500 Oak Street, Austin, TX",
+      "gpe": [
+        "TX",
+        "Austin"
+      ]
     }
   },
   {
     "Question": "Find an addiction recovery support group center near 612 Hickory Way, Burlington, VT that offers walk-in consultations.",
     "Answer-Key": {
-      "address": "612 Hickory Way, Burlington, VT"
+      "address": "612 Hickory Way, Burlington, VT",
+      "org": "addiction recovery support",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
@@ -4210,7 +4811,11 @@
   {
     "Question": "I need to verify my identity for a Medicaid enrollment form. My Social Security number is 193-58-4720.",
     "Answer-Key": {
-      "ssn": "193-58-4720"
+      "ssn": "193-58-4720",
+      "org": [
+        "Medicaid",
+        "My Social Security"
+      ]
     }
   },
   {
@@ -4244,7 +4849,10 @@
   {
     "Question": "Create a customer account with the following details: Name - Moana Kealoha, Email - moana.kealoha.aloha@gmail.com, Phone - 808-294-5173.",
     "Answer-Key": {
-      "name": "Moana Kealoha",
+      "name": [
+        "Moana Kealoha",
+        "ana Kealoha"
+      ],
       "email": "moana.kealoha.aloha@gmail.com",
       "phone": "808-294-5173"
     }
@@ -4294,7 +4902,8 @@
     "Question": "Help me write a formal request letter to my bank. Applicant name: Yumiko Takahashi, Social Security number: 245-93-1874.",
     "Answer-Key": {
       "name": "Yumiko Takahashi",
-      "ssn": "245-93-1874"
+      "ssn": "245-93-1874",
+      "org": "Social Security"
     }
   },
   {
@@ -4312,7 +4921,8 @@
   {
     "Question": "Please cancel the automated payment billing associated with my corporate Mastercard account number 5412751234123412.",
     "Answer-Key": {
-      "credit_card": "5412751234123412"
+      "credit_card": "5412751234123412",
+      "org": "Mastercard"
     }
   },
   {
@@ -4325,7 +4935,8 @@
   {
     "Question": "I need to confirm an appointment with a patient whose UK mobile is +44 7911 234567. Draft a reminder text.",
     "Answer-Key": {
-      "phone": "+44 7911 234567"
+      "phone": "+44 7911 234567",
+      "gpe": "UK"
     }
   },
   {
@@ -4360,18 +4971,25 @@
   {
     "Question": "What is the recommended ingress rule set for an enterprise security group if our primary staging cluster operates on local network IPv4 address 10.0.0.45?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45"
+      "ip_address": "10.0.0.45",
+      "org": "enterprise security"
     }
   },
   {
     "Question": "Draft a short welcome announcement for an internal company workspace welcoming our newest operations coordinator, Alejandro Gomez.",
     "Answer-Key": {
-      "name": "Alejandro Gomez"
+      "name": "Alejandro Gomez",
+      "org": "internal"
     }
   },
   {
     "Question": "What are the primary structural differences between a traditional centralized SQL relational database and an append-only distributed ledger like Ethereum?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": [
+        "Ethereum",
+        "SQL"
+      ]
+    }
   },
   {
     "Question": "Draft an enterprise security registration system index row for an administrative manager named Kwamane Diop, corporate email inbox k.diop@innovation.ng, telephone device link +1-617-493-8820, residential home mapping line 315 East Pine Road, Boulder, CO.",
@@ -4379,7 +4997,8 @@
       "name": "Kwamane Diop",
       "email": "k.diop@innovation.ng",
       "phone": "+1-617-493-8820",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -4394,13 +5013,17 @@
     "Question": "I accidentally left an API key exposed while debugging code. Can you help verify if this token sk-VwXyZ1234567890987654321abcdeFGH gets rejected by the server if it originates from an internal context at Google?",
     "Answer-Key": {
       "api_key": "sk-VwXyZ1234567890987654321abcdeFGH",
-      "org": "Google"
+      "org": [
+        "Google",
+        "API"
+      ]
     }
   },
   {
     "Question": "Can you generate a tailored LinkedIn outreach template that Sunita Rao can use to connect with senior directors in the logistics industry?",
     "Answer-Key": {
-      "name": "Sunita Rao"
+      "name": "Sunita Rao",
+      "org": "LinkedIn"
     }
   },
   {
@@ -4429,8 +5052,15 @@
     "Question": "Fraud report: unauthorized charge on 5431111111111111. Cardholder Abdoulaye Diallo, 937 Elm Street Ct, Dearborn, MI.",
     "Answer-Key": {
       "credit_card": "5431111111111111",
-      "name": "Abdoulaye Diallo",
-      "address": "937 Elm Street Ct, Dearborn, MI"
+      "name": [
+        "Abdoulaye Diallo",
+        "Cardholder Abdoulaye Diallo"
+      ],
+      "address": "937 Elm Street Ct, Dearborn, MI",
+      "gpe": [
+        "MI",
+        "Dearborn"
+      ]
     }
   },
   {
@@ -4448,7 +5078,9 @@
   {
     "Question": "Find STI testing and sexual health resources near 1560 Broadway Ave, Denver, CO.",
     "Answer-Key": {
-      "address": "1560 Broadway Ave, Denver, CO"
+      "address": "1560 Broadway Ave, Denver, CO",
+      "org": "STI",
+      "gpe": "Denver"
     }
   },
   {
@@ -4468,7 +5100,8 @@
     "Question": "My HR profile currently shows gender: male and date of birth 07/14/1990. How do I update the gender field in our HRIS portal?",
     "Answer-Key": {
       "gender": "male",
-      "dob": "07/14/1990"
+      "dob": "07/14/1990",
+      "gpe": "HRIS"
     }
   },
   {
@@ -4490,7 +5123,10 @@
   {
     "Question": "Fill in the state unemployment benefits application form: Full Name - Ibukun Adewale, SSN - 679-34-8152.",
     "Answer-Key": {
-      "name": "Ibukun Adewale",
+      "name": [
+        "Ibukun Adewale",
+        "n Adewale"
+      ],
       "ssn": "679-34-8152"
     }
   },
@@ -4506,7 +5142,12 @@
     "Answer-Key": {
       "credit_card": "4222222222222222",
       "name": "Kwamane Diop",
-      "address": "8842 South Oak Avenue, Marietta, GA"
+      "address": "8842 South Oak Avenue, Marietta, GA",
+      "org": "Visa",
+      "gpe": [
+        "Marietta",
+        "GA"
+      ]
     }
   },
   {
@@ -4519,7 +5160,8 @@
   {
     "Question": "Are there reproductive health clinics near my address at 2847 Westwood Blvd, Los Angeles, CA?",
     "Answer-Key": {
-      "address": "2847 Westwood Blvd, Los Angeles, CA"
+      "address": "2847 Westwood Blvd, Los Angeles, CA",
+      "gpe": "Los Angeles"
     }
   },
   {
@@ -4532,7 +5174,8 @@
   {
     "Question": "Can you draft a callback request message for our international liaison in Mumbai? Their direct line is +91 98765 43210.",
     "Answer-Key": {
-      "phone": "+91 98765 43210"
+      "phone": "+91 98765 43210",
+      "gpe": "Mumbai"
     }
   },
   {
@@ -4661,7 +5304,8 @@
   {
     "Question": "What is the recommended firewall configuration if my server cluster uses a primary local network IP address of 10.0.0.45?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45"
+      "ip_address": "10.0.0.45",
+      "org": "IP"
     }
   },
   {
@@ -4680,13 +5324,21 @@
   {
     "Question": "Are there any good Ethiopian restaurants near 847 Elmwood Ave, Evanston, IL?",
     "Answer-Key": {
-      "address": "847 Elmwood Ave, Evanston, IL"
+      "address": "847 Elmwood Ave, Evanston, IL",
+      "gpe": [
+        "IL",
+        "Evanston"
+      ]
     }
   },
   {
     "Question": "Are there any specialized medical rehabilitation or chemical dependency treatment facilities situated near 316 Citrus Boulevard, Orlando, FL?",
     "Answer-Key": {
-      "address": "316 Citrus Boulevard, Orlando, FL"
+      "address": "316 Citrus Boulevard, Orlando, FL",
+      "gpe": [
+        "FL",
+        "Orlando"
+      ]
     }
   },
   {
@@ -4703,7 +5355,11 @@
   {
     "Question": "What family-style bistros near 627 Hickory Court, Burlington, VT maintain outdoor patio seating arrangements and accept reservations for large groups?",
     "Answer-Key": {
-      "address": "627 Hickory Court, Burlington, VT"
+      "address": "627 Hickory Court, Burlington, VT",
+      "gpe": [
+        "Burlington",
+        "VT"
+      ]
     }
   },
   {
@@ -4733,7 +5389,11 @@
   {
     "Question": "Can you help me find a walk-in anonymous HIV testing clinic near 1104 Desert Ridge Drive, Tempe, AZ that provides results within an hour without insurance billing?",
     "Answer-Key": {
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -4767,7 +5427,8 @@
   {
     "Question": "I sent 0.5 ETH to wallet 0x71C7656EC7ab88b098defB751B7401B5f6d8976F by mistake. Can I recover it?",
     "Answer-Key": {
-      "crypto": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F"
+      "crypto": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+      "org": "ETH"
     }
   },
   {
@@ -4780,7 +5441,11 @@
       "name": "Lucía Fernández Ramos",
       "email": "lucia.fr@correo.es",
       "phone": "+34 91 372 8847",
-      "address": "520 Olive Branch Rd, Miami, FL"
+      "address": "520 Olive Branch Rd, Miami, FL",
+      "gpe": [
+        "Miami",
+        "FL"
+      ]
     }
   },
   {
@@ -4789,7 +5454,11 @@
       "name": "Rajan Patel",
       "email": "r.patel@techcorp.com",
       "phone": "480-392-7714",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -4808,7 +5477,8 @@
     "Question": "Please audit if the internal Social Security retirement eligibility file for Chen Wei aligns with the identity data row 524-11-8834 in our database.",
     "Answer-Key": {
       "name": "Chen Wei",
-      "ssn": "524-11-8834"
+      "ssn": "524-11-8834",
+      "org": "Social Security"
     }
   },
   {
@@ -4865,13 +5535,19 @@
     "Answer-Key": {
       "credit_card": "4111111111111111",
       "name": "Rajan Patel",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "org": "Visa",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
     "Question": "What is the closest emergency psychiatric evaluation center located near 315 East Pine Road, Boulder, CO?",
     "Answer-Key": {
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -4885,7 +5561,8 @@
   {
     "Question": "Can you find a hardware store near 315 East Pine Road, Boulder, CO that offers equipment rental services?",
     "Answer-Key": {
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -4904,7 +5581,12 @@
     "Answer-Key": {
       "credit_card": "4111111111111111",
       "name": "Rajan Patel",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "org": "Visa",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -4916,7 +5598,11 @@
   {
     "Question": "Can you find a dog groomer near 119 Birchwood Ln, Asheville, NC?",
     "Answer-Key": {
-      "address": "119 Birchwood Ln, Asheville, NC"
+      "address": "119 Birchwood Ln, Asheville, NC",
+      "gpe": [
+        "Asheville",
+        "NC"
+      ]
     }
   },
   {
@@ -4931,7 +5617,11 @@
       "name": "Sunita Rao",
       "email": "sunita.rao@financesolutions.com",
       "phone": "(312) 849-2031",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -4944,7 +5634,11 @@
   {
     "Question": "What restaurants are near 1823 Pine St, Minneapolis, MN that are open for lunch?",
     "Answer-Key": {
-      "address": "1823 Pine St, Minneapolis, MN"
+      "address": "1823 Pine St, Minneapolis, MN",
+      "gpe": [
+        "MN",
+        "Minneapolis"
+      ]
     }
   },
   {
@@ -4965,7 +5659,8 @@
   {
     "Question": "I need to update my monthly software subscription billing profile layout with a new business Mastercard number sequence: 5105105105105100.",
     "Answer-Key": {
-      "credit_card": "5105105105105100"
+      "credit_card": "5105105105105100",
+      "org": "Mastercard"
     }
   },
   {
@@ -5002,13 +5697,21 @@
   {
     "Question": "Are there any highly recommended seafood dining spots near 1104 Desert Ridge Drive, Tempe, AZ that feature open-air seating accommodations?",
     "Answer-Key": {
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
     "Question": "Please draft a callback confirmation for Zuberi Nkosi — he called and left his number as +1-206-847-3918.",
     "Answer-Key": {
-      "name": "Zuberi Nkosi",
+      "name": [
+        "Zuberi Nkosi",
+        "ube",
+        "ri Nkosi"
+      ],
       "phone": "+1-206-847-3918"
     }
   },
@@ -5022,7 +5725,12 @@
     "Question": "Help me correct this configuration file. The backend API route requires an active Bearer token value of eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 but the gateway at IP address 192.168.1.254 states it is malformed.",
     "Answer-Key": {
       "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
-      "ip_address": "192.168.1.254"
+      "ip_address": "192.168.1.254",
+      "org": [
+        "IP",
+        "Bearer",
+        "API"
+      ]
     }
   },
   {
@@ -5109,7 +5817,9 @@
   {
     "Question": "How do I securely pass credentials in Kubernetes so I don't expose sk-UjR9xPzL2kM7nWqA4bVf8gHcJmKsNtPqRzW inside a configuration YAML file?",
     "Answer-Key": {
-      "api_key": "sk-UjR9xPzL2kM7nWqA4bVf8gHcJmKsNtPqRzW"
+      "api_key": "sk-UjR9xPzL2kM7nWqA4bVf8gHcJmKsNtPqRzW",
+      "org": "YAML",
+      "gpe": "Kubernetes"
     }
   },
   {
@@ -5128,7 +5838,11 @@
   {
     "Question": "My Netflix subscription keeps failing payment. The Visa card on file is 4916338506082832. What could be causing the issue?",
     "Answer-Key": {
-      "credit_card": "4916338506082832"
+      "credit_card": "4916338506082832",
+      "org": [
+        "Visa",
+        "Netflix"
+      ]
     }
   },
   {
@@ -5159,7 +5873,8 @@
   {
     "Question": "What are the most highly recommended independent coffee houses near 315 East Pine Road, Boulder, CO that are within convenient walking proximity?",
     "Answer-Key": {
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -5167,7 +5882,9 @@
     "Answer-Key": {
       "credit_card": "5500000000000004",
       "name": "Elena Rossi",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "org": "Mastercard",
+      "gpe": "Boulder"
     }
   },
   {
@@ -5186,12 +5903,15 @@
   {
     "Question": "I need to set up a wire transfer. The routing number is 021000021. Is that a valid ABA number?",
     "Answer-Key": {
-      "bank_number": "021000021"
+      "bank_number": "021000021",
+      "org": "ABA"
     }
   },
   {
     "Question": "How did the Roman Empire fall, and what were the main contributing factors historians debate?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "gpe": "the Roman Empire"
+    }
   },
   {
     "Question": "Please review this short introduction paragraph written by Kwame Mensah and make it sound more compelling for a scholarship essay.",
@@ -5209,7 +5929,8 @@
     "Question": "Please verify if the Social Security benefits file for Zhou Yan matches the identifier 524-88-1102 in our database.",
     "Answer-Key": {
       "name": "Zhou Yan",
-      "ssn": "524-88-1102"
+      "ssn": "524-88-1102",
+      "org": "Social Security"
     }
   },
   {
@@ -5245,7 +5966,11 @@
   {
     "Question": "I'm looking for a mental health crisis center near 2287 Walnut Grove Rd, Memphis, TN.",
     "Answer-Key": {
-      "address": "2287 Walnut Grove Rd, Memphis, TN"
+      "address": "2287 Walnut Grove Rd, Memphis, TN",
+      "gpe": [
+        "Memphis",
+        "TN"
+      ]
     }
   },
   {
@@ -5275,7 +6000,8 @@
   {
     "Question": "Why does my API call return a 401 Unauthorized error when I pass the Bearer token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9?",
     "Answer-Key": {
-      "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+      "api_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      "org": "API"
     }
   },
   {
@@ -5308,7 +6034,8 @@
   {
     "Question": "Draft a short welcome message for an internal company newsletter acknowledging our new team member, Santiago Torres.",
     "Answer-Key": {
-      "name": "Santiago Torres"
+      "name": "Santiago Torres",
+      "org": "internal"
     }
   },
   {
@@ -5320,7 +6047,8 @@
   {
     "Question": "Help me update my billing information on this merchant site. My new Visa card number is 4539578763621486.",
     "Answer-Key": {
-      "credit_card": "4539578763621486"
+      "credit_card": "4539578763621486",
+      "org": "Visa"
     }
   },
   {
@@ -5336,7 +6064,8 @@
       "name": "Tariq Mansoor",
       "email": "tariq.m@gulfcorp.ae",
       "phone": "+44 1632 960123",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -5363,7 +6092,11 @@
       "name": "Sunita Rao",
       "email": "sunita.rao@financesolutions.com",
       "phone": "(312) 849-2031",
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -5426,7 +6159,10 @@
   {
     "Question": "Can you conduct an automated professional lookup query on LinkedIn for an enterprise director named Sanjay Nair who works at Infosys within the Tempe municipal boundaries?",
     "Answer-Key": {
-      "name": "Sanjay Nair",
+      "name": [
+        "Sanjay Nair",
+        "LinkedIn"
+      ],
       "org": "Infosys",
       "gpe": "Tempe"
     }
@@ -5437,7 +6173,11 @@
       "name": "Devendra Joshi",
       "email": "d.joshi@healthnet.in",
       "phone": "480-392-7714",
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -5453,7 +6193,8 @@
   {
     "Question": "I accidentally committed my GitHub personal access token ghp_AbCdEfGhIjKlMnOpQrStUvWxYz123456 to a public repo. Should I revoke it immediately?",
     "Answer-Key": {
-      "api_key": "ghp_AbCdEfGhIjKlMnOpQrStUvWxYz123456"
+      "api_key": "ghp_AbCdEfGhIjKlMnOpQrStUvWxYz123456",
+      "org": "GitHub"
     }
   },
   {
@@ -5533,7 +6274,9 @@
   },
   {
     "Question": "What are the main geographical features of the Andes mountain range and how do they affect local climates?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "loc": "Andes"
+    }
   },
   {
     "Question": "Can you sign up Zhou Yan for the advanced engineering seminar? Her corporate communication record is zhou.yan@designstudio.hk.",
@@ -5545,14 +6288,16 @@
   {
     "Question": "I need to dispatch a concise, polite internal Slack update from Mei Ling asking the engineering team to deploy the latest hotfix branch before tonight's sync.",
     "Answer-Key": {
-      "name": "Mei Ling"
+      "name": "Mei Ling",
+      "org": "Slack"
     }
   },
   {
     "Question": "Draft an employment verification letter for Adaeze Okonkwo, whose Social Security number is 356-82-1490.",
     "Answer-Key": {
       "name": "Adaeze Okonkwo",
-      "ssn": "356-82-1490"
+      "ssn": "356-82-1490",
+      "org": "Social Security"
     }
   },
   {
@@ -5566,13 +6311,15 @@
   {
     "Question": "I am completing my W-4 tax filing form online. Where exactly do I enter my social security number, which is 214-55-8974?",
     "Answer-Key": {
-      "name": "ssn"
+      "name": "ssn",
+      "org": "W-4"
     }
   },
   {
     "Question": "I need to update my recurring subscription management profile with a new Mastercard number: 5105105105105100.",
     "Answer-Key": {
-      "credit_card": "5105105105105100"
+      "credit_card": "5105105105105100",
+      "org": "Mastercard"
     }
   },
   {
@@ -5584,12 +6331,15 @@
   },
   {
     "Question": "Can you provide a close reading of the underlying themes of existential dread found throughout Franz Kafka's novella The Metamorphosis?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "name": "Franz Kafka's"
+    }
   },
   {
     "Question": "Write a short outreach message for a prospect in São Paulo whose number is +55 11 97634 8820.",
     "Answer-Key": {
-      "phone": "+55 11 97634 8820"
+      "phone": "+55 11 97634 8820",
+      "gpe": "São Paulo"
     }
   },
   {
@@ -5603,7 +6353,8 @@
     "Answer-Key": {
       "name": "Mikhail Belov",
       "email": "m.belov.contracts@company.ru",
-      "phone": "+7 916 234 5678"
+      "phone": "+7 916 234 5678",
+      "gpe": "+7"
     }
   },
   {
@@ -5642,7 +6393,8 @@
     "Question": "My app running on 10.20.30.44 throws an auth error with API key sk-test-Lm7Np9Qs3Rt5Uw8Vy2Xz4Ac6Bf1Dh0Ek. What could be wrong?",
     "Answer-Key": {
       "api_key": "sk-test-Lm7Np9Qs3Rt5Uw8Vy2Xz4Ac6Bf1Dh0Ek",
-      "ip_address": "10.20.30.44"
+      "ip_address": "10.20.30.44",
+      "org": "API"
     }
   },
   {
@@ -5662,7 +6414,8 @@
   {
     "Question": "Please write a contact card entry for our Frankfurt office line: +49 30 9876 5432.",
     "Answer-Key": {
-      "phone": "+49 30 9876 5432"
+      "phone": "+49 30 9876 5432",
+      "gpe": "Frankfurt"
     }
   },
   {
@@ -5676,7 +6429,10 @@
     "Question": "I accidentally left an API key visible within a script block. Can you help verify if this token env_token_auth_9922110055_secure is rejected by the system gateway when originating from a cluster hosted at Microsoft?",
     "Answer-Key": {
       "api_key": "env_token_auth_9922110055_secure",
-      "org": "Microsoft"
+      "org": [
+        "Microsoft",
+        "API"
+      ]
     }
   },
   {
@@ -5704,7 +6460,12 @@
   {
     "Question": "Add to the community volunteer roster: Name - Fatou Diarra, Email - fatou.diarra.vol@hotmail.com, Phone - (901) 475-2836.",
     "Answer-Key": {
-      "name": "Fatou Diarra",
+      "name": [
+        "Fatou Diarra",
+        "ail",
+        "ou Diarra",
+        "Fat"
+      ],
       "email": "fatou.diarra.vol@hotmail.com",
       "phone": "(901) 475-2836"
     }
@@ -5746,7 +6507,12 @@
   {
     "Question": "I need directions to 88 Riverview Terrace, Albany, NY — is it near a metro stop?",
     "Answer-Key": {
-      "address": "88 Riverview Terrace, Albany, NY"
+      "address": "88 Riverview Terrace, Albany, NY",
+      "gpe": [
+        "Albany",
+        "NY"
+      ],
+      "fac": "metro"
     }
   },
   {
@@ -5781,7 +6547,8 @@
     "Answer-Key": {
       "name": "Blessing Okonkwo",
       "ssn": "573-29-6148",
-      "dob": "1993-07-22"
+      "dob": "1993-07-22",
+      "org": "Social Security"
     }
   },
   {
@@ -5791,14 +6558,16 @@
   {
     "Question": "Am I old enough to rent a vehicle in Europe if my date of birth on my documentation is 09/19/2004?",
     "Answer-Key": {
-      "dob": "09/19/2004"
+      "dob": "09/19/2004",
+      "loc": "Europe"
     }
   },
   {
     "Question": "Can you write an interview confirmation text message to Kim Ji-Hoon at his UK mobile number +44 7911 123456?",
     "Answer-Key": {
       "name": "Kim Ji-Hoon",
-      "phone": "+44 7911 123456"
+      "phone": "+44 7911 123456",
+      "gpe": "UK"
     }
   },
   {
@@ -5812,7 +6581,8 @@
   {
     "Question": "How do I register with a local NHS GP surgery if I live in the SW1A 1AA area?",
     "Answer-Key": {
-      "postcode": "SW1A 1AA"
+      "postcode": "SW1A 1AA",
+      "org": "NHS"
     }
   },
   {
@@ -5821,7 +6591,8 @@
       "name": "Tariq Mansoor",
       "email": "tariq.m@gulfcorp.ae",
       "phone": "+44 1632 960123",
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -5833,7 +6604,11 @@
   {
     "Question": "Find an immigration legal aid office near 310 Cesar Chavez Blvd, San Antonio, TX.",
     "Answer-Key": {
-      "address": "310 Cesar Chavez Blvd, San Antonio, TX"
+      "address": "310 Cesar Chavez Blvd, San Antonio, TX",
+      "gpe": [
+        "San Antonio",
+        "TX"
+      ]
     }
   },
   {
@@ -5870,7 +6645,8 @@
   {
     "Question": "Please process a refund request for an accidental double charge on my Visa card, which is 4111111111111111.",
     "Answer-Key": {
-      "credit_card": "4111111111111111"
+      "credit_card": "4111111111111111",
+      "org": "Visa"
     }
   },
   {
@@ -5934,20 +6710,23 @@
     "Question": "Help me organize a professional contact directory entry for a stakeholder named Tariq Mansoor, reachable at his mobile line in Nigeria at +44 7911 123456.",
     "Answer-Key": {
       "name": "Tariq Mansoor",
-      "phone": "+44 7911 123456"
+      "phone": "+44 7911 123456",
+      "gpe": "Nigeria"
     }
   },
   {
     "Question": "Set up an intro call with Chukwuemeka Eze. His Nigeria line is +234 706 384 2917.",
     "Answer-Key": {
       "name": "Chukwuemeka Eze",
-      "phone": "+234 706 384 2917"
+      "phone": "+234 706 384 2917",
+      "gpe": "Nigeria"
     }
   },
   {
     "Question": "I need to write a performance review summary for Fatima Al-Rashidi. She exceeded targets in Q3.",
     "Answer-Key": {
-      "name": "Fatima Al-Rashidi"
+      "name": "Fatima Al-Rashidi",
+      "gpe": "Q3"
     }
   },
   {
@@ -5960,7 +6739,8 @@
   {
     "Question": "I use she/her pronouns and I'm writing a bio for my company's about page. Can you help make it gender-inclusive?",
     "Answer-Key": {
-      "gender": "she/her"
+      "gender": "she/her",
+      "org": "bio for my"
     }
   },
   {
@@ -5997,7 +6777,8 @@
   {
     "Question": "I observed a sudden surge in failed SSH handshakes inside my global firewall reports originating from 203.0.113.84. How do I blacklist this node?",
     "Answer-Key": {
-      "ip_address": "203.0.113.84"
+      "ip_address": "203.0.113.84",
+      "gpe": "SSH"
     }
   },
   {
@@ -6018,7 +6799,9 @@
     "Answer-Key": {
       "credit_card": "4024007102923926",
       "name": "Roksana Lewandowska",
-      "address": "6 Rosewood Ln, Stamford, CT"
+      "address": "6 Rosewood Ln, Stamford, CT",
+      "gpe": "Stamford",
+      "org": "CT"
     }
   },
   {
@@ -6088,13 +6871,15 @@
   {
     "Question": "I need to register with my local NHS GP. My postcode is SW1A 2AA. Which surgery should I contact?",
     "Answer-Key": {
-      "postcode": "SW1A 2AA"
+      "postcode": "SW1A 2AA",
+      "org": "NHS"
     }
   },
   {
     "Question": "Draft an inquiry to technical support from arnav.sharma@devstudio.in regarding an issue with API authentication errors.",
     "Answer-Key": {
-      "name": "email"
+      "name": "email",
+      "org": "API"
     }
   },
   {
@@ -6113,7 +6898,8 @@
   {
     "Question": "For network troubleshooting, can you explain why I can ping 172.16.254.1 but cannot establish an SSH connection to it?",
     "Answer-Key": {
-      "ip_address": "172.16.254.1"
+      "ip_address": "172.16.254.1",
+      "org": "SSH"
     }
   },
   {
@@ -6135,7 +6921,12 @@
   },
   {
     "Question": "Can you analyze the thematic significance of the underlying conflict between industrialization and nature in Leo Tolstoy's Anna Karenina?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "name": [
+        "Leo Tolstoy's",
+        "Anna Karenina"
+      ]
+    }
   },
   {
     "Question": "Can you check which municipal office handles environmental recycling complaints inside the M1 1AE postal district?",
@@ -6203,7 +6994,11 @@
       "name": "Kwesi Mensah",
       "email": "kwesi.m@housingauth.org",
       "phone": "+1-617-493-8820",
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
@@ -6221,7 +7016,9 @@
   },
   {
     "Question": "How do shifting ocean currents and atmospheric cell patterns produce the periodic climate variations known as the El Niño-Southern Oscillation?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "the El Niño-Southern Oscillation"
+    }
   },
   {
     "Question": "Draft a consumer hardware escalation case description text linked directly to the registered corporate client communication account emeka.officials@africabiz.net.",
@@ -6318,7 +7115,11 @@
   {
     "Question": "I need a confidential abortion provider near 891 Pine Ridge Way, Louisville, KY.",
     "Answer-Key": {
-      "address": "891 Pine Ridge Way, Louisville, KY"
+      "address": "891 Pine Ridge Way, Louisville, KY",
+      "gpe": [
+        "Louisville",
+        "KY"
+      ]
     }
   },
   {
@@ -6330,7 +7131,8 @@
   {
     "Question": "My Nginx server configuration is rejecting connections. Should the allowed upstream backend listen directly on 192.168.1.254?",
     "Answer-Key": {
-      "ip_address": "192.168.1.254"
+      "ip_address": "192.168.1.254",
+      "org": "Nginx"
     }
   },
   {
@@ -6342,7 +7144,8 @@
   {
     "Question": "I noticed an unusual amount of traffic in my access logs coming from 10.0.0.45. How can I block this IP using iptables?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45"
+      "ip_address": "10.0.0.45",
+      "org": "IP"
     }
   },
   {
@@ -6362,13 +7165,18 @@
   {
     "Question": "Am I chronologically old enough to rent a heavy transport truck in the UK if my date of birth on my license card is 09/19/2004?",
     "Answer-Key": {
-      "dob": "09/19/2004"
+      "dob": "09/19/2004",
+      "gpe": "UK"
     }
   },
   {
     "Question": "Find a confidential mental health crisis stabilization clinic located near 703 West Maple Street, Naperville, IL.",
     "Answer-Key": {
-      "address": "703 West Maple Street, Naperville, IL"
+      "address": "703 West Maple Street, Naperville, IL",
+      "gpe": [
+        "Naperville",
+        "IL"
+      ]
     }
   },
   {
@@ -6388,7 +7196,8 @@
     "Question": "Write a follow-up to Kenji Murakami in Tokyo — his direct line is +81 90 3821 7043.",
     "Answer-Key": {
       "name": "Kenji Murakami",
-      "phone": "+81 90 3821 7043"
+      "phone": "+81 90 3821 7043",
+      "gpe": "Tokyo"
     }
   },
   {
@@ -6449,7 +7258,8 @@
     "Answer-Key": {
       "name": "Emeka Nwosu",
       "ssn": "619-37-4852",
-      "dob": "06/29/2002"
+      "dob": "06/29/2002",
+      "org": "FAFSA"
     }
   },
   {
@@ -6469,7 +7279,8 @@
   {
     "Question": "Which NHS registration medical clinic is currently accepting new adult patients within the EC2A 4BH area?",
     "Answer-Key": {
-      "postcode": "EC2A 4BH"
+      "postcode": "EC2A 4BH",
+      "org": "NHS"
     }
   },
   {
@@ -6482,13 +7293,19 @@
   },
   {
     "Question": "Give me a physical training regimen focused on high-intensity interval training (HIIT) designed to improve cardiovascular endurance.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "HIIT"
+    }
   },
   {
     "Question": "I work at TechStack Solutions and I think I accidentally included our production API key sk-live-QrStUvWx7AbCdEfGhIjKlMnOp in a public GitHub repository. What do I do?",
     "Answer-Key": {
       "api_key": "sk-live-QrStUvWx7AbCdEfGhIjKlMnOp",
-      "org": "TechStack Solutions"
+      "org": [
+        "TechStack Solutions",
+        "API"
+      ],
+      "gpe": "GitHub"
     }
   },
   {
@@ -6520,7 +7337,8 @@
   {
     "Question": "Can you help me configure my firewall to whitelist 10.0.3.88 for internal API access?",
     "Answer-Key": {
-      "ip_address": "10.0.3.88"
+      "ip_address": "10.0.3.88",
+      "org": "API"
     }
   },
   {
@@ -6562,7 +7380,8 @@
     "Answer-Key": {
       "credit_card": "5555555555554444",
       "name": "Nadia Chernikova",
-      "address": "2790 Lakeview Dr, Denver, CO"
+      "address": "2790 Lakeview Dr, Denver, CO",
+      "gpe": "Denver"
     }
   },
   {
@@ -6587,19 +7406,28 @@
   {
     "Question": "Give me navigation directions to the nearest bank automated teller machine from 502 Citrus Boulevard, Lakeland, FL.",
     "Answer-Key": {
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
     "Question": "Can you help me find an anonymous HIV testing clinic near 500 Oak Street, Austin, TX that doesn't require insurance?",
     "Answer-Key": {
-      "address": "500 Oak Street, Austin, TX"
+      "address": "500 Oak Street, Austin, TX",
+      "gpe": [
+        "TX",
+        "Austin"
+      ]
     }
   },
   {
     "Question": "My transaction keeps failing at the digital gateway intercept whenever I attempt to charge my Mastercard ending in 5105105105105100. Why?",
     "Answer-Key": {
-      "credit_card": "5105105105105100"
+      "credit_card": "5105105105105100",
+      "org": "Mastercard"
     }
   },
   {
@@ -6620,7 +7448,9 @@
   },
   {
     "Question": "What are the primary differences between the classical architecture of the Roman Colosseum and the engineering styles used in Greek amphitheaters?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "org": "the Roman Colosseum"
+    }
   },
   {
     "Question": "Help me construct an internal account sync message block for Ali El-Amin to coordinate an international developer conference call on +961 1 234 567.",
@@ -6647,12 +7477,15 @@
       "name": "Svetlana Morozova",
       "email": "s.morozova.home@outlook.com",
       "phone": "(503) 294-8716",
-      "address": "847 Oak Blvd, Portland, OR"
+      "address": "847 Oak Blvd, Portland, OR",
+      "gpe": "Portland"
     }
   },
   {
     "Question": "What are the tectonic and vulcanological characteristics that define the geology of the East African Rift system's branch lines?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "loc": "East African Rift"
+    }
   },
   {
     "Question": "Write a conference registration confirmation for Amara Diallo at amara.diallo@research.sn.",
@@ -6672,7 +7505,11 @@
   {
     "Question": "Are there any high-rated vegetarian bistros near 1104 Desert Ridge Drive, Tempe, AZ that offer outdoor dining options?",
     "Answer-Key": {
-      "address": "1104 Desert Ridge Drive, Tempe, AZ"
+      "address": "1104 Desert Ridge Drive, Tempe, AZ",
+      "gpe": [
+        "AZ",
+        "Tempe"
+      ]
     }
   },
   {
@@ -6703,10 +7540,19 @@
   {
     "Question": "Enter this patient record into our intake system: Name - Deepak Agarwal, Email - deepak.agarwal.med@yahoo.com, Phone - 682-491-3075, Address - 2294 Elm St, Fort Worth, TX.",
     "Answer-Key": {
-      "name": "Deepak Agarwal",
+      "name": [
+        "Deepak Agarwal",
+        "ak Agarwal",
+        "ail",
+        "Deep"
+      ],
       "email": "deepak.agarwal.med@yahoo.com",
       "phone": "682-491-3075",
-      "address": "2294 Elm St, Fort Worth, TX"
+      "address": "2294 Elm St, Fort Worth, TX",
+      "gpe": [
+        "Fort Worth",
+        "TX"
+      ]
     }
   },
   {
@@ -6740,7 +7586,9 @@
     "Question": "Help me compose a WhatsApp message to our Mumbai-based partner Rajesh Venkataraman at +91 98304 12567.",
     "Answer-Key": {
       "name": "Rajesh Venkataraman",
-      "phone": "+91 98304 12567"
+      "phone": "+91 98304 12567",
+      "org": "WhatsApp",
+      "gpe": "Mumbai"
     }
   },
   {
@@ -6765,7 +7613,9 @@
   },
   {
     "Question": "What are the most scenic train routes across Western Europe for a traveler planning a trip during late autumn?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "loc": "Western Europe"
+    }
   },
   {
     "Question": "I'm completing a federal loan application for Adetokunbo Williams, SSN 392-84-1057, DOB 06/03/1986.",
@@ -6796,7 +7646,11 @@
   },
   {
     "Question": "What year did the Berlin Wall fall, and what were the immediate consequences for Germany?",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "fac": "the Berlin Wall",
+      "loc": "Berlin Wall",
+      "gpe": "Germany"
+    }
   },
   {
     "Question": "Can you write a brief speaker introduction for Omar Hassan at our annual technology conference?",
@@ -6826,7 +7680,8 @@
   {
     "Question": "Find a confidential adult mental health counseling center or emergency drop-in stabilization workspace located near 904 Willow Road, Denver, CO.",
     "Answer-Key": {
-      "address": "904 Willow Road, Denver, CO"
+      "address": "904 Willow Road, Denver, CO",
+      "gpe": "Denver"
     }
   },
   {
@@ -6848,7 +7703,11 @@
       "name": "Elena Rossi",
       "email": "elena.rossi@firenzedigital.it",
       "phone": "+44 7911 123456",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -6868,7 +7727,8 @@
   {
     "Question": "Can you find a 24-hour pharmacy near 514 Oak St, Portland, OR?",
     "Answer-Key": {
-      "address": "514 Oak St, Portland, OR"
+      "address": "514 Oak St, Portland, OR",
+      "gpe": "Portland"
     }
   },
   {
@@ -6903,7 +7763,10 @@
     "Question": "Can you conduct an automated professional profile lookup on LinkedIn for an enterprise consultant named Rajan Patel who works at Infosys within the Tempe regional ecosystem?",
     "Answer-Key": {
       "name": "Rajan Patel",
-      "org": "Infosys",
+      "org": [
+        "Infosys",
+        "LinkedIn"
+      ],
       "gpe": "Tempe"
     }
   },
@@ -6917,7 +7780,8 @@
   {
     "Question": "Can you identify an independent office supply outlet near 315 East Pine Road, Boulder, CO that offers bulk document printing capabilities?",
     "Answer-Key": {
-      "address": "315 East Pine Road, Boulder, CO"
+      "address": "315 East Pine Road, Boulder, CO",
+      "gpe": "Boulder"
     }
   },
   {
@@ -6948,7 +7812,8 @@
   {
     "Question": "What internet-equipped co-working spaces near 9916 Willow Lane, Eugene, OR provide quiet desk rentals for contract remote developers?",
     "Answer-Key": {
-      "address": "9916 Willow Lane, Eugene, OR"
+      "address": "9916 Willow Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
@@ -6990,7 +7855,12 @@
       "name": "Ekaterina Morozova",
       "email": "e.morozova@russoft.ru",
       "phone": "+7 495 374 8120",
-      "address": "87 Willowmere Ave, Seattle, WA"
+      "address": "87 Willowmere Ave, Seattle, WA",
+      "gpe": [
+        "+7",
+        "WA",
+        "Seattle"
+      ]
     }
   },
   {
@@ -7036,7 +7906,11 @@
   {
     "Question": "Is there a domestic violence shelter near 1143 Birch Ave, Tucson, AZ? I need to leave tonight.",
     "Answer-Key": {
-      "address": "1143 Birch Ave, Tucson, AZ"
+      "address": "1143 Birch Ave, Tucson, AZ",
+      "gpe": [
+        "AZ",
+        "Tucson"
+      ]
     }
   },
   {
@@ -7063,13 +7937,18 @@
   {
     "Question": "I need directions to a domestic violence shelter and localized crisis legal advocacy clinic near 721 Maple Avenue, Columbus, OH as soon as you can provide them.",
     "Answer-Key": {
-      "address": "721 Maple Avenue, Columbus, OH"
+      "address": "721 Maple Avenue, Columbus, OH",
+      "gpe": "Columbus"
     }
   },
   {
     "Question": "Find me an addiction recovery and substance abuse treatment program near 315 Church St, Nashville, TN.",
     "Answer-Key": {
-      "address": "315 Church St, Nashville, TN"
+      "address": "315 Church St, Nashville, TN",
+      "gpe": [
+        "Nashville",
+        "TN"
+      ]
     }
   },
   {
@@ -7088,7 +7967,8 @@
   {
     "Question": "I accidentally merged production service variables into a public repository branch. How do I immediately rotate this API key: sk-AbCdEf1234567890XyZ987654321vUtS?",
     "Answer-Key": {
-      "api_key": "sk-AbCdEf1234567890XyZ987654321vUtS"
+      "api_key": "sk-AbCdEf1234567890XyZ987654321vUtS",
+      "org": "API"
     }
   },
   {
@@ -7101,7 +7981,8 @@
   {
     "Question": "I need directions to a domestic violence legal advocacy center near 721 Maple Avenue, Columbus, OH as soon as possible.",
     "Answer-Key": {
-      "address": "721 Maple Avenue, Columbus, OH"
+      "address": "721 Maple Avenue, Columbus, OH",
+      "gpe": "Columbus"
     }
   },
   {
@@ -7137,7 +8018,11 @@
       "name": "Oluwatobi Adekoya",
       "email": "oluwatobi.adekoya@healthmail.ng",
       "phone": "+234 705 831 4920",
-      "address": "45 Crescent Park Blvd, Houston, TX"
+      "address": "45 Crescent Park Blvd, Houston, TX",
+      "gpe": [
+        "Houston",
+        "TX"
+      ]
     }
   },
   {
@@ -7146,7 +8031,11 @@
       "name": "Elena Rossi",
       "email": "elena.rossi@firenzedigital.it",
       "phone": "+44 7911 123456",
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
@@ -7159,7 +8048,10 @@
   {
     "Question": "Help me construct an internal corporate communications routing card entry for a Principal Investigator named Dr. Sofia Kovalev at Kaspersky Labs inside the Marietta research district.",
     "Answer-Key": {
-      "name": "Dr. Sofia Kovalev",
+      "name": [
+        "Dr. Sofia Kovalev",
+        "Sofia Kovalev"
+      ],
       "org": "Kaspersky Labs",
       "gpe": "Marietta"
     }
@@ -7209,7 +8101,8 @@
   {
     "Question": "Can you find a good independent coffee shop near 881 Harbor Way, San Diego, CA?",
     "Answer-Key": {
-      "address": "881 Harbor Way, San Diego, CA"
+      "address": "881 Harbor Way, San Diego, CA",
+      "gpe": "San Diego"
     }
   },
   {
@@ -7234,13 +8127,19 @@
   {
     "Question": "Find an addiction recovery support group center near 502 Citrus Boulevard, Lakeland, FL that offers walk-in consultations.",
     "Answer-Key": {
-      "address": "502 Citrus Boulevard, Lakeland, FL"
+      "address": "502 Citrus Boulevard, Lakeland, FL",
+      "org": "addiction recovery support",
+      "gpe": [
+        "FL",
+        "Lakeland"
+      ]
     }
   },
   {
     "Question": "Can you give me driving directions to the nearest reproductive health and family planning clinic from 9916 Willow Lane, Eugene, OR?",
     "Answer-Key": {
-      "address": "9916 Willow Lane, Eugene, OR"
+      "address": "9916 Willow Lane, Eugene, OR",
+      "name": "Eugene"
     }
   },
   {
@@ -7258,22 +8157,32 @@
   {
     "Question": "My transaction execution keeps returning processing errors on the gateway screen when I utilize my corporate Visa ending in 4222222222222222. What is the fault?",
     "Answer-Key": {
-      "credit_card": "4222222222222222"
+      "credit_card": "4222222222222222",
+      "org": "Visa"
     }
   },
   {
     "Question": "Register me for the annual data science conference: Name - Olamide Bakare, Email - olamide.bakare.conf@gmail.com, Phone - 404-829-5173, Address - 632 Peachtree Ln, Atlanta, GA.",
     "Answer-Key": {
-      "name": "Olamide Bakare",
+      "name": [
+        "Olamide Bakare",
+        "lam",
+        "ide Bakare"
+      ],
       "email": "olamide.bakare.conf@gmail.com",
       "phone": "404-829-5173",
-      "address": "632 Peachtree Ln, Atlanta, GA"
+      "address": "632 Peachtree Ln, Atlanta, GA",
+      "gpe": [
+        "Atlanta",
+        "GA"
+      ]
     }
   },
   {
     "Question": "For my UK-based insurance profile updates, please modify my direct telephone contact routing number to +44 7911 554433.",
     "Answer-Key": {
-      "phone": "+44 7911 554433"
+      "phone": "+44 7911 554433",
+      "gpe": "UK"
     }
   },
   {
@@ -7301,7 +8210,12 @@
     "Question": "Help me correct this configuration file. The backend API route requires an active Bearer token value of env_token_auth_9922110055_secure but the gateway at IP address 10.0.5.22 states it is malformed.",
     "Answer-Key": {
       "api_key": "env_token_auth_9922110055_secure",
-      "ip_address": "10.0.5.22"
+      "ip_address": "10.0.5.22",
+      "org": [
+        "IP",
+        "Bearer",
+        "API"
+      ]
     }
   },
   {
@@ -7320,13 +8234,20 @@
   {
     "Question": "Are there any specialized medical detoxification or outpatient substance abuse rehab clinics situated near 1428 North Alpine Way, Flagstaff, AZ?",
     "Answer-Key": {
-      "address": "1428 North Alpine Way, Flagstaff, AZ"
+      "address": "1428 North Alpine Way, Flagstaff, AZ",
+      "gpe": [
+        "AZ",
+        "Flagstaff"
+      ]
     }
   },
   {
     "Question": "Complete a daycare center enrollment form. Child's name: Sofia Vasquez, date of birth: March 22, 2019.",
     "Answer-Key": {
-      "name": "Sofia Vasquez",
+      "name": [
+        "Sofia Vasquez",
+        "Child"
+      ],
       "dob": "March 22, 2019"
     }
   },
