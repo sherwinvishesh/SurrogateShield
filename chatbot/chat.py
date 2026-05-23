@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import List, Optional
 
@@ -127,58 +128,82 @@ class ClaudeChat:
 
     def _send_to_api(self, api_payload: list) -> str:
         """Route the API call to the configured provider and return the response text."""
-        try:
-            if self._provider == "claude":
-                response = self._client.messages.create(
-                    model=CLAUDE_MODEL,
-                    max_tokens=4096,
-                    system=SYSTEM_PROMPT,
-                    messages=api_payload,
-                )
-                return response.content[0].text
+        _retryable = (anthropic.RateLimitError, anthropic.APIConnectionError)
+        _base_delay = 5  # seconds
 
-            if self._provider == "gemini":
-                model = self._client.GenerativeModel(
-                    model_name=GEMINI_MODEL,
-                    system_instruction=SYSTEM_PROMPT,
-                )
-                history = [
-                    {
-                        "role": "user" if m["role"] == "user" else "model",
-                        "parts": [m["content"]],
-                    }
-                    for m in api_payload[:-1]
-                ]
-                chat = model.start_chat(history=history)
-                response = chat.send_message(api_payload[-1]["content"])
-                return response.text
+        for attempt in range(3):
+            try:
+                if self._provider == "claude":
+                    response = self._client.messages.create(
+                        model=CLAUDE_MODEL,
+                        max_tokens=4096,
+                        system=SYSTEM_PROMPT,
+                        messages=api_payload,
+                    )
+                    return response.content[0].text
 
-            if self._provider == "chatgpt":
-                messages = [{"role": "system", "content": SYSTEM_PROMPT}] + api_payload
-                response = self._client.chat.completions.create(
-                    model=OPENAI_MODEL,
-                    max_tokens=4096,
-                    messages=messages,
-                )
-                return response.choices[0].message.content
+                if self._provider == "gemini":
+                    model = self._client.GenerativeModel(
+                        model_name=GEMINI_MODEL,
+                        system_instruction=SYSTEM_PROMPT,
+                    )
+                    history = [
+                        {
+                            "role": "user" if m["role"] == "user" else "model",
+                            "parts": [m["content"]],
+                        }
+                        for m in api_payload[:-1]
+                    ]
+                    chat = model.start_chat(history=history)
+                    response = chat.send_message(api_payload[-1]["content"])
+                    return response.text
 
-            if self._provider == "local":
-                model = os.environ.get("LOCAL_LLM_MODEL", LOCAL_LLM_MODEL)
-                messages = [{"role": "system", "content": SYSTEM_PROMPT}] + api_payload
-                response = self._client.chat(model=model, messages=messages)
-                return response.message.content
+                if self._provider == "chatgpt":
+                    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + api_payload
+                    response = self._client.chat.completions.create(
+                        model=OPENAI_MODEL,
+                        max_tokens=4096,
+                        messages=messages,
+                    )
+                    return response.choices[0].message.content
 
-            raise EnvironmentError(f"Unknown provider: {self._provider!r}")
+                if self._provider == "local":
+                    model = os.environ.get("LOCAL_LLM_MODEL", LOCAL_LLM_MODEL)
+                    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + api_payload
+                    response = self._client.chat(model=model, messages=messages)
+                    return response.message.content
 
-        except anthropic.APIConnectionError as exc:
-            logger.error(f"[ClaudeChat] Connection error: {exc}")
-            raise
-        except anthropic.AuthenticationError:
-            logger.error("[ClaudeChat] Authentication failed — check ANTHROPIC_API_KEY")
-            raise
-        except Exception as exc:
-            logger.error(f"[ClaudeChat] API call failed ({self._provider}): {exc}")
-            raise
+                raise EnvironmentError(f"Unknown provider: {self._provider!r}")
+
+            except anthropic.AuthenticationError:
+                logger.error("[ClaudeChat] Authentication failed — check ANTHROPIC_API_KEY")
+                raise
+
+            except _retryable as exc:
+                if attempt < 2:
+                    delay = _base_delay * (2 ** attempt)
+                    if isinstance(exc, anthropic.RateLimitError):
+                        try:
+                            ra = exc.response.headers.get("retry-after")
+                            if ra:
+                                delay = float(ra)
+                        except Exception:
+                            pass
+                        label = "Rate limited"
+                    else:
+                        label = "Connection error"
+                    logger.warning(
+                        f"[ClaudeChat] {label} — retrying in {delay:.0f}s"
+                        f" (attempt {attempt + 1}/3)"
+                    )
+                    time.sleep(delay)
+                else:
+                    logger.error(f"[ClaudeChat] API call failed after 3 attempts: {exc}")
+                    raise
+
+            except Exception as exc:
+                logger.error(f"[ClaudeChat] API call failed ({self._provider}): {exc}")
+                raise
 
     def send(self, sanitised_message: str) -> str:
         """

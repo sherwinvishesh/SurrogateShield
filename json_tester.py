@@ -30,6 +30,7 @@ OUTPUT_FIELDS: List[Tuple[str, str]] = [
     ("surrogate_map",     "Surrogate map           (original → replacement)"),
     ("sanitized_input",   "Sanitized input         (text sent to LLM)"),
     ("llm_response",      "LLM response            (raw text received)"),
+    ("final_output",      "Final output            (llm_response with surrogates restored to real values)"),
     ("stage_timings_ms",  "Stage timings (ms)      (PatternScan / EntityTrace / ContextGuard / surrogate gen / LLM)"),
     ("presidio_sanitized_input",
      "Presidio sanitized  (Presidio [TYPE] redaction — baseline for BERTScore)"),
@@ -193,7 +194,7 @@ def _process_one(
 
     # ── Surrogate generation ──────────────────────────────────────────────────
     need_surrogates = any(
-        fields.get(k) for k in ("surrogate_map", "sanitized_input", "llm_response")
+        fields.get(k) for k in ("surrogate_map", "sanitized_input", "llm_response", "final_output")
     )
     surrogate_map: Dict[str, str] = {}
     if need_surrogates:
@@ -251,6 +252,16 @@ def _process_one(
         if want_timings:
             timings["llm_call_ms"] = _ms(t)
         answer["llm_response"] = raw
+
+    # ── Final output (surrogates restored to real values) ─────────────────────
+    if fields.get("final_output"):
+        raw_response = answer.get("llm_response")
+        if raw_response is not None and surrogate_map:
+            from reconstruction.logic import ResolvePass
+            shadow_map = {surrogate: original for original, surrogate in surrogate_map.items()}
+            answer["final_output"] = ResolvePass().resolve(raw_response, shadow_map)
+        else:
+            answer["final_output"] = raw_response  # no surrogates or no LLM call
 
     # ── Assemble timings ──────────────────────────────────────────────────────
     if want_timings:
