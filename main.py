@@ -80,17 +80,30 @@ def _current_provider_name() -> str:
 # ─── Banners ──────────────────────────────────────────────────────────────────
 
 def _print_banner() -> None:
+    _TOP = (
+        "███████╗██╗  ██╗██╗███████╗██╗     ██████╗ \n"
+        "██╔════╝██║  ██║██║██╔════╝██║     ██╔══██╗\n"
+        "███████╗███████║██║█████╗  ██║     ██║  ██║\n"
+    )
+    _BOT = (
+        "╚════██║██╔══██║██║██╔══╝  ██║     ██║  ██║\n"
+        "███████║██║  ██║██║███████╗███████╗██████╔╝\n"
+        "╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═════╝ "
+    )
     content = Align.center(
         Text.assemble(
             "\n",
-            ("◆  ", "bold blue"),
-            ("Surrogate", "bold white"),
-            ("Shield", "bold blue"),
-            (f"  {VERSION}\n\n", "dim blue"),
-            (TAGLINE + "\n", "dim"),
+            ("◆  ────────────────────────────────────  ◆\n\n", "dim blue"),
+            ("S   U   R   R   O   G   A   T   E\n\n", "bold white"),
+            (_TOP, "bold blue"),
+            (_BOT, "bold cyan"),
+            ("\n\n", ""),
+            ("◆  ────────────────────────────────────  ◆\n\n", "dim blue"),
+            ("Privacy-preserving proxy for LLMs\n", "dim"),
+            ("PII never leaves your device\n", "dim"),
         )
     )
-    console.print(Panel(content, border_style="blue", padding=(1, 8), expand=False))
+    console.print(Panel(content, border_style="blue", padding=(1, 6), expand=False))
     console.print()
 
 
@@ -98,10 +111,9 @@ def _print_compact_banner() -> None:
     line = Text.assemble(
         ("◆  ", "bold blue"),
         ("Surrogate", "bold white"),
-        ("Shield", "bold blue"),
+        ("Shield", "bold cyan"),
         ("  ·  ", "dim"),
         ("PII never leaves your device", "dim"),
-        (f"  {VERSION}", "dim blue"),
     )
     console.print(Rule(style="blue"))
     console.print(Align.center(line))
