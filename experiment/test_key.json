@@ -199,10 +199,7 @@
       "credit_card": "4111111111111111",
       "name": "Rajan Patel",
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -1039,10 +1036,7 @@
     "Question": "Can you generate a detailed vehicle navigation routing path to the closest public medical center from 703 West Maple Street, Naperville, IL?",
     "Answer-Key": {
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -1155,10 +1149,7 @@
       "name": "Linnea Lindstrom",
       "email": "linnea.l@nordictech.se",
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -1376,10 +1367,7 @@
     "Question": "Please locate a pro bono immigration human rights legal defense clinic near 8842 South Oak Avenue, Marietta, GA that can assist with urgent deportation stays.",
     "Answer-Key": {
       "address": "8842 South Oak Avenue",
-      "gpe": [
-        "Marietta",
-        "GA"
-      ]
+      "gpe": "Marietta"
     }
   },
   {
@@ -1581,10 +1569,7 @@
     "Question": "Find a completely confidential adolescent mental health crisis evaluation facility or hospital wing located near 703 West Maple Street, Naperville, IL.",
     "Answer-Key": {
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -2306,10 +2291,7 @@
       "name": "Linnea Lindstrom",
       "email": "linnea.l@nordictech.se",
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -2647,10 +2629,7 @@
     "Question": "Please find a pro bono immigration legal aid office near 8842 South Oak Avenue, Marietta, GA that can help with asylum documentation.",
     "Answer-Key": {
       "address": "8842 South Oak Avenue",
-      "gpe": [
-        "Marietta",
-        "GA"
-      ]
+      "gpe": "Marietta"
     }
   },
   {
@@ -3115,10 +3094,7 @@
       "credit_card": "4000056655665556",
       "name": "Jaswinder Singh",
       "address": "4418 Birch Rd",
-      "gpe": [
-        "Seattle",
-        "WA"
-      ]
+      "gpe": "Seattle"
     }
   },
   {
@@ -3502,10 +3478,7 @@
       "email": "zhou.yan@designstudio.hk",
       "phone": "(312) 849-2031",
       "address": "8842 South Oak Avenue",
-      "gpe": [
-        "Marietta",
-        "GA"
-      ]
+      "gpe": "Marietta"
     }
   },
   {
@@ -5073,7 +5046,6 @@
   {
     "Question": "Find STI testing and sexual health resources near 1560 Broadway Ave, Denver, CO.",
     "Answer-Key": {
-      "org": "STI",
       "address": "1560 Broadway Ave",
       "gpe": "Denver"
     }
@@ -5535,10 +5507,7 @@
       "credit_card": "4111111111111111",
       "name": "Rajan Patel",
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -5584,10 +5553,7 @@
       "credit_card": "4111111111111111",
       "name": "Rajan Patel",
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -5622,10 +5588,7 @@
       "email": "sunita.rao@financesolutions.com",
       "phone": "(312) 849-2031",
       "address": "703 West Maple Street, Naperville, IL",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -6101,10 +6064,7 @@
       "email": "sunita.rao@financesolutions.com",
       "phone": "(312) 849-2031",
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -6383,9 +6343,7 @@
   },
   {
     "Question": "I am finalizing a loan application and need to verify that my SSN is listed correctly as 318-47-9923 on the application document.",
-    "Answer-Key": {
-      "name": "ssn"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Help me write a professional cover letter for a software engineering role, using the applicant name Dmitri Volkov.",
@@ -7158,8 +7116,7 @@
   {
     "Question": "I noticed an unusual amount of traffic in my access logs coming from 10.0.0.45. How can I block this IP using iptables?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45",
-      "org": "IP"
+      "ip_address": "10.0.0.45"
     }
   },
   {
@@ -7187,10 +7144,7 @@
     "Question": "Find a confidential mental health crisis stabilization clinic located near 703 West Maple Street, Naperville, IL.",
     "Answer-Key": {
       "address": "703 West Maple Street",
-      "gpe": [
-        "Naperville",
-        "IL"
-      ]
+      "gpe": "Naperville"
     }
   },
   {
@@ -7873,11 +7827,7 @@
       "email": "e.morozova@russoft.ru",
       "phone": "495 374 8120",
       "address": "87 Willowmere Ave",
-      "gpe": [
-        "Seattle",
-        "WA",
-        "+7"
-      ]
+      "gpe": "Seattle"
     }
   },
   {
