@@ -350,21 +350,36 @@ def run_evaluation(
                             r'\b' + _re.escape(sw) + r'\b', ow, restored
                         )
 
-                # Step 4 — any surrogate still present in restored is a real leak
-                leaked = [v for v in surrogate_map.values() if v and v in restored]
+                # Step 4 — any surrogate still present in restored is a real leak.
+                # Skip self-mapped entries (original == surrogate): the pipeline
+                # detected the PII but could not generate a different surrogate,
+                # so the value was intentionally kept unchanged — not a leak.
+                leaked = [
+                    v for k, v in surrogate_map.items()
+                    if v and k != v and v in restored
+                ]
                 total_resolve_leaks            += 1 if leaked else 0
                 total_individual_resolve_leaks += len(leaked)
 
             if need_sanit and key_pii_list:
+                import re as _re
                 rnr_set = {
                     r["value"].lower()
                     for r in (a_entry.get("recognized_not_replaced") or [])
                     if isinstance(r, dict) and r.get("value")
                 }
-                si_lower   = sanitized_input.lower()
+                si_lower = sanitized_input.lower()
+                # Use word-boundary matching: a PII value only counts as leaked
+                # if it appears as a distinct token, not as a substring embedded
+                # inside another word (e.g. 'il' inside 'vehicle', 'sti' inside
+                # 'testing').  _re.escape handles special chars (+, ., etc.).
+                def _pii_in_text(val: str) -> bool:
+                    pat = r'(?<![a-zA-Z0-9])' + _re.escape(val) + r'(?![a-zA-Z0-9])'
+                    return bool(_re.search(pat, si_lower))
+
                 leaked_pii = [
                     v for v in key_pii_list
-                    if v.lower() in si_lower and v.lower() not in rnr_set
+                    if v.lower() not in rnr_set and _pii_in_text(v.lower())
                 ]
                 total_pii_leaks_to_llm     += 1 if leaked_pii else 0
                 total_individual_pii_leaks += len(leaked_pii)

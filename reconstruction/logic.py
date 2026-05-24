@@ -187,9 +187,6 @@ class ResolvePass:
                 final_unresolved[surrogate] = original
 
         for surrogate, original in final_unresolved.items():
-            logger.warning(
-                f"[ResolvePass] Fuzzy miss: could not resolve surrogate {surrogate!r}"
-            )
             self.failures.append(
                 ResolutionFailure(
                     surrogate=surrogate,

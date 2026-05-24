@@ -26,13 +26,19 @@ def get_analyzer():
     try:
         import logging
 
-        # Suppress Presidio's non-English recognizer warnings and spaCy
-        # entity mapping warnings before loading anything
-        logging.getLogger("presidio_analyzer").setLevel(logging.ERROR)
-        logging.getLogger("presidio_analyzer.nlp_engine.spacy_nlp_engine"
-                          ).setLevel(logging.ERROR)
-        logging.getLogger("presidio_analyzer.recognizer_registry"
-                          ).setLevel(logging.ERROR)
+        # Silence all Presidio loggers completely before importing anything.
+        # The spaCy NLP engine uses "presidio-analyzer" (hyphen); other
+        # modules use "presidio_analyzer" (underscore).  Setting propagate=False
+        # ensures messages never reach the root handler even if levels change.
+        for _lg_name in (
+            "presidio-analyzer",
+            "presidio_analyzer",
+            "presidio_analyzer.nlp_engine.spacy_nlp_engine",
+            "presidio_analyzer.recognizer_registry",
+        ):
+            _lg = logging.getLogger(_lg_name)
+            _lg.setLevel(logging.CRITICAL)
+            _lg.propagate = False
 
         from presidio_analyzer import AnalyzerEngine, RecognizerRegistry
         from presidio_analyzer.nlp_engine import (
