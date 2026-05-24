@@ -107,10 +107,16 @@ _PATTERNS: list = [
     ),
 
     # ── SSN ────────────────────────────────────────────────────────────────────
+    # Matches formatted (123-45-6789 / 123 45 6789) AND bare 9-digit form.
+    # Bare 9-digit matches are validated against the ABA routing checksum:
+    # numbers that pass that checksum are left for us_bank_number instead.
     (
         "ssn",
-        re.compile(r"\b\d{3}[ -]\d{2}[ -]\d{4}\b"),
-        None,
+        re.compile(r"\b\d{3}[ -]\d{2}[ -]\d{4}\b|\b\d{9}\b"),
+        lambda m: (
+            True if re.search(r"[ -]", m.group())
+            else not _aba_routing_valid(m.group())
+        ),
     ),
 
     # ── Email ──────────────────────────────────────────────────────────────────
