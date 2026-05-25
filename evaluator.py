@@ -110,6 +110,7 @@ EVAL_FIELDS = [
     ("timing",               "Stage timings  (avg ms per stage)"),
     ("resolve_quality",      "ResolvePass quality  (surrogate leak rate + accuracy)"),
     ("sanitization_quality", "Sanitization quality  (PII leak to LLM rate + accuracy)"),
+    ("bertscore_stats",      "BERTScore statistics  (paired t-test + descriptive stats)"),
 ]
 
 
@@ -197,6 +198,7 @@ def run_evaluation(
     need_presidio_cmp  = fields.get("presidio_comparison", False)
     need_bertscore_cmp = fields.get("bertscore_comparison", False)
     need_ablation      = fields.get("ablation_study", False)
+    need_bertscore_stats = fields.get("bertscore_stats", False)
 
     no_answers       = 0
     no_answers_empty = 0
@@ -239,6 +241,9 @@ def run_evaluation(
     prs_bs_precisions = []
     prs_bs_recalls    = []
     prs_bs_f1s        = []
+
+    paired_ss_f1s  = []
+    paired_prs_f1s = []
 
     from collections import defaultdict as _dd
 
@@ -497,6 +502,12 @@ def run_evaluation(
                     prs_bs_recalls.append(   bs_prs.get("recall",    0))
                     prs_bs_f1s.append(       bs_prs.get("f1",        0))
 
+                ss_f1  = bs_ss.get("f1")  if isinstance(bs_ss,  dict) else None
+                prs_f1 = bs_prs.get("f1") if isinstance(bs_prs, dict) else None
+                if ss_f1 is not None and prs_f1 is not None:
+                    paired_ss_f1s.append(ss_f1)
+                    paired_prs_f1s.append(prs_f1)
+
             if need_ablation:
                 ps_pii  = [v.lower() for v in (a_entry.get("pattern_scan_pii")  or [])]
                 et_pii  = [v.lower() for v in (a_entry.get("entity_trace_pii")  or [])]
@@ -732,6 +743,42 @@ def run_evaluation(
                 "data_status": _bs_status(prs_count, total),
             },
         }
+
+    if need_bertscore_cmp:
+        try:
+            import numpy as np
+            from scipy import stats as _scipy_stats
+            n = len(paired_ss_f1s)
+            if n >= 2:
+                t_stat, p_val = _scipy_stats.ttest_rel(paired_ss_f1s, paired_prs_f1s)
+                ss_mean  = float(np.mean(paired_ss_f1s))
+                ss_std   = float(np.std(paired_ss_f1s))
+                prs_mean = float(np.mean(paired_prs_f1s))
+                prs_std  = float(np.std(paired_prs_f1s))
+                mean_diff = ss_mean - prs_mean
+                p_val = float(p_val)
+                result["bertscore_stats"] = {
+                    "n_paired":      n,
+                    "ss_mean":       round(ss_mean,  4),
+                    "ss_std":        round(ss_std,   4),
+                    "presidio_mean": round(prs_mean, 4),
+                    "presidio_std":  round(prs_std,  4),
+                    "mean_diff":     round(mean_diff, 4),
+                    "t_statistic":   round(float(t_stat), 4),
+                    "p_value":       p_val,
+                    "p_significant": p_val < 0.001,
+                    "available":     True,
+                }
+            else:
+                result["bertscore_stats"] = {
+                    "available": False,
+                    "error": f"Not enough paired observations (need ≥ 2, got {n})",
+                }
+        except ImportError:
+            result["bertscore_stats"] = {
+                "available": False,
+                "error": "scipy/numpy not installed",
+            }
 
     if need_ablation:
 

@@ -1398,6 +1398,52 @@ def _run_evaluation() -> None:
             )
             console.print()
 
+            # ── Statistical significance (always shown with Table 2) ──────────
+            bs_stats = metrics.get("bertscore_stats")
+            if bs_stats is not None:
+                if bs_stats.get("available"):
+                    p_val  = bs_stats["p_value"]
+                    p_sig  = bs_stats["p_significant"]
+                    md_pct = bs_stats["mean_diff"] * 100
+                    md_str = f"+{md_pct:.2f}pp" if md_pct >= 0 else f"{md_pct:.2f}pp"
+                    if p_val < 0.001:
+                        p_display = "[bold green]p < 0.001[/bold green]"
+                    elif p_val < 0.01:
+                        p_display = "[yellow]p < 0.01[/yellow]"
+                    else:
+                        p_display = f"[red]p = {p_val:.4f}[/red]"
+                    if p_sig:
+                        note = (
+                            "[dim]Paired t-test (scipy.stats.ttest_rel). Statistically significant"
+                            " at p < 0.001 — the BERTScore utility gap is not due to chance.[/dim]"
+                        )
+                    else:
+                        note = "[yellow]Result does not reach p < 0.001 significance threshold.[/yellow]"
+                    panel_body = (
+                        f"  Paired observations    {bs_stats['n_paired']}\n"
+                        f"  SS mean F1             {bs_stats['ss_mean']:.4f} ± {bs_stats['ss_std']:.4f} (std)\n"
+                        f"  Presidio mean F1       {bs_stats['presidio_mean']:.4f} ± {bs_stats['presidio_std']:.4f} (std)\n"
+                        f"  Mean difference        {md_str}\n"
+                        f"  t-statistic            {bs_stats['t_statistic']:.2f}\n"
+                        f"  p-value                {p_display}\n\n"
+                        f"  {note}"
+                    )
+                    console.print(Panel(
+                        panel_body,
+                        title="[bold blue]BERTScore Statistical Significance[/bold blue]",
+                        border_style="blue",
+                        padding=(1, 2),
+                    ))
+                else:
+                    console.print(Panel(
+                        "[dim]Install scipy and numpy to enable statistical significance testing:\n"
+                        "  pip install scipy numpy[/dim]",
+                        title="[bold blue]BERTScore Statistical Significance[/bold blue]",
+                        border_style="blue",
+                        padding=(1, 2),
+                    ))
+                console.print()
+
     # ── Section 8: Ablation Study ─────────────────────────────────────────────
     abl = metrics.get("ablation_study")
     if abl:

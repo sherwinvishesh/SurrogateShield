@@ -540,6 +540,18 @@
       "data_status": "partial"
     }
   },
+  "bertscore_stats": {
+    "n_paired": 1123,
+    "ss_mean": 0.9485,
+    "ss_std": 0.0342,
+    "presidio_mean": 0.8159,
+    "presidio_std": 0.054,
+    "mean_diff": 0.1326,
+    "t_statistic": 89.5092,
+    "p_value": 0.0,
+    "p_significant": true,
+    "available": true
+  },
   "ablation_study": {
     "questions_with_data": 1060,
     "total_questions": 1124,
@@ -595,14 +607,6 @@
     },
     "per_type": {
       "ps_only": {
-        "PERSON": {
-          "precision": 1.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
-          "fp": 0,
-          "fn": 537
-        },
         "email": {
           "precision": 0.9958,
           "recall": 1.0,
@@ -611,13 +615,13 @@
           "fp": 1,
           "fn": 0
         },
-        "GPE": {
+        "PERSON": {
           "precision": 1.0,
           "recall": 0.0,
           "f1": 0.0,
           "tp": 0,
           "fp": 0,
-          "fn": 347
+          "fn": 537
         },
         "phone": {
           "precision": 0.9858,
@@ -626,6 +630,14 @@
           "tp": 209,
           "fp": 3,
           "fn": 6
+        },
+        "GPE": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 347
         },
         "ORG": {
           "precision": 1.0,
@@ -741,14 +753,6 @@
         }
       },
       "ps_et": {
-        "PERSON": {
-          "precision": 1.0,
-          "recall": 0.946,
-          "f1": 0.9722,
-          "tp": 508,
-          "fp": 0,
-          "fn": 29
-        },
         "email": {
           "precision": 0.9958,
           "recall": 1.0,
@@ -757,13 +761,13 @@
           "fp": 1,
           "fn": 0
         },
-        "GPE": {
-          "precision": 0.9559,
-          "recall": 1.0,
-          "f1": 0.9775,
-          "tp": 347,
-          "fp": 16,
-          "fn": 0
+        "PERSON": {
+          "precision": 1.0,
+          "recall": 0.946,
+          "f1": 0.9722,
+          "tp": 508,
+          "fp": 0,
+          "fn": 29
         },
         "phone": {
           "precision": 0.9858,
@@ -772,6 +776,14 @@
           "tp": 209,
           "fp": 3,
           "fn": 6
+        },
+        "GPE": {
+          "precision": 0.9559,
+          "recall": 1.0,
+          "f1": 0.9775,
+          "tp": 347,
+          "fp": 16,
+          "fn": 0
         },
         "ORG": {
           "precision": 0.9901,
@@ -887,14 +899,6 @@
         }
       },
       "ps_cg": {
-        "PERSON": {
-          "precision": 1.0,
-          "recall": 0.041,
-          "f1": 0.0787,
-          "tp": 22,
-          "fp": 0,
-          "fn": 515
-        },
         "email": {
           "precision": 0.9958,
           "recall": 1.0,
@@ -903,13 +907,13 @@
           "fp": 1,
           "fn": 0
         },
-        "GPE": {
+        "PERSON": {
           "precision": 1.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
+          "recall": 0.041,
+          "f1": 0.0787,
+          "tp": 22,
           "fp": 0,
-          "fn": 347
+          "fn": 515
         },
         "phone": {
           "precision": 0.9858,
@@ -918,6 +922,14 @@
           "tp": 209,
           "fp": 3,
           "fn": 6
+        },
+        "GPE": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 347
         },
         "ORG": {
           "precision": 1.0,
@@ -1033,14 +1045,6 @@
         }
       },
       "full": {
-        "PERSON": {
-          "precision": 1.0,
-          "recall": 0.987,
-          "f1": 0.9934,
-          "tp": 530,
-          "fp": 0,
-          "fn": 7
-        },
         "email": {
           "precision": 0.9958,
           "recall": 1.0,
@@ -1049,13 +1053,13 @@
           "fp": 1,
           "fn": 0
         },
-        "GPE": {
-          "precision": 0.9559,
-          "recall": 1.0,
-          "f1": 0.9775,
-          "tp": 347,
-          "fp": 16,
-          "fn": 0
+        "PERSON": {
+          "precision": 1.0,
+          "recall": 0.987,
+          "f1": 0.9934,
+          "tp": 530,
+          "fp": 0,
+          "fn": 7
         },
         "phone": {
           "precision": 0.9858,
@@ -1064,6 +1068,14 @@
           "tp": 209,
           "fp": 3,
           "fn": 6
+        },
+        "GPE": {
+          "precision": 0.9559,
+          "recall": 1.0,
+          "f1": 0.9775,
+          "tp": 347,
+          "fp": 16,
+          "fn": 0
         },
         "ORG": {
           "precision": 0.9903,
