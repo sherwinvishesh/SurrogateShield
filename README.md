@@ -1,6 +1,29 @@
 # SurrogateShield
 
-> A privacy-preserving CLI proxy for LLMs — PII never leaves your device.
+```
+╭───────────────────────────────────────────────────────╮
+│                                                       │
+│                                                       │
+│      ◆  ────────────────────────────────────  ◆       │
+│                                                       │
+│      S   U   R   R   O   G   A   T   E                │
+│                                                       │
+│      ███████╗██╗  ██╗██╗███████╗██╗     ██████╗       │
+│      ██╔════╝██║  ██║██║██╔════╝██║     ██╔══██╗      │
+│      ███████╗███████║██║█████╗  ██║     ██║  ██║      │
+│      ╚════██║██╔══██║██║██╔══╝  ██║     ██║  ██║      │
+│      ███████║██║  ██║██║███████╗███████╗██████╔╝      │
+│      ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═════╝       │
+│                                                       │
+│      ◆  ────────────────────────────────────  ◆       │
+│                                                       │
+│      Privacy-preserving proxy for LLMs                │
+│      PII never leaves your device                     │
+│                                                       │
+│                                                       │
+╰───────────────────────────────────────────────────────╯
+```
+
 
 SurrogateShield intercepts your messages before they reach any LLM API, detects all personally identifiable information (PII), replaces it with realistic fake surrogates, sends the sanitised message, and restores your real values in the response. All cryptographic operations run locally. Nothing sensitive is ever transmitted.
 
@@ -57,6 +80,7 @@ Display to user
 - **Presidio comparison** — side-by-side Microsoft Presidio results in PII Finder and Evaluation, including per-entity-type F1/precision/recall
 - **Batch evaluation** — precision, recall, F1, per-entity-type breakdown, ResolvePass leak rate, sanitisation quality, BERTScore utility preservation, Presidio side-by-side comparison, and **ablation study** against ground-truth answer keys
 - **API Transparency panel** — see exactly what was sent, what was received, and the final restored output
+- **Attacker Experiment** — simulates an informed adversary who intercepts sanitised API traffic and attempts to recover original PII from both SurrogateShield and Presidio output; proves surrogate-based anonymisation achieves equivalent inference resistance to placeholder redaction
 
 
 
@@ -420,6 +444,7 @@ python main.py add-doc path/to/document.txt
 | `D1–D9` | Delete conversation by number |
 | `J` | JSON Test — batch-process a question file |
 | `E` | Evaluation — score pipeline quality against ground-truth |
+| `A` | Attacker Experiment — simulate adversarial PII recovery |
 | `S` | Settings (provider, view mode) |
 | `H` | Help |
 | `Q` | Quit |
@@ -599,6 +624,86 @@ All four are **on by default** in JSON Test. If the answers file pre-dates the a
 
 
 
+## Attacker Experiment
+
+The Attacker Experiment (`attacker.py`) simulates an **informed adversary** who intercepts the sanitised text SurrogateShield sends to the LLM API and actively tries to recover the original PII values. It is the adversarial counterpart to the Evaluation suite and answers a critical research question: does replacing PII with realistic-looking surrogates (rather than `[PLACEHOLDER]` tokens) make it easier for an attacker to infer the originals?
+
+### What it tests
+
+Two variants are run on each question from an existing answers file:
+
+| Variant | What the attacker sees | Goal |
+|---|---|---|
+| **SurrogateShield** | Sanitised text with realistic fake values (fake names, SSNs, emails, …) | Try to recover the originals from the surrogates |
+| **Presidio** | Redacted text with `[ENTITY_TYPE]` placeholder tokens | Try to recover the originals from the placeholders |
+
+The attacker is given a carefully constructed adversarial prompt that discloses the PII types that were replaced and instructs the model to use every available inference technique — linguistic analysis, contextual reasoning, demographic inference, cross-field correlation, format patterns, and more.
+
+### Expected result
+
+**0% recovery for both systems.** Surrogates have no cryptographic or statistical relationship to the original values. This proves SurrogateShield achieves *equivalent inference resistance* to blunt placeholder redaction, while preserving significantly higher semantic utility as measured by BERTScore.
+
+### Running the experiment
+
+Press `A` in the dashboard. The four-screen flow will:
+
+1. Explain the experiment
+2. Prompt for an existing answers file from `experiment/` (must contain `surrogate_map`, `sanitized_input`, and optionally `presidio_sanitized_input` / `presidio_found_piis` fields)
+3. Show question counts and estimated API calls, then run
+4. Display a results summary on completion
+
+Output files are written to `experiment/`:
+
+| File | Contents |
+|---|---|
+| `<stem>_Attacker_Experiment.json` | Per-question recovery attempt details for both variants |
+| `<stem>_Attacker_Experiment_Analysis.json` | Aggregated recovery rates, per-type breakdown, overall assessment |
+
+The experiment supports **resume** — if interrupted, re-running with the same answers file picks up where it left off.
+
+### Analysis metrics
+
+| Metric | Description |
+|---|---|
+| Questions available | Questions with SS / Presidio data to attack |
+| Total targeted | Total PII values the attacker attempted to recover |
+| Total recovered | Values where the attacker's guess matched the original (exact, lowercased) |
+| Recovery rate | `recovered / targeted` — lower is better for privacy |
+| Recovery rate (excl. address) | Rate excluding address-type entities (service queries fuzz addresses rather than fully replace them, so proximity recovery is theoretically possible; tracked separately) |
+| By-type breakdown | Per-PII-type targeted/recovered counts and rate |
+
+### Address handling
+
+Street addresses in service queries receive **house-number fuzzing** (`±2–8`) rather than full replacement. Exact address recovery is still impossible, but proximity-based recovery is theoretically possible. Address results are tracked separately via `address_recovered_count` / `non_address_recovered_count` and excluded from the primary recovery rate to keep the comparison fair.
+
+### Generating compatible answers files
+
+Enable these fields in JSON Test before running to ensure the experiment has full data:
+
+| Field | Required for |
+|---|---|
+| `surrogate_map` | SS attacker — original PII values and their surrogates |
+| `sanitized_input` | SS attacker — the text to attack |
+| `pii_detail` | SS attacker — type metadata for the prompt |
+| `presidio_sanitized_input` | Presidio attacker — the placeholder-redacted text |
+| `presidio_found_piis` | Presidio attacker — type metadata for the prompt |
+
+### Test coverage (`tests/test6.py`)
+
+`test6.py` covers the full `attacker.py` module with mocked API calls — no real API key or network required:
+
+| Test area | What is verified |
+|---|---|
+| `_build_types_list()` | Readable bullet formatting, label mapping, unknown-type fallback |
+| `_types_from_pii_detail()` | Type normalization from SS `pii_detail` dicts |
+| `_types_from_presidio_found()` | Presidio entity type mapping to internal types |
+| `score_recovery()` | Exact-match scoring, address/non-address separation, null-guess handling |
+| `run_attacker_call()` | API response parsing, JSON fence stripping, error fallback |
+| `compute_analysis()` | Rate aggregation, per-type counts, address exclusion logic |
+| `run_experiment()` | End-to-end flow with mocked API client and temp files |
+
+
+
 ## Running the Tests
 
 ```bash
@@ -609,9 +714,12 @@ source .venv/bin/activate
 python tests/test1.py
 python tests/test2.py
 python tests/test3.py
+python tests/test6.py
 ```
 
 `test1.py` covers PatternScan, EntityTrace, SentinelLayer cascade, MimicGen, ShadowMap, ResolvePass, and a full no-API pipeline round-trip. All tests run without an API key.
+
+`test6.py` covers the Attacker Experiment module (`attacker.py`) — type formatting, recovery scoring, API response parsing, analysis aggregation, and end-to-end experiment flow. All API calls are mocked; no real API key or network access needed.
 
 
 
@@ -626,6 +734,7 @@ SurrogateShield/
 ├── settings_manager.py      # Persistent user settings (~/.surrogateshield/settings.json)
 ├── evaluator.py             # Precision/recall/F1 evaluation logic + Presidio/BERTScore/ablation study
 ├── json_tester.py           # Batch JSON question processing
+├── attacker.py              # Adversarial PII recovery experiment (Attacker Experiment)
 ├── run.sh                   # Launcher script (venv activation, .env loading)
 ├── requirements.txt
 │
@@ -659,12 +768,15 @@ SurrogateShield/
 ├── experiment/              # Batch test input/output files
 │   ├── example.json         # Sample question file
 │   ├── example_key.json     # Sample ground-truth answer key
-│   └── example_answers.json # Sample output from JSON Test
+│   ├── example_answers.json # Sample output from JSON Test
+│   ├── *_Attacker_Experiment.json          # Per-question attacker results (auto-generated)
+│   └── *_Attacker_Experiment_Analysis.json # Aggregated recovery-rate analysis (auto-generated)
 │
 ├── tests/                   # Test suite (no API key required)
 │   ├── test1.py             # PatternScan, EntityTrace, cascade, MimicGen, ShadowMap, ResolvePass, round-trip
 │   ├── test2.py             # Additional detection and generation tests
-│   └── test3.py             # Additional pipeline and storage tests
+│   ├── test3.py             # Additional pipeline and storage tests
+│   └── test6.py             # Attacker Experiment — type formatting, scoring, analysis, end-to-end (mocked API)
 │
 └── conversations/           # Runtime — auto-created on first use
     ├── <conv_id>.json        # Conversation history (surrogate text only, not originals)
