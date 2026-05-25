@@ -16,8 +16,6 @@ no keyword lists):
 
   Pass B — Email-username → PERSON reclassification
       If an ORG entity's text is a prefix of a detected email username
-      (e.g. "Sherwin" is prefix of "sherwinvishesh"), the NER mis-labelling
-      is corrected to PERSON.  Decision is made from pattern-detection output.
 
   Pass C — PERSON component deduplication
       When entity A ("Mitchell") is a word-component of entity B
@@ -126,9 +124,9 @@ def _reclassify_email_username_orgs(
     sometimes labels the standalone first name as ORG.  This pass uses the
     email detection output (from PatternScan) to correct that labelling.
 
-    Example: "sherwinvishesh@gmail.com" detected → username "sherwinvishesh"
-             "Sherwin" detected as ORG → "sherwin" is prefix of username
-             → reclassify "Sherwin" as PERSON
+    Example: "[redacted]@gmail.com" detected → username "[redacted]"
+             "abhi" detected as ORG → "abhi" is prefix of username
+             → reclassify "abhi" as PERSON
     """
     email_usernames: Set[str] = set()
     for ent in entities:
