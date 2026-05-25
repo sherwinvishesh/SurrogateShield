@@ -1,0 +1,558 @@
+(base) sherwinvishesh@Sherwins-MacBook-Pro SurrogateShield % ./run.sh   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+╭───────────────────────────────────────────────────────╮
+│                                                       │
+│                                                       │
+│      ◆  ────────────────────────────────────  ◆       │
+│                                                       │
+│      S   U   R   R   O   G   A   T   E                │
+│                                                       │
+│      ███████╗██╗  ██╗██╗███████╗██╗     ██████╗       │
+│      ██╔════╝██║  ██║██║██╔════╝██║     ██╔══██╗      │
+│      ███████╗███████║██║█████╗  ██║     ██║  ██║      │
+│      ╚════██║██╔══██║██║██╔══╝  ██║     ██║  ██║      │
+│      ███████║██║  ██║██║███████╗███████╗██████╔╝      │
+│      ╚══════╝╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═════╝       │
+│                                                       │
+│      ◆  ────────────────────────────────────  ◆       │
+│                                                       │
+│      Privacy-preserving proxy for LLMs                │
+│      PII never leaves your device                     │
+│                                                       │
+│                                                       │
+╰───────────────────────────────────────────────────────╯
+
+──────────────────────────────────────────────────────────────────────────────────────────────────── Pipeline ────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1  PatternScan     Regex — SSNs, emails, phones, cards, API keys
+   │
+  2  EntityTrace     spaCy NER — names, places, organisations
+   │
+  3  ContextGuard    distilbert-NER — borderline entity resolution
+   │
+  4  MimicGen        Realistic fake values per PII type (Faker)
+   │
+  5  ShadowMap       AES-256-GCM encrypted map — stays on device
+   │
+  6  Claude API      Receives surrogates — never real values
+   │
+  7  ResolvePass     Swaps fakes back to real values in response
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────── Conversations ─────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                                                │
+│    No saved conversations yet.                                                                                                                                                                                 │
+│                                                                                                                                                                                                                │
+│    Press N to start one.                                                                                                                                                                                       │
+│                                                                                                                                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+──────────────────────────────────────────────────────────────────────────────────────────────────── Actions ─────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  N    New conversation
+  R    New conversation + RAG mode
+  P    PII Finder  — test detection, zero API calls
+  J    JSON Test  — batch evaluation from a JSON file
+  E    Evaluation  — score pipeline quality from JSON files
+  A    Attacker Experiment  — simulate adversarial PII recovery
+  S    Settings
+  H    Help
+  Q    Quit
+
+›  a
+
+
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                               ◆  SurrogateShield  ·  PII never leaves your device                                                                                
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                                                │
+│  Attacker Experiment  · Simulated Adversarial PII Recovery                                                                                                                                                     │
+│                                                                                                                                                                                                                │
+│  What this tests:                                                                                                                                                                                              │
+│  This experiment simulates an informed adversary who intercepts the sanitized text                                                                                                                             │
+│  SurrogateShield sends to the LLM API. The adversary knows a privacy proxy was used,                                                                                                                           │
+│  knows that realistic surrogate values replaced real PII, and actively attempts to                                                                                                                             │
+│  recover the originals using every available inference technique.                                                                                                                                              │
+│                                                                                                                                                                                                                │
+│  Two variants are tested on each question:                                                                                                                                                                     │
+│    SurrogateShield  — attacker sees realistic fake values (names, SSNs, emails)                                                                                                                                │
+│    Presidio          — attacker sees [PLACEHOLDER] tokens                                                                                                                                                      │
+│                                                                                                                                                                                                                │
+│  Expected result: 0% recovery for both systems.                                                                                                                                                                │
+│  This proves SurrogateShield achieves equivalent inference resistance to placeholder                                                                                                                           │
+│  redaction, while preserving significantly higher semantic utility (BERTScore).                                                                                                                                │
+│                                                                                                                                                                                                                │
+│  Requires: ANTHROPIC_API_KEY · ~2 API calls per question                                                                                                                                                       │
+│                                                                                                                                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+  Press Enter to continue  ·  B to go back
+
+›  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                               ◆  SurrogateShield  ·  PII never leaves your device                                                                                
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  experiment/answers file › experiment_answers.json
+
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                                                │
+│  Found:  100 questions                                                                                                                                                                                         │
+│    With SS data:        97  (will run attacker on these)                                                                                                                                                       │
+│    With Presidio data:  100  (will run attacker on these)                                                                                                                                                      │
+│    Estimated API calls: 197                                                                                                                                                                                    │
+│                                                                                                                                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+  Press Enter to run  ·  B to go back
+
+›  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                               ◆  SurrogateShield  ·  PII never leaves your device                                                                                
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Attacker Experiment Running  · experiment_answers.json
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  ⟳    1/100  I am finishing an online verification form. Do I qualify for the student exemption if my date of birth is listed as 08/2…
+  ✓    1/100  11.6s
+  ⟳    2/100  Set up an automated appointment reminder for Hans Weber. His Swiss office number is +41 44 123 45 67.
+  ✓    2/100  15.8s
+  ⟳    3/100  Log this new sales lead in the CRM: Name - Pawel Wierzbicki, Email - p.wierzbicki.sales@gmail.com, Phone - +48 22 123 45…
+  ✓    3/100  15.9s
+  ⟳    4/100  For my official passport renewal dossier processing steps, what is my exact biological age calculation if my birth date …
+  ✓    4/100  10.7s
+  ⟳    5/100  Can you execute a systemic database billing address update request for a client profile? The primary Visa account is 422…
+  ✓    5/100  21.7s
+  ⟳    6/100  Write a polite post-interview follow-up email I can send from tariq.mansouri.arch@gmail.com.
+  ✓    6/100  10.2s
+  ⟳    7/100  Find a completely confidential adolescent mental health crisis evaluation facility or hospital wing located near 703 Wes…
+  ✓    7/100  14.6s
+  ⟳    8/100  Create a security audit profile record for a user named Tariq Mansoor, government registry 501-94-3321, date of birth Ma…
+  ✓    8/100  13.3s
+  ⟳    9/100  What was Japan's nominal GDP in 2023 and how does it rank globally?
+  ✓    9/100  14.2s
+  ⟳   10/100  Help me write a professional cover letter for a software engineering role, using the applicant name Dmitri Volkov.
+  ✓   10/100  10.5s
+  ⟳   11/100  Add this international supplier contact: Name - Katarzyna Wojciechowska, direct line - +49 30 8765 4321.
+  ✓   11/100  13.6s
+  ⟳   12/100  Help me write a polite email response from Takashi Sato confirming his attendance at an upcoming corporate strategic pla…
+  ✓   12/100  10.8s
+  ⟳   13/100  What are the local sales tax regulations and exemptions that apply to ZIP code 85281?
+  ✓   13/100  11.9s
+  ⟳   14/100  For my Social Security disability benefits application, I need to include my SSN 518-29-4067. Can you help me draft the …
+  ✓   14/100  15.0s
+  ⟳   15/100  Draft a newsletter signup confirmation message for Yuki Tanaka at yuki.tanaka.design@outlook.com.
+  ✓   15/100  12.0s
+  ⟳   16/100  Help me compose a WhatsApp message to our Mumbai-based partner Rajesh Venkataraman at +91 98304 12567.
+  ✓   16/100  20.5s
+  ⟳   17/100  Can you find a hardware store near 9916 Willow Lane, Eugene, OR that is open on Sundays?
+  ✓   17/100  15.8s
+  ⟳   18/100  I want to dispute a charge on my account. Name: Fernando Castillo, card number 4012888888881881, billing address 931 Elm…
+  ✓   18/100  19.0s
+  ⟳   19/100  I am verifying an active commercial line of credit dossier and need to cross-check that my social security record matche…
+  ✓   19/100  10.9s
+  ⟳   20/100  How do I calculate my localized annual property assessment tax bracket if my new urban flat is located inside postcode S…
+  ✓   20/100  10.4s
+  ⟳   21/100  For internal network environment troubleshooting, can you explain why packets cleanly route to 172.16.254.1 but fail to …
+  ✓   21/100  9.8s
+  ⟳   22/100  Please log a customer support callback ticket for Tariq Mansoor to be reached on his contact line +44 1632 960123.
+  ✓   22/100  14.2s
+  ⟳   23/100  We need an HR form completed for a new hire named Zhou Yan, contactable via zhou.yan@globalbiz.hk or phone (312) 849-203…
+  ✓   23/100  15.3s
+  ⟳   24/100  Please check if public educational zoning allocation rules vary for family groups living inside the 02111 zip boundaries…
+  ✓   24/100  12.9s
+  ⟳   25/100  Can you check if there are any special age-related pension exemptions for Elena Rossi if her date of birth is 06/19/1999…
+  ✓   25/100  13.9s  💾 saved
+  ⟳   26/100  Please review this brief personal bio written by Kwamane Diop and make it sound more compelling for an upcoming tech con…
+  ✓   26/100  9.7s
+  ⟳   27/100  I accidentally sent sensitive documents to rafael.delgado@constructora-mx.com instead of a colleague. What should I do?
+  ✓   27/100  10.6s
+  ⟳   28/100  Can you check the blockchain transaction ledger to see if any assets were sent to this cryptocurrency wallet address: 1A…
+  ✓   28/100  10.9s
+  ⟳   29/100  Can you help me assemble a two-factor data confirmation profile that routes temporary tokens to (312) 555-9821 and accou…
+  ✓   29/100  12.2s
+  ⟳   30/100  Add this customer to our CRM system: Name - Fernanda Souza, Email - fernanda.souza.crm@gmail.com, Phone - +55 21 98765-4…
+  ✓   30/100  23.6s
+  ⟳   31/100  We need to update our HR onboarding forms for our new employee Kwesi Mensah, reachable at +1-617-493-8820.
+  ✓   31/100  11.0s
+  ⟳   32/100  Can you log an international supplier profile entry for Kwamane Diop, noting that his direct telecommunications line in …
+  ✓   32/100  15.6s
+  ⟳   33/100  Can you generate a technical inquiry to bank systems operations asking why routing number index 043000261 is throwing da…
+  ✓   33/100  10.1s
+  ⟳   34/100  I need a formal email draft stating that naoki.tanaka@tokyodesign.jp has been appointed as the primary contact for the p…
+  ✓   34/100  12.3s
+  ⟳   35/100  Please generate an automated passport system verification log entry row for Jean-Pierre Dubois, noting that his official…
+  ✓   35/100  12.8s
+  ⟳   36/100  Can you draft an email to the social security office asking why my profile data isn't showing under the identity number …
+  ✓   36/100  11.0s
+  ⟳   37/100  Help me structure a formal corporate verification document file for an engineering specialist named Linnea Lindstrom who…
+  ✓   37/100  12.7s
+  ⟳   38/100  Create an independent consultant master database entry row for a vendor named Stanislaw Novak with his phone line logged…
+  ✓   38/100  12.3s
+  ⟳   39/100  I need to file a fraud dispute for a charge I didn't authorize. My name is Amara Obinna, Visa card 4024007172768029, bil…
+  ✓   39/100  24.1s
+  ⟳   40/100  Where do I input the bank routing number 021000021 on this direct deposit authorization interface to connect my financia…
+  ✓   40/100  10.9s
+  ⟳   41/100  Help me find the LinkedIn profile for Carlos Mendez from NovaBuild Solutions in Naperville.
+  ✓   41/100  17.3s
+  ⟳   42/100  Please log this referral: Fatou Camara, fatou.camara@dakarlaw.sn, +221 77 842 3190.
+  ✓   42/100  14.6s
+  ⟳   43/100  Does your shipping distribution network provide climate-managed logistical tracking to residential addresses within the …
+  ✓   43/100  12.1s
+  ⟳   44/100  Find mental health counseling services near 892 Prospect Ave, Cleveland, OH.
+  ✓   44/100  14.8s
+  ⟳   45/100  Please draft a detailed credit card fraud mitigation entry logging a series of charges on Mastercard account 51051051051…
+  ✓   45/100  24.8s
+  ⟳   46/100  Can you assist me in debugging this application deployment? I accidentally left my active GitHub personal access token g…
+  ✓   46/100  17.0s
+  ⟳   47/100  Please create an internal fleet management vehicle access authorization index entry for an operator named Elena Rossi, h…
+  ✓   47/100  11.7s
+  ⟳   48/100  Draft a subscription welcome email for our new user Pedro Alves at p.alves.tech@outlook.com.
+  ✓   48/100  11.1s
+  ⟳   49/100  Please draft a formal thank-you note from Rohan Kapoor to his doctoral dissertation committee.
+  ✓   49/100  11.2s
+  ⟳   50/100  Draft a medical chart cover page for a patient named Tariq Mansoor with his official date of birth listed as March 05, 1…
+  ✓   50/100  11.0s  💾 saved
+  ⟳   51/100  Please compile an automated background screening clearance authorization card template for an applicant named Sofia Kova…
+  ✓   51/100  13.7s
+  ⟳   52/100  Please trace the active business registry information for a designer named Elena Rossi at Embraer located in Bozeman.
+  ✓   52/100  15.4s
+  ⟳   53/100  Is there an addiction recovery support group near 453 Magnolia Court Rd, Richmond, VA?
+  ✓   53/100  18.4s
+  ⟳   54/100  Can you register Zhou Yan for the upcoming systems engineering symposium? Her corporate communication channel is recorde…
+  ✓   54/100  11.5s
+  ⟳   55/100  Draft an HR onboarding profile for Silvia Marini, silvia.marini@itatech.it, +39 02 8374 6621.
+  ✓   55/100  13.9s
+  ⟳   56/100  Why does my Node microservice cluster return an authentication error code whenever I present the verification Bearer tok…
+  ✓   56/100  17.3s
+  ⟳   57/100  I need a professional email draft summarizing a data consultation brief from Devendra Joshi whose executive email contac…
+  ✓   57/100  12.1s
+  ⟳   58/100  Can you log an international supplier profile entry for Carlos Silva, noting that his direct telecommunications line in …
+  ✓   58/100  12.9s
+  ⟳   59/100  Help me format a secure credential verification log table row noting that a customer who declared gender: non-binary has…
+  ✓   59/100  12.5s
+  ⟳   60/100  Draft a clinical chart cover index page format for an adult patient named Mustafa Al-Kouri with his official date of bir…
+  ✓   60/100  12.5s
+  ⟳   61/100  I accidentally committed production application environment variables to a open source trunk branch. Can you help verify…
+  ✓   61/100  15.1s
+  ⟳   62/100  Does the master contractor accounting database show an active corporate escrow record for Alejandro Gomez linked with th…
+  ✓   62/100  11.7s
+  ⟳   63/100  Draft a product warranty claim message regarding a broken hardware component associated with the customer profile email …
+  ✓   63/100  11.0s
+  ⟳   64/100  I think there's a fraudulent charge on my Visa card 4532015112830366. Can you help me draft a dispute letter to my bank?
+  ✓   64/100  14.1s
+  ⟳   65/100  For local network troubleshooting, can you explain why I can route traffic to 192.168.1.254 but cannot open a TCP connec…
+  ✓   65/100  12.3s
+  ⟳   66/100  Help me understand what to do if my SSN 257-83-4901 was included in a data breach.
+  ✓   66/100  10.3s
+  ⟳   67/100  I need to alter my corporate account contact preference properties. Please map my primary communication email deepak.kum…
+  ✓   67/100  12.4s
+  ⟳   68/100  How do I securely pass an environment variable in Docker so I don't expose sk-3f7g8h9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x on th…
+  ✓   68/100  15.8s
+  ⟳   69/100  Can you evaluate the secure directory records row for a validation candidate profile matching Elena Rossi, national regi…
+  ✓   69/100  13.6s
+  ⟳   70/100  I need to write a collections notice for Vasile Popescu. His contact number on file is (614) 937-2084.
+  ✓   70/100  13.2s
+  ⟳   71/100  Please update my external supplier registry profile fields to stream all technical audio escalations directly to +91 984…
+  ✓   71/100  10.6s
+  ⟳   72/100  Please update my contact information on file. New email: d.osei.arch@gmail.com, primary phone: 480-274-3816.
+  ✓   72/100  12.7s
+  ⟳   73/100  Can you write a short introductory bio for an independent graphic designer named Ananya Chatterjee for her online portfo…
+  ✓   73/100  9.8s
+  ⟳   74/100  I need to verify my identity for a Medicaid enrollment form. My Social Security number is 193-58-4720.
+  ✓   74/100  13.6s
+  ⟳   75/100  Can you draft an automated account generation receipt confirming that the client's backup notification line is listed as…
+  ✓   75/100  11.7s  💾 saved
+  ⟳   76/100  Write a conference registration confirmation for Amara Diallo at amara.diallo@research.sn.
+  ✓   76/100  12.5s
+  ⟳   77/100  Draft a customer registration summary line for an account under the name Sofia Kovalev, using sofia.k@cybersecure.ru and…
+  ✓   77/100  13.9s
+  ⟳   78/100  For international emergency contact purposes, please record my mobile phone number in the registry as +49 151 23456789.
+  ✓   78/100  11.2s
+  ⟳   79/100  I am unable to access my online banking panel. Please log an identity recovery assistance ticket for deepak.sharma@india…
+  ✓   79/100  10.2s
+  ⟳   80/100  Draft a formal speech commemorating the discovery of penicillin by Alexander Fleming for a high school science fair open…
+  ✓   80/100  12.3s
+  ⟳   81/100  Draft a business inquiry notification confirming that Chloe Mercier requested an immediate technical callback at +33 1 4…
+  ✓   81/100  11.9s
+  ⟳   82/100  We need to configure a municipal social services infrastructure directory row for a citizen named Kwamane Diop whose off…
+  ✓   82/100  11.1s
+  ⟳   83/100  Write a formal email from Fatoumata Diallo requesting an extension on a project deadline due to unexpected technical del…
+  ✓   83/100  11.0s
+  ⟳   84/100  I need to draft an event invitation for Claire Dupont. Her email address is claire.dupont.events@gmail.com.
+  ✓   84/100  13.0s
+  ⟳   85/100  I'm debugging our Stripe integration at DataPulse Inc and accidentally logged the key sk-stripe-RqWxMnBvCkJhYtPpLsOaUiEd…
+  ✓   85/100  13.8s
+  ⟳   86/100  Can you generate a compelling professional networking introductory message format that Amira Al-Mansoor can distribute t…
+  ✓   86/100  9.7s
+  ⟳   87/100  Write a performance review summary for Ngozi Eze, who exceeded all her quarterly targets this year and mentored two juni…
+  ✓   87/100  13.2s
+  ⟳   88/100  What year did the Berlin Wall fall, and what were the immediate consequences for Germany?
+  ✓   88/100  16.7s
+  ⟳   89/100  How do I verify my municipal trash collection schedule if my commercial office is located completely inside ZIP code 852…
+  ✓   89/100  11.9s
+  ⟳   90/100  Can you draft a text message to remind my client about their appointment tomorrow? Their number is 612-847-3920.
+  ✓   90/100  11.3s
+  ⟳   91/100  Can you format a demographic data entry row for an identity profile where gender: male is combined with the official dat…
+  ✓   91/100  13.9s
+  ⟳   92/100  I need to renew my driver's license. Number: TX9283740, DOB: 1987-05-16.
+  ✓   92/100  12.6s
+  ⟳   93/100  I'm filing taxes for Olumide Adeyemi. His Social Security Number is 358-74-1926.
+  ✓   93/100  13.0s
+  ⟳   94/100  I need to log an official driver validation data index entry row for an independent courier named Rajesh Kumar, driver_l…
+  ✓   94/100  14.1s
+  ⟳   95/100  Set up two-factor authentication for account nadia.volkov@mailru.net using phone 916-482-7193.
+  ✓   95/100  12.3s
+  ⟳   96/100  Can you explain how black holes form?
+  ✓   96/100  5.4s
+  ⟳   97/100  Draft a formal corporate callback routing log line confirming that an executive lead named Kenji Tanaka requested a tech…
+  ✓   97/100  13.5s
+  ⟳   98/100  Create a high-privilege system administration audit profile for an operative user named Tariq Mansoor, national index li…
+  ✓   98/100  15.3s
+  ⟳   99/100  I need directions to a domestic violence shelter and localized crisis legal advocacy clinic near 721 Maple Avenue, Colum…
+  ✓   99/100  14.7s
+  ⟳  100/100  Our UK office contact number is +44 20 7946 3851. Can you add this to our contact page copy?
+  ✓  100/100  13.6s  💾 saved
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Done!  All questions processed.
+
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                               ◆  SurrogateShield  ·  PII never leaves your device                                                                                
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ✓  Zero PII recovered — inference resistance confirmed                                                                                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+───────────────────────────────────────────────────────────────────────────────────────── Attacker Experiment — Table 3 ──────────────────────────────────────────────────────────────────────────────────────────
+
+╭──────────────────────┬─────────────────┬──────────╮
+│ Metric               │ SurrogateShield │ Presidio │
+├──────────────────────┼─────────────────┼──────────┤
+│ Questions tested     │       100       │   100    │
+├──────────────────────┼─────────────────┼──────────┤
+│ PII values targeted  │       194       │   196    │
+├──────────────────────┼─────────────────┼──────────┤
+│ Values recovered     │        0        │    3     │
+├──────────────────────┼─────────────────┼──────────┤
+│ Recovery rate        │      0.00%      │  1.53%   │
+├──────────────────────┼─────────────────┼──────────┤
+│ Rate (excl. address) │      0.00%      │  1.62%   │
+╰──────────────────────┴─────────────────┴──────────╯
+
+──────────────────────────────────────────────────────────────────────────────────────── Recovery Attempts by Entity Type ────────────────────────────────────────────────────────────────────────────────────────
+
+╭───────────────────┬──────────────┬───────────────┬────────────┬───────────────────┬────────────────────┬────────────────╮
+│ Entity Type       │  SS Targeted │  SS Recovered │    SS Rate │ Presidio Targeted │ Presidio Recovered │  Presidio Rate │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ PERSON            │           53 │             0 │      0.00% │                53 │                  1 │          1.89% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ GPE               │           17 │             0 │      0.00% │                17 │                  2 │         11.76% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ LOC               │            1 │             0 │      0.00% │                 1 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ ORG               │           17 │             0 │      0.00% │                17 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ FAC               │            1 │             0 │      0.00% │                 1 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ email             │           21 │             0 │      0.00% │                21 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ phone             │           14 │             0 │      0.00% │                14 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ ssn               │           12 │             0 │      0.00% │                12 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ address *         │           11 │             0 │      0.00% │                11 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ dob               │           14 │             0 │      0.00% │                14 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ credit_card       │            4 │             0 │      0.00% │                 4 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ ip_address        │            3 │             0 │      0.00% │                 3 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ api_key           │            5 │             0 │      0.00% │                 5 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ postal_code       │            7 │             0 │      0.00% │                 7 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ gender_indicator  │            2 │             0 │      0.00% │                 2 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ crypto            │            1 │             0 │      0.00% │                 1 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ us_bank_number    │            2 │             0 │      0.00% │                 2 │                  0 │          0.00% │
+├───────────────────┼──────────────┼───────────────┼────────────┼───────────────────┼────────────────────┼────────────────┤
+│ us_driver_license │            1 │             0 │      0.00% │                 1 │                  0 │          0.00% │
+╰───────────────────┴──────────────┴───────────────┴────────────┴───────────────────┴────────────────────┴────────────────╯
+  * address values in service queries receive house-number fuzzing. Exact recovery is impossible; shown separately for transparency.
+
+╭────────────────────────────────────────────────────────────────────────────────────────────── Security Analysis ───────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                                                │
+│  SurrogateShield achieves 0% exact PII recovery rate (excluding address),                                                                                                                                      │
+│  identical to Presidio's placeholder redaction approach.                                                                                                                                                       │
+│                                                                                                                                                                                                                │
+│  The informed adversary — who knew the proxy was used, knew the PII types replaced, and                                                                                                                        │
+│  applied every available inference technique — was unable to recover any original values.                                                                                                                      │
+│  This confirms that realistic surrogate replacement provides equivalent inference resistance                                                                                                                   │
+│  to placeholder redaction, while delivering [BERTScore advantage — see Table 2] higher BERTScore utility.                                                                                                      │
+│                                                                                                                                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+  S    Save analysis as JSON  (already saved to experiment/)
+  B    Back to dashboard
+
+›  s
+
+  ✓  Results already saved to:
+       /Users/sherwinvishesh/Downloads/SurrogateShield/experiment/experiment_answers_Attacker_Experiment.json
+       /Users/sherwinvishesh/Downloads/SurrogateShield/experiment/experiment_answers_Attacker_Experiment_Analysis.json
+
+›  

@@ -1,0 +1,1203 @@
+{
+  "no_of_questions": 1124,
+  "no_of_answers": 1123,
+  "no_of_answers_empty": 1,
+  "answer_rate": 0.9991,
+  "no_surrogates_found": 2133,
+  "no_surrogates_in_key": 2282,
+  "avg_surrogates_per_question_found": 1.8977,
+  "avg_surrogates_per_question_in_key": 2.0302,
+  "precision_surrogates": 0.9867,
+  "recall_surrogates": 0.9929,
+  "f1_surrogates": 0.9887,
+  "accuracy_surrogates": 0.9846,
+  "error_surrogates": 0.0071,
+  "avg_pattern_scan_ms": 0.246313,
+  "avg_entity_trace_ms": 24.604203,
+  "avg_context_guard_ms": 0.468112,
+  "avg_surrogate_gen_ms": 0.573277,
+  "total_resolve_leaks": 0,
+  "total_individual_resolve_leaks": 0,
+  "resolve_leak_rate": 0.0,
+  "precision_resolve": 1.0,
+  "error_resolve": 0.0,
+  "total_pii_leaks_to_llm": 0,
+  "total_individual_pii_leaks": 0,
+  "pii_leak_rate": 0.0,
+  "accuracy_sanitization": 1.0,
+  "error_sanitization": 0.0,
+  "per_entity_type": {
+    "PERSON": {
+      "precision": 1.0,
+      "recall": 0.987,
+      "f1": 0.9934,
+      "tp": 530,
+      "fp": 0,
+      "fn": 7
+    },
+    "email": {
+      "precision": 0.9958,
+      "recall": 1.0,
+      "f1": 0.9979,
+      "tp": 236,
+      "fp": 1,
+      "fn": 0
+    },
+    "GPE": {
+      "precision": 0.9586,
+      "recall": 1.0,
+      "f1": 0.9788,
+      "tp": 347,
+      "fp": 15,
+      "fn": 0
+    },
+    "phone": {
+      "precision": 0.9861,
+      "recall": 0.9907,
+      "f1": 0.9884,
+      "tp": 213,
+      "fp": 3,
+      "fn": 2
+    },
+    "ORG": {
+      "precision": 0.9904,
+      "recall": 1.0,
+      "f1": 0.9952,
+      "tp": 206,
+      "fp": 2,
+      "fn": 0
+    },
+    "postal_code": {
+      "precision": 0.9872,
+      "recall": 1.0,
+      "f1": 0.9935,
+      "tp": 77,
+      "fp": 1,
+      "fn": 0
+    },
+    "credit_card": {
+      "precision": 1.0,
+      "recall": 0.9762,
+      "f1": 0.988,
+      "tp": 41,
+      "fp": 0,
+      "fn": 1
+    },
+    "address": {
+      "precision": 0.9249,
+      "recall": 0.9563,
+      "f1": 0.9403,
+      "tp": 197,
+      "fp": 16,
+      "fn": 9
+    },
+    "ssn": {
+      "precision": 0.9917,
+      "recall": 1.0,
+      "f1": 0.9959,
+      "tp": 120,
+      "fp": 1,
+      "fn": 0
+    },
+    "dob": {
+      "precision": 0.9939,
+      "recall": 1.0,
+      "f1": 0.9969,
+      "tp": 163,
+      "fp": 1,
+      "fn": 0
+    },
+    "api_key": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 32,
+      "fp": 0,
+      "fn": 0
+    },
+    "LOC": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 13,
+      "fp": 0,
+      "fn": 0
+    },
+    "us_driver_license": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    },
+    "ip_address": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 36,
+      "fp": 0,
+      "fn": 0
+    },
+    "gender_indicator": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 22,
+      "fp": 0,
+      "fn": 0
+    },
+    "FAC": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "crypto": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    },
+    "us_bank_number": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "presidio_comparison": {
+    "presidio_questions_with_data": 1123,
+    "data_status": "partial",
+    "data_count": 1123,
+    "total_count": 1124,
+    "ss_overall": {
+      "precision": 0.9826,
+      "recall": 0.9917,
+      "f1": 0.9871
+    },
+    "presidio_overall": {
+      "precision": 0.855,
+      "recall": 0.9291,
+      "f1": 0.8905
+    },
+    "per_type": {
+      "FAC": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": null
+      },
+      "GPE": {
+        "ss": {
+          "precision": 0.9586,
+          "recall": 1.0,
+          "f1": 0.9788,
+          "tp": 347,
+          "fp": 15,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.8918,
+          "recall": 0.9971,
+          "f1": 0.9415,
+          "tp": 346,
+          "fp": 42,
+          "fn": 1
+        }
+      },
+      "LOC": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 13,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": null
+      },
+      "ORG": {
+        "ss": {
+          "precision": 0.9904,
+          "recall": 1.0,
+          "f1": 0.9952,
+          "tp": 206,
+          "fp": 2,
+          "fn": 0
+        },
+        "presidio": null
+      },
+      "PERSON": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 0.987,
+          "f1": 0.9934,
+          "tp": 530,
+          "fp": 0,
+          "fn": 7
+        },
+        "presidio": {
+          "precision": 0.9657,
+          "recall": 0.9441,
+          "f1": 0.9548,
+          "tp": 507,
+          "fp": 18,
+          "fn": 30
+        }
+      },
+      "address": {
+        "ss": {
+          "precision": 0.9249,
+          "recall": 0.9563,
+          "f1": 0.9403,
+          "tp": 197,
+          "fp": 16,
+          "fn": 9
+        },
+        "presidio": null
+      },
+      "api_key": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 32,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": null
+      },
+      "credit_card": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 0.9762,
+          "f1": 0.988,
+          "tp": 41,
+          "fp": 0,
+          "fn": 1
+        },
+        "presidio": {
+          "precision": 1.0,
+          "recall": 0.9762,
+          "f1": 0.988,
+          "tp": 41,
+          "fp": 0,
+          "fn": 1
+        }
+      },
+      "crypto": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 1.0,
+          "recall": 0.375,
+          "f1": 0.5455,
+          "tp": 3,
+          "fp": 0,
+          "fn": 5
+        }
+      },
+      "dob": {
+        "ss": {
+          "precision": 0.9939,
+          "recall": 1.0,
+          "f1": 0.9969,
+          "tp": 163,
+          "fp": 1,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.5078,
+          "recall": 1.0,
+          "f1": 0.6736,
+          "tp": 163,
+          "fp": 158,
+          "fn": 0
+        }
+      },
+      "email": {
+        "ss": {
+          "precision": 0.9958,
+          "recall": 1.0,
+          "f1": 0.9979,
+          "tp": 236,
+          "fp": 1,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.9958,
+          "recall": 1.0,
+          "f1": 0.9979,
+          "tp": 236,
+          "fp": 1,
+          "fn": 0
+        }
+      },
+      "gender_indicator": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 22,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": null
+      },
+      "ip_address": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 36,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.9722,
+          "recall": 0.9722,
+          "f1": 0.9722,
+          "tp": 35,
+          "fp": 1,
+          "fn": 1
+        }
+      },
+      "phone": {
+        "ss": {
+          "precision": 0.9861,
+          "recall": 0.9907,
+          "f1": 0.9884,
+          "tp": 213,
+          "fp": 3,
+          "fn": 2
+        },
+        "presidio": {
+          "precision": 0.8049,
+          "recall": 0.614,
+          "f1": 0.6966,
+          "tp": 132,
+          "fp": 32,
+          "fn": 83
+        }
+      },
+      "postal_code": {
+        "ss": {
+          "precision": 0.9872,
+          "recall": 1.0,
+          "f1": 0.9935,
+          "tp": 77,
+          "fp": 1,
+          "fn": 0
+        },
+        "presidio": null
+      },
+      "ssn": {
+        "ss": {
+          "precision": 0.9917,
+          "recall": 1.0,
+          "f1": 0.9959,
+          "tp": 120,
+          "fp": 1,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.9836,
+          "recall": 1.0,
+          "f1": 0.9917,
+          "tp": 120,
+          "fp": 2,
+          "fn": 0
+        }
+      },
+      "us_bank_number": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.6667,
+          "recall": 1.0,
+          "f1": 0.8,
+          "tp": 8,
+          "fp": 4,
+          "fn": 0
+        }
+      },
+      "us_driver_license": {
+        "ss": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "presidio": {
+          "precision": 0.35,
+          "recall": 0.875,
+          "f1": 0.5,
+          "tp": 7,
+          "fp": 13,
+          "fn": 1
+        }
+      }
+    },
+    "ss_only_types": {
+      "api_key": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 32,
+        "fp": 0,
+        "fn": 0
+      },
+      "address": {
+        "precision": 0.9249,
+        "recall": 0.9563,
+        "f1": 0.9403,
+        "tp": 197,
+        "fp": 16,
+        "fn": 9
+      },
+      "postal_code": {
+        "precision": 0.9872,
+        "recall": 1.0,
+        "f1": 0.9935,
+        "tp": 77,
+        "fp": 1,
+        "fn": 0
+      },
+      "gender_indicator": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 22,
+        "fp": 0,
+        "fn": 0
+      },
+      "ORG": {
+        "precision": 0.9904,
+        "recall": 1.0,
+        "f1": 0.9952,
+        "tp": 206,
+        "fp": 2,
+        "fn": 0
+      },
+      "FAC": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "presidio_only_counts": {
+      "ORGANIZATION": 298,
+      "NRP": 26,
+      "US_PASSPORT": 1,
+      "US_ITIN": 1,
+      "URL": 1
+    },
+    "approximate_note": "DATE_TIME/dob and LOCATION/GPE are approximate comparisons"
+  },
+  "bertscore_comparison": {
+    "total_questions": 1124,
+    "ss": {
+      "precision": 0.9474,
+      "recall": 0.9499,
+      "f1": 0.9485,
+      "data_count": 1123,
+      "data_status": "partial"
+    },
+    "presidio": {
+      "precision": 0.8096,
+      "recall": 0.8227,
+      "f1": 0.8159,
+      "data_count": 1123,
+      "data_status": "partial"
+    }
+  },
+  "ablation_study": {
+    "questions_with_data": 1060,
+    "total_questions": 1124,
+    "stage_entity_counts": {
+      "pattern_scan": 1134,
+      "entity_trace": 1077,
+      "context_guard": 37,
+      "total": 2248
+    },
+    "stage_necessity": {
+      "questions_needing_entity_trace": 721,
+      "questions_needing_context_guard": 22,
+      "pct_needing_entity_trace": 0.6802,
+      "pct_needing_context_guard": 0.0208
+    },
+    "configurations": {
+      "ps_only": {
+        "label": "PatternScan only",
+        "precision": 0.9806,
+        "recall": 0.4873,
+        "f1": 0.6511,
+        "tp": 1112,
+        "fp": 22,
+        "fn": 1170
+      },
+      "ps_et": {
+        "label": "PatternScan + EntityTrace",
+        "precision": 0.9819,
+        "recall": 0.9514,
+        "f1": 0.9664,
+        "tp": 2171,
+        "fp": 40,
+        "fn": 111
+      },
+      "ps_cg": {
+        "label": "PatternScan + ContextGuard",
+        "precision": 0.9812,
+        "recall": 0.5035,
+        "f1": 0.6655,
+        "tp": 1149,
+        "fp": 22,
+        "fn": 1133
+      },
+      "full": {
+        "label": "Full cascade (all three)",
+        "precision": 0.9822,
+        "recall": 0.9663,
+        "f1": 0.9742,
+        "tp": 2205,
+        "fp": 40,
+        "fn": 77
+      }
+    },
+    "per_type": {
+      "ps_only": {
+        "PERSON": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 537
+        },
+        "email": {
+          "precision": 0.9958,
+          "recall": 1.0,
+          "f1": 0.9979,
+          "tp": 236,
+          "fp": 1,
+          "fn": 0
+        },
+        "GPE": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 347
+        },
+        "phone": {
+          "precision": 0.9858,
+          "recall": 0.9721,
+          "f1": 0.9789,
+          "tp": 209,
+          "fp": 3,
+          "fn": 6
+        },
+        "ORG": {
+          "precision": 1.0,
+          "recall": 0.0485,
+          "f1": 0.0926,
+          "tp": 10,
+          "fp": 0,
+          "fn": 196
+        },
+        "postal_code": {
+          "precision": 0.9872,
+          "recall": 1.0,
+          "f1": 0.9935,
+          "tp": 77,
+          "fp": 1,
+          "fn": 0
+        },
+        "credit_card": {
+          "precision": 1.0,
+          "recall": 0.9524,
+          "f1": 0.9756,
+          "tp": 40,
+          "fp": 0,
+          "fn": 2
+        },
+        "address": {
+          "precision": 0.9074,
+          "recall": 0.7136,
+          "f1": 0.7989,
+          "tp": 147,
+          "fp": 15,
+          "fn": 59
+        },
+        "ssn": {
+          "precision": 0.9917,
+          "recall": 1.0,
+          "f1": 0.9959,
+          "tp": 120,
+          "fp": 1,
+          "fn": 0
+        },
+        "dob": {
+          "precision": 0.9939,
+          "recall": 0.9939,
+          "f1": 0.9939,
+          "tp": 162,
+          "fp": 1,
+          "fn": 1
+        },
+        "api_key": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 32,
+          "fp": 0,
+          "fn": 0
+        },
+        "LOC": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 13
+        },
+        "us_driver_license": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1": 0.8571,
+          "tp": 6,
+          "fp": 0,
+          "fn": 2
+        },
+        "ip_address": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 36,
+          "fp": 0,
+          "fn": 0
+        },
+        "gender_indicator": {
+          "precision": 1.0,
+          "recall": 0.9545,
+          "f1": 0.9767,
+          "tp": 21,
+          "fp": 0,
+          "fn": 1
+        },
+        "FAC": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 6
+        },
+        "crypto": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "us_bank_number": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "ps_et": {
+        "PERSON": {
+          "precision": 1.0,
+          "recall": 0.946,
+          "f1": 0.9722,
+          "tp": 508,
+          "fp": 0,
+          "fn": 29
+        },
+        "email": {
+          "precision": 0.9958,
+          "recall": 1.0,
+          "f1": 0.9979,
+          "tp": 236,
+          "fp": 1,
+          "fn": 0
+        },
+        "GPE": {
+          "precision": 0.9559,
+          "recall": 1.0,
+          "f1": 0.9775,
+          "tp": 347,
+          "fp": 16,
+          "fn": 0
+        },
+        "phone": {
+          "precision": 0.9858,
+          "recall": 0.9721,
+          "f1": 0.9789,
+          "tp": 209,
+          "fp": 3,
+          "fn": 6
+        },
+        "ORG": {
+          "precision": 0.9901,
+          "recall": 0.9709,
+          "f1": 0.9804,
+          "tp": 200,
+          "fp": 2,
+          "fn": 6
+        },
+        "postal_code": {
+          "precision": 0.9872,
+          "recall": 1.0,
+          "f1": 0.9935,
+          "tp": 77,
+          "fp": 1,
+          "fn": 0
+        },
+        "credit_card": {
+          "precision": 1.0,
+          "recall": 0.9524,
+          "f1": 0.9756,
+          "tp": 40,
+          "fp": 0,
+          "fn": 2
+        },
+        "address": {
+          "precision": 0.9074,
+          "recall": 0.7136,
+          "f1": 0.7989,
+          "tp": 147,
+          "fp": 15,
+          "fn": 59
+        },
+        "ssn": {
+          "precision": 0.9917,
+          "recall": 1.0,
+          "f1": 0.9959,
+          "tp": 120,
+          "fp": 1,
+          "fn": 0
+        },
+        "dob": {
+          "precision": 0.9939,
+          "recall": 0.9939,
+          "f1": 0.9939,
+          "tp": 162,
+          "fp": 1,
+          "fn": 1
+        },
+        "api_key": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 32,
+          "fp": 0,
+          "fn": 0
+        },
+        "LOC": {
+          "precision": 1.0,
+          "recall": 0.4615,
+          "f1": 0.6316,
+          "tp": 6,
+          "fp": 0,
+          "fn": 7
+        },
+        "us_driver_license": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "ip_address": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 36,
+          "fp": 0,
+          "fn": 0
+        },
+        "gender_indicator": {
+          "precision": 1.0,
+          "recall": 0.9545,
+          "f1": 0.9767,
+          "tp": 21,
+          "fp": 0,
+          "fn": 1
+        },
+        "FAC": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "crypto": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "us_bank_number": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "ps_cg": {
+        "PERSON": {
+          "precision": 1.0,
+          "recall": 0.041,
+          "f1": 0.0787,
+          "tp": 22,
+          "fp": 0,
+          "fn": 515
+        },
+        "email": {
+          "precision": 0.9958,
+          "recall": 1.0,
+          "f1": 0.9979,
+          "tp": 236,
+          "fp": 1,
+          "fn": 0
+        },
+        "GPE": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 347
+        },
+        "phone": {
+          "precision": 0.9858,
+          "recall": 0.9721,
+          "f1": 0.9789,
+          "tp": 209,
+          "fp": 3,
+          "fn": 6
+        },
+        "ORG": {
+          "precision": 1.0,
+          "recall": 0.0728,
+          "f1": 0.1357,
+          "tp": 15,
+          "fp": 0,
+          "fn": 191
+        },
+        "postal_code": {
+          "precision": 0.9872,
+          "recall": 1.0,
+          "f1": 0.9935,
+          "tp": 77,
+          "fp": 1,
+          "fn": 0
+        },
+        "credit_card": {
+          "precision": 1.0,
+          "recall": 0.9524,
+          "f1": 0.9756,
+          "tp": 40,
+          "fp": 0,
+          "fn": 2
+        },
+        "address": {
+          "precision": 0.9074,
+          "recall": 0.7136,
+          "f1": 0.7989,
+          "tp": 147,
+          "fp": 15,
+          "fn": 59
+        },
+        "ssn": {
+          "precision": 0.9917,
+          "recall": 1.0,
+          "f1": 0.9959,
+          "tp": 120,
+          "fp": 1,
+          "fn": 0
+        },
+        "dob": {
+          "precision": 0.9939,
+          "recall": 0.9939,
+          "f1": 0.9939,
+          "tp": 162,
+          "fp": 1,
+          "fn": 1
+        },
+        "api_key": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 32,
+          "fp": 0,
+          "fn": 0
+        },
+        "LOC": {
+          "precision": 1.0,
+          "recall": 0.7692,
+          "f1": 0.8696,
+          "tp": 10,
+          "fp": 0,
+          "fn": 3
+        },
+        "us_driver_license": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1": 0.8571,
+          "tp": 6,
+          "fp": 0,
+          "fn": 2
+        },
+        "ip_address": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 36,
+          "fp": 0,
+          "fn": 0
+        },
+        "gender_indicator": {
+          "precision": 1.0,
+          "recall": 0.9545,
+          "f1": 0.9767,
+          "tp": 21,
+          "fp": 0,
+          "fn": 1
+        },
+        "FAC": {
+          "precision": 1.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 6
+        },
+        "crypto": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "us_bank_number": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        }
+      },
+      "full": {
+        "PERSON": {
+          "precision": 1.0,
+          "recall": 0.987,
+          "f1": 0.9934,
+          "tp": 530,
+          "fp": 0,
+          "fn": 7
+        },
+        "email": {
+          "precision": 0.9958,
+          "recall": 1.0,
+          "f1": 0.9979,
+          "tp": 236,
+          "fp": 1,
+          "fn": 0
+        },
+        "GPE": {
+          "precision": 0.9559,
+          "recall": 1.0,
+          "f1": 0.9775,
+          "tp": 347,
+          "fp": 16,
+          "fn": 0
+        },
+        "phone": {
+          "precision": 0.9858,
+          "recall": 0.9721,
+          "f1": 0.9789,
+          "tp": 209,
+          "fp": 3,
+          "fn": 6
+        },
+        "ORG": {
+          "precision": 0.9903,
+          "recall": 0.9951,
+          "f1": 0.9927,
+          "tp": 205,
+          "fp": 2,
+          "fn": 1
+        },
+        "postal_code": {
+          "precision": 0.9872,
+          "recall": 1.0,
+          "f1": 0.9935,
+          "tp": 77,
+          "fp": 1,
+          "fn": 0
+        },
+        "credit_card": {
+          "precision": 1.0,
+          "recall": 0.9524,
+          "f1": 0.9756,
+          "tp": 40,
+          "fp": 0,
+          "fn": 2
+        },
+        "address": {
+          "precision": 0.9074,
+          "recall": 0.7136,
+          "f1": 0.7989,
+          "tp": 147,
+          "fp": 15,
+          "fn": 59
+        },
+        "ssn": {
+          "precision": 0.9917,
+          "recall": 1.0,
+          "f1": 0.9959,
+          "tp": 120,
+          "fp": 1,
+          "fn": 0
+        },
+        "dob": {
+          "precision": 0.9939,
+          "recall": 0.9939,
+          "f1": 0.9939,
+          "tp": 162,
+          "fp": 1,
+          "fn": 1
+        },
+        "api_key": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 32,
+          "fp": 0,
+          "fn": 0
+        },
+        "LOC": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 13,
+          "fp": 0,
+          "fn": 0
+        },
+        "us_driver_license": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "ip_address": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 36,
+          "fp": 0,
+          "fn": 0
+        },
+        "gender_indicator": {
+          "precision": 1.0,
+          "recall": 0.9545,
+          "f1": 0.9767,
+          "tp": 21,
+          "fp": 0,
+          "fn": 1
+        },
+        "FAC": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 6,
+          "fp": 0,
+          "fn": 0
+        },
+        "crypto": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        },
+        "us_bank_number": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 0
+        }
+      }
+    },
+    "entity_types_seen": [
+      "FAC",
+      "GPE",
+      "LOC",
+      "ORG",
+      "PERSON",
+      "address",
+      "api_key",
+      "credit_card",
+      "crypto",
+      "dob",
+      "email",
+      "gender_indicator",
+      "ip_address",
+      "phone",
+      "postal_code",
+      "ssn",
+      "us_bank_number",
+      "us_driver_license"
+    ]
+  }
+}

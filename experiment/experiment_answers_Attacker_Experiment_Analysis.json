@@ -1,0 +1,205 @@
+{
+  "source_file": "experiment_answers.json",
+  "total_questions": 100,
+  "ss": {
+    "questions_available": 100,
+    "total_targeted": 194,
+    "total_recovered": 0,
+    "total_recovered_excluding_address": 0,
+    "recovery_rate": 0.0,
+    "recovery_rate_excluding_address": 0.0,
+    "by_type": {
+      "PERSON": {
+        "targeted": 53,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "GPE": {
+        "targeted": 17,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "LOC": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "ORG": {
+        "targeted": 17,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "FAC": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "email": {
+        "targeted": 21,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "phone": {
+        "targeted": 14,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "ssn": {
+        "targeted": 12,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "address": {
+        "targeted": 11,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "dob": {
+        "targeted": 14,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "credit_card": {
+        "targeted": 4,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "ip_address": {
+        "targeted": 3,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "api_key": {
+        "targeted": 5,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "postal_code": {
+        "targeted": 7,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "gender_indicator": {
+        "targeted": 2,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "crypto": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "us_bank_number": {
+        "targeted": 2,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "us_driver_license": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      }
+    }
+  },
+  "presidio": {
+    "questions_available": 100,
+    "total_targeted": 196,
+    "total_recovered": 3,
+    "total_recovered_excluding_address": 3,
+    "recovery_rate": 0.0153,
+    "recovery_rate_excluding_address": 0.0162,
+    "by_type": {
+      "PERSON": {
+        "targeted": 53,
+        "recovered": 1,
+        "rate": 0.0189
+      },
+      "GPE": {
+        "targeted": 17,
+        "recovered": 2,
+        "rate": 0.1176
+      },
+      "LOC": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "ORG": {
+        "targeted": 17,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "FAC": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "email": {
+        "targeted": 21,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "phone": {
+        "targeted": 14,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "ssn": {
+        "targeted": 12,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "address": {
+        "targeted": 11,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "dob": {
+        "targeted": 14,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "credit_card": {
+        "targeted": 4,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "ip_address": {
+        "targeted": 3,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "api_key": {
+        "targeted": 5,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "postal_code": {
+        "targeted": 7,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "gender_indicator": {
+        "targeted": 2,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "crypto": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "us_bank_number": {
+        "targeted": 2,
+        "recovered": 0,
+        "rate": 0.0
+      },
+      "us_driver_license": {
+        "targeted": 1,
+        "recovered": 0,
+        "rate": 0.0
+      }
+    }
+  },
+  "address_note": "Address values in service queries receive house-number fuzzing rather than full replacement. Exact recovery is still impossible but proximity-based recovery is theoretically possible. Address results are tracked separately and excluded from the primary recovery rate."
+}
