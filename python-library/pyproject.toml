@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "surrogateshield"
+version = "0.1.0"
+description = "Privacy-preserving PII proxy — mask real data before it reaches any LLM"
+requires-python = ">=3.9"
+dependencies = [
+    "faker>=24.0.0",
+    "cryptography>=42.0.0",
+    "rapidfuzz>=3.6.0",
+    "requests>=2.31.0",
+    "spacy>=3.7.0",
+    "transformers>=4.40.0",
+    "torch>=2.0.0",
+]
+
+[project.optional-dependencies]
+display = ["rich>=13.7.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["surrogateshield*"]
