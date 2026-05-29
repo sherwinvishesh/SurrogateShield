@@ -186,8 +186,16 @@ def mask(text: str) -> str:
             _display.show_mask_results([], {})
         return text
 
-    # Generate surrogates: {original_text → surrogate_text}
-    surrogate_map = session.get_mimic().generate_all(confirmed)
+    # Reuse surrogates for originals already seen in this session
+    existing_shadow = session.get_shadow_map().get_all()  # {surrogate: original}
+    original_to_surrogate = {v: k for k, v in existing_shadow.items()}
+
+    already_mapped = [e for e in confirmed if e.text in original_to_surrogate]
+    new_entities   = [e for e in confirmed if e.text not in original_to_surrogate]
+
+    surrogate_map = {e.text: original_to_surrogate[e.text] for e in already_mapped}
+    if new_entities:
+        surrogate_map.update(session.get_mimic().generate_all(new_entities))
 
     # Apply substitutions (longest match first to avoid substring collisions)
     sanitized = text
