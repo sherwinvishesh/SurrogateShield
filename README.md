@@ -465,8 +465,8 @@ Place a question file in `experiment/<name>.json`:
 
 ```json
 [
-  { "input": "My name is Revanth and my SSN is 544-87-2944. What are Wyoming's tax benefits?" },
-  { "input": "My email is revanth@gmail.com and phone is 480-555-1234. Draft a resignation letter." }
+  { "input": "My name is Sherwin and my SSN is 544-87-2944. What are Wyoming's tax benefits?" },
+  { "input": "My email is sjathann@asu.edu and phone is 480-555-1234. Draft a resignation letter." }
 ]
 ```
 
@@ -502,9 +502,9 @@ Pair your question file with an answer-key file at `experiment/<name>_key.json`:
 ```json
 [
   {
-    "Question": "My name is Revanth and my SSN is 544-87-2944...",
+    "Question": "My name is Sherwin and my SSN is 544-87-2944...",
     "Answer-Key": {
-      "name": "Revanth",
+      "name": "Sherwin",
       "ssn": "544-87-2944"
     }
   }
