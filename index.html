@@ -992,6 +992,9 @@
     table.data { min-width: 540px; }
     table.data th, table.data td { padding: 12px 14px; font-size: 13px; }
     table.data .mono, table.data td.mono { font-size: 12px; }
+    /* Compact reference tables wrap instead of scrolling */
+    .table-wrap.compact table.data { min-width: 0; }
+    .table-wrap.compact table.data td { white-space: normal; word-break: break-word; }
 
     .callout { padding: 16px 18px; font-size: 13.5px; }
 
@@ -1440,9 +1443,9 @@
     <div class="nav-links">
       <a href="#how-it-works">Pipeline</a>
       <a href="#detection">Detection</a>
-      <a href="#pii-types">PII Types</a>
       <a href="#presidio">vs Presidio</a>
       <a href="#evaluation">Evaluation</a>
+      <a href="#library">Library</a>
       <a href="#install">Install</a>
     </div>
     <a href="#install" class="nav-cta">$ git clone</a>
@@ -1469,7 +1472,8 @@
         <span>v / <strong>1.4.0</strong></span>
         <span>build / <strong>2026.05</strong></span>
         <span>python / <strong>≥ 3.9</strong></span>
-        <span>license / <strong>Apache 2.0</strong></span>
+        <span>pip / <strong style="color: var(--neon);">surrogateshield</strong></span>
+        <span>license / <strong>Apache-2.0</strong></span>
         <span>status / <strong style="color: var(--neon);">● operational</strong></span>
       </div>
     </div>
@@ -1479,13 +1483,13 @@
       your device.<span class="accent"> Surrogates do.</span>
     </h1>
     <p class="hero-sub">
-      SurrogateShield intercepts every message before it reaches an LLM API, replaces personal information with realistic fake values, sends the sanitised payload, and restores your originals in the response. All cryptographic operations run locally.
+      SurrogateShield intercepts every message before it reaches an LLM API, replaces personal information with realistic fake values, sends the sanitised payload, and restores your originals in the response. All cryptographic operations run locally. Ships as both an interactive dashboard and a self-contained <code>pip install surrogateshield</code> library.
     </p>
 
     <div class="hero-ctas">
       <a href="#install" class="btn btn-primary">Install in 30 seconds <span class="arrow">→</span></a>
+      <a href="#library" class="btn">Use the library</a>
       <a href="#how-it-works" class="btn">See the pipeline</a>
-      <a href="#evaluation" class="btn">Read the evaluation</a>
     </div>
 
     <div class="stat-strip">
@@ -1543,7 +1547,7 @@
         <div class="demo-lane" data-lane="user">
           <div class="lane-marker">USER ▸ on device</div>
           <div class="demo-message" id="demoUserMsg">
-            Hi, I'm <span class="tok tok-person" data-orig="Revanth" data-surr="Sarah Mitchell" data-type="PERSON">Revanth</span>. My email is <span class="tok tok-email" data-orig="revanth@asu.edu" data-surr="jdoe@example.net" data-type="email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="85f7e0f3e4ebf1edc5e4f6f0abe0e1f0">[email&#160;protected]</a></span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
+            Hi, I'm <span class="tok tok-person" data-orig="Revanth" data-surr="Sarah Mitchell" data-type="PERSON">Revanth</span>. My email is <span class="tok tok-email" data-orig="revanth@asu.edu" data-surr="jdoe@example.net" data-type="email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="196b7c6f78776d7159786a6c377c7d6c">[email&#160;protected]</a></span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
           </div>
         </div>
 
@@ -1590,9 +1594,9 @@
             </div>
             <div class="sa-row pending" data-type="email">
               <span class="sa-type">email</span>
-              <span class="sa-orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="11637467707f6579517062643f747564">[email&#160;protected]</a></span>
+              <span class="sa-orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abd9ceddcac5dfc3ebcad8de85cecfde">[email&#160;protected]</a></span>
               <span class="sa-arrow">↔</span>
-              <span class="sa-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="93f9f7fcf6d3f6ebf2fee3fff6bdfdf6e7">[email&#160;protected]</a></span>
+              <span class="sa-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f298969d97b2978a939f829e97dc9c9786">[email&#160;protected]</a></span>
             </div>
             <div class="sa-row pending" data-type="ssn">
               <span class="sa-type">ssn</span>
@@ -1881,7 +1885,7 @@
         <tbody>
           <tr><td class="mono">street address</td><td class="mono">99 Cathedral Close · 456 Innovation Plaza</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">ssn</td><td class="mono">544-87-2944</td><td class="mono" style="color: var(--dim);">format</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">email</td><td class="mono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="275254425567425f464a574b420944484a">[email&#160;protected]</a></td><td class="mono" style="color: var(--dim);">RFC structure</td><td><span class="pill regex">regex</span></td></tr>
+          <tr><td class="mono">email</td><td class="mono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f481879186b4918c9599849891da979b99">[email&#160;protected]</a></td><td class="mono" style="color: var(--dim);">RFC structure</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">phone_us</td><td class="mono">+1-480-555-1234</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">phone_uk</td><td class="mono">+44 7911 123456</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">phone_intl</td><td class="mono">+49 8234 927461</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
@@ -1923,14 +1927,14 @@
     <div class="surrogate-grid">
       <div class="surrogate-card">
         <div class="role"><span class="tag-orig">●</span> ORIGINAL · user input</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Revanth Anumolu</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4d3f283b2c2339250d2a202c2421632e2220">[email&#160;protected]</a></span> or <span class="pii-orig">+1-480-555-1234</span>.
+        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Revanth Anumolu</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abd9ceddcac5dfc3ebccc6cac2c785c8c4c6">[email&#160;protected]</a></span> or <span class="pii-orig">+1-480-555-1234</span>.
 
 Can you draft a resignation letter to my employer <span class="pii-orig">Northstar Robotics</span>?</div>
       </div>
 
       <div class="surrogate-card">
         <div class="role"><span class="tag-surr">●</span> SANITISED · sent to LLM</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span> and I live at <span class="pii-surr">789 Crescent Row, Springfield, IL 62704</span>. Reach me at <span class="pii-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dbb1bfb4be9bbea3bab6abb7bef5b5beaf">[email&#160;protected]</a></span> or <span class="pii-surr">+1-217-555-0142</span>.
+        <div class="surrogate-body">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span> and I live at <span class="pii-surr">789 Crescent Row, Springfield, IL 62704</span>. Reach me at <span class="pii-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="147e707b7154716c75796478713a7a7160">[email&#160;protected]</a></span> or <span class="pii-surr">+1-217-555-0142</span>.
 
 Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon Dynamics</span>?</div>
       </div>
@@ -1959,9 +1963,9 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
       </div>
       <div class="mapping-row">
         <span class="type">email</span>
-        <span class="orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d6a4b3a0b7b8a2be96b1bbb7bfbaf8b5b9bb">[email&#160;protected]</a></span>
+        <span class="orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d3a1b6a5b2bda7bb93b4beb2babffdb0bcbe">[email&#160;protected]</a></span>
         <span class="arrow">↔</span>
-        <span class="surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="85efe1eae0c5e0fde4e8f5e9e0abebe0f1">[email&#160;protected]</a></span>
+        <span class="surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0e646a616b4e6b766f637e626b20606b7a">[email&#160;protected]</a></span>
       </div>
       <div class="mapping-row">
         <span class="type">phone_us</span>
@@ -1983,7 +1987,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <thead><tr><th style="width: 220px;">Entity type</th><th>Generated surrogate looks like</th></tr></thead>
         <tbody>
           <tr><td class="mono">PERSON</td><td class="mono"><span class="pii-surr">Sarah Mitchell</span></td></tr>
-          <tr><td class="mono">email</td><td class="mono"><span class="pii-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5f353b303a1f3a273e322f333a71313a2b">[email&#160;protected]</a></span></td></tr>
+          <tr><td class="mono">email</td><td class="mono"><span class="pii-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b7ddd3d8d2f7d2cfd6dac7dbd299d9d2c3">[email&#160;protected]</a></span></td></tr>
           <tr><td class="mono">ssn</td><td class="mono"><span class="pii-surr">XXX-XX-XXXX</span> &nbsp;<span style="color: var(--dim);">— valid format</span></td></tr>
           <tr><td class="mono">phone_us</td><td class="mono"><span class="pii-surr">+1-###-###-####</span></td></tr>
           <tr><td class="mono">address</td><td class="mono"><span class="pii-surr">789 Crescent Row, Springfield, IL</span></td></tr>
@@ -2429,7 +2433,16 @@ Display to user</pre>
 │   └── <span class="path">rag.py</span>               <span class="comment"># RAGStore — Chroma + sentence-transformers</span>
 │
 ├── <span class="dir">experiment/</span>              <span class="comment"># Batch test files</span>
-├── <span class="dir">tests/</span>                   <span class="comment"># test1–test6 — no API key needed</span>
+├── <span class="dir">tests/</span>                   <span class="comment"># test1–test7 — no API key needed</span>
+│
+├── <span class="dir">python-library/</span>          <span class="comment"># Standalone pip package — surrogateshield</span>
+│   ├── <span class="path">pyproject.toml</span>       <span class="comment"># Package metadata + dependencies</span>
+│   ├── <span class="path">README.md</span>            <span class="comment"># Full library API reference</span>
+│   └── <span class="dir">surrogateshield/</span>     <span class="comment"># Self-contained — zero imports from main app</span>
+│       ├── <span class="path">__init__.py</span>      <span class="comment"># Public API: config · scan · mask · unmask · flush</span>
+│       ├── <span class="path">_response_parser.py</span> <span class="comment"># Anthropic / OpenAI / Gemini / plain string</span>
+│       └── <span class="dir">core/</span>            <span class="comment"># detection · generation · storage · reconstruction</span>
+│
 └── <span class="dir">conversations/</span>           <span class="comment"># Runtime — .json (surrogate text) + .shadowmap</span></pre>
     </div>
   </div>
@@ -2472,6 +2485,10 @@ Display to user</pre>
 
 <span class="c"># Launch</span>
 <span class="prompt">$ </span>./run.sh</pre>
+    </div>
+
+    <div class="callout" style="margin-top: 28px;">
+      <strong>Just want the pipeline in your own app?</strong> Skip the clone — <code>pip install surrogateshield</code> gives you the full detection and masking engine as a five-function library with no dashboard dependency. See <a href="#library" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Library</a>.
     </div>
 
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Supported providers</h3>
@@ -2531,6 +2548,292 @@ Display to user</pre>
   </div>
 </section>
 
+<!-- ============== PYTHON LIBRARY ============== -->
+<section id="library">
+  <div class="container">
+    <div class="section-num">13 / LIBRARY</div>
+    <div class="eyebrow">Standalone package</div>
+    <h2 class="section-title">The whole pipeline, in <em>pip install surrogateshield</em>.</h2>
+    <p class="section-lede">
+      No dashboard, no CLI — just the core detection and masking pipeline as a clean Python API. The package is self-contained: it imports nothing from the main application and carries its own copies of every detection, generation, storage, and reconstruction module. The public surface is five functions and a single import line.
+    </p>
+
+    <div class="code-block" style="margin-top: 48px;">
+      <div class="code-header"><span>terminal · bash</span><span>install</span></div>
+<pre class="code-body"><span class="c"># Core package — spaCy model installs automatically</span>
+<span class="prompt">$ </span>pip install surrogateshield
+
+<span class="c"># Optional: Rich colour tables for detected PII / surrogates</span>
+<span class="prompt">$ </span>pip install <span class="s">"surrogateshield[display]"</span></pre>
+    </div>
+
+    <div class="callout">
+      <strong>Zero manual model steps.</strong> Both the spaCy NER model (<code>en_core_web_lg</code>) and the ContextGuard transformer (<code>dslim/distilbert-NER</code>, ~250 MB) install / download automatically — spaCy with the package, distilbert on the first <code>mask()</code> call, cached thereafter.
+    </div>
+
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Public API — five functions</h3>
+    <div class="table-wrap" style="margin-top: 20px;">
+      <table class="data">
+        <thead><tr><th style="width: 230px;">Function</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td class="mono" style="color: var(--neon);">shield.config(**kwargs)</td><td style="color: var(--muted);">Set thresholds, storage mode, <code>pii_off</code> list, service-query toggle, and display options</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.scan(text)</td><td style="color: var(--muted);">Detect PII and return <code>{value: type}</code> — no substitution, no shadow-map update (alias: <code>shield.pii_finder</code>)</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.mask(text)</td><td style="color: var(--muted);">Detect all PII, replace with surrogates, store the mapping — returns the sanitised string</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.unmask(response)</td><td style="color: var(--muted);">Restore originals in an LLM response — accepts any provider object or a plain string</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.flush()</td><td style="color: var(--muted);">Clear the session shadow map and generate a new session ID</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Quick start — a full round-trip</h3>
+    <div class="code-block" style="margin-top: 20px;">
+      <div class="code-header"><span>python · claude</span><span>mask ▸ call ▸ unmask ▸ flush</span></div>
+<pre class="code-body"><span class="k">import</span> anthropic
+<span class="k">import</span> surrogateshield <span class="k">as</span> shield
+
+client = anthropic.Anthropic()
+shield.config(detailed_view=<span class="p">False</span>)   <span class="c"># silent in production</span>
+
+text = (
+    <span class="s">"Hi, I'm Sarah Mitchell. My email is <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9be8fae9faf3b5f6f2eff8f3fef7f7dbfcf6faf2f7b5f8f4f6">[email&#160;protected]</a>, "</span>
+    <span class="s">"my SSN is 123-45-6789, and I was born on 04/12/1990."</span>
+)
+
+<span class="c"># Detect every PII field, swap in realistic fakes, store the mapping</span>
+sanitized = shield.<span class="k">mask</span>(text)
+<span class="c"># → "Hi, I'm Rachel Torres. My email is <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9ce8f3eeeef9efeefdfff4f9f0dce5fdf4f3f3b2fff3f1">[email&#160;protected]</a>,</span>
+<span class="c">#    my SSN is 876-32-1045, and I was born on 09/27/1983."</span>
+
+response = client.messages.create(
+    model=<span class="s">"claude-sonnet-4-6"</span>, max_tokens=<span class="v">1024</span>,
+    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: sanitized}],
+)
+
+<span class="c"># unmask() takes the native SDK object directly — restores real values</span>
+<span class="k">print</span>(shield.<span class="k">unmask</span>(response))   <span class="c"># contains "Sarah Mitchell", real SSN, …</span>
+shield.<span class="k">flush</span>()                      <span class="c"># end the session</span></pre>
+    </div>
+    <p style="margin-top: 14px; color: var(--muted); font-size: 13.5px;">The model never processes a single real value — yet the answer your users see contains their own data. Same flow works with OpenAI, Gemini, and local / Ollama models; <code>unmask()</code> auto-detects the response format.</p>
+
+    <div class="split">
+      <div class="feature">
+        <div class="num">INSPECT</div>
+        <h3>scan() — detect without masking</h3>
+        <p>Runs the full cascade and returns a <code>{value: type}</code> dict. Never modifies the text or the session — safe to call read-only.</p>
+        <ul>
+          <li>Returns every entity regardless of <code>pii_off</code></li>
+          <li><code>pii_finder</code> alias for data-pipeline readability</li>
+          <li>Pre-warm models with <code>shield.scan("")</code> at startup</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <div class="num">SELECTIVE</div>
+        <h3>pii_off — detect but keep</h3>
+        <p>Pass a list of types or aliases to detect-but-not-replace — useful when a location app needs real city names but must still protect identities.</p>
+        <ul>
+          <li><code>shield.config(pii_off=["location", "org"])</code></li>
+          <li>Aliases: <code>phone</code> · <code>name</code> · <code>location</code> · <code>bank</code> · <code>crypto</code> …</li>
+          <li>Raw type strings (<code>"email"</code>, <code>"ssn"</code>) accepted too</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <div class="num">PERSISTENT</div>
+        <h3>Encrypted disk shadow map</h3>
+        <p>Default is in-memory. Point <code>pii_mem</code> at a directory and the session map persists across processes, AES-256-GCM encrypted — for web servers and multi-worker deployments.</p>
+        <ul>
+          <li><code>shield.config(pii_mem="/var/app/shadowmaps")</code></li>
+          <li>Per-session 32-byte key, <code>0o600</code> permissions</li>
+          <li><code>flush()</code> deletes the <code>.shadowmap</code> + <code>.key</code> files</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <div class="num">PORTABLE</div>
+        <h3>Any provider, any object</h3>
+        <p><code>unmask()</code> tries Anthropic, OpenAI, and Gemini response formats automatically before falling back to <code>str(response)</code> — so plain strings from local models work too.</p>
+        <ul>
+          <li>Anthropic <code>Message</code> · OpenAI <code>ChatCompletion</code> · Gemini response</li>
+          <li>Multi-turn: session map survives across turns</li>
+          <li>Same 20-type cascade as the full application</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Multi-turn -->
+    <h3 style="margin-top: 72px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Multi-turn conversations</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">Keep two histories: one in surrogates for the API, one with real values for display. The session shadow map stays alive across turns, so a surrogate minted in turn 1 still resolves in turn 5 — the model never sees a real value in <em>any</em> turn.</p>
+    <div class="code-block" style="margin-top: 20px;">
+      <div class="code-header"><span>python · openai</span><span>two histories, one session</span></div>
+<pre class="code-body"><span class="k">from</span> openai <span class="k">import</span> OpenAI
+<span class="k">import</span> surrogateshield <span class="k">as</span> shield
+
+client = OpenAI()
+api_history, display_history = [], []   <span class="c"># surrogates vs real values</span>
+
+<span class="k">def</span> <span class="p">chat</span>(user_input):
+    sanitized = shield.<span class="k">mask</span>(user_input)
+    api_history.append({<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: sanitized})
+    display_history.append({<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: user_input})
+
+    response = client.chat.completions.create(
+        model=<span class="s">"gpt-4o-mini"</span>, messages=api_history,
+    )
+    raw = response.choices[<span class="v">0</span>].message.content   <span class="c"># surrogate text</span>
+    restored = shield.<span class="k">unmask</span>(response)            <span class="c"># real values</span>
+
+    api_history.append({<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: raw})
+    display_history.append({<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: restored})
+    <span class="k">return</span> restored
+
+chat(<span class="s">"My name is John Doe and I live at 42 Baker Street, London."</span>)
+<span class="k">print</span>(chat(<span class="s">"What was the address I mentioned earlier?"</span>))
+<span class="c"># → "42 Baker Street, London" restored from turn 1's shadow map</span>
+shield.<span class="k">flush</span>()</pre>
+    </div>
+
+    <!-- Provider snippets -->
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">One pattern, every provider</h3>
+    <div class="code-block" style="margin-top: 20px;">
+      <div class="code-header"><span>python</span><span>gemini · ollama / local</span></div>
+<pre class="code-body"><span class="c"># Google Gemini — unmask() reads response.text automatically</span>
+model = genai.GenerativeModel(<span class="s">"gemini-1.5-flash"</span>)
+sanitized = shield.<span class="k">mask</span>(<span class="s">"My card is 4532015112830366, IP 192.168.1.100."</span>)
+<span class="k">print</span>(shield.<span class="k">unmask</span>(model.generate_content(sanitized)))
+shield.<span class="k">flush</span>()
+
+<span class="c"># Local / Ollama — unmask() also accepts a plain string</span>
+sanitized = shield.<span class="k">mask</span>(<span class="s">"My phone is +44 7911 123456, postcode SW1A 1AA."</span>)
+raw_reply = ask_ollama(sanitized)              <span class="c"># your own HTTP call</span>
+<span class="k">print</span>(shield.<span class="k">unmask</span>(raw_reply))
+shield.<span class="k">flush</span>()</pre>
+    </div>
+
+    <!-- Reconstruction passes -->
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">unmask() — three reconstruction passes</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">Each pass only runs on surrogates the previous one did not resolve, so partial matches never corrupt unrelated text.</p>
+    <div class="table-wrap" style="margin-top: 20px;">
+      <table class="data">
+        <thead><tr><th style="width: 80px;">Pass</th><th style="width: 200px;">Method</th><th>Handles</th></tr></thead>
+        <tbody>
+          <tr><td class="mono" style="color: var(--neon);">1</td><td class="mono">exact replacement</td><td style="color: var(--muted);">Surrogate appears verbatim in the response — the vast majority of cases</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">2</td><td class="mono">component matching</td><td style="color: var(--muted);">Multi-word surrogate used partially (model wrote "Rachel" from "Rachel Torres") — scoped to unresolved surrogates only</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">3</td><td class="mono">fuzzy · rapidfuzz</td><td style="color: var(--muted);"><code>partial_ratio ≥ fuzzy_threshold</code> (default 85) — reformatted casing, added punctuation, minor edits</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- config full reference -->
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">config() — full parameter reference</h3>
+    <div class="table-wrap" style="margin-top: 20px;">
+      <table class="data">
+        <thead><tr><th style="width: 250px;">Parameter</th><th style="width: 130px;">Default</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">detailed_view</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Print Rich tables after each call; set <code>False</code> for silent / production operation</td></tr>
+          <tr><td class="mono">pii_mem</td><td class="mono" style="color: var(--text);">"temp"</td><td style="color: var(--muted);"><code>"temp"</code> = in-memory; a directory path = AES-256-GCM disk persistence (must exist)</td></tr>
+          <tr><td class="mono">pii_off</td><td class="mono" style="color: var(--text);">None</td><td style="color: var(--muted);">Types detected but not replaced — aliases or raw type strings</td></tr>
+          <tr><td class="mono">service</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Minimal address fuzzing for location queries instead of full replacement</td></tr>
+          <tr><td class="mono">spacy_model</td><td class="mono" style="color: var(--text);">en_core_web_lg</td><td style="color: var(--muted);">EntityTrace NER model — swap for <code>en_core_web_sm</code> for speed over accuracy</td></tr>
+          <tr><td class="mono">context_guard_enabled</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Run the distilbert second pass — set <code>False</code> for faster, spaCy-only detection</td></tr>
+          <tr><td class="mono">entity_trace_high_threshold</td><td class="mono" style="color: var(--neon);">0.85</td><td style="color: var(--muted);">spaCy score at/above which an entity is confirmed immediately</td></tr>
+          <tr><td class="mono">entity_trace_low_threshold</td><td class="mono" style="color: var(--amber);">0.60</td><td style="color: var(--muted);">spaCy score at/above which an entity is forwarded to ContextGuard</td></tr>
+          <tr><td class="mono">context_guard_threshold</td><td class="mono" style="color: var(--neon);">0.70</td><td style="color: var(--muted);">distilbert score required to promote a borderline / new entity</td></tr>
+          <tr><td class="mono">entity_trace_fallback_threshold</td><td class="mono" style="color: var(--text);">0.65</td><td style="color: var(--muted);">Used only when ContextGuard is disabled, to promote borderline entities</td></tr>
+          <tr><td class="mono">fuzzy_threshold</td><td class="mono" style="color: var(--text);">85</td><td style="color: var(--muted);">rapidfuzz <code>partial_ratio</code> (0–100) for pass 3 of <code>unmask()</code> — below 70 not recommended</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- pii_off aliases + service query -->
+    <div class="split">
+      <div class="feature" style="padding: 0;">
+        <div style="padding: 22px 24px 0;">
+          <div class="num">PII_OFF ALIASES</div>
+          <h3>Short names, expanded</h3>
+        </div>
+        <div class="table-wrap compact" style="margin: 16px 0 0; border-left: none; border-right: none; border-bottom: none;">
+          <table class="data">
+            <tbody>
+              <tr><td class="mono" style="color: var(--neon);">phone</td><td class="mono" style="color: var(--muted);">phone_us · phone_uk · phone_intl</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">postal_code</td><td class="mono" style="color: var(--muted);">zip_us · postcode_uk</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">name / names</td><td class="mono" style="color: var(--muted);">PERSON</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">location</td><td class="mono" style="color: var(--muted);">GPE · LOC</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">org · facility</td><td class="mono" style="color: var(--muted);">ORG · FAC</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">bank · license · crypto</td><td class="mono" style="color: var(--muted);">us_bank_number · us_driver_license · crypto</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="num">SERVICE QUERIES</div>
+        <h3>Proportional address protection</h3>
+        <p>A location question like <em>"find a coffee shop near 99 Market Street"</em> would be useless with a random fake address. With <code>service=True</code> (default) the library shifts the house number by <strong>±1</strong> (~20 m) and preserves the street, city, and state verbatim.</p>
+        <ul>
+          <li>House number fuzzed, everything else kept</li>
+          <li>Sensitive topics (medical, legal, shelter, DV, rehab) force full replacement regardless</li>
+          <li><code>shield.config(service=False)</code> to always fully anonymise</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Quasi-identifier -->
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Quasi-identifier combination scoring <span style="color: var(--muted); font-family: var(--font-mono); font-size: 12px; margin-left: 12px;">Sweeney k-anonymity</span></h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">When a combination is detected, <em>all</em> constituent fields are added to the replace set — not just the obviously-sensitive ones.</p>
+    <div class="table-wrap" style="margin-top: 20px;">
+      <table class="data">
+        <thead><tr><th>Combination</th><th style="width: 110px;">Risk</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">ZIP + DOB + Gender</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">87% of US population uniquely identified — Sweeney 2000</td></tr>
+          <tr><td class="mono">Postcode + DOB</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">UK ICO guidance — sufficient for re-identification</td></tr>
+          <tr><td class="mono">Name + SSN</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">Enables direct identity theft</td></tr>
+          <tr><td class="mono">Name + DOB</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">Standard identity-verification combination worldwide</td></tr>
+          <tr><td class="mono">Phone + Name</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">Directly identifies an individual</td></tr>
+          <tr><td class="mono">IP Address + Name</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">Enables device-level identification</td></tr>
+          <tr><td class="mono">Name + Employer + City</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Uniquely identifies in most cities</td></tr>
+          <tr><td class="mono">Email + Location</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Narrows to a specific named individual</td></tr>
+          <tr><td class="mono">Phone + Location</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Narrows to a local individual</td></tr>
+          <tr><td class="mono">DOB + Location + Employer</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Highly specific triple</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dependencies + troubleshooting -->
+    <div class="split">
+      <div class="feature" style="padding: 0;">
+        <div style="padding: 22px 24px 0;">
+          <div class="num">DEPENDENCIES</div>
+          <h3>Installed automatically</h3>
+        </div>
+        <div class="table-wrap compact" style="margin: 16px 0 0; border-left: none; border-right: none; border-bottom: none;">
+          <table class="data">
+            <tbody>
+              <tr><td class="mono" style="color: var(--neon);">faker</td><td style="color: var(--muted);">Realistic fake values per type</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">cryptography</td><td style="color: var(--muted);">AES-256-GCM for the disk shadow map</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">rapidfuzz</td><td style="color: var(--muted);">Fuzzy reconstruction pass</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">spacy + en-core-web-lg</td><td style="color: var(--muted);">Stage 2 NER (model bundled)</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">transformers + torch</td><td style="color: var(--muted);">Stage 3 ContextGuard</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">requests</td><td style="color: var(--muted);">Optional Nominatim address verify</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="num">TROUBLESHOOTING</div>
+        <h3>Common adjustments</h3>
+        <ul>
+          <li><strong>Slow first call?</strong> Models load lazily — pre-warm with <code>shield.scan("")</code> at startup</li>
+          <li><strong>Need it faster?</strong> <code>config(context_guard_enabled=False)</code> skips distilbert (spaCy-only, lower recall)</li>
+          <li><strong>Surrogate not restored?</strong> Lower <code>fuzzy_threshold</code> toward 75 to recover heavily reformatted values</li>
+          <li><strong>Noisy stdout?</strong> <code>config(detailed_view=False)</code> silences all tables</li>
+          <li>distilbert (~250 MB) downloads once to <code>~/.cache/huggingface/</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: 28px;">
+      <strong>134 checks, no API key.</strong> <code>tests/test7.py</code> covers the standalone package end to end — library entities, ShadowMap memory + persistent modes, response parser, <code>pii_off</code> filtering, threshold wiring, ResolvePass, and all five public functions.
+    </div>
+  </div>
+</section>
+
 <!-- ============== FOOTER ============== -->
 <footer>
   <div class="container">
@@ -2556,12 +2859,13 @@ Display to user</pre>
       <div>
         <h4>Build</h4>
         <a href="#install">Install</a>
+        <a href="#library">Python library</a>
         <a href="#cli">CLI reference</a>
         <a href="#architecture">Architecture</a>
       </div>
     </div>
     <div class="colophon" style="width: 100%;">
-      <span>SurrogateShield · v1.4.0 · Apache 2.0 license</span>
+      <span>SurrogateShield · v1.4.0 · Apache-2.0 license</span>
       <span>built with python · spaCy · transformers · faker · cryptography · chromadb</span>
     </div>
   </div>
