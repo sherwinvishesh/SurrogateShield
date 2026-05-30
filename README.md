@@ -742,7 +742,7 @@ SurrogateShield is also available as a standalone pip package — no dashboard, 
 pip install surrogateshield
 ```
 
-Both the spaCy model (`en_core_web_lg`) and the ContextGuard transformer model (`dslim/distilbert-NER`) install automatically — no separate download step needed.
+Both the spaCy model (`en_core_web_lg`) and the ContextGuard transformer model (`dslim/distilbert-NER`) download automatically on first use — no separate download step needed. Each model is cached locally after the first run.
 
 
 ### Quick start

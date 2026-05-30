@@ -26,17 +26,28 @@ def _get_nlp(model_name: str = "en_core_web_lg"):
         return _nlp[model_name]
     try:
         import spacy
-        model = spacy.load(model_name)
+        try:
+            model = spacy.load(model_name)
+        except OSError:
+            # Model not installed — download it on first use (~750 MB, cached after)
+            logger.info(
+                f"[EntityTrace] spaCy model '{model_name}' not found. "
+                "Downloading — this happens once and is cached locally."
+            )
+            from spacy.cli import download as _spacy_download
+            _spacy_download(model_name)
+            model = spacy.load(model_name)
         _nlp[model_name] = model
         logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
-    except OSError:
+    except ImportError:
         logger.error(
-            f"[EntityTrace] spaCy model '{model_name}' not found. "
-            f"Run: python -m spacy download {model_name}"
+            "[EntityTrace] spaCy is not installed. Run: pip install spacy"
         )
         _nlp[model_name] = None
     except Exception as exc:
-        logger.error(f"[EntityTrace] Failed to load spaCy: {exc}")
+        logger.error(
+            f"[EntityTrace] Failed to load or download spaCy model '{model_name}': {exc}"
+        )
         _nlp[model_name] = None
     return _nlp[model_name]
 

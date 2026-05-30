@@ -46,7 +46,7 @@ Install the package from PyPI:
 pip install surrogateshield
 ```
 
-The spaCy language model (`en_core_web_lg`) installs automatically as part of `pip install surrogateshield` — no manual step needed.
+The spaCy language model (`en_core_web_lg`) downloads automatically on the first call to `mask()` or `scan()` — a one-time ~750 MB download that is cached locally. No manual step needed.
 
 If you want the Rich terminal output (colour tables showing detected PII and surrogates), install the optional display dependency:
 
@@ -68,7 +68,7 @@ The core package installs the following automatically:
 | `rapidfuzz` | Fuzzy string matching in the reconstruction pass |
 | `requests` | Address verification via OpenStreetMap Nominatim |
 | `spacy` | Named-entity recognition (Stage 2) |
-| `en-core-web-lg` | spaCy English NER model, bundled — installs automatically |
+| `en-core-web-lg` | spaCy English NER model — downloaded automatically on first use (~750 MB, cached) |
 | `transformers` | HuggingFace NER pipeline (Stage 3 ContextGuard) |
 | `torch` | Required backend for the transformers pipeline |
 
