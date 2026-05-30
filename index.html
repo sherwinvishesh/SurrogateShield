@@ -1547,7 +1547,7 @@
         <div class="demo-lane" data-lane="user">
           <div class="lane-marker">USER ▸ on device</div>
           <div class="demo-message" id="demoUserMsg">
-            Hi, I'm <span class="tok tok-person" data-orig="Revanth" data-surr="Sarah Mitchell" data-type="PERSON">Revanth</span>. My email is <span class="tok tok-email" data-orig="revanth@asu.edu" data-surr="jdoe@example.net" data-type="email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="196b7c6f78776d7159786a6c377c7d6c">[email&#160;protected]</a></span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
+            Hi, I'm <span class="tok tok-person" data-orig="Revanth" data-surr="Sarah Mitchell" data-type="PERSON">Revanth</span>. My email is <span class="tok tok-email" data-orig="revanth@asu.edu" data-surr="jdoe@example.net" data-type="email">revanth@asu.edu</span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
           </div>
         </div>
 
@@ -1594,9 +1594,9 @@
             </div>
             <div class="sa-row pending" data-type="email">
               <span class="sa-type">email</span>
-              <span class="sa-orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abd9ceddcac5dfc3ebcad8de85cecfde">[email&#160;protected]</a></span>
+              <span class="sa-orig">revanth@asu.edu</span>
               <span class="sa-arrow">↔</span>
-              <span class="sa-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f298969d97b2978a939f829e97dc9c9786">[email&#160;protected]</a></span>
+              <span class="sa-surr">jdoe@example.net</span>
             </div>
             <div class="sa-row pending" data-type="ssn">
               <span class="sa-type">ssn</span>
@@ -1885,7 +1885,7 @@
         <tbody>
           <tr><td class="mono">street address</td><td class="mono">99 Cathedral Close · 456 Innovation Plaza</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">ssn</td><td class="mono">544-87-2944</td><td class="mono" style="color: var(--dim);">format</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">email</td><td class="mono"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f481879186b4918c9599849891da979b99">[email&#160;protected]</a></td><td class="mono" style="color: var(--dim);">RFC structure</td><td><span class="pill regex">regex</span></td></tr>
+          <tr><td class="mono">email</td><td class="mono">user@example.com</td><td class="mono" style="color: var(--dim);">RFC structure</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">phone_us</td><td class="mono">+1-480-555-1234</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">phone_uk</td><td class="mono">+44 7911 123456</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">phone_intl</td><td class="mono">+49 8234 927461</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
@@ -1927,14 +1927,14 @@
     <div class="surrogate-grid">
       <div class="surrogate-card">
         <div class="role"><span class="tag-orig">●</span> ORIGINAL · user input</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Revanth Anumolu</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abd9ceddcac5dfc3ebccc6cac2c785c8c4c6">[email&#160;protected]</a></span> or <span class="pii-orig">+1-480-555-1234</span>.
+        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Revanth Anumolu</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig">revanth@gmail.com</span> or <span class="pii-orig">+1-480-555-1234</span>.
 
 Can you draft a resignation letter to my employer <span class="pii-orig">Northstar Robotics</span>?</div>
       </div>
 
       <div class="surrogate-card">
         <div class="role"><span class="tag-surr">●</span> SANITISED · sent to LLM</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span> and I live at <span class="pii-surr">789 Crescent Row, Springfield, IL 62704</span>. Reach me at <span class="pii-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="147e707b7154716c75796478713a7a7160">[email&#160;protected]</a></span> or <span class="pii-surr">+1-217-555-0142</span>.
+        <div class="surrogate-body">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span> and I live at <span class="pii-surr">789 Crescent Row, Springfield, IL 62704</span>. Reach me at <span class="pii-surr">jdoe@example.net</span> or <span class="pii-surr">+1-217-555-0142</span>.
 
 Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon Dynamics</span>?</div>
       </div>
@@ -1963,9 +1963,9 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
       </div>
       <div class="mapping-row">
         <span class="type">email</span>
-        <span class="orig"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d3a1b6a5b2bda7bb93b4beb2babffdb0bcbe">[email&#160;protected]</a></span>
+        <span class="orig">revanth@gmail.com</span>
         <span class="arrow">↔</span>
-        <span class="surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0e646a616b4e6b766f637e626b20606b7a">[email&#160;protected]</a></span>
+        <span class="surr">jdoe@example.net</span>
       </div>
       <div class="mapping-row">
         <span class="type">phone_us</span>
@@ -1987,7 +1987,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <thead><tr><th style="width: 220px;">Entity type</th><th>Generated surrogate looks like</th></tr></thead>
         <tbody>
           <tr><td class="mono">PERSON</td><td class="mono"><span class="pii-surr">Sarah Mitchell</span></td></tr>
-          <tr><td class="mono">email</td><td class="mono"><span class="pii-surr"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b7ddd3d8d2f7d2cfd6dac7dbd299d9d2c3">[email&#160;protected]</a></span></td></tr>
+          <tr><td class="mono">email</td><td class="mono"><span class="pii-surr">jdoe@example.net</span></td></tr>
           <tr><td class="mono">ssn</td><td class="mono"><span class="pii-surr">XXX-XX-XXXX</span> &nbsp;<span style="color: var(--dim);">— valid format</span></td></tr>
           <tr><td class="mono">phone_us</td><td class="mono"><span class="pii-surr">+1-###-###-####</span></td></tr>
           <tr><td class="mono">address</td><td class="mono"><span class="pii-surr">789 Crescent Row, Springfield, IL</span></td></tr>
