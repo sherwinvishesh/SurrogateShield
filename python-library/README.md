@@ -46,11 +46,7 @@ Install the package from PyPI:
 pip install surrogateshield
 ```
 
-Then download the spaCy language model. This is a one-time step and the model is cached locally afterwards:
-
-```bash
-python -m spacy download en_core_web_lg
-```
+The spaCy language model (`en_core_web_lg`) installs automatically as part of `pip install surrogateshield` — no manual step needed.
 
 If you want the Rich terminal output (colour tables showing detected PII and surrogates), install the optional display dependency:
 
@@ -72,6 +68,7 @@ The core package installs the following automatically:
 | `rapidfuzz` | Fuzzy string matching in the reconstruction pass |
 | `requests` | Address verification via OpenStreetMap Nominatim |
 | `spacy` | Named-entity recognition (Stage 2) |
+| `en-core-web-lg` | spaCy English NER model, bundled — installs automatically |
 | `transformers` | HuggingFace NER pipeline (Stage 3 ContextGuard) |
 | `torch` | Required backend for the transformers pipeline |
 
@@ -470,8 +467,7 @@ ss.config(
 
     spacy_model="en_core_web_lg",
     # The spaCy model used by EntityTrace for named-entity recognition.
-    # Must be downloaded before first use:
-    #     python -m spacy download en_core_web_lg
+    # en_core_web_lg installs automatically with pip install surrogateshield.
     # You can substitute a smaller model such as en_core_web_sm for faster
     # inference at the cost of NER accuracy.
 
@@ -531,14 +527,6 @@ Resets the session: clears the shadow map (and deletes disk files if in persiste
 
 
 ## Troubleshooting
-
-**spaCy model not found**
-
-```
-OSError: [E050] Can't find model 'en_core_web_lg'.
-```
-
-Run `python -m spacy download en_core_web_lg` in the same Python environment where surrogateshield is installed.
 
 **ContextGuard model download on first run**
 
