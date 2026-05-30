@@ -724,7 +724,7 @@ echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
     <div class="ba-grid">
       <div class="ba-box">
         <div class="ba-label orig">Original</div>
-        <div class="ba-text">Hi, I'm <span class="orig-val">Revanth</span>. My email is <span class="orig-val">revanth@asu.edu</span> and my SSN is <span class="orig-val">544-87-2944</span>.</div>
+        <div class="ba-text">Hi, I'm <span class="orig-val">Sherwin</span>. My email is <span class="orig-val">sjathann@asu.edu</span> and my SSN is <span class="orig-val">544-87-2944</span>.</div>
       </div>
       <div class="ba-box">
         <div class="ba-label surr">Sent to LLM</div>
@@ -928,8 +928,8 @@ python main.py add-doc path/to/document.txt</code></pre>
     <h3>Input format</h3>
     <p>Create a JSON file in the <code>experiment/</code> directory:</p>
     <pre><code>[
-  { "input": "My name is Revanth and my SSN is 544-87-2944. What are Wyoming's tax benefits?" },
-  { "input": "My email is revanth@gmail.com and phone is 480-555-1234. Draft a resignation letter." }
+  { "input": "My name is Sherwin and my SSN is 544-87-2944. What are Wyoming's tax benefits?" },
+  { "input": "My email is sjathann@asu.edu and phone is 480-555-1234. Draft a resignation letter." }
 ]</code></pre>
 
     <h3>Running</h3>
@@ -981,9 +981,9 @@ python main.py add-doc path/to/document.txt</code></pre>
     <h3>Ground-truth key format</h3>
     <pre><code>[
   {
-    "Question": "My name is Revanth and my SSN is 544-87-2944...",
+    "Question": "My name is Sherwin and my SSN is 544-87-2944...",
     "Answer-Key": {
-      "name": "Revanth",
+      "name": "Sherwin",
       "ssn": "544-87-2944"
     }
   }
@@ -1144,7 +1144,7 @@ python main.py add-doc path/to/document.txt</code></pre>
 544-87-2944  →  317-42-8806
 
 # Email
-revanth@asu.edu  →  jdoe@example.net
+sjathann@asu.edu  →  jdoe@example.net
 
 # Phone US
 +1-480-555-1234  →  +1-602-555-9871
@@ -1163,7 +1163,7 @@ My DL number is B7654321  →  My DL number is F2390481</code></pre>
 
     <h3>Named entities (EntityTrace + ContextGuard)</h3>
     <pre><code># Person
-Revanth  →  Sarah Mitchell
+Sherwin  →  Sarah Mitchell
 
 # City / GPE
 Phoenix, AZ  →  Springfield, IL (in sensitive contexts)

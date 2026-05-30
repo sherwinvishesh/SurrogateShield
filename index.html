@@ -1547,7 +1547,7 @@
         <div class="demo-lane" data-lane="user">
           <div class="lane-marker">USER ▸ on device</div>
           <div class="demo-message" id="demoUserMsg">
-            Hi, I'm <span class="tok tok-person" data-orig="Revanth" data-surr="Sarah Mitchell" data-type="PERSON">Revanth</span>. My email is <span class="tok tok-email" data-orig="revanth@asu.edu" data-surr="jdoe@example.net" data-type="email">revanth@asu.edu</span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
+            Hi, I'm <span class="tok tok-person" data-orig="Sherwin" data-surr="Sarah Mitchell" data-type="PERSON">Sherwin</span>. My email is <span class="tok tok-email" data-orig="sjathann@asu.edu" data-surr="jdoe@example.net" data-type="email">sjathann@asu.edu</span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
           </div>
         </div>
 
@@ -1588,13 +1588,13 @@
           <div class="sa-rows" id="shadowRows">
             <div class="sa-row pending" data-type="PERSON">
               <span class="sa-type">PERSON</span>
-              <span class="sa-orig">Revanth</span>
+              <span class="sa-orig">Sherwin</span>
               <span class="sa-arrow">↔</span>
               <span class="sa-surr">Sarah Mitchell</span>
             </div>
             <div class="sa-row pending" data-type="email">
               <span class="sa-type">email</span>
-              <span class="sa-orig">revanth@asu.edu</span>
+              <span class="sa-orig">sjathann@asu.edu</span>
               <span class="sa-arrow">↔</span>
               <span class="sa-surr">jdoe@example.net</span>
             </div>
@@ -1899,7 +1899,7 @@
           <tr><td class="mono">crypto <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono">BTC P2PKH / P2SH / Bech32 · ETH 0x…</td><td class="mono" style="color: var(--dim);">charset</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">us_bank_number <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono">021000021 · 122105155</td><td class="mono">ABA 9-digit checksum</td><td><span class="pill regex">regex</span></td></tr>
           <tr><td class="mono">us_driver_license <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono">B7654321 · F123456789012</td><td class="mono">context-gated</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">PERSON</td><td class="mono">Revanth Mitchell</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
+          <tr><td class="mono">PERSON</td><td class="mono">Sherwin Jathanna</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
           <tr><td class="mono">GPE / LOC</td><td class="mono">geo-political / general location</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
           <tr><td class="mono">ORG</td><td class="mono">organisation name</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
           <tr><td class="mono">FAC</td><td class="mono">facility name</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
@@ -1927,7 +1927,7 @@
     <div class="surrogate-grid">
       <div class="surrogate-card">
         <div class="role"><span class="tag-orig">●</span> ORIGINAL · user input</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Revanth Anumolu</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig">revanth@gmail.com</span> or <span class="pii-orig">+1-480-555-1234</span>.
+        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Sherwin Jathanna</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig">sjathann@asu.edu</span> or <span class="pii-orig">+1-480-555-1234</span>.
 
 Can you draft a resignation letter to my employer <span class="pii-orig">Northstar Robotics</span>?</div>
       </div>
@@ -1945,7 +1945,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="mapping-table">
       <div class="mapping-row">
         <span class="type">PERSON</span>
-        <span class="orig">Revanth Anumolu</span>
+        <span class="orig">Sherwin Jathanna</span>
         <span class="arrow">↔</span>
         <span class="surr">Sarah Mitchell</span>
       </div>
@@ -1963,7 +1963,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
       </div>
       <div class="mapping-row">
         <span class="type">email</span>
-        <span class="orig">revanth@gmail.com</span>
+        <span class="orig">sjathann@asu.edu</span>
         <span class="arrow">↔</span>
         <span class="surr">jdoe@example.net</span>
       </div>
@@ -2929,7 +2929,7 @@ shield.<span class="k">flush</span>()</pre>
         wire("toLLM", false);
         wire("fromLLM", true);
         const llm = document.getElementById("demoLLMRecv");
-        llm.innerHTML = 'Got it, <span class="tok swapped" data-orig="Revanth" data-surr="Sarah Mitchell" data-type="PERSON">Sarah Mitchell</span> — I’ve noted your SSN <span class="tok swapped" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">317-42-8806</span> and will reach you at <span class="tok swapped" data-orig="revanth@asu.edu" data-surr="jdoe@example.net" data-type="email">jdoe@example.net</span>.';
+        llm.innerHTML = `Got it, <span class="tok swapped" data-orig="Sherwin" data-surr="Sarah Mitchell" data-type="PERSON">Sarah Mitchell</span> &mdash; I’ve noted your SSN <span class="tok swapped" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">317-42-8806</span> and will reach you at <span class="tok swapped" data-orig="sjathann@asu.edu" data-surr="jdoe@example.net" data-type="email">jdoe@example.net</span>.`;
         setUserOut(null);
       }
     },
@@ -2941,12 +2941,12 @@ shield.<span class="k">flush</span>()</pre>
       apply() {
         wire("fromLLM", false);
         const out = document.getElementById("demoUserOut");
-        out.innerHTML = 'Got it, <span class="tok resolving" data-type="PERSON">Sarah Mitchell</span> — I’ve noted your SSN <span class="tok resolving" data-type="ssn">317-42-8806</span> and will reach you at <span class="tok resolving" data-type="email">jdoe@example.net</span>.';
+        out.innerHTML = `Got it, <span class="tok resolving" data-type="PERSON">Sarah Mitchell</span> &mdash; I’ve noted your SSN <span class="tok resolving" data-type="ssn">317-42-8806</span> and will reach you at <span class="tok resolving" data-type="email">jdoe@example.net</span>.`;
         const toks = qsa("#demoUserOut .tok");
         const subs = [
-          { from: "Sarah Mitchell", to: "Revanth" },
+          { from: "Sarah Mitchell", to: "Sherwin" },
           { from: "317-42-8806", to: "544-87-2944" },
-          { from: "jdoe@example.net", to: "revanth@asu.edu" }
+          { from: "jdoe@example.net", to: "sjathann@asu.edu" }
         ];
         toks.forEach((t, i) => {
           setTimeout(() => {
