@@ -6,13 +6,13 @@ fake surrogates, and restores the real values in the LLM response.
 
 Public API
 ──────────
-    import SurrogateShield as ss
+    import surrogateshield as shield
 
-    ss.config(pii_off=["phone", "location"])
-    sanitized = ss.mask(user_text)
+    shield.config(pii_off=["phone", "location"])
+    sanitized = shield.mask(user_text)
     response  = llm.chat(sanitized)
-    restored  = ss.unmask(response)
-    ss.flush()
+    restored  = shield.unmask(response)
+    shield.flush()
 """
 
 from __future__ import annotations
