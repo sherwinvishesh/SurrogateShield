@@ -24,6 +24,18 @@
 ╰───────────────────────────────────────────────────────╯
 ```
 
+<p align="center">
+  <a href="https://pypi.org/project/surrogateshield/"><img src="https://img.shields.io/pypi/v/surrogateshield?label=PyPI&color=blue" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/surrogateshield/"><img src="https://img.shields.io/pypi/pyversions/surrogateshield?label=Python" alt="Python versions"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="License"></a>
+  <img src="https://img.shields.io/badge/spaCy-3.7%2B-09A3D5?logo=spacy&logoColor=white" alt="spaCy">
+  <img src="https://img.shields.io/badge/encryption-AES--256--GCM-blueviolet" alt="AES-256-GCM">
+  <img src="https://img.shields.io/badge/paper-under%20review-orange" alt="Paper under review">
+  <br/>
+  <a href="https://sherwinvishesh.github.io/SurrogateShield/"><img src="https://img.shields.io/badge/website-SurrogateShield-1f6feb?logo=githubpages&logoColor=white" alt="Website"></a>
+  <a href="https://sherwinvishesh.github.io/SurrogateShield/docs.html"><img src="https://img.shields.io/badge/docs-read%20now-0d9488?logo=readthedocs&logoColor=white" alt="Documentation"></a>
+</p>
+
 
 SurrogateShield intercepts your messages before they reach any LLM API, detects all personally identifiable information (PII), replaces it with realistic fake surrogates, sends the sanitised message, and restores your real values in the response. All cryptographic operations run locally. Nothing sensitive is ever transmitted.
 
