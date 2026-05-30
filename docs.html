@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SurrogateShield — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #07090b;
+    --bg-elev: #0c1014;
+    --bg-elev2: #11161b;
+    --border: #1c242b;
+    --border-strong: #2a343d;
+    --text: #e6eaef;
+    --muted: #8a939d;
+    --dim: #4f5862;
+    --neon: #4ff0d4;
+    --neon-dim: #2bb6a0;
+    --neon-glow: rgba(79, 240, 212, 0.18);
+    --lime: #c7f53d;
+    --coral: #ff7a6b;
+    --amber: #ffc857;
+    --font-sans: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --sidebar-width: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: var(--neon); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: var(--font-mono); font-size: 0.875em; color: var(--neon); background: rgba(79,240,212,0.07); padding: 2px 6px; border: 1px solid rgba(79,240,212,0.14); }
+  pre { background: var(--bg-elev); border: 1px solid var(--border); padding: 18px 20px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; margin: 16px 0; }
+  pre code { background: none; border: none; padding: 0; color: var(--text); font-size: 1em; }
+
+  /* ---- Top nav ---- */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(7,9,11,0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+  }
+  .topnav .brand { font-weight: 600; font-size: 15px; color: var(--text); }
+  .topnav .brand span { color: var(--neon); }
+  .topnav .sep { color: var(--dim); }
+  .topnav .page-title { color: var(--muted); font-size: 14px; }
+  .topnav .back-link { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--muted); border: 1px solid var(--border-strong); padding: 5px 12px; }
+  .topnav .back-link:hover { color: var(--neon); border-color: var(--neon); text-decoration: none; }
+
+  /* ---- Layout ---- */
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: var(--bg-elev);
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    padding: 20px 0 40px;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); }
+
+  .sidebar-section {
+    margin-bottom: 6px;
+  }
+  .sidebar-heading {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 10px 20px 4px;
+    font-weight: 500;
+  }
+  .sidebar a {
+    display: block;
+    padding: 6px 20px;
+    font-size: 13.5px;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    transition: all 0.12s;
+    line-height: 1.4;
+  }
+  .sidebar a:hover { color: var(--text); background: rgba(79,240,212,0.04); }
+  .sidebar a.active { color: var(--neon); border-left-color: var(--neon); background: rgba(79,240,212,0.05); }
+  .sidebar a.sub { padding-left: 34px; font-size: 12.5px; }
+
+  /* ---- Main content ---- */
+  .content {
+    flex: 1;
+    min-width: 0;
+    padding: 40px 48px 80px;
+    max-width: 900px;
+  }
+
+  /* ---- Headings ---- */
+  .doc-section { padding-top: 16px; scroll-margin-top: 72px; }
+  h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.025em; margin-bottom: 12px; }
+  h1 .accent { color: var(--neon); }
+  h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; margin-top: 48px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 16px; font-weight: 600; margin-top: 28px; margin-bottom: 10px; color: var(--text); }
+  h4 { font-size: 14px; font-weight: 600; margin-top: 20px; margin-bottom: 8px; color: var(--muted); font-family: var(--font-mono); letter-spacing: 0.05em; text-transform: uppercase; }
+  p { margin-bottom: 14px; color: var(--muted); line-height: 1.7; }
+  p strong { color: var(--text); font-weight: 500; }
+
+  /* ---- Hero description ---- */
+  .doc-intro { margin-bottom: 32px; padding: 20px 24px; border: 1px solid var(--border); border-left: 3px solid var(--neon); background: var(--bg-elev); }
+  .doc-intro p { margin: 0; font-size: 15px; }
+
+  /* ---- Step blocks ---- */
+  .steps { margin: 20px 0; display: flex; flex-direction: column; gap: 0; }
+  .step { display: grid; grid-template-columns: 36px 1fr; gap: 0 16px; }
+  .step-num {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2px;
+  }
+  .step-num .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--neon);
+    color: var(--neon);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-num .line {
+    flex: 1;
+    width: 1px;
+    background: var(--border);
+    margin: 4px 0;
+    min-height: 16px;
+  }
+  .step-body { padding-bottom: 20px; }
+  .step-body h3 { margin-top: 4px; margin-bottom: 6px; font-size: 15px; }
+  .step:last-child .step-num .line { display: none; }
+
+  /* ---- Tables ---- */
+  .table-wrap { margin: 16px 0; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { text-align: left; padding: 10px 14px; background: var(--bg-elev2); border: 1px solid var(--border); color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+  tbody td { padding: 10px 14px; border: 1px solid var(--border); vertical-align: top; color: var(--muted); }
+  tbody td:first-child { color: var(--text); font-family: var(--font-mono); font-size: 12.5px; }
+  tbody tr:hover td { background: rgba(79,240,212,0.02); }
+
+  /* ---- Callouts ---- */
+  .callout { margin: 18px 0; padding: 14px 18px; border: 1px solid var(--border); border-left: 3px solid var(--amber); background: var(--bg-elev); font-size: 14px; line-height: 1.6; color: var(--muted); }
+  .callout strong { color: var(--text); }
+  .callout.tip { border-left-color: var(--neon); }
+  .callout.warn { border-left-color: var(--coral); }
+
+  /* ---- Key badges ---- */
+  .key { display: inline-block; font-family: var(--font-mono); font-size: 12px; padding: 2px 8px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--neon); margin: 1px; }
+
+  /* ---- Tag pills ---- */
+  .tag { display: inline-block; font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; border: 1px solid var(--border-strong); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 2px; }
+  .tag.regex { color: var(--neon); border-color: rgba(79,240,212,0.4); }
+  .tag.ner { color: var(--amber); border-color: rgba(255,200,87,0.35); }
+  .tag.new { color: var(--lime); border-color: rgba(199,245,61,0.4); }
+
+  /* ---- Function signature ---- */
+  .fn-sig { font-family: var(--font-mono); font-size: 13.5px; color: var(--text); background: var(--bg-elev); border: 1px solid var(--border); padding: 12px 16px; margin: 14px 0 8px; }
+  .fn-sig .fn-name { color: var(--neon); }
+  .fn-sig .fn-param { color: var(--lime); }
+  .fn-desc { font-size: 13.5px; color: var(--muted); margin: 0 0 16px; line-height: 1.6; }
+
+  /* ---- Pipeline flow box ---- */
+  .pipeline-box { margin: 20px 0; border: 1px solid var(--border); background: var(--bg-elev); }
+  .pipeline-stage { padding: 14px 20px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 180px 1fr; gap: 16px; align-items: start; }
+  .pipeline-stage:last-child { border-bottom: none; }
+  .stage-name { font-family: var(--font-mono); font-size: 13px; color: var(--neon); font-weight: 500; }
+  .stage-model { font-size: 11px; color: var(--dim); margin-top: 2px; }
+  .stage-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+
+  /* ---- Before/after example ---- */
+  .ba-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .ba-box { border: 1px solid var(--border); background: var(--bg-elev); padding: 16px; }
+  .ba-label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 10px; }
+  .ba-label.orig { color: var(--coral); }
+  .ba-label.surr { color: var(--neon); }
+  .ba-text { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; color: var(--text); }
+  .orig-val { color: var(--coral); }
+  .surr-val { color: var(--neon); }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 24px 20px 60px; }
+    .ba-grid { grid-template-columns: 1fr; }
+    .pipeline-stage { grid-template-columns: 1fr; }
+  }
+
+  /* ---- Section separator ---- */
+  .section-sep { height: 1px; background: var(--border); margin: 48px 0; }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<nav class="topnav">
+  <a href="index.html" class="brand">Surrogate<span>Shield</span></a>
+  <span class="sep">/</span>
+  <span class="page-title">Documentation</span>
+  <a href="index.html" class="back-link">← Back to home</a>
+</nav>
+
+<div class="layout">
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar" id="sidebar">
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">Getting Started</div>
+    <a href="#overview">Overview</a>
+    <a href="#installation">Installation</a>
+    <a href="#quick-start">Quick Start</a>
+    <a href="#env-vars">Environment Variables</a>
+    <a href="#first-run">First Run</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">How It Works</div>
+    <a href="#pipeline">Pipeline Overview</a>
+    <a href="#service-query" class="sub">ServiceQueryDetector</a>
+    <a href="#sentinellayer" class="sub">SentinelLayer</a>
+    <a href="#patternscan" class="sub">PatternScan</a>
+    <a href="#entitytrace" class="sub">EntityTrace</a>
+    <a href="#contextguard" class="sub">ContextGuard</a>
+    <a href="#postprocessing" class="sub">Post-processing Passes</a>
+    <a href="#mimicgen" class="sub">MimicGen</a>
+    <a href="#shadowmap" class="sub">ShadowMap</a>
+    <a href="#resolvepass" class="sub">ResolvePass</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">Dashboard & CLI</div>
+    <a href="#cli">CLI Commands</a>
+    <a href="#keyboard-shortcuts">Keyboard Shortcuts</a>
+    <a href="#chat-mode">Chat Mode</a>
+    <a href="#pii-finder">PII Finder</a>
+    <a href="#rag-mode">RAG Mode</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">Evaluation</div>
+    <a href="#json-test">JSON Batch Test</a>
+    <a href="#evaluation-mode">Evaluation Mode</a>
+    <a href="#attacker-experiment">Attacker Experiment</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">PII Types</div>
+    <a href="#pii-types">All Detected Types</a>
+    <a href="#pii-examples">Examples</a>
+    <a href="#quasi-identifier">Quasi-Identifier Risk</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">Configuration</div>
+    <a href="#runtime-settings">Runtime Settings</a>
+    <a href="#config-constants">Config Constants</a>
+    <a href="#providers">LLM Providers</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">Python Library</div>
+    <a href="#library-install">Installation</a>
+    <a href="#library-quickstart">Quick Start</a>
+    <a href="#library-api">Public API</a>
+    <a href="#library-scan">scan()</a>
+    <a href="#library-pii-off">pii_off</a>
+    <a href="#library-persistent">Persistent ShadowMap</a>
+    <a href="#library-providers">Provider Examples</a>
+    <a href="#library-config">Config Parameters</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-heading">Reference</div>
+    <a href="#security-design">Security Design</a>
+    <a href="#privacy-guarantees">Privacy Guarantees</a>
+    <a href="#project-structure">Project Structure</a>
+    <a href="#running-tests">Running Tests</a>
+    <a href="#troubleshooting">Troubleshooting</a>
+  </div>
+
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="content">
+
+  <!-- ============================================================ -->
+  <!-- OVERVIEW -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="overview">
+    <h1>SurrogateShield <span class="accent">Documentation</span></h1>
+    <div class="doc-intro">
+      <p>SurrogateShield is a privacy-preserving proxy for LLMs. It intercepts every message before it reaches an LLM API, replaces personally identifiable information (PII) with realistic fake surrogates, sends the sanitised payload, and restores your originals in the response. All cryptographic operations run locally. Nothing sensitive is ever transmitted.</p>
+    </div>
+
+    <p>SurrogateShield ships in two forms:</p>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li><strong>Interactive dashboard</strong> — a full terminal UI with chat, PII Finder, batch evaluation, and the Attacker Experiment</li>
+      <li><strong><code>pip install surrogateshield</code></strong> — a standalone Python library with a five-function API you can embed in any application</li>
+    </ul>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- INSTALLATION -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="installation">
+    <h2>Installation</h2>
+
+    <h3>Requirements</h3>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Python 3.9 or newer</li>
+      <li>pip</li>
+      <li>A virtual environment (strongly recommended — see below)</li>
+    </ul>
+
+    <div class="callout warn">
+      <strong>Important:</strong> Always install into a virtual environment. Installing into the system or base conda Python is the most common cause of "package not found" errors at runtime.
+    </div>
+
+    <h3>Step-by-step</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"><div class="num">1</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Clone the repository</h3>
+          <pre><code>git clone https://github.com/sherwinvishesh/SurrogateShield.git
+cd SurrogateShield</code></pre>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"><div class="num">2</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Create and activate a virtual environment</h3>
+          <pre><code># macOS / Linux
+python -m venv .venv
+source .venv/bin/activate
+
+# Windows
+python -m venv .venv
+.venv\Scripts\activate</code></pre>
+          <p>You should see <code>(.venv)</code> in your prompt after activation.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"><div class="num">3</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Install Python dependencies</h3>
+          <pre><code>pip install -r requirements.txt</code></pre>
+          <p>This installs everything: the Anthropic client, spaCy, Faker, cryptography, sentence-transformers, and more. First install can take 2–5 minutes.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"><div class="num">4</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Download the spaCy model</h3>
+          <pre><code>python -m spacy download en_core_web_lg</code></pre>
+          <p>Required by EntityTrace (stage 2 NER detection) and optionally by the Presidio comparison panel. This is a one-time download (~700 MB).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"><div class="num">5</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>ContextGuard model (automatic)</h3>
+          <p>The <code>dslim/distilbert-NER</code> model (~250 MB) is downloaded automatically from HuggingFace Hub on first run. No manual command needed. Subsequent runs are instant — it is cached locally.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Full dependency list</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Package</th><th>Version</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>anthropic</td><td>≥0.25.0</td><td>Claude API client</td></tr>
+          <tr><td>python-dotenv</td><td>≥1.0.0</td><td>.env file loading</td></tr>
+          <tr><td>spacy</td><td>≥3.7.0</td><td>EntityTrace NER + Presidio NLP backend</td></tr>
+          <tr><td>faker</td><td>≥24.0.0</td><td>Surrogate generation</td></tr>
+          <tr><td>cryptography</td><td>≥42.0.0</td><td>AES-256-GCM, HKDF for ShadowMap</td></tr>
+          <tr><td>rapidfuzz</td><td>≥3.6.0</td><td>Fuzzy reconstruction matching in ResolvePass</td></tr>
+          <tr><td>typer</td><td>≥0.12.0</td><td>CLI framework</td></tr>
+          <tr><td>rich</td><td>≥13.7.0</td><td>Terminal UI</td></tr>
+          <tr><td>chromadb</td><td>≥0.4.0</td><td>RAG vector store (in-process)</td></tr>
+          <tr><td>sentence-transformers</td><td>≥2.7.0</td><td>RAG embeddings (all-MiniLM-L6-v2)</td></tr>
+          <tr><td>transformers</td><td>≥4.40.0</td><td>ContextGuard (distilbert-NER)</td></tr>
+          <tr><td>torch</td><td>≥2.0.0</td><td>ContextGuard inference</td></tr>
+          <tr><td>requests</td><td>≥2.31.0</td><td>Address verification via Nominatim</td></tr>
+          <tr><td>bert-score</td><td>≥0.3.13</td><td>Utility preservation scoring (optional)</td></tr>
+          <tr><td>ollama</td><td>≥0.1.8</td><td>Local LLM support (optional)</td></tr>
+          <tr><td>presidio-analyzer</td><td>≥2.2.0</td><td>Presidio comparison panel (optional)</td></tr>
+          <tr><td>presidio-anonymizer</td><td>≥2.2.0</td><td>Presidio anonymization (optional)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- ENV VARS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="env-vars">
+    <h2>Environment Variables</h2>
+    <p>Create a <code>.env</code> file in the project root. You only need the key for the provider you intend to use:</p>
+    <pre><code># Required for Claude (default provider)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Required for Gemini
+GEMINI_API_KEY=AIzaSy...
+
+# Required for ChatGPT
+OPENAI_API_KEY=sk-...
+
+# No key needed for local Ollama</code></pre>
+    <p>The <code>.env</code> file is listed in <code>.gitignore</code> — it will never be accidentally committed.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- QUICK START -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="quick-start">
+    <h2>Quick Start</h2>
+    <pre><code># 1. Activate your venv
+source .venv/bin/activate
+
+# 2. Add your API key
+echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
+
+# 3. Launch the dashboard
+./run.sh
+# or: python main.py</code></pre>
+    <p>The launcher script <code>run.sh</code> activates the venv and loads the <code>.env</code> file automatically.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- FIRST RUN -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="first-run">
+    <h2>First Run</h2>
+    <p>On the first launch, ContextGuard downloads its model (~250 MB) from HuggingFace Hub. This may take 1–5 minutes depending on your connection. Progress is shown in the terminal. After that, the model is cached at <code>~/.cache/huggingface/</code> and loads instantly.</p>
+
+    <p>The interactive dashboard will appear. You will see:</p>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>The SurrogateShield ASCII banner</li>
+      <li>The pipeline overview (7 stages)</li>
+      <li>A list of any saved conversations</li>
+      <li>The action menu</li>
+    </ul>
+
+    <p>Press <span class="key">N</span> to start a new conversation. Type any message containing PII and watch the pipeline work.</p>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- PIPELINE OVERVIEW -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="pipeline">
+    <h2>Pipeline Overview</h2>
+    <p>Every message you type goes through the following stages before it reaches the LLM. On the way back, surrogates in the response are replaced with your originals before you see anything.</p>
+
+    <div class="pipeline-box">
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">ServiceQueryDetector</div>
+          <div class="stage-model">detection/service_query.py</div>
+        </div>
+        <div class="stage-desc">Checks if the message is a location query (e.g. "restaurants near 1126 E Apache Blvd"). If yes, applies minimal address fuzzing instead of full replacement. Sensitive keywords (medical, legal, shelter) override this and force full detection.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">PatternScan</div>
+          <div class="stage-model">detection/pattern_scan.py · Stage 1</div>
+        </div>
+        <div class="stage-desc">Regex-based detection for structured PII: SSNs, emails, phone numbers, credit cards, dates of birth, IP addresses, API keys, ZIP codes, crypto wallets, ABA routing numbers, driver's licenses. Runs first so structured PII is masked before any NER model sees it.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">EntityTrace</div>
+          <div class="stage-model">spaCy en_core_web_lg · Stage 2</div>
+        </div>
+        <div class="stage-desc">Named-entity recognition for unstructured PII: people, places, organisations, facilities. Returns two confidence tiers — confirmed (≥0.85) and borderline (0.60–0.85). Borderline candidates are forwarded to ContextGuard.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">ContextGuard</div>
+          <div class="stage-model">dslim/distilbert-NER · Stage 3</div>
+        </div>
+        <div class="stage-desc">Transformer-based verifier that confirms borderline entities from EntityTrace and independently catches anything missed. Word-piece artefact cleaning and a short-token blocklist prevent common false positives.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">MimicGen</div>
+          <div class="stage-model">generation/logic.py</div>
+        </div>
+        <div class="stage-desc">Generates type-consistent surrogates using Faker. A fake name looks like a name, a fake SSN passes format checks, a fake credit card passes the Luhn algorithm. No collisions within a session.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">ShadowMap</div>
+          <div class="stage-model">storage/logic.py · AES-256-GCM</div>
+        </div>
+        <div class="stage-desc">Stores the {surrogate → original} mapping encrypted with AES-256-GCM. A per-conversation key is derived via HKDF-SHA256 using a device-local secret. The map file is unreadable without the device key.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">LLM API</div>
+          <div class="stage-model">HTTPS · surrogates only</div>
+        </div>
+        <div class="stage-desc">Receives only surrogates — your real values never leave the device. The provider cannot see original PII in the prompt, conversation history, or RAG context.</div>
+      </div>
+      <div class="pipeline-stage">
+        <div>
+          <div class="stage-name">ResolvePass</div>
+          <div class="stage-model">reconstruction/logic.py</div>
+        </div>
+        <div class="stage-desc">Three-tier restoration: exact match → component match (partial name mentions) → fuzzy match (rapidfuzz ≥85). Restores your originals in the LLM response before you see it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SERVICE QUERY DETECTOR -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="service-query">
+    <h2>ServiceQueryDetector</h2>
+    <p>Not all location information is equally sensitive. A message like <em>"restaurants near 1126 E Apache Blvd, Tempe, AZ"</em> needs the city and state to give a useful answer — fully replacing them with fake values would destroy the response quality.</p>
+
+    <p>ServiceQueryDetector identifies these location queries and applies a proportional response:</p>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Street addresses: house number is shifted by <strong>±2–8</strong> (max ~100 m geographic error), street name and city are preserved</li>
+      <li>City/state names: not replaced — they provide no meaningful re-identification risk in service queries</li>
+      <li>Sensitive topic override: if the message contains keywords like <em>medical</em>, <em>legal</em>, <em>shelter</em>, or <em>immigration</em>, full anonymisation is forced regardless of query structure</li>
+    </ul>
+
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-label orig">Original message</div>
+        <div class="ba-text">restaurants near <span class="orig-val">1126</span> E Apache Blvd, Tempe, AZ</div>
+      </div>
+      <div class="ba-box">
+        <div class="ba-label surr">Sent to LLM</div>
+        <div class="ba-text">restaurants near <span class="surr-val">1128</span> E Apache Blvd, Tempe, AZ</div>
+      </div>
+    </div>
+
+    <p>Address existence is optionally verified via OpenStreetMap Nominatim (disable with <code>SERVICE_QUERY_VERIFY_ADDRESSES = False</code> in <code>config.py</code> for offline use).</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SENTINELLAYER -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="sentinellayer">
+    <h2>SentinelLayer — The Detection Cascade</h2>
+    <p>Three detectors run sequentially. Spans claimed by an earlier stage are not re-processed downstream, preventing double-detection. Each stage is described in detail below.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PATTERN SCAN -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="patternscan">
+    <h2>PatternScan — Stage 1</h2>
+    <p>Regex-based structural detection. Runs first so all structured PII is masked before any NER model sees it. Format validators (Luhn, ABA checksum) reject false positives before any entity is emitted.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pattern</th><th>Example</th><th>Validator</th></tr></thead>
+        <tbody>
+          <tr><td>Street address</td><td>99 Cathedral Close, 456 Innovation Plaza</td><td>—</td></tr>
+          <tr><td>SSN</td><td>544-87-2944</td><td>—</td></tr>
+          <tr><td>Email</td><td>user@example.com</td><td>—</td></tr>
+          <tr><td>Phone US</td><td>+1-480-555-1234</td><td>—</td></tr>
+          <tr><td>Phone UK</td><td>+44 7911 123456</td><td>—</td></tr>
+          <tr><td>Phone international</td><td>+49 8234 927461</td><td>—</td></tr>
+          <tr><td>Credit card</td><td>4111 1111 1111 1111</td><td>Luhn algorithm</td></tr>
+          <tr><td>Date of birth</td><td>01/15/1990, March 14 1990</td><td>—</td></tr>
+          <tr><td>IPv4</td><td>192.168.1.100</td><td>—</td></tr>
+          <tr><td>API key / secret</td><td>sk-ant-..., Bearer ..., ghp_..., AKIA..., AIzaSy...</td><td>—</td></tr>
+          <tr><td>Gender indicator</td><td>gender: female, she/her, I am a man</td><td>—</td></tr>
+          <tr><td>UK postcode</td><td>SW1A 1AA</td><td>—</td></tr>
+          <tr><td>US ZIP code</td><td>85281, 85281-1234</td><td>—</td></tr>
+          <tr><td>Crypto wallet <span class="tag new">new</span></td><td>Bitcoin P2PKH/P2SH/Bech32, Ethereum 0x...</td><td>—</td></tr>
+          <tr><td>ABA routing number <span class="tag new">new</span></td><td>021000021, 122105155</td><td>ABA 9-digit checksum</td></tr>
+          <tr><td>US driver's license <span class="tag new">new</span></td><td>B7654321, F123456789012</td><td>Context-gated (keyword required)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <strong>Pattern order matters.</strong> Patterns claim character spans. Later patterns cannot overlap earlier ones. <code>crypto</code> and <code>us_bank_number</code> run before <code>zip_us</code> so that 9-digit routing numbers and long hex strings are claimed before the ZIP pattern can fragment them.
+    </div>
+
+    <h3>ABA routing number checksum</h3>
+    <p>The ABA 9-digit checksum eliminates false positives — random 9-digit numbers almost always fail:</p>
+    <pre><code>(3·d₀ + 7·d₁ + d₂ + 3·d₃ + 7·d₄ + d₅ + 3·d₆ + 7·d₇ + d₈) mod 10 = 0</code></pre>
+
+    <h3>Driver's license context gate</h3>
+    <p>The driver's license regex requires a keyword (<em>driver's license</em>, <em>license number</em>, <em>DL</em>, <em>D.L.</em>) within the same phrase. Only the license value itself is marked as an entity — the keyword prefix stays in the sanitised text.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- ENTITY TRACE -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="entitytrace">
+    <h2>EntityTrace — Stage 2</h2>
+    <p>spaCy <code>en_core_web_lg</code> Named Entity Recognition. Extracts <code>PERSON</code>, <code>GPE</code>, <code>LOC</code>, <code>ORG</code>, and <code>FAC</code> entities. Returns two confidence tiers:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tier</th><th>Score range</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>Confirmed</td><td>≥ 0.85</td><td>Promoted immediately to the entity list</td></tr>
+          <tr><td>Borderline</td><td>0.60 – 0.85</td><td>Forwarded to ContextGuard for verification</td></tr>
+          <tr><td>Fallback (CG off)</td><td>≥ 0.65</td><td>Promoted when ContextGuard is disabled</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>EntityTrace also includes an <strong>ORG→GPE reclassifier</strong>: when a location preposition appears before an entity name (e.g. <em>"lives in Google"</em>), the classification is corrected from ORG to GPE.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CONTEXT GUARD -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="contextguard">
+    <h2>ContextGuard — Stage 3</h2>
+    <p>Transformer-based verifier using <code>dslim/distilbert-NER</code> (~250 MB, downloaded once from HuggingFace Hub on first run, no server required). Two jobs:</p>
+    <ol style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li><strong>Confirm</strong> borderline candidates forwarded from EntityTrace (requires score ≥ 0.70)</li>
+      <li><strong>Independently detect</strong> anything EntityTrace missed</li>
+    </ol>
+    <p>Applies word-piece artefact cleaning and a blocklist of short/title tokens that commonly cause false positives (e.g. "I", "A", "The").</p>
+    <p>ContextGuard can be disabled via <code>config.py</code> or via the library's <code>shield.config(context_guard_enabled=False)</code> for faster, spaCy-only detection.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- POST-PROCESSING -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="postprocessing">
+    <h2>Post-processing Passes</h2>
+    <p>Four additional passes run on the combined entity set from all three stages:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pass</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>A — Structural ORG</td><td>Regex for <code>[the/a/an] &lt;name&gt; [corporation|company|corp|inc|ltd|llc…]</code> — catches corporate names without relying on NER name lists</td></tr>
+          <tr><td>B — Email-username reclassification</td><td>Corrects ORG→PERSON when the entity text is a prefix of a detected email username (e.g. "alice" from alice@corp.com)</td></tr>
+          <tr><td>C — PERSON component dedup</td><td>Removes standalone surnames that are sub-components of already-detected full names (prevents "Mitchell" being a second entity when "Sarah Mitchell" is already detected)</td></tr>
+          <tr><td>D — Topical geo-entity filter</td><td>Drops a GPE/LOC only if it appears exclusively in knowledge-query sub-clauses (e.g. "What is the capital of France?" — "France" is topical, not PII)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MIMICGEN -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="mimicgen">
+    <h2>MimicGen — Surrogate Generation</h2>
+    <p>Generates type-consistent surrogates using <a href="https://faker.readthedocs.io/" target="_blank">Faker</a>. Each surrogate is realistic for its PII type and unique within the session (tracked via a <code>used_surrogates</code> set to guarantee no collisions).</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Entity type</th><th>Generated surrogate looks like</th></tr></thead>
+        <tbody>
+          <tr><td>PERSON</td><td>Sarah Mitchell</td></tr>
+          <tr><td>email</td><td>jdoe@example.net</td></tr>
+          <tr><td>ssn</td><td>XXX-XX-XXXX (valid format)</td></tr>
+          <tr><td>phone_us</td><td>+1-###-###-####</td></tr>
+          <tr><td>phone_uk</td><td>+44 7### ######</td></tr>
+          <tr><td>phone_intl</td><td>+49 8234 927461</td></tr>
+          <tr><td>address</td><td>789 Crescent Row, Springfield, IL</td></tr>
+          <tr><td>credit_card</td><td>Valid Luhn-format number</td></tr>
+          <tr><td>dob</td><td>MM/DD/YYYY (age 18–80)</td></tr>
+          <tr><td>ip_address</td><td>10.x.x.x</td></tr>
+          <tr><td>zip_us / postcode_uk</td><td>Correct format</td></tr>
+          <tr><td>api_key</td><td>sk- + 32 random chars</td></tr>
+          <tr><td>GPE / LOC / ORG / FAC</td><td>Faker city/company names</td></tr>
+          <tr><td>gender_indicator</td><td>Grammatically valid gender expression</td></tr>
+          <tr><td>crypto <span class="tag new">new</span></td><td>Bitcoin P2PKH format — 1 + Base58 chars, 26–35 chars</td></tr>
+          <tr><td>us_bank_number <span class="tag new">new</span></td><td>Valid 9-digit ABA routing number (passes checksum)</td></tr>
+          <tr><td>us_driver_license <span class="tag new">new</span></td><td>CA-format: letter + 7 digits (e.g. B4923817)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Example: before and after substitution</h3>
+    <div class="ba-grid">
+      <div class="ba-box">
+        <div class="ba-label orig">Original</div>
+        <div class="ba-text">Hi, I'm <span class="orig-val">Revanth</span>. My email is <span class="orig-val">revanth@asu.edu</span> and my SSN is <span class="orig-val">544-87-2944</span>.</div>
+      </div>
+      <div class="ba-box">
+        <div class="ba-label surr">Sent to LLM</div>
+        <div class="ba-text">Hi, I'm <span class="surr-val">Sarah Mitchell</span>. My email is <span class="surr-val">jdoe@example.net</span> and my SSN is <span class="surr-val">317-42-8806</span>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SHADOWMAP -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="shadowmap">
+    <h2>ShadowMap — Encrypted Storage</h2>
+    <p>An encrypted, per-conversation mapping of <code>{surrogate → original}</code>. Stored on disk; unreadable without the device secret.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Encryption</td><td>AES-256-GCM with a fresh 12-byte nonce per save</td></tr>
+          <tr><td>Key derivation</td><td>HKDF-SHA256 with device secret as IKM and conversation ID as salt</td></tr>
+          <tr><td>Device secret</td><td>Generated once at <code>~/.surrogateshield/device.key</code> with <code>0o600</code> permissions</td></tr>
+          <tr><td>File location</td><td><code>conversations/&lt;conv_id&gt;.shadowmap</code> (binary, not human-readable)</td></tr>
+          <tr><td>Format</td><td><code>nonce (12 bytes) ‖ AES-GCM ciphertext</code></td></tr>
+          <tr><td>Graceful degradation</td><td>Missing or corrupt file → empty mapping, no crash</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- RESOLVEPASS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="resolvepass">
+    <h2>ResolvePass — Response Restoration</h2>
+    <p>Three-pass restoration of original values in LLM responses:</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num"><div class="num">1</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Exact replacement</h3>
+          <p>Handles the vast majority of cases. The surrogate string in the response is replaced with the original value verbatim.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"><div class="num">2</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Component matching</h3>
+          <p>For multi-word surrogates (e.g. the LLM mentions only "Mitchell" when the surrogate was "Sarah Mitchell"), scoped to unresolved surrogates only to prevent corruption of adjacent text.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num"><div class="num">3</div><div class="line"></div></div>
+        <div class="step-body">
+          <h3>Fuzzy matching</h3>
+          <p>rapidfuzz <code>partial_ratio</code> with a configurable threshold (default 85). Handles typos and paraphrasing by the LLM. Every failure is categorised as <code>exact_miss</code>, <code>fuzzy_hit</code>, or <code>fuzzy_miss</code> for research analysis.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- CLI COMMANDS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="cli">
+    <h2>CLI Commands</h2>
+    <pre><code># Launch the interactive dashboard (recommended)
+python main.py
+./run.sh
+
+# Start a new chat conversation directly
+python main.py chat
+
+# Continue a saved conversation
+python main.py chat --load &lt;conversation-id&gt;
+
+# New conversation with RAG enabled
+python main.py chat --rag
+
+# List all saved conversations
+python main.py list
+
+# PII detection sandbox — no API calls, no credits
+python main.py pii-finder
+
+# Index a document into the RAG vector store
+python main.py add-doc path/to/document.txt</code></pre>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- KEYBOARD SHORTCUTS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="keyboard-shortcuts">
+    <h2>Dashboard Keyboard Shortcuts</h2>
+    <p>These shortcuts work from the main dashboard screen.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><span class="key">N</span></td><td>New conversation</td></tr>
+          <tr><td><span class="key">R</span></td><td>New conversation with RAG mode enabled</td></tr>
+          <tr><td><span class="key">P</span></td><td>PII Finder — test detection without any API call</td></tr>
+          <tr><td><span class="key">1</span> – <span class="key">9</span></td><td>Open saved conversation by number</td></tr>
+          <tr><td><span class="key">D1</span> – <span class="key">D9</span></td><td>Delete conversation by number (e.g. D3 deletes conversation #3)</td></tr>
+          <tr><td><span class="key">J</span></td><td>JSON Test — batch-process a question file</td></tr>
+          <tr><td><span class="key">E</span></td><td>Evaluation — score pipeline quality against ground-truth</td></tr>
+          <tr><td><span class="key">A</span></td><td>Attacker Experiment — simulate adversarial PII recovery</td></tr>
+          <tr><td><span class="key">S</span></td><td>Settings (provider selection, view mode, Presidio comparison)</td></tr>
+          <tr><td><span class="key">H</span></td><td>Help screen</td></tr>
+          <tr><td><span class="key">Q</span></td><td>Quit</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CHAT MODE -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="chat-mode">
+    <h2>Chat Mode</h2>
+    <p>Chat mode is the primary way to use SurrogateShield. Press <span class="key">N</span> from the dashboard or run <code>python main.py chat</code>.</p>
+
+    <p>In each turn:</p>
+    <ol style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Type your message and press Enter</li>
+      <li>The full detection cascade runs on your message</li>
+      <li>Detected PII is replaced with surrogates</li>
+      <li>The sanitised message is sent to the LLM API</li>
+      <li>The response is returned and surrogates are restored</li>
+      <li>You see the response with your real values</li>
+    </ol>
+
+    <p>If <strong>Detailed View</strong> is enabled (Settings → D), each turn also shows:</p>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Pipeline stage logs</li>
+      <li>A per-entity PII detection table</li>
+      <li>The API transparency panel (what was sent, what was received, the final restored output)</li>
+    </ul>
+
+    <p>Type <code>exit</code> or press Ctrl+C to return to the dashboard. Conversations are saved automatically.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PII FINDER -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="pii-finder">
+    <h2>PII Finder</h2>
+    <p>The PII Finder is a detection sandbox with zero API calls and zero credits spent. Press <span class="key">P</span> from the dashboard or run <code>python main.py pii-finder</code>.</p>
+
+    <p>Type any text to see exactly what SurrogateShield would detect and what it would send to the LLM. The service-query path (address fuzzing) is also active, so you can test how location queries are handled.</p>
+
+    <p>Special commands in PII Finder:</p>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li><code>reset</code> — clears the surrogate memory so you can start fresh</li>
+      <li><code>exit</code> — returns to the dashboard</li>
+    </ul>
+
+    <p>If the Presidio comparison panel is enabled in Settings, the PII Finder also shows a side-by-side comparison with Microsoft Presidio's <code>[ENTITY_TYPE]</code> placeholder redaction below each result.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- RAG MODE -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="rag-mode">
+    <h2>RAG Mode</h2>
+    <p>RAG (Retrieval-Augmented Generation) lets you index your own documents and have them automatically retrieved as context for your questions. Backed by ChromaDB and <code>all-MiniLM-L6-v2</code> embeddings — no server required, runs in-process.</p>
+
+    <h3>Indexing a document</h3>
+    <pre><code>python main.py add-doc path/to/your/document.txt</code></pre>
+    <p>Documents are anonymised through the full SentinelLayer pipeline before indexing. Real PII never enters the vector store. Surrogate mappings from indexed documents are stored in a shared <code>rag_global</code> ShadowMap.</p>
+
+    <h3>Starting a RAG conversation</h3>
+    <p>Press <span class="key">R</span> from the dashboard, or run <code>python main.py chat --rag</code>. Retrieved context is prepended to your sanitised message before the LLM call.</p>
+
+    <h4>Configuration</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting in config.py</th><th>Default</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>RAG_TOP_K</td><td>3</td><td>Number of document chunks retrieved per query</td></tr>
+          <tr><td>RAG_CHUNK_SIZE</td><td>512</td><td>Characters per chunk when splitting indexed documents</td></tr>
+          <tr><td>EMBEDDING_MODEL</td><td>all-MiniLM-L6-v2</td><td>sentence-transformers model for embeddings</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- JSON TEST -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="json-test">
+    <h2>JSON Batch Test</h2>
+    <p>Batch-process a list of questions through the full pipeline. Press <span class="key">J</span> from the dashboard.</p>
+
+    <h3>Input format</h3>
+    <p>Create a JSON file in the <code>experiment/</code> directory:</p>
+    <pre><code>[
+  { "input": "My name is Revanth and my SSN is 544-87-2944. What are Wyoming's tax benefits?" },
+  { "input": "My email is revanth@gmail.com and phone is 480-555-1234. Draft a resignation letter." }
+]</code></pre>
+
+    <h3>Running</h3>
+    <ol style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Press <span class="key">J</span> in the dashboard</li>
+      <li>Enter the filename (e.g. <code>test</code> for <code>experiment/test.json</code>)</li>
+      <li>Select which output fields to capture (toggle with number keys)</li>
+      <li>Press Enter to run</li>
+    </ol>
+
+    <p>Output is saved to <code>experiment/&lt;name&gt;_answers.json</code>. Results are flushed every 25 questions — safe to interrupt and resume.</p>
+
+    <h3>Available output fields</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>What it captures</th></tr></thead>
+        <tbody>
+          <tr><td>question</td><td>The original question text</td></tr>
+          <tr><td>pattern_scan_pii</td><td>Entities detected by PatternScan (regex stage)</td></tr>
+          <tr><td>entity_trace_pii</td><td>Entities detected by EntityTrace (spaCy NER)</td></tr>
+          <tr><td>context_guard_pii</td><td>Entities detected by ContextGuard (distilbert-NER)</td></tr>
+          <tr><td>confirmed_pii</td><td>Final combined confirmed entity list</td></tr>
+          <tr><td>pii_detail</td><td>Per-entity type, score, and source</td></tr>
+          <tr><td>quasi_id_risks</td><td>Quasi-identifier combination risks detected</td></tr>
+          <tr><td>surrogate_map</td><td>Mapping of original → surrogate for every replaced entity</td></tr>
+          <tr><td>sanitized_input</td><td>The exact text sent to the LLM</td></tr>
+          <tr><td>llm_response</td><td>Raw LLM response (surrogates, before restoration)</td></tr>
+          <tr><td>stage_timings_ms</td><td>PatternScan / EntityTrace / ContextGuard / surrogate gen / LLM latency in ms</td></tr>
+          <tr><td>presidio_sanitized_input</td><td>Presidio [TYPE]-placeholder redaction (baseline for BERTScore)</td></tr>
+          <tr><td>presidio_found_piis</td><td>Presidio raw detected entities — type, value, score</td></tr>
+          <tr><td>bertscore_ss</td><td>BERTScore of original vs SurrogateShield sanitised input</td></tr>
+          <tr><td>bertscore_presidio</td><td>BERTScore of original vs Presidio sanitised input</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>Note:</strong> <code>presidio_sanitized_input</code>, <code>presidio_found_piis</code>, <code>bertscore_ss</code>, and <code>bertscore_presidio</code> are off by default. Enable them in the field selection screen to generate data for the Presidio comparison and BERTScore tables in Evaluation.
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- EVALUATION MODE -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="evaluation-mode">
+    <h2>Evaluation Mode</h2>
+    <p>Score a completed answers file against a ground-truth key. Press <span class="key">E</span> from the dashboard.</p>
+
+    <h3>Ground-truth key format</h3>
+    <pre><code>[
+  {
+    "Question": "My name is Revanth and my SSN is 544-87-2944...",
+    "Answer-Key": {
+      "name": "Revanth",
+      "ssn": "544-87-2944"
+    }
+  }
+]</code></pre>
+
+    <p>Save this as <code>experiment/&lt;name&gt;_key.json</code>. The evaluator accepts flexible label names — see the supported labels below.</p>
+
+    <h3>Supported answer-key labels</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Label(s) in key file</th><th>Internal type</th></tr></thead>
+        <tbody>
+          <tr><td>name, person, PERSON</td><td>PERSON</td></tr>
+          <tr><td>email</td><td>email</td></tr>
+          <tr><td>phone, phone_us, phone_uk, phone_intl</td><td>phone</td></tr>
+          <tr><td>ssn</td><td>ssn</td></tr>
+          <tr><td>address</td><td>address</td></tr>
+          <tr><td>dob, date_of_birth</td><td>dob</td></tr>
+          <tr><td>org, ORG, organization</td><td>ORG</td></tr>
+          <tr><td>gpe, GPE, location</td><td>GPE</td></tr>
+          <tr><td>credit_card</td><td>credit_card</td></tr>
+          <tr><td>api_key</td><td>api_key</td></tr>
+          <tr><td>ip, ip_address</td><td>ip_address</td></tr>
+          <tr><td>zip, zip_us, postcode, postcode_uk</td><td>postal_code</td></tr>
+          <tr><td>gender</td><td>gender_indicator</td></tr>
+          <tr><td>fac, FAC</td><td>FAC</td></tr>
+          <tr><td>crypto, bitcoin, ethereum, wallet <span class="tag new">new</span></td><td>crypto</td></tr>
+          <tr><td>bank_number, us_bank_number, routing_number, routing <span class="tag new">new</span></td><td>us_bank_number</td></tr>
+          <tr><td>driver_license, us_driver_license, dl, license <span class="tag new">new</span></td><td>us_driver_license</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Metrics reported</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Precision / Recall / F1 / Accuracy</td><td>Overall surrogate detection quality</td></tr>
+          <tr><td>Error (miss rate)</td><td>Fraction of key PII values not detected</td></tr>
+          <tr><td>Stage timings</td><td>Average ms per pipeline stage</td></tr>
+          <tr><td>ResolvePass leak rate</td><td>Fraction of responses where a surrogate was not restored</td></tr>
+          <tr><td>Sanitisation quality</td><td>Fraction of questions where real PII reached the LLM</td></tr>
+          <tr><td>Per-entity-type breakdown</td><td>F1 / precision / recall per PII type</td></tr>
+          <tr><td>Presidio comparison (Table 1)</td><td>SS vs Presidio side-by-side per comparable type + overall</td></tr>
+          <tr><td>BERTScore comparison (Table 2)</td><td>Semantic utility preservation: SS vs Presidio vs no-anonymisation baseline</td></tr>
+          <tr><td>Ablation study (Table 4)</td><td>Per-stage F1 contribution across four pipeline configurations</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Ablation study</h3>
+    <p>The ablation study quantifies how much each detection stage contributes to overall F1. It is computed <strong>post-hoc from the existing answers file</strong> — no pipeline re-run needed. Each answer records which stage detected each entity via the <code>source</code> field in <code>pii_detail</code>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Configuration</th><th>Detected set</th></tr></thead>
+        <tbody>
+          <tr><td>PatternScan only</td><td>pattern_scan_pii</td></tr>
+          <tr><td>PatternScan + EntityTrace</td><td>pattern_scan_pii ∪ entity_trace_pii</td></tr>
+          <tr><td>PatternScan + ContextGuard</td><td>pattern_scan_pii ∪ context_guard_pii</td></tr>
+          <tr><td>Full cascade (all three)</td><td>confirmed_pii</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>To generate ablation data, enable <code>pattern_scan_pii</code>, <code>entity_trace_pii</code>, <code>context_guard_pii</code>, and <code>confirmed_pii</code> in JSON Test before running (all four are on by default).</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- ATTACKER EXPERIMENT -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="attacker-experiment">
+    <h2>Attacker Experiment</h2>
+    <p>Simulates an informed adversary who intercepts the sanitised text SurrogateShield sends to the LLM API and actively tries to recover the original PII values. Press <span class="key">A</span> from the dashboard.</p>
+
+    <h3>What it tests</h3>
+    <p>Two variants run on each question from an existing answers file:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Variant</th><th>What the attacker sees</th><th>Goal</th></tr></thead>
+        <tbody>
+          <tr><td>SurrogateShield</td><td>Sanitised text with realistic fake values (fake names, SSNs, emails)</td><td>Try to recover the originals from the surrogates</td></tr>
+          <tr><td>Presidio</td><td>Redacted text with [ENTITY_TYPE] placeholder tokens</td><td>Try to recover the originals from the placeholders</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Expected result</h3>
+    <p><strong>0% recovery for both systems.</strong> Surrogates have no cryptographic or statistical relationship to the original values. This proves SurrogateShield achieves equivalent inference resistance to blunt placeholder redaction, while preserving significantly higher semantic utility (as measured by BERTScore).</p>
+
+    <h3>Running the experiment</h3>
+    <p>Press <span class="key">A</span> in the dashboard. The four-screen flow will:</p>
+    <ol style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Explain the experiment</li>
+      <li>Prompt for an existing answers file from <code>experiment/</code> (must contain <code>surrogate_map</code>, <code>sanitized_input</code>, and optionally <code>presidio_sanitized_input</code> / <code>presidio_found_piis</code>)</li>
+      <li>Show question counts and estimated API calls, then run</li>
+      <li>Display a results summary on completion</li>
+    </ol>
+
+    <p>The experiment supports <strong>resume</strong> — if interrupted, re-running with the same answers file picks up where it left off.</p>
+
+    <h3>Output files</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>File</th><th>Contents</th></tr></thead>
+        <tbody>
+          <tr><td>&lt;stem&gt;_Attacker_Experiment.json</td><td>Per-question recovery attempt details for both variants</td></tr>
+          <tr><td>&lt;stem&gt;_Attacker_Experiment_Analysis.json</td><td>Aggregated recovery rates, per-type breakdown, overall assessment</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Required fields in answers file</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Required for</th></tr></thead>
+        <tbody>
+          <tr><td>surrogate_map</td><td>SS attacker — original PII values and their surrogates</td></tr>
+          <tr><td>sanitized_input</td><td>SS attacker — the text to attack</td></tr>
+          <tr><td>pii_detail</td><td>SS attacker — type metadata for the prompt</td></tr>
+          <tr><td>presidio_sanitized_input</td><td>Presidio attacker — the placeholder-redacted text</td></tr>
+          <tr><td>presidio_found_piis</td><td>Presidio attacker — type metadata for the prompt</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- PII TYPES -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="pii-types">
+    <h2>PII Types Detected</h2>
+    <p>SurrogateShield detects 20 PII types across three detection mechanisms:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Types</th></tr></thead>
+        <tbody>
+          <tr><td>Structural (regex) <span class="tag regex">PatternScan</span></td><td>SSN, email, phone (US/UK/international), credit card, street address, DOB, IPv4, API keys/secrets, gender indicator, US ZIP, UK postcode, crypto wallet (Bitcoin/Ethereum), ABA routing number, US driver's license</td></tr>
+          <tr><td>Named entities (NER) <span class="tag ner">EntityTrace / ContextGuard</span></td><td>PERSON, GPE (geo-political entity), LOC, ORG, FAC (facility)</td></tr>
+          <tr><td>Inferred</td><td>Implicit location from context</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PII EXAMPLES -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="pii-examples">
+    <h2>PII Examples</h2>
+
+    <h3>Structured PII (PatternScan)</h3>
+    <pre><code># SSN
+544-87-2944  →  317-42-8806
+
+# Email
+revanth@asu.edu  →  jdoe@example.net
+
+# Phone US
++1-480-555-1234  →  +1-602-555-9871
+
+# Credit card (Luhn-valid)
+4111 1111 1111 1111  →  5234 5678 9012 3456
+
+# Bitcoin wallet
+1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf  →  1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2
+
+# ABA routing number
+021000021  →  071000013
+
+# Driver's license (context-gated)
+My DL number is B7654321  →  My DL number is F2390481</code></pre>
+
+    <h3>Named entities (EntityTrace + ContextGuard)</h3>
+    <pre><code># Person
+Revanth  →  Sarah Mitchell
+
+# City / GPE
+Phoenix, AZ  →  Springfield, IL (in sensitive contexts)
+# Note: well-known cities are often preserved in service queries
+
+# Organisation
+Arizona State University  →  Lakewood Industries
+
+# Facility
+Banner Health Hospital  →  Riverside Medical Center</code></pre>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- QUASI-IDENTIFIER -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="quasi-identifier">
+    <h2>Quasi-Identifier Risk</h2>
+    <p>Based on Sweeney's k-anonymity research. Even without traditional PII, certain combinations of fields can uniquely re-identify individuals. SurrogateShield detects these and warns you before the message is sent.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Combination</th><th>Risk level</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>ZIP + DOB + Gender</td><td>High</td><td>87% of US population uniquely identifiable (Sweeney 2000)</td></tr>
+          <tr><td>Postcode + DOB</td><td>High</td><td>High re-identification risk even without a name</td></tr>
+          <tr><td>Name + Employer + Location</td><td>Medium</td><td>Combination enables targeted lookup</td></tr>
+          <tr><td>IP + Location</td><td>Medium</td><td>Together they narrow to a specific user</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Warnings appear in the terminal when these combinations are detected. Enable Detailed View (Settings → D) to always show quasi-identifier analysis.</p>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- RUNTIME SETTINGS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="runtime-settings">
+    <h2>Runtime Settings</h2>
+    <p>Changed interactively from inside the app (press <span class="key">S</span> → Settings). Persisted across sessions in <code>~/.surrogateshield/settings.json</code>.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Default</th><th>What it controls</th></tr></thead>
+        <tbody>
+          <tr><td>llm_provider</td><td>claude</td><td>Active LLM backend — Claude / Gemini / ChatGPT / Local</td></tr>
+          <tr><td>detailed_view</td><td>false</td><td>Show pipeline stage logs, per-entity PII table, and the API transparency panel in each chat turn</td></tr>
+          <tr><td>presidio_comparison</td><td>false</td><td>Show the Presidio side-by-side panel below each PII Finder result. Off by default — requires presidio packages and spaCy model</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CONFIG CONSTANTS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="config-constants">
+    <h2>Advanced Configuration (<code>config.py</code>)</h2>
+    <p>Hard-coded thresholds and flags. Edit the file directly to change them. No restart required for PII Finder; restart required for chat sessions.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>ENTITY_TRACE_HIGH_THRESHOLD</td><td>0.85</td><td>spaCy score above which an entity is immediately confirmed</td></tr>
+          <tr><td>ENTITY_TRACE_LOW_THRESHOLD</td><td>0.60</td><td>spaCy score above which an entity is forwarded to ContextGuard</td></tr>
+          <tr><td>CONTEXT_GUARD_CONFIDENCE_THRESHOLD</td><td>0.70</td><td>distilbert score required to confirm a borderline entity</td></tr>
+          <tr><td>ENTITY_TRACE_FALLBACK_THRESHOLD</td><td>0.65</td><td>Score used when ContextGuard is disabled to promote borderline entities</td></tr>
+          <tr><td>FUZZY_MATCH_THRESHOLD</td><td>85</td><td>rapidfuzz partial_ratio threshold for ResolvePass reconstruction</td></tr>
+          <tr><td>SERVICE_QUERY_DETECTION_ENABLED</td><td>True</td><td>Enable the lightweight address-fuzzing path for location queries</td></tr>
+          <tr><td>SERVICE_QUERY_VERIFY_ADDRESSES</td><td>True</td><td>Verify fuzzed addresses via OpenStreetMap Nominatim (disable for offline use)</td></tr>
+          <tr><td>SHOW_API_TRANSPARENCY</td><td>True</td><td>Show the sent / received / restored transparency panel after each chat turn</td></tr>
+          <tr><td>RAG_TOP_K</td><td>3</td><td>Number of document chunks retrieved per RAG query</td></tr>
+          <tr><td>RAG_CHUNK_SIZE</td><td>512</td><td>Characters per chunk when splitting indexed documents</td></tr>
+          <tr><td>CLAUDE_MODEL</td><td>claude-sonnet-4-6</td><td>Claude model identifier</td></tr>
+          <tr><td>SPACY_MODEL</td><td>en_core_web_lg</td><td>spaCy model used by EntityTrace and Presidio</td></tr>
+          <tr><td>EMBEDDING_MODEL</td><td>all-MiniLM-L6-v2</td><td>sentence-transformers model for RAG embeddings</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PROVIDERS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="providers">
+    <h2>LLM Providers</h2>
+    <p>Switch providers from the Settings menu (press <span class="key">S</span> inside the dashboard).</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Provider</th><th>Model</th><th>Env var required</th></tr></thead>
+        <tbody>
+          <tr><td>Claude (default)</td><td>claude-sonnet-4-6</td><td>ANTHROPIC_API_KEY</td></tr>
+          <tr><td>Gemini</td><td>gemini-1.5-flash</td><td>GEMINI_API_KEY</td></tr>
+          <tr><td>ChatGPT</td><td>gpt-4o-mini</td><td>OPENAI_API_KEY</td></tr>
+          <tr><td>Local (Ollama)</td><td>llama3.2 (configurable)</td><td>None — runs fully offline</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Enabling Presidio comparison</h3>
+    <p>The Presidio comparison panel is off by default. To enable it:</p>
+    <ol style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
+      <li>Activate your venv, then install: <code>pip install presidio-analyzer presidio-anonymizer</code></li>
+      <li>Download the spaCy model (if not already done): <code>python -m spacy download en_core_web_lg</code></li>
+      <li>Open the app and press <span class="key">S</span> → <span class="key">C</span> (Settings → Presidio Comparison) to toggle it on</li>
+    </ol>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- LIBRARY INSTALLATION -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-install">
+    <h2>Python Library — Installation</h2>
+    <p>SurrogateShield is also available as a standalone pip package. No dashboard, no CLI — just the core detection and masking pipeline as a clean Python API.</p>
+
+    <pre><code>pip install surrogateshield</code></pre>
+
+    <p>Both the spaCy model (<code>en_core_web_lg</code>) and the ContextGuard transformer model (<code>dslim/distilbert-NER</code>) install automatically — no separate download step needed.</p>
+
+    <div class="callout tip">
+      <strong>Self-contained:</strong> The library does not import from the main application and carries its own copies of the detection, generation, storage, and reconstruction modules. You can use it independently of the dashboard.
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- LIBRARY QUICK START -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-quickstart">
+    <h2>Python Library — Quick Start</h2>
+    <pre><code>import surrogateshield as shield
+
+# Silence the default Rich tables (recommended for production)
+shield.config(detailed_view=False)
+
+user_text = (
+    "Hi, I'm Sarah Mitchell. My email is sarah.mitchell@gmail.com, "
+    "my SSN is 123-45-6789, and I was born on 04/12/1990."
+)
+
+sanitized = shield.mask(user_text)
+# "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,
+#  my SSN is 876-32-1045, and I was born on 09/27/1983."
+
+response = any_llm.chat(sanitized)   # send surrogates, not real PII
+restored = shield.unmask(response)   # real values restored from the session map
+shield.flush()                       # clear session before the next conversation</code></pre>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- LIBRARY API -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-api">
+    <h2>Python Library — Public API</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Function</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>shield.config(**kwargs)</td><td>Set thresholds, storage mode, pii_off list, and display options</td></tr>
+          <tr><td>shield.mask(text)</td><td>Detect all PII, replace with surrogates, store the mapping. Returns the sanitised string.</td></tr>
+          <tr><td>shield.unmask(response)</td><td>Restore original PII in an LLM response (any provider object or plain string)</td></tr>
+          <tr><td>shield.scan(text)</td><td>Detect PII and return {value: type} dict — no substitution, no shadow map update</td></tr>
+          <tr><td>shield.pii_finder</td><td>Alias for shield.scan</td></tr>
+          <tr><td>shield.flush()</td><td>Clear the session shadow map and generate a new session ID</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- LIBRARY SCAN -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-scan">
+    <h2>scan() — Inspect Without Masking</h2>
+    <p><code>scan()</code> runs the full detection cascade and returns a <code>{value: type}</code> dict, but it never modifies the session or updates the ShadowMap. Safe to call in a read-only context.</p>
+
+    <pre><code>found = shield.scan(
+    "Contact Alice Nguyen at alice@corp.com or call +1-415-555-0198."
+)
+# {"Alice Nguyen": "PERSON", "alice@corp.com": "email", "+1-415-555-0198": "phone_us"}
+
+for value, pii_type in found.items():
+    print(f"{pii_type:15s}  {value}")</code></pre>
+
+    <p><code>scan()</code> always returns every detected entity regardless of <code>pii_off</code> settings.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PII_OFF -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-pii-off">
+    <h2>pii_off — Suppress Specific Types</h2>
+    <p>Sometimes you want to detect certain PII types but not replace them. Use <code>pii_off</code> to suppress substitution for specific types while still detecting them.</p>
+
+    <pre><code>shield.config(pii_off=["location", "org"])
+
+sanitized = shield.mask(
+    "Emma Johnson works at Deloitte in New York, email emma@deloitte.com."
+)
+# "Emma Johnson"      → replaced (PERSON not in pii_off)
+# "emma@deloitte.com" → replaced (email not in pii_off)
+# "Deloitte"          → kept  (org in pii_off)
+# "New York"          → kept  (location in pii_off)</code></pre>
+
+    <h3>Available aliases for pii_off</h3>
+    <p><code>phone</code>, <code>name</code>, <code>location</code>, <code>org</code>, <code>email</code>, <code>ssn</code>, <code>dob</code>, <code>address</code>, <code>zip</code>, <code>postcode</code>, <code>postal_code</code>, <code>credit_card</code>, <code>ip_address</code>, <code>api_key</code>, <code>crypto</code>, <code>bank</code>, <code>license</code>, <code>gender_indicator</code></p>
+    <p>Raw type strings (<code>"PERSON"</code>, <code>"GPE"</code>, etc.) also accepted.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PERSISTENT SHADOW MAP -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-persistent">
+    <h2>Persistent ShadowMap</h2>
+    <p>By default the session mapping is in-memory only. For web servers or multi-process deployments, point <code>pii_mem</code> at a directory and the map is encrypted to disk with AES-256-GCM.</p>
+
+    <pre><code>import os, surrogateshield as shield
+
+os.makedirs("/var/app/shadowmaps", exist_ok=True)
+shield.config(pii_mem="/var/app/shadowmaps")
+
+sanitized = shield.mask("My name is Clara Oswald, phone 555-123-4567.")
+restored  = shield.unmask(llm.chat(sanitized))
+shield.flush()   # deletes the .shadowmap and .key files for this session</code></pre>
+
+    <p>When <code>pii_mem</code> is a directory path, each session gets its own <code>.shadowmap</code> file encrypted with AES-256-GCM. <code>shield.flush()</code> deletes the files and generates a new session ID.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- LIBRARY PROVIDERS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-providers">
+    <h2>Provider Examples</h2>
+    <p><code>unmask()</code> accepts native SDK response objects directly — no manual text extraction needed.</p>
+
+    <h3>Anthropic / Claude</h3>
+    <pre><code>import anthropic
+import surrogateshield as shield
+
+client = anthropic.Anthropic()
+shield.config(detailed_view=False)
+
+sanitized = shield.mask(user_text)
+response = client.messages.create(
+    model="claude-opus-4-8",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": sanitized}]
+)
+print(shield.unmask(response))   # passes Anthropic Message object directly
+shield.flush()</code></pre>
+
+    <h3>OpenAI / ChatGPT</h3>
+    <pre><code>from openai import OpenAI
+import surrogateshield as shield
+
+client = OpenAI()
+shield.config(detailed_view=False)
+
+sanitized = shield.mask(user_text)
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": sanitized}]
+)
+print(shield.unmask(response))   # passes ChatCompletion object directly
+shield.flush()</code></pre>
+
+    <h3>Google Gemini</h3>
+    <pre><code>import google.generativeai as genai
+import surrogateshield as shield
+
+model = genai.GenerativeModel("gemini-1.5-flash")
+shield.config(detailed_view=False)
+
+sanitized = shield.mask(user_text)
+response = model.generate_content(sanitized)
+print(shield.unmask(response))   # passes GenerateContentResponse directly
+shield.flush()</code></pre>
+
+    <h3>Ollama / plain string</h3>
+    <pre><code>import surrogateshield as shield
+
+shield.config(detailed_view=False)
+sanitized = shield.mask(user_text)
+raw_reply = ask_ollama(sanitized)      # plain string
+print(shield.unmask(raw_reply))        # plain strings work too
+shield.flush()</code></pre>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- LIBRARY CONFIG PARAMS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="library-config">
+    <h2>Library Config Parameters</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Parameter</th><th>Default</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>detailed_view</td><td>True</td><td>Print Rich tables after each call; set False in production</td></tr>
+          <tr><td>pii_mem</td><td>"temp"</td><td>"temp" for in-memory; a directory path for AES-256-GCM disk persistence</td></tr>
+          <tr><td>pii_off</td><td>[]</td><td>PII types to detect but not replace</td></tr>
+          <tr><td>service</td><td>True</td><td>Minimal address fuzzing for location queries instead of full replacement</td></tr>
+          <tr><td>context_guard_enabled</td><td>True</td><td>Run the HuggingFace second-pass NER; set False for faster, spaCy-only detection</td></tr>
+          <tr><td>fuzzy_threshold</td><td>85</td><td>rapidfuzz score (0–100) used in the third reconstruction pass of unmask()</td></tr>
+          <tr><td>spacy_model</td><td>en_core_web_lg</td><td>spaCy model for EntityTrace; swap for en_core_web_sm for faster but lower-accuracy NER</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <!-- ============================================================ -->
+  <!-- SECURITY DESIGN -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="security-design">
+    <h2>Security Design</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th>Mechanism</th></tr></thead>
+        <tbody>
+          <tr><td>Device secret</td><td>32-byte random key at <code>~/.surrogateshield/device.key</code>, permissions <code>0o600</code></td></tr>
+          <tr><td>Per-conversation key</td><td>HKDF-SHA256 with device secret as IKM and conversation ID as salt</td></tr>
+          <tr><td>ShadowMap encryption</td><td>AES-256-GCM with fresh 12-byte nonce per write</td></tr>
+          <tr><td>ShadowMap format</td><td><code>nonce (12 bytes) ‖ AES-GCM ciphertext</code> — unreadable without device key</td></tr>
+          <tr><td>API transmission</td><td>Only surrogates sent — real values never leave the device</td></tr>
+          <tr><td>Conversation history</td><td>Stored locally in <code>conversations/</code>; JSON holds surrogate text, not originals</td></tr>
+          <tr><td>.gitignore</td><td><code>*.shadowmap</code>, <code>conversations/*.json</code>, <code>device.key</code>, <code>.env</code> all excluded</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PRIVACY GUARANTEES -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="privacy-guarantees">
+    <h2>Privacy Guarantees</h2>
+    <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 2;">
+      <li><strong>No PII crosses the API boundary.</strong> Every entity confirmed by SentinelLayer is replaced before the HTTP request is made.</li>
+      <li><strong>Service queries get proportional protection.</strong> A restaurant search near your home address gets the house number shifted; the city name is preserved so the answer is useful. Sensitive topic overrides (medical, legal, shelter) force full anonymisation regardless.</li>
+      <li><strong>Geographic generality is preserved.</strong> US states, countries, and major cities are never replaced — they provide no meaningful re-identification risk and destroying them would break answer quality.</li>
+      <li><strong>Quasi-identifier risks are surfaced.</strong> If your message contains combinations like ZIP+DOB+gender that are statistically re-identifying even without traditional PII, you are warned before the message is sent.</li>
+      <li><strong>RAG documents are anonymised at index time.</strong> Real PII never enters the vector store. Retrieval and context injection all operate on surrogates.</li>
+      <li><strong>Financial and identity credentials are protected.</strong> Bitcoin/Ethereum wallet addresses, ABA routing numbers, and driver's license numbers are detected and replaced alongside traditional PII.</li>
+    </ul>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PROJECT STRUCTURE -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="project-structure">
+    <h2>Project Structure</h2>
+    <pre><code>SurrogateShield/
+├── main.py                  # CLI entry point and interactive dashboard
+├── pipeline.py              # End-to-end message pipeline orchestration
+├── config.py                # All constants and thresholds (single source of truth)
+├── util.py                  # Shared dataclasses (DetectedEntity, Conversation)
+├── settings_manager.py      # Persistent user settings (~/.surrogateshield/settings.json)
+├── evaluator.py             # Precision/recall/F1 evaluation logic + Presidio/BERTScore/ablation
+├── json_tester.py           # Batch JSON question processing
+├── attacker.py              # Adversarial PII recovery experiment
+├── run.sh                   # Launcher script (venv activation, .env loading)
+│
+├── detection/               # SentinelLayer — three-stage PII detection cascade
+│   ├── logic.py             # Cascade orchestration + post-processing passes A–D
+│   ├── pattern_scan.py      # PatternScan — regex-based structured PII detection
+│   ├── entity_trace.py      # EntityTrace — spaCy NER (en_core_web_lg)
+│   ├── context_guard.py     # ContextGuard — distilbert-NER (dslim/distilbert-NER)
+│   ├── service_query.py     # ServiceQueryDetector — address fuzzing for location queries
+│   ├── quasi_identifier.py  # Quasi-identifier combination risk scorer (k-anonymity)
+│   └── geo_data.py          # Geographic pass-through whitelist (US states, countries)
+│
+├── generation/
+│   └── logic.py             # MimicGen — type-consistent surrogate generation (Faker)
+│
+├── storage/
+│   └── logic.py             # ShadowMap — AES-256-GCM encrypted surrogate mapping store
+│
+├── reconstruction/
+│   └── logic.py             # ResolvePass — three-pass surrogate→original restoration
+│
+├── presidio/                # Presidio integration layer (optional comparison feature)
+│   ├── engine.py            # Lazy singleton AnalyzerEngine wrapper
+│   ├── detect.py            # detect(text) → list[PresidioEntity]
+│   └── redact.py            # redact(text, entities) → [TYPE]-placeholder string
+│
+├── chatbot/
+│   ├── chat.py              # Multi-provider LLM conversation handler
+│   └── rag.py               # RAGStore — ChromaDB + sentence-transformers vector store
+│
+├── experiment/              # Batch test input/output files
+│   ├── example.json         # Sample question file
+│   ├── example_key.json     # Sample ground-truth answer key
+│   └── example_answers.json # Sample output from JSON Test
+│
+├── tests/                   # Test suite (no API key required)
+│   ├── test1.py             # PatternScan, cascade, MimicGen, ShadowMap, ResolvePass
+│   ├── test2.py             # Additional detection and generation tests
+│   ├── test3.py             # Additional pipeline and storage tests
+│   ├── test6.py             # Attacker Experiment — all mocked, no API key needed
+│   └── test7.py             # Python library — 134 checks, no API key required
+│
+└── python-library/          # Standalone pip package (surrogateshield)
+    ├── pyproject.toml
+    └── surrogateshield/     # Public API: config, scan, mask, unmask, flush</code></pre>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- RUNNING TESTS -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="running-tests">
+    <h2>Running Tests</h2>
+    <pre><code># Activate your venv first
+source .venv/bin/activate
+
+# Core pipeline tests (no API key required)
+python tests/test1.py
+python tests/test2.py
+python tests/test3.py
+
+# Attacker Experiment tests (all API calls mocked, no API key required)
+python tests/test6.py
+
+# Python library tests (run from repo root)
+python tests/test7.py</code></pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Test file</th><th>What it covers</th></tr></thead>
+        <tbody>
+          <tr><td>test1.py</td><td>PatternScan, EntityTrace, SentinelLayer cascade, MimicGen, ShadowMap, ResolvePass, and a full no-API pipeline round-trip</td></tr>
+          <tr><td>test2.py</td><td>Additional detection and generation tests</td></tr>
+          <tr><td>test3.py</td><td>Additional pipeline and storage tests</td></tr>
+          <tr><td>test6.py</td><td>Attacker Experiment module — type formatting, recovery scoring, API response parsing, analysis aggregation, and end-to-end experiment flow (all mocked)</td></tr>
+          <tr><td>test7.py</td><td>Standalone <code>surrogateshield</code> pip package — entities, ShadowMap memory and persistent modes, response parser, state singletons, pipeline pii_off filtering, threshold wiring, ResolvePass, and all five public API functions. 134 checks, no API key required.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- TROUBLESHOOTING -->
+  <!-- ============================================================ -->
+  <section class="doc-section" id="troubleshooting">
+    <h2>Troubleshooting</h2>
+
+    <h3>Presidio shows "not installed"</h3>
+    <p>This almost always means the packages were installed into a different Python than the one running the app. Fix:</p>
+    <pre><code># Activate your venv first, then:
+pip install presidio-analyzer presidio-anonymizer
+python -m spacy download en_core_web_lg</code></pre>
+
+    <h3>"Package not found" at runtime</h3>
+    <p>You ran <code>pip install</code> without activating the venv first. The packages went into the system Python. Fix:</p>
+    <pre><code>source .venv/bin/activate   # activate venv
+pip install -r requirements.txt   # reinstall into venv</code></pre>
+
+    <h3>ContextGuard model download is slow</h3>
+    <p>The <code>dslim/distilbert-NER</code> model is ~250 MB. On a slow connection, the first download can take 5–15 minutes. Progress is shown in the terminal. Once downloaded, it is cached at <code>~/.cache/huggingface/</code>.</p>
+
+    <h3>BERTScore takes very long</h3>
+    <p>BERTScore uses <code>roberta-large</code> (~1.4 GB). On CPU, scoring a batch of 50 questions can take 15–30 minutes. The model is only downloaded if you enable BERTScore fields in JSON Test. If you have a GPU, it will be used automatically.</p>
+
+    <h3>Address verification fails in offline environments</h3>
+    <p>ServiceQueryDetector optionally verifies fuzzed addresses via OpenStreetMap Nominatim. In offline environments, disable this:</p>
+    <pre><code># In config.py
+SERVICE_QUERY_VERIFY_ADDRESSES = False</code></pre>
+
+    <h3>Conversations are not found after moving the project</h3>
+    <p>Conversations are stored in <code>conversations/</code> relative to the project root. If you move the project directory, the existing <code>.shadowmap</code> files are no longer decryptable with the device key at <code>~/.surrogateshield/device.key</code> — but the device key itself stays in place, so new conversations in the new location will work normally.</p>
+
+    <h3>spaCy model not found</h3>
+    <pre><code># With venv active:
+python -m spacy download en_core_web_lg</code></pre>
+  </section>
+
+  <div class="section-sep"></div>
+
+  <p style="color: var(--dim); font-family: var(--font-mono); font-size: 12px;">SurrogateShield v1.4.0 · Apache-2.0 · <a href="index.html" style="color: var(--dim);">Back to home</a></p>
+
+</main>
+</div>
+
+<script>
+  // Highlight active sidebar link based on scroll position
+  const sections = document.querySelectorAll('.doc-section');
+  const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+  function updateActive() {
+    let current = '';
+    sections.forEach(s => {
+      const top = s.getBoundingClientRect().top;
+      if (top <= 100) current = s.id;
+    });
+    sidebarLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+</script>
+</body>
+</html>
