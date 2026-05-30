@@ -81,6 +81,7 @@ Display to user
 - **Batch evaluation** — precision, recall, F1, per-entity-type breakdown, ResolvePass leak rate, sanitisation quality, BERTScore utility preservation, Presidio side-by-side comparison, and **ablation study** against ground-truth answer keys
 - **API Transparency panel** — see exactly what was sent, what was received, and the final restored output
 - **Attacker Experiment** — simulates an informed adversary who intercepts sanitised API traffic and attempts to recover original PII from both SurrogateShield and Presidio output; proves surrogate-based anonymisation achieves equivalent inference resistance to placeholder redaction
+- **Standalone Python library** — the full detection and masking pipeline is also packaged as `surrogateshield` (`pip install surrogateshield`), a self-contained API with no dashboard dependency, for embedding directly into any Python application or service
 
 
 
@@ -228,6 +229,11 @@ Local Retrieval-Augmented Generation backed by [ChromaDB](https://www.trychroma.
 - Surrogate mappings from indexed documents are stored in a shared `rag_global` ShadowMap so they can be restored in responses
 
 
+### 6. Python Library (`python-library/surrogateshield`)
+
+All five components above — PatternScan, EntityTrace, ContextGuard, MimicGen, ShadowMap, and ResolvePass — are re-packaged as a self-contained pip-installable library. The library carries its own copies of every module; it shares no code with the main application at runtime. The public surface is five functions (`config`, `scan`, `mask`, `unmask`, `flush`) and a single import line. See the [Python Library](#python-library) section below for usage.
+
+
 
 ## Supported LLM Providers
 
@@ -269,7 +275,7 @@ Switch providers from the **Settings** menu inside the dashboard (press `S`).
 
 ```bash
 # Clone
-git clone <repo-url>
+git clone https://github.com/sherwinvishesh/SurrogateShield.git
 cd SurrogateShield
 
 # Create and activate a virtual environment  ← required
@@ -715,11 +721,172 @@ python tests/test1.py
 python tests/test2.py
 python tests/test3.py
 python tests/test6.py
+
+# Python library tests (run from repo root, no venv needed if surrogateshield is installed)
+python tests/test7.py
 ```
 
 `test1.py` covers PatternScan, EntityTrace, SentinelLayer cascade, MimicGen, ShadowMap, ResolvePass, and a full no-API pipeline round-trip. All tests run without an API key.
 
 `test6.py` covers the Attacker Experiment module (`attacker.py`) — type formatting, recovery scoring, API response parsing, analysis aggregation, and end-to-end experiment flow. All API calls are mocked; no real API key or network access needed.
+
+`test7.py` covers the standalone `surrogateshield` pip package — library entities, ShadowMap memory and persistent modes, response parser, state singletons, pipeline pii_off filtering, threshold wiring, ResolvePass, and all five public API functions (`config`, `scan`, `mask`, `unmask`, `flush`). 134 checks, no API key required.
+
+
+
+## Python Library
+
+SurrogateShield is also available as a standalone pip package — no dashboard, no CLI, just the core detection and masking pipeline as a clean Python API. The package is self-contained: it does not import from the main application and carries its own copies of the detection, generation, storage, and reconstruction modules.
+
+```bash
+pip install surrogateshield
+```
+
+Both the spaCy model (`en_core_web_lg`) and the ContextGuard transformer model (`dslim/distilbert-NER`) install automatically — no separate download step needed.
+
+
+### Quick start
+
+```python
+import surrogateshield as shield
+
+# Silence the default Rich tables (recommended for production)
+shield.config(detailed_view=False)
+
+user_text = (
+    "Hi, I'm Sarah Mitchell. My email is sarah.mitchell@gmail.com, "
+    "my SSN is 123-45-6789, and I was born on 04/12/1990."
+)
+
+sanitized = shield.mask(user_text)
+# "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,
+#  my SSN is 876-32-1045, and I was born on 09/27/1983."
+
+response = any_llm.chat(sanitized)   # send surrogates, not real PII
+restored = shield.unmask(response)   # real values restored from the session map
+shield.flush()                       # clear session before the next conversation
+```
+
+
+### Provider support
+
+`unmask()` accepts native SDK response objects directly — no manual text extraction needed:
+
+```python
+# Anthropic
+import anthropic
+import surrogateshield as shield
+
+client = anthropic.Anthropic()
+sanitized = shield.mask(user_text)
+response = client.messages.create(model="claude-opus-4-8", max_tokens=1024,
+                                   messages=[{"role": "user", "content": sanitized}])
+print(shield.unmask(response))   # passes Anthropic Message object directly
+shield.flush()
+
+# OpenAI
+from openai import OpenAI
+client = OpenAI()
+sanitized = shield.mask(user_text)
+response = client.chat.completions.create(model="gpt-4o",
+                                          messages=[{"role": "user", "content": sanitized}])
+print(shield.unmask(response))   # passes ChatCompletion object directly
+shield.flush()
+
+# Gemini
+import google.generativeai as genai
+model = genai.GenerativeModel("gemini-1.5-flash")
+sanitized = shield.mask(user_text)
+response = model.generate_content(sanitized)
+print(shield.unmask(response))   # passes GenerateContentResponse directly
+shield.flush()
+
+# Any local model / plain string
+raw_reply = ask_ollama(sanitized)
+print(shield.unmask(raw_reply))  # plain strings work too
+shield.flush()
+```
+
+
+### Public API
+
+| Function | Description |
+|---|---|
+| `shield.config(**kwargs)` | Set thresholds, storage mode, pii_off list, and display options |
+| `shield.mask(text)` | Detect all PII, replace with surrogates, store the mapping |
+| `shield.unmask(response)` | Restore original PII in an LLM response (any provider object or plain string) |
+| `shield.scan(text)` | Detect PII and return `{value: type}` dict — no substitution, no shadow map update |
+| `shield.pii_finder` | Alias for `shield.scan` |
+| `shield.flush()` | Clear the session shadow map and generate a new session ID |
+
+
+### scan() — inspect without masking
+
+```python
+found = shield.scan(
+    "Contact Alice Nguyen at alice@corp.com or call +1-415-555-0198."
+)
+# {"Alice Nguyen": "PERSON", "alice@corp.com": "email", "+1-415-555-0198": "phone_us"}
+
+for value, pii_type in found.items():
+    print(f"{pii_type:15s}  {value}")
+```
+
+`scan()` always returns every detected entity regardless of `pii_off` settings. It is safe to call in a read-only context — it never modifies the session.
+
+
+### pii_off — suppress specific types
+
+```python
+shield.config(pii_off=["location", "org"])
+
+sanitized = shield.mask(
+    "Emma Johnson works at Deloitte in New York, email emma@deloitte.com."
+)
+# "Emma Johnson"      → replaced (PERSON not in pii_off)
+# "emma@deloitte.com" → replaced (email not in pii_off)
+# "Deloitte"          → kept  (org in pii_off)
+# "New York"          → kept  (location in pii_off)
+```
+
+Available aliases: `phone`, `name`, `location`, `org`, `email`, `ssn`, `dob`, `address`, `zip`, `postcode`, `postal_code`, `credit_card`, `ip_address`, `api_key`, `crypto`, `bank`, `license`, `gender_indicator`. Raw type strings (`"PERSON"`, `"GPE"`, etc.) also accepted.
+
+
+### Persistent shadow map
+
+By default the session mapping is in-memory only. For web servers or multi-process deployments, point `pii_mem` at a directory and the map is encrypted to disk with AES-256-GCM:
+
+```python
+import os, surrogateshield as shield
+
+os.makedirs("/var/app/shadowmaps", exist_ok=True)
+shield.config(pii_mem="/var/app/shadowmaps")
+
+sanitized = shield.mask("My name is Clara Oswald, phone 555-123-4567.")
+restored  = shield.unmask(llm.chat(sanitized))
+shield.flush()   # deletes the .shadowmap and .key files for this session
+```
+
+
+### Key config parameters
+
+| Parameter | Default | Effect |
+|---|---|---|
+| `detailed_view` | `True` | Print Rich tables after each call; set `False` in production |
+| `pii_mem` | `"temp"` | `"temp"` for in-memory; a directory path for AES-256-GCM disk persistence |
+| `pii_off` | `[]` | PII types to detect but not replace |
+| `service` | `True` | Minimal address fuzzing for location queries instead of full replacement |
+| `context_guard_enabled` | `True` | Run the HuggingFace second-pass NER; set `False` for faster, spaCy-only detection |
+| `fuzzy_threshold` | `85` | rapidfuzz score (0–100) used in the third reconstruction pass of `unmask()` |
+| `spacy_model` | `"en_core_web_lg"` | spaCy model for EntityTrace; swap for `en_core_web_sm` for faster but lower-accuracy NER |
+
+
+### What the library detects
+
+The same 20-type detection cascade as the full application: email, SSN, phone (US / UK / international), credit card (Luhn-validated), street address, date of birth, IPv4, API keys, gender indicator, US ZIP, UK postcode, Bitcoin/Ethereum wallet addresses, ABA routing numbers, US driver's licenses, plus named entities PERSON, ORG, GPE, LOC, and FAC via the spaCy + distilbert-NER two-model pipeline.
+
+
+See [`python-library/README.md`](python-library/README.md) for the complete API reference, all config parameters, surrogate generation details, and troubleshooting.
 
 
 
@@ -776,7 +943,33 @@ SurrogateShield/
 │   ├── test1.py             # PatternScan, EntityTrace, cascade, MimicGen, ShadowMap, ResolvePass, round-trip
 │   ├── test2.py             # Additional detection and generation tests
 │   ├── test3.py             # Additional pipeline and storage tests
-│   └── test6.py             # Attacker Experiment — type formatting, scoring, analysis, end-to-end (mocked API)
+│   ├── test6.py             # Attacker Experiment — type formatting, scoring, analysis, end-to-end (mocked API)
+│   └── test7.py             # Python library — entities, ShadowMap, ResolvePass, pipeline, full public API (134 checks)
+│
+├── python-library/          # Standalone pip package (surrogateshield)
+│   ├── pyproject.toml       # Package metadata and dependencies
+│   ├── README.md            # Full library API reference
+│   └── surrogateshield/     # Package source — self-contained, zero imports from the main app
+│       ├── __init__.py      # Public API: config, scan, mask, unmask, flush
+│       ├── _state.py        # Module-level cfg and session singletons
+│       ├── _display.py      # Optional Rich terminal output (graceful fallback if Rich absent)
+│       ├── _response_parser.py  # extract_text() — Anthropic / OpenAI / Gemini / plain string
+│       └── core/
+│           ├── entities.py              # DetectedEntity, mask_spans, remove_span_overlap
+│           ├── detection/
+│           │   ├── pipeline.py          # run_cascade(), deduplicate(), pii_off alias table
+│           │   ├── pattern_scan.py      # 17-pattern regex scanner with Luhn / ABA validators
+│           │   ├── entity_trace.py      # spaCy NER (model-name-keyed cache)
+│           │   ├── context_guard.py     # distilbert-NER second pass (optional)
+│           │   ├── service_query.py     # Service-query detection + address fuzzing
+│           │   ├── quasi_identifier.py  # Quasi-identifier combination risk scorer
+│           │   └── geo_data.py          # Geographic pass-through whitelist
+│           ├── generation/
+│           │   └── mimic.py             # MimicGen — Faker-based surrogate generation
+│           ├── storage/
+│           │   └── shadow_map.py        # ShadowMap — memory mode + AES-256-GCM disk mode
+│           └── reconstruction/
+│               └── resolve.py           # ResolvePass — exact / component / fuzzy restoration
 │
 └── conversations/           # Runtime — auto-created on first use
     ├── <conv_id>.json        # Conversation history (surrogate text only, not originals)
