@@ -6,7 +6,7 @@ This folder holds all input question sets and their corresponding outputs used f
 
 ## File Types
 
-### `*.json` — Questions Only
+### `*.json`: Questions Only
 
 These are the **input files** fed into the batch tester. Each file is a JSON array where every entry has a single `"input"` key containing the question string.
 
@@ -25,7 +25,7 @@ These are the **input files** fed into the batch tester. Each file is a JSON arr
 
 
 
-### `*_key.json` — Questions with Answer Keys
+### `*_key.json`: Questions with Answer Keys
 
 These are the **reference/ground-truth files**. Each entry pairs a question with an `"Answer-Key"` object that lists the PII entities expected to be detected. If no PII is present, `"Answer-Key"` is an empty object `{}`.
 
@@ -50,7 +50,7 @@ These are the **reference/ground-truth files**. Each entry pairs a question with
 
 
 
-### `*_answers.json` — Pipeline Output
+### `*_answers.json`: Pipeline Output
 
 These are **auto-generated** by the batch tester after running a `*.json` input file through SurrogateShield. The stem name is inherited from the input file (e.g. `test.json` → `test_answers.json`).
 
@@ -104,7 +104,7 @@ print(f'Results written to: {output_path}')
 "
 ```
 
-Progress is flushed to disk every 25 questions, so a run can be safely interrupted and resumed — already-processed questions are skipped automatically on restart.
+Progress is flushed to disk every 25 questions, so a run can be safely interrupted and resumed; already-processed questions are skipped automatically on restart.
 
 
 
@@ -130,3 +130,7 @@ Each entry in `*_answers.json` can contain the following fields (depending on wh
 | `presidio_found_piis` | Raw Presidio detections with type and score |
 | `bertscore_ss` | BERTScore comparing original vs SurrogateShield sanitized input |
 | `bertscore_presidio` | BERTScore comparing original vs Presidio sanitized input |
+
+---
+
+Made with ❤️ by Sherwin Vishesh Jathanna

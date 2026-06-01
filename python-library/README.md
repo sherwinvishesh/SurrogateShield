@@ -1,6 +1,6 @@
 # SurrogateShield
 
-SurrogateShield is a Python library that acts as a privacy-preserving proxy between your application and any large language model. Before your text reaches the LLM it intercepts every piece of personally identifiable information, replaces each one with a realistic-looking fake value called a surrogate, and after the model responds it swaps the surrogates back to the real values — so the output your users see contains their own data, but the model never processed it.
+SurrogateShield is a Python library that acts as a privacy-preserving proxy between your application and any large language model. Before your text reaches the LLM it intercepts every piece of personally identifiable information, replaces each one with a realistic-looking fake value called a surrogate, and after the model responds it swaps the surrogates back to the real values; so the output your users see contains their own data, but the model never processed it.
 
 The library is self-contained, requires no external API, and works with any LLM provider: Anthropic Claude, OpenAI, Google Gemini, or a locally-hosted model.
 
@@ -18,11 +18,11 @@ This approach is grounded in k-anonymity research (Sweeney 2000) and is designed
 
 SurrogateShield runs a three-stage detection cascade on every piece of text before it is sent to the LLM.
 
-**Stage 1 — PatternScan** uses regular expressions to detect structurally identifiable PII: email addresses, phone numbers, SSNs, credit card numbers, street addresses, IP addresses, API keys, dates, postal codes, and cryptocurrency wallet addresses. Pattern matching is done first so that these spans are masked before the NER models see the text.
+**Stage 1; PatternScan** uses regular expressions to detect structurally identifiable PII: email addresses, phone numbers, SSNs, credit card numbers, street addresses, IP addresses, API keys, dates, postal codes, and cryptocurrency wallet addresses. Pattern matching is done first so that these spans are masked before the NER models see the text.
 
-**Stage 2 — EntityTrace** loads a spaCy NER model (en_core_web_lg by default) and extracts named entities: PERSON, GPE (geopolitical entity), LOC, ORG, and FAC. It skips any span already found by PatternScan. Entities above a high confidence threshold are confirmed immediately; entities in a middle band are passed to Stage 3 for a second opinion.
+**Stage 2; EntityTrace** loads a spaCy NER model (en_core_web_lg by default) and extracts named entities: PERSON, GPE (geopolitical entity), LOC, ORG, and FAC. It skips any span already found by PatternScan. Entities above a high confidence threshold are confirmed immediately; entities in a middle band are passed to Stage 3 for a second opinion.
 
-**Stage 3 — ContextGuard** runs a HuggingFace transformer model (dslim/distilbert-NER, ~250 MB, downloaded once and cached) over the text that PatternScan and EntityTrace have not yet claimed. It also makes the final call on borderline entities from EntityTrace.
+**Stage 3; ContextGuard** runs a HuggingFace transformer model (dslim/distilbert-NER, ~250 MB, downloaded once and cached) over the text that PatternScan and EntityTrace have not yet claimed. It also makes the final call on borderline entities from EntityTrace.
 
 After the three detection stages, four post-processing passes refine the entity list:
 
@@ -33,7 +33,7 @@ After the three detection stages, four post-processing passes refine the entity 
 
 The library also scores every detected entity set for quasi-identifier combination risk using the Sweeney k-anonymity model. Combinations like ZIP code + date of birth, name + SSN, or name + employer + city are flagged internally even when each individual field seems innocuous.
 
-Once detection is complete, MimicGen creates a realistic surrogate for each detected value using the Faker library — a fake email for a real email, a Luhn-valid credit card number for a real one, a properly formatted SSN, and so on. The surrogates are type-consistent and unique within a session.
+Once detection is complete, MimicGen creates a realistic surrogate for each detected value using the Faker library; a fake email for a real email, a Luhn-valid credit card number for a real one, a properly formatted SSN, and so on. The surrogates are type-consistent and unique within a session.
 
 The original → surrogate mapping is inverted (surrogate → original) and stored in an in-memory ShadowMap. After the LLM responds, ResolvePass runs three passes to restore the original values: exact string replacement, component-word matching for multi-word surrogates the model may have split, and rapidfuzz fuzzy matching for cases where the model slightly reformatted a surrogate.
 
@@ -46,7 +46,7 @@ Install the package from PyPI:
 pip install surrogateshield
 ```
 
-The spaCy language model (`en_core_web_lg`) downloads automatically on the first call to `mask()` or `scan()` — a one-time ~750 MB download that is cached locally. No manual step needed.
+The spaCy language model (`en_core_web_lg`) downloads automatically on the first call to `mask()` or `scan()`; a one-time ~750 MB download that is cached locally. No manual step needed.
 
 If you want the Rich terminal output (colour tables showing detected PII and surrogates), install the optional display dependency:
 
@@ -68,14 +68,14 @@ The core package installs the following automatically:
 | `rapidfuzz` | Fuzzy string matching in the reconstruction pass |
 | `requests` | Address verification via OpenStreetMap Nominatim |
 | `spacy` | Named-entity recognition (Stage 2) |
-| `en-core-web-lg` | spaCy English NER model — downloaded automatically on first use (~750 MB, cached) |
+| `en-core-web-lg` | spaCy English NER model: downloaded automatically on first use (~750 MB, cached) |
 | `transformers` | HuggingFace NER pipeline (Stage 3 ContextGuard) |
 | `torch` | Required backend for the transformers pipeline |
 
 Rich is optional (`pip install "surrogateshield[display]"`) and only affects terminal output formatting.
 
 
-## Quick start — Claude (Anthropic)
+## Quick start: Claude (Anthropic)
 
 ```python
 import anthropic
@@ -116,7 +116,7 @@ shield.flush()
 ```
 
 
-## Multi-turn conversation — OpenAI
+## Multi-turn conversation: OpenAI
 
 Multi-turn conversations require care: the conversation history sent to the model must use surrogates throughout, but the history shown to the user should contain real values. SurrogateShield keeps the session shadow map alive across turns so every surrogate from every previous turn can still be resolved.
 
@@ -221,7 +221,7 @@ shield.flush()
 ```
 
 
-## scan() — detect PII without changing anything
+## scan(): detect PII without changing anything
 
 `scan()` runs the full detection cascade and returns a dict mapping each detected value to its PII type. It does not generate surrogates, does not update the shadow map, and does not modify the text. Use it when you want to inspect what SurrogateShield would find before committing to masking.
 
@@ -253,7 +253,7 @@ found = shield.pii_finder(text)
 ```
 
 
-## pii_off — detect but do not replace specific types
+## pii_off: detect but do not replace specific types
 
 Sometimes you want SurrogateShield to detect every PII type for awareness but only replace a subset. `pii_off` accepts a list of type names or short aliases. Detected entities whose type matches an entry in `pii_off` are identified in the scan results but are not substituted in the output.
 
@@ -317,7 +317,7 @@ Sensitive topic override: even when a message matches the service-query pattern,
 
 ## Persistent shadow map
 
-By default (`pii_mem="temp"`) the surrogate mappings are stored in memory and are lost when the Python process exits. For applications where sessions survive across process restarts — a web server, a long-running pipeline, or a multi-worker deployment — you can point `pii_mem` at a directory on disk and SurrogateShield will persist the shadow map with AES-256-GCM encryption.
+By default (`pii_mem="temp"`) the surrogate mappings are stored in memory and are lost when the Python process exits. For applications where sessions survive across process restarts; a web server, a long-running pipeline, or a multi-worker deployment; you can point `pii_mem` at a directory on disk and SurrogateShield will persist the shadow map with AES-256-GCM encryption.
 
 ```python
 import os
@@ -428,14 +428,14 @@ All surrogates are unique within a session. If the same real value appears multi
 
 After the LLM responds, `unmask()` runs three passes to restore original values:
 
-**Pass 1 — Exact replacement** replaces every surrogate in the shadow map that appears verbatim in the response. This handles the majority of cases.
+**Pass 1; Exact replacement** replaces every surrogate in the shadow map that appears verbatim in the response. This handles the majority of cases.
 
-**Pass 2 — Component matching** handles multi-word surrogates that the LLM used only partially. For example if the surrogate was "Rachel Torres" but the model wrote only "Rachel", the first-name component is matched and replaced with the original first name. This pass only runs on surrogates that Pass 1 did not find, to prevent partial matches from corrupting unrelated text.
+**Pass 2; Component matching** handles multi-word surrogates that the LLM used only partially. For example if the surrogate was "Rachel Torres" but the model wrote only "Rachel", the first-name component is matched and replaced with the original first name. This pass only runs on surrogates that Pass 1 did not find, to prevent partial matches from corrupting unrelated text.
 
-**Pass 3 — Fuzzy matching** uses rapidfuzz `partial_ratio` to find surrogates that the model slightly reformatted (changed capitalisation, added punctuation, etc.). The threshold defaults to 85 out of 100.
+**Pass 3; Fuzzy matching** uses rapidfuzz `partial_ratio` to find surrogates that the model slightly reformatted (changed capitalisation, added punctuation, etc.). The threshold defaults to 85 out of 100.
 
 
-## config() — all parameters
+## config(): all parameters
 
 ```python
 shield.config(
@@ -517,7 +517,7 @@ Runs the full detection cascade on `text` and returns `{detected_value: pii_type
 An alias for `shield.scan`. Provided for readability in data-pipeline contexts.
 
 **`shield.mask(text: str) -> str`**
-Runs detection, generates surrogates, applies substitutions, and updates the session shadow map. Respects `pii_off` settings — types in that list are detected but not replaced. Returns the sanitized string safe to send to an LLM. If `detailed_view=True`, prints a masking results table.
+Runs detection, generates surrogates, applies substitutions, and updates the session shadow map. Respects `pii_off` settings; types in that list are detected but not replaced. Returns the sanitized string safe to send to an LLM. If `detailed_view=True`, prints a masking results table.
 
 **`shield.unmask(response) -> str`**
 Accepts any LLM SDK response object or a plain string. Extracts the text content, looks up every surrogate in the session shadow map, and returns the response with original values restored. Tries Anthropic, OpenAI, and Gemini response formats automatically before falling back to `str(response)`. If `detailed_view=True`, prints a one-line restore confirmation.
@@ -566,3 +566,7 @@ shield.config(fuzzy_threshold=75)
 ```
 
 Values below 70 are not recommended as they increase the risk of incorrect replacements.
+
+---
+
+Made with ❤️ by Sherwin Vishesh Jathanna

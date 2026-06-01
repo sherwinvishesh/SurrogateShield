@@ -2464,7 +2464,7 @@ Display to user</pre>
         <span>installation</span>
       </div>
 <pre class="code-body"><span class="c"># Clone</span>
-<span class="prompt">$ </span>git clone &lt;repo-url&gt;
+<span class="prompt">$ </span>git clone https://github.com/sherwinvishesh/SurrogateShield.git
 <span class="prompt">$ </span>cd SurrogateShield
 
 <span class="c"># Create and activate a virtual environment  ← required</span>
@@ -2595,13 +2595,13 @@ client = anthropic.Anthropic()
 shield.config(detailed_view=<span class="p">False</span>)   <span class="c"># silent in production</span>
 
 text = (
-    <span class="s">"Hi, I'm Sarah Mitchell. My email is <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9be8fae9faf3b5f6f2eff8f3fef7f7dbfcf6faf2f7b5f8f4f6">[email&#160;protected]</a>, "</span>
+    <span class="s">"Hi, I'm Sarah Mitchell. My email is sarah.mitchell@gmail.com, "</span>
     <span class="s">"my SSN is 123-45-6789, and I was born on 04/12/1990."</span>
 )
 
 <span class="c"># Detect every PII field, swap in realistic fakes, store the mapping</span>
 sanitized = shield.<span class="k">mask</span>(text)
-<span class="c"># → "Hi, I'm Rachel Torres. My email is <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9ce8f3eeeef9efeefdfff4f9f0dce5fdf4f3f3b2fff3f1">[email&#160;protected]</a>,</span>
+<span class="c"># → "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,</span>
 <span class="c">#    my SSN is 876-32-1045, and I was born on 09/27/1983."</span>
 
 response = client.messages.create(
@@ -2871,7 +2871,7 @@ shield.<span class="k">flush</span>()</pre>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 (function() {
   const stages = [
     {
