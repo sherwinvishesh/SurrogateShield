@@ -2011,7 +2011,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="eyebrow">Surrogates vs placeholders</div>
     <h2 class="section-title">Why realistic surrogates beat <em>[ENTITY_TYPE]</em> redaction.</h2>
     <p class="section-lede">
-      Microsoft Presidio replaces PII with placeholder tokens. SurrogateShield replaces with type-consistent fakes. Per Table 7 (simulated attacker, per-value recovery): SurrogateShield <strong>0.00%</strong> recovery on 194 targeted values, Presidio <strong>1.53%</strong> on 196 — and BERTScore utility is ~95% vs ~84%.
+      Microsoft Presidio replaces PII with placeholder tokens. SurrogateShield replaces with type-consistent fakes. Per Table 7 (simulated attacker, per-value recovery): SurrogateShield <strong>0.00%</strong> recovery on 196 targeted values, Presidio <strong>1.53%</strong> on 196 — and BERTScore utility is ~95% vs ~84%.
     </p>
 
     <div class="compare-grid">
@@ -2022,7 +2022,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <div class="compare-stats">
           <div><span>BERTScore F1</span><strong>~ 95%</strong></div>
           <div><span>Per-value recovery</span><strong>0.00%</strong></div>
-          <div><span>Nᵥ targeted</span><strong>194</strong></div>
+          <div><span>Nᵥ targeted</span><strong>196</strong></div>
           <div><span>Recovered</span><strong>0</strong></div>
         </div>
       </div>
@@ -2201,7 +2201,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <h3>SurrogateShield — realistic fakes</h3>
         <p>The attacker sees a coherent sanitised message: real-looking names, formatted SSNs, valid Luhn credit cards, plausible addresses.</p>
         <ul>
-          <li>Nᵥ targeted: <strong style="color: var(--text);">194</strong> PII values</li>
+          <li>Nᵥ targeted: <strong style="color: var(--text);">196</strong> PII values</li>
           <li>Recovered: <strong style="color: var(--neon);">0</strong> — per-value rate <strong style="color: var(--neon);">0.00%</strong></li>
           <li>Surrogates have no statistical relationship to originals</li>
           <li>Tracked separately: address proximity recovery (service-query fuzzing)</li>
@@ -2238,7 +2238,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
           </tr>
           <tr>
             <td style="color: var(--neon);">SurrogateShield (surrogates)</td>
-            <td class="mono" style="text-align: right;">194</td>
+            <td class="mono" style="text-align: right;">196</td>
             <td class="mono" style="text-align: right; color: var(--neon);">0</td>
             <td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.00%</td>
           </tr>

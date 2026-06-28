@@ -1,0 +1,201 @@
+Generate a dataset of exactly 200 questions for testing a PII detection 
+system called SurrogateShield. Output ONLY a valid JSON array — no 
+explanation, no markdown, no backticks, just raw JSON starting with [ 
+and ending with ].
+
+---
+
+OUTPUT FORMAT — every entry must be exactly this structure:
+
+{
+  "Question": "the full question text here",
+  "Answer-Key": {
+    "type_label": "exact_pii_value_as_it_appears_in_question"
+  }
+}
+
+For no-PII questions use: "Answer-Key": {}
+For multiple values of the same type use a list: "name": ["John", "Jane"]
+
+---
+
+TYPE LABELS — use exactly these strings:
+
+  "name"           full personal names
+  "email"          email addresses
+  "phone"          any phone number (US, UK, international)
+  "ssn"            Social Security Numbers (XXX-XX-XXXX format)
+  "address"        street addresses only (not city/state alone)
+  "dob"            dates of birth
+  "org"            company or organization names
+  "gpe"            specific identifying locations (small towns, 
+                   neighborhoods — NOT major cities or US states)
+  "credit_card"    credit card numbers (must pass Luhn validation)
+  "api_key"        API keys or tokens (sk- prefix, Bearer tokens, etc.)
+  "ip_address"     IPv4 addresses
+  "zip"            US ZIP codes
+  "postcode"       UK postcodes
+  "gender"         explicit gender declarations
+  "crypto"         cryptocurrency wallet addresses
+  "bank_number"    ABA routing numbers (9 digits)
+  "driver_license" driver's license numbers
+
+---
+
+DISTRIBUTION — generate exactly this many of each group:
+
+GROUP 1 — No PII (Answer-Key is empty {}): 15 questions
+  Questions about history, science, cooking, travel, general knowledge.
+  No personal information whatsoever. Tests false-positive rate.
+
+GROUP 2 — Single name only: 10 questions
+  Various tasks: draft an email, write a bio, send a message.
+  Use diverse names: South Asian, East Asian, African, Latin, Middle 
+  Eastern, Eastern European — not just Western names.
+
+GROUP 3 — Single email only: 8 questions
+  Email drafting, account recovery, newsletter signup, tech support.
+
+GROUP 4 — Single phone only: 8 questions
+  Mix: 3 US phones, 2 UK phones (+44 format), 3 international (+country code).
+  Contexts: callback requests, contact forms, appointment reminders.
+
+GROUP 5 — Single SSN only: 6 questions
+  Tax filing, benefits verification, background check, loan application.
+
+GROUP 6 — Single address only: 8 questions
+  Service queries (restaurants near, directions to, pharmacy near).
+  Include full street address with number, street name with suffix, 
+  city, and 2-letter state. These TRIGGER service query detection.
+
+GROUP 7 — Single date of birth only: 6 questions
+  Age verification, passport renewal, insurance enrollment, medical forms.
+  Use varied formats: MM/DD/YYYY, written month (March 14 1990), ISO.
+
+GROUP 8 — Single credit card only: 5 questions
+  Payment processing, subscription management, refund requests.
+  Generate Luhn-valid numbers only. Mix Visa (starts 4), Mastercard (starts 51-55).
+
+GROUP 9 — Single API key only: 5 questions
+  Developer asking for help debugging code that accidentally contains 
+  their API key. Use realistic formats: sk-followed by 32 chars,
+  Bearer tokens, ghp_ GitHub tokens.
+
+GROUP 10 — Single IP address only: 4 questions
+  Server configuration, security audit, access logs, network troubleshooting.
+
+GROUP 11 — Single ZIP code only: 4 questions
+  Local service searches, tax jurisdiction, delivery zone queries.
+  ZIP codes alone as the only PII (no name or address).
+
+GROUP 12 — Single UK postcode only: 3 questions
+  UK-specific: council tax, NHS registration, local authority queries.
+  Use valid UK postcode format: SW1A 1AA, EC2A 4BH, etc.
+
+GROUP 13 — Name + email (2 PII): 10 questions
+  Introduction emails, newsletter signup, account creation, contact forms.
+
+GROUP 14 — Name + phone (2 PII): 8 questions
+  Appointment booking, callback requests, HR onboarding forms.
+
+GROUP 15 — Name + SSN (2 PII — HIGH quasi-ID risk): 8 questions
+  Tax returns, Social Security benefits, employment verification.
+  This combination triggers the Name+SSN quasi-identifier warning.
+
+GROUP 16 — Name + DOB (2 PII — HIGH quasi-ID risk): 7 questions
+  Identity verification, insurance enrollment, government services.
+
+GROUP 17 — Email + phone (2 PII): 6 questions
+  Contact information updates, two-factor setup, customer service.
+
+GROUP 18 — ZIP + DOB (2 PII — quasi-ID): 5 questions
+  Voter registration, local service eligibility, benefits enrollment.
+  These two together re-identify 63% of US population (Sweeney 2000).
+
+GROUP 19 — Name + email + phone (3 PII): 8 questions
+  Professional contact cards, HR forms, CRM entries.
+  Contexts: job application, patient intake, customer registration.
+
+GROUP 20 — Name + SSN + DOB (3 PII — MAXIMUM quasi-ID risk): 6 questions
+  Loan applications, background checks, federal forms.
+  These three together enable direct identity theft.
+
+GROUP 21 — Name + org + gpe (3 PII): 6 questions
+  LinkedIn-style professional queries, employee directory lookups.
+  Use small/mid-size cities for gpe (not major metros like NYC/LA).
+  Example gpe values: "Tempe", "Burlington", "Naperville", "Bozeman".
+
+GROUP 22 — Credit card + name + address (3 PII): 5 questions
+  Payment disputes, fraud reports, billing address updates.
+
+GROUP 23 — Name + email + phone + address (4+ PII): 6 questions
+  Comprehensive intake forms, patient registration, mortgage application.
+  The maximum PII density scenario.
+
+GROUP 24 — API key + org or IP context (2 PII): 4 questions
+  Developer accidentally pastes API key while asking for code help.
+  Some include the company name or server IP alongside the key.
+
+GROUP 25 — Sensitive topic queries (service query OVERRIDE): 8 questions
+  These contain an address BUT also contain a sensitive keyword 
+  (medical, legal, mental health, immigration, domestic violence, rehab)
+  which OVERRIDES service query detection and forces full anonymization.
+  Include the address in the Answer-Key since it should be fully replaced.
+  Example: "Find an HIV testing clinic near 500 Oak Street, Austin, TX"
+  Answer-Key: {"address": "500 Oak Street, Austin, TX"}
+
+GROUP 26 — Gender indicator (1-2 PII): 4 questions
+  Explicit gender declarations: "I am a female engineer", "gender: male",
+  "she/her pronouns". Combine with name or DOB for quasi-ID testing.
+
+GROUP 27 — International phone + name (2 PII): 5 questions
+  International contacts: Germany (+49), India (+91), Brazil (+55),
+  Japan (+81), Nigeria (+234). Professional contexts.
+
+GROUP 28 — New entity types (LESS FOCUS): 8 questions
+  2 with crypto wallet address only
+  2 with bank routing number only (in context: "routing number 021000021")
+  2 with driver's license: DL + name
+  2 with driver's license + DOB
+
+---
+
+QUALITY REQUIREMENTS:
+
+1. Every question must read as a realistic, natural LLM user query —
+   something a real person would actually type to Claude or ChatGPT.
+
+2. PII values must be completely fake but realistic-looking. Never use
+   real people's information.
+
+3. SSNs: XXX-XX-XXXX format, never 000, 666, or 900-999 area numbers.
+
+4. Credit cards: must pass Luhn validation. 
+   Visa: starts with 4, 16 digits. 
+   Mastercard: starts with 51-55, 16 digits.
+
+5. Phone numbers must look real. Do NOT use 555 numbers.
+   US format examples: 480-392-7714, (312) 849-2031, +1-617-493-8820
+
+6. Addresses must have: house number + street name + valid suffix 
+   (Blvd, Ave, St, Dr, Rd, Ln, Way, Ct) + city + 2-letter state.
+
+7. Names must be ethnically diverse across all 200 questions.
+   Include: South Asian, East Asian, West African, Latin American,
+   Middle Eastern, Eastern European, Western European names.
+   No more than 10 questions should use common Anglo names.
+
+8. Vary the LLM task types across all questions:
+   drafting emails/letters, tax questions, medical forms, legal help,
+   HR requests, tech support, financial questions, travel planning,
+   resignation letters, cover letters, lease agreements, scheduling,
+   recipe requests, coding help, data entry tasks.
+
+9. For service query questions (GROUP 6): the question MUST contain
+   a navigation/service keyword (near, directions to, find a, 
+   restaurants near, pharmacy near, closest) AND a full street address.
+
+10. Do not reuse the same name, SSN, email, phone, or address across
+    multiple questions.
+
+Output: raw JSON array only, 200 entries exactly.
