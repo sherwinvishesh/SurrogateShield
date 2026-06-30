@@ -1,5 +1,7 @@
 # Experiment Folder
 
+> Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 This folder holds all input question sets and their corresponding outputs used for batch testing SurrogateShield.
 
 

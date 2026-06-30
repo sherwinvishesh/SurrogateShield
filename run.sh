@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
 # ─────────────────────────────────────────────────────────────────────────────
 # run.sh — SurrogateShield launcher
 #

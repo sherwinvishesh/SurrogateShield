@@ -1,3 +1,5 @@
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 """
 detection/context_guard.py — ContextGuard
 

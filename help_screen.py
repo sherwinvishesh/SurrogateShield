@@ -1,3 +1,5 @@
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 """
 help_screen.py — SurrogateShield help content (displayed via main menu H key).
 """

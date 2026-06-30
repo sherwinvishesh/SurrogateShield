@@ -1,3 +1,5 @@
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 """
 test7.py — SurrogateShield Python Library Tests
 

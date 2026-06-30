@@ -25,7 +25,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-green" alt="License"></a>
   <img src="https://img.shields.io/badge/spaCy-3.7%2B-09A3D5?logo=spacy&logoColor=white" alt="spaCy">
   <img src="https://img.shields.io/badge/encryption-AES--256--GCM-blueviolet" alt="AES-256-GCM">
-  <img src="https://img.shields.io/badge/paper-under%20review-orange" alt="Paper under review">
+  <a href="https://arxiv.org/abs/2606.29567"><img src="https://img.shields.io/badge/arXiv-2606.29567-b31b1b.svg" alt="arXiv"></a>
   <br/>
   <a href="https://sherwinvishesh.github.io/SurrogateShield/"><img src="https://img.shields.io/badge/website-SurrogateShield-1f6feb?logo=githubpages&logoColor=white" alt="Website"></a>
   <a href="https://sherwinvishesh.github.io/SurrogateShield/docs.html"><img src="https://img.shields.io/badge/docs-read%20now-0d9488?logo=readthedocs&logoColor=white" alt="Documentation"></a>

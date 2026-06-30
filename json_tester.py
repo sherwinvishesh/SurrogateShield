@@ -1,3 +1,5 @@
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 """
 json_tester.py — Batch JSON testing for SurrogateShield.
 

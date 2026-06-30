@@ -1,3 +1,5 @@
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 """
 test2.py — SurrogateShield Live Fix Verification
 

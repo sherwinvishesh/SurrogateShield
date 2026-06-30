@@ -1,3 +1,5 @@
+# Paper available on arXiv: https://arxiv.org/abs/2606.29567
+
 """
 Apply [ENTITY_TYPE] redaction using Presidio detection results.
 Produces the text that Presidio would send to an LLM.
