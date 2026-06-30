@@ -4,6 +4,8 @@ SurrogateShield is a Python library that acts as a privacy-preserving proxy betw
 
 The library is self-contained, requires no external API, and works with any LLM provider: Anthropic Claude, OpenAI, Google Gemini, or a locally-hosted model.
 
+Paper available on arXiv: [https://arxiv.org/abs/2606.29567](https://arxiv.org/abs/2606.29567)
+
 
 ## Why SurrogateShield exists
 

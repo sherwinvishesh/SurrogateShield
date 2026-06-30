@@ -41,6 +41,7 @@ Homepage = "https://sherwinvishesh.github.io/SurrogateShield/"
 Repository = "https://github.com/sherwinvishesh/SurrogateShield"
 Documentation = "https://sherwinvishesh.github.io/SurrogateShield/docs.html"
 "Bug Tracker" = "https://github.com/sherwinvishesh/SurrogateShield/issues"
+Paper = "https://arxiv.org/abs/2606.29567"
 
 [project.optional-dependencies]
 display = ["rich>=13.7.0"]
