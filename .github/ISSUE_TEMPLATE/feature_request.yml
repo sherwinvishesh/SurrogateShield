@@ -1,0 +1,77 @@
+name: ✨ Feature request
+description: Suggest a new PII type, detector, provider, or capability
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement to SurrogateShield.
+
+        If you're proposing a **new PII type**, note that a full round-trip usually
+        touches detection, surrogate generation, evaluation labels, the standalone
+        library, tests, and docs — see the *Adding a new PII type* checklist in
+        [CONTRIBUTING.md](https://github.com/sherwinvishesh/SurrogateShield/blob/main/CONTRIBUTING.md).
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: What kind of feature is this?
+      options:
+        - New PII type / detection pattern
+        - Improved detection accuracy (fewer misses / false positives)
+        - New surrogate generator
+        - New LLM provider
+        - Evaluation / experiment capability
+        - Python library API
+        - Dashboard / CLI / UX
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What are you trying to do, and what's currently missing or painful?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior you'd like. Use fake example values where helpful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy impact
+      description: SurrogateShield's core guarantee is that no real PII leaves the device.
+      options:
+        - label: I have considered whether this change could cause real PII to reach an LLM, a log, or an unencrypted file.
+          required: true
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to help implement this.
+          required: false

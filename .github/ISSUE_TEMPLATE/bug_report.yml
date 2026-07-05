@@ -1,0 +1,116 @@
+name: 🐛 Bug report
+description: Report a problem with detection, masking, reconstruction, or the app
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report.
+
+        ⚠️ **Do not paste real PII.** Use clearly fake values (e.g. `544-87-2944`,
+        `jdoe@example.net`, `Sarah Mitchell`) when showing example input/output.
+
+        If this is a **security or privacy vulnerability** (e.g. real PII reaching an
+        LLM), please **do not** file it here — follow the
+        [Security Policy](https://github.com/sherwinvishesh/SurrogateShield/blob/main/SECURITY.md) instead.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight checklist
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I am running inside an activated virtual environment (`.venv`).
+          required: true
+        - label: This report contains **no real PII** — only synthetic example values.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area is affected?
+      options:
+        - Detection (PatternScan / EntityTrace / ContextGuard)
+        - Surrogate generation (MimicGen)
+        - Storage / encryption (ShadowMap)
+        - Reconstruction (ResolvePass)
+        - Service-query / address fuzzing
+        - Evaluation / JSON Test / Attacker Experiment
+        - RAG
+        - Dashboard / CLI
+        - Python library (surrogateshield pip package)
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and its impact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps, commands, or code (library snippet) to reproduce. Use fake PII.
+      placeholder: |
+        1. Run `python main.py pii-finder`
+        2. Enter: "My name is Sarah Mitchell, SSN 544-87-2944"
+        3. ...
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior (logs / output)
+      description: Paste relevant output. Scrub anything sensitive.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Output of `pip show surrogateshield` version, or the git commit hash.
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.11.6"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15.3 / Ubuntu 22.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: LLM provider (if relevant)
+      options:
+        - "Not relevant / offline"
+        - Claude
+        - Gemini
+        - ChatGPT
+        - Local (Ollama)

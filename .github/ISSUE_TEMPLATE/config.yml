@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security or privacy vulnerability
+    url: https://github.com/sherwinvishesh/SurrogateShield/security/advisories/new
+    about: Please report PII leaks and other vulnerabilities privately — never in a public issue. See SECURITY.md.
+  - name: 📚 Documentation & usage
+    url: https://sherwinvishesh.github.io/SurrogateShield/docs.html
+    about: Read the docs before filing — many questions are answered there.
+  - name: 💬 Questions & discussion
+    url: https://github.com/sherwinvishesh/SurrogateShield/discussions
+    about: For open-ended questions and ideas that aren't yet a bug or feature request.
