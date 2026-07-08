@@ -259,6 +259,14 @@
     color: #051210;
     border-color: #6ff5dd;
   }
+  .btn-glow { animation: btnGlow 2.6s ease-in-out infinite; }
+  @keyframes btnGlow {
+    0%, 100% { box-shadow: 0 0 0 1px var(--neon), 0 0 24px rgba(79, 240, 212, 0.28); }
+    50%      { box-shadow: 0 0 0 1px var(--neon), 0 0 42px rgba(79, 240, 212, 0.60); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-glow { animation: none; }
+  }
   .btn .arrow { font-size: 15px; }
 
   /* Hero stat strip */
@@ -686,6 +694,74 @@
   .code-body .p { color: var(--amber); }
   .code-body .v { color: var(--coral); }
   .code-body .prompt { color: var(--dim); user-select: none; }
+
+  /* ---- Citation tool ---- */
+  .cite-card {
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    overflow: hidden;
+  }
+  .cite-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 12px 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-elev2);
+    flex-wrap: wrap;
+  }
+  .cite-formats { display: flex; flex-wrap: wrap; gap: 4px; }
+  .cite-tab {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .cite-tab:hover { color: var(--text); }
+  .cite-tab.active {
+    color: var(--neon);
+    border-color: var(--neon);
+    background: rgba(79, 240, 212, 0.06);
+  }
+  .cite-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 14px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cite-copy:hover,
+  .cite-copy.copied {
+    border-color: var(--neon);
+    color: var(--neon);
+    background: rgba(79, 240, 212, 0.06);
+  }
+  .cite-copy-icon { font-size: 13px; line-height: 1; }
+  .cite-body {
+    margin: 0;
+    padding: 22px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-x: auto;
+  }
 
   /* ---- Architecture tree ---- */
   .tree-wrap {
@@ -1448,6 +1524,7 @@
       <a href="#evaluation">Evaluation</a>
       <a href="#library">Library</a>
       <a href="#install">Install</a>
+      <a href="#cite">Cite</a>
     </div>
     <a href="docs.html" class="nav-cta">Docs →</a>
   </div>
@@ -1488,9 +1565,9 @@
     </p>
 
     <div class="hero-ctas">
-      <a href="#install" class="btn btn-primary">Install in 30 seconds <span class="arrow">→</span></a>
-      <a href="#library" class="btn">Use the library</a>
+      <a href="#library" class="btn btn-primary btn-glow">Use the library <span class="arrow">→</span></a>
       <a href="#how-it-works" class="btn">See the pipeline</a>
+      <a href="https://arxiv.org/abs/2606.29567" class="btn" target="_blank" rel="noopener">arXiv <span class="arrow">↗</span></a>
     </div>
 
     <div class="stat-strip">
@@ -2835,6 +2912,36 @@ shield.<span class="k">flush</span>()</pre>
   </div>
 </section>
 
+<!-- ============== CITE ============== -->
+<section id="cite">
+  <div class="container">
+    <div class="section-num">14 / CITE</div>
+    <div class="eyebrow">Citation</div>
+    <h2 class="section-title">Cite this work.</h2>
+    <p class="section-lede">
+      SurrogateShield is described in our paper on <a href="https://arxiv.org/abs/2606.29567" target="_blank" rel="noopener" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">arXiv</a>. Pick a format and copy — BibTeX is the default.
+    </p>
+
+    <div class="cite-card" style="margin-top: 48px;">
+      <div class="cite-header">
+        <div class="cite-formats" role="tablist" aria-label="Citation format">
+          <button class="cite-tab active" data-fmt="bibtex" role="tab" aria-selected="true">BibTeX</button>
+          <button class="cite-tab" data-fmt="apa" role="tab" aria-selected="false">APA</button>
+          <button class="cite-tab" data-fmt="mla" role="tab" aria-selected="false">MLA</button>
+          <button class="cite-tab" data-fmt="chicago" role="tab" aria-selected="false">Chicago</button>
+          <button class="cite-tab" data-fmt="ieee" role="tab" aria-selected="false">IEEE</button>
+          <button class="cite-tab" data-fmt="harvard" role="tab" aria-selected="false">Harvard</button>
+        </div>
+        <button class="cite-copy" id="citeCopy" type="button" aria-label="Copy citation to clipboard">
+          <span class="cite-copy-icon" aria-hidden="true">⧉</span>
+          <span class="cite-copy-label">Copy</span>
+        </button>
+      </div>
+      <pre class="cite-body" id="citeBody"></pre>
+    </div>
+  </div>
+</section>
+
 <!-- ============== FOOTER ============== -->
 <footer>
   <div class="container">
@@ -2863,6 +2970,7 @@ shield.<span class="k">flush</span>()</pre>
         <a href="#library">Python library</a>
         <a href="#cli">CLI reference</a>
         <a href="#architecture">Architecture</a>
+        <a href="#cite">Cite this work</a>
       </div>
     </div>
     <div class="colophon" style="width: 100%;">
@@ -3060,6 +3168,90 @@ shield.<span class="k">flush</span>()</pre>
     });
   }, { threshold: 0.25 });
   io.observe(panel);
+})();
+</script>
+
+<!-- ============== CITATION TOOL ============== -->
+<script>
+(function() {
+  const citations = {
+    bibtex: `@ARTICLE{2026arXiv260629567V,
+       author = {{Jathanna}, Sherwin Vishesh},
+        title = "{SurrogateShield: Beyond Redaction for High-Utility, Privacy-Preserving LLM Interactions}",
+      journal = {arXiv e-prints},
+     keywords = {Cryptography and Security, Computation and Language, K.4.1; I.2.7},
+         year = 2026,
+        month = jun,
+          eid = {arXiv:2606.29567},
+        pages = {arXiv:2606.29567},
+          doi = {10.48550/arXiv.2606.29567},
+archivePrefix = {arXiv},
+       eprint = {2606.29567},
+ primaryClass = {cs.CR}
+}`,
+    apa: "Jathanna, S. V. (2026). SurrogateShield: Beyond Redaction for High-Utility, Privacy-Preserving LLM Interactions. arXiv preprint arXiv:2606.29567. https://doi.org/10.48550/arXiv.2606.29567",
+    mla: "Jathanna, Sherwin Vishesh. “SurrogateShield: Beyond Redaction for High-Utility, Privacy-Preserving LLM Interactions.” arXiv, 2026, arxiv.org/abs/2606.29567.",
+    chicago: "Jathanna, Sherwin Vishesh. “SurrogateShield: Beyond Redaction for High-Utility, Privacy-Preserving LLM Interactions.” arXiv preprint arXiv:2606.29567 (2026). https://doi.org/10.48550/arXiv.2606.29567.",
+    ieee: "S. V. Jathanna, “SurrogateShield: Beyond Redaction for High-Utility, Privacy-Preserving LLM Interactions,” arXiv:2606.29567 [cs.CR], Jun. 2026, doi: 10.48550/arXiv.2606.29567.",
+    harvard: "Jathanna, S.V. (2026) ‘SurrogateShield: Beyond Redaction for High-Utility, Privacy-Preserving LLM Interactions’, arXiv:2606.29567 [cs.CR]. Available at: https://doi.org/10.48550/arXiv.2606.29567."
+  };
+
+  const body = document.getElementById("citeBody");
+  const copyBtn = document.getElementById("citeCopy");
+  const copyLabel = copyBtn ? copyBtn.querySelector(".cite-copy-label") : null;
+  const tabs = Array.from(document.querySelectorAll(".cite-tab"));
+  let current = "bibtex";
+  let resetTimer = null;
+
+  function render(fmt) {
+    if (!citations[fmt]) return;
+    current = fmt;
+    body.textContent = citations[fmt];
+    tabs.forEach(t => {
+      const active = t.dataset.fmt === fmt;
+      t.classList.toggle("active", active);
+      t.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  }
+
+  tabs.forEach(t => t.addEventListener("click", () => render(t.dataset.fmt)));
+
+  function flashCopied() {
+    if (!copyBtn) return;
+    copyBtn.classList.add("copied");
+    if (copyLabel) copyLabel.textContent = "Copied";
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      copyBtn.classList.remove("copied");
+      if (copyLabel) copyLabel.textContent = "Copy";
+    }, 1800);
+  }
+
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise((resolve, reject) => {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); resolve(); }
+      catch (e) { reject(e); }
+      finally { document.body.removeChild(ta); }
+    });
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      copyText(citations[current]).then(flashCopied).catch(() => {});
+    });
+  }
+
+  render("bibtex");
 })();
 </script>
 
