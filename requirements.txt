@@ -23,3 +23,6 @@ sentence-transformers>=2.7.0
 
 # Optional — required only when CONTEXT_GUARD_FALLBACK_TO_OLLAMA=True
 ollama>=0.1.8
+
+# Development — test suite (python -m pytest tests/)
+pytest>=8.0.0

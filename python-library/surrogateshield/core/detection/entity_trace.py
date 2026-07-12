@@ -63,6 +63,11 @@ _ENTITY_BLOCKLIST = {
     "jan", "feb", "mar", "apr", "jun", "jul", "aug",
     "sep", "oct", "nov", "dec",
     "am", "pm", "gmt", "utc", "est", "pst",
+    # generic tech/domain acronyms spaCy mislabels as ORG/GPE.
+    # (ssh/ux/sql are intentionally NOT here — they occur as real ORG names.)
+    "api", "ip", "url", "http", "https", "sti", "std", "faq",
+    "crm", "pdf", "dns", "vpn", "cpu", "gpu", "html", "css",
+    "bearer", "bear", "token", "auth",
 }
 
 _LOCATION_PREPS = {

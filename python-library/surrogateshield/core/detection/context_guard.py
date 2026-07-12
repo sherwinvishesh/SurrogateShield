@@ -27,31 +27,32 @@ logger = logging.getLogger(__name__)
 _ner_pipelines: Dict[str, object] = {}
 
 
-def _get_ner(model_name: str = "dslim/distilbert-NER"):
-    """Lazy-load and cache the HuggingFace NER pipeline by model name."""
+def _get_ner(model_name: str = "dslim/distilbert-NER", device: int = -1):
+    """Lazy-load and cache the HuggingFace NER pipeline by (model, device)."""
     global _ner_pipelines
-    if model_name in _ner_pipelines:
-        return _ner_pipelines[model_name]
+    cache_key = (model_name, device)
+    if cache_key in _ner_pipelines:
+        return _ner_pipelines[cache_key]
     try:
         from transformers import pipeline as hf_pipeline
         pipeline = hf_pipeline(
             "ner",
             model=model_name,
             aggregation_strategy="simple",
-            device=-1,
+            device=device,
         )
-        _ner_pipelines[model_name] = pipeline
-        logger.info(f"[ContextGuard] Loaded NER model: {model_name}")
+        _ner_pipelines[cache_key] = pipeline
+        logger.info(f"[ContextGuard] Loaded NER model: {model_name} (device={device})")
     except ImportError:
         logger.warning(
             "[ContextGuard] transformers not installed — skipping. "
             "Run: pip install transformers torch"
         )
-        _ner_pipelines[model_name] = None
+        _ner_pipelines[cache_key] = None
     except Exception as exc:
         logger.warning(f"[ContextGuard] Failed to load NER model: {exc}")
-        _ner_pipelines[model_name] = None
-    return _ner_pipelines[model_name]
+        _ner_pipelines[cache_key] = None
+    return _ner_pipelines[cache_key]
 
 
 _LABEL_MAP = {
@@ -69,6 +70,10 @@ _CG_BLOCKLIST: frozenset = frozenset({
     "dr", "mr", "mrs", "ms", "prof", "professor", "rev", "sr", "jr",
     "sir", "lord", "dame", "capt", "lt", "sgt", "col", "gen",
     "de", "le", "la", "el", "al", "van", "von",
+    # generic tech/domain acronyms the NER model mistakes for ORGs.
+    # (ssh/ux/sql intentionally excluded — they occur as real ORG names.)
+    "api", "ip", "sti", "std", "url", "http", "https",
+    "faq", "crm", "pdf", "dns", "vpn", "bear", "bearer",
 })
 
 
@@ -85,6 +90,7 @@ def guard(
     model_name: str = "dslim/distilbert-NER",
     enabled: bool = True,
     confidence_threshold: float = 0.70,
+    device: int = -1,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Run NER on remaining_text and verify borderline_entities.
@@ -121,7 +127,7 @@ def guard(
     if not clean:
         return confirmed, uncertain
 
-    ner = _get_ner(model_name)
+    ner = _get_ner(model_name, device)
     if ner is None:
         return confirmed, uncertain
 

@@ -26,6 +26,7 @@ from typing import List, Tuple
 
 from config import (
     CONTEXT_GUARD_MODEL,
+    CONTEXT_GUARD_DEVICE,
     CONTEXT_GUARD_ENABLED,
     CONTEXT_GUARD_CONFIDENCE_THRESHOLD,
 )
@@ -47,9 +48,12 @@ def _get_ner():
             "ner",
             model=CONTEXT_GUARD_MODEL,
             aggregation_strategy="simple",
-            device=-1,
+            device=CONTEXT_GUARD_DEVICE,
         )
-        logger.info(f"[ContextGuard] Loaded NER model: {CONTEXT_GUARD_MODEL}")
+        logger.info(
+            f"[ContextGuard] Loaded NER model: {CONTEXT_GUARD_MODEL} "
+            f"(device={CONTEXT_GUARD_DEVICE})"
+        )
     except ImportError:
         logger.warning(
             "[ContextGuard] transformers not installed — skipping. "
@@ -79,6 +83,10 @@ _CG_BLOCKLIST: frozenset = frozenset({
     "dr", "mr", "mrs", "ms", "prof", "professor", "rev", "sr", "jr",
     "sir", "lord", "dame", "capt", "lt", "sgt", "col", "gen",
     "de", "le", "la", "el", "al", "van", "von",
+    # generic tech/domain acronyms the NER model mistakes for ORGs.
+    # (ssh/ux/sql intentionally excluded — they occur as real ORG names.)
+    "api", "ip", "sti", "std", "url", "http", "https",
+    "faq", "crm", "pdf", "dns", "vpn", "bear", "bearer",
 })
 
 

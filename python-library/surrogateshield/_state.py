@@ -26,6 +26,18 @@ class _Config:
     context_guard_threshold: float = 0.70
     entity_trace_fallback_threshold: float = 0.65
     fuzzy_threshold: int = 85
+    # ── Address handling (v2) ────────────────────────────────────────────
+    # "shift"   → house number ±address_shift_range, everything else kept
+    # "replace" → structure-preserving fake address
+    # "auto"    → shift for service queries, replace otherwise
+    address_mode: str = "shift"
+    address_shift_range: int = 1
+    # Opt-in Nominatim existence check (network!). Never on the hot path
+    # unless explicitly enabled.
+    verify_addresses: bool = False
+    # ── ContextGuard model (v2: configurable, was hard-coded) ────────────
+    context_guard_model: str = "dslim/distilbert-NER"
+    context_guard_device: int = -1
 
 
 class _Session:

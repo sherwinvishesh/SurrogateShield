@@ -151,14 +151,37 @@ Four additional passes run on the combined entity set:
 | C: PERSON component dedup | Removes standalone surnames that are sub-components of already-detected full names |
 | D: Topical geo-entity filter | Drops a GPE/LOC only if it appears exclusively in knowledge-query sub-clauses |
 
+#### Address parser (`detection/address_parser.py`) — v2
+
+The canonical structured parser is the single source of truth for "what is an
+address". It captures the FULL span — house number, pre/post directionals,
+street name (including ordinals like "5th"), suffix, apartment/suite/unit,
+city, state (full names + uppercase 2-letter abbreviations), and ZIP/ZIP+4 —
+as ONE entity, so components are never surrogated independently. PO boxes,
+multi-line mailing blocks, comma-free formats, and highway forms
+("1500 Highway 50") are all recognized, and a two-tier suffix system plus a
+plausibility validator rejects prose like "3 point turn" or "5 stars".
+
+How the surrogate is built is controlled by `ADDRESS_MODE` in `config.py`:
+
+| Mode | Behaviour |
+|---|---|
+| `"shift"` *(default)* | Only the house number changes, by up to ±`ADDRESS_SHIFT_RANGE` (default ±1, ~one building). Street, city, state, ZIP, and formatting preserved **byte-for-byte**. |
+| `"replace"` | Structure-preserving fake — every component replaced by a fake of the same shape, in the same slot. No real component reaches the LLM. |
+| `"auto"` | The v1 context-aware behaviour: shift for service queries, replace otherwise. |
+
+A shifted address never collides with another real address in the
+conversation, house number 1 always shifts up (never to 0), and leading
+zeros / alpha suffixes ("0123", "123A") are preserved.
+
 #### ServiceQueryDetector (`detection/service_query.py`)
 
 Identifies messages like "restaurants near 1126 E Apache Blvd, Tempe, AZ" and applies a lighter touch:
 
-- Street addresses get the **house number shifted by ±2–8** (max geographic error ~100 m), street name and city preserved
 - City/state names are **not replaced**: the LLM needs them to give useful answers
+- Drives the shift-vs-replace decision when `ADDRESS_MODE="auto"`
 - A sensitive-topic override (medical, legal, shelter, immigration keywords) forces full anonymisation regardless of query structure
-- Address existence is verified via OpenStreetMap Nominatim (optional, skippable in offline environments)
+- Address existence can be verified via OpenStreetMap Nominatim (`SERVICE_QUERY_VERIFY_ADDRESSES=True`; **off by default** — it is a network call per address)
 
 #### Quasi-Identifier Scorer (`detection/quasi_identifier.py`)
 
@@ -185,7 +208,8 @@ Generates type-consistent surrogates using [Faker](https://faker.readthedocs.io/
 | `phone_us` | `+1-###-###-####` |
 | `phone_uk` | `+44 7### ######` |
 | `phone_intl` | `+49 8234 927461` |
-| `address` | `789 Crescent Row, Springfield, IL` |
+| `address` (shift mode) | `790 Crescent Row, Springfield, IL` for `789 Crescent Row, Springfield, IL` — number ±1, everything else byte-identical |
+| `address` (replace mode) | `412 Nguyen Row, South Debra, PR 90830` — same structure, every component fake |
 | `credit_card` | Valid Luhn-format number |
 | `dob` | `MM/DD/YYYY` (age 18–80) |
 | `ip_address` | `10.x.x.x` |
@@ -408,9 +432,12 @@ Hard-coded thresholds and flags. Edit the file directly to change them; no resta
 | `ENTITY_TRACE_LOW_THRESHOLD` | `0.60` | spaCy score above which an entity is forwarded to ContextGuard |
 | `CONTEXT_GUARD_CONFIDENCE_THRESHOLD` | `0.70` | distilbert score required to confirm a borderline entity |
 | `ENTITY_TRACE_FALLBACK_THRESHOLD` | `0.65` | Score used when ContextGuard is disabled to promote borderline entities |
-| `FUZZY_MATCH_THRESHOLD` | `85` | rapidfuzz `partial_ratio` threshold for ResolvePass reconstruction |
-| `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Enable the lightweight address-fuzzing path for location queries |
-| `SERVICE_QUERY_VERIFY_ADDRESSES` | `True` | Verify fuzzed addresses via OpenStreetMap Nominatim (disable for offline use) |
+| `FUZZY_MATCH_THRESHOLD` | `85` | rapidfuzz threshold for ResolvePass reconstruction |
+| `ADDRESS_MODE` | `"shift"` | Address surrogation: `"shift"` (house number ±range), `"replace"` (structure-preserving fake), or `"auto"` (context-aware) |
+| `ADDRESS_SHIFT_RANGE` | `1` | Max house-number delta for shift mode (~one building at ±1) |
+| `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Suppress standalone city/state replacement for location queries; drives `ADDRESS_MODE="auto"` |
+| `SERVICE_QUERY_VERIFY_ADDRESSES` | `False` | Verify addresses via OpenStreetMap Nominatim. **Off by default** — a network call per address |
+| `CONTEXT_GUARD_DEVICE` | `-1` | ContextGuard inference device: `-1` = CPU, `0+` = GPU id |
 | `SHOW_API_TRANSPARENCY` | `True` | Show the sent / received / restored transparency panel after each chat turn |
 | `RAG_TOP_K` | `3` | Number of document chunks retrieved per RAG query |
 | `RAG_CHUNK_SIZE` | `512` | Characters per chunk when splitting indexed documents |
@@ -501,6 +528,33 @@ Press `J` in the dashboard, enter the filename, select which fields to capture, 
 | `bertscore_presidio` | BERTScore of original vs Presidio sanitised input |
 
 By default, `presidio_sanitized_input`, `presidio_found_piis`, `bertscore_ss`, and `bertscore_presidio` are **off**: enable them in the field selection screen to generate data for the Presidio comparison and BERTScore tables in Evaluation.
+
+### Offline detection evaluation (no LLM, no API key)
+
+`offline_eval.py` scores the detection cascade directly against a key file — no
+LLM calls, nothing leaves the machine. It is the fastest way to measure
+detection accuracy while iterating:
+
+```bash
+# Overall + per-type precision / recall / F1 against the 1124-question set
+python offline_eval.py --key experiment/test_key.json
+
+# Write full results (including every miss and false positive) to JSON
+python offline_eval.py --key experiment/test_key.json --json experiment/offline_eval_v2.json
+
+# Focus on one type, cap the run, or use exact (v1-comparable) matching
+python offline_eval.py --key experiment/test_key.json --types address --limit 200
+python offline_eval.py --key experiment/test_key.json --strict
+
+# Lint a key file for corrupt ground-truth values (values absent from the
+# question, addresses that don't parse) — no models needed
+python offline_eval.py --key experiment/experiment_key.json --lint-key
+```
+
+Default matching is span-aware: because v2 detects addresses as full spans
+(`6720 Palm Dr, Phoenix, AZ`) while the ground truth annotates components
+separately, a key value counts as found when a detected span contains it.
+`--strict` falls back to exact string equality.
 
 ### Evaluation (Precision / Recall / F1)
 

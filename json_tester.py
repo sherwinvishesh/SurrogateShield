@@ -106,21 +106,25 @@ def _process_one(
             timings["context_guard_ms"] = _ms(t)
 
     # ── Detection (authoritative results with all post-processing passes) ──────
-    from detection.service_query import is_service_query, fuzz_addresses
-    from config import SERVICE_QUERY_DETECTION_ENABLED
+    from detection.service_query import is_sensitive_topic, is_service_query
+    from config import (
+        ADDRESS_MODE,
+        ADDRESS_SHIFT_RANGE,
+        SERVICE_QUERY_DETECTION_ENABLED,
+    )
 
+    # Same address-mode resolution as pipeline.process_turn: addresses flow
+    # through the normal detect→generate path in every mode.
     is_svc = SERVICE_QUERY_DETECTION_ENABLED and is_service_query(question)
-    fuzzed_addresses: dict = {}
-    working_question = question
-
-    if is_svc:
-        from config import SERVICE_QUERY_VERIFY_ADDRESSES
-        working_question, fuzzed_addresses = fuzz_addresses(
-            question, verify=SERVICE_QUERY_VERIFY_ADDRESSES
+    if ADDRESS_MODE == "auto":
+        address_mode = (
+            "shift" if (is_svc and not is_sensitive_topic(question)) else "replace"
         )
+    else:
+        address_mode = ADDRESS_MODE
 
     confirmed, _ = run_cascade(
-        working_question,
+        question,
         skip_location_entities=is_svc,
     )
     confirmed = deduplicate(confirmed)
@@ -170,15 +174,6 @@ def _process_one(
                 "surrogate_status": "skipped",
                 "skip_reason":      _skip_reason,
             }
-        for original_addr, fuzzed_addr in fuzzed_addresses.items():
-            detail[original_addr] = {
-                "type":             "address",
-                "score":            1.0,
-                "source":           "pattern",
-                "surrogate_status": "fuzzed",
-                "skip_reason":      "service_query_fuzzed",
-                "fuzzed_to":        fuzzed_addr,
-            }
         answer["pii_detail"] = detail
 
     if fields.get("quasi_id_risks"):
@@ -202,7 +197,15 @@ def _process_one(
     if need_surrogates:
         t = time.time()
         mimic = MimicGen()
-        surrogate_map = mimic.generate_all(confirmed) if confirmed else {}
+        surrogate_map = (
+            mimic.generate_all(
+                confirmed,
+                address_mode=address_mode,
+                address_shift_range=ADDRESS_SHIFT_RANGE,
+            )
+            if confirmed
+            else {}
+        )
         if want_timings:
             timings["surrogate_gen_ms"] = _ms(t)
     elif want_timings:
@@ -211,10 +214,9 @@ def _process_one(
     if fields.get("surrogate_map"):
         answer["surrogate_map"] = surrogate_map
 
-    # ── Sanitized text ────────────────────────────────────────────────────────
-    sanitized = question
-    for orig in sorted(surrogate_map, key=len, reverse=True):
-        sanitized = sanitized.replace(orig, surrogate_map[orig])
+    # ── Sanitized text (span-safe; records what would ACTUALLY be sent) ──────
+    from util import apply_entity_surrogates
+    sanitized = apply_entity_surrogates(question, confirmed, surrogate_map)
 
     if fields.get("sanitized_input"):
         answer["sanitized_input"] = sanitized
@@ -232,14 +234,6 @@ def _process_one(
                     if is_svc
                     else "topical_geo_filtered"
                 ),
-            })
-
-        for original_addr, fuzzed_addr in fuzzed_addresses.items():
-            rnr_list.append({
-                "value":     original_addr,
-                "type":      "address",
-                "reason":    "service_query_fuzzed",
-                "fuzzed_to": fuzzed_addr,
             })
 
         answer["recognized_not_replaced"] = rnr_list

@@ -15,10 +15,11 @@ with default settings (which is harmless for tests).
 from __future__ import annotations
 
 import logging
+import re
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from rich.console import Console
 from rich.table import Table
@@ -70,6 +71,9 @@ class DetectedEntity:
         type:   PII type label (e.g. 'email', 'PERSON', 'implicit_location').
         score:  Confidence score in [0.0, 1.0]. PatternScan always yields 1.0.
         source: Which detector produced this entity ('pattern', 'ner', 'slm').
+        parsed: Structured payload for entities that carry one (addresses
+                carry a ParsedAddress from the canonical address parser).
+                Optional and unused by all non-address code paths.
     """
     text: str
     start: int
@@ -77,6 +81,7 @@ class DetectedEntity:
     type: str
     score: float = 1.0
     source: str = "pattern"
+    parsed: Optional[object] = field(default=None, compare=False)
 
     def overlaps(self, other: "DetectedEntity") -> bool:
         """Return True if this entity's span overlaps with another entity's span."""
@@ -171,6 +176,56 @@ def remove_span_overlap(candidate: DetectedEntity, existing: List[DetectedEntity
         True if there is an overlap (candidate should be skipped).
     """
     return any(candidate.overlaps(e) for e in existing)
+
+
+def apply_entity_surrogates(
+    text: str,
+    entities: List[DetectedEntity],
+    mapping: Dict[str, str],
+) -> str:
+    """
+    Replace each detected entity with its surrogate, span-safely.
+
+    Two stages:
+      1. Splice surrogates at the exact (start, end) offsets, right-to-left
+         so earlier offsets stay valid.  This guarantees a surrogate for one
+         entity can never rewrite text inside another entity's span (e.g. a
+         standalone "Tempe" surrogate must not touch the "Tempe" inside a
+         shift-mode address that is deliberately preserved).
+      2. A word-boundary pass replaces any ADDITIONAL occurrences of each
+         original outside the already-claimed spans, longest-original first
+         (preserves recall for repeated values the cascade only saw once).
+    """
+    if not mapping:
+        return text
+
+    # Stage 1 — span splice (right-to-left, skip overlaps defensively)
+    spliceable = sorted(
+        (e for e in entities if e.text in mapping and 0 <= e.start < e.end <= len(text)),
+        key=lambda e: e.start,
+        reverse=True,
+    )
+    claimed_end = len(text) + 1
+    result = text
+    for ent in spliceable:
+        if ent.end > claimed_end:
+            continue  # overlaps an entity already spliced
+        if result[ent.start:ent.end] != ent.text:
+            continue  # offsets no longer line up with the text — skip
+        result = result[:ent.start] + mapping[ent.text] + result[ent.end:]
+        claimed_end = ent.start
+
+    # Stage 2 — remaining occurrences of each original, outside surrogates.
+    # Longest originals first so substrings never clobber longer values.
+    for original in sorted(mapping, key=len, reverse=True):
+        if original in result:
+            pattern = re.compile(
+                r"(?<![\w])" + re.escape(original) + r"(?![\w])"
+            )
+            surrogate = mapping[original]
+            result = pattern.sub(lambda _m: surrogate, result)
+
+    return result
 
 
 def new_conversation_id() -> str:

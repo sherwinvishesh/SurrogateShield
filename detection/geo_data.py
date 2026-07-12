@@ -43,6 +43,19 @@ US_STATES: frozenset = frozenset({
     "district of columbia", "puerto rico", "guam",
 })
 
+# ── US state / territory USPS abbreviations (uppercase) ──────────────────────
+# Used by the address parser: a 2-letter token is only treated as a state when
+# it appears UPPERCASE and is in this set, so English words like "or", "in",
+# "me", "hi", "ok" can never be mistaken for Oregon, Indiana, Maine, …
+US_STATE_ABBREVS: frozenset = frozenset({
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY",
+    "DC", "PR", "GU", "VI", "AS", "MP",
+})
+
 # ── Major countries (full names + common abbreviations, lowercase) ────────────
 MAJOR_COUNTRIES: frozenset = frozenset({
     "united states", "united states of america", "usa", "us",

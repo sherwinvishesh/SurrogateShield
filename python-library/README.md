@@ -296,21 +296,59 @@ Available aliases and what they expand to:
 You can also pass raw type strings directly, e.g. `pii_off=["email", "dob", "ssn"]`.
 
 
-## Service query detection
+## Address handling (v2)
 
-When a user asks a location-based question such as "find a coffee shop near 99 Market Street", replacing the address with a completely different fake address would make the LLM's answer useless. SurrogateShield detects these service queries and applies minimal address fuzzing instead: the house number is shifted by exactly ±1 (maximum real-world displacement ~20 metres) while the street name, city, and state are preserved verbatim.
+Addresses are parsed by a canonical structured parser that captures the FULL
+address — house number, directionals, street, apartment/suite/unit, city,
+state, and ZIP — as one unit. Numbered streets ("123 5th Ave"), PO boxes,
+ZIP+4, multi-line mailing blocks, comma-free formats, and highway forms
+("1500 Highway 50") are all recognized, and the components are never
+surrogated independently (the v1 "garbled address" failure mode).
+
+How the surrogate is built is controlled by `address_mode`:
+
+| Mode | Behaviour |
+|------|-----------|
+| `"shift"` *(default)* | Only the house number changes, by up to ±`address_shift_range` (default ±1 — roughly one building). Street, city, state, ZIP, and the original formatting are preserved **byte-for-byte**: `789 Crescent Row, Tempe, AZ 85281` → `790 Crescent Row, Tempe, AZ 85281`. Maximum answer utility. |
+| `"replace"` | A structure-preserving fake: every component is replaced by a fake of the same shape in the same slot (`789 Crescent Row, Tempe, AZ 85281` → `412 Nguyen Row, South Debra, PR 90830`). Strongest privacy — no real component reaches the LLM. |
+| `"auto"` | The v1 smart behaviour: `shift` for service queries ("find a coffee shop near …"), `replace` for everything else. Sensitive topics (medical, legal, shelter-related) always force `replace`. |
 
 ```python
 import surrogateshield as shield
 
-# Service query detection is on by default (service=True)
-text = "Find a parking space near 42 Baker Street, London."
-sanitized = shield.mask(text)
-# Address becomes "43 Baker Street, London" or "41 Baker Street, London"
-# The model can still answer usefully about that neighbourhood
-print(sanitized)
+# default: shift mode
+sanitized = shield.mask("Find parking near 42 Baker Street, London.")
+# → "Find parking near 43 Baker Street, London." (or 41)
 
-# To disable service query detection and always apply full surrogates:
+# strongest privacy: full structure-preserving replacement
+shield.config(address_mode="replace")
+
+# the v1 context-aware behaviour
+shield.config(address_mode="auto")
+
+# widen the shift window to ±4
+shield.config(address_mode="shift", address_shift_range=4)
+```
+
+A shifted address never collides with another real address in the
+conversation ("789 Crescent Row" and "790 Crescent Row" both present are
+shifted apart automatically), and the same original always maps to the same
+surrogate within a session.
+
+Set `verify_addresses=True` to have each detected address checked against
+OpenStreetMap Nominatim. This makes a **network call per address** and is off
+by default — v2 never touches the network unless you opt in.
+
+
+## Service query detection
+
+Service queries ("find a coffee shop near …", directions, weather) suppress
+replacement of standalone city/state names so the LLM can give useful local
+answers, and drive the `shift`/`replace` decision when `address_mode="auto"`.
+
+```python
+# Service query detection is on by default (service=True)
+# To disable it and always treat messages uniformly:
 shield.config(service=False)
 ```
 
@@ -499,12 +537,43 @@ shield.config(
     # directly, since there is no ContextGuard to consult.
 
     fuzzy_threshold=85,
-    # The rapidfuzz partial_ratio score (0–100) used in the third
-    # reconstruction pass of unmask(). Lowering this value recovers more
-    # surrogates that the model reformatted, at the cost of a higher chance
-    # of incorrect replacements. 85 is a conservative default.
+    # The rapidfuzz score (0–100) used in the fuzzy reconstruction pass of
+    # unmask(). Lowering this value recovers more surrogates that the model
+    # reformatted, at the cost of a higher chance of incorrect replacements.
+    # 85 is a conservative default.
+
+    address_mode="shift",
+    # How detected addresses are surrogated:
+    #   "shift"   — house number shifted by up to ±address_shift_range;
+    #               street, city, state, ZIP, and formatting preserved
+    #               byte-for-byte (default).
+    #   "replace" — structure-preserving fake address (every component
+    #               faked, same shape, one unit).
+    #   "auto"    — shift for service queries, replace for everything else.
+    # Raises ValueError for any other value.
+
+    address_shift_range=1,
+    # Maximum house-number delta for shift mode. Must be an integer >= 1.
+    # ±1 keeps the geographic error to roughly one building.
+
+    verify_addresses=False,
+    # When True, each detected address is checked against OpenStreetMap
+    # Nominatim. This makes a NETWORK call per address (~1-2 s) — keep it
+    # False (default) unless you explicitly need existence verification.
+
+    context_guard_model="dslim/distilbert-NER",
+    # The HuggingFace model used by ContextGuard. Any token-classification
+    # model id works, e.g. "dslim/bert-base-NER" for higher recall at the
+    # cost of speed.
+
+    context_guard_device=-1,
+    # Device for ContextGuard inference: -1 = CPU (default), 0+ = GPU id.
 )
 ```
+
+Every parameter is validated: an unknown `address_mode`, a threshold outside
+its range, or an unrecognized `pii_off` entry raises `ValueError` with an
+actionable message instead of failing silently later.
 
 
 ## Full API reference

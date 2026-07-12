@@ -50,7 +50,16 @@ These are the **reference/ground-truth files**. Each entry pairs a question with
 
 **Files of this type:** `example_key.json`, `test_key.json`
 
-
+> **Ground-truth corrections (v2).** The v1 answer keys carried artifacts from
+> the LLM data-generation pipeline: "phantom" address values baked in from v1's
+> expected ±1 shift (e.g. `3406 Foxglove Ct` when the question only contained
+> `3405 Foxglove Ct`), a handful of regex-garbage addresses
+> (`"401 Unauthorized error when I pass"`), label/value swaps
+> (`{"name": "phone"}`), and unannotated international phones and JWT secrets. A
+> ground-truth value must appear verbatim in its question, so these were
+> removed or corrected. Run `python offline_eval.py --key experiment/test_key.json
+> --lint-key` to re-check any key file for values that are absent from their
+> question or addresses that do not parse.
 
 ### `*_answers.json`: Pipeline Output
 

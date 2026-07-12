@@ -23,6 +23,7 @@ CONTEXT_GUARD_CONFIDENCE_THRESHOLD: float = 0.70  # ContextGuard confidence → 
 # ContextGuard now uses a local HuggingFace model — no Ollama server needed.
 # First run will download ~250 MB from HuggingFace Hub (cached afterwards).
 CONTEXT_GUARD_MODEL: str = "dslim/distilbert-NER"
+CONTEXT_GUARD_DEVICE: int = -1                # -1 = CPU, >= 0 = GPU device id
 CONTEXT_GUARD_ENABLED: bool = True            # always on — no Ollama required
 CONTEXT_GUARD_FALLBACK_TO_OLLAMA: bool = False  # set True to use phi3:mini instead
 
@@ -72,16 +73,34 @@ AES_NONCE_SIZE: int = 12                         # GCM nonce length in bytes
 ENTITY_TRACE_FALLBACK_THRESHOLD: float = 0.65
 
 # ─────────────────────────────────────────────
+# Address handling (v2)
+# ─────────────────────────────────────────────
+
+# How detected addresses are surrogated:
+#   "shift"   — house number shifted by up to ±ADDRESS_SHIFT_RANGE; street,
+#               city, state, ZIP, and formatting preserved byte-for-byte
+#               (default — maximum answer utility, ~one-building error).
+#   "replace" — structure-preserving fake address (every component faked,
+#               same shape — strongest privacy).
+#   "auto"    — shift for service queries, replace for everything else
+#               (sensitive topics always force replace).
+ADDRESS_MODE: str = "shift"
+
+# Maximum house-number delta for shift mode (>= 1). ±1 keeps the geographic
+# error to roughly one building.
+ADDRESS_SHIFT_RANGE: int = 1
+
+# ─────────────────────────────────────────────
 # Service query detection
 # ─────────────────────────────────────────────
 
-# When True, messages matching service/knowledge query patterns receive minimal
-# address fuzzing (house-number shift ±2–8) instead of full surrogate replacement.
+# When True, service/knowledge queries suppress standalone city/state
+# replacement (preserves answer utility) and drive ADDRESS_MODE="auto".
 SERVICE_QUERY_DETECTION_ENABLED: bool = True
 
-# If True, each fuzzed address is verified via OpenStreetMap Nominatim (~1-2s per
-# address). Set False to skip network call (useful in tests or offline environments).
-SERVICE_QUERY_VERIFY_ADDRESSES: bool = True
+# If True, each detected address is verified via OpenStreetMap Nominatim
+# (~1-2s NETWORK call per address). Off by default — opt-in only.
+SERVICE_QUERY_VERIFY_ADDRESSES: bool = False
 
 # ─────────────────────────────────────────────
 # Logging / display
@@ -93,3 +112,44 @@ SHOW_DETECTION_TABLE: bool = True                # Print detection results in ch
 # Show a transparency panel after each turn: what was sent to Anthropic,
 # what raw response came back, and what the final restored output is.
 SHOW_API_TRANSPARENCY: bool = True
+
+# ─────────────────────────────────────────────
+# Version
+# ─────────────────────────────────────────────
+
+VERSION: str = "2.0.0"
+
+
+# ─────────────────────────────────────────────
+# Config validation (runs on import — fails fast on bad edits)
+# ─────────────────────────────────────────────
+
+def validate_config() -> None:
+    """Raise ValueError with an actionable message on any invalid setting."""
+    if ADDRESS_MODE not in ("shift", "replace", "auto"):
+        raise ValueError(
+            f"ADDRESS_MODE must be 'shift', 'replace', or 'auto', got {ADDRESS_MODE!r}"
+        )
+    if not isinstance(ADDRESS_SHIFT_RANGE, int) or ADDRESS_SHIFT_RANGE < 1:
+        raise ValueError(
+            f"ADDRESS_SHIFT_RANGE must be an integer >= 1, got {ADDRESS_SHIFT_RANGE!r}"
+        )
+    if not (0 <= FUZZY_MATCH_THRESHOLD <= 100):
+        raise ValueError(
+            f"FUZZY_MATCH_THRESHOLD must be in [0, 100], got {FUZZY_MATCH_THRESHOLD!r}"
+        )
+    for name, value in (
+        ("ENTITY_TRACE_HIGH_THRESHOLD", ENTITY_TRACE_HIGH_THRESHOLD),
+        ("ENTITY_TRACE_LOW_THRESHOLD", ENTITY_TRACE_LOW_THRESHOLD),
+        ("CONTEXT_GUARD_CONFIDENCE_THRESHOLD", CONTEXT_GUARD_CONFIDENCE_THRESHOLD),
+        ("ENTITY_TRACE_FALLBACK_THRESHOLD", ENTITY_TRACE_FALLBACK_THRESHOLD),
+    ):
+        if not (0.0 <= value <= 1.0):
+            raise ValueError(f"{name} must be in [0.0, 1.0], got {value!r}")
+    if not isinstance(CONTEXT_GUARD_DEVICE, int):
+        raise ValueError(
+            f"CONTEXT_GUARD_DEVICE must be an integer (-1 = CPU), got {CONTEXT_GUARD_DEVICE!r}"
+        )
+
+
+validate_config()

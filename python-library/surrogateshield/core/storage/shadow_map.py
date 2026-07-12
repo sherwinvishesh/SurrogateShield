@@ -57,6 +57,9 @@ class ShadowMap:
         self._session_id = session_id
         self._storage_dir = storage_dir
         self._mappings: Dict[str, str] = {}
+        # Forward index (original → surrogate), maintained alongside the main
+        # map so callers never have to copy + invert the whole map per call.
+        self._reverse: Dict[str, str] = {}
 
         if storage_dir is not None:
             self._dir = Path(storage_dir)
@@ -93,6 +96,8 @@ class ShadowMap:
     def update(self, new_mappings: Dict[str, str]) -> None:
         """Merge new surrogate→original mappings and persist if configured."""
         self._mappings.update(new_mappings)
+        for surrogate, original in new_mappings.items():
+            self._reverse[original] = surrogate
         if self._storage_dir is not None:
             self._save()
 
@@ -100,9 +105,19 @@ class ShadowMap:
         """Return a copy of all current surrogate→original mappings."""
         return dict(self._mappings)
 
+    def lookup_original(self, original: str) -> Optional[str]:
+        """Return the surrogate already issued for *original*, or None.
+        O(1) via the maintained forward index."""
+        return self._reverse.get(original)
+
+    def originals(self):
+        """View of all original values currently mapped (forward-index keys)."""
+        return self._reverse.keys()
+
     def flush(self) -> None:
         """Clear all mappings and delete disk files if in persistent mode."""
         self._mappings.clear()
+        self._reverse.clear()
         if self._storage_dir is not None:
             for path in (self._map_path, self._key_path):
                 if path is not None and path.exists():
@@ -143,6 +158,7 @@ class ShadowMap:
             aesgcm = AESGCM(derived)
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             self._mappings = json.loads(plaintext.decode("utf-8"))
+            self._reverse = {v: k for k, v in self._mappings.items()}
             logger.info(f"[ShadowMap] Loaded {len(self._mappings)} mappings from {self._map_path}")
         except Exception as exc:
             logger.warning(
@@ -150,6 +166,7 @@ class ShadowMap:
                 "Starting with empty mappings."
             )
             self._mappings = {}
+            self._reverse = {}
 
     def __len__(self) -> int:
         return len(self._mappings)

@@ -37,6 +37,7 @@ from __future__ import annotations
 import re
 from typing import List, Optional, Set
 
+from detection import address_parser
 from util import DetectedEntity, get_logger
 
 logger = get_logger(__name__)
@@ -84,29 +85,12 @@ def _aba_routing_valid(number: str) -> bool:
 # ─────────────────────────────────────────────
 
 _PATTERNS: list = [
-
-    # ── Street address ─────────────────────────────────────────────────────────
-    # Structural pattern: house-number + optional street-name words + type suffix.
-    # Catches "99 Cathedral Close", "456 Innovation Plaza", "1126 E Apache Blvd",
-    # "789 Crescent Row", "12 Close Mews" etc.
-    # Being caught here means they are masked BEFORE NER runs, so they never
-    # enter the topical-geo filter and are always protected.
-    (
-        "address",
-        re.compile(
-            r"\b\d+\s+"
-            r"(?:[A-Za-z]+\s+){0,4}"
-            r"(?:Street|St|Avenue|Ave|Boulevard|Blvd|Road|Rd|Drive|Dr|"
-            r"Lane|Ln|Way|Court|Ct|Place|Pl|Row|Mews|Close|Crescent|Cres|"
-            r"Parkway|Pkwy|Highway|Hwy|Freeway|Fwy|Terrace|Terr|"
-            r"Circle|Cir|Loop|Trail|Trl|Plaza|Pass|Square|Sq|"
-            r"Grove|Green|Park|Gardens?|View|Walk|Rise|Mount|Hill|"
-            r"Gate|Alley|Chase|Heath|Meadow|Ridge|Vale|Glen)"
-            r"\.?\b",
-            re.IGNORECASE,
-        ),
-        None,
-    ),
+    # NOTE: street addresses are detected by the canonical structured parser
+    # (address_parser.find_addresses) in scan() BEFORE this pattern list runs,
+    # so the full span — street + unit + city + state + ZIP — is claimed as
+    # ONE entity and later patterns (zip_us, ssn, phone) can never split
+    # components out of an address. Being caught first also means they are
+    # masked BEFORE NER runs, so they never enter the topical-geo filter.
 
     # ── SSN ────────────────────────────────────────────────────────────────────
     # Matches formatted (123-45-6789 / 123 45 6789) AND bare 9-digit form.
@@ -131,6 +115,24 @@ _PATTERNS: list = [
         None,
     ),
 
+    # ── International phone (non-US, non-UK) ───────────────────────────────────
+    # MUST appear before phone_us (so "+7 495 374 8120" is claimed whole and
+    # phone_us cannot grab just the "495 374 8120" tail) and before zip_us.
+    # Groups are flexible (1-6 digits) to cover "+49 30 8842 6610" style
+    # city-code formats; the validator requires >= 9 total digits so prose
+    # like "+3 4 5" can never match.
+    (
+        "phone_intl",
+        re.compile(
+            r"(?<!\d)"
+            r"\+(?!1[ \-.]|44[ \-.])"
+            r"[1-9]\d{0,2}"
+            r"(?:[ \-.]\d{1,9}){1,4}"
+            r"(?!\d)"
+        ),
+        lambda m: 9 <= len(re.sub(r"\D", "", m.group())) <= 15,
+    ),
+
     # ── US phone ───────────────────────────────────────────────────────────────
     (
         "phone_us",
@@ -146,24 +148,6 @@ _PATTERNS: list = [
         re.compile(
             r"(?<!\d)(\+44\s?|0)"
             r"(\d{4}[\s\-]?\d{6}|\d{3}[\s\-]?\d{3}[\s\-]?\d{4}|\d{2}[\s\-]?\d{4}[\s\-]?\d{4})"
-            r"(?!\d)"
-        ),
-        None,
-    ),
-
-    # ── International phone (non-US, non-UK) ───────────────────────────────────
-    # MUST appear before zip_us.
-    (
-        "phone_intl",
-        re.compile(
-            r"(?<!\d)"
-            r"\+(?!1[ \-.]|44[ \-.])"
-            r"[1-9]\d{0,2}"
-            r"[ \-.]"
-            r"\d{3,6}"
-            r"[ \-.]"
-            r"\d{3,8}"
-            r"(?:[ \-.]\d{2,6})?"
             r"(?!\d)"
         ),
         None,
@@ -224,6 +208,7 @@ _PATTERNS: list = [
             r"|gho_[A-Za-z0-9]{20,}"
             r"|AKIA[0-9A-Z]{16}"
             r"|AIzaSy[A-Za-z0-9\-_]{10,}"
+            r"|eyJ[A-Za-z0-9\-_]{8,}(?:\.[A-Za-z0-9\-_]+){0,2}"
             r"|[A-Z][A-Z0-9_]*=(?:sk[-_]|ant-api-|AIzaSy|ghp_|gho_|AKIA)"
             r"[A-Za-z0-9\-_]{12,}"
             r")"
@@ -240,6 +225,7 @@ _PATTERNS: list = [
             r'\b(?:'
             r'(?:gender|sex)\s*[:=]\s*(?:male|female|m|f|man|woman|boy|girl|non-binary|nb)'
             r'|(?:i\s+am\s+a|i\'m\s+a)\s+(?:male|female|man|woman|boy|girl)'
+            r'|identif(?:y|ies)\s+as\s+(?:male|female|a\s+man|a\s+woman|non-?binary|nb)'
             r'|(?:he/him|she/her|they/them)'
             r')\b',
             re.IGNORECASE,
@@ -348,6 +334,29 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
                 if len(sv) > len(matched) and matched in sv:
                     return True
         return False
+
+    # ── Street addresses first: the canonical parser claims the FULL span
+    # (street + unit + city + state + ZIP) as one entity.
+    for parsed in address_parser.find_addresses(text):
+        if not _span_free(parsed.start, parsed.end):
+            continue
+        if _should_skip(parsed.full_text):
+            logger.debug(f"[PatternScan] Skipping (skip_values): {parsed.full_text!r}")
+            continue
+        entity = DetectedEntity(
+            text=parsed.full_text,
+            start=parsed.start,
+            end=parsed.end,
+            type="address",
+            score=1.0,
+            source="pattern",
+            parsed=parsed,
+        )
+        results.append(entity)
+        occupied_spans.append((parsed.start, parsed.end))
+        logger.debug(
+            f"[PatternScan] address: {entity.text!r} at [{parsed.start}:{parsed.end}]"
+        )
 
     for entity_type, pattern, validator in _PATTERNS:
         for match in pattern.finditer(text):

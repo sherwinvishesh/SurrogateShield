@@ -1,0 +1,1552 @@
+[
+  {
+    "text": "I live at 7 Main St.",
+    "expected": "7 Main St",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 7 Main Ln, Tempe, AZ 85281",
+    "expected": "7 Main Ln, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 7 Main Hwy, Phoenix, Arizona",
+    "expected": "7 Main Hwy, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 7 Oak Street, Tempe, AZ",
+    "expected": "7 Oak Street, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "7 Oak Ct, Phoenix, Arizona is my address",
+    "expected": "7 Oak Ct, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "7 Oak Trl, Salem, OR 97301-1234 is my address",
+    "expected": "7 Oak Trl, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "7 5th Ave, Tempe, AZ 85281 is my address",
+    "expected": "7 5th Ave, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 7 5th Pl, Salem, OR 97301-1234.",
+    "expected": "7 5th Pl, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 7 5th Cove.",
+    "expected": "7 5th Cove",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 7 42nd Avenue, Phoenix, Arizona.",
+    "expected": "7 42nd Avenue, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 7 42nd Cir",
+    "expected": "7 42nd Cir",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 7 42nd Pike, Tempe, AZ",
+    "expected": "7 42nd Pike, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 7 Crescent Blvd, Salem, OR 97301-1234",
+    "expected": "7 Crescent Blvd, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "7 Crescent Ter, Tempe, AZ is my address",
+    "expected": "7 Crescent Ter, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "7 Crescent Xing, Tempe, AZ 85281 is my address",
+    "expected": "7 Crescent Xing, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "7 Apache Rd is my address",
+    "expected": "7 Apache Rd",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 7 Apache Pkwy, Tempe, AZ 85281.",
+    "expected": "7 Apache Pkwy, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 7 Apache Row, Phoenix, Arizona.",
+    "expected": "7 Apache Row, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 7 Martin Luther King Jr Dr, Tempe, AZ.",
+    "expected": "7 Martin Luther King Jr Dr, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 7 Martin Luther King Jr Hwy, Phoenix, Arizona",
+    "expected": "7 Martin Luther King Jr Hwy, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 7 Martin Luther King Jr Sq, Salem, OR 97301-1234",
+    "expected": "7 Martin Luther King Jr Sq, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 42 Main Ln, Tempe, AZ 85281",
+    "expected": "42 Main Ln, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "42 Main Trl, Salem, OR 97301-1234 is my address",
+    "expected": "42 Main Trl, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "42 Main Ter is my address",
+    "expected": "42 Main Ter",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "42 Oak Ct, Phoenix, Arizona is my address",
+    "expected": "42 Oak Ct, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 42 Oak Cove.",
+    "expected": "42 Oak Cove",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 42 Oak Plaza, Tempe, AZ.",
+    "expected": "42 Oak Plaza, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 42 5th Pl, Salem, OR 97301-1234.",
+    "expected": "42 5th Pl, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 42 5th Pike, Tempe, AZ",
+    "expected": "42 5th Pike, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 42 5th Cres, Tempe, AZ 85281",
+    "expected": "42 5th Cres, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 42 42nd Cir",
+    "expected": "42 42nd Cir",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "42 42nd Xing, Tempe, AZ 85281 is my address",
+    "expected": "42 42nd Xing, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "42 42nd Terrace, Phoenix, Arizona is my address",
+    "expected": "42 42nd Terrace, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "42 Crescent Ter, Tempe, AZ is my address",
+    "expected": "42 Crescent Ter, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 42 Crescent Row, Phoenix, Arizona.",
+    "expected": "42 Crescent Row, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 42 Crescent St, Salem, OR 97301-1234.",
+    "expected": "42 Crescent St, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 42 Apache Pkwy, Tempe, AZ 85281.",
+    "expected": "42 Apache Pkwy, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 42 Apache Sq, Salem, OR 97301-1234",
+    "expected": "42 Apache Sq, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 42 Apache Street",
+    "expected": "42 Apache Street",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 42 Martin Luther King Jr Hwy, Phoenix, Arizona",
+    "expected": "42 Martin Luther King Jr Hwy, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "42 Martin Luther King Jr Ter is my address",
+    "expected": "42 Martin Luther King Jr Ter",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "42 Martin Luther King Jr Ave, Tempe, AZ is my address",
+    "expected": "42 Martin Luther King Jr Ave, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123 Main Trl, Salem, OR 97301-1234 is my address",
+    "expected": "123 Main Trl, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 123 Main Plaza, Tempe, AZ.",
+    "expected": "123 Main Plaza, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123 Main Avenue, Tempe, AZ 85281.",
+    "expected": "123 Main Avenue, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123 Oak Cove.",
+    "expected": "123 Oak Cove",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 123 Oak Cres, Tempe, AZ 85281",
+    "expected": "123 Oak Cres, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123 Oak Blvd, Phoenix, Arizona",
+    "expected": "123 Oak Blvd, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123 5th Pike, Tempe, AZ",
+    "expected": "123 5th Pike, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "123 5th Terrace, Phoenix, Arizona is my address",
+    "expected": "123 5th Terrace, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123 5th Rd, Salem, OR 97301-1234 is my address",
+    "expected": "123 5th Rd, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123 42nd Xing, Tempe, AZ 85281 is my address",
+    "expected": "123 42nd Xing, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 123 42nd St, Salem, OR 97301-1234.",
+    "expected": "123 42nd St, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123 42nd Dr.",
+    "expected": "123 42nd Dr",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123 Crescent Row, Phoenix, Arizona.",
+    "expected": "123 Crescent Row, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 123 Crescent Street",
+    "expected": "123 Crescent Street",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123 Crescent Ln, Tempe, AZ",
+    "expected": "123 Crescent Ln, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123 Apache Sq, Salem, OR 97301-1234",
+    "expected": "123 Apache Sq, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "123 Apache Ave, Tempe, AZ is my address",
+    "expected": "123 Apache Ave, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123 Apache Ct, Tempe, AZ 85281 is my address",
+    "expected": "123 Apache Ct, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123 Martin Luther King Jr Ter is my address",
+    "expected": "123 Martin Luther King Jr Ter",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 123 Martin Luther King Jr Avenue, Tempe, AZ 85281.",
+    "expected": "123 Martin Luther King Jr Avenue, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123 Martin Luther King Jr Pl, Phoenix, Arizona.",
+    "expected": "123 Martin Luther King Jr Pl, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 789 Main Plaza, Tempe, AZ.",
+    "expected": "789 Main Plaza, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 789 Main Blvd, Phoenix, Arizona",
+    "expected": "789 Main Blvd, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 789 Main Cir, Salem, OR 97301-1234",
+    "expected": "789 Main Cir, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 789 Oak Cres, Tempe, AZ 85281",
+    "expected": "789 Oak Cres, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "789 Oak Rd, Salem, OR 97301-1234 is my address",
+    "expected": "789 Oak Rd, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "789 Oak Ter is my address",
+    "expected": "789 Oak Ter",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "789 5th Terrace, Phoenix, Arizona is my address",
+    "expected": "789 5th Terrace, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 789 5th Dr.",
+    "expected": "789 5th Dr",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 789 5th Pkwy, Tempe, AZ.",
+    "expected": "789 5th Pkwy, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 789 42nd St, Salem, OR 97301-1234.",
+    "expected": "789 42nd St, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 789 42nd Ln, Tempe, AZ",
+    "expected": "789 42nd Ln, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 789 42nd Hwy, Tempe, AZ 85281",
+    "expected": "789 42nd Hwy, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 789 Crescent Street",
+    "expected": "789 Crescent Street",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "789 Crescent Ct, Tempe, AZ 85281 is my address",
+    "expected": "789 Crescent Ct, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "789 Crescent Trl, Phoenix, Arizona is my address",
+    "expected": "789 Crescent Trl, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "789 Apache Ave, Tempe, AZ is my address",
+    "expected": "789 Apache Ave, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 789 Apache Pl, Phoenix, Arizona.",
+    "expected": "789 Apache Pl, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 789 Apache Cove, Salem, OR 97301-1234.",
+    "expected": "789 Apache Cove, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 789 Martin Luther King Jr Avenue, Tempe, AZ 85281.",
+    "expected": "789 Martin Luther King Jr Avenue, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 789 Martin Luther King Jr Cir, Salem, OR 97301-1234",
+    "expected": "789 Martin Luther King Jr Cir, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 789 Martin Luther King Jr Pike",
+    "expected": "789 Martin Luther King Jr Pike",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 1126 Main Blvd, Phoenix, Arizona",
+    "expected": "1126 Main Blvd, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "1126 Main Ter is my address",
+    "expected": "1126 Main Ter",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "1126 Main Xing, Tempe, AZ is my address",
+    "expected": "1126 Main Xing, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "1126 Oak Rd, Salem, OR 97301-1234 is my address",
+    "expected": "1126 Oak Rd, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 1126 Oak Pkwy, Tempe, AZ.",
+    "expected": "1126 Oak Pkwy, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 1126 Oak Row, Tempe, AZ 85281.",
+    "expected": "1126 Oak Row, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 1126 5th Dr.",
+    "expected": "1126 5th Dr",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 1126 5th Hwy, Tempe, AZ 85281",
+    "expected": "1126 5th Hwy, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 1126 5th Sq, Phoenix, Arizona",
+    "expected": "1126 5th Sq, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 1126 42nd Ln, Tempe, AZ",
+    "expected": "1126 42nd Ln, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "1126 42nd Trl, Phoenix, Arizona is my address",
+    "expected": "1126 42nd Trl, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "1126 42nd Ter, Salem, OR 97301-1234 is my address",
+    "expected": "1126 42nd Ter, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "1126 Crescent Ct, Tempe, AZ 85281 is my address",
+    "expected": "1126 Crescent Ct, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 1126 Crescent Cove, Salem, OR 97301-1234.",
+    "expected": "1126 Crescent Cove, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 1126 Crescent Plaza.",
+    "expected": "1126 Crescent Plaza",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 1126 Apache Pl, Phoenix, Arizona.",
+    "expected": "1126 Apache Pl, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 1126 Apache Pike",
+    "expected": "1126 Apache Pike",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 1126 Apache Cres, Tempe, AZ",
+    "expected": "1126 Apache Cres, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 1126 Martin Luther King Jr Cir, Salem, OR 97301-1234",
+    "expected": "1126 Martin Luther King Jr Cir, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "1126 Martin Luther King Jr Xing, Tempe, AZ is my address",
+    "expected": "1126 Martin Luther King Jr Xing, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "1126 Martin Luther King Jr Terrace, Tempe, AZ 85281 is my address",
+    "expected": "1126 Martin Luther King Jr Terrace, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "4400 Main Ter is my address",
+    "expected": "4400 Main Ter",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 4400 Main Row, Tempe, AZ 85281.",
+    "expected": "4400 Main Row, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 4400 Main St, Phoenix, Arizona.",
+    "expected": "4400 Main St, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 4400 Oak Pkwy, Tempe, AZ.",
+    "expected": "4400 Oak Pkwy, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 4400 Oak Sq, Phoenix, Arizona",
+    "expected": "4400 Oak Sq, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 4400 Oak Street, Salem, OR 97301-1234",
+    "expected": "4400 Oak Street, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 4400 5th Hwy, Tempe, AZ 85281",
+    "expected": "4400 5th Hwy, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "4400 5th Ter, Salem, OR 97301-1234 is my address",
+    "expected": "4400 5th Ter, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "4400 5th Ave is my address",
+    "expected": "4400 5th Ave",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "4400 42nd Trl, Phoenix, Arizona is my address",
+    "expected": "4400 42nd Trl, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 4400 42nd Plaza.",
+    "expected": "4400 42nd Plaza",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 4400 42nd Avenue, Tempe, AZ.",
+    "expected": "4400 42nd Avenue, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 4400 Crescent Cove, Salem, OR 97301-1234.",
+    "expected": "4400 Crescent Cove, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 4400 Crescent Cres, Tempe, AZ",
+    "expected": "4400 Crescent Cres, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 4400 Crescent Blvd, Tempe, AZ 85281",
+    "expected": "4400 Crescent Blvd, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 4400 Apache Pike",
+    "expected": "4400 Apache Pike",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "4400 Apache Terrace, Tempe, AZ 85281 is my address",
+    "expected": "4400 Apache Terrace, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "4400 Apache Rd, Phoenix, Arizona is my address",
+    "expected": "4400 Apache Rd, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "4400 Martin Luther King Jr Xing, Tempe, AZ is my address",
+    "expected": "4400 Martin Luther King Jr Xing, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 4400 Martin Luther King Jr St, Phoenix, Arizona.",
+    "expected": "4400 Martin Luther King Jr St, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 4400 Martin Luther King Jr Dr, Salem, OR 97301-1234.",
+    "expected": "4400 Martin Luther King Jr Dr, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 99999 Main Row, Tempe, AZ 85281.",
+    "expected": "99999 Main Row, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 99999 Main Street, Salem, OR 97301-1234",
+    "expected": "99999 Main Street, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 99999 Main Ln",
+    "expected": "99999 Main Ln",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 99999 Oak Sq, Phoenix, Arizona",
+    "expected": "99999 Oak Sq, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "99999 Oak Ave is my address",
+    "expected": "99999 Oak Ave",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "99999 Oak Ct, Tempe, AZ is my address",
+    "expected": "99999 Oak Ct, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "99999 5th Ter, Salem, OR 97301-1234 is my address",
+    "expected": "99999 5th Ter, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 99999 5th Avenue, Tempe, AZ.",
+    "expected": "99999 5th Avenue, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 99999 5th Pl, Tempe, AZ 85281.",
+    "expected": "99999 5th Pl, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 99999 42nd Plaza.",
+    "expected": "99999 42nd Plaza",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 99999 42nd Blvd, Tempe, AZ 85281",
+    "expected": "99999 42nd Blvd, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 99999 42nd Cir, Phoenix, Arizona",
+    "expected": "99999 42nd Cir, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 99999 Crescent Cres, Tempe, AZ",
+    "expected": "99999 Crescent Cres, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "99999 Crescent Rd, Phoenix, Arizona is my address",
+    "expected": "99999 Crescent Rd, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "99999 Crescent Ter, Salem, OR 97301-1234 is my address",
+    "expected": "99999 Crescent Ter, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "99999 Apache Terrace, Tempe, AZ 85281 is my address",
+    "expected": "99999 Apache Terrace, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 99999 Apache Dr, Salem, OR 97301-1234.",
+    "expected": "99999 Apache Dr, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 99999 Apache Pkwy.",
+    "expected": "99999 Apache Pkwy",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 99999 Martin Luther King Jr St, Phoenix, Arizona.",
+    "expected": "99999 Martin Luther King Jr St, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 99999 Martin Luther King Jr Ln",
+    "expected": "99999 Martin Luther King Jr Ln",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 99999 Martin Luther King Jr Hwy, Tempe, AZ",
+    "expected": "99999 Martin Luther King Jr Hwy, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 0123 Main Street, Salem, OR 97301-1234",
+    "expected": "0123 Main Street, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "0123 Main Ct, Tempe, AZ is my address",
+    "expected": "0123 Main Ct, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "0123 Main Trl, Tempe, AZ 85281 is my address",
+    "expected": "0123 Main Trl, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "0123 Oak Ave is my address",
+    "expected": "0123 Oak Ave",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 0123 Oak Pl, Tempe, AZ 85281.",
+    "expected": "0123 Oak Pl, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 0123 Oak Cove, Phoenix, Arizona.",
+    "expected": "0123 Oak Cove, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 0123 5th Avenue, Tempe, AZ.",
+    "expected": "0123 5th Avenue, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 0123 5th Cir, Phoenix, Arizona",
+    "expected": "0123 5th Cir, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 0123 5th Pike, Salem, OR 97301-1234",
+    "expected": "0123 5th Pike, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 0123 42nd Blvd, Tempe, AZ 85281",
+    "expected": "0123 42nd Blvd, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "0123 42nd Ter, Salem, OR 97301-1234 is my address",
+    "expected": "0123 42nd Ter, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "0123 42nd Xing is my address",
+    "expected": "0123 42nd Xing",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "0123 Crescent Rd, Phoenix, Arizona is my address",
+    "expected": "0123 Crescent Rd, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 0123 Crescent Pkwy.",
+    "expected": "0123 Crescent Pkwy",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 0123 Crescent Row, Tempe, AZ.",
+    "expected": "0123 Crescent Row, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 0123 Apache Dr, Salem, OR 97301-1234.",
+    "expected": "0123 Apache Dr, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 0123 Apache Hwy, Tempe, AZ",
+    "expected": "0123 Apache Hwy, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 0123 Apache Sq, Tempe, AZ 85281",
+    "expected": "0123 Apache Sq, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 0123 Martin Luther King Jr Ln",
+    "expected": "0123 Martin Luther King Jr Ln",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "0123 Martin Luther King Jr Trl, Tempe, AZ 85281 is my address",
+    "expected": "0123 Martin Luther King Jr Trl, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "0123 Martin Luther King Jr Ter, Phoenix, Arizona is my address",
+    "expected": "0123 Martin Luther King Jr Ter, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123A Main Ct, Tempe, AZ is my address",
+    "expected": "123A Main Ct, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 123A Main Cove, Phoenix, Arizona.",
+    "expected": "123A Main Cove, Phoenix, Arizona",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123A Main Plaza, Salem, OR 97301-1234.",
+    "expected": "123A Main Plaza, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123A Oak Pl, Tempe, AZ 85281.",
+    "expected": "123A Oak Pl, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 123A Oak Pike, Salem, OR 97301-1234",
+    "expected": "123A Oak Pike, Salem, OR 97301-1234",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123A Oak Cres",
+    "expected": "123A Oak Cres",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123A 5th Cir, Phoenix, Arizona",
+    "expected": "123A 5th Cir, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "123A 5th Xing is my address",
+    "expected": "123A 5th Xing",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123A 5th Terrace, Tempe, AZ is my address",
+    "expected": "123A 5th Terrace, Tempe, AZ",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123A 42nd Ter, Salem, OR 97301-1234 is my address",
+    "expected": "123A 42nd Ter, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 123A 42nd Row, Tempe, AZ.",
+    "expected": "123A 42nd Row, Tempe, AZ",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123A 42nd St, Tempe, AZ 85281.",
+    "expected": "123A 42nd St, Tempe, AZ 85281",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123A Crescent Pkwy.",
+    "expected": "123A Crescent Pkwy",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Ship it to 123A Crescent Sq, Tempe, AZ 85281",
+    "expected": "123A Crescent Sq, Tempe, AZ 85281",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123A Crescent Street, Phoenix, Arizona",
+    "expected": "123A Crescent Street, Phoenix, Arizona",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "Ship it to 123A Apache Hwy, Tempe, AZ",
+    "expected": "123A Apache Hwy, Tempe, AZ",
+    "note": "cross product / text end"
+  },
+  {
+    "text": "123A Apache Ter, Phoenix, Arizona is my address",
+    "expected": "123A Apache Ter, Phoenix, Arizona",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123A Apache Ave, Salem, OR 97301-1234 is my address",
+    "expected": "123A Apache Ave, Salem, OR 97301-1234",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "123A Martin Luther King Jr Trl, Tempe, AZ 85281 is my address",
+    "expected": "123A Martin Luther King Jr Trl, Tempe, AZ 85281",
+    "note": "cross product / sentence start"
+  },
+  {
+    "text": "I live at 123A Martin Luther King Jr Plaza, Salem, OR 97301-1234.",
+    "expected": "123A Martin Luther King Jr Plaza, Salem, OR 97301-1234",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "I live at 123A Martin Luther King Jr Avenue.",
+    "expected": "123A Martin Luther King Jr Avenue",
+    "note": "cross product / period end"
+  },
+  {
+    "text": "Deliver to 18 Main St Apt 4B today",
+    "expected": "18 Main St Apt 4B",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 18 Oak Street Suite 210, Tempe, AZ today",
+    "expected": "18 Oak Street Suite 210, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 18 5th Ave Unit 7, Tempe, AZ 85281 today",
+    "expected": "18 5th Ave Unit 7, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 18 42nd Avenue # 12, Phoenix, Arizona today",
+    "expected": "18 42nd Avenue # 12, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 18 Crescent Blvd Ste 5, Salem, OR 97301-1234 today",
+    "expected": "18 Crescent Blvd Ste 5, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 18 Apache Rd Apt. 9C today",
+    "expected": "18 Apache Rd Apt. 9C",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 18 Martin Luther King Jr Dr Bldg 2, Tempe, AZ today",
+    "expected": "18 Martin Luther King Jr Dr Bldg 2, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 Main Ln Apt 4B, Tempe, AZ 85281 today",
+    "expected": "77 Main Ln Apt 4B, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 Oak Ct Suite 210, Phoenix, Arizona today",
+    "expected": "77 Oak Ct Suite 210, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 5th Pl Unit 7, Salem, OR 97301-1234 today",
+    "expected": "77 5th Pl Unit 7, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 42nd Cir # 12 today",
+    "expected": "77 42nd Cir # 12",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 Crescent Ter Ste 5, Tempe, AZ today",
+    "expected": "77 Crescent Ter Ste 5, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 Apache Pkwy Apt. 9C, Tempe, AZ 85281 today",
+    "expected": "77 Apache Pkwy Apt. 9C, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 77 Martin Luther King Jr Hwy Bldg 2, Phoenix, Arizona today",
+    "expected": "77 Martin Luther King Jr Hwy Bldg 2, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 Main Trl Apt 4B, Salem, OR 97301-1234 today",
+    "expected": "301 Main Trl Apt 4B, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 Oak Cove Suite 210 today",
+    "expected": "301 Oak Cove Suite 210",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 5th Pike Unit 7, Tempe, AZ today",
+    "expected": "301 5th Pike Unit 7, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 42nd Xing # 12, Tempe, AZ 85281 today",
+    "expected": "301 42nd Xing # 12, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 Crescent Row Ste 5, Phoenix, Arizona today",
+    "expected": "301 Crescent Row Ste 5, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 Apache Sq Apt. 9C, Salem, OR 97301-1234 today",
+    "expected": "301 Apache Sq Apt. 9C, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 301 Martin Luther King Jr Ter Bldg 2 today",
+    "expected": "301 Martin Luther King Jr Ter Bldg 2",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 Main Plaza Apt 4B, Tempe, AZ today",
+    "expected": "640 Main Plaza Apt 4B, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 Oak Cres Suite 210, Tempe, AZ 85281 today",
+    "expected": "640 Oak Cres Suite 210, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 5th Terrace Unit 7, Phoenix, Arizona today",
+    "expected": "640 5th Terrace Unit 7, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 42nd St # 12, Salem, OR 97301-1234 today",
+    "expected": "640 42nd St # 12, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 Crescent Street Ste 5 today",
+    "expected": "640 Crescent Street Ste 5",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 Apache Ave Apt. 9C, Tempe, AZ today",
+    "expected": "640 Apache Ave Apt. 9C, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 640 Martin Luther King Jr Avenue Bldg 2, Tempe, AZ 85281 today",
+    "expected": "640 Martin Luther King Jr Avenue Bldg 2, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 Main Blvd Apt 4B, Phoenix, Arizona today",
+    "expected": "2222 Main Blvd Apt 4B, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 Oak Rd Suite 210, Salem, OR 97301-1234 today",
+    "expected": "2222 Oak Rd Suite 210, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 5th Dr Unit 7 today",
+    "expected": "2222 5th Dr Unit 7",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 42nd Ln # 12, Tempe, AZ today",
+    "expected": "2222 42nd Ln # 12, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 Crescent Ct Ste 5, Tempe, AZ 85281 today",
+    "expected": "2222 Crescent Ct Ste 5, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 Apache Pl Apt. 9C, Phoenix, Arizona today",
+    "expected": "2222 Apache Pl Apt. 9C, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 2222 Martin Luther King Jr Cir Bldg 2, Salem, OR 97301-1234 today",
+    "expected": "2222 Martin Luther King Jr Cir Bldg 2, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 Main Ter Apt 4B today",
+    "expected": "45 Main Ter Apt 4B",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 Oak Pkwy Suite 210, Tempe, AZ today",
+    "expected": "45 Oak Pkwy Suite 210, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 5th Hwy Unit 7, Tempe, AZ 85281 today",
+    "expected": "45 5th Hwy Unit 7, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 42nd Trl # 12, Phoenix, Arizona today",
+    "expected": "45 42nd Trl # 12, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 Crescent Cove Ste 5, Salem, OR 97301-1234 today",
+    "expected": "45 Crescent Cove Ste 5, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 Apache Pike Apt. 9C today",
+    "expected": "45 Apache Pike Apt. 9C",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 45 Martin Luther King Jr Xing Bldg 2, Tempe, AZ today",
+    "expected": "45 Martin Luther King Jr Xing Bldg 2, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 Main Row Apt 4B, Tempe, AZ 85281 today",
+    "expected": "88 Main Row Apt 4B, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 Oak Sq Suite 210, Phoenix, Arizona today",
+    "expected": "88 Oak Sq Suite 210, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 5th Ter Unit 7, Salem, OR 97301-1234 today",
+    "expected": "88 5th Ter Unit 7, Salem, OR 97301-1234",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 42nd Plaza # 12 today",
+    "expected": "88 42nd Plaza # 12",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 Crescent Cres Ste 5, Tempe, AZ today",
+    "expected": "88 Crescent Cres Ste 5, Tempe, AZ",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 Apache Terrace Apt. 9C, Tempe, AZ 85281 today",
+    "expected": "88 Apache Terrace Apt. 9C, Tempe, AZ 85281",
+    "note": "unit cross product"
+  },
+  {
+    "text": "Deliver to 88 Martin Luther King Jr St Bldg 2, Phoenix, Arizona today",
+    "expected": "88 Martin Luther King Jr St Bldg 2, Phoenix, Arizona",
+    "note": "unit cross product"
+  },
+  {
+    "text": "The office is at 742 W 3rd St.",
+    "expected": "742 W 3rd St",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 1126 E Apache Blvd, Tempe, AZ 85281.",
+    "expected": "1126 E Apache Blvd, Tempe, AZ 85281",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 500 N Central Ave.",
+    "expected": "500 N Central Ave",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 1600 Pennsylvania Ave NW, Washington, DC 20500.",
+    "expected": "1600 Pennsylvania Ave NW, Washington, DC 20500",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 88 South Main St.",
+    "expected": "88 South Main St",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 12 NE Glisan St, Portland, OR.",
+    "expected": "12 NE Glisan St, Portland, OR",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 3300 West Camelback Rd, Phoenix, AZ.",
+    "expected": "3300 West Camelback Rd, Phoenix, AZ",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 77 E Missouri Ave NE.",
+    "expected": "77 E Missouri Ave NE",
+    "note": "directional"
+  },
+  {
+    "text": "The office is at 901 S Mill Ave, Tempe, AZ 85281.",
+    "expected": "901 S Mill Ave, Tempe, AZ 85281",
+    "note": "directional"
+  },
+  {
+    "text": "Please deliver to 500 Main St Apt 4B, Tempe, AZ 85281.",
+    "expected": "500 Main St Apt 4B, Tempe, AZ 85281",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 12 Oak Rd, Suite 200, Mesa, AZ.",
+    "expected": "12 Oak Rd, Suite 200, Mesa, AZ",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 9 Elm Dr Unit 7.",
+    "expected": "9 Elm Dr Unit 7",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 4400 N Scottsdale Rd # 9, Scottsdale, AZ.",
+    "expected": "4400 N Scottsdale Rd # 9, Scottsdale, AZ",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 820 Birch Ln Ste 5, Boise, ID 83702.",
+    "expected": "820 Birch Ln Ste 5, Boise, ID 83702",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 77 Pine St, Apt. 12, Denver, CO.",
+    "expected": "77 Pine St, Apt. 12, Denver, CO",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 301 Cedar Blvd Bldg 3, Austin, TX 78701.",
+    "expected": "301 Cedar Blvd Bldg 3, Austin, TX 78701",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 18 Willow Way Apt C, Portland, OR.",
+    "expected": "18 Willow Way Apt C, Portland, OR",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 2222 E Broadway Rd Lot 118, Mesa, AZ 85204.",
+    "expected": "2222 E Broadway Rd Lot 118, Mesa, AZ 85204",
+    "note": "unit designator"
+  },
+  {
+    "text": "Please deliver to 640 Spruce Ct Rm 21, Reno, NV.",
+    "expected": "640 Spruce Ct Rm 21, Reno, NV",
+    "note": "unit designator"
+  },
+  {
+    "text": "Send checks to PO Box 1234, Flagstaff, AZ 86001.",
+    "expected": "PO Box 1234, Flagstaff, AZ 86001",
+    "note": "po box"
+  },
+  {
+    "text": "Send checks to P.O. Box 98.",
+    "expected": "P.O. Box 98",
+    "note": "po box"
+  },
+  {
+    "text": "Send checks to po box 4521, Tucson, AZ.",
+    "expected": "po box 4521, Tucson, AZ",
+    "note": "po box"
+  },
+  {
+    "text": "Send checks to Post Office Box 77, Yuma, AZ 85364.",
+    "expected": "Post Office Box 77, Yuma, AZ 85364",
+    "note": "po box"
+  },
+  {
+    "text": "Send checks to POB 55.",
+    "expected": "POB 55",
+    "note": "po box"
+  },
+  {
+    "text": "Send checks to P.O. Box 30021, Phoenix, AZ 85046.",
+    "expected": "P.O. Box 30021, Phoenix, AZ 85046",
+    "note": "po box"
+  },
+  {
+    "text": "Mail goes to 55 Birch Ln, Salem, OR 97301-1234.",
+    "expected": "55 Birch Ln, Salem, OR 97301-1234",
+    "note": "zip+4 / full state"
+  },
+  {
+    "text": "Mail goes to 88 Pine St, Portland, Oregon 97205.",
+    "expected": "88 Pine St, Portland, Oregon 97205",
+    "note": "zip+4 / full state"
+  },
+  {
+    "text": "Mail goes to 123 Palm Dr, Miami, Florida 33101-4501.",
+    "expected": "123 Palm Dr, Miami, Florida 33101-4501",
+    "note": "zip+4 / full state"
+  },
+  {
+    "text": "Mail goes to 9 Frost Rd, Concord, New Hampshire.",
+    "expected": "9 Frost Rd, Concord, New Hampshire",
+    "note": "zip+4 / full state"
+  },
+  {
+    "text": "Mail goes to 417 Dune Ave, Santa Fe, New Mexico 87501.",
+    "expected": "417 Dune Ave, Santa Fe, New Mexico 87501",
+    "note": "zip+4 / full state"
+  },
+  {
+    "text": "no commas 123 Main St Tempe AZ 85281 done",
+    "expected": "123 Main St Tempe AZ 85281",
+    "note": "no comma"
+  },
+  {
+    "text": "no commas 1126 E Apache Blvd Tempe AZ done",
+    "expected": "1126 E Apache Blvd Tempe AZ",
+    "note": "no comma"
+  },
+  {
+    "text": "no commas 500 Oak Ave Mesa AZ 85204 done",
+    "expected": "500 Oak Ave Mesa AZ 85204",
+    "note": "no comma"
+  },
+  {
+    "text": "Shipping label:\n123 Main St\nTempe, AZ 85281\nUSA",
+    "expected": "123 Main St\nTempe, AZ 85281",
+    "note": "multi-line"
+  },
+  {
+    "text": "Bill to:\n500 Oak Ave\nApt 12\nMesa, AZ 85204",
+    "expected": "500 Oak Ave\nApt 12\nMesa, AZ 85204",
+    "note": "multi-line unit"
+  },
+  {
+    "text": "789 Crescent Row\nTempe, AZ",
+    "expected": "789 Crescent Row\nTempe, AZ",
+    "note": "multi-line short"
+  },
+  {
+    "text": "i live at 123 main st, tempe, az 85281",
+    "expected": "123 main st",
+    "note": "lowercase"
+  },
+  {
+    "text": "address is 500 oak ave thanks",
+    "expected": "500 oak ave",
+    "note": "lowercase"
+  },
+  {
+    "text": "789 crescent row, tempe",
+    "expected": "789 crescent row",
+    "note": "lowercase"
+  },
+  {
+    "text": "The farm is at 1500 Highway 50.",
+    "expected": "1500 Highway 50",
+    "note": "highway form"
+  },
+  {
+    "text": "The farm is at 220 US-19.",
+    "expected": "220 US-19",
+    "note": "highway form"
+  },
+  {
+    "text": "The farm is at 34 Route 66.",
+    "expected": "34 Route 66",
+    "note": "highway form"
+  },
+  {
+    "text": "The farm is at 12 County Road 45.",
+    "expected": "12 County Road 45",
+    "note": "highway form"
+  },
+  {
+    "text": "The farm is at 8 State Highway 71.",
+    "expected": "8 State Highway 71",
+    "note": "highway form"
+  },
+  {
+    "text": "Meet me at 123 5th Avenue, New York, NY 10003.",
+    "expected": "123 5th Avenue, New York, NY 10003",
+    "note": "ordinal street"
+  },
+  {
+    "text": "Meet me at 350 42nd Street.",
+    "expected": "350 42nd Street",
+    "note": "ordinal street"
+  },
+  {
+    "text": "Meet me at 77 3rd Ave.",
+    "expected": "77 3rd Ave",
+    "note": "ordinal street"
+  },
+  {
+    "text": "Meet me at 901 1st St, Austin, TX.",
+    "expected": "901 1st St, Austin, TX",
+    "note": "ordinal street"
+  },
+  {
+    "text": "Meet me at 45 9th Ave N.",
+    "expected": "45 9th Ave N",
+    "note": "ordinal street"
+  },
+  {
+    "text": "They moved to 10 Sunset Cove.",
+    "expected": "10 Sunset Cove",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 22 Miller Pike.",
+    "expected": "22 Miller Pike",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 1428 North Alpine Way, Flagstaff, AZ.",
+    "expected": "1428 North Alpine Way, Flagstaff, AZ",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 1 Infinite Loop, Cupertino, CA 95014.",
+    "expected": "1 Infinite Loop, Cupertino, CA 95014",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 9 Eagle Point.",
+    "expected": "9 Eagle Point",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 84 Meadow Run, Franklin, TN.",
+    "expected": "84 Meadow Run, Franklin, TN",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 300 Cedar Ridge.",
+    "expected": "300 Cedar Ridge",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 17 Foxglove Bend.",
+    "expected": "17 Foxglove Bend",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 66 Harbor View.",
+    "expected": "66 Harbor View",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "They moved to 5 Windmill Pass, Gilbert, AZ 85296.",
+    "expected": "5 Windmill Pass, Gilbert, AZ 85296",
+    "note": "ambiguous suffix"
+  },
+  {
+    "text": "My billing address is 1428 North Alpine Way, Flagstaff, AZ.",
+    "expected": "1428 North Alpine Way, Flagstaff, AZ",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "My billing address is 6720 Palm Dr, Phoenix, AZ.",
+    "expected": "6720 Palm Dr, Phoenix, AZ",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "My billing address is 1126 E Apache Blvd, Tempe, AZ.",
+    "expected": "1126 E Apache Blvd, Tempe, AZ",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "My billing address is 789 Crescent Row, Tempe, AZ.",
+    "expected": "789 Crescent Row, Tempe, AZ",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "My billing address is 99 Cathedral Close.",
+    "expected": "99 Cathedral Close",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "My billing address is 456 Innovation Plaza.",
+    "expected": "456 Innovation Plaza",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "My billing address is 12 Close Mews.",
+    "expected": "12 Close Mews",
+    "note": "experiment ground truth"
+  },
+  {
+    "text": "I live at 123 Main St, Phoenix and work downtown",
+    "expected": "123 Main St, Phoenix",
+    "note": "major city no boundary"
+  },
+  {
+    "text": "Ship to 44 Oak Ave, Tempe.",
+    "expected": "44 Oak Ave, Tempe",
+    "note": "bare city + period"
+  },
+  {
+    "text": "Ship to 44 Oak Ave, Tempe",
+    "expected": "44 Oak Ave, Tempe",
+    "note": "bare city + end"
+  },
+  {
+    "text": "The venue: 12 St James's Street, London.",
+    "expected": "12 St James's Street, London",
+    "note": "apostrophe/hyphen"
+  },
+  {
+    "text": "The venue: 800 O'Farrell St, San Francisco, CA.",
+    "expected": "800 O'Farrell St, San Francisco, CA",
+    "note": "apostrophe/hyphen"
+  },
+  {
+    "text": "The venue: 23 Winston-Salem Rd.",
+    "expected": "23 Winston-Salem Rd",
+    "note": "apostrophe/hyphen"
+  }
+]

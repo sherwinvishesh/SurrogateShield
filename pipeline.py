@@ -55,18 +55,25 @@ from rich.rule import Rule
 
 from util import (
     DetectedEntity,
+    apply_entity_surrogates,
     get_logger,
     print_detection_table,
     print_needs_confirmation,
 )
+from detection import address_parser
 from detection import logic as sentinel_layer
-from detection.service_query import is_service_query, fuzz_addresses
+from detection.service_query import is_sensitive_topic, is_service_query
 from detection.quasi_identifier import format_warning as _qi_format_warning
 from generation.logic import MimicGen
 from storage.logic import ShadowMap
 from reconstruction.logic import ResolvePass
 from chatbot.chat import ClaudeChat
-from config import SERVICE_QUERY_DETECTION_ENABLED
+from config import (
+    ADDRESS_MODE,
+    ADDRESS_SHIFT_RANGE,
+    SERVICE_QUERY_DETECTION_ENABLED,
+    SERVICE_QUERY_VERIFY_ADDRESSES,
+)
 
 if TYPE_CHECKING:
     from chatbot.rag import RAGStore
@@ -112,10 +119,18 @@ def anonymise_text(text: str, mimic: Optional[MimicGen] = None) -> Tuple[str, Di
         mimic = MimicGen()
     confirmed, _ = sentinel_layer.run_cascade(text)
     confirmed = sentinel_layer.deduplicate(confirmed)
-    surrogate_map = mimic.generate_all(confirmed) if confirmed else {}
-    sanitised = text
-    for orig in sorted(surrogate_map, key=len, reverse=True):
-        sanitised = sanitised.replace(orig, surrogate_map[orig])
+    # Documents have no service-query context: "auto" resolves to replace.
+    doc_address_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "replace"
+    surrogate_map = (
+        mimic.generate_all(
+            confirmed,
+            address_mode=doc_address_mode,
+            address_shift_range=ADDRESS_SHIFT_RANGE,
+        )
+        if confirmed
+        else {}
+    )
+    sanitised = apply_entity_surrogates(text, confirmed, surrogate_map)
     return sanitised, surrogate_map
 
 
@@ -176,27 +191,21 @@ class Pipeline:
         }
         provider = _PROVIDER_NAMES.get(_s.get("llm_provider", "claude"), "LLM")
 
-        # ── Service query check ───────────────────────────────────────────────
+        # ── Service query check / address-mode resolution ─────────────────────
         # Service queries (e.g. "restaurants near 1126 E Apache Blvd, Tempe, AZ")
         # get minimal treatment:
-        #   • Street address house number shifted by ±1 only
         #   • City/state names NOT replaced (preserves answer utility)
         #   • Other PII (names, emails, SSNs) still detected and replaced
+        # Addresses flow through the normal detect→generate path in every mode;
+        # ADDRESS_MODE decides shift vs replace ("auto" = shift only for
+        # non-sensitive service queries — the v1 behaviour).
         is_svc = SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_message)
-        service_addr_map: Dict[str, str] = {}
-
-        if is_svc:
-            from config import SERVICE_QUERY_VERIFY_ADDRESSES
-            fuzzed_message, service_addr_map = fuzz_addresses(
-                user_message, verify=SERVICE_QUERY_VERIFY_ADDRESSES
+        if ADDRESS_MODE == "auto":
+            address_mode = (
+                "shift" if (is_svc and not is_sensitive_topic(user_message)) else "replace"
             )
-            if service_addr_map:
-                self.shadow.update({v: k for k, v in service_addr_map.items()})
-                self.shadow.save()
-                logger.info(
-                    f"[Pipeline] Service query: fuzzed {len(service_addr_map)} address(es)"
-                )
-                user_message = fuzzed_message
+        else:
+            address_mode = ADDRESS_MODE
 
         # ── Step 1: Detection ─────────────────────────────────────────────────
         logger.info("[Pipeline] Running SentinelLayer cascade")
@@ -219,7 +228,33 @@ class Pipeline:
         # ── Step 3: Generate surrogates ───────────────────────────────────────
         surrogate_map: Dict[str, str] = {}
         if confirmed:
-            surrogate_map = self.mimic.generate_all(confirmed)
+            # Opt-in address existence verification (network — off by default)
+            if SERVICE_QUERY_VERIFY_ADDRESSES:
+                for ent in confirmed:
+                    if ent.type == "address" and getattr(ent, "parsed", None) is not None:
+                        address_parser.verify_address_exists(ent.parsed)
+
+            # Reuse surrogates for originals seen in earlier turns (O(1)
+            # forward-index lookups), generate only for the new ones.
+            new_entities = []
+            for ent in confirmed:
+                key = ent.text.strip()
+                existing = self.shadow.lookup_original(key)
+                if existing is not None:
+                    surrogate_map[key] = existing
+                else:
+                    new_entities.append(ent)
+
+            if new_entities:
+                # A new surrogate must never equal a real value from ANY turn.
+                new_map = self.mimic.generate_all(
+                    new_entities,
+                    address_mode=address_mode,
+                    address_shift_range=ADDRESS_SHIFT_RANGE,
+                    forbidden=set(self.shadow.originals()),
+                )
+                surrogate_map.update(new_map)
+
             if detailed:
                 print_detection_table(confirmed, surrogate_map)
                 qi_matches = getattr(confirmed, "_qi_matches", [])
@@ -230,8 +265,8 @@ class Pipeline:
         else:
             logger.info("[Pipeline] No PII detected — message sent as-is")
 
-        # ── Step 4: Sanitise message ──────────────────────────────────────────
-        sanitised = self._apply_surrogates(user_message, surrogate_map)
+        # ── Step 4: Sanitise message (span-safe substitution) ─────────────────
+        sanitised = apply_entity_surrogates(user_message, confirmed, surrogate_map)
 
         # ── Step 5: Update ShadowMap ──────────────────────────────────────────
         if surrogate_map:

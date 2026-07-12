@@ -233,9 +233,14 @@ def _run_pii_finder() -> None:
     service-query path (address fuzzing + location suppression).
     """
     from detection.logic import run_cascade, deduplicate
-    from detection.service_query import is_service_query, fuzz_addresses
+    from detection.service_query import is_service_query
     from generation.logic import MimicGen
-    from config import SERVICE_QUERY_DETECTION_ENABLED
+    from util import apply_entity_surrogates
+    from config import (
+        ADDRESS_MODE,
+        ADDRESS_SHIFT_RANGE,
+        SERVICE_QUERY_DETECTION_ENABLED,
+    )
 
     mimic = MimicGen()
 
@@ -357,18 +362,46 @@ def _run_pii_finder() -> None:
 
         # ── Service query path ────────────────────────────────────────────────
         if SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_input):
-            fuzzed, addr_map = fuzz_addresses(user_input, verify=False)
+            # v2: addresses flow through the unified detect→generate path.
+            # In service-query mode "auto" resolves to shift (±N house number).
+            sq_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "shift"
 
+            sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
+            sq_confirmed = deduplicate(sq_confirmed)
+            sq_skipped   = getattr(sq_confirmed, '_skipped_entities', [])
+            sq_surrogate_map = (
+                mimic.generate_all(
+                    sq_confirmed,
+                    address_mode=sq_mode,
+                    address_shift_range=ADDRESS_SHIFT_RANGE,
+                )
+                if sq_confirmed
+                else {}
+            )
+            sq_sanitised = apply_entity_surrogates(
+                user_input, sq_confirmed, sq_surrogate_map
+            )
+
+            addr_map = {
+                e.text: sq_surrogate_map[e.text]
+                for e in sq_confirmed
+                if e.type == "address" and e.text in sq_surrogate_map
+            }
             if addr_map:
                 addr_lines = "\n".join(
-                    f"  [red]{orig}[/red]  →  [green]{fuzz}[/green]"
-                    for orig, fuzz in addr_map.items()
+                    f"  [red]{orig}[/red]  →  [green]{surr}[/green]"
+                    for orig, surr in addr_map.items()
+                )
+                mode_note = (
+                    f"House number ±{ADDRESS_SHIFT_RANGE}, city/state unchanged"
+                    if sq_mode == "shift"
+                    else "Structure-preserving fake address"
                 )
                 console.print(Panel(
                     "[bold blue]Service query[/bold blue]  "
-                    "[dim]· House number ±1, city/state unchanged[/dim]\n\n"
+                    f"[dim]· {mode_note}[/dim]\n\n"
                     f"{addr_lines}\n\n"
-                    f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{fuzzed}[/blue]",
+                    f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{sq_sanitised}[/blue]",
                     border_style="blue", padding=(1, 2),
                 ))
             else:
@@ -377,18 +410,10 @@ def _run_pii_finder() -> None:
                     "[dim]· No specific street address found[/dim]\n\n"
                     "[dim]Location names are not PII in service queries — "
                     "message would be sent unchanged.[/dim]\n\n"
-                    f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{user_input}[/blue]",
+                    f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{sq_sanitised}[/blue]",
                     border_style="blue", padding=(1, 2),
                 ))
             console.print()
-
-            sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
-            sq_confirmed = deduplicate(sq_confirmed)
-            sq_skipped   = getattr(sq_confirmed, '_skipped_entities', [])
-            # Addresses in service queries are fuzzed (not surrogate-replaced).
-            # Only generate surrogates for non-address entities (e.g. names).
-            sq_non_addr      = [e for e in sq_confirmed if e.type != "address"]
-            sq_surrogate_map = mimic.generate_all(sq_non_addr) if sq_non_addr else {}
 
             if sq_confirmed or sq_skipped:
                 sq_tbl = Table(
@@ -401,11 +426,10 @@ def _run_pii_finder() -> None:
                 sq_tbl.add_column("Source",    style="dim",       width=8)
                 sq_tbl.add_column("Surrogate", style="green bold")
                 for ent in sq_confirmed:
-                    if ent.type == "address":
-                        surrogate_cell = "[dim yellow]fuzzed — service query[/dim yellow]"
-                    else:
-                        surrogate_cell = sq_surrogate_map.get(ent.text, "[dim]—[/dim]")
-                    sq_tbl.add_row(ent.text, ent.type, f"{ent.score:.2f}", ent.source, surrogate_cell)
+                    sq_tbl.add_row(
+                        ent.text, ent.type, f"{ent.score:.2f}", ent.source,
+                        sq_surrogate_map.get(ent.text, "[dim]—[/dim]"),
+                    )
                 for ent in sq_skipped:
                     sq_tbl.add_row(
                         ent.text, ent.type, f"{ent.score:.2f}", ent.source,
@@ -432,7 +456,17 @@ def _run_pii_finder() -> None:
             _show_presidio_panel(user_input)
             continue
 
-        surrogate_map = mimic.generate_all(confirmed) if confirmed else {}
+        # Non-service context: "auto" resolves to replace (the v1 behaviour).
+        std_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "replace"
+        surrogate_map = (
+            mimic.generate_all(
+                confirmed,
+                address_mode=std_mode,
+                address_shift_range=ADDRESS_SHIFT_RANGE,
+            )
+            if confirmed
+            else {}
+        )
 
         tbl = Table(
             title="[bold blue]SentinelLayer — Detected PII[/bold blue]",

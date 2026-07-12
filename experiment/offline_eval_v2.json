@@ -1,0 +1,174 @@
+{
+  "key_file": "experiment/test_key.json",
+  "questions": 1124,
+  "matching": "span-aware",
+  "overall": {
+    "precision": 1.0,
+    "recall": 0.9991,
+    "f1": 0.9996,
+    "tp": 2255,
+    "fp": 0,
+    "fn": 2
+  },
+  "per_type": {
+    "FAC": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 6,
+      "fp": 0,
+      "fn": 0
+    },
+    "GPE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 346,
+      "fp": 0,
+      "fn": 0
+    },
+    "LOC": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 13,
+      "fp": 0,
+      "fn": 0
+    },
+    "ORG": {
+      "precision": 1.0,
+      "recall": 0.9944,
+      "f1": 0.9972,
+      "tp": 177,
+      "fp": 0,
+      "fn": 1
+    },
+    "PERSON": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 533,
+      "fp": 0,
+      "fn": 0
+    },
+    "address": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 153,
+      "fp": 0,
+      "fn": 0
+    },
+    "api_key": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 39,
+      "fp": 0,
+      "fn": 0
+    },
+    "credit_card": {
+      "precision": 1.0,
+      "recall": 0.9762,
+      "f1": 0.988,
+      "tp": 41,
+      "fp": 0,
+      "fn": 1
+    },
+    "crypto": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    },
+    "dob": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 163,
+      "fp": 0,
+      "fn": 0
+    },
+    "email": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 237,
+      "fp": 0,
+      "fn": 0
+    },
+    "gender_indicator": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 22,
+      "fp": 0,
+      "fn": 0
+    },
+    "ip_address": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 36,
+      "fp": 0,
+      "fn": 0
+    },
+    "phone": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 264,
+      "fp": 0,
+      "fn": 0
+    },
+    "postal_code": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 78,
+      "fp": 0,
+      "fn": 0
+    },
+    "ssn": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 123,
+      "fp": 0,
+      "fn": 0
+    },
+    "us_bank_number": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    },
+    "us_driver_license": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "misses": [
+    {
+      "entry": 659,
+      "type": "credit_card",
+      "value": "5412751234123412",
+      "question": "Please cancel the automated payment billing associated with my corporate Mastercard account number 5412751234123412."
+    },
+    {
+      "entry": 1055,
+      "type": "ORG",
+      "value": "Summit Ridge Consulting",
+      "question": "Write a professional summary for Zanele Mokoena at Summit Ridge Consulting in Tempe."
+    }
+  ],
+  "false_positives": []
+}

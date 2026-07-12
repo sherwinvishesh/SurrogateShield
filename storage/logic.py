@@ -154,6 +154,9 @@ class ShadowMap:
             Path(SHADOWMAP_DIR) / f"{conversation_id}.shadowmap"
         )
         self._mappings: Dict[str, str] = {}
+        # Forward index (original → surrogate), maintained alongside the main
+        # map so callers never have to copy + invert the whole map per call.
+        self._reverse: Dict[str, str] = {}
         self._load()
 
     # ── CRUD ────────────────────────────────────────────────────
@@ -167,6 +170,7 @@ class ShadowMap:
             original:  The real PII value to restore later.
         """
         self._mappings[surrogate] = original
+        self._reverse[original] = surrogate
 
     def get(self, surrogate: str) -> Optional[str]:
         """
@@ -188,10 +192,21 @@ class ShadowMap:
             new_mappings: New entries to add/update.
         """
         self._mappings.update(new_mappings)
+        for surrogate, original in new_mappings.items():
+            self._reverse[original] = surrogate
 
     def all_mappings(self) -> Dict[str, str]:
         """Return a copy of all current surrogate→original mappings."""
         return dict(self._mappings)
+
+    def lookup_original(self, original: str) -> Optional[str]:
+        """Return the surrogate already issued for *original*, or None.
+        O(1) via the maintained forward index."""
+        return self._reverse.get(original)
+
+    def originals(self):
+        """View of all original values currently mapped (forward-index keys)."""
+        return self._reverse.keys()
 
     # ── Persistence ─────────────────────────────────────────────
 
@@ -241,6 +256,7 @@ class ShadowMap:
             aesgcm = AESGCM(self._key)
             plaintext = aesgcm.decrypt(nonce, ciphertext, None)
             self._mappings = json.loads(plaintext.decode("utf-8"))
+            self._reverse = {v: k for k, v in self._mappings.items()}
             logger.info(
                 f"[ShadowMap] Loaded {len(self._mappings)} mappings from {self._path}"
             )
@@ -250,6 +266,7 @@ class ShadowMap:
                 "Starting with empty mappings."
             )
             self._mappings = {}
+            self._reverse = {}
 
     def delete(self) -> None:
         """

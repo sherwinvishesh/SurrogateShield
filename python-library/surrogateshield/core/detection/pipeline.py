@@ -307,6 +307,8 @@ def run_cascade(
     entity_trace_low_threshold: float = 0.60,
     context_guard_threshold: float = 0.70,
     entity_trace_fallback_threshold: float = 0.65,
+    context_guard_model: str = "dslim/distilbert-NER",
+    context_guard_device: int = -1,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full SentinelLayer cascade then apply post-processing passes.
@@ -362,9 +364,10 @@ def run_cascade(
         slm_confirmed, slm_uncertain = context_guard.guard(
             remaining_text=remaining_text,
             borderline_entities=ner_borderline,
-            model_name="dslim/distilbert-NER",
+            model_name=context_guard_model,
             enabled=True,
             confidence_threshold=context_guard_threshold,
+            device=context_guard_device,
         )
         if skip_location_entities:
             slm_confirmed = [e for e in slm_confirmed if e.type not in _GEO_TYPES]
