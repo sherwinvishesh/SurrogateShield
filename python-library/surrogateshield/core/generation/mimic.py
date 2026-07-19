@@ -25,6 +25,12 @@ logger = logging.getLogger(__name__)
 _fake = Faker()
 Faker.seed(None)
 
+# Types whose surrogates mirror the original's exact character shape
+# (an ID number swaps to a same-shape ID number).
+_SHAPE_TYPES = frozenset({
+    "mac_address", "vin", "passport", "id_number", "license_plate",
+})
+
 
 def _aba_check(number: str) -> bool:
     digits = [int(c) for c in number]
@@ -303,6 +309,62 @@ class MimicGen:
                 return candidate
         return str(int(numeric) + 1).zfill(len(numeric))
 
+    def _shape_like(self, original: str) -> str:
+        """
+        Random string with the same character-class shape as *original*:
+        digits→digits, uppercase→uppercase, lowercase→lowercase, separators
+        preserved.  Hex-looking strings (IPv6, MAC) stay within hex digits
+        so the surrogate remains format-valid.
+        """
+        stripped = original.replace(":", "").replace("-", "").replace(".", "")
+        is_hexish = (
+            (":" in original or "." in original)
+            and bool(re.fullmatch(r"[0-9A-Fa-f]*", stripped))
+        )
+        for _ in range(20):
+            out = []
+            for c in original:
+                if c.isdigit():
+                    out.append(str(self._rng.randint(0, 9)))
+                elif is_hexish and c.isalpha():
+                    pool = "abcdef" if c.islower() else "ABCDEF"
+                    out.append(self._rng.choice(pool))
+                elif c.isupper():
+                    out.append(self._rng.choice("ABCDEFGHJKLMNPQRSTUVWXYZ"))
+                elif c.islower():
+                    out.append(self._rng.choice("abcdefghijkmnpqrstuvwxyz"))
+                else:
+                    out.append(c)
+            candidate = "".join(out)
+            if candidate != original:
+                return candidate
+        return original[::-1]
+
+    def _gen_iban_like(self, original: str) -> str:
+        """
+        Same-country fake IBAN with VALID mod-97 check digits and the
+        original grouping/spacing preserved.
+        """
+        compact = re.sub(r"\s+", "", original)
+        country = compact[:2]
+        body = "".join(
+            str(self._rng.randint(0, 9)) if c.isdigit()
+            else self._rng.choice("ABCDEFGHJKLMNPQRSTUVWXYZ")
+            for c in compact[4:]
+        )
+        rearranged = body + country + "00"
+        numeric = "".join(str(int(c, 36)) for c in rearranged)
+        check = 98 - (int(numeric) % 97)
+        candidate = f"{country}{check:02d}{body}"
+        out, i = [], 0
+        for c in original:
+            if c.isspace():
+                out.append(c)
+            else:
+                out.append(candidate[i])
+                i += 1
+        return "".join(out)
+
     def _gen_credit_card(self) -> str:
         return _fake.credit_card_number(card_type=None)
 
@@ -418,6 +480,19 @@ class MimicGen:
                 forbidden=forbidden,
             )
             logger.debug(f"[MimicGen] address: {entity.text!r} → {surrogate!r}")
+            return surrogate
+
+        # Shape-preserving types: the surrogate keeps the exact format of the
+        # original (an ID number swaps to an ID number of the same shape).
+        if entity.type == "iban":
+            surrogate = self._unique(lambda: self._gen_iban_like(entity.text))
+            logger.debug(f"[MimicGen] iban: {entity.text!r} → {surrogate!r}")
+            return surrogate
+        if entity.type in _SHAPE_TYPES or (
+            entity.type == "ip_address" and ":" in entity.text
+        ):
+            surrogate = self._unique(lambda: self._shape_like(entity.text))
+            logger.debug(f"[MimicGen] {entity.type}: {entity.text!r} → {surrogate!r}")
             return surrogate
 
         method_name = self._GENERATORS.get(entity.type, "_gen_default")

@@ -28,7 +28,7 @@ def _clean_session():
 def test_version_matches_pyproject():
     pyproject = (Path(__file__).resolve().parent.parent / "pyproject.toml").read_text()
     declared = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.M).group(1)
-    assert ss.__version__ == declared == "2.0.0"
+    assert ss.__version__ == declared == "2.1.0"
 
 
 def test_public_all():

@@ -28,7 +28,7 @@ from .core.detection import service_query as _service_query
 from .core.entities import apply_entity_surrogates as _apply_entity_surrogates
 from .core.reconstruction.resolve import ResolvePass as _ResolvePass
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 __all__ = ["config", "scan", "pii_finder", "mask", "unmask", "flush"]
 
 

@@ -40,7 +40,7 @@ def test_root_config_defaults_and_validation():
     assert root_config.SERVICE_QUERY_VERIFY_ADDRESSES is False
     assert root_config.FUZZY_MATCH_THRESHOLD == 85
     assert root_config.CONTEXT_GUARD_DEVICE == -1
-    assert root_config.VERSION == "2.0.0"
+    assert root_config.VERSION == "2.1.0"
     root_config.validate_config()  # must not raise on shipped defaults
 
 

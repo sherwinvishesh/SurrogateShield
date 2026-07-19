@@ -17,7 +17,8 @@
   {
     "Question": "I need to configure a recurring payment profile with a new corporate Mastercard account number: 5412751234123412.",
     "Answer-Key": {
-      "org": "Mastercard"
+      "org": "Mastercard",
+      "credit_card": "5412751234123412"
     }
   },
   {
@@ -69,7 +70,8 @@
   {
     "Question": "Please initiate an immediate billing correction workflow for a double transaction on my primary Visa account, which is 4222222222222222.",
     "Answer-Key": {
-      "org": "Visa"
+      "org": "Visa",
+      "credit_card": "4222222222222222"
     }
   },
   {
@@ -499,11 +501,8 @@
   {
     "Question": "Add this international supplier contact: Name - Katarzyna Wojciechowska, direct line - +49 30 8765 4321.",
     "Answer-Key": {
-      "org": [
-        "Kat",
-        "Wojciechowska"
-      ],
-      "phone": "+49 30 8765 4321"
+      "phone": "+49 30 8765 4321",
+      "name": "Katarzyna Wojciechowska"
     }
   },
   {
@@ -618,7 +617,8 @@
       "gpe": [
         "Miami",
         "FL"
-      ]
+      ],
+      "org": "Mastercard"
     }
   },
   {
@@ -940,12 +940,13 @@
     "Question": "Please compile an account restoration profile summary for a user named Tariq Mansoor, whose primary payment card on file is Visa 5412751234123412 and billing address is 502 Citrus Boulevard, Lakeland, FL.",
     "Answer-Key": {
       "name": "Tariq Mansoor",
-      "org": "Visa 5412751234123412",
+      "org": "Visa",
       "address": "502 Citrus Boulevard",
       "gpe": [
         "Lakeland",
         "FL"
-      ]
+      ],
+      "credit_card": "5412751234123412"
     }
   },
   {
@@ -1358,10 +1359,7 @@
     "Question": "I need to fill out a FAFSA for Priya Nambiar: born 2002-07-08, SSN 318-57-9204.",
     "Answer-Key": {
       "org": "FAFSA",
-      "name": [
-        "riya",
-        "Nambiar"
-      ],
+      "name": "Priya Nambiar",
       "dob": "2002-07-08",
       "ssn": "318-57-9204"
     }
@@ -1653,7 +1651,9 @@
   },
   {
     "Question": "I need urgent assistance setting up a secure webhook proxy. The validation header expects a Bearer token value string matching secret_token_abc123XyZ98754321_secure.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "api_key": "secret_token_abc123XyZ98754321_secure"
+    }
   },
   {
     "Question": "What are the licensed structural engineering firms specializing in residential retrofitting within the 90210 geographic district?",
@@ -1723,7 +1723,8 @@
       "name": "Elena Rossi",
       "credit_card": "5500000000000004",
       "address": "315 East Pine Road",
-      "gpe": "Boulder"
+      "gpe": "Boulder",
+      "org": "Mastercard"
     }
   },
   {
@@ -1765,12 +1766,13 @@
     "Question": "Please compile an account membership restoration log row for a client profile named Tariq Mansoor, whose current primary payment credential is Visa 5412751234123412 and billing home is 502 Citrus Boulevard, Lakeland, FL.",
     "Answer-Key": {
       "name": "Tariq Mansoor",
-      "org": "Visa 5412751234123412",
+      "org": "Visa",
       "address": "502 Citrus Boulevard",
       "gpe": [
         "Lakeland",
         "FL"
-      ]
+      ],
+      "credit_card": "5412751234123412"
     }
   },
   {
@@ -1833,10 +1835,7 @@
   {
     "Question": "I need to cancel a recurring subscription charge. The payment was made with Mastercard 5425233430109903.",
     "Answer-Key": {
-      "org": [
-        "Master",
-        "card"
-      ],
+      "org": "Mastercard",
       "credit_card": "5425233430109903"
     }
   },
@@ -1978,7 +1977,8 @@
   {
     "Question": "Please terminate the automated annual recurring membership profile linked directly to my commercial corporate Visa 5500000000000004.",
     "Answer-Key": {
-      "credit_card": "5500000000000004"
+      "credit_card": "5500000000000004",
+      "org": "Visa"
     }
   },
   {
@@ -2167,7 +2167,8 @@
   {
     "Question": "I need to configure an automated monthly payment processing row with a new corporate Mastercard routing profile: 5412751234123412.",
     "Answer-Key": {
-      "org": "Mastercard"
+      "org": "Mastercard",
+      "credit_card": "5412751234123412"
     }
   },
   {
@@ -2309,7 +2310,8 @@
   {
     "Question": "Please cancel the automated cloud server payment billing link established on my corporate Mastercard account number 5412751234123412.",
     "Answer-Key": {
-      "org": "Mastercard"
+      "org": "Mastercard",
+      "credit_card": "5412751234123412"
     }
   },
   {
@@ -2521,7 +2523,9 @@
         "Reno",
         "NV"
       ],
-      "name": "Emeka Nzekwe"
+      "name": "Emeka Nzekwe",
+      "credit_card": "5234567891234567",
+      "org": "Mastercard"
     }
   },
   {
@@ -2716,7 +2720,8 @@
   {
     "Question": "Why does my production monitoring application throw an authentication timeout exception when I feed the Bearer token secret_key_998877665544332211 from a pod deployed on IP 192.168.10.5?",
     "Answer-Key": {
-      "ip_address": "192.168.10.5"
+      "ip_address": "192.168.10.5",
+      "api_key": "secret_key_998877665544332211"
     }
   },
   {
@@ -2797,7 +2802,8 @@
   {
     "Question": "Why does my Node.js microservice keep failing with an authentication error when I pass the Bearer token secret_token_abc123XyZ98754321_secure from a deployment hosted on server IP 10.0.0.45?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45"
+      "ip_address": "10.0.0.45",
+      "api_key": "secret_token_abc123XyZ98754321_secure"
     }
   },
   {
@@ -3056,7 +3062,8 @@
       "gpe": [
         "Flagstaff",
         "AZ"
-      ]
+      ],
+      "org": "Mastercard"
     }
   },
   {
@@ -3203,10 +3210,7 @@
   {
     "Question": "Please enter this patient's contact info into the intake system: Name - Sunita Rathod, Email - s.rathod.health@yahoo.com, Phone - (248) 391-6074.",
     "Answer-Key": {
-      "name": [
-        "Sun",
-        "ita Rathod"
-      ],
+      "name": "Sunita Rathod",
       "email": "s.rathod.health@yahoo.com",
       "phone": "(248) 391-6074"
     }
@@ -3266,7 +3270,9 @@
   },
   {
     "Question": "I need help configuring a webhook. The endpoint expects a Bearer token value of secret_token_abc123XyZ98754321_secure.",
-    "Answer-Key": {}
+    "Answer-Key": {
+      "api_key": "secret_token_abc123XyZ98754321_secure"
+    }
   },
   {
     "Question": "How do I file an official application for commercial property council tax exemptions if my physical business unit is in postcode EC2A 4BH?",
@@ -3346,7 +3352,8 @@
       "gpe": [
         "Marietta",
         "GA"
-      ]
+      ],
+      "credit_card": "4222222222222222"
     }
   },
   {
@@ -3473,10 +3480,7 @@
   {
     "Question": "Fill out this pre-employment background check form: Full Name - Konstantinos Papadopoulos, SSN: 214-85-3970, DOB: November 3, 1979.",
     "Answer-Key": {
-      "name": [
-        "Konstantin",
-        "os Papadopoulos"
-      ],
+      "name": "Konstantinos Papadopoulos",
       "ssn": "214-85-3970",
       "dob": "November 3, 1979"
     }
@@ -3644,9 +3648,7 @@
   },
   {
     "Question": "What is the mathematical definition of a prime number, and how does the Sieve of Eratosthenes help find them?",
-    "Answer-Key": {
-      "org": "the Sieve of Eratosthenes"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Are there specific regional tax credits available for senior citizens in ZIP code 60611 who have an official date of birth of 09/04/1954?",
@@ -3680,9 +3682,7 @@
   },
   {
     "Question": "Explain the structural difference between a typical sonata-allegro movement form and a standard theme and variations layout.",
-    "Answer-Key": {
-      "org": "sonata-allegro"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Draft a business inquiry notification confirming that Chloe Mercier requested an immediate technical callback at +33 1 42 27 78 90.",
@@ -4271,7 +4271,7 @@
       "credit_card": "5412751234123412",
       "name": "Tariq Mansoor",
       "address": "502 Citrus Boulevard, Lakeland, FL",
-      "org": "Visa 5412751234123412",
+      "org": "Visa",
       "gpe": [
         "FL",
         "Lakeland"
@@ -4362,7 +4362,8 @@
       "gpe": [
         "Marietta",
         "GA"
-      ]
+      ],
+      "credit_card": "4222222222222222"
     }
   },
   {
@@ -4382,10 +4383,7 @@
   {
     "Question": "Please log this referral: Fatou Camara, fatou.camara@dakarlaw.sn, +221 77 842 3190.",
     "Answer-Key": {
-      "name": [
-        "Fat",
-        "ou Camara"
-      ],
+      "name": "Fatou Camara",
       "email": "fatou.camara@dakarlaw.sn",
       "phone": "+221 77 842 3190"
     }
@@ -4447,7 +4445,8 @@
   {
     "Question": "Please process an immediate billing adjustment for an erroneous charge on my Visa card account, which is 4222222222222222.",
     "Answer-Key": {
-      "org": "Visa"
+      "org": "Visa",
+      "credit_card": "4222222222222222"
     }
   },
   {
@@ -4459,9 +4458,7 @@
   },
   {
     "Question": "What were the primary engineering innovations that allowed historical builders to construct the massive freestanding domes of the Italian Renaissance?",
-    "Answer-Key": {
-      "org": "the Italian Renaissance"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Help me compose an introductory message for Hiroshi Nakamura, who is joining our US office from the Tokyo branch.",
@@ -4532,7 +4529,8 @@
   {
     "Question": "My transaction keeps failing on the checkout page when I use my Visa ending in 4222222222222222. What could be the issue?",
     "Answer-Key": {
-      "org": "Visa"
+      "org": "Visa",
+      "credit_card": "4222222222222222"
     }
   },
   {
@@ -4573,7 +4571,8 @@
   {
     "Question": "Why does my back-end container swarm keep failing with a credential access exception when I pass the verification Bearer token secret_token_abc123XyZ98754321_secure from a task node running on subnet IP address 10.0.0.45?",
     "Answer-Key": {
-      "ip_address": "10.0.0.45"
+      "ip_address": "10.0.0.45",
+      "api_key": "secret_token_abc123XyZ98754321_secure"
     }
   },
   {
@@ -4753,7 +4752,7 @@
   {
     "Question": "Create a customer account with the following details: Name - Moana Kealoha, Email - moana.kealoha.aloha@gmail.com, Phone - 808-294-5173.",
     "Answer-Key": {
-      "name": "ana Kealoha",
+      "name": "Moana Kealoha",
       "email": "moana.kealoha.aloha@gmail.com",
       "phone": "808-294-5173"
     }
@@ -5017,7 +5016,7 @@
   {
     "Question": "Fill in the state unemployment benefits application form: Full Name - Ibukun Adewale, SSN - 679-34-8152.",
     "Answer-Key": {
-      "name": "n Adewale",
+      "name": "Ibukun Adewale",
       "ssn": "679-34-8152"
     }
   },
@@ -5037,7 +5036,8 @@
       "gpe": [
         "Marietta",
         "GA"
-      ]
+      ],
+      "credit_card": "4222222222222222"
     }
   },
   {
@@ -5588,11 +5588,7 @@
   {
     "Question": "Please draft a callback confirmation for Zuberi Nkosi — he called and left his number as +1-206-847-3918.",
     "Answer-Key": {
-      "name": [
-        "Zuberi Nkosi",
-        "ube",
-        "ri Nkosi"
-      ],
+      "name": "Zuberi Nkosi",
       "phone": "+1-206-847-3918"
     }
   },
@@ -6328,12 +6324,7 @@
   {
     "Question": "Add to the community volunteer roster: Name - Fatou Diarra, Email - fatou.diarra.vol@hotmail.com, Phone - (901) 475-2836.",
     "Answer-Key": {
-      "name": [
-        "Fatou Diarra",
-        "ail",
-        "ou Diarra",
-        "Fat"
-      ],
+      "name": "Fatou Diarra",
       "email": "fatou.diarra.vol@hotmail.com",
       "phone": "(901) 475-2836"
     }
@@ -6600,7 +6591,8 @@
   {
     "Question": "Why does my Node.js microservice keep failing with an authentication error when I pass the Bearer token secret_key_998877665544332211 from a deployment hosted on server IP 192.168.10.5?",
     "Answer-Key": {
-      "ip_address": "192.168.10.5"
+      "ip_address": "192.168.10.5",
+      "api_key": "secret_key_998877665544332211"
     }
   },
   {
@@ -6884,9 +6876,7 @@
   },
   {
     "Question": "How do shifting ocean currents and atmospheric cell patterns produce the periodic climate variations known as the El Niño-Southern Oscillation?",
-    "Answer-Key": {
-      "org": "the El Niño-Southern Oscillation"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Draft a consumer hardware escalation case description text linked directly to the registered corporate client communication account emeka.officials@africabiz.net.",
@@ -7309,9 +7299,7 @@
   },
   {
     "Question": "What are the primary differences between the classical architecture of the Roman Colosseum and the engineering styles used in Greek amphitheaters?",
-    "Answer-Key": {
-      "org": "the Roman Colosseum"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Help me construct an internal account sync message block for Ali El-Amin to coordinate an international developer conference call on +961 1 234 567.",
@@ -7401,11 +7389,7 @@
   {
     "Question": "Enter this patient record into our intake system: Name - Deepak Agarwal, Email - deepak.agarwal.med@yahoo.com, Phone - 682-491-3075, Address - 2294 Elm St, Fort Worth, TX.",
     "Answer-Key": {
-      "name": [
-        "Deep",
-        "ak Agarwal",
-        "ail"
-      ],
+      "name": "Deepak Agarwal",
       "email": "deepak.agarwal.med@yahoo.com",
       "phone": "682-491-3075",
       "address": "2294 Elm St",
@@ -8009,16 +7993,14 @@
   {
     "Question": "My transaction execution keeps returning processing errors on the gateway screen when I utilize my corporate Visa ending in 4222222222222222. What is the fault?",
     "Answer-Key": {
-      "org": "Visa"
+      "org": "Visa",
+      "credit_card": "4222222222222222"
     }
   },
   {
     "Question": "Register me for the annual data science conference: Name - Olamide Bakare, Email - olamide.bakare.conf@gmail.com, Phone - 404-829-5173, Address - 632 Peachtree Ln, Atlanta, GA.",
     "Answer-Key": {
-      "name": [
-        "lam",
-        "ide Bakare"
-      ],
+      "name": "Olamide Bakare",
       "email": "olamide.bakare.conf@gmail.com",
       "phone": "404-829-5173",
       "address": "632 Peachtree Ln",

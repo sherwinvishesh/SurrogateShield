@@ -59,7 +59,8 @@ _ENTITY_BLOCKLIST = {
     "address", "zip", "postcode", "passport", "iban", "bic",
     "cvv", "cvc", "expiry",
     "mr", "mrs", "ms", "dr", "prof", "jr", "sr",
-    "mon", "tue", "wed", "thu", "fri", "sat", "sun",
+    "mon", "tue", "wed", "thu", "fri", "sat",
+    # "sun" intentionally NOT here — it's a real surname ("Dr. Sun")
     "jan", "feb", "mar", "apr", "jun", "jul", "aug",
     "sep", "oct", "nov", "dec",
     "am", "pm", "gmt", "utc", "est", "pst",
@@ -68,6 +69,13 @@ _ENTITY_BLOCKLIST = {
     "api", "ip", "url", "http", "https", "sti", "std", "faq",
     "crm", "pdf", "dns", "vpn", "cpu", "gpu", "html", "css",
     "bearer", "bear", "token", "auth",
+    # contact-channel labels ("Mobile +91…", "Cell: …") — never entities
+    "mobile", "cell", "tel",
+    # document-field labels NER mistakes for entities ("VIN 1HGB…")
+    "vin", "mrn", "ktn", "agi",
+    # country-level mentions are not identifying (and masking them
+    # destroys utility): "…, UK." / "shipped from the USA"
+    "uk", "usa", "u.k.", "u.s.", "u.s.a.",
 }
 
 _LOCATION_PREPS = {
@@ -121,6 +129,12 @@ def trace(
 
         if ent.text.lower().strip() in _ENTITY_BLOCKLIST:
             logger.debug(f"[EntityTrace] Skipping blocklisted token: {ent.text!r}")
+            continue
+
+        # A real name never spans a line break — entities that do are
+        # artifacts of form-style text ("DESHAWN M\nADDRESS").
+        if "\n" in ent.text:
+            logger.debug(f"[EntityTrace] Skipping newline-spanning: {ent.text!r}")
             continue
 
         _TYPE_DEFAULTS = {

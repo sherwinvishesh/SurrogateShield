@@ -41,7 +41,10 @@ check("Email detected",              has("email me at test@example.com", "email"
 check("SSN with dashes",             has("SSN is 123-45-6789", "ssn"))
 check("SSN no dashes",               has("SSN 123456789", "ssn"))
 check("Credit card Luhn valid",      has("card 4532015112830366", "credit_card"))
-check("Credit card Luhn invalid → rejected", empty("bad card 1234567890123456"))
+# Luhn-invalid digits with NO card framing are rejected; note that
+# "bad card 1234..." IS detected by design — the text says it's a card,
+# so the (typo'd) number is still card-intent PII.
+check("Credit card Luhn invalid → rejected", empty("bad value 1234567890123456"))
 check("US phone",                    has("call +1-555-867-5309", "phone_us"))
 check("UK phone",                    has("call +44 7911 123456", "phone_uk"))
 check("IPv4 address",                has("server 192.168.1.100", "ip_address"))

@@ -77,6 +77,7 @@ _UNAMBIGUOUS_SUFFIXES = frozenset({
     "landing", "lndg", "manor", "mnr", "gardens", "gdns",
     "heights", "hts", "square", "sq", "alley", "aly",
     "row", "mews", "byway", "pike", "esplanade", "boardwalk",
+    "parade", "promenade", "quay", "wharf",
 })
 
 # Tier 2: common English nouns that are also street suffixes — these require
@@ -116,6 +117,13 @@ _CITY_BLOCKLIST = frozenset({
 })
 
 _STATE_NAMES_LOWER = US_STATES  # already lowercase in geo_data
+
+# State abbreviations that are safe to accept in lowercase ("tempe az 85281").
+# Abbreviations that collide with English words are excluded — those are only
+# accepted in uppercase.  Lowercase abbreviations additionally require a ZIP.
+_LOWERCASE_SAFE_ABBREVS = frozenset(
+    a.lower() for a in US_STATE_ABBREVS
+) - frozenset({"in", "or", "ok", "hi", "me", "oh", "la", "al", "de", "id"})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -168,11 +176,16 @@ _UNIT = (
     rf"|#\s?{_UNIT_ID}"
 )
 
-# City: 1-4 capitalized words (case enforced even under IGNORECASE via (?-i:)).
-_CITY = r"(?-i:[A-Z][A-Za-z'’.\-]{1,15}(?:[ ][A-Z][A-Za-z'’.\-]{1,15}){0,3})"
+# City: 1-4 words.  Case discipline is enforced in _assemble: a capitalized
+# city is trimmed at the first lowercase word ("Springfield is beautiful" →
+# "Springfield"), while an all-lowercase city ("madison wi 53711") is only
+# accepted when a ZIP follows — real chat text is often typed lowercase.
+_CITY = r"[A-Za-z][A-Za-z'’.\-]{1,15}(?:[ ][A-Za-z][A-Za-z'’.\-]{1,15}){0,3}"
 
-# State: full name (any case) or UPPERCASE-only 2-letter USPS abbreviation.
-_STATE = rf"(?:{_STATE_NAME_ALT}|(?-i:(?:{_STATE_ABBREV_ALT}))\.?)"
+# State: full name (any case) or 2-letter USPS abbreviation.  Lowercase
+# abbreviations are matched here but only *accepted* by _assemble when they
+# are unambiguous (not English words) and backed by a following ZIP.
+_STATE = rf"(?:{_STATE_NAME_ALT}|(?:{_STATE_ABBREV_ALT})\.?)"
 
 _ZIP = r"\d{5}(?:-\d{4})?(?!\d)"
 
@@ -227,6 +240,18 @@ def _norm_suffix(token: Optional[str]) -> Optional[str]:
 def _is_state_token(token: str) -> bool:
     stripped = token.rstrip(".")
     return stripped in US_STATE_ABBREVS or stripped.lower() in _STATE_NAMES_LOWER
+
+
+def _abbrev_state_ok(token: str, zip_present: bool) -> bool:
+    """Is this token acceptable as a state ABBREVIATION, given its case?
+
+    Uppercase abbreviations ("AZ") are always acceptable; lowercase ones
+    ("az") only when they cannot be English words and a ZIP follows.
+    """
+    stripped = token.rstrip(".")
+    if stripped in US_STATE_ABBREVS and stripped.isupper():
+        return True
+    return stripped in _LOWERCASE_SAFE_ABBREVS and zip_present
 
 
 def _is_sep_delimited(sep: Optional[str]) -> bool:
@@ -295,7 +320,14 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
             return None
 
         norm = _norm_suffix(suffix)
-        has_tail = bool(g.get("city") or g.get("state") or g.get("zip"))
+        # Extra-evidence check for ambiguous suffixes.  Only case-credible
+        # tail evidence counts: a lowercase city group ("this morning" after
+        # "5 mile run") is NOT evidence unless a ZIP backs it up.
+        city_g = g.get("city")
+        has_tail = bool(
+            g.get("state") or g.get("zip")
+            or (city_g and city_g[0].isupper())
+        )
         if norm in _AMBIGUOUS_SUFFIXES:
             # Ambiguous suffixes need extra evidence: a capitalized street
             # name, or an explicit city/state/ZIP tail.
@@ -314,12 +346,34 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
     city_txt = g.get("city")
     state_txt = g.get("state")
     zip_txt = g.get("zip")
+    city_group_end = match.end("city") if city_txt else None
 
-    # Fixup 1: the city group can swallow an uppercase state abbreviation
-    # ("Tempe AZ" as a two-word city, or "AZ" alone as the city).
+    # Case discipline: the city group matches any case so lowercase chat
+    # text ("madison wi 53711") parses, but a properly-capitalized city
+    # must not absorb following lowercase prose ("Springfield is
+    # beautiful").  Trim at the first case break; any state/ZIP evidence
+    # that matched beyond the trim is discarded with it.
+    if city_txt and city_txt[0].isupper():
+        words = city_txt.split()
+        keep = [words[0]]
+        for w in words[1:]:
+            if w[0].isupper():
+                keep.append(w)
+            else:
+                break
+        if len(keep) != len(words):
+            city_txt = " ".join(keep)
+            city_group_end = match.start("city") + len(city_txt)
+            state_txt = None
+            zip_txt = None
+
+    # Fixup 1: the city group can swallow a state abbreviation ("Tempe AZ"
+    # as a two-word city, or "AZ" alone as the city).  Lowercase
+    # abbreviations ("tempe az") are split out only when unambiguous and
+    # backed by a following ZIP.
     if city_txt and not state_txt:
         words = city_txt.split()
-        if _is_state_token(words[-1]) and words[-1].isupper():
+        if _abbrev_state_ok(words[-1], bool(zip_txt)):
             if len(words) == 1:
                 state_txt, city_txt = words[0], None
             else:
@@ -335,7 +389,9 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
     if city_txt:
         delimited = _is_sep_delimited(g.get("citysep"))
         has_following = bool(state_txt or zip_txt)
-        if _city_word_ok(city_txt):
+        city_is_lower = city_txt[0].islower()
+        # A lowercase city is only believable with a ZIP backing it up.
+        if _city_word_ok(city_txt) and not (city_is_lower and not zip_txt):
             if has_following:
                 # "…, Tempe, AZ" / "… Tempe AZ 85281" — safe.
                 city_accepted = True
@@ -344,13 +400,13 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
                 # boundary after it, or a well-known city name, so we don't
                 # absorb "…, John was there".
                 if city_txt.lower() in MAJOR_CITIES or _followed_by_boundary(
-                    text, match.end("city")
+                    text, city_group_end
                 ):
                     city_accepted = True
 
     if city_accepted:
         city = city_txt
-        end = match.end("city")
+        end = city_group_end
 
     # Track whether the state token came from the regex state group or was
     # recovered out of the city group (Fixup 1) — the span end differs.
@@ -358,10 +414,18 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
 
     state_accepted = False
     if state_txt and (city_accepted or city_txt is None or state_from_city_group):
+        token = state_txt.rstrip(".")
+        # Case rules: full names any case; abbreviations uppercase, or
+        # lowercase-safe with a ZIP ("madison wi 53711").
+        case_ok = (
+            token.lower() in _STATE_NAMES_LOWER
+            or (token in US_STATE_ABBREVS and token.isupper())
+            or (token in _LOWERCASE_SAFE_ABBREVS and bool(zip_txt))
+        )
         # A state is accepted when comma/newline-delimited, or preceded by an
         # accepted city, or followed by a ZIP ("123 Main St OR take a left"
         # has none of these).
-        if (
+        if case_ok and (
             _is_sep_delimited(g.get("statesep"))
             or city_accepted
             or (state_from_city_group and _is_sep_delimited(g.get("citysep")))
@@ -371,7 +435,7 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
 
     if state_accepted:
         state = state_txt
-        end = match.end("city") if state_from_city_group else match.end("state")
+        end = city_group_end if state_from_city_group else match.end("state")
 
     zip_accepted = bool(zip_txt) and (state_accepted or city_accepted)
     if zip_accepted:

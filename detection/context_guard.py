@@ -87,6 +87,15 @@ _CG_BLOCKLIST: frozenset = frozenset({
     # (ssh/ux/sql intentionally excluded — they occur as real ORG names.)
     "api", "ip", "sti", "std", "url", "http", "https",
     "faq", "crm", "pdf", "dns", "vpn", "bear", "bearer",
+    # contact-channel labels ("Mobile +91…", "Cell: …") — never entities
+    "mobile", "cell", "tel", "fax",
+    # document-field labels NER mistakes for entities ("VIN 1HGB…")
+    "vin", "mrn", "ktn", "er", "agi",
+    # role nouns fragment-expansion can surface ("Client", "Batch", "Median")
+    "client", "customer", "vendor", "supplier", "contact", "batch", "median",
+    "user", "patient", "member",
+    # form-field labels ("Name - X, Email - Y" intake rows)
+    "email", "phone", "name", "dob", "ssn", "address",
 })
 
 
@@ -136,9 +145,11 @@ def guard(
         else:
             uncertain.append(ent)
 
-    # Run NER on remaining text
-    clean = remaining_text.replace("█", " ").strip()
-    if not clean:
+    # Run NER on remaining text.  █ placeholders become spaces; the text is
+    # deliberately NOT stripped so model offsets stay aligned with
+    # remaining_text (stripping used to shift every span left).
+    clean = remaining_text.replace("█", " ")
+    if not clean.strip():
         return confirmed, uncertain
 
     ner = _get_ner()
@@ -175,10 +186,40 @@ def guard(
             logger.debug(f"[ContextGuard] Skipping blocklisted token: {text!r}")
             continue
 
+        # A real name never spans a line break
+        if "\n" in text:
+            logger.debug(f"[ContextGuard] Skipping newline-spanning: {text!r}")
+            continue
+
+        # Word-boundary alignment: word-piece aggregation sometimes emits
+        # fragments of longer words ("ri Nkosi" from "Zuberi Nkosi",
+        # "lient" from "Client").  A fragment is real signal with wrong
+        # boundaries — EXPAND it to the enclosing words, then re-screen.
+        start = int(r.get("start", 0))
+        end   = int(r.get("end", len(text)))
+        idx = clean.find(text, max(0, start - 2), end + 2)
+        if idx != -1:
+            start, end = idx, idx + len(text)
+            grew = False
+            while start > 0 and clean[start - 1].isalnum() and (idx - start) < 12:
+                start -= 1
+                grew = True
+            while (end < len(clean) and clean[end].isalnum()
+                   and (end - (idx + len(text))) < 12):
+                end += 1
+                grew = True
+            if grew:
+                text = clean[start:end].strip()
+                logger.debug(
+                    f"[ContextGuard] Expanded fragment {raw_word!r} → {text!r}"
+                )
+                if len(text) < 3 or text.lower() in _CG_BLOCKLIST:
+                    continue
+
         entity = DetectedEntity(
             text=text,
-            start=r.get("start", 0),
-            end=r.get("end", len(text)),
+            start=start,
+            end=end,
             type=entity_type,
             score=score,
             source="slm",

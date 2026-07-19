@@ -23,42 +23,45 @@ logger = logging.getLogger(__name__)
 
 # ─── Service query patterns (precompiled) ────────────────────────────────────
 
+# Every keyword group is \b-anchored: without anchors, substrings inside
+# ordinary words classify prose as service queries ("sTOPped … MilTOn"
+# used to satisfy "(top).{0,40}(to)") and silently suppress geo entities.
 _SERVICE_PATTERNS = [re.compile(p, re.IGNORECASE) for p in [
     # Food / dining
-    r"(find|locate|show|get|recommend|suggest|any|good|best).{0,60}"
-    r"(restaurant|cafe|coffee|breakfast|lunch|dinner|food|brunch|spot|place|eatery|bistro|diner)"
-    r".{0,40}(near|in|around|close|by)",
+    r"\b(find|locate|show|get|recommend|suggest|any|good|best)\b.{0,60}"
+    r"\b(restaurant|cafe|coffee|breakfast|lunch|dinner|food|brunch|spot|place|eatery|bistro|diner)s?\b"
+    r".{0,40}\b(near|in|around|close|by)\b",
 
     # Generic "what/where X near Y"
-    r"(what|which|where|any).{0,50}(near|close to|around|in the area)",
+    r"\b(what|which|where|any)\b.{0,50}\b(near|close to|around|in the area)\b",
 
     # Nearest / closest / open now
-    r"(nearest|closest|best|top|good|popular|open).{0,40}(near|close|around|by|to)",
+    r"\b(nearest|closest|best|top|good|popular|open)\b.{0,40}\b(near|close|around|by|to)\b",
 
     # "Is there a / are there any / find me"
-    r"(is there a?|are there any|find (a|some|me|the)).{0,60}"
-    r"(near|in|around|close|by)",
+    r"\b(is there a?|are there any|find (a|some|me|the))\b.{0,60}"
+    r"\b(near|in|around|close|by)\b",
 
     # Directions
-    r"directions?.{0,25}(to|from)",
-    r"(how (do i|to|can i) get|navigate|route).{0,25}(to|from)",
+    r"\bdirections?\b.{0,25}\b(to|from)\b",
+    r"\b(how (do i|to|can i) get|navigate|route)\b.{0,25}\b(to|from)\b",
 
     # Weather
-    r"(weather|temperature|forecast|rain|snow|humidity).{0,25}(in|at|near|for)",
+    r"\b(weather|temperature|forecast|rain|snow|humidity)\b.{0,25}\b(in|at|near|for)\b",
 
     # Hours / availability
-    r"(what.{0,15}(open|closed|hours|close)|is.{0,5}(open|closed)).{0,40}(near|in)",
+    r"\b(what.{0,15}(open|closed|hours|close)|is.{0,5}(open|closed))\b.{0,40}\b(near|in)\b",
 
     # Activities / places
-    r"(places?|spots?|areas?|things? to do|activities?).{0,25}(in|near|around)",
+    r"\b(places?|spots?|areas?|things? to do|activities?)\b.{0,25}\b(in|near|around)\b",
 
     # Specific service types
-    r"(charging station|parking|atm|gas station|petrol|fuel).{0,40}(near|close|around)",
-    r"(pharmacy|chemist|hospital|clinic|doctor|urgent care).{0,40}(near|in|around|close)",
-    r"(grocery|supermarket|store|shop|mall|market).{0,40}(near|in|around|close)",
+    r"\b(charging station|parking|atm|gas station|petrol|fuel)\b.{0,40}\b(near|close|around)\b",
+    r"\b(pharmacy|chemist|hospital|clinic|doctor|urgent care)\b.{0,40}\b(near|in|around|close)\b",
+    r"\b(grocery|supermarket|store|shop|mall|market)\b.{0,40}\b(near|in|around|close)\b",
 
     # "check if ... near"
-    r"check (if|whether).{0,60}(near|in|around|close)",
+    r"\bcheck (if|whether)\b.{0,60}\b(near|in|around|close)\b",
 ]]
 
 # Sensitive topics that override service classification → full anonymization
