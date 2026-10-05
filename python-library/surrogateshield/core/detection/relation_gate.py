@@ -106,6 +106,14 @@ hallo bonjour hola oi ciao tiene tenía tem tinha vive mora estudia trabaja est�
 _EDGE_CAPITAL = frozenset("ich ik je hallo bonjour hola hi hello hey dear naam".split())
 # Possessives that make the next word a noun ("Mein Vermieter", "Mijn BSN").
 # "Mia" and "Ma" are names, so they are not listed.
+# titles before a name: never part of it ("Don" and "Sr" are names or
+# ambiguous, so they are not listed)
+_TITLE_WORDS = frozenset("""
+mr mrs ms mx dr prof father fr sister brother rev reverend pastor imam rabbi professor
+professora doutor doutora dra dott dottor dottore dottoressa signor signora señor señora sra
+srta herr frau monsieur madame mme mlle maître mevrouw meneer dhr mevr
+""".split())
+_ARTICLES = frozenset("il lo la le el o a os as der die das the".split())
 _POSSESSIVE_DET = frozenset("""
 my mein meine meinem meinen meiner unser unsere mijn onze mon mes notre mi mis
 nuestro nuestra meu minha nosso nossa mio nostro nostra mera meri mere hamara
@@ -138,13 +146,25 @@ def trim_person(ent: DetectedEntity, text: str):
     had_possessive = False
     while i < j:
         w = toks[i].group()
-        if w.lower() in _POSSESSIVE_DET:
+        if w.lower().rstrip(".") in _TITLE_WORDS and i + 1 < j:
+            pass                            # "Father Eamon Kirwan" -> "Eamon Kirwan"
+        elif (w.lower() in _ARTICLES and i + 2 < j
+              and toks[i + 1].group().lower().rstrip(".") in _TITLE_WORDS):
+            pass                            # "il dottor Bellandi" -> "Bellandi"
+        elif w.lower() in _POSSESSIVE_DET:
             had_possessive = True
         elif not (w.lower() in _EDGE_WORDS and (w.islower() or w.lower() in _EDGE_CAPITAL)):
             break
         i += 1
     while j > i and toks[j - 1].group().islower() and toks[j - 1].group() in _EDGE_WORDS:
         j -= 1
+    if (i < j and toks[i].group()[:1].isupper() and text != text.lower()
+            and (i, j) != (0, len(toks))):
+        # after a title or frame: a lower-case verb ending the span is not
+        # the name ("professora Renata pediu" -> "Renata")
+        while (j - 1 > i and toks[j - 1].group().islower()
+               and toks[j - 1].group() not in _NAME_PARTICLES):
+            j -= 1
     if i == j:
         return None
     words = [t.group() for t in toks[i:j]]

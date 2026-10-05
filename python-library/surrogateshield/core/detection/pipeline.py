@@ -225,6 +225,42 @@ _INTRO_STRONG = re.compile(
     rf"\bmy\s+name(?:'s|\s+is)\s+({_NAME_TOKEN}(?:\s+{_NAME_TOKEN}){{0,2}})",
     re.IGNORECASE,
 )
+# "her name is Krystal Okwuosa", "HIS REAL NAME IS KAIRAT ABENOV": another
+# person's name, which must be case-marked ("his name is irrelevant")
+_INTRO_OTHER = re.compile(
+    rf"\b(?:his|her|their|your|whose)\s+(?:(?:real|full|legal|first|given|last)\s+)?"
+    rf"name(?:'s|\s+is|\s+was)\s+({_NAME_TOKEN}(?:\s+{_NAME_TOKEN}){{0,2}})",
+    re.IGNORECASE,
+)
+# E8: a title of any language before a capitalised name ("A professora
+# Renata", "il dottor Bellandi", "Father Eamon Kirwan's", "Frau Kessler")
+_TITLE_ANY = re.compile(
+    r"(?i:\b(?:father|fr\.|sister|brother|rev\.?|reverend|pastor|imam|rabbi|professora?"
+    r"|doutora?|dra?\.|dott(?:\.|ore|oressa|or)|dott\.ssa|signora?|sig\.(?:ra)?|señora?|sra?\.|srta\."
+    r"|herr|frau|monsieur|madame|mme\.?|mlle\.?|maître|mevrouw|meneer|dhr\.|mevr\.))\s+"
+    r"([A-ZÀ-Ý][\w'’\-]+(?:\s+[A-ZÀ-Ý][\w'’\-]+){0,2})"
+)
+# E9: a greeting line ("Dear TAN HUI MIN,", "> Dear Ms Okafor,")
+_DEAR_FRAME = re.compile(
+    r"(?:^|\n)[> \t]*(?i:dear)\s+([A-ZÀ-Ý][\w'’\-.]*(?:\s+[A-ZÀ-Ý][\w'’\-.]*){0,3})\s*[,:!\n]")
+_DEAR_NOT = frozenset("""
+sir sirs madam madame customer customers client clients user users member members team all
+colleague colleagues friend friends valued hiring manager landlord landlady parent parents
+guardian guardians applicant account holder recipient sender admissions committee editor
+mr mrs ms mx miss dr prof mr. mrs. ms. dr. prof. tenant tenants neighbour neighbors
+neighbours students student staff everyone hr support
+""".split())
+# E10: a display name before an address ("Sofía Paredes <sofia.p@x.io>")
+_NAME_ANGLE_EMAIL = re.compile(
+    r"([A-ZÀ-Ý][\w'’\-]+(?:[ \t]+[A-ZÀ-Ý][\w'’\-]+){1,3})[ \t]*<([^<>\s@]+)@[^<>\s]+>")
+_CLIPPED_TAIL = re.compile(r"[ \t]([A-ZÀ-Ý][a-zà-ÿ'’\-]{2,})(?=[ \t]*(?:$|\n|[,;)]))", re.M)
+_MONTH_DAY = frozenset("""january february march april may june july august september october
+november december monday tuesday wednesday thursday friday saturday sunday""".split())
+_ROLE_MAILBOX = frozenset("""
+info admin support sales contact help team hello noreply no-reply donotreply do-not-reply mail
+office billing service services security hr jobs careers press news marketing accounts
+webmaster postmaster root notifications alerts newsletter enquiries inquiries reception
+""".split())
 _INTRO_WEAK = re.compile(
     rf"\b(?:i\s+am|i'm|im|this\s+is)\s+({_NAME_TOKEN}(?:\s+{_NAME_TOKEN}){{0,2}})",
     re.IGNORECASE,
@@ -390,6 +426,40 @@ def _detect_structural_persons(
             candidates.append((m.start(1), m.start(1) + len(span_text), span_text))
             strong.add((m.start(1), m.start(1) + len(span_text)))
 
+    for m in _INTRO_OTHER.finditer(text):
+        toks = _trim_trailing_stopwords(m.group(1).split())
+        if toks and _person_tokens_ok(toks) and _name_case_marked(toks):
+            span_text = " ".join(toks)
+            candidates.append((m.start(1), m.start(1) + len(span_text), span_text))
+            strong.add((m.start(1), m.start(1) + len(span_text)))
+
+    for m in _TITLE_ANY.finditer(text):
+        toks = _trim_trailing_stopwords(m.group(1).split())
+        if toks:
+            toks[-1] = re.sub(r"['’]s$", "", toks[-1])
+        if (toks and toks[-1] and _person_tokens_ok(toks) and not any(_verbish(t) for t in toks)
+                and _token_core(toks[0]) not in ("christmas", "time", "nature", "superior")):
+            span_text = " ".join(toks)
+            candidates.append((m.start(1), m.start(1) + len(span_text), span_text))
+
+    for m in _DEAR_FRAME.finditer(text):
+        toks = m.group(1).split()
+        while toks and _token_core(toks[0]) in _DEAR_NOT:
+            toks = toks[1:]             # "Dear Ms Okafor" -> "Okafor"
+        toks = _trim_trailing_stopwords(toks)
+        if (toks and _person_tokens_ok(toks)
+                and not any(_token_core(t) in _DEAR_NOT for t in toks)):
+            span_text = " ".join(toks)
+            start = m.start(1) + m.group(1).index(span_text) if span_text in m.group(1) else -1
+            if start >= 0:
+                candidates.append((start, start + len(span_text), span_text))
+
+    for m in _NAME_ANGLE_EMAIL.finditer(text):
+        toks = m.group(1).split()
+        if (m.group(2).lower() not in _ROLE_MAILBOX and _person_tokens_ok(toks)
+                and not any(_token_core(t) in relation_gate._SENDER_NOUNS for t in toks)):
+            candidates.append((m.start(1), m.end(1), m.group(1)))
+
     for m in _INTRO_WEAK.finditer(text):
         toks = _trim_trailing_stopwords(m.group(1).split())
         # weak frames ("this is X") need a full 2+-token name, no gerunds
@@ -472,6 +542,24 @@ def _detect_structural_persons(
         candidates.append(
             (pm.start(1), ent.end, text[pm.start(1):ent.end])
         )
+
+    # E11: a clipped name at the end of a field or line ("Employee: Abebe
+    # Girma Tesfaye" with only "Abebe Girma" tagged) takes the capitalised
+    # word after it — never a common word, a month or a weekday
+    for ent in existing_entities:
+        if ent.type != "PERSON" or ent.source == "pattern" or not ent.text[:1].isupper():
+            continue
+        nm = _CLIPPED_TAIL.match(text, ent.end)
+        if not nm:
+            continue
+        core = nm.group(1).lower()
+        if (core in _PERSON_STOPWORDS or core in pattern_scan._NOT_NAME_WORD
+                or core in _MONTH_DAY or _verbish(core)
+                or core in relation_gate.WORD_NAMES or core in relation_gate.NOT_NAMES
+                or any(e is not ent and e.start < nm.end(1) and nm.start(1) < e.end
+                       for e in existing_entities)):
+            continue
+        candidates.append((ent.start, nm.end(1), text[ent.start:nm.end(1)]))
 
     new_ents: List[DetectedEntity] = []
     superseded: List[DetectedEntity] = []
@@ -606,8 +694,9 @@ def _merge_adjacent_persons(
 
     merged: List[DetectedEntity] = []
     for ent in persons:
-        if merged and text[merged[-1].end:ent.start] == " ":
-            prev = merged[-1]
+        if merged and (text[merged[-1].end:ent.start] == " "
+                       or merged[-1].start < ent.start < merged[-1].end < ent.end):
+            prev = merged[-1]               # adjacent, or overlapping
             merged[-1] = DetectedEntity(
                 text=text[prev.start:ent.end],
                 start=prev.start,

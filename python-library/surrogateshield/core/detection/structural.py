@@ -357,6 +357,72 @@ support admin moderator mod host guest server client http https ps edit update
 """.split())
 
 
+# role mailboxes and generic handle words: never a person's name
+_ROLE_WORDS = frozenset("""
+info admin support sales contact help team hello noreply reply donotreply mail office billing
+service services security jobs careers press news marketing accounts webmaster postmaster
+root notifications alerts newsletter enquiries inquiries reception user test dev official
+real the official gaming games tv live media studio shop store app bot svc srv sys api ci
+sa daemon cron backup deploy prod staging
+""".split())
+
+
+def _fold(w: str) -> str:
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
+
+
+def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
+    """The words of a detected e-mail, @handle or profile-URL slug name the
+    person elsewhere in the message: "hui.min.tan68@…" makes "TAN HUI MIN"
+    a name, "@farshad.m" makes "not again farshad" one. A single word must
+    be at least three letters and no function or mailbox word."""
+    from .relation_gate import _stop_words
+    stop = _stop_words()["en"]
+    from faker.providers.lorem.en_US import Provider as Lorem
+    common = frozenset(Lorem.word_list) | stop
+    parts: Set[str] = set()
+    lone: Set[str] = set()                 # may stand alone as a name
+    for e in ents:
+        if e.type == "email":
+            local = e.text.split("@")[0]
+        elif e.type == "handle":
+            local = e.text.lstrip("@").split("#")[0]
+        elif e.type == "url":
+            local = re.split(r"[/?#]", e.text.rstrip("/"))[-1]
+        else:
+            continue
+        segs = [w for w in re.split(r"[._\-+\d]+", _fold(local)) if w]
+        if any(w in _ROLE_WORDS for w in segs):
+            continue                        # "svc_payroll", "support.emea": no person
+        for n, w in enumerate(segs):
+            if len(w) >= 3 and w not in _ROLE_WORDS and w not in stop:
+                parts.add(w)
+                if w not in common and (len(w) >= 4 or (n == 0 and len(segs) > 1)):
+                    lone.add(w)
+    if not parts:
+        return [], []
+    added: List[DetectedEntity] = []
+    toks = list(re.finditer(r"[^\W\d_]+(?:[\-'’][^\W\d_]+)*", text))
+    k = 0
+    while k < len(toks):
+        run = []
+        while (k < len(toks) and all(_fold(p) in parts for p in re.split(r"[\-'’]", toks[k].group()))
+               and (not run or re.fullmatch(r"[ \t]+", text[toks[k - 1].end():toks[k].start()]))):
+            run.append(toks[k])
+            k += 1
+        if not run:
+            k += 1
+            continue
+        s, e = run[0].start(), run[-1].end()
+        single = len(run) == 1
+        if single and (_fold(run[0].group()) not in lone or run[0].group().lower() in _NOT_NICKNAMES):
+            continue
+        if not _overlaps(s, e, list(ents) + added):
+            added.append(_ent(text, s, e, "PERSON", 0.9))
+    return added, []
+
+
 def _speakers(text: str, ents: Sequence[DetectedEntity]):
     hits = list(_SPEAKER.finditer(text))
     if len(hits) < 2:
@@ -402,8 +468,22 @@ mr mrs ms mx miss dr prof sir madam
 """.split())
 
 
+# "Contact Bríd on 086 422 7731", "reach Kofi at kofi@x.io": a name with
+# the way to reach it right after
+_CONTACT_ON = re.compile(
+    r"\b(?i:contact|reach|ring|call|text|whatsapp|message|email)\s+"
+    r"([A-ZÀ-Ý][a-zà-ÿ'’\-]{1,15}(?:[ \t]+[A-ZÀ-Ý][a-zà-ÿ'’\-]{1,20})?)"
+    r"\s+(?:on|at|via)\s+(?=[+(]?\d|\S+@)")
+
+
 def _verb_frames(text: str, ents: Sequence[DetectedEntity]):
     added = []
+    for m in _CONTACT_ON.finditer(text):
+        words = m.group(1).lower().split()
+        if any(w in _NOT_NICKNAMES or w in NOT_NAMES or w in PUBLIC_ORGS for w in words):
+            continue
+        if not _overlaps(m.start(1), m.end(1), list(ents) + added):
+            added.append(_ent(text, m.start(1), m.end(1), "PERSON", 0.85))
     for m in _VERB_NAME.finditer(text):
         name = m.group(1)
         key = name.lower()
@@ -420,7 +500,8 @@ def _verb_frames(text: str, ents: Sequence[DetectedEntity]):
 _PAYMENT = re.compile(
     r"(?i:\b(?:payment|pmt|transfer|xfer|zelle|venmo|paypal|cash\s*app|sent|paid|deposit|refund)"
     r"\s+(?:to|from)\s+)"
-    r"((?:[A-Z][a-z'’\-]+|[A-Z][A-Z'’\-]+)(?:[ \t]+(?:[A-Z][a-z'’\-]+|[A-Z][A-Z'’\-]+)){1,2})\b"
+    r"((?:[A-Z][a-z'’\-]+|[A-Z][A-Z'’\-]+|[A-Z]\.?(?=[ \t]+[A-Z]{2}))"   # "M OKAFOR"
+    r"(?:[ \t]+(?:[A-Z][a-z'’\-]+|[A-Z][A-Z'’\-]+)){1,2})\b"
 )
 _LEGAL = re.compile(r"(?i)\b(?:inc|llc|ltd|corp|co|company|bank|group|plc|gmbh)\.?$")
 
@@ -1008,6 +1089,7 @@ def detect(
         lambda t, es: _address_parts(t, es),
         lambda t, es: _csv(t, es),
         lambda t, es: _speakers(t, es),
+        lambda t, es: _local_part_names(t, es),
         lambda t, es: _payments(t),
         lambda t, es: _names_intl(t, es),
         lambda t, es: _kin_names(t, es),
