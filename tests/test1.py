@@ -147,11 +147,13 @@ check("Credit card is digits only",    cc_s.replace(" ", "").replace("-", "").is
 check("US phone starts with +1",       phone_us_s.startswith("+1"))
 check("UK phone starts with +44",      phone_uk_s.startswith("+44"))
 
-# Collision resistance
+# Collision resistance: uniqueness is enforced by generate_all, which every
+# caller uses; generate() alone returns the linked surrogate, not a unique one
 collisions_m = MimicGen()
 emails = [
-    collisions_m.generate(DetectedEntity(f"user{i}@test.com", 0, 15, "email", 1.0))
-    for i in range(50)
+    v for i in range(50)
+    for v in collisions_m.generate_all(
+        [DetectedEntity(f"user{i}@test.com", 0, 15, "email", 1.0)]).values()
 ]
 check("50 email surrogates all unique", len(set(emails)) == 50)
 
