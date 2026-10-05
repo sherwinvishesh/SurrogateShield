@@ -18,7 +18,16 @@ ENV/
 conversations/*.shadowmap
 
 # Conversation history (may contain sanitised PII surrogates)
-conversations/*.json
+conversations/
+
+# Experiment outputs: answers files hold the ORIGINAL questions, surrogate
+# maps (original → surrogate) and responses in clear text (audit I25). The
+# synthetic artefacts shipped with the paper stay tracked; new runs are not.
+experiment/*_answers*.json
+experiment/*_eval_results*.json
+experiment/*_Attacker_Experiment*.json
+experiment/*.tmp
+*.json.tmp
 
 # Device secret — NEVER commit this
 ~/.surrogateshield/
