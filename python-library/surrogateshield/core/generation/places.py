@@ -20,8 +20,14 @@ from typing import Callable, Dict, Optional, Sequence, Tuple
 
 from ..detection.geo_data import GEO_PASS_THROUGH, US_STATE_ABBREVS, US_STATES
 
+
+def _towns(block: str) -> Tuple[str, ...]:
+    """Split a '|' list and strip each name: padding in a surrogate marks it as fake."""
+    return tuple(t.strip() for t in block.split("|"))
+
+
 TOWNS: Dict[str, Tuple[str, ...]] = {
-    "US": tuple("""Flagstaff|Prescott|Yuma|Boulder|Fort Collins|Pueblo|Salem|Spokane|Tacoma
+    "US": _towns("""Flagstaff|Prescott|Yuma|Boulder|Fort Collins|Pueblo|Salem|Spokane|Tacoma
         |Bellingham|Olympia|Boise|Missoula|Billings|Reno|Provo|Ogden|Santa Fe|Las Cruces
         |Bakersfield|Modesto|Santa Rosa|Redding|Santa Barbara|Pasadena|Ventura|Lubbock|Amarillo
         |Waco|Abilene|Midland|Corpus Christi|Tulsa|Wichita|Topeka|Sioux Falls|Fargo|Des Moines
@@ -31,13 +37,11 @@ TOWNS: Dict[str, Tuple[str, ...]] = {
         |Huntsville|Montgomery|Shreveport|Little Rock|Fayetteville|Roanoke|Charlottesville
         |Norfolk|Frederick|Annapolis|Allentown|Erie|Scranton|Lancaster|Trenton|Albany|Syracuse
         |Ithaca|Hartford|New Haven|Worcester|Burlington|Manchester|Anchorage
-        |Juneau|Hilo|Cheyenne|Casper|Morgantown""".replace("\n", "").replace(" |", "|")
-                .replace("        ", "").split("|")),
-    "GB": tuple("""York|Exeter|Norwich|Cambridge|Oxford|Brighton|Leicester|Nottingham|Sheffield
+        |Juneau|Hilo|Cheyenne|Casper|Morgantown"""),
+    "GB": _towns("""York|Exeter|Norwich|Cambridge|Oxford|Brighton|Leicester|Nottingham|Sheffield
         |Bristol|Cardiff|Swansea|Plymouth|Southampton|Portsmouth|Coventry|Leeds|Bradford
         |Sunderland|Aberdeen|Dundee|Inverness|Stirling|Belfast|Carlisle|Salisbury|Winchester
-        |Canterbury|Cheltenham|Gloucester|Hereford|Shrewsbury|Bournemouth|Ipswich|Colchester"""
-                .replace("\n", "").replace("        ", "").split("|")),
+        |Canterbury|Cheltenham|Gloucester|Hereford|Shrewsbury|Bournemouth|Ipswich|Colchester"""),
     "CA": ("Halifax", "Kingston", "Saskatoon", "Winnipeg", "Edmonton", "Kelowna", "Sudbury",
            "Moncton", "Fredericton", "Guelph", "Kamloops", "Thunder Bay", "Sherbrooke"),
     "AU": ("Hobart", "Canberra", "Geelong", "Cairns", "Townsville", "Wollongong", "Ballarat",

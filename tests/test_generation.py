@@ -536,3 +536,13 @@ def test_J4_surrogate_unique_across_case():
     for _ in range(200):
         assert gen.generate(_ent("Pune", "GPE")).casefold() != "shreveport"
     assert gen._taken("SHREVEPORT") and not gen._taken("Ogden")
+
+
+def test_J5_D3_town_surrogates_have_no_padding():
+    # the US list was split after a newline join that left 7 spaces on every
+    # town ending a source line ("Tempe" → "Pensacola       ")
+    from surrogateshield.core.generation.places import TOWNS
+    assert all(t and t == t.strip() and "  " not in t for ts in TOWNS.values() for t in ts)
+    for seed in range(40):
+        s = MimicGen(seed=seed).generate(DetectedEntity("Tempe", 0, 5, "GPE", 0.9, "ner"))
+        assert s == s.strip() and "  " not in s, (seed, s)
