@@ -22,6 +22,7 @@ import re
 from typing import Callable, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity
+from . import pattern_scan
 from .geo_data import MAJOR_CITIES, US_STATES
 from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE
 
@@ -396,6 +397,81 @@ _INTL_STREET = re.compile(
     # de: "Hauptstraße 5", "Lindenweg 12a"
     r"|\b[A-ZÄÖÜ][\wäöüß]+(?:stra(?:ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm)\s+\d{1,4}[a-z]?\b"
 )
+_W_ANY = r"[^\W\d_][\w'’\-]*"
+_CITY_W = r"[A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*(?:[ \-][A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*)?"
+# a postcode written before or after its town, or in brackets after one:
+# "79098 Freiburg", "101 Reykjavík", "040 01 Košice", "Hamilton 3204",
+# "Zwolle (8011 PK)". Only after a street on the same line, or bracketed.
+_NOT_NL_SUFFIX = r"(?!AD|BC|CE|AM|PM|OK|US|UK|EU|TV|PC|GB|MB|KB|HP|KM|MM|CM)"
+_POSTCODE_TOWN = re.compile(
+    r"[ \t]*,?[ \t]*(?:"
+    r"(?P<pc>\d{3}[ ]\d{2}|\d{4}[ ]?" + _NOT_NL_SUFFIX + r"[A-Z]{2}|\d{3,5}|[A-Z]{1,2}-?\d{4,5})[ \t]+(?P<t1>" + _CITY_W + r")"
+    r"|(?P<t2>" + _CITY_W + r")[ \t]+(?P<pc2>\d{4,5})(?!\d)"
+    r")(?![\w\-])"
+)
+_BRACKET_POSTCODE = re.compile(r"\((\d{4}[ ]?" + _NOT_NL_SUFFIX + r"[A-Z]{2})\)")
+# number-after streets with no suffix word, confirmed by the postcode-town
+# that follows: "Laugavegur 52, 101 Reykjavík", "17 Hlavná, 040 01 Košice"
+_BARE_STREET = re.compile(
+    r"\b(?:" + _CITY_W + r")[ \t]+\d{1,4}[a-z]?(?=[ \t]*,[ \t]*\d{3})"
+    r"|\b\d{1,4}[a-z]?[ \t]+(?:" + _CITY_W + r")(?=[ \t]*,[ \t]*\d{3})"
+)
+_ADDRESS_CUE = re.compile(
+    r"(?i)\b(?:address|adresse|addr|direcci[oó]n|endere[cç]o|indirizzo|shipping|ship\s+to"
+    r"|deliver\w*|send\s+(?:it\s+)?to|mail\s+to|lives?|living|reside\w*|wohne\w*|abito"
+    r"|vivo|moro|bor|b[ýy]v\w*|heima|postal)\b")
+# "in via Emilia Est 211": the Italian street word after "in", lower-case
+_IT_LOWER_STREET = re.compile(
+    r"(?<=\bin )(?:via|viale|piazza|corso|vicolo|largo)\s+" + _W + r"(?:\s+" + _W + r"){0,3},?\s+\d{1,4}[A-Za-z]?\b"
+)
+# a lower-case British street whose suffix is also a noun ("14 birchwood
+# close"), confirmed by a postcode later on the line
+_LOWER_UK_STREET = re.compile(
+    r"\b\d{1,4}[a-z]?\s+[a-z][a-z'\-]+(?:\s+[a-z][a-z'\-]+)?\s+(?:close|grove|way|green|hill|rise"
+    r"|walk|gardens|view|park|chase|mews|crescent|terrace|lane|road|street|drive|avenue|place|court|row)\b"
+    r"(?=[^\n]{0,40}\b[a-z]{1,2}\d[a-z\d]?\s?\d[a-z]{2}\b)", re.IGNORECASE
+)
+# a flat or unit number in front of a street address: "flat 4, 70 Cowley Road"
+_UNIT_BEFORE = re.compile(
+    r"(?i)\b(?:flat|apt\.?|apartment|unit|suite|ste\.?)\s*#?\s*\d{1,4}[a-z]?\s*,?\s*$")
+
+
+def _address_parts(text: str, ents: Sequence[DetectedEntity]):
+    """Postcode-towns, bracketed postcodes and unit numbers around a street
+    address, and number-after streets that a postcode-town confirms."""
+    added: List[DetectedEntity] = []
+
+    def _add(s, e):
+        if s < e and not any(x.start < e and s < x.end and (x.type == "address" or x.source == "pattern")
+                             for x in list(ents) + added):
+            added.append(_ent(text, s, e, "address", 0.95))
+
+    for rx in (_BARE_STREET, _IT_LOWER_STREET, _LOWER_UK_STREET):
+        for m in rx.finditer(text):
+            if rx is _BARE_STREET:
+                words = re.findall(r"[^\W\d_]+", m.group())
+                if (any(w.lower() in pattern_scan._NOT_NAME_WORD for w in words)
+                        or not _ADDRESS_CUE.search(text, max(0, m.start() - 120), m.start())):
+                    continue                # "Page 12, 2024 Report"
+            _add(m.start(), m.end())
+    streets = [x for x in list(ents) + added if x.type == "address"]
+    for st in streets:
+        m = _POSTCODE_TOWN.match(text, st.end)
+        town = m and (m.group("t1") or m.group("t2"))
+        if m and not any(w.lower() in pattern_scan._NOT_NAME_WORD
+                         for w in re.findall(r"[^\W\d_]+", town)):
+            _add(m.start("pc") if m.group("pc") else m.start("t2"), m.end())
+        ls = text.rfind("\n", 0, st.start) + 1
+        u = _UNIT_BEFORE.search(text, ls, st.start)
+        if u:
+            _add(u.start(), u.end() - (len(u.group()) - len(u.group().rstrip(" ,"))))
+    for m in _BRACKET_POSTCODE.finditer(text):
+        _add(m.start(1), m.end(1))
+    removed = [x for x in ents if x.source != "pattern"
+               and any(a.start <= x.start and x.end <= a.end for a in added)]
+    return added, removed
+
+
 _INTL_UNIT = re.compile(
     r"(?i:\b(?:apto|apartamento|apt|piso|depto|dpto|appartement|appt|[ée]tage|wohnung|interno"
     r"|int\.|sala|bloco|bloque|escalera|esc\.)\.?\s*)(?:n[º°o]\.?\s*)?\d{1,4}[A-Za-z]?\b"
@@ -441,6 +517,7 @@ def detect(
         lambda t, es: _trim_intros(t, es),
         lambda t, es: _extend_particles(t, es),
         lambda t, es: _streets(t, es),
+        lambda t, es: _address_parts(t, es),
         lambda t, es: _csv(t, es),
         lambda t, es: _speakers(t, es),
         lambda t, es: _payments(t),
