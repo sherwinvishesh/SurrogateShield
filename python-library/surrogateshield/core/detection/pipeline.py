@@ -1091,8 +1091,8 @@ def run_cascade(
     # normalised to a space ("University of Leicester\nORCID"): its text no
     # longer matches the message, so no edit could be planned for it and the
     # name would go out unmasked. Re-anchor every span on the message itself.
-    confirmed          = _anchor_to_lines(confirmed, text)
-    needs_confirmation = _anchor_to_lines(needs_confirmation, text)
+    confirmed          = _snap_to_words(_anchor_to_lines(confirmed, text), text)
+    needs_confirmation = _snap_to_words(_anchor_to_lines(needs_confirmation, text), text)
 
     if use_post_passes:
         # ── Pass A: Structural ORG detection ─────────────────────────────────────
@@ -1282,6 +1282,77 @@ def _anchor_to_lines(entities: List[DetectedEntity], text: str) -> List[Detected
         if best is None or best[0] == 0:
             continue
         out.append(_dc_replace(e, text=text[best[1]:best[2]], start=best[1], end=best[2]))
+    return out
+
+
+_JOINER = "-'’"
+_QUOTES = "\"'“”‘’«»`"
+# a name word next to a one-word PERSON: "Hyun-woo Park", "Jean-Luc d'Aubigné"
+_NAME_NEXT = re.compile(r" ((?:[dDlL]['’]|[OÓ]['’ ]|Mac|Mc)?[A-ZÀ-ÖØ-Þ][^\W\d_]+(?:[\-'’][^\W\d_]+)*)(?![\w\-'’@.]\w)")
+_PARTICLES_BEFORE = re.compile(r"(?:\b(?:[Vv]an|[Vv]on|[Dd]e|[Dd]er|[Dd]en|[Tt]er|[Dd]i|[Dd]a|[Dd]u|[Ll]a|[Ll]e|[Zz]u) )+$")
+_NOT_NAME_NEXT = frozenset("""
+i im i'm monday tuesday wednesday thursday friday saturday sunday january
+february march april may june july august september october november december
+thanks thank please hi hello dear regards best cheers sorry yes no ok okay
+can could would should will is are was were has have had do does did
+""".split())
+# a company word after a one-word ORG: "Brightwater Logistics"
+_ORG_TAIL = re.compile(
+    r" (Ltd|Limited|Inc|LLC|GmbH|AG|SA|BV|Pty|PLC|Co|Corp|Group|Logistics|Roofing|"
+    r"Grocers|Clinic|Consulting|Solutions|Studio|Studios|Services|Holdings|Partners|"
+    r"Construction|Plumbing|Electric|Dental|Bakery|Labs|Systems|Freight|Design)\b\.?")
+
+
+def _snap_to_words(entities: List[DetectedEntity], text: str) -> List[DetectedEntity]:
+    """Model spans end on word boundaries: a span cut inside a word ("Hyun"
+    of "Hyun-woo", "n Adeyemi-" of "Oluwaseun Adeyemi-Clarke") grows to the
+    whole word, outer quotes are dropped, a one-word PERSON takes the name
+    word or particles next to it ("van der Merwe", "Jean-Luc d'Aubigné") and
+    a one-word ORG its company word. Every letter of a name it touches is
+    replaced: a partial cover leaks the rest (I1, J2)."""
+    out = []
+    for e in entities:
+        if e.source == "pattern" or not (0 <= e.start < e.end <= len(text)):
+            out.append(e)
+            continue
+        s, t = e.start, e.end
+        while s < t and (text[s] in _QUOTES or text[s].isspace()):
+            s += 1
+        while t > s and (text[t - 1] in _QUOTES or text[t - 1] in _JOINER or text[t - 1].isspace()):
+            t -= 1
+        if s == t:
+            out.append(e)
+            continue
+        while s > 0 and (text[s - 1].isalnum()
+                         or (text[s - 1] in _JOINER and s > 1 and text[s - 2].isalpha()
+                             and text[s].isalpha())):
+            s -= 1
+        while t < len(text) and (text[t].isalnum()
+                                 or (text[t] in _JOINER and t + 1 < len(text)
+                                     and text[t + 1].isalpha() and text[t - 1].isalpha()
+                                     and not re.match(r"['’]s\b", text[t:]))):
+            t += 1
+        if re.search(r"[^\W\d_]['’]s$", text[s:t]):
+            t -= 2                          # possessive: "Thandiwe's" -> "Thandiwe"
+        if e.type == "PERSON" and " " not in text[s:t].strip():
+            m = _NAME_NEXT.match(text, t)
+            if (m and m.group(1).lower() not in _NOT_NAME_NEXT
+                    and m.group(1).lower() not in pattern_scan._NOT_NAME_WORD):
+                t = m.end(1)
+            m = _PARTICLES_BEFORE.search(text, max(0, s - 24), s)
+            before = text[:m.start()].split()[-1:] if m else []
+            if (m and (m.start() == 0 or not text[m.start() - 1].isalnum())
+                    and (re.search(r"[VvTt][oae]n\b", m.group())          # van, von, ter, ten
+                         or not before or not before[0][:1].islower())):
+                s = m.start()                # not "in der Lindenstraße"
+        elif e.type == "ORG" and " " not in text[s:t].strip():
+            m = _ORG_TAIL.match(text, t)
+            if m:
+                t = m.end(1)
+        if (s, t) == (e.start, e.end) and text[s:t] == e.text:
+            out.append(e)
+        else:
+            out.append(_dc_replace(e, text=text[s:t], start=s, end=t))
     return out
 
 
