@@ -323,9 +323,28 @@ def plan(answers: list, sample: Optional[int], seed: int) -> tuple[list[int], in
 
 
 def _atomic_write(path: Path, obj) -> None:
+    """Write *obj* as JSON via a 0600 temp file and ``os.replace``."""
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(obj, indent=2, ensure_ascii=False), encoding="utf-8")
+    fd = os.open(str(tmp), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    try:
+        os.write(fd, json.dumps(obj, indent=2, ensure_ascii=False).encode("utf-8"))
+        os.fsync(fd)
+    finally:
+        os.close(fd)
     os.replace(tmp, path)
+
+
+# Outcomes that are measurements, not failures: a rerun keeps them.
+_FINAL_ERRORS = {"no text for this arm", "truncated (max_tokens)", "json_parse_error"}
+
+
+def _row_complete(row: dict) -> bool:
+    """False when an arm hit a provider error (rate limit, connection, …):
+    a rerun calls it again (audit I26). Unparseable or truncated replies are
+    results and are kept."""
+    return all(row.get(arm, {}).get("available")
+               or row.get(arm, {}).get("error") in _FINAL_ERRORS
+               for arm in ARMS)
 
 
 def run_experiment(
@@ -374,7 +393,7 @@ def run_experiment(
         prev_meta = {k: v for k, v in (prev.get("meta") or {}).items() if k in meta}
         if prev_meta != meta:
             raise ValueError(f"{out_path.name} exists with different settings; move it away to start over")
-        rows = prev.get("rows") or []
+        rows = [r for r in (prev.get("rows") or []) if _row_complete(r)]
     done = {r["index"] for r in rows}
 
     if client is None:
@@ -384,10 +403,21 @@ def run_experiment(
         client = anthropic.Anthropic()
 
     def _flush() -> None:
+        rows.sort(key=lambda r: r["index"])
         _atomic_write(out_path, {"meta": {**meta, "updated": datetime.now(timezone.utc).isoformat()},
                                  "rows": rows, "analysis": compute_analysis(rows)})
 
     todo = [i for i in indices if i not in done]
+    try:
+        _attack_rows(todo, answers, keys, rows, client, model, progress_cb, _flush)
+    except KeyboardInterrupt:
+        _flush()          # keep every finished row; a rerun resumes after it
+        raise
+    _flush()
+    return out_path
+
+
+def _attack_rows(todo, answers, keys, rows, client, model, progress_cb, flush) -> None:
     for n, i in enumerate(todo):
         a, k = answers[i], keys[i]
         question = a.get("question") or k.get("Question", "")
@@ -413,9 +443,7 @@ def run_experiment(
             ok = all(row[arm]["available"] for arm in ARMS if a.get(_ARM_TEXT[arm]) is not None)
             progress_cb(n, len(todo), "ok" if ok else "error")
         if (n + 1) % FLUSH_EVERY == 0:
-            _flush()
-    _flush()
-    return out_path
+            flush()
 
 
 def compute_analysis(rows: list) -> dict:

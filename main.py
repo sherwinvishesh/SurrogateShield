@@ -736,6 +736,10 @@ def _run_json_test() -> None:
             console.print(f"  [yellow]{errors} error{'s' if errors != 1 else ''}[/yellow] — details in the output file.")
         console.print(f"  [dim]Saved to:[/dim] [cyan]{out}[/cyan]")
 
+    except KeyboardInterrupt:
+        # run_batch flushed every finished row before re-raising (audit I26)
+        console.print("\n  [yellow]Interrupted.[/yellow]  [dim]Progress saved — run the "
+                      "same file again to resume.[/dim]")
     except EnvironmentError as exc:
         console.print(f"\n  [red bold]Configuration error:[/red bold] {exc}")
         console.print("  [dim]Go to Settings (S) to configure your LLM provider.[/dim]")
@@ -985,8 +989,12 @@ def _run_attacker_experiment() -> None:
     try:
         path = _atk.run_experiment(answers_file, key_file, sample=sample, seed=seed,
                                    model=model, progress_cb=_on_progress)
-    except (ValueError, OSError) as exc:
-        console.print(f"\n  [red bold]Error:[/red bold] {exc}\n")
+    except (ValueError, OSError, KeyboardInterrupt) as exc:
+        if isinstance(exc, KeyboardInterrupt):
+            console.print("\n  [yellow]Interrupted.[/yellow]  [dim]Finished rows saved — "
+                          "run again to resume.[/dim]\n")
+        else:
+            console.print(f"\n  [red bold]Error:[/red bold] {exc}\n")
         try:
             console.input("  [dim]Press Enter to return to dashboard…[/dim]")
         except (EOFError, KeyboardInterrupt):
@@ -1379,6 +1387,30 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
     _run_chat_loop(pipeline, rag_mode=bool(effective_rag))
 
 
+MULTILINE_FENCE = '"""'
+
+
+def read_message(read_line) -> str:
+    """Read one chat message (audit I26). A single line is a message; a line
+    ending in a backslash continues on the next; a line starting with
+    MULTILINE_FENCE (three double quotes) opens a block that ends at a line
+    ending with the fence — for pasting multi-line text as one message."""
+    first = read_line("[bold blue]You[/bold blue]  ")
+    if first.lstrip().startswith(MULTILINE_FENCE):
+        body = first.lstrip()[len(MULTILINE_FENCE):]
+        lines = []
+        while not body.rstrip().endswith(MULTILINE_FENCE):
+            lines.append(body)
+            body = read_line("[dim]  …[/dim]  ")
+        lines.append(body.rstrip()[:-len(MULTILINE_FENCE)])
+        return "\n".join(lines).strip()
+    lines = [first]
+    while lines[-1].endswith("\\"):
+        lines[-1] = lines[-1][:-1]
+        lines.append(read_line("[dim]  …[/dim]  "))
+    return "\n".join(lines).strip()
+
+
 def _run_chat_loop(pipeline, rag_mode: bool) -> None:
     from chatbot.providers import ProviderAuthError
     from settings_manager import load_settings as _ls
@@ -1394,14 +1426,15 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
     console.print()
     console.print(
         f"[dim]ID [/dim][blue]{conv_id}[/blue]{mode_tag}"
-        "[dim]  ·  type [bold]exit[/bold] to return to dashboard[/dim]"
+        "[dim]  ·  type [bold]exit[/bold] to return to dashboard  ·  "
+        f"paste several lines between [bold]{MULTILINE_FENCE}[/bold] and [bold]{MULTILINE_FENCE}[/bold][/dim]"
     )
     console.print(Rule(style="blue"))
     console.print()
 
     while True:
         try:
-            user_input = console.input("[bold blue]You[/bold blue]  ").strip()
+            user_input = read_message(console.input)
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Session ended.[/dim]"); break
 
@@ -1413,6 +1446,10 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
 
         try:
             response, _, _ = pipeline.process_turn(user_input, interactive=True)
+        except (KeyboardInterrupt, EOFError):
+            # history is only written after a reply (I18): nothing to undo
+            console.print("\n[yellow]Turn cancelled.[/yellow]  [dim]Type exit to leave.[/dim]")
+            continue
         except DetectorUnavailable as exc:
             _print_detector_unavailable(exc)
             break
