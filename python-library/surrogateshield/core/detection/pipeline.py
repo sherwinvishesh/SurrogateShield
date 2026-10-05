@@ -480,6 +480,9 @@ def _detect_structural_persons(
     for start, end, span_text in sorted(candidates, key=lambda c: (c[0], -(c[1]))):
         if text[start:end] != span_text:
             continue  # offset bookkeeping failed — never emit a wrong span
+        st = structural._INTL_STREET.match(text, start)
+        if st and st.end() >= end:
+            continue  # "Calle Mayor 17": a street, which Pass S claims
         if any(not (end <= s or start >= e) for s, e in claimed):
             continue
         blocking = None

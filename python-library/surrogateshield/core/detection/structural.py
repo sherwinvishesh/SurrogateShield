@@ -756,6 +756,12 @@ _JA_PLACE = re.compile(r"(" + r"[\u4e00-\u9fff々ァ-ヶー]{1,6})(?:に住ん�
 _ZH_PII_AFTER = r"(?=的(?:身份证|电话|手机|地址|邮箱|护照|生日|银行卡|病历))"
 _ZH_ORG = re.compile(r"在(" + _HAN + r"{2,10}?(?:医院|诊所|学校|大学|中学|小学|幼儿园|公司|银行))"
                      r"(?:工作|上班|上学|读书|就诊|看病|住院)")
+# "深圳南山区桃园路88号5栋1203", "成都高新区": a city (Faker's zh_CN list), a
+# district and a numbered road; a function character never starts a name
+_ZH_NAME_CH = r"[^\W\d_A-Za-z在住是我你他她们的了和与到从于为把被叫个家这那一]"
+_ZH_ROAD = (r"(?P<road>" + _ZH_NAME_CH + r"{1,4}?(?:路|街|大道|巷|弄|胡同)\d{1,5}号"
+            r"(?:\d{1,4}(?:栋|幢|座|单元|号楼|楼|层|室|号))*(?:\d{1,5}室?)?)")
+_ZH_DISTRICT = r"(?P<dist>" + _ZH_NAME_CH + r"{1,3}?[区县])"
 _HI_KIN = (r"(?:मेरी|मेरा|मेरे|हमारी|हमारा|हमारे)\s+(?:माँ|मां|माता|पिता|पापा|बहन|भाई|बेटी|बेटा"
            r"|पत्नी|पति|दोस्त|सहेली|दादी|दादा|नानी|नाना)\s+")
 _HI_CITIES = ("दिल्ली मुंबई लखनऊ कोलकाता चेन्नई बेंगलुरु बैंगलोर हैदराबाद पुणे जयपुर कानपुर पटना "
@@ -772,6 +778,16 @@ def _lexicons():
     hi_first = frozenset(tuple(HI.first_names_male) + tuple(HI.first_names_female))
     hi_last = frozenset(tuple(HI.last_names) + ("देवी", "कुमारी", "कुमार", "बाई"))
     return zh, hi_first, hi_last
+
+
+@lru_cache(maxsize=1)
+def _zh_address():
+    from faker.providers.address.zh_CN import Provider as A
+    cities = sorted(set(A.cities), key=len, reverse=True)
+    city = r"(?P<city>(?:" + "|".join(cities) + r")市?)"
+    # a city alone stays ("北京烤鸭"); with a district or road it is an address
+    return (re.compile(city + _ZH_DISTRICT + r"?" + _ZH_ROAD + r"?(?<=[区县\d室号])"),
+            re.compile(_ZH_DISTRICT + r"?" + _ZH_ROAD))
 
 
 def _names_intl(text: str, ents: Sequence[DetectedEntity]):
@@ -793,6 +809,10 @@ def _names_intl(text: str, ents: Sequence[DetectedEntity]):
             add(m.start(1), m.end(1), "ORG")
         for m in _JA_PLACE.finditer(text):
             add(m.start(1), m.end(1), "GPE")
+        for m in (m for rx in _zh_address() for m in rx.finditer(text)):
+            for g, typ in (("city", "GPE"), ("dist", "GPE"), ("road", "address")):
+                if m.groupdict().get(g):
+                    add(m.start(g), m.end(g), typ)
     if re.search(r"[\u0900-\u097f]", text):
         _, hi_first, hi_last = _lexicons()
         for m in re.finditer(_HI_KIN + r"([\u0900-\u097f]+)(?:\s+([\u0900-\u097f]+))?", text):
@@ -816,12 +836,20 @@ _INTL_STREET = re.compile(
     # fr: "14 rue des Lilas", "3 bis avenue Victor Hugo"
     r"\b\d{1,4}(?:\s?(?:bis|ter))?,?\s+(?:rue|avenue|av\.|boulevard|bd|chemin|all[ée]e|impasse"
     r"|place|quai|route|cours)\s+" + _JOIN + _W + r"(?:\s+" + _W + r"){0,3}"
-    # pt/es/it: "Rua Augusta 1508", "Calle Mayor, 12", "Via Roma 5"
-    r"|\b(?:Rua|Avenida|Av\.|Travessa|Alameda|Calle|Paseo|Plaza|Carrer|Via|Viale|Piazza|Corso)"
+    # pt/es/it/pl: "Rua Augusta 1508", "Calle Mayor, 12", "Via Roma 5", "Bv. San Juan 1120"
+    r"|(?<![\w.])(?:Rua|Avenida|Avda\.|Av\.|Travessa|Trav\.|Alameda|Estrada|Largo|Pra[çc]a|Rodovia"
+    r"|Calle|Paseo|Plaza|Carrer|Camino|Carrera|Bulevar|Bv\.|Bvd\.|Blvd\.|Via|Viale|Piazza|Corso"
+    r"|Vicolo|Strada|ul\.|ulica|Aleja)"
     r"\s+" + _JOIN + _W + r"(?:\s+" + _JOIN + _W + r"){0,3},?\s+(?:n[º°o]\.?\s*)?\d{1,5}[A-Za-z]?\b"
-    # de: "Hauptstraße 5", "Lindenweg 12a"
+    # number first: "12 Rua do Sol", "8 Via dei Mille"
+    r"|\b\d{1,4}[A-Za-z]?,?\s+(?:Rua|Avenida|Travessa|Alameda|Estrada|Largo|Pra[çc]a|Calle|Via|Viale"
+    r"|Piazza|Corso|Strada)\s+" + _JOIN + _W + r"(?:\s+" + _JOIN + _W + r"){0,3}"
+    # de/nl/nordic/fi compounds: "Hauptstraße 5", "Lindenweg 12a", "Kerkstraat 14",
+    # "Storgata 41B", "Nørregade 3", "Mannerheimintie 12"
     r"|\b(?!(?:Spring|String|Offspring|Boring|Swing|Sing|Bring|Wing|Sling|Sting|Spa)\b)"
-    r"[A-ZÄÖÜ][\wäöüß]+(?:stra(?:ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm)\s+\d{1,4}[a-z]?\b"
+    r"[A-ZÄÖÜÆØÅ][\wäöüßæøå]+(?:stra(?:ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm|straat|laan"
+    r"|gracht|plein|kade|singel|dijk|steeg|dreef|gata|gatan|gaten|vägen|veien|vegen|vej|gade"
+    r"|stræde|katu|tie)\s+\d{1,4}[A-Za-z]?\b"
 )
 _W_ANY = r"[^\W\d_][\w'’\-]*"
 _CITY_W = r"[A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*(?:[ \-][A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*)?"
@@ -832,7 +860,8 @@ _NOT_NL_SUFFIX = r"(?!AD|BC|CE|AM|PM|OK|US|UK|EU|TV|PC|GB|MB|KB|HP|KM|MM|CM)"
 _POSTCODE_TOWN = re.compile(
     r"[ \t]*,?[ \t]*(?:"
     r"(?P<pc>\d{3}[ ]\d{2}|\d{4}[ ]?" + _NOT_NL_SUFFIX + r"[A-Z]{2}|\d{3,5}|[A-Z]{1,2}-?\d{4,5})[ \t]+(?P<t1>" + _CITY_W + r")"
-    r"|(?P<t2>" + _CITY_W + r")[ \t]+(?P<pc2>\d{4,5})(?!\d)"
+    # a locality may sit between: "Gandhi Nagar, Almora 263601" (IN PIN)
+    r"|(?:(?P<loc>" + _CITY_W + r")[ \t]*,[ \t]*)?(?P<t2>" + _CITY_W + r")[ \t]+(?P<pc2>\d{4,6})(?!\d)"
     r")(?![\w\-])"
 )
 _BRACKET_POSTCODE = re.compile(r"\((\d{4}[ ]?" + _NOT_NL_SUFFIX + r"[A-Z]{2})\)")
@@ -863,7 +892,18 @@ _TOWN_UK_POSTCODE = re.compile(
     r"(?=[A-Za-z]{1,2}\d[A-Za-z\d]?[ \t]?\d[A-Za-z]{2}\b)")
 # a flat or unit number in front of a street address: "flat 4, 70 Cowley Road"
 _UNIT_BEFORE = re.compile(
-    r"(?i)\b(?:flat|apt\.?|apartment|unit|suite|ste\.?)\s*#?\s*\d{1,4}[a-z]?\s*,?\s*$")
+    r"(?i)\b((?:flat|apt\.?|apartment|unit|suite|ste\.?)\s*#?\s*\d{1,4}[a-z]?)\s*(?:,|\bat\b|\bof\b)?\s*$")
+# floor / door / unit after a street: "Calle Mayor 17, 3º B", "Travessa do
+# Carmo 8, 2.º Esq.", "Lindenallee 3a, 2. OG links", "Piso 4 Dpto B"
+_UNIT_AFTER = re.compile(
+    r"[ \t]*,?[ \t]*(?:"
+    r"\d{1,2}[ \t]?\.?[ \t]?[º°ª]\.?(?:[ \t]*(?:[A-H](?![\w])|Esq\.?|Dto\.?|Dta\.?|Dir\.?|Izq(?:da)?\.?"
+    r"|Dcha\.?|Fte\.?|Frente|Puerta[ \t]+\w{1,3}))?"
+    r"|\d{1,2}\.[ \t]*(?:OG|Stock|Etage|Obergeschoss|EG|DG|UG)(?:[ \t]+(?:links|rechts|mitte|Mitte))?"
+    r"|(?i:piso|planta|dpto|depto|puerta|pta|apto|apt|esc|escalera|bloque|portal|unit|flat|suite|ste"
+    r"|wohnung|whg|top|stiege|bus|bo[iî]te)\.?[ \t]*#?[ \t]*(?=[\w]{0,4}\d|[A-Z]\b)\w{1,4}\b"
+    r")")
+_STREET_POSTCODE = re.compile(r"[^\n]{0,40}?\b[A-ZÀ-Ý][\w'’\-]+[ \t]*\((\d{4,6})\)")
 
 
 def _address_parts(text: str, ents: Sequence[DetectedEntity]):
@@ -886,18 +926,29 @@ def _address_parts(text: str, ents: Sequence[DetectedEntity]):
             _add(m.start(), m.end())
     streets = [x for x in list(ents) + added if x.type == "address"]
     for st in streets:
-        m = _POSTCODE_TOWN.match(text, st.end)
-        town = m and (m.group("t1") or m.group("t2"))
+        end = st.end
+        for _ in range(3):                  # "Piso 4 Dpto B", "3º B"
+            u = _UNIT_AFTER.match(text, end)
+            if not u or u.end() == end:
+                break
+            _add(u.start() + len(u.group()) - len(u.group().lstrip(" \t,")), u.end())
+            end = u.end()
+        b = _STREET_POSTCODE.match(text, end)
+        if b:
+            _add(b.start(1), b.end(1))       # "Ponferrada (24401)"
+        m = _POSTCODE_TOWN.match(text, end)
+        town = m and (m.group("t1") or (m.group("loc") or "") + " " + m.group("t2"))
         if m and not any(w.lower() in pattern_scan._NOT_NAME_WORD
                          for w in re.findall(r"[^\W\d_]+", town)):
-            _add(m.start("pc") if m.group("pc") else m.start("t2"), m.end())
+            _add(m.start("pc") if m.group("pc") else m.start("loc") if m.group("loc")
+                 else m.start("t2"), m.end())
         t = _TOWN_UK_POSTCODE.match(text, st.end)
         if t and t.group(1).lower() not in pattern_scan._NOT_NAME_WORD:
             _add(t.start(1), t.end(1))     # "14 birchwood close, wokingham rg40 2hd"
         ls = text.rfind("\n", 0, st.start) + 1
         u = _UNIT_BEFORE.search(text, ls, st.start)
         if u:
-            _add(u.start(), u.end() - (len(u.group()) - len(u.group().rstrip(" ,"))))
+            _add(u.start(1), u.end(1))
     for m in _BRACKET_POSTCODE.finditer(text):
         _add(m.start(1), m.end(1))
     removed = [x for x in ents if x.source != "pattern"
@@ -908,6 +959,8 @@ def _address_parts(text: str, ents: Sequence[DetectedEntity]):
 _INTL_UNIT = re.compile(
     r"(?i:\b(?:apto|apartamento|apt|piso|depto|dpto|appartement|appt|[ée]tage|wohnung|interno"
     r"|int\.|sala|bloco|bloque|escalera|esc\.)\.?\s*)(?:n[º°o]\.?\s*)?\d{1,4}[A-Za-z]?\b"
+    # Indian house numbers: "H.No. 3-118", "Door No: 12/4", "Plot No. 45A"
+    r"|\b(?:H\.?[ ]?No|House[ ]No|Flat[ ]No|Plot[ ]No|Door[ ]No|D\.[ ]?No)\.?[ ]?[:\-]?[ ]?\d[\w/\-]{0,9}"
 )
 
 

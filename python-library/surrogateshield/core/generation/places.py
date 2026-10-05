@@ -156,6 +156,17 @@ def country_of(original: str, context: str = "") -> str:
     return "US"
 
 
+def _zh_place(text: str, choose: Callable[[Sequence[str]], str],
+              avoid: Callable[[str], bool]) -> Optional[str]:
+    """A Chinese city for a city, a district for a district ("南山区" ->
+    "永川区"), from Faker's zh_CN lists; the suffix is kept."""
+    from faker.providers.address.zh_CN import Provider as A
+    suffix = text[-1] if text[-1] in "区县市镇" else ""
+    pool = A.districts if suffix in ("区", "县", "镇") else A.cities
+    cands = [p + suffix for p in pool if p + suffix != text and not avoid(p + suffix)]
+    return choose(sorted(cands)) if cands else None
+
+
 def real_place(original: str, context: str, choose: Callable[[Sequence[str]], str],
                avoid: Callable[[str], bool]) -> Optional[str]:
     """A real place standing in for *original*, or None when every
@@ -164,6 +175,8 @@ def real_place(original: str, context: str, choose: Callable[[Sequence[str]], st
     use, a word of the message)."""
     text = original.strip()
     cf = text.casefold().rstrip(".")
+    if re.search(r"[\u4e00-\u9fff]", text):
+        return _zh_place(text, choose, avoid)
     if text.upper() in US_STATE_ABBREVS and len(text) == 2:
         pool: Sequence[str] = [s for s in _STATE_ABBRS if s != text.upper()]
     elif cf in US_STATES:

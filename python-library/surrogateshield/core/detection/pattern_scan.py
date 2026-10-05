@@ -1409,6 +1409,18 @@ _PATTERNS: list = [
         _nearby_id_validator,
     ),
 
+    # ── labelled postcode, any country: "zip": "X5000", "PLZ 79098",
+    # "CAP 20121", "código postal 1100-148". "PIN code" is left to the
+    # credential rule above: a card PIN and an Indian PIN code both get masked.
+    (
+        "zip_us",
+        re.compile(r"(?i)\b(?:zip(?:[\s_]*code)?|post(?:al)?[\s_]*code|postcode|plz|(?-i:CAP)"
+                   r"|c[oó]digo[\s_]+postal|(?-i:CP)|c\.p\.)\b"
+                   r"[\"']?\s*[:=#\-–]?\s*[\"']?(?-i:(?P<v>[A-Z]{0,2}-?\d{3,6}(?:[ \-]?[A-Z]{2,3}(?![\w])|-\d{3,4})?"
+                   r"|[A-Z]\d[A-Z][ ]?\d[A-Z]\d))(?![\w])"),
+        None,
+    ),
+
     # ── US ZIP code (context-gated) ────────────────────────────────────────────
     # ZIPs inside addresses are claimed by the address parser; a standalone
     # 5-digit number is only a ZIP when the text says so.

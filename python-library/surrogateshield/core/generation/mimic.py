@@ -162,12 +162,28 @@ def _swap_gender(text: str, rng) -> str:
 _MAX_ORIGINAL_RETRIES = 20
 
 
+_EURO_COMPOUND = (r"stra(?:ß|ss)e|weg|platz|allee|gasse|ring|damm|straat|laan|gracht|plein|kade"
+                  r"|singel|dijk|steeg|dreef|gata|gatan|gaten|vägen|veien|vegen|vej|gade|stræde"
+                  r"|katu|tie")
 _EURO_STREET_WORD = re.compile(
-    r"(?i)\b(?:rue|avenue|av\.|boulevard|bd|chemin|all[ée]e|impasse|place|quai|route|cours"
-    r"|rua|avenida|travessa|alameda|calle|paseo|plaza|carrer|via|viale|piazza|corso"
-    r"|apto|apartamento|apt|piso|depto|dpto|appartement|appt|[ée]tage|wohnung|interno|sala"
-    r"|bloco|bloque|escalera|\w+(?:stra(?:ß|ss)e|weg|platz|allee|gasse))\b"
+    r"(?i)\b(?:rue|avenue|av|avda|boulevard|bd|bv|bvd|blvd|bulevar|chemin|all[ée]e|impasse|place"
+    r"|quai|route|cours|rua|avenida|travessa|trav|alameda|estrada|largo|pra[çc]a|rodovia|calle"
+    r"|paseo|plaza|carrer|camino|carrera|via|viale|piazza|corso|vicolo|strada|ul|ulica|aleja"
+    r"|apto|apartamento|apt|piso|planta|depto|dpto|puerta|pta|esq|dto|dta|dir|izq|izqda|dcha"
+    r"|frente|appartement|appt|[ée]tage|wohnung|whg|og|eg|dg|ug|stock|links|rechts|mitte"
+    r"|interno|sala|bloco|bloque|escalera|esc|portal|unit|flat|suite|ste|top|stiege|bus|bo[iî]te"
+    r"|h|no|house|plot|door|\w+?(?:" + _EURO_COMPOUND + r"))\b"
 )
+# a stem that suits the compound's language: "Kerkstraat" -> "Molenstraat"
+_EURO_STEMS = (
+    (re.compile(r"(?i)straat|laan|gracht|plein|kade|singel|dijk|steeg|dreef"),
+     ("Molen", "Kerk", "Linden", "Dorps", "Bloemen", "Beuken")),
+    (re.compile(r"(?i)gata|gatan|gaten|vägen|veien|vegen|vej|gade|stræde"),
+     ("Stor", "Kirke", "Skole", "Strand", "Bjørke", "Møller")),
+    (re.compile(r"(?i)katu|tie"), ("Koulu", "Kirkko", "Puisto", "Ranta")),
+    (re.compile(r".*"), ("Linden", "Berg", "Garten", "Schiller", "Mühlen", "Kirch", "Wald")),
+)
+_ZH_ROAD_NAMES = ("人民", "中山", "解放", "建设", "和平", "文化", "新华", "长江", "光明", "朝阳")
 _EURO_JOINERS = frozenset("de des du la le da do dos das del della di von der bis ter".split())
 _EURO_STREET_NAMES = ("Flores", "Liberdade", "Garibaldi", "Mozart", "Pasteur", "Castelo",
                       "Oliveira", "Roma", "Goethe", "Mayor", "Vitória", "Tilleuls",
@@ -594,10 +610,12 @@ class MimicGen:
                     self.used_surrogates.add(candidate)
                     return candidate
 
-        # A European street the US parser cannot read ("14 rue des Lilas",
-        # "Rua Augusta 1508", "apto 52"): keep its words and shape, swap the
-        # numbers and the name words (I13).
-        if entity is not None and _EURO_STREET_WORD.search(entity.text):
+        # A street or unit the US parser cannot read ("14 rue des Lilas",
+        # "Rua Augusta 1508", "apto 52", "3º B", "H.No. 3-118"): keep its
+        # words and shape, swap the numbers and the name words (I13). A full
+        # Faker address in place of "2. OG links" would read as nonsense.
+        if entity is not None and (_EURO_STREET_WORD.search(entity.text)
+                                   or re.search(r"\d", entity.text)):
             for _ in range(20):
                 candidate = self._euro_street_like(entity.text)
                 if candidate not in blocked and candidate != entity.text \
@@ -618,17 +636,27 @@ class MimicGen:
 
         def word(m):
             w = m.group(0)
-            de = re.fullmatch(r"(?i)(\w+?)(stra(?:ß|ss)e|weg|platz|allee|gasse)", w)
-            if de:   # German compound: the prefix IS the street name
-                stem = self._rng.choice([n for n in ("Linden", "Berg", "Garten", "Schiller",
-                                                     "Mühlen", "Kirch", "Wald")
-                                         if n.lower() != de.group(1).lower()])
+            de = re.fullmatch(r"(?i)(\w+?)(" + _EURO_COMPOUND + r")", w)
+            if de:   # a compound (de/nl/nordic/fi): the prefix IS the street name
+                stems = next(st for rx, st in _EURO_STEMS if rx.fullmatch(de.group(2)))
+                stem = self._rng.choice([n for n in stems if n.lower() != de.group(1).lower()])
                 return stem + de.group(2)
             if _EURO_STREET_WORD.fullmatch(w) or w.lower() in _EURO_JOINERS:
                 return w
+            if w.isupper() and w.isalpha() and len(w) <= 3:
+                return letters(w)    # postcode letters "8861 AJ"
             choice = self._rng.choice([n for n in _EURO_STREET_NAMES if n != w])
             return choice.upper() if w.isupper() else choice
-        return re.sub(r"[A-ZÀ-Ý][\w'’\-]+", word, out)
+
+        def letters(w):
+            return "".join(self._rng.choice([c for c in "ABCDEFGHJKLMNPRSTVWXZ" if c != x])
+                           for x in w)
+        out = re.sub(r"[A-ZÀ-Ý][\w'’\-]+", word, out)
+        # a Chinese road name: "桃园路88号" -> "建设路31号"
+        out = re.sub(r"[\u4e00-\u9fff]{1,4}(?=路|街|大道|巷|弄|胡同)", lambda m: self._rng.choice(
+            [n for n in _ZH_ROAD_NAMES if n != m.group()]), out)
+        # a door or stair letter: "3º B", "Dpto B" (not the "H" of "H.No.")
+        return re.sub(r"(?<![\w.])[A-Z](?![\w.])", lambda m: letters(m.group()), out)
 
     def _replace_address(self, parsed: "address_parser.ParsedAddress") -> str:
         """Build a structure-preserving fake: same components, same separators,
