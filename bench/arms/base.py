@@ -135,7 +135,10 @@ def produce(arm: str, load: Callable[[], Callable[[str, int], List[Edit]]], conf
             row.update(edits=edits, ms=round(ms, 2))
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
     os.replace(tmp, out)
-    meta = {"arm": arm, "config": config, "input": rel(src), "messages": len(msgs), "edits": n_edits, "refused": n_refused,
+    with open(src, "rb") as f:
+        input_sha256 = hashlib.sha256(f.read()).hexdigest()   # the scorer refuses spans of another input
+    meta = {"arm": arm, "config": config, "input": rel(src), "input_sha256": input_sha256,
+            "messages": len(msgs), "edits": n_edits, "refused": n_refused,
             "load_seconds": round(load_s, 1), "offline": os.environ.get("HF_HUB_OFFLINE") == "1", "seed": SEED,
             "command": f"{Path(sys.prefix).name}/bin/python -m bench.arms.{arm} --in {rel(src)} --out {rel(out)}"
                        + (f" --limit {limit}" if limit is not None else "")}

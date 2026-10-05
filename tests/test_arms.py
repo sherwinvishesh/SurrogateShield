@@ -1,5 +1,6 @@
 """Model-free tests for the span producers in bench/arms/ (Phase 4, E4)."""
 
+import hashlib
 import json
 import random
 import re
@@ -85,6 +86,7 @@ def test_produce_writes_sorted_spans_and_meta(tmp_path):
     side = json.loads(Path(str(out) + ".meta.json").read_text())
     assert side == meta and meta["messages"] == 2 and meta["edits"] == 2 and meta["config"] == {"k": 1}
     assert "--limit 2" in meta["command"]
+    assert meta["input_sha256"] == hashlib.sha256(src.read_bytes()).hexdigest()   # the real-data scorer checks it
 
 
 def test_produce_refuses_overlapping_output(tmp_path):
