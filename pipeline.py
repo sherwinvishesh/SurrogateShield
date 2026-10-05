@@ -66,6 +66,7 @@ from detection.quasi_identifier import format_warning as _qi_format_warning
 from generation.logic import MimicGen
 from storage.logic import RAG_STORE_ID, ShadowMap, surrogates_in_use
 from reconstruction.logic import ResolvePass
+from surrogateshield.core.consistency import assign_surrogates, quoted_back
 from chatbot.chat import ClaudeChat
 from config import (
     ADDRESS_MODE,
@@ -122,25 +123,16 @@ def anonymise_text(text: str, mimic: Optional[MimicGen] = None, *,
     if mimic is None:
         mimic = MimicGen()
     known = shadow.all_mappings() if shadow is not None else {}
-    confirmed, _ = sentinel_layer.run_cascade(text, skip_values=set(known) or None)
+    confirmed, _ = sentinel_layer.run_cascade(text, skip_values=quoted_back(known) or None)
     confirmed = sentinel_layer.deduplicate(confirmed)
     # Documents have no service-query context: "auto" resolves to replace.
     doc_address_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "replace"
-    surrogate_map: Dict[str, str] = {}
-    new = []
-    for ent in confirmed:
-        existing = shadow.lookup_original(ent.text.strip()) if shadow is not None else None
-        if existing is not None:
-            surrogate_map[ent.text.strip()] = existing
-        else:
-            new.append(ent)
-    if new:
-        surrogate_map.update(mimic.generate_all(
-            new,
-            address_mode=doc_address_mode,
-            address_shift_range=ADDRESS_SHIFT_RANGE,
-            forbidden=set(shadow.originals()) if shadow is not None else None,
-        ))
+    surrogate_map = assign_surrogates(
+        confirmed, text, mimic, [shadow],
+        forbidden=set(shadow.originals()) if shadow is not None else None,
+        address_mode=doc_address_mode,
+        address_shift_range=ADDRESS_SHIFT_RANGE,
+    )
     sanitised = apply_entity_surrogates(text, confirmed, surrogate_map)
     return sanitised, surrogate_map
 
@@ -220,7 +212,9 @@ class Pipeline:
         # surrogate here, so retrieval matches and quoted excerpts restore.
         rag_shadow = self._rag_shadow()
         rag_map = rag_shadow.all_mappings() if rag_shadow is not None else {}
-        existing_surrogates = set(self.shadow.all_mappings().keys()) | set(rag_map)
+        # Surrogates quoted back from earlier answers are not re-detected;
+        # low-entropy ones ("72", "female") are values of their own (I5).
+        existing_surrogates = quoted_back(set(self.shadow.all_mappings()) | set(rag_map))
         confirmed, needs_confirmation = sentinel_layer.run_cascade(
             user_message,
             skip_values=existing_surrogates,
@@ -239,28 +233,15 @@ class Pipeline:
         # ── Step 3: Generate surrogates ───────────────────────────────────────
         surrogate_map: Dict[str, str] = {}
         if confirmed:
-            # Reuse surrogates for originals seen in earlier turns (O(1)
-            # forward-index lookups), generate only for the new ones.
-            new_entities = []
-            for ent in confirmed:
-                key = ent.text.strip()
-                existing = self.shadow.lookup_original(key)
-                if existing is None and rag_shadow is not None:
-                    existing = rag_shadow.lookup_original(key)
-                if existing is not None:
-                    surrogate_map[key] = existing
-                else:
-                    new_entities.append(ent)
-
-            if new_entities:
-                # A new surrogate must never equal a real value from ANY turn.
-                new_map = self.mimic.generate_all(
-                    new_entities,
-                    address_mode=address_mode,
-                    address_shift_range=ADDRESS_SHIFT_RANGE,
-                    forbidden=set(self.shadow.originals()) | set(rag_map.values()),
-                )
-                surrogate_map.update(new_map)
+            # An original seen in an earlier turn (or in the documents) keeps
+            # its surrogate, case-insensitively (I3); a new surrogate never
+            # equals a real value from any turn nor text already in the message.
+            surrogate_map = assign_surrogates(
+                confirmed, user_message, self.mimic, [self.shadow, rag_shadow],
+                forbidden=set(self.shadow.originals()) | set(rag_map.values()),
+                address_mode=address_mode,
+                address_shift_range=ADDRESS_SHIFT_RANGE,
+            )
 
             if detailed:
                 print_detection_table(confirmed, surrogate_map)
@@ -297,7 +278,9 @@ class Pipeline:
 
         # ── Step 8: Reconstruct originals ─────────────────────────────────────
         all_mappings = {**rag_map, **self.shadow.all_mappings()}   # conversation pairs win
-        restored_response = self.resolve.resolve(raw_response, all_mappings)
+        restored_response = self.resolve.resolve(raw_response, all_mappings,
+                                                  current=set(surrogate_map.values()),
+                                                  sent=sanitised)
 
         self.chat.update_last_assistant_message(restored_response)
         self.chat.save()

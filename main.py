@@ -407,6 +407,7 @@ def _run_pii_finder() -> None:
                     sq_confirmed,
                     address_mode=sq_mode,
                     address_shift_range=ADDRESS_SHIFT_RANGE,
+                    text=user_input,
                 )
                 if sq_confirmed
                 else {}
@@ -500,6 +501,7 @@ def _run_pii_finder() -> None:
                 confirmed,
                 address_mode=std_mode,
                 address_shift_range=ADDRESS_SHIFT_RANGE,
+                text=user_input,
             )
             if confirmed
             else {}

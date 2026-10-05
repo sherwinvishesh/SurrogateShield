@@ -182,6 +182,7 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None) -
             confirmed,
             address_mode=address_mode,
             address_shift_range=ADDRESS_SHIFT_RANGE,
+            text=question,
         )
         if confirmed
         else {}

@@ -28,6 +28,7 @@ from typing import Dict, Iterator, List, Optional, Tuple
 from . import _display, _response_parser
 from ._state import Config, cfg as _default_config
 from .core.detection import pipeline as _pipeline
+from .core.consistency import assign_surrogates, quoted_back
 from .core.detection import service_query as _service_query
 from .core.entities import plan_substitutions, splice
 from .core.generation.mimic import MimicGen
@@ -91,6 +92,8 @@ class Session:
         self._mimic = MimicGen()
         self._mimic.used_surrogates.update(self._shadow.get_all())
         self._resolver = ResolvePass()
+        self._last_surrogates: frozenset = frozenset()
+        self._last_sent: Optional[str] = None
         self._closed = False
 
     # ── detection ────────────────────────────────────────────────────────────
@@ -100,9 +103,13 @@ class Session:
             raise TypeError(f"text must be a str, got {type(text).__name__}")
         c = self.config
         is_svc, address_mode = _service_query.resolve(text, c.address_mode, c.service)
+        with self._lock:
+            # Surrogates quoted back from earlier answers are not re-masked
+            # (low-entropy ones such as "72" are values of their own, I5).
+            known = quoted_back(self._shadow.get_all())
         confirmed, _ = _pipeline.run_cascade(
             text=text,
-            skip_values=None,
+            skip_values=known or None,
             skip_location_entities=is_svc,
             pii_off=None,                 # split below so scan() can report them
             spacy_model=c.spacy_model,
@@ -158,6 +165,8 @@ class Session:
                 result = MaskResult(text, tuple(detections), {}, is_svc)
             else:
                 result = self._substitute(text, is_svc, address_mode, detections, masked)
+            self._last_surrogates = frozenset(result.replacements.values())
+            self._last_sent = result.text
         if c.detailed_view:
             _display.show_mask_results(result)
         return result
@@ -165,24 +174,13 @@ class Session:
     def _substitute(self, text, is_svc, address_mode, detections, masked) -> MaskResult:
         c = self.config
         unique = _pipeline.deduplicate(masked)
-        replacements: Dict[str, str] = {}
-        new_entities = []
-        for ent in unique:
-            key = ent.text.strip()
-            existing = self._shadow.lookup_original(key)
-            if existing is not None:
-                replacements[key] = existing
-            else:
-                new_entities.append(ent)
-        if new_entities:
-            new_map = self._mimic.generate_all(
-                new_entities,
-                address_mode=address_mode,
-                address_shift_range=c.address_shift_range,
-                forbidden=set(self._shadow.originals()),
-            )
-            replacements.update(new_map)
-            self._shadow.update({v: k for k, v in new_map.items()})
+        replacements = assign_surrogates(
+            unique, text, self._mimic, [self._shadow],
+            forbidden=set(self._shadow.originals()),
+            address_mode=address_mode,
+            address_shift_range=c.address_shift_range,
+        )
+        self._shadow.update({v: k for k, v in replacements.items()})
         edits = plan_substitutions(text, masked, replacements)
         return MaskResult(splice(text, edits), tuple(detections), replacements, is_svc)
 
@@ -197,6 +195,12 @@ class Session:
 
         *response* is a str or an Anthropic / OpenAI / Gemini response (object
         or dict). Raises ``TypeError`` for ``None`` or anything without text.
+
+        Low-entropy surrogates (a bare age, a gender term, one or two
+        characters) are restored only if the most recent :meth:`mask` sent
+        them: a "72" in an answer about a later message is left alone. A
+        bare first name or surname that the user typed unmasked in that
+        message ("Peter the Great") is not taken for a surrogate's.
         """
         text = _response_parser.extract_text(response)
         with self._lock:
@@ -206,6 +210,8 @@ class Session:
             restored = self._resolver.resolve(
                 response_text=text, shadow_map=mapping,
                 fuzzy_threshold=self.config.fuzzy_threshold,
+                current=self._last_surrogates,
+                sent=self._last_sent,
             )
             del self._resolver.failures[before:]
         if self.config.detailed_view:

@@ -18,6 +18,7 @@ from faker import Faker
 
 from ..detection import address_parser
 from ..detection.geo_data import US_STATE_ABBREVS
+from ..consistency import is_low_entropy, occurs
 from ..entities import DetectedEntity
 
 logger = logging.getLogger(__name__)
@@ -184,6 +185,11 @@ class MimicGen:
     def _unique(self, generator_fn, max_attempts: int = 50) -> str:
         for _ in range(max_attempts):
             candidate = str(generator_fn())
+            # Low-entropy values (an age, a gender term) are restored only in
+            # their own turn, so they need not be unique per conversation —
+            # there are only a handful of near ages (audit I5).
+            if is_low_entropy(candidate):
+                return candidate
             if candidate not in self.used_surrogates:
                 self.used_surrogates.add(candidate)
                 return candidate
@@ -717,6 +723,7 @@ class MimicGen:
         address_mode: str = "shift",
         address_shift_range: int = 1,
         forbidden: Optional[Set[str]] = None,
+        text: Optional[str] = None,
     ) -> Dict[str, str]:
         """
         Generate surrogates for all entities.
@@ -728,6 +735,13 @@ class MimicGen:
             address_shift_range: Max house-number delta for shift mode.
             forbidden:           Extra strings surrogates must never equal
                                  (e.g. shadow-map originals from prior turns).
+            text:                The message the entities come from. A surrogate
+                                 that already appears in it (whole value, any
+                                 case) is avoided when another can be drawn:
+                                 restoring it would also rewrite that text
+                                 (audit I5). Equality with an original, or
+                                 (except for addresses) containing one as a
+                                 whole value, is never accepted.
         """
         blocked: Set[str] = set(forbidden or ())
         # A shifted address must never equal ANOTHER real address in the same
@@ -736,11 +750,29 @@ class MimicGen:
         # No surrogate may equal any original in the message (J4): a value
         # "replaced" by itself is sent verbatim.
         originals = {e.text.strip().lower() for e in entities}
+        # Nor any earlier original (low-entropy values are not unique).
+        equal_blocked = originals | {f.strip().lower() for f in blocked if not is_low_entropy(f)}
+        # Nor contain one as a whole value: "Daniel Kowalczyk" → "Emily
+        # Daniel" would send the separately detected "Daniel" verbatim.
+        # Addresses keep their street and city by design (shift policy).
+        contained = sorted({o for o in originals | {f.strip().lower() for f in blocked}
+                            if len(o) >= 3 and not is_low_entropy(o)}, key=len)
+
+        def contains_original(surrogate: str) -> bool:
+            # words: as a whole word ("Ann" in "Joanna" is fine); structured
+            # values (URL, e-mail, number): anywhere ("…/team/sarah" in
+            # "…/team/sarahjohnson" is not)
+            folded = surrogate.lower()
+            return any(o in folded and o != folded
+                       and (not o.replace(" ", "").isalpha() or occurs(surrogate, o))
+                       for o in contained)
 
         mapping: Dict[str, str] = {}
+        chosen: Set[str] = set()
         for ent in entities:
             key = ent.text.strip()
             if key not in mapping:
+                fallback = None
                 for _ in range(_MAX_ORIGINAL_RETRIES):
                     surrogate = self.generate(
                         ent,
@@ -748,14 +780,27 @@ class MimicGen:
                         address_shift_range=address_shift_range,
                         forbidden=frozenset(blocked),
                     )
-                    if surrogate.strip().lower() not in originals:
-                        break
+                    if surrogate.strip().lower() in equal_blocked:
+                        continue
+                    if ent.type != "address" and (
+                            contains_original(surrogate)
+                            or len(key) >= 3 and key.lower() in surrogate.lower()):
+                        continue                 # not even "Will" in "Williams"
+                    if surrogate in chosen or (text is not None and occurs(text, surrogate)):
+                        fallback = fallback or surrogate
+                        continue
+                    break
                 else:
-                    raise RuntimeError(
-                        f"could not generate a surrogate for a {ent.type} entity "
-                        f"that differs from every original in the message"
-                    )
+                    if fallback is None:
+                        raise RuntimeError(
+                            f"could not generate a surrogate for a {ent.type} entity "
+                            f"that differs from every original in the message"
+                        )
+                    logger.warning(f"[MimicGen] {ent.type}: every candidate surrogate is already "
+                                   f"used in this message; using one anyway")
+                    surrogate = fallback
                 mapping[key] = surrogate
+                chosen.add(surrogate)
                 blocked.add(surrogate)
         logger.info(f"[MimicGen] Generated {len(mapping)} surrogate mappings")
         return mapping
