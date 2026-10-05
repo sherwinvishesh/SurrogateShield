@@ -227,13 +227,20 @@ def is_junk(ent: DetectedEntity, text: str = "") -> bool:
         return True
     if core.lower() in NOT_NAMES:
         return True
+    words = core.split()
+    if _QUESTION_WORD.match(core):
+        return True                         # "Combien de calories", "¿Cuáles son …"
+    if ent.type == "PERSON" and len(words) >= 2 and any(c.isdigit() for c in core):
+        return True                         # "mas faltam 8 itens", "ORD-562939 chegou"
+    if (ent.type == "PERSON" and core == core.lower() and text and text != text.lower()
+            and _ARTICLE.match(core)):
+        return True                         # "las ventajas" in a cased sentence
     if ent.type == "PERSON" and core == core.lower() and _CLAUSE_WORD.search(core):
         return True                         # "je veux vérifier la clé" is a clause
     if _CODE.search(_unquote(core)) or _MEMBER_ACCESS.search(core):
         return True                         # a quoted name ("Kalinda Whitehorse") is not code
     if core.lower() in _DEGREES:
         return True                         # "MSc from Politehnica"
-    words = core.split()
     if ent.type != "PERSON" and len(words) >= 2 and _JOB_TITLE.search(core) and text and re.match(
             r"\s+(?:role|position|job|post|vacancy|opening|internship)\b", text[ent.end:ent.end + 20], re.I):
         return True                         # "a Data Analyst role at Spotify"
@@ -247,6 +254,16 @@ def is_junk(ent: DetectedEntity, text: str = "") -> bool:
             return False                    # "NOOR" in caps is still a name
         return not (ent.type in ("GPE", "LOC") and core in US_STATE_ABBREVS)
     return False
+
+
+# A span that opens with a question word is a question, not a name or org.
+_QUESTION_WORD = re.compile(
+    r"(?i)^[¿¡]?(?:combien|pourquoi|comment|quand|quel(?:le)?s?|lequel|où"
+    r"|cu[aá]l(?:es)?|cu[aá]nt[oa]s?|qu[eé]|c[oó]mo|d[oó]nde|qui[eé]n(?:es)?|por\s+qu[eé]"
+    r"|quais|qual|quantos?|onde|porque|warum|wieso|weshalb|welche[rsnm]?|wann|wieviel"
+    r"|perch[eé]|quanti|dove|chi)(?![\w'’])"
+)
+_ARTICLE = re.compile(r"^(?:las|los|el|la|les|le|des|die|der|das|den|dem|os|as|una|une|ein|eine)\s")
 
 
 def _shouting(text: str) -> bool:

@@ -176,3 +176,20 @@ def test_I12_cased_intro_needs_capitalised_name():
 def test_I12_policy_reason_registered():
     import eval_metrics
     assert "not_tied_to_person" in eval_metrics.POLICY_REASONS
+
+
+@pytest.mark.parametrize("text, spec", [
+    ("Combien de calories dans 250 grammes de pâtes ?", ("Combien de calories", "PERSON")),
+    ("¿Cuáles son las ventajas fiscales?", ("Cuáles", "ORG")),
+    ("¿Cuáles son las ventajas fiscales?", ("las ventajas", "PERSON")),
+    ("O pedido ORD-562939 chegou em 12/20/2027, mas faltam 8 itens.", ("mas faltam 8 itens", "PERSON")),
+    ("O pedido ORD-562939 chegou em 12/20/2027", ("ORD-562939 chegou", "PERSON")),
+])
+def test_I12_question_words_articles_and_digits_are_not_names(text, spec):
+    assert dropped(text, spec) == [spec[0]]
+
+
+def test_I12_digit_and_lowercase_rules_keep_real_names():
+    assert dropped("username sarahm92 is locked", ("sarahm92", "PERSON")) == []
+    assert dropped("hi im la toya from austin", ("la toya", "PERSON")) == []
+    assert dropped("Quentin Dove called", ("Quentin Dove", "PERSON")) == []

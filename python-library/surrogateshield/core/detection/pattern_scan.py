@@ -139,7 +139,7 @@ _NEG_NUM_CONTEXT = re.compile(
     r"|item|model|serial|imei|ref|reference|case|confirmation|receipt"
     r"|txn|transaction|version|score|error|hash|artifact|quantity|qty"
     r"|p\.?o\.?)"
-    r"\s*(?:number|no\.?|num|id)?\s*[:#\-]*\s*$",
+    r"\s*(?:number|no\.?|num|id|code)?\s*[:#\-]*\s*$",     # "error code 4631872866"
     re.IGNORECASE,
 )
 

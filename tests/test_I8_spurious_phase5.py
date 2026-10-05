@@ -107,3 +107,9 @@ def test_I14_pattern_positives_kept(text, value):
 def test_I8_season_is_not_a_german_street():
     added, _ = structural._streets("labs at Georgia Tech in Spring 2026. Lindenstraße 14", [])
     assert [e.text for e in added] == ["Lindenstraße 14"]
+
+
+def test_I8_error_code_is_not_a_phone():
+    text = "The build failed with error code 4631872866 after 2 hours."
+    assert [e for e in ps.scan(text) if e.type.startswith("phone")] == []
+    assert [e.text for e in ps.scan("call me at 4631872866")] == ["4631872866"]
