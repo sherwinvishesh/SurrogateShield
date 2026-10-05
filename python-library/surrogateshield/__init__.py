@@ -13,6 +13,10 @@ Public API
         response  = llm.chat(sanitized)
         restored  = s.unmask(response)
 
+    async with shield.Session() as s:        # asyncio: models run in a worker thread
+        sanitized = await s.amask(user_text)
+        restored  = await s.aunmask(await llm.achat(sanitized))
+
     # Module-level shortcuts use the current context's session:
     shield.config(pii_off=["phone"])
     shield.unmask(llm.chat(shield.mask(user_text)))

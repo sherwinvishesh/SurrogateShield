@@ -224,6 +224,30 @@ class Session:
             _display.show_unmask_results(sum(1 for s in mapping if s in text))
         return restored
 
+    # ── asyncio ──────────────────────────────────────────────────────────────
+    #
+    # Detection is CPU-bound model inference. The a* methods run the method of
+    # the same name in a worker thread (asyncio.to_thread), so an event loop
+    # keeps serving other requests meanwhile. Results and exceptions are the
+    # same as the sync methods'. The worker copies the caller's context, so a
+    # session bound with use_session() stays current inside it.
+
+    async def ascan(self, text: str) -> List[Detection]:
+        """:meth:`scan` in a worker thread."""
+        return await asyncio.to_thread(self.scan, text)
+
+    async def amask_result(self, text: str) -> MaskResult:
+        """:meth:`mask_result` in a worker thread."""
+        return await asyncio.to_thread(self.mask_result, text)
+
+    async def amask(self, text: str) -> str:
+        """:meth:`mask` in a worker thread."""
+        return await asyncio.to_thread(self.mask, text)
+
+    async def aunmask(self, response) -> str:
+        """:meth:`unmask` in a worker thread."""
+        return await asyncio.to_thread(self.unmask, response)
+
     # ── lifecycle ────────────────────────────────────────────────────────────
 
     def forget(self, original: str) -> int:
@@ -254,6 +278,12 @@ class Session:
         return self
 
     def __exit__(self, *exc) -> None:
+        self.close()
+
+    async def __aenter__(self) -> "Session":
+        return self
+
+    async def __aexit__(self, *exc) -> None:
         self.close()
 
     def __repr__(self) -> str:
