@@ -40,6 +40,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import replace as _dc_replace
+from functools import lru_cache
+from importlib import import_module
 from typing import Iterable, List, Tuple
 
 from ..entities import DetectedEntity
@@ -221,11 +223,111 @@ def is_common_noun(ent: DetectedEntity, text: str) -> bool:
     return len(words) == 1 or (len(words) == 2 and re.fullmatch(r"[A-Z]?\d{1,5}[A-Z]?", words[1]) is not None)
 
 
+# ── non-English messages: function words inside a model span ──────────────
+
+_LANGS = ("de", "fr", "es", "it", "pt", "nl")
+
+
+@lru_cache(maxsize=1)
+def _stop_words() -> dict:
+    """spaCy's stop-word list per language (shipped with spaCy, offline)."""
+    out = {l: frozenset(import_module(f"spacy.lang.{l}.stop_words").STOP_WORDS)
+           for l in _LANGS + ("en",)}
+    return out
+
+
+# Romanised Hindi / Urdu function words: "mera naam … hai, Nagpur se" is
+# not Italian although "se", "hai" and "ma" are Italian stop words.
+_HINGLISH = frozenset("""
+hai hain hoon tha thi the mera meri mere mujhe mujhko naam ka ki ke ko se aur
+nahi nahin kya kyun karna karo chahiye bhai yaar ap aap apna hum tum wala wali
+""".split())
+
+
+@lru_cache(maxsize=256)
+def message_language(text: str):
+    """The language of a message by its function words, or None for English,
+    romanised Hindi, or when unsure: at least three stop words of one of
+    de/fr/es/it/pt/nl, and more of them than English or Hinglish ones."""
+    words = re.findall(r"[^\W\d_]+(?:['’][^\W\d_]+)?", text.lower())
+    if len(words) < 4:
+        return None
+    stops = _stop_words()
+    counts = {l: sum(w in stops[l] and (l == "en" or w not in stops["en"]) for w in words)
+              for l in _LANGS + ("en",)}      # "in", "me", "die" count for English
+    best = max(_LANGS, key=lambda l: counts[l])
+    other = max(counts["en"], sum(w in _HINGLISH for w in words))
+    return best if counts[best] >= 3 and counts[best] >= 2 * other else None
+
+
+# Stop words that are also given names or surnames (from Faker's name lists
+# for 24 locales): capitalised, they stay names ("Ik ben Ben", "Sara").
+_STOP_NAMES = frozenset("""
+allen aller anders ben bent dan elke lang lange gross gute mir einer tage aura bas
+font mille sans sur ante bien bueno dar dias diez ella esa grande hasta mas mia mio
+nada pero salvo sean sola tan uno alla anni bravo chi coll dalla ebbe essi forza li
+lo mai mie mila otto prima sara sue tali volta ali estes esteve nova sem moet om uwe
+""".split())
+# Words that open a German noun phrase or close a request, never a name
+_DE_OPENERS = frozenset("der die das den dem des ein eine einen einem einer sie er es wir ich".split())
+_DE_NOUN = re.compile(r"(?:ung|heit|keit|schaft|it[äa]t|ismus|nummer|vertrag|gesch[äa]fte?)$")
+
+
+def is_foreign_fragment(ent: DetectedEntity, text: str) -> bool:
+    """A model span in a de/fr/es/it/pt/nl message that is part of a clause,
+    not a name: "Kannst du diese", "Ele nasceu", "Der Vertrag", "Rufen Sie",
+    "een bezwaarbrief aan de gemeente", "Kündigung". Only model spans (an
+    English NER model reading another language); a capitalised name inside
+    the span ("ich bin Jörg Baumgartner") was cut out by trim_person."""
+    if ent.source in ("pattern", "structural") or not text or text == text.lower():
+        return False
+    lang = message_language(text)
+    if lang is None:
+        return False
+    stop = _stop_words()[lang]
+    found = list(re.finditer(r"[^\W\d_]+(?:['’][^\W\d_]+)?", ent.text))
+    toks = [m.group() for m in found]
+    if not toks:
+        return False
+
+    def name_like(k: int) -> bool:          # a capitalised word that is no function word
+        t = toks[k]
+        return t[0].isupper() and (t.lower() not in stop or t.lower() in _STOP_NAMES)
+
+    last_low = max((k for k, t in enumerate(toks) if t[0].islower() and t in stop), default=-1)
+    if lang == "de":                        # every German noun is capitalised: only a
+        if any(name_like(k) for k in range(last_low + 1, len(toks))) and last_low >= 0:
+            return False                    # word after a preposition ("bei Kraftwerk")
+    elif any(name_like(k) and not re.search(r"(?:^|[.!?¿¡:\n]\s*)$",
+                                            text[:ent.start + found[k].start()])
+             for k in range(len(toks))):
+        return False                        # "Nagpur se": a name mid-sentence
+    low = [t for t in toks if t[0].islower()]
+    caps = [t for t in toks if t[0].isupper()]
+    if low and any(t not in _NAME_PARTICLES for t in low) and any(t in stop for t in low):
+        return True                         # a clause: "mir helfen", "al mio medico"
+    if caps and all(t.lower() in stop and t.lower() not in _STOP_NAMES for t in caps) and (
+            low or len(caps) == 1):
+        return True                         # "Ele nasceu", "Mi aiuti", "Mon"
+    if lang == "de":
+        if toks[0].lower() in _DE_OPENERS and len(toks) <= 3:
+            return True                     # "Der Vertrag"
+        if len(toks) >= 2 and toks[-1].lower() in ("sie", "du", "ihr", "wir", "uns"):
+            return True                     # "Rufen Sie"
+        if len(toks) == 1 and _DE_NOUN.search(toks[0].lower()):
+            return True                     # "Kündigung", "Mitgliedsnummer"
+    if len(toks) == 1 and low and ent.type == "PERSON":
+        return toks[0] in stop              # a lower-case function word alone
+    return False
+
+
 def is_junk(ent: DetectedEntity, text: str = "") -> bool:
     core = _core(ent.text)
     if not core or not any(c.isalpha() for c in core):
         return True                         # "&" from "Mr. & Mrs. Castellano"
     if core.lower() in NOT_NAMES:
+        return True
+    if is_foreign_fragment(ent, text):
         return True
     words = core.split()
     if _QUESTION_WORD.match(core):
