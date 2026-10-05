@@ -48,6 +48,13 @@ Install the package from PyPI:
 pip install surrogateshield
 ```
 
+PyPI has 1.0.0. This README describes the unreleased 2.1.0 on the `v2`
+branch; until it is released, install it from a checkout:
+
+```bash
+pip install ./python-library
+```
+
 Then install the spaCy language model once (~600 MB):
 
 ```bash
@@ -520,7 +527,7 @@ shield.config(
 
     spacy_model="en_core_web_lg",
     # The spaCy model used by EntityTrace for named-entity recognition.
-    # en_core_web_lg installs automatically with pip install surrogateshield.
+    # Install it once with python -m spacy download en_core_web_lg.
     # You can substitute a smaller model such as en_core_web_sm for faster
     # inference at the cost of NER accuracy.
 

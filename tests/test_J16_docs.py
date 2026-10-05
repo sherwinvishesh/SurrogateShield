@@ -33,3 +33,11 @@ def test_J16_every_result_file_has_its_command():
         stored = json.loads((RESULTS / name).read_text(encoding="utf-8")).get("command")
         if stored is not None:
             assert stored.split()[-1].endswith(name)
+
+
+def test_J16_quickstart_install_is_accurate():
+    # The spaCy model is a separate download, and PyPI has 1.0.0, not this branch.
+    text = (ROOT / "python-library" / "README.md").read_text(encoding="utf-8")
+    assert "installs automatically" not in text
+    assert "python -m spacy download en_core_web_lg" in text
+    assert "pip install ./python-library" in text
