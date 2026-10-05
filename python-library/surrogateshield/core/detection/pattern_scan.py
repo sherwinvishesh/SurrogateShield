@@ -906,6 +906,22 @@ _PATTERNS: list = [
             r"|gho_[A-Za-z0-9]{20,}"
             r"|AKIA[0-9A-Z]{16}"
             r"|AIzaSy[A-Za-z0-9\-_]{10,}"
+            # published provider token prefixes (Slack, GitHub, GitLab, npm,
+            # PyPI, Hugging Face, SendGrid, Shopify, DigitalOcean, Google
+            # OAuth, AWS session keys, Telegram bots)
+            r"|\bxox[abposre]-[0-9A-Za-z\-]{10,}"
+            r"|\bxapp-\d-[0-9A-Za-z\-]{10,}"
+            r"|\b(?:ghs|ghu|ghr)_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}"
+            r"|\bglpat-[A-Za-z0-9\-_]{20}"
+            r"|\bnpm_[A-Za-z0-9]{36}"
+            r"|\bpypi-[A-Za-z0-9\-_]{40,}"
+            r"|\bhf_[A-Za-z0-9]{30,}"
+            r"|\bSG\.[A-Za-z0-9\-_]{16,}\.[A-Za-z0-9\-_]{16,}"
+            r"|\bshp(?:at|ca|pa|ss)_[a-fA-F0-9]{32}"
+            r"|\bdop_v1_[a-f0-9]{64}"
+            r"|\bya29\.[A-Za-z0-9\-_]{20,}"
+            r"|\bASIA[0-9A-Z]{16}"
+            r"|\b\d{8,10}:AA[A-Za-z0-9\-_]{33}\b"
             r"|eyJ[A-Za-z0-9\-_]{8,}(?:\.[A-Za-z0-9\-_]+){0,2}"
             r"|[A-Z][A-Z0-9_]*=(?:sk[-_]|ant-api-|AIzaSy|ghp_|gho_|AKIA)"
             r"[A-Za-z0-9\-_]{12,}"
