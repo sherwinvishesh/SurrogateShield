@@ -616,6 +616,41 @@ Ends the current session: clears its shadow map (and deletes its file in persist
 **Exceptions:** `DetectorUnavailable` (a detection model is missing or failed), `StorageError` (the persistent store cannot be read or written), `TypeError`, `ValueError`.
 
 
+## Limitations
+
+SurrogateShield reduces the personal data that reaches a provider. It does
+not remove all of it. The measured results, including the failures, are in
+[`bench/results/README.md`](https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md), each with the command
+that produced it.
+
+- **Detection misses PII in text it was not tuned on.** On real-world
+  messages the rules never saw, some names, places, IDs, handles, ages and
+  organisations go through unmasked. Some ordinary text gets replaced. Gate
+  J2 (≤ 2 % leaked, ≤ 3 % spurious) fails on unseen text.
+- **English first.** Detection is built and measured mainly on English. Other
+  languages are covered only for the forms listed in
+  [`CHANGELOG.md`](https://github.com/sherwinvishesh/SurrogateShield/blob/v2/CHANGELOG.md), such as some Hindi, Chinese and Japanese
+  kin frames, and street forms outside the US and UK.
+- **Special-category data is not replaced.** Health conditions, medications,
+  religion, ethnicity, sexual orientation and political affiliation reach the
+  provider as written. In "my mother has diabetes", the diagnosis is sent.
+- **Names judged public are kept on purpose.** A name the relation gate takes
+  for a public figure, brand or author is sent verbatim. It can also keep a
+  private person who shares that name, when nothing in the text ties them to
+  the user.
+- **Service queries keep the street and city.** With `address_mode="auto"`,
+  "nearest pharmacy to …" shifts the house number and sends the rest.
+- **Surrogates hide values, not context.** The provider still sees what the
+  message says about the person. Enough context can identify someone without
+  any of the replaced values. Resistance to an attacker has not been
+  re-measured since the attacker protocol was corrected.
+- **Restoration can miss a rewritten surrogate.** If the model rewrites a
+  surrogate past the fuzzy threshold, it stays in the answer.
+- **Detection needs its local models.** Without spaCy's `en_core_web_lg`, or
+  without the cached ContextGuard model when offline, `mask()` raises
+  `DetectorUnavailable` and sends nothing. The first mask after start-up
+  takes seconds.
+
 ## Troubleshooting
 
 **ContextGuard model download on first run**

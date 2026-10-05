@@ -1074,6 +1074,41 @@ SurrogateShield/
 
 
 
+## Limitations
+
+SurrogateShield reduces the personal data that reaches a provider. It does
+not remove all of it. The measured results, including the failures, are in
+[`bench/results/README.md`](bench/results/README.md), each with the command
+that produced it.
+
+- **Detection misses PII in text it was not tuned on.** On real-world
+  messages the rules never saw, some names, places, IDs, handles, ages and
+  organisations go through unmasked. Some ordinary text gets replaced. Gate
+  J2 (≤ 2 % leaked, ≤ 3 % spurious) fails on unseen text.
+- **English first.** Detection is built and measured mainly on English. Other
+  languages are covered only for the forms listed in
+  [`CHANGELOG.md`](CHANGELOG.md), such as some Hindi, Chinese and Japanese
+  kin frames, and street forms outside the US and UK.
+- **Special-category data is not replaced.** Health conditions, medications,
+  religion, ethnicity, sexual orientation and political affiliation reach the
+  provider as written. In "my mother has diabetes", the diagnosis is sent.
+- **Names judged public are kept on purpose.** A name the relation gate takes
+  for a public figure, brand or author is sent verbatim. It can also keep a
+  private person who shares that name, when nothing in the text ties them to
+  the user.
+- **Service queries keep the street and city.** With `address_mode="auto"`,
+  "nearest pharmacy to …" shifts the house number and sends the rest.
+- **Surrogates hide values, not context.** The provider still sees what the
+  message says about the person. Enough context can identify someone without
+  any of the replaced values. Resistance to an attacker has not been
+  re-measured since the attacker protocol was corrected.
+- **Restoration can miss a rewritten surrogate.** If the model rewrites a
+  surrogate past the fuzzy threshold, it stays in the answer.
+- **Detection needs its local models.** Without spaCy's `en_core_web_lg`, or
+  without the cached ContextGuard model when offline, `mask()` raises
+  `DetectorUnavailable` and sends nothing. The first mask after start-up
+  takes seconds.
+
 ## Privacy Guarantees
 
 - **No PII crosses the API boundary.** Every entity confirmed by SentinelLayer is replaced before the HTTP request is made.
