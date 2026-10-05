@@ -1,28 +1,30 @@
 """
 reconstruction/resolve.py — ResolvePass
 
-Post-response surrogate-to-original reconstruction.
+Post-response surrogate-to-original reconstruction (audit E2, I5, I15).
 
-Three passes in sequence:
-    1. Exact string replacement — longest surrogate first so substrings never
-       clobber longer values; every rewritten span is tracked so later passes
-       can never corrupt it.
-    2. Alignment-safe component matching — for multi-word surrogates that are
-       UNRESOLVED after Pass 1.  Surrogate/original words are aligned with
-       difflib.SequenceMatcher (truncation-proof for length-mismatched pairs),
-       then contiguous surrogate n-grams (longest first, minimum 2 words) are
-       searched with whitespace-flexible word-boundary patterns and replaced
-       by the aligned original words.  A guarded single-token fallback covers
-       "first name only" echoes.
-       IMPORTANT: only processes surrogates in the `unresolved` set —
-       running component matching on already-resolved surrogates caused
-       silent corruption (e.g. "Ashley" from resolved "Ashley Wise" wrongly
-       replacing "Ashley" in "Ashley County" in the same response).
-    3. Fuzzy match — rapidfuzz.fuzz.partial_ratio_alignment gives the TRUE
-       best-match offsets (v1's sliding window anchored the replacement at
-       the window start, garbling output).  The span is snapped to word
-       boundaries, sanity-checked for length, and re-verified with
-       fuzz.ratio before replacing.
+Every pass matches whole values only — never inside a longer word or number
+("Lee" ≠ "Leeds", "8" ≠ "8.5", "Lopez" ≠ "Lopez-Garcia") — and every rewritten
+span is protected from later passes.
+
+    1. Exact — longest surrogate first, case-insensitive with the case carried
+       over ("MIA LOPEZ" → "SARAH MITCHELL"). Lower-case matches only for
+       multi-word surrogates or values with a digit/@ (so a surrogate "Will"
+       never rewrites "will").
+    2. Component — for multi-word surrogates unresolved after Pass 1:
+       contiguous n-grams (≥ 2 words) aligned to the original's words with
+       difflib, so a partial echo ("790 Crescent Row") restores.
+    3. Fuzzy — multi-word, letters-only surrogates of ≥ 6 characters, and only
+       when one of their words (≥ 4 letters) is present verbatim; the matched
+       span must have the same number of words. Never numbers or single words
+       ("Katherine" does not turn "Catherine the Great" into a person).
+    4. Given name / surname — "Tell Mia" → "Tell Sarah" for a person-shaped
+       surrogate; not before another capitalised word ("Mia Hamm"), not for
+       common words ("Grace", "May"), surname only after a title ("Dr. Lopez").
+
+Low-entropy surrogates (a bare age, a gender term, ≤ 2 characters) recur in
+ordinary text, so with ``current=`` they are restored only when they were
+sent in the current turn (audit I5).
 
 Every failure is logged with its failure type for the research taxonomy:
     exact_miss  — surrogate not found via exact match
@@ -35,12 +37,35 @@ from __future__ import annotations
 import difflib
 import logging
 import re
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
+
+from ..consistency import glued, is_low_entropy, match_case, occurs
 
 logger = logging.getLogger(__name__)
 
 # Default for Pass 3; override per call with resolve(..., fuzzy_threshold=…).
 FUZZY_MATCH_THRESHOLD = 85
+
+_TITLES = frozenset("mr mrs ms miss mx dr prof sir madam rev fr".split())
+_SUFFIXES = frozenset("jr sr ii iii iv md phd dds dvm esq rn cpa".split())
+_ORG_WORDS = frozenset("""inc llc ltd corp co company group partners associates holdings bank
+    university college school hospital clinic foundation institute labs systems solutions
+    services technologies consulting agency studio center centre church club and of the &""".split())
+# Given names that are also ordinary words: a capitalised "Grace" or "May"
+# in an answer is not evidence of the person (audit I5).
+_COMMON_WORD_NAMES = frozenset("""grace hope faith joy may june april august summer autumn dawn rose
+    lily ivy daisy holly iris violet ruby pearl amber crystal sky skye rain storm will mark bill
+    bob jack pat sue rob art guy ray don frank grant hunter chase mason carter cooper parker
+    taylor bishop king price young rich long little black white brown green gray grey rice hill
+    wood lane ford banks bell page booth cash love major miles penny sterling star angel destiny
+    harmony trinity justice liberty patience charity precious royal reign sunny honey hazel olive
+    sage basil jade jasmine pepper river brook glen dale forest north west south east""".split())
+_NAME_TOKEN = re.compile(r"[^\W\d_][^\W\d_'’.-]*(?:['’-][^\W\d_]+)*\.?")
+_NEXT_CAPITALISED = re.compile(r"[ \t]+[A-Z]")
+_TITLE_BEFORE = re.compile(r"(?i)\b(?:mr|mrs|ms|miss|mx|dr|prof)\.?\s+$")
+# A capitalised word right before, which itself is not sentence-initial
+# ("Did LeBron James"): the name part belongs to another person's name.
+_PREV_NAME = re.compile(r"[^\s.!?:;\"(\[]\s+[A-Z][^\W\d_]*[ \t]+$")
 
 
 # ─────────────────────────────────────────────
@@ -69,80 +94,66 @@ class ResolutionFailure:
 # Span-tracking primitives (shared by all passes)
 # ─────────────────────────────────────────────
 
-def _overlaps_any(start: int, end: int, spans: List[Tuple[int, int]]) -> bool:
+Spans = List[Tuple[int, int]]
+
+
+def _overlaps_any(start: int, end: int, spans: Spans) -> bool:
     return any(not (end <= s or start >= e) for s, e in spans)
 
 
-def _splice(
-    text: str,
-    start: int,
-    end: int,
-    replacement: str,
-    spans: List[Tuple[int, int]],
-) -> Tuple[str, List[Tuple[int, int]]]:
+def _splice(text: str, start: int, end: int, replacement: str,
+            spans: Spans) -> Tuple[str, Spans]:
     """Replace text[start:end] with *replacement*, shifting tracked spans and
     recording the new span as protected."""
     new_text = text[:start] + replacement + text[end:]
     delta = len(replacement) - (end - start)
-    updated = [
-        (s + delta, e + delta) if s >= end else (s, e)
-        for s, e in spans
-    ]
+    updated = [(s + delta, e + delta) if s >= end else (s, e) for s, e in spans]
     updated.append((start, start + len(replacement)))
     return new_text, updated
 
 
-def _replace_exact_tracked(
-    text: str,
-    needle: str,
-    replacement: str,
-    spans: List[Tuple[int, int]],
-) -> Tuple[str, List[Tuple[int, int]], int]:
-    """Replace every occurrence of *needle* outside protected spans."""
-    hits = 0
-    idx = text.find(needle)
-    while idx != -1:
-        if _overlaps_any(idx, idx + len(needle), spans):
-            idx = text.find(needle, idx + 1)
-            continue
-        text, spans = _splice(text, idx, idx + len(needle), replacement, spans)
-        hits += 1
-        idx = text.find(needle, idx + len(replacement))
-    return text, spans, hits
-
-
-def _replace_pattern_tracked(
+def _replace_where(
     text: str,
     pattern: "re.Pattern",
-    replacement: str,
-    spans: List[Tuple[int, int]],
-) -> Tuple[str, List[Tuple[int, int]], int]:
-    """Replace every regex match outside protected spans."""
-    hits = 0
-    pos = 0
+    replacement: Callable[[str], str],
+    spans: Spans,
+    accept: Callable[[str, "re.Match"], bool] = lambda _t, _m: True,
+) -> Tuple[str, Spans, int]:
+    """Replace every whole-value match of *pattern* outside protected spans
+    that *accept* allows; *replacement* maps the matched surface text."""
+    hits, pos = 0, 0
     while True:
         m = pattern.search(text, pos)
         if m is None:
-            break
-        if _overlaps_any(m.start(), m.end(), spans):
+            return text, spans, hits
+        if (_overlaps_any(m.start(), m.end(), spans) or glued(text, m.start(), m.end())
+                or not accept(text, m)):
             pos = m.start() + 1
             continue
-        text, spans = _splice(text, m.start(), m.end(), replacement, spans)
+        new = replacement(m.group(0))
+        text, spans = _splice(text, m.start(), m.end(), new, spans)
         hits += 1
-        pos = m.start() + len(replacement)
-    return text, spans, hits
+        pos = m.start() + len(new)
+
+
+def _case_variant_ok(surface: str, surrogate: str) -> bool:
+    """Which case variants of a surrogate Pass 1 accepts."""
+    if surface == surrogate:
+        return True
+    if surface.isupper() and sum(c.isalpha() for c in surface) >= 2:
+        return True
+    if surface == surrogate[:1].upper() + surrogate[1:]:          # sentence start
+        return True
+    if surface.islower():
+        return len(surrogate.split()) > 1 or any(c.isdigit() or c == "@" for c in surrogate)
+    return False
 
 
 # ─────────────────────────────────────────────
 # Pass 2 helpers — token alignment
 # ─────────────────────────────────────────────
 
-def _aligned_original(
-    opcodes,
-    orig_words: List[str],
-    i: int,
-    j: int,
-) -> Optional[str]:
+def _aligned_original(opcodes, orig_words: List[str], i: int, j: int) -> Optional[str]:
     """
     Translate the surrogate word range [i, j) into the corresponding original
     words using SequenceMatcher opcodes (a=surrogate words, b=original words).
@@ -165,10 +176,9 @@ def _aligned_original(
 
 
 def _ngram_pattern(words: List[str]) -> "re.Pattern":
-    """Whitespace-flexible, word-boundary pattern for a run of tokens."""
-    return re.compile(
-        r"(?<!\w)" + r"\s+".join(re.escape(w) for w in words) + r"(?!\w)"
-    )
+    """Whitespace-flexible pattern for a run of tokens (boundaries are
+    checked by :func:`glued`)."""
+    return re.compile(r"\s+".join(re.escape(w) for w in words))
 
 
 def _snap_to_word_boundaries(text: str, start: int, end: int) -> Tuple[int, int]:
@@ -185,20 +195,31 @@ def _snap_to_word_boundaries(text: str, start: int, end: int) -> Tuple[int, int]
     return start, end
 
 
+def _core_words(value: str) -> List[str]:
+    """Words of a name without titles and post-nominal suffixes."""
+    return [w for w in value.split() if w.strip(".,").lower() not in _TITLES | _SUFFIXES]
+
+
+def _person_shaped(surrogate: str) -> bool:
+    words = _core_words(surrogate)
+    return (len(words) >= 2 and all(_NAME_TOKEN.fullmatch(w) and w[0].isupper() for w in words)
+            and not any(w.strip(".,").lower() in _ORG_WORDS for w in surrogate.split()))
+
+
+def _fuzzy_eligible(surrogate: str) -> bool:
+    words = surrogate.split()
+    return (len(words) >= 2 and len(surrogate) >= 6
+            and not any(c.isdigit() for c in surrogate)
+            and all(_NAME_TOKEN.fullmatch(w.strip(",")) for w in words))
+
+
 # ─────────────────────────────────────────────
 # ResolvePass
 # ─────────────────────────────────────────────
 
 class ResolvePass:
     """
-    Reconstructs original PII values in LLM responses.
-
-    Uses three passes:
-      1. Exact replacement (longest surrogate first, span-tracked)
-      2. Alignment-safe component matching — scoped to UNRESOLVED surrogates
-         only, to prevent component words of already-resolved surrogates from
-         corrupting unrelated text.
-      3. Anchored fuzzy matching via rapidfuzz partial_ratio_alignment
+    Reconstructs original PII values in LLM responses (see module docstring).
 
     Attributes:
         failures: Log of ResolutionFailure events, accumulated across calls.
@@ -208,11 +229,20 @@ class ResolvePass:
         """Initialise ResolvePass with an empty failure log."""
         self.failures: List[ResolutionFailure] = []
 
+    def _mark_hit(self, surrogate: str) -> None:
+        for f in reversed(self.failures):
+            if f.surrogate == surrogate and f.failure_type == "exact_miss":
+                f.failure_type = "fuzzy_hit"
+                break
+
     def resolve(
         self,
         response_text: str,
         shadow_map: Dict[str, str],
         fuzzy_threshold: int = FUZZY_MATCH_THRESHOLD,
+        *,
+        current: Optional[Iterable[str]] = None,
+        sent: Optional[str] = None,
     ) -> str:
         """
         Reconstruct original values in *response_text* using *shadow_map*.
@@ -221,173 +251,142 @@ class ResolvePass:
             response_text:   The LLM response text (may contain surrogates).
             shadow_map:      Dict mapping surrogate → original.
             fuzzy_threshold: Minimum rapidfuzz score (0–100) for Pass 3.
+            current:         Surrogates sent in the turn being answered. When
+                             given, low-entropy surrogates outside it are not
+                             restored (audit I5).
+            sent:            The masked text the response answers. A bare
+                             name part that the user typed there outside any
+                             surrogate ("Peter" in "Peter the Great") is the
+                             user's own word, so Pass 4 leaves it alone.
 
         Returns:
             Response string with surrogates replaced by original values.
         """
+        if current is not None:
+            current = set(current)
+            shadow_map = {s: o for s, o in shadow_map.items()
+                          if s in current or not is_low_entropy(s)}
         if not shadow_map:
             return response_text
 
         result = response_text
-        protected: List[Tuple[int, int]] = []
+        protected: Spans = []
         unresolved: Dict[str, str] = {}
 
-        # ── Pass 1: Exact replacement (longest surrogate first) ────────
-        for surrogate, original in sorted(
-            shadow_map.items(), key=lambda kv: len(kv[0]), reverse=True
-        ):
-            result, protected, hits = _replace_exact_tracked(
-                result, surrogate, original, protected
-            )
+        # ── Pass 1: whole-value, case-carrying, longest first ──────────
+        for surrogate, original in sorted(shadow_map.items(), key=lambda kv: len(kv[0]),
+                                          reverse=True):
+            if not surrogate.strip():
+                continue
+            pattern = re.compile(re.escape(surrogate), re.IGNORECASE)
+            result, protected, hits = _replace_where(
+                result, pattern, lambda surface: match_case(surface, surrogate, original),
+                protected, accept=lambda _t, m: _case_variant_ok(m.group(0), surrogate))
             if hits:
                 logger.debug(f"[ResolvePass] Exact hit: {surrogate!r} → {original!r}")
             else:
                 unresolved[surrogate] = original
-                logger.debug(f"[ResolvePass] Exact miss: {surrogate!r}")
-                self.failures.append(
-                    ResolutionFailure(
-                        surrogate=surrogate,
-                        original=original,
-                        failure_type="exact_miss",
-                        context_snippet=response_text[:120],
-                    )
-                )
+                self.failures.append(ResolutionFailure(
+                    surrogate=surrogate, original=original, failure_type="exact_miss",
+                    context_snippet=response_text[:120]))
 
+        # Low-entropy values never take part in partial matching.
+        unresolved = {s: o for s, o in unresolved.items() if not is_low_entropy(s)}
         if not unresolved:
             return result
 
-        # ── Pass 2: Alignment-safe component matching ──────────────────
-        #
-        # Scoped to `unresolved` only (see module docstring for the
-        # Ashley-County rationale). Words are aligned with SequenceMatcher,
-        # so length-mismatched surrogate/original pairs can never be zipped
-        # out of position (the v1 truncation bug).
-        component_resolved: Set[str] = set()
+        # Partial matches (passes 2–4) never take text the user typed outside
+        # a surrogate: "Peter" in "Peter the Great" is the user's own word.
+        typed = sent
+        if typed is not None:
+            for surrogate in sorted(shadow_map, key=len, reverse=True):
+                if not is_low_entropy(surrogate):
+                    typed = re.sub(re.escape(surrogate), " ", typed, flags=re.IGNORECASE)
 
+        def own_words(_text, m) -> bool:
+            return typed is not None and occurs(typed, m.group(0))
+
+        # ── Pass 2: alignment-safe component matching ──────────────────
         for surrogate, original in list(unresolved.items()):
             surrogate_words = surrogate.split()
             original_words = original.split()
-
             if len(surrogate_words) <= 1:
-                continue  # single-word surrogates handled by Pass 1 / Pass 3
-
+                continue
             opcodes = difflib.SequenceMatcher(
-                None, surrogate_words, original_words, autojunk=False
-            ).get_opcodes()
-
+                None, surrogate_words, original_words, autojunk=False).get_opcodes()
             hit = False
-            # Contiguous n-grams, longest first, minimum 2 tokens.
-            for n in range(len(surrogate_words), 1, -1):
+            for n in range(len(surrogate_words), 1, -1):          # longest first, ≥ 2 words
                 for i in range(0, len(surrogate_words) - n + 1):
-                    aligned = _aligned_original(
-                        opcodes, original_words, i, i + n
-                    )
-                    if aligned is None:
+                    aligned = _aligned_original(opcodes, original_words, i, i + n)
+                    if aligned is None or aligned == " ".join(surrogate_words[i:i + n]):
                         continue
-                    pattern = _ngram_pattern(surrogate_words[i:i + n])
-                    result, protected, hits = _replace_pattern_tracked(
-                        result, pattern, aligned, protected
-                    )
+                    result, protected, hits = _replace_where(
+                        result, _ngram_pattern(surrogate_words[i:i + n]),
+                        lambda _surface, a=aligned: a, protected,
+                        accept=lambda t, m: not own_words(t, m))
                     if hits:
-                        logger.debug(
-                            f"[ResolvePass] Component hit ({n}-gram): "
-                            f"{' '.join(surrogate_words[i:i + n])!r} → {aligned!r} "
-                            f"(surrogate: {surrogate!r})"
-                        )
+                        logger.debug(f"[ResolvePass] Component hit ({n}-gram) for {surrogate!r}")
                         hit = True
                 if hit:
                     break
-
             if hit:
-                component_resolved.add(surrogate)
-                for f in reversed(self.failures):
-                    if f.surrogate == surrogate and f.failure_type == "exact_miss":
-                        f.failure_type = "fuzzy_hit"
-                        break
+                self._mark_hit(surrogate)
+                del unresolved[surrogate]
 
-        for surrogate in component_resolved:
-            del unresolved[surrogate]
+        # ── Pass 3: anchored fuzzy matching (names with a typo) ────────
+        fuzzy_candidates = {s: o for s, o in unresolved.items() if _fuzzy_eligible(s)}
+        if fuzzy_candidates:
+            try:
+                from rapidfuzz import fuzz
+            except ImportError:
+                logger.warning("[ResolvePass] rapidfuzz not installed — skipping fuzzy pass")
+                fuzzy_candidates = {}
+            for surrogate, original in fuzzy_candidates.items():
+                span = _find_fuzzy_span(result, surrogate, fuzzy_threshold, protected)
+                if span is None or typed is not None and occurs(typed, result[span[0]:span[1]]):
+                    continue
+                start, end = span
+                result, protected = _splice(result, start, end, original, protected)
+                logger.debug(f"[ResolvePass] Fuzzy hit for {surrogate!r}")
+                self._mark_hit(surrogate)
+                del unresolved[surrogate]
 
-        if not unresolved:
-            return result
+        # ── Pass 4: given name / surname of a person-shaped surrogate ──
+        other_strings = None
+        for surrogate, original in list(unresolved.items()):
+            sw, ow = _core_words(surrogate), _core_words(original)
+            if not (_person_shaped(surrogate) and len(sw) == len(ow)):
+                continue
+            if other_strings is None:
+                other_strings = [x for pair in shadow_map.items() for x in pair]
+            hit = False
+            for s_word, o_word, need_title in ((sw[0], ow[0], False), (sw[-1], ow[-1], True)):
+                if (s_word == o_word or len(s_word) < 3
+                        or s_word.strip(".").lower() in _COMMON_WORD_NAMES
+                        or any(s_word in x for x in other_strings if x not in (surrogate, original))
+                        or typed is not None and occurs(typed, s_word)):
+                    continue
 
-        # ── Pass 3: Anchored fuzzy matching ────────────────────────────
-        # Runs BEFORE the single-token fallback so a whole-value typo echo
-        # ("Jordn Mercer") is repaired as one unit rather than word-by-word.
-        try:
-            from rapidfuzz import fuzz
-            fuzzy_available = True
-        except ImportError:
-            logger.warning("[ResolvePass] rapidfuzz not installed — skipping fuzzy pass")
-            fuzzy_available = False
-
-        if fuzzy_available:
-            for surrogate, original in list(unresolved.items()):
-                span = _find_fuzzy_span(result, surrogate, fuzzy_threshold)
-
-                if span is not None and not _overlaps_any(span[0], span[1], protected):
-                    start, end = span
-                    matched_text = result[start:end]
-                    result, protected = _splice(result, start, end, original, protected)
-                    logger.debug(
-                        f"[ResolvePass] Fuzzy hit: {matched_text!r} → {original!r}"
-                    )
-                    for f in reversed(self.failures):
-                        if f.surrogate == surrogate and f.failure_type == "exact_miss":
-                            f.failure_type = "fuzzy_hit"
-                            break
-                    del unresolved[surrogate]
-
-        # ── Pass 4: Guarded single-token fallback (last resort) ────────
-        # "First name only" echoes: equal word counts, token ≥3 chars,
-        # capitalized, and not a substring of any other shadow key/value.
-        final_unresolved: Dict[str, str] = {}
+                def accept(text, m, need_title=need_title):
+                    if _NEXT_CAPITALISED.match(text, m.end()):
+                        return False                     # "Mia Hamm": another person
+                    if _PREV_NAME.search(text, 0, m.start()) and not _TITLE_BEFORE.search(
+                            text, 0, m.start()):
+                        return False                     # "LeBron James": another person
+                    return not need_title or bool(_TITLE_BEFORE.search(text, 0, m.start()))
+                result, protected, hits = _replace_where(
+                    result, re.compile(re.escape(s_word)), lambda _s, o=o_word: o,
+                    protected, accept=accept)
+                hit = hit or bool(hits)
+            if hit:
+                logger.debug(f"[ResolvePass] Name-part hit for {surrogate!r}")
+                self._mark_hit(surrogate)
+                del unresolved[surrogate]
 
         for surrogate, original in unresolved.items():
-            surrogate_words = surrogate.split()
-            original_words = original.split()
-            hit = False
-            if len(surrogate_words) > 1 and len(surrogate_words) == len(original_words):
-                other_strings = [
-                    s
-                    for pair in shadow_map.items()
-                    for s in pair
-                    if s not in (surrogate, original)
-                ]
-                for s_word, o_word in zip(surrogate_words, original_words):
-                    if s_word == o_word or len(s_word) < 3 or not s_word[0].isupper():
-                        continue
-                    if any(s_word in other for other in other_strings):
-                        continue
-                    pattern = _ngram_pattern([s_word])
-                    result, protected, hits = _replace_pattern_tracked(
-                        result, pattern, o_word, protected
-                    )
-                    if hits:
-                        logger.debug(
-                            f"[ResolvePass] Component hit (single token): "
-                            f"{s_word!r} → {o_word!r} (surrogate: {surrogate!r})"
-                        )
-                        hit = True
-
-            if hit:
-                for f in reversed(self.failures):
-                    if f.surrogate == surrogate and f.failure_type == "exact_miss":
-                        f.failure_type = "fuzzy_hit"
-                        break
-            else:
-                final_unresolved[surrogate] = original
-
-        for surrogate, original in final_unresolved.items():
-            self.failures.append(
-                ResolutionFailure(
-                    surrogate=surrogate,
-                    original=original,
-                    failure_type="fuzzy_miss",
-                    context_snippet=result[:120],
-                )
-            )
-
+            self.failures.append(ResolutionFailure(
+                surrogate=surrogate, original=original, failure_type="fuzzy_miss",
+                context_snippet=result[:120]))
         return result
 
     def get_failure_summary(self) -> Dict[str, int]:
@@ -407,39 +406,36 @@ class ResolvePass:
 # Fuzzy span finder (anchored)
 # ─────────────────────────────────────────────
 
-def _find_fuzzy_span(
-    text: str,
-    query: str,
-    threshold: float,
-) -> Optional[Tuple[int, int]]:
+def _find_fuzzy_span(text: str, query: str, threshold: float,
+                     protected: Spans = ()) -> Optional[Tuple[int, int]]:
     """
-    Find the best fuzzy occurrence of *query* in *text* with TRUE offsets.
+    The best fuzzy occurrence of *query* in *text*, with true offsets, or None.
 
-    Uses rapidfuzz.fuzz.partial_ratio_alignment (one call, no sliding
-    window), snaps the returned span outward to word boundaries, rejects
-    spans wildly shorter/longer than the query (0.5×–2×), and re-verifies
-    the snapped span with fuzz.ratio before accepting.
-
-    Returns:
-        (start, end) of the span to replace, or None if no acceptable match.
+    Requires one of the query's words (≥ 4 letters) verbatim in *text*
+    outside protected spans, then uses rapidfuzz.fuzz.partial_ratio_alignment,
+    snaps to word boundaries, and accepts only a span with the same number of
+    words that re-scores ≥ *threshold* with fuzz.ratio.
     """
     from rapidfuzz import fuzz
 
     if not query or not text:
         return None
-
-    alignment = fuzz.partial_ratio_alignment(
-        query.lower(), text.lower(), score_cutoff=threshold
-    )
+    anchors = [w.strip(".,'’") for w in query.split() if len(w.strip(".,'’")) >= 4]
+    if not any(not _overlaps_any(m.start(), m.end(), protected) and not glued(text, m.start(), m.end())
+               for a in anchors for m in re.finditer(re.escape(a), text)):
+        return None
+    alignment = fuzz.partial_ratio_alignment(query.lower(), text.lower(), score_cutoff=threshold)
     if alignment is None:
         return None
-
     start, end = _snap_to_word_boundaries(text, alignment.dest_start, alignment.dest_end)
-    span_len = end - start
-    if span_len < 0.5 * len(query) or span_len > 2 * len(query):
+    if (len(text[start:end].split()) != len(query.split())
+            or _overlaps_any(start, end, protected) or glued(text, start, end)):
         return None
-
     if fuzz.ratio(query.lower(), text[start:end].lower()) < threshold:
         return None
-
+    # a capitalised word matches only a capitalised word ("James Orr" is not
+    # "James or")
+    if any(q[:1].isupper() and not w[:1].isupper()
+           for q, w in zip(query.split(), text[start:end].split())):
+        return None
     return start, end

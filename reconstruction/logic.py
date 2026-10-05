@@ -3,7 +3,7 @@
 """ResolvePass for the app: ``surrogateshield.core.reconstruction.resolve``
 with the fuzzy threshold taken from ``config.py`` (audit F4)."""
 
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional
 
 import config as _config
 from surrogateshield.core.reconstruction import resolve as _impl
@@ -16,10 +16,14 @@ class ResolvePass(_impl.ResolvePass):
         response_text: str,
         shadow_map: Dict[str, str],
         fuzzy_threshold: Optional[int] = None,
+        *,
+        current: Optional[Iterable[str]] = None,
+        sent: Optional[str] = None,
     ) -> str:
         if fuzzy_threshold is None:
             fuzzy_threshold = _config.FUZZY_MATCH_THRESHOLD
-        return super().resolve(response_text, shadow_map, fuzzy_threshold)
+        return super().resolve(response_text, shadow_map, fuzzy_threshold, current=current,
+                               sent=sent)
 
 
 def __getattr__(name):

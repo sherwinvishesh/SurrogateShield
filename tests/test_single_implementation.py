@@ -58,7 +58,7 @@ def test_F4_resolver_is_package_resolver(monkeypatch):
     assert issubclass(ResolvePass, resolve.ResolvePass)
     seen = {}
     monkeypatch.setattr(resolve.ResolvePass, "resolve",
-                        lambda self, t, m, f=85: seen.setdefault("f", f) and t)
+                        lambda self, t, m, f=85, current=None, sent=None: seen.setdefault("f", f) and t)
     monkeypatch.setattr(config, "FUZZY_MATCH_THRESHOLD", 93)
     ResolvePass().resolve("t", {"a": "b"})
     assert seen["f"] == 93

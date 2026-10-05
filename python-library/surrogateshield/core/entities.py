@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
+from .consistency import glued
+
 
 @dataclass
 class DetectedEntity:
@@ -50,9 +52,10 @@ def plan_substitutions(
     never be rewritten by a later pass (E1):
       1. The detected entity spans whose text has a surrogate. Overlapping
          spans keep the longest one.
-      2. Every ADDITIONAL whole-word occurrence of each mapped original that
-         lies outside the claimed spans (repeated values the cascade only saw
-         once), longest original first.
+      2. Every ADDITIONAL whole-value occurrence of each mapped original
+         (``consistency.glued``: not inside a longer word or number — the
+         rule ResolvePass restores with) outside the claimed spans, longest
+         original first.
     """
     if not mapping:
         return []
@@ -74,9 +77,8 @@ def plan_substitutions(
     for original in sorted(mapping, key=len, reverse=True):
         if not original or original not in text:
             continue
-        pattern = re.compile(r"(?<![\w])" + re.escape(original) + r"(?![\w])")
-        for m in pattern.finditer(text):
-            if _free(m.start(), m.end()):
+        for m in re.finditer(re.escape(original), text):
+            if not glued(text, m.start(), m.end()) and _free(m.start(), m.end()):
                 edits.append((m.start(), m.end(), original, mapping[original]))
 
     edits.sort(key=lambda x: x[0])
