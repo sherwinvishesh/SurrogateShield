@@ -215,13 +215,20 @@ def guard(
             # The word is not in the text near its offsets (an [UNK] piece, a
             # normalised character): the offsets are the authority, so the
             # entity's text is what an edit at those offsets would replace.
+            # A span across a line break ("Bartholomew Ekwueme\nCell") keeps
+            # the line with most letters: an entity never spans a break.
             if not 0 <= start < end <= len(clean):
                 continue
+            lines = [(sum(c.isalpha() for c in m.group()), start + m.start(), start + m.end())
+                     for m in re.finditer(r"[^\n]+", clean[start:end])]
+            if not lines:
+                continue
+            _, start, end = max(lines, key=lambda x: x[0])
             span = clean[start:end]
             start += len(span) - len(span.lstrip())
             end = start + len(span.strip())
             text = clean[start:end]
-            if len(text) < 3 or text.lower() in _CG_BLOCKLIST or "\n" in text:
+            if len(text) < 3 or text.lower() in _CG_BLOCKLIST:
                 continue
 
         entity = DetectedEntity(

@@ -60,6 +60,19 @@ def test_C3_word_not_in_text_uses_the_model_offsets(monkeypatch):
     assert conf == [("PERSON", "Ǯofi Mensah")]
 
 
+@pytest.mark.parametrize("text, word, want", [
+    # the model joins the lines with a space, so the word is not in the text
+    ("From Bartholomew Ekwueme\nCell 555-0100", "Bartholomew Ekwueme Cell", "Bartholomew Ekwueme"),
+    ("Lecturer, University of Leicester\nORCID 0000", "University of Leicester ORCID",
+     "University of Leicester"),
+])
+def test_C3_span_across_a_line_break_keeps_its_main_line(monkeypatch, text, word, want):
+    # a regression of the fix above dropped these, and the name went out
+    s = text.index(want.split()[0])
+    conf, _ = run(monkeypatch, text, [r(word, s, s + len(word))])
+    assert [t for _, t in conf] == [want]
+
+
 def test_C3_offsets_outside_the_text_are_dropped(monkeypatch):
     assert run(monkeypatch, "short", [r("Nobody Here", 40, 51)]) == ([], [])
 
