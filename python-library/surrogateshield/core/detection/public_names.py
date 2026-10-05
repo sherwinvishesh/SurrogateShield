@@ -145,3 +145,24 @@ Buenas | Oi | Olá | Ola | Obrigado | Obrigada | Atenciosamente | Hallo | Danke
 Grüße | Gruß | Ciao | Grazie | Namaste | Como | Cómo | Qué | Que | Porque | Pourquoi
 Comment | Wie | Warum | Was | Wo | Por favor | Please | Router | Modem | Wifi | WiFi
 """)
+
+# Given names that are also ordinary English words (virtues, gems, flowers,
+# months, seasons, trades, verbs). On its own, without anything that points
+# to a person, such a word is the word ("rhymes with Joy", "Amber or Jade",
+# "Bill of Sale").
+WORD_NAMES = _set("""
+Joy | Hope | Faith | Charity | Grace | Mercy | Honor | Honour | Victory | Destiny
+Patience | Prudence | Constance | Harmony | Melody | Serenity | Trinity | Liberty
+Justice | Journey | Chance | Angel | Glory | Bliss | Felicity | Verity | Unity
+Amber | Jade | Pearl | Ruby | Crystal | Jewel | Opal | Garnet | Coral | Diamond
+Daisy | Rose | Lily | Iris | Violet | Ivy | Holly | Heather | Hazel | Poppy | Fern
+Willow | Olive | Jasmine | Laurel | Myrtle | Blossom | Saffron | Sage | Rosemary
+April | May | June | August | Summer | Autumn | Winter | Spring | Dawn | Sky | Rain
+Storm | River | Brook | Ocean | Star | Sunny | Misty | Snow | Frost | Stormy
+Hunter | Baker | Cooper | Carter | Taylor | Porter | Mason | Fisher | Archer
+Banner | Page | Penny | Ginger | Candy | Honey | Cherry | Peaches | Story
+Bill | Mark | Will | Pat | Sue | Rob | Art | Frank | Grant | Chase | Drew | Gene
+Rich | Bob | Jack | Max | Bud | Buck | Duke | Earl | King | Prince | Major | Royal
+Cliff | Glen | Dale | Forest | Rock | Stone | Flint | Reed | Heath | Wood | Sterling
+Matt | Matte | Rusty | Lance | Miles | Price | Hunt | Ward | Marsh | Rocky
+""")

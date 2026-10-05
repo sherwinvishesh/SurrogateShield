@@ -43,7 +43,8 @@ from typing import Iterable, List, Tuple
 
 from ..entities import DetectedEntity
 from .geo_data import US_STATE_ABBREVS
-from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE
+from .pattern_scan import _KIN as _KIN_WORDS
+from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE, WORD_NAMES
 
 GATED_TYPES = frozenset({"ORG", "GPE", "LOC", "FAC", "PERSON"})
 _PLACE_ORG = frozenset({"ORG", "GPE", "LOC", "FAC"})
@@ -132,15 +133,85 @@ _NAME_LIKE_ORGS = frozenset({
 })
 
 
+# A person named as the author, subject or star of a public work: "the plot
+# of Chimamanda Ngozi Adichie's …", "novels similar to Haruki Murakami's …",
+# "Which Shah Rukh Khan film …", "who was Mumtaz Mahal?"
+_WORK_BEFORE = re.compile(
+    r"(?i)\b(?:similar\s+to|plot\s+of|summar(?:y|ize|ise)\s+of|(?:novels?|books?|poems?"
+    r"|songs?|albums?|films?|movies?|plays?|paintings?|works?|essays?|lyrics)\s+(?:by|of)"
+    r"|written\s+by|directed\s+by|painted\s+by|composed\s+by|sung\s+by|starring"
+    r"|biography\s+of|history\s+of|quotes?\s+(?:by|from))\s+(?:the\s+)?$"
+)
+_WORK_AFTER = re.compile(
+    r"(?i)^(?:'s)?\s+(?:films?|movies?|songs?|albums?|books?|novels?|poems?|plays?"
+    r"|paintings?|shows?|series|quotes?|speech|lyrics|discography|filmography)\b"
+)
+
+
 def is_public_person(ent: DetectedEntity, text: str) -> bool:
     core = _core(ent.text)
     low = core.lower()
-    public = (low in PUBLIC_PEOPLE or bool(_EPITHET.search(core))
-              or (low in PUBLIC_ORGS and low not in _NAME_LIKE_ORGS))
-    if not public:
+    before = text[max(0, ent.start - 40):ent.start]
+    if _PERSONAL_BEFORE_PERSON.search(before):
+        return False
+    if low in PUBLIC_PEOPLE or _EPITHET.search(core) or (
+            low in PUBLIC_ORGS and low not in _NAME_LIKE_ORGS):
+        return True
+    if " " not in core:
+        return False                        # one name alone is never "public"
+    after = text[ent.end:ent.end + 30]
+    return bool(_WORK_BEFORE.search(before) or _WORK_AFTER.match(after)
+                or (re.search(r"(?i)\bwho\s+(?:was|is)\s+$", before)
+                    and after.lstrip().startswith("?")))
+
+
+# Something that points to a person next to a word-name: a greeting or an
+# addressee before it, a person's action or relation after it, a sign-off.
+_PERSON_BEFORE = re.compile(
+    r"(?i)(?:\b(?:to|from|tell|ask|told|asked|met|meet|call|text|email|cc|thanks"
+    r"|thank\s+you|dear|hi|hey|hello|love|sincerely|regards)\s*,?\s*$|(?:^|\n)\s*[-–—~]\s*$)"
+)
+_PERSON_AFTER = re.compile(
+    r"(?i)^(?:'s\s+(?:mom|mum|dad|mother|father|wife|husband|partner|son|daughter"
+    r"|kid|baby|birthday|party|wedding|phone|number|email|address|house|place|car"
+    r"|school|teacher|boss|room|condition|surgery|diagnosis)\b"
+    r"|,?\s+(?:said|says|told|asked|wants?|wanted|texted|called|emailed|replied|thinks"
+    r"|needs?|lives|lived|works|worked|got|gets|has|had|is\s+(?:my|our|a|an|coming"
+    r"|going|sick|pregnant|turning|getting)|was\s+(?:my|our|born|diagnosed)"
+    r"|are\s+(?:my|our|coming|going|visiting|staying|both)|were\s+(?:my|our|born)"
+    r"|and\s+(?:i|me|my)|will|can|could|would|keeps|just)\b"
+    r"|,\s+(?:my|our|his|her|their)\b)"
+)
+
+
+_LIST_BEFORE = re.compile(r"(?:[A-Z][\w'\-]*\s*(?:,\s*(?:and\s+|&\s+|or\s+)?|\s+(?:and|&|or)\s+))+$")
+_LIST_AFTER = re.compile(r"(?:\s*(?:,\s*(?:and\s+|&\s+|or\s+)?|\s+(?:and|&|or)\s+)[A-Z][\w'\-]*)+")
+
+
+def is_word_name(ent: DetectedEntity, text: str) -> bool:
+    """A lone PERSON that is also an ordinary word, with no sign of a person
+    around it ("What rhymes with Joy, Hunter and Destiny?"), or any lone
+    lower-case PERSON after an article ("under the matt")."""
+    core = _core(ent.text)
+    if " " in core:
         return False
     before = text[max(0, ent.start - 40):ent.start]
-    return not _PERSONAL_BEFORE_PERSON.search(before)
+    if core.islower() and re.search(r"(?i)\b(?:the|a|an|this|that)\s+$", before):
+        return True
+    if core.lower() not in WORD_NAMES:
+        return False
+    # read the evidence around the whole list: "my friends Hope and Will are …"
+    lead = _LIST_BEFORE.search(before)
+    if lead:
+        before = before[:lead.start()]
+    after = text[ent.end:ent.end + 80]
+    trail = _LIST_AFTER.match(after)
+    if trail:
+        after = after[trail.end():]
+    personal = (_PERSONAL_BEFORE_PERSON.search(before) or _PERSON_BEFORE.search(before)
+                or _PERSON_AFTER.match(after)
+                or re.search(rf"(?i)\b{_KIN_WORDS}\s+$", before))
+    return not personal
 
 
 # ── ties ─────────────────────────────────────────────────────────────────────
@@ -313,7 +384,7 @@ def gate(
             first.append(e)
         elif is_junk(e, text):
             _drop(e)
-        elif e.type == "PERSON" and is_public_person(e, text):
+        elif e.type == "PERSON" and (is_public_person(e, text) or is_word_name(e, text)):
             _drop(e)
         else:
             first.append(e)
