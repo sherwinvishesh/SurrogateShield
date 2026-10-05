@@ -422,6 +422,9 @@ def same_type(gold_t: str, pred_t: str) -> bool:
 #   service_query_address_shift      — non-sensitive service query, address
 #                                      mode "shift": only the house number
 #                                      changes; street/city/state/ZIP stay.
+#   service_query_address_coarse     — sensitive service query (I6), address
+#                                      mode "coarse": the street line becomes
+#                                      "my area"; city/state stay.
 #   service_query_location_suppressed — standalone city/state in a service
 #                                      query ("coffee near Tempe").
 #   topical_geo_filtered             — a place that is only the topic of a
@@ -429,6 +432,7 @@ def same_type(gold_t: str, pred_t: str) -> bool:
 #                                      with no direct identifier of a person.
 POLICY_REASONS = frozenset({
     "service_query_address_shift",
+    "service_query_address_coarse",
     "service_query_location_suppressed",
     "topical_geo_filtered",
     # I12: an ORG/place/name the relation gate kept verbatim because nothing
@@ -464,6 +468,13 @@ def classify_sent_leaks(
         (s["start"], s["end"]) for s in spans
         if shift and s["replaced"] and normalize_type(s["type"]) == "address"
     ]
+    # Sensitive service query: only city/state are carried into the coarse
+    # surrogate — credit a value only if the surrogate itself contains it.
+    coarse = [
+        (s["start"], s["end"], surrogate_map.get(s["text"]) or "") for s in spans
+        if address_mode == "coarse" and s["replaced"]
+        and normalize_type(s["type"]) == "address"
+    ]
     n_gold = 0
     leaks = []
     for t, v in key_values(answer_key):
@@ -479,6 +490,9 @@ def classify_sent_leaks(
         }
         if any(sb <= b and e <= se for b, e in occ for sb, se in shifted):
             reasons.add("service_query_address_shift")
+        if any(sb <= b and e <= se and contains_value(sur, v)
+               for b, e in occ for sb, se, sur in coarse):
+            reasons.add("service_query_address_coarse")
         reasons = sorted(reasons)
         leaks.append({
             "type": t,

@@ -100,7 +100,7 @@ class Session:
         if not isinstance(text, str):
             raise TypeError(f"text must be a str, got {type(text).__name__}")
         c = self.config
-        is_svc = c.service and _service_query.is_service_query(text)
+        is_svc, address_mode = _service_query.resolve(text, c.address_mode, c.service)
         confirmed, _ = _pipeline.run_cascade(
             text=text,
             skip_values=None,
@@ -126,7 +126,7 @@ class Session:
             detections.append(d)
             if d.masked:
                 masked.append(ent)
-        return is_svc, detections, masked
+        return (is_svc, address_mode), detections, masked
 
     def scan(self, text: str) -> List[Detection]:
         """Detect PII without masking it, with the same settings as
@@ -151,19 +151,19 @@ class Session:
                 text is not masked (fail closed, audit I17).
             TypeError: *text* is not a str.
         """
-        is_svc, detections, masked = self._detect(text)   # models: outside the lock
+        (is_svc, address_mode), detections, masked = self._detect(text)   # models: outside the lock
         c = self.config
         with self._lock:
             self._check_open()
             if not masked:
                 result = MaskResult(text, tuple(detections), {}, is_svc)
             else:
-                result = self._substitute(text, is_svc, detections, masked)
+                result = self._substitute(text, is_svc, address_mode, detections, masked)
         if c.detailed_view:
             _display.show_mask_results(result)
         return result
 
-    def _substitute(self, text, is_svc, detections, masked) -> MaskResult:
+    def _substitute(self, text, is_svc, address_mode, detections, masked) -> MaskResult:
         c = self.config
         if c.verify_addresses:
             for ent in masked:
@@ -180,7 +180,6 @@ class Session:
             else:
                 new_entities.append(ent)
         if new_entities:
-            address_mode = _service_query.resolve_address_mode(c.address_mode, is_svc)
             new_map = self._mimic.generate_all(
                 new_entities,
                 address_mode=address_mode,

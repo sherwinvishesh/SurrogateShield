@@ -43,9 +43,11 @@ def test_I22_auto_shifts_only_service_queries(sq):
     assert sq.resolve_address_mode("auto", True) == "shift"
     assert sq.resolve_address_mode("auto", False) == "replace"
     assert sq.resolve_address_mode("replace", True) == "replace"
-    # a sensitive topic is never a service query, so auto replaces
+    # a sensitive service query is never shifted (±1 keeps the real street);
+    # I6 coarsens it to "my area" + city/state instead
     q = "Find a free legal aid clinic for undocumented immigrants near 12 Elm St, Tempe, AZ"
-    assert sq.resolve_address_mode("auto", sq.is_service_query(q)) == "replace"
+    assert sq.resolve(q, "auto") == (True, "coarse")
+    assert sq.resolve_address_mode("auto", True, sensitive=True) == "coarse"
 
 
 def test_I22_default_address_mode_is_auto():

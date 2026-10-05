@@ -164,12 +164,11 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None) -
         SERVICE_QUERY_DETECTION_ENABLED,
     )
     from detection.logic import deduplicate, run_cascade
-    from detection.service_query import is_service_query, resolve_address_mode
+    from detection.service_query import resolve as resolve_service
     from util import plan_substitutions, splice
 
     # Same address-mode resolution as pipeline.process_turn.
-    is_svc = SERVICE_QUERY_DETECTION_ENABLED and is_service_query(question)
-    address_mode = resolve_address_mode(ADDRESS_MODE, is_svc)
+    is_svc, address_mode = resolve_service(question, ADDRESS_MODE, SERVICE_QUERY_DETECTION_ENABLED)
 
     timings: Dict[str, float] = {}
     confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings,

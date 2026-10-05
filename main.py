@@ -259,7 +259,7 @@ def _run_pii_finder() -> None:
     service-query path (address fuzzing + location suppression).
     """
     from detection.logic import run_cascade, deduplicate
-    from detection.service_query import is_service_query
+    from detection.service_query import resolve as resolve_service
     from generation.logic import MimicGen
     from detection.service_query import resolve_address_mode
     from util import apply_entity_surrogates
@@ -388,10 +388,12 @@ def _run_pii_finder() -> None:
             continue
 
         # ── Service query path ────────────────────────────────────────────────
-        if SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_input):
+        is_svc, sq_mode = resolve_service(user_input, ADDRESS_MODE,
+                                          SERVICE_QUERY_DETECTION_ENABLED)
+        if is_svc:
             # v2: addresses flow through the unified detect→generate path.
-            # In service-query mode "auto" resolves to shift (±N house number).
-            sq_mode = resolve_address_mode(ADDRESS_MODE, True)
+            # "auto" resolves to shift (±N house number), or to coarse ("my
+            # area", city/state kept) for a sensitive service query (I6).
 
             try:
                 sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
@@ -425,6 +427,8 @@ def _run_pii_finder() -> None:
                 mode_note = (
                     f"House number ±{ADDRESS_SHIFT_RANGE}, city/state unchanged"
                     if sq_mode == "shift"
+                    else "Street line coarsened to 'my area', city/state unchanged"
+                    if sq_mode == "coarse"
                     else "Structure-preserving fake address"
                 )
                 console.print(Panel(

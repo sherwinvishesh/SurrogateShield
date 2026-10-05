@@ -62,7 +62,7 @@ from util import (
 )
 from detection import address_parser
 from detection import logic as sentinel_layer
-from detection.service_query import is_service_query, resolve_address_mode
+from detection.service_query import resolve as resolve_service
 from detection.quasi_identifier import format_warning as _qi_format_warning
 from generation.logic import MimicGen
 from storage.logic import ShadowMap
@@ -193,8 +193,8 @@ class Pipeline:
         # Addresses flow through the normal detect→generate path in every mode;
         # ADDRESS_MODE decides shift vs replace ("auto" = shift only for
         # non-sensitive service queries — the v1 behaviour).
-        is_svc = SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_message)
-        address_mode = resolve_address_mode(ADDRESS_MODE, is_svc)
+        is_svc, address_mode = resolve_service(user_message, ADDRESS_MODE,
+                                               SERVICE_QUERY_DETECTION_ENABLED)
 
         # ── Step 1: Detection ─────────────────────────────────────────────────
         logger.info("[Pipeline] Running SentinelLayer cascade")

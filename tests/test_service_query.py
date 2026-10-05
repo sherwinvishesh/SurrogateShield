@@ -40,7 +40,10 @@ def test_non_service_queries(sq, text):
     assert not sq.is_service_query(text)
 
 
-# ── Sensitive-topic override ──────────────────────────────────────────────────
+# ── Sensitive topics: coarsened, not fully anonymised (audit I6) ─────────────
+# v1 returned False here, replacing the real city with a fictional one — a
+# useless answer exactly when location matters most. Now the query stays a
+# service query and the street line becomes "my area".
 
 @pytest.mark.parametrize("text", [
     "therapy clinics near 789 Crescent Row, Tempe, AZ",
@@ -49,9 +52,10 @@ def test_non_service_queries(sq, text):
     "domestic violence shelter close to downtown",
     "HIV testing sites near Mill Ave",
 ])
-def test_sensitive_topics_override_service_classification(sq, text):
+def test_sensitive_service_queries_are_coarse(sq, text):
     assert sq.is_sensitive_topic(text)
-    assert not sq.is_service_query(text)
+    assert sq.classify(text) == "service_coarse"
+    assert sq.resolve(text, "auto") == (True, "coarse")
 
 
 def test_non_sensitive_text(sq):

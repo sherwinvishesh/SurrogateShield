@@ -238,6 +238,23 @@ class MimicGen:
 
         blocked = frozenset(forbidden | self.used_surrogates)
 
+        if mode == "coarse":
+            # I6: sensitive service query — drop the street line, keep the
+            # (already public-scale) city/state/ZIP-less tail as written.
+            tail = ""
+            if parsed is not None:
+                anchor = parsed.city or parsed.state
+                if anchor and anchor in parsed.full_text:
+                    tail = parsed.full_text[parsed.full_text.index(anchor):]
+                    if parsed.zip_code:
+                        tail = tail.replace(parsed.zip_code, "").rstrip(" ,")
+            coarse = f"my area, {tail}" if tail else "my area"
+            if coarse not in blocked:
+                self.used_surrogates.add(coarse)
+                return coarse
+            # a second address in the same coarse message: a structure-
+            # preserving fake keeps the mapping one-to-one (exact restore)
+
         if mode == "shift" and parsed is not None:
             shifted = shift_house_number(
                 parsed, shift_range=shift_range, rng=self._rng, forbidden=blocked
@@ -662,7 +679,7 @@ class MimicGen:
 
         Args:
             entities:            Confirmed PII entities.
-            address_mode:        "shift" or "replace" (an "auto" policy must be
+            address_mode:        "shift", "replace" or "coarse" (an "auto" policy must be
                                  resolved by the caller before this point).
             address_shift_range: Max house-number delta for shift mode.
             forbidden:           Extra strings surrogates must never equal
