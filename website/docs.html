@@ -540,9 +540,9 @@ echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
       <div class="pipeline-stage">
         <div>
           <div class="stage-name">LLM API</div>
-          <div class="stage-model">HTTPS · surrogates only</div>
+          <div class="stage-model">HTTPS · surrogates for detected values</div>
         </div>
-        <div class="stage-desc">Receives only surrogates — your real values never leave the device. The provider cannot see original PII in the prompt, conversation history, or RAG context.</div>
+        <div class="stage-desc">Receives surrogates for every detected value, in the prompt, the conversation history and RAG context. Values the detector misses are sent as typed; see Limitations in the README.</div>
       </div>
       <div class="pipeline-stage">
         <div>
@@ -898,7 +898,7 @@ python main.py add-doc path/to/document.txt</code></pre>
 
     <h3>Indexing a document</h3>
     <pre><code>python main.py add-doc path/to/your/document.txt</code></pre>
-    <p>Documents are anonymised through the full SentinelLayer pipeline before indexing. Real PII never enters the vector store. Surrogate mappings from indexed documents are stored in a shared <code>rag_global</code> ShadowMap.</p>
+    <p>Documents are anonymised through the full SentinelLayer pipeline before indexing. Detected PII is replaced before a document is indexed. Surrogate mappings from indexed documents are stored in a shared <code>rag_global</code> ShadowMap.</p>
 
     <h3>Starting a RAG conversation</h3>
     <p>Press <span class="key">R</span> from the dashboard, or run <code>python main.py chat --rag</code>. Retrieved context is prepended to your sanitised message before the LLM call.</p>
@@ -1072,8 +1072,8 @@ python main.py add-doc path/to/document.txt</code></pre>
       </table>
     </div>
 
-    <h3>Expected result</h3>
-    <p><strong>0% recovery for both systems.</strong> Surrogates have no cryptographic or statistical relationship to the original values. This proves SurrogateShield achieves equivalent inference resistance to blunt placeholder redaction, while preserving significantly higher semantic utility (as measured by BERTScore).</p>
+    <h3>What it measures</h3>
+    <p>How many gold values an attacker model, different from the responder, recovers from each arm, exact or partial. A value an arm left in plain text counts as leaked, not recovered. No measured result is published yet; <code>python bench/phase8.py</code> runs the protocol, and results are listed in <code>bench/results/README.md</code> with their commands.</p>
 
     <h3>Running the experiment</h3>
     <p>Press <span class="key">A</span> in the dashboard. The four-screen flow will:</p>
@@ -1495,9 +1495,9 @@ shield.flush()</code></pre>
           <tr><td>Per-conversation key</td><td>HKDF-SHA256 with device secret as IKM and conversation ID as salt</td></tr>
           <tr><td>ShadowMap encryption</td><td>AES-256-GCM with fresh 12-byte nonce per write</td></tr>
           <tr><td>ShadowMap format</td><td><code>nonce (12 bytes) ‖ AES-GCM ciphertext</code> — unreadable without device key</td></tr>
-          <tr><td>API transmission</td><td>Only surrogates sent — real values never leave the device</td></tr>
-          <tr><td>Conversation history</td><td>Stored locally in <code>conversations/</code>; JSON holds surrogate text, not originals</td></tr>
-          <tr><td>.gitignore</td><td><code>*.shadowmap</code>, <code>conversations/*.json</code>, <code>device.key</code>, <code>.env</code> all excluded</td></tr>
+          <tr><td>API transmission</td><td>Detected values are sent as surrogates; values the detector misses are sent as typed (see Limitations)</td></tr>
+          <tr><td>Conversation history</td><td>Stored locally in <code>~/.surrogateshield/conversations/</code>, encrypted like the ShadowMap; it contains the real values you typed (display history) as well as the surrogate text sent to the API</td></tr>
+          <tr><td>.gitignore</td><td><code>*.shadowmap</code>, <code>conversations/</code>, <code>device.key</code>, <code>.env</code>, and new experiment outputs (<code>experiment/*_answers*.json</code>, <code>*_eval_results*.json</code>, <code>*_Attacker_Experiment*.json</code>) excluded</td></tr>
         </tbody>
       </table>
     </div>
@@ -1509,11 +1509,11 @@ shield.flush()</code></pre>
   <section class="doc-section" id="privacy-guarantees">
     <h2>Privacy Guarantees</h2>
     <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 2;">
-      <li><strong>No PII crosses the API boundary.</strong> Every entity confirmed by SentinelLayer is replaced before the HTTP request is made.</li>
+      <li><strong>Detected PII is replaced before any request is made.</strong> Values the detector misses are sent as typed; see Limitations in the README.</li>
       <li><strong>Service queries get proportional protection.</strong> A restaurant search near your home address gets the house number shifted; the city name is preserved so the answer is useful. Sensitive topic overrides (medical, legal, shelter) force full anonymisation regardless.</li>
       <li><strong>Geographic generality is preserved.</strong> US states, countries, and major cities are never replaced — they provide no meaningful re-identification risk and destroying them would break answer quality.</li>
       <li><strong>Quasi-identifier risks are surfaced.</strong> If your message contains combinations like ZIP+DOB+gender that are statistically re-identifying even without traditional PII, you are warned before the message is sent.</li>
-      <li><strong>RAG documents are anonymised at index time.</strong> Real PII never enters the vector store. Retrieval and context injection all operate on surrogates.</li>
+      <li><strong>RAG documents are anonymised at index time.</strong> Detected PII is replaced before a document is indexed. Retrieval and context injection all operate on surrogates.</li>
       <li><strong>Financial and identity credentials are protected.</strong> Bitcoin/Ethereum wallet addresses, ABA routing numbers, and driver's license numbers are detected and replaced alongside traditional PII.</li>
     </ul>
   </section>

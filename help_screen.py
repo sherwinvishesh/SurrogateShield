@@ -45,7 +45,7 @@ def print_help(console: Console) -> None:
                 "real values are restored in the response. ",
                 "dim",
             ),
-            ("Your data never leaves your device.", "bold white"),
+            ("Values the detector misses are sent as typed — see Limitations in the README.", "bold white"),
         ),
         border_style="blue",
         padding=(1, 2),
@@ -61,7 +61,7 @@ def print_help(console: Console) -> None:
         ("ContextGuard",   "DistilBERT NER — borderline / ambiguous entities"),
         ("MimicGen",       "Generates realistic fake values via Faker"),
         ("ShadowMap",      "AES-256-GCM encrypted surrogate map — stays on device"),
-        ("LLM API",        "Receives surrogates only — real values never transmitted"),
+        ("LLM API",        "Receives surrogates for every detected value"),
         ("ResolvePass",    "Swaps surrogate values back to real values in the response"),
     ]
     for i, (name, desc) in enumerate(stages, 1):

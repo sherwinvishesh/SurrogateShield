@@ -81,7 +81,7 @@ console = Console()
 
 app = typer.Typer(
     name="surrogateshield",
-    help="Privacy-preserving CLI proxy for LLMs — PII never leaves your device.",
+    help="Privacy-preserving CLI proxy for LLMs — masks PII before it leaves your device.",
     add_completion=False,
 )
 
@@ -127,7 +127,7 @@ def _print_banner() -> None:
             ("\n\n", ""),
             ("◆  ────────────────────────────────────  ◆\n\n", "dim blue"),
             ("Privacy-preserving proxy for LLMs\n", "dim"),
-            ("PII never leaves your device\n", "dim"),
+            ("Masks PII before it leaves your device\n", "dim"),
         )
     )
     console.print(Panel(content, border_style="blue", padding=(1, 6), expand=False))
@@ -140,7 +140,7 @@ def _print_compact_banner() -> None:
         ("Surrogate", "bold white"),
         ("Shield", "bold cyan"),
         ("  ·  ", "dim"),
-        ("PII never leaves your device", "dim"),
+        ("Masks PII before it leaves your device", "dim"),
     )
     console.print(Rule(style="blue"))
     console.print(Align.center(line))

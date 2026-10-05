@@ -1557,11 +1557,11 @@
     </div>
 
     <h1 class="hero-headline">
-      PII never leaves<br>
-      your device.<span class="accent"> Surrogates do.</span>
+      PII is masked<br>
+      before it leaves.<span class="accent"> Surrogates go instead.</span>
     </h1>
     <p class="hero-sub">
-      SurrogateShield intercepts every message before it reaches an LLM API, replaces personal information with realistic fake values, sends the sanitised payload, and restores your originals in the response. All cryptographic operations run locally. Ships as both an interactive dashboard and a self-contained <code>pip install surrogateshield</code> library.
+      SurrogateShield replaces the personal data it detects with realistic, consistent surrogates before your message reaches an LLM provider, and puts the real values back in the reply. On unseen chat text it lets through less than half of what Microsoft Presidio's default configuration does. It is not perfect: about one value in five still gets through, so read the Limitations. All cryptographic operations run locally. Ships as both an interactive dashboard and a self-contained <code>pip install surrogateshield</code> library.
     </p>
 
     <div class="hero-ctas">
@@ -1580,12 +1580,12 @@
         <div class="stat-label">ShadowMap encryption<br>HKDF-SHA256 per conv</div>
       </div>
       <div class="stat">
-        <div class="stat-value">0.00%</div>
-        <div class="stat-label">Adversarial PII<br>recovery rate</div>
+        <div class="stat-value">21.6% vs 47.4%</div>
+        <div class="stat-label">PII leaked on unseen chat text<br>SurrogateShield vs Presidio</div>
       </div>
       <div class="stat">
-        <div class="stat-value">~95%</div>
-        <div class="stat-label">BERTScore utility<br>preservation</div>
+        <div class="stat-value">47.5 ms</div>
+        <div class="stat-label">Warm median latency<br>per message, CPU</div>
       </div>
     </div>
   </div>
@@ -1598,7 +1598,7 @@
     <div class="eyebrow">How it works</div>
     <h2 class="section-title">A single round-trip through the proxy, end to end.</h2>
     <p class="section-lede">
-      Every message travels through detection, surrogate generation, encrypted mapping, the LLM call, and reconstruction. PII never crosses the API boundary in plaintext.
+      Every message travels through detection, surrogate generation, encrypted mapping, the LLM call, and reconstruction. Detected PII is replaced before the request is made, and a missing detection model stops the request.
     </p>
 
     <!-- ============ ANIMATED DEMO ============ -->
@@ -2089,7 +2089,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="eyebrow">Surrogates vs placeholders</div>
     <h2 class="section-title">Why realistic surrogates beat <em>[ENTITY_TYPE]</em> redaction.</h2>
     <p class="section-lede">
-      Microsoft Presidio replaces PII with placeholder tokens. SurrogateShield replaces with type-consistent fakes. Per Table 7 (simulated attacker, per-value recovery): SurrogateShield <strong>0.00%</strong> recovery on 196 targeted values, Presidio <strong>1.53%</strong> on 196 — and BERTScore utility is ~95% vs ~84%.
+      Microsoft Presidio replaces PII with placeholder tokens. SurrogateShield replaces with type-consistent fakes. On 240 real-world-style chat messages never used for tuning, SurrogateShield let <strong>21.6%</strong> of the values that had to be protected reach the provider (153 of 708); Presidio's default configuration let through <strong>47.4%</strong>. Commands and every split: <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md">bench/results</a>.
     </p>
 
     <div class="compare-grid">
@@ -2098,10 +2098,10 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <div class="title ss">Realistic surrogates</div>
         <div class="compare-output">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span>. Can you draft a resignation letter to <span class="pii-surr">Halcyon Dynamics</span>?</div>
         <div class="compare-stats">
-          <div><span>BERTScore F1</span><strong>~ 95%</strong></div>
-          <div><span>Per-value recovery</span><strong>0.00%</strong></div>
-          <div><span>Nᵥ targeted</span><strong>196</strong></div>
-          <div><span>Recovered</span><strong>0</strong></div>
+          <div><span>Leaked, unseen chat text</span><strong>21.6%</strong></div>
+          <div><span>Spurious edits</span><strong>16.5%</strong></div>
+          <div><span>PII-free messages untouched</span><strong>54 / 77</strong></div>
+          <div><span>Synthetic test F1</span><strong>0.986</strong></div>
         </div>
       </div>
       <div class="compare-col">
@@ -2109,10 +2109,10 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <div class="title">Placeholder redaction</div>
         <div class="compare-output">Hi, I'm <span class="placeholder">[PERSON]</span>. My SSN is <span class="placeholder">[US_SSN]</span>. Can you draft a resignation letter to <span class="placeholder">[ORGANIZATION]</span>?</div>
         <div class="compare-stats">
-          <div><span>BERTScore F1</span><strong>~ 84%</strong></div>
-          <div><span>Per-value recovery</span><strong>1.53%</strong></div>
-          <div><span>Nᵥ targeted</span><strong>196</strong></div>
-          <div><span>Recovered</span><strong>3</strong></div>
+          <div><span>Leaked, unseen chat text</span><strong>47.4%</strong></div>
+          <div><span>Spurious edits</span><strong>39.8%</strong></div>
+          <div><span>PII-free messages untouched</span><strong>18 / 77</strong></div>
+          <div><span>Synthetic test F1</span><strong>0.746</strong></div>
         </div>
       </div>
     </div>
@@ -2193,7 +2193,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <div class="metric-num">M05</div>
         <div class="metric-val">BERTScore</div>
         <div class="metric-label">Utility preservation</div>
-        <div class="metric-sub">Semantic distance vs original (roberta-large)</div>
+        <div class="metric-sub">Answer vs the answer to the original (roberta-large, rescaled)</div>
       </div>
       <div class="metric">
         <div class="metric-num">M06</div>
@@ -2204,61 +2204,40 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     </div>
 
     <h3 style="margin-top: 72px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">BERTScore — utility preservation</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Measured with <code>roberta-large</code>. Higher F1 means anonymisation preserved more of the original message's semantic meaning — i.e. the LLM still has the structure it needs to produce a useful response.</p>
-    <div class="bar-chart">
-      <div class="bar-row">
-        <span class="label">No anonymisation</span>
-        <div class="bar-track"><div class="bar-fill alt" style="width: 100%;"></div></div>
-        <span class="bar-val alt">100.0%</span>
-      </div>
-      <div class="bar-row">
-        <span class="label">SurrogateShield</span>
-        <div class="bar-track"><div class="bar-fill" style="width: 95%;"></div></div>
-        <span class="bar-val">~95.0%</span>
-      </div>
-      <div class="bar-row">
-        <span class="label">Presidio (placeholders)</span>
-        <div class="bar-track"><div class="bar-fill alt" style="width: 84%;"></div></div>
-        <span class="bar-val alt">~84.0%</span>
-      </div>
-    </div>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Measured with <code>roberta-large</code>, rescaled. The utility pair compares each arm's answer with the answer to the original message. Comparing sanitised input with the original favours realistic surrogates by construction, so it is not used as a utility claim. No measured result is published yet; <code>python bench/phase8.py</code> produces one.</p>
 
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Ablation — per-stage F1 contribution</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Four pipeline configurations are simulated post-hoc from the existing answers file. Each entity's <code>source</code> field tells us which stage detected it.</p>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">The cascade is re-run with stages switched off on 1,200 synthetic dev messages, which were used for tuning. Scored on replaced spans only (span overlap); 95% intervals are a paired bootstrap over messages. Command: <code>python offline_eval.py --key experiment/synth_dev_key.json --ablation</code>.</p>
     <div class="table-wrap" style="margin-top: 20px;">
       <table class="data">
-        <thead><tr><th>Configuration</th><th>Detected set</th><th>Best for</th><th style="text-align: right;">Approx. F1</th></tr></thead>
+        <thead><tr><th>Configuration</th><th style="text-align: right;">Micro F1</th><th style="text-align: right;">Change vs full (95% CI)</th></tr></thead>
         <tbody>
           <tr>
             <td class="mono">PatternScan only</td>
-            <td class="mono" style="color: var(--muted);">pattern_scan_pii</td>
-            <td style="color: var(--muted);">ssn · email · phone · CC · crypto · DL</td>
-            <td class="mono" style="text-align: right; color: var(--text);">0.62</td>
+            <td class="mono" style="text-align: right; color: var(--text);">0.842</td>
+            <td class="mono" style="text-align: right; color: var(--muted);">−0.138 [−0.149, −0.127]</td>
           </tr>
           <tr>
-            <td class="mono">PatternScan + EntityTrace</td>
-            <td class="mono" style="color: var(--muted);">∪ entity_trace_pii</td>
-            <td style="color: var(--muted);">+ PERSON · GPE · ORG (high-conf)</td>
-            <td class="mono" style="text-align: right; color: var(--text);">0.84 <span style="color: var(--lime);">↑</span></td>
+            <td class="mono">+ EntityTrace (ContextGuard off)</td>
+            <td class="mono" style="text-align: right; color: var(--text);">0.980</td>
+            <td class="mono" style="text-align: right; color: var(--muted);">−0.001 [−0.003, +0.001]</td>
           </tr>
           <tr>
-            <td class="mono">PatternScan + ContextGuard</td>
-            <td class="mono" style="color: var(--muted);">∪ context_guard_pii</td>
-            <td style="color: var(--muted);">+ borderline NER recovery</td>
-            <td class="mono" style="text-align: right; color: var(--text);">0.80 <span style="color: var(--lime);">↑</span></td>
+            <td class="mono">All stages, post-passes off</td>
+            <td class="mono" style="text-align: right; color: var(--text);">0.968</td>
+            <td class="mono" style="text-align: right; color: var(--muted);">−0.013 [−0.016, −0.009]</td>
           </tr>
           <tr>
             <td class="mono" style="color: var(--neon);">Full cascade</td>
-            <td class="mono" style="color: var(--muted);">confirmed_pii</td>
-            <td style="color: var(--muted);">all types · best precision/recall balance</td>
-            <td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.91 <span style="color: var(--lime);">↑</span></td>
+            <td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.981</td>
+            <td class="mono" style="text-align: right; color: var(--muted);">—</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="callout" style="margin-top: 28px;">
-      <strong>Note.</strong> F1 figures above are representative ranges from the in-repo example set; actual values depend on the question file. The Evaluation screen reports <em>exact</em> values for your data plus the <em>Key stage</em> column — which configuration first achieves ≥80% F1 for each type (PatternScan for structured types like <code>ssn</code> and <code>email</code>; EntityTrace for <code>PERSON</code>, <code>GPE</code>, <code>ORG</code>).
+      <strong>Note.</strong> On this split ContextGuard adds no measurable F1 (the interval includes 0) and costs about 27 ms per message. The Evaluation screen reports the same table for your own key file.
     </div>
   </div>
 </section>
@@ -2268,60 +2247,13 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
   <div class="container">
     <div class="section-num">07 / ADVERSARIAL</div>
     <div class="eyebrow">Attacker experiment</div>
-    <h2 class="section-title">An informed adversary recovers <em>nothing</em>.</h2>
+    <h2 class="section-title">Can an attacker model recover the originals?</h2>
     <p class="section-lede">
-      <code>attacker.py</code> simulates an adversary who intercepts the sanitised API payload and is given an adversarial prompt disclosing every PII type that was replaced. They are instructed to use linguistic analysis, demographic inference, cross-field correlation, and format patterns to recover the originals. Both anonymisation systems are attacked.
+      <code>attacker.py</code> gives a second model, different from the one that answers, the text each system sent to the provider. It is told that a filter may have replaced some values, changed parts of others or left them unchanged, and asked to estimate every original. Recovery is scored per gold value, exact or partial (same e-mail domain, area code, name token, street or city, birth year). A value an arm left in plain text counts as leaked, not recovered.
     </p>
 
-    <div class="split">
-      <div class="feature">
-        <div class="num">VARIANT A</div>
-        <h3>SurrogateShield — realistic fakes</h3>
-        <p>The attacker sees a coherent sanitised message: real-looking names, formatted SSNs, valid Luhn credit cards, plausible addresses.</p>
-        <ul>
-          <li>Nᵥ targeted: <strong style="color: var(--text);">196</strong> PII values</li>
-          <li>Recovered: <strong style="color: var(--neon);">0</strong> — per-value rate <strong style="color: var(--neon);">0.00%</strong></li>
-          <li>Surrogates have no statistical relationship to originals</li>
-          <li>Tracked separately: address proximity recovery (service-query fuzzing)</li>
-        </ul>
-      </div>
-      <div class="feature">
-        <div class="num">VARIANT B</div>
-        <h3>Presidio — placeholder redaction</h3>
-        <p>The attacker sees <code>[PERSON]</code>, <code>[US_SSN]</code>, <code>[ORGANIZATION]</code> tokens scattered through the message.</p>
-        <ul>
-          <li>Nᵥ targeted: <strong style="color: var(--text);">196</strong> PII values</li>
-          <li>Recovered: <strong style="color: var(--coral);">3</strong> — per-value rate <strong style="color: var(--coral);">1.53%</strong></li>
-          <li>Placeholders leak <em>type</em> information, enabling occasional cross-field inference</li>
-          <li>Result: <em>SurrogateShield is strictly more resistant</em></li>
-        </ul>
-      </div>
-    </div>
-
     <div class="callout" style="margin-top: 28px;">
-      <strong>The research claim.</strong> Realistic surrogates beat placeholder redaction on <em>both</em> dimensions — lower per-value recovery (<strong>0.00%</strong> vs <strong>1.53%</strong>) and substantially higher semantic utility (<strong>~95%</strong> vs <strong>~84%</strong> BERTScore F1). Presidio’s placeholders leak type information, which the adversary occasionally exploits via cross-field inference; surrogates carry no such signal.
-    </div>
-
-    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Table 7 — Simulated attacker per-value recovery rates</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Per-value rate: fraction of individual PII values recovered across all targeted values. Nᵥ = values targeted.</p>
-    <div class="table-wrap" style="margin-top: 20px;">
-      <table class="data">
-        <thead><tr><th>Condition</th><th style="text-align: right; width: 110px;">Nᵥ</th><th style="text-align: right; width: 130px;">Recovered</th><th style="text-align: right; width: 150px;">Per-value rate</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Presidio (placeholder redaction)</td>
-            <td class="mono" style="text-align: right;">196</td>
-            <td class="mono" style="text-align: right; color: var(--coral);">3</td>
-            <td class="mono" style="text-align: right; color: var(--coral);">1.53%</td>
-          </tr>
-          <tr>
-            <td style="color: var(--neon);">SurrogateShield (surrogates)</td>
-            <td class="mono" style="text-align: right;">196</td>
-            <td class="mono" style="text-align: right; color: var(--neon);">0</td>
-            <td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.00%</td>
-          </tr>
-        </tbody>
-      </table>
+      <strong>No measured result is published yet.</strong> An earlier run reported 0.00% vs 1.53%. Its prompt told the attacker that recovery was impossible, and Presidio's three "recoveries" were values it had left in plain text, so those figures are withdrawn. <code>python bench/phase8.py</code> runs the protocol; results will be listed in <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md">bench/results</a> with their commands.
     </div>
 
     <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Per-attempt analysis</h3>
@@ -2376,8 +2308,8 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <div class="num">TRANSMISSION</div>
         <h3>Wire-level guarantees</h3>
         <ul>
-          <li>Only surrogates sent over HTTPS to the provider</li>
-          <li>Conversation history holds surrogate text, not originals</li>
+          <li>Detected values are sent over HTTPS as surrogates; missed values are sent as typed</li>
+          <li>Conversation history holds the values you typed, encrypted like the ShadowMap</li>
           <li>RAG documents anonymised through full SentinelLayer before indexing</li>
           <li>Vector store operates exclusively on surrogates</li>
         </ul>
@@ -2387,7 +2319,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
         <h3>What is excluded by default</h3>
         <ul>
           <li><code>*.shadowmap</code> — encrypted surrogate stores</li>
-          <li><code>conversations/*.json</code> — chat history</li>
+          <li><code>conversations/</code> — chat history</li>
           <li><code>device.key</code> — device secret</li>
           <li><code>.env</code> — API keys</li>
         </ul>
@@ -2403,7 +2335,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="eyebrow">Privacy-aware retrieval</div>
     <h2 class="section-title">Documents are anonymised at <em>index time</em>.</h2>
     <p class="section-lede">
-      Local RAG via ChromaDB + sentence-transformers (<code>all-MiniLM-L6-v2</code>). No server. Real PII never enters the vector store.
+      Local RAG via ChromaDB + sentence-transformers (<code>all-MiniLM-L6-v2</code>). No server. Detected PII is replaced before a document is indexed.
     </p>
 
     <div class="pipeline-wrap">
@@ -2946,7 +2878,7 @@ shield.<span class="k">flush</span>()</pre>
   <div class="container">
     <div class="brand-block">
       <div class="brand">SurrogateShield</div>
-      <p>Privacy-preserving proxy for LLMs. PII never leaves your device. Built for research, usable in production.</p>
+      <p>Privacy-preserving proxy for LLMs. Masks PII before it leaves your device. Built for research.</p>
     </div>
     <div class="links">
       <div>
@@ -3019,7 +2951,7 @@ shield.<span class="k">flush</span>()</pre>
     },
     {
       label: "Send",
-      sub: "Sanitised payload travels to the LLM API · originals never leave the device",
+      sub: "Sanitised payload travels to the LLM API · detected originals stay on the device",
       indicator: 2,
       activeMsg: null,
       apply() {

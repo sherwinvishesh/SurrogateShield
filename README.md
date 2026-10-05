@@ -15,7 +15,7 @@
       ◆  ────────────────────────────────────  ◆       
                                                        
       Privacy-preserving proxy for LLMs                
-      PII never leaves your device                     
+      Masks PII before it leaves your device           
 
 ```
 
@@ -32,7 +32,7 @@
 </p>
 
 
-SurrogateShield intercepts your messages before they reach any LLM API, detects all personally identifiable information (PII), replaces it with realistic fake surrogates, sends the sanitised message, and restores your real values in the response. All cryptographic operations run locally. Nothing sensitive is ever transmitted.
+SurrogateShield replaces the personal data it detects with realistic, consistent surrogates before your message reaches an LLM provider, and puts the real values back in the reply. On unseen chat text it lets through less than half of what Microsoft Presidio's default configuration does. It is not perfect: about one value in five still gets through, so read [Limitations](#limitations). All cryptographic operations run locally. Measured results, each with its command, are in [`bench/results/README.md`](bench/results/README.md).
 
 
 
@@ -258,7 +258,7 @@ Every failure is categorised as `exact_miss`, `fuzzy_hit`, or `fuzzy_miss` for r
 Local Retrieval-Augmented Generation backed by [ChromaDB](https://www.trychroma.com/) and [sentence-transformers](https://www.sbert.net/) (`all-MiniLM-L6-v2`).
 
 - No server required; ChromaDB runs in-process with telemetry off, storing its index in `~/.surrogateshield/rag` (mode 0700; `RAG_DIR` in `config.py`)
-- Documents are **anonymised through the full SentinelLayer pipeline before indexing**: real PII never enters the vector store. Detection runs in segments of at most 20,000 characters; if detection fails, nothing is indexed
+- Documents are **anonymised through the full SentinelLayer pipeline before indexing**: detected PII is replaced before a document is indexed. Detection runs in segments of at most 20,000 characters; if detection fails, nothing is indexed
 - Surrogate mappings from indexed documents are stored in the encrypted `rag_global` ShadowMap. In a RAG chat, a name that already appears in a document gets the document's surrogate, so retrieval matches it and quoted excerpts are restored in the answer
 - Queries are anonymised before retrieval
 - Retrieved context goes into the current request only; it is not stored in the conversation history or sent again on later turns
@@ -666,13 +666,14 @@ The per-type comparison covers all types both systems can detect. Types SS detec
 
 #### BERTScore utility preservation (Table 2)
 
-BERTScore (`roberta-large`) measures how well the semantic meaning of the original message is preserved after anonymisation. Higher F1 = better utility.
+BERTScore (`roberta-large`, rescaled with its baseline) is computed for two pairs:
+- **input fidelity:** the sanitised message against the original;
+- **utility:** each arm's answer against the answer to the original message,
+  when `clean_llm_response` is collected (synthetic data only).
 
-| Approach | Expected BERTScore F1 |
-|---|---|
-| No anonymisation (baseline) | 100% |
-| SurrogateShield (realistic surrogates) | ~92–97%: type-consistent replacements preserve sentence structure |
-| Presidio (placeholder redaction) | ~80–88%: `[ENTITY_TYPE]` tokens break semantic continuity |
+Input fidelity favours realistic surrogates by construction, so only the
+utility pair says whether answers stay useful. No measured result is
+published yet. `python bench/phase8.py` produces one.
 
 Enable the `BERTScore SS` and `BERTScore Presidio` fields in JSON Test to generate data for this table. The `roberta-large` model (~1.4 GB) is downloaded automatically on first use and can take 15–30 minutes to score on CPU.
 
@@ -724,9 +725,13 @@ Two variants are run on each question from an existing answers file:
 
 The attacker is given a carefully constructed adversarial prompt that discloses the PII types that were replaced and instructs the model to use every available inference technique; linguistic analysis, contextual reasoning, demographic inference, cross-field correlation, format patterns, and more.
 
-### Expected result
+### What it measures
 
-**0% recovery for both systems.** Surrogates have no cryptographic or statistical relationship to the original values. This proves SurrogateShield achieves *equivalent inference resistance* to blunt placeholder redaction, while preserving significantly higher semantic utility as measured by BERTScore.
+The experiment counts how many values an attacker model recovers from each
+arm, exactly or in part. A value that an arm left in plain text is counted
+as leaked, not recovered. No measured result is published yet;
+`python bench/phase8.py` produces one, and results are listed in
+[`bench/results/README.md`](bench/results/README.md).
 
 ### Running the experiment
 
@@ -759,7 +764,7 @@ The experiment supports **resume**: if interrupted, re-running with the same ans
 
 ### Address handling
 
-Street addresses in service queries receive **house-number fuzzing** (`±2–8`) rather than full replacement. Exact address recovery is still impossible, but proximity-based recovery is theoretically possible. Address results are tracked separately via `address_recovered_count` / `non_address_recovered_count` and excluded from the primary recovery rate to keep the comparison fair.
+Street addresses in service queries receive **house-number fuzzing** (±`address_shift_range`, default 1) rather than full replacement. Exact address recovery is still impossible, but proximity-based recovery is theoretically possible. Address results are tracked separately via `address_recovered_count` / `non_address_recovered_count` and excluded from the primary recovery rate to keep the comparison fair.
 
 ### Generating compatible answers files
 
@@ -1068,11 +1073,62 @@ SurrogateShield/
 | Per-conversation key | HKDF-SHA256: device secret as IKM, conversation ID as salt, file kind as info |
 | ShadowMap encryption | AES-256-GCM with fresh 12-byte nonce per write; kind and ID as associated data |
 | ShadowMap format | `"SSv1" ‖ nonce (12 bytes) ‖ AES-GCM ciphertext`: unreadable without device key |
-| API transmission | Only surrogates sent: real values never leave the device |
+| API transmission | Detected values are sent as surrogates; values the detector misses are sent as typed (see Limitations) |
 | Conversation history | Stored locally in `~/.surrogateshield/conversations/`, encrypted like the ShadowMap; it contains the real values you typed (display history) as well as the surrogate text sent to the API |
 | `.gitignore` | `*.shadowmap`, `conversations/`, `device.key`, `.env`, and new experiment outputs (`experiment/*_answers*.json`, `*_eval_results*.json`, `*_Attacker_Experiment*.json`) excluded |
 
 
+
+## Measured results
+
+All runs are offline, at the commit named in
+[`bench/results/README.md`](bench/results/README.md), with the commands
+below. Presidio runs with its shipped default configuration at threshold
+0.4.
+
+**Real-world chat messages never used for tuning (dev4, 240 messages).**
+`python bench/compare.py --synth none --realworld dev4`
+- SurrogateShield let 21.6 % of the values that had to be protected reach
+  the provider (153 of 708). Presidio let through 47.4 %.
+- SurrogateShield made fewer edits to text that needed none: 16.5 %
+  against 39.8 %.
+
+**Real-world test split (240 messages; seen: this is its third run).**
+`python bench/compare.py --final`
+- Leaked: 13.2 % (65 of 494), against Presidio's 39.0 %.
+- Spurious edits: 16.9 %, against 35.8 %.
+- Messages with no personal data left untouched: 46 of 65, against 14.
+
+**Synthetic test split (300 seeded messages, 673 gold spans).** Generated
+by the project's own seeded generator. Same command.
+- Micro F1 0.986 (P 0.990, R 0.982), against Presidio's 0.746.
+- Messages without personal data that were edited: 6 of 75, against
+  Presidio's 61.
+- Labelled values sent unmasked: 5 (0.7 %).
+
+**Ablation (synthetic dev set, used for tuning; 1,200 messages).**
+`python offline_eval.py --key experiment/synth_dev_key.json --ablation`
+
+| configuration | micro F1 | change against full (95 % CI) |
+|---|---|---|
+| PatternScan only | 0.842 | −0.138 [−0.149, −0.127] |
+| + EntityTrace (ContextGuard off) | 0.980 | −0.001 [−0.003, +0.001] |
+| all stages, post-passes off | 0.968 | −0.013 [−0.016, −0.009] |
+| full cascade | 0.981 | — |
+
+**Latency.** `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python bench/perf.py`
+- Warm median latency: 47.5 ms per message without ContextGuard, 74.8 ms
+  with it.
+- The first mask after start-up takes 3–6 s.
+- Peak memory: about 0.8–1.1 GB.
+- Measured on an Apple-silicon laptop (CPU).
+
+**Multi-turn restoration.** `python bench/echo.py`
+- 0 of 250 turns were restored incorrectly when the provider echoed the
+  surrogates back, over seeds 0–7.
+
+**Utility (BERTScore on answers) and attacker recovery.** Not yet
+measured; `python bench/phase8.py` runs both.
 
 ## Limitations
 
@@ -1111,11 +1167,11 @@ that produced it.
 
 ## Privacy Guarantees
 
-- **No PII crosses the API boundary.** Every entity confirmed by SentinelLayer is replaced before the HTTP request is made.
+- **Detected PII is replaced before any request is made.** Every entity confirmed by SentinelLayer is replaced before the HTTP request is made, and a missing detection model stops the request (fail closed). Values the detector misses are sent as typed; see Limitations.
 - **Service queries get proportional protection.** A restaurant search near your home address gets the house number shifted; the city name is preserved so the answer is useful. Sensitive topic overrides (medical, legal, shelter) force full anonymisation regardless.
 - **Geographic generality is preserved.** US states, countries, and major cities are never replaced; they provide no meaningful re-identification risk and destroying them would break answer quality.
 - **Quasi-identifier risks are surfaced.** If your message contains combinations like ZIP+DOB+gender that are statistically re-identifying even without traditional PII, you are warned before the message is sent.
-- **RAG documents are anonymised at index time.** Real PII never enters the vector store. Retrieval and context injection all operate on surrogates.
+- **RAG documents are anonymised at index time.** Detected PII is replaced before a document is indexed. Retrieval and context injection operate on the anonymised text.
 - **Financial and identity credentials are protected.** Bitcoin/Ethereum wallet addresses, ABA routing numbers, and driver's license numbers are detected and replaced alongside traditional PII.
 
 ---
