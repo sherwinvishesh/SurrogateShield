@@ -157,6 +157,238 @@ Raw file SHA-256:
 - `data/train-00004-of-00014.parquet` `08c7e0c31edc120606d67cfa82486471d82945a7a414761501ea44b1ab0cd804`
 - `data/train-00008-of-00014.parquet` `a69578183dde5de1aa94134da2d7c2d13f00d88a577ef91140a492fbbbf10792`
 
+## Systems under test
+
+Recorded by `python -m bench.arms.run` from each arm's meta sidecar
+(`bench/results/spans/<arm>/*.meta.json`); every arm runs offline.
+
+### gliner_pii
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "backbone_revision": {
+  "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+ },
+ "flat_ner": true,
+ "labels": [
+  "person",
+  "organization",
+  "email",
+  "phone number",
+  "address",
+  "location",
+  "date of birth",
+  "age",
+  "passport number",
+  "social security number",
+  "credit card number",
+  "bank account number",
+  "iban",
+  "driver's license number",
+  "national id number",
+  "tax identification number",
+  "health insurance id number",
+  "ip address",
+  "url",
+  "username",
+  "password",
+  "api key"
+ ],
+ "model": "urchade/gliner_multi_pii-v1",
+ "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+ "overlap_words": 30,
+ "replacement": "[LABEL] placeholder",
+ "threshold": 0.5,
+ "versions": {
+  "gliner": "0.2.29",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ },
+ "window_words": 200
+}
+```
+
+### llm_guard
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "entity_types": [
+  "CREDIT_CARD",
+  "CRYPTO",
+  "EMAIL_ADDRESS",
+  "IBAN_CODE",
+  "IP_ADDRESS",
+  "PERSON",
+  "PHONE_NUMBER",
+  "US_SSN",
+  "US_BANK_NUMBER",
+  "CREDIT_CARD_RE",
+  "UUID",
+  "EMAIL_ADDRESS_RE",
+  "US_SSN_RE"
+ ],
+ "faker": "module Faker re-seeded per message (seed_instance)",
+ "faker_arity_shim": "one-argument lambdas in _entity_faker_map called with a dummy argument (0.3.16 bug)",
+ "model": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2",
+ "model_revision": "9ea992753ab2686be4a8f64605ccc7be197ad794",
+ "recognizer_conf": "DEBERTA_AI4PRIVACY_v2_CONF",
+ "scanner": "llm_guard.input_scanners.Anonymize(Vault(), use_faker=True)",
+ "threshold": 0.5,
+ "versions": {
+  "faker": "37.12.0",
+  "llm-guard": "0.3.16",
+  "presidio-analyzer": "2.2.358",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ }
+}
+```
+
+### presidio_default
+
+Interpreter `.venv/bin/python`, seed 20261005.
+
+```
+{
+ "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+ "overlap_resolution": "longest span, then highest score",
+ "presidio_analyzer_version": "2.2.362",
+ "replacement": "[ENTITY_TYPE] placeholder (presidio/redact.py)",
+ "score_threshold": 0.4
+}
+```
+
+### presidio_faker
+
+Interpreter `.venv/bin/python`, seed 20261005.
+
+```
+{
+ "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+ "faker_types": [
+  "CREDIT_CARD",
+  "DATE_TIME",
+  "EMAIL_ADDRESS",
+  "IBAN_CODE",
+  "IP_ADDRESS",
+  "LOCATION",
+  "NRP",
+  "ORGANIZATION",
+  "PERSON",
+  "PHONE_NUMBER",
+  "URL",
+  "US_BANK_NUMBER",
+  "US_SSN"
+ ],
+ "merge": "AnonymizerEngine default: same-type entities separated only by spaces become one",
+ "overlap_resolution": "longest span, then highest score",
+ "presidio_analyzer_version": "2.2.362",
+ "replacement": "presidio_anonymizer custom operator: Faker('en_US') seeded per message, per-message (type, value) memo; types without a Faker provider keep their shape (digit\u2192digit, letter\u2192letter)",
+ "score_threshold": 0.4,
+ "versions": {
+  "faker": "40.15.0",
+  "presidio-anonymizer": "2.2.362",
+  "python": "3.13.2"
+ }
+}
+```
+
+### presidio_transformers
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "model_revision": "78f2152eb93ddd817290ce8dbe46f1a6685e09fc",
+ "nlp_configuration": {
+  "models": [
+   {
+    "lang_code": "en",
+    "model_name": {
+     "spacy": "en_core_web_sm",
+     "transformers": "obi/deid_roberta_i2b2"
+    }
+   }
+  ],
+  "ner_model_configuration": {
+   "aggregation_strategy": "max",
+   "alignment_mode": "expand",
+   "labels_to_ignore": [
+    "O"
+   ],
+   "low_confidence_score_multiplier": 0.4,
+   "low_score_entity_names": [
+    "ID"
+   ],
+   "model_to_presidio_entity_mapping": {
+    "AGE": "AGE",
+    "DATE": "DATE_TIME",
+    "EMAIL": "EMAIL",
+    "FACILITY": "LOCATION",
+    "GPE": "LOCATION",
+    "HCW": "PERSON",
+    "HOSP": "ORGANIZATION",
+    "HOSPITAL": "LOCATION",
+    "ID": "ID",
+    "LOC": "LOCATION",
+    "LOCATION": "LOCATION",
+    "NORP": "NRP",
+    "ORG": "ORGANIZATION",
+    "ORGANIZATION": "ORGANIZATION",
+    "PATIENT": "PERSON",
+    "PATORG": "ORGANIZATION",
+    "PER": "PERSON",
+    "PERSON": "PERSON",
+    "PHONE": "PHONE_NUMBER",
+    "STAFF": "PERSON",
+    "TIME": "DATE_TIME",
+    "VENDOR": "ORGANIZATION"
+   },
+   "stride": 16
+  },
+  "nlp_engine_name": "transformers"
+ },
+ "overlap_resolution": "longest span, then highest score",
+ "replacement": "[ENTITY_TYPE] placeholder",
+ "score_threshold": 0.4,
+ "versions": {
+  "presidio-analyzer": "2.2.358",
+  "python": "3.12.9",
+  "spacy": "3.8.16",
+  "spacy-huggingface-pipelines": "0.0.4",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ }
+}
+```
+
+### ss
+
+Interpreter `.venv/bin/python`, seed 20261005.
+
+```
+{
+ "ADDRESS_MODE": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
 ## Frozen files (SHA-256)
 
 | file | SHA-256 |

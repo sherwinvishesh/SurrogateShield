@@ -131,6 +131,15 @@ def render(m: dict) -> str:
         for k in sorted(d):
             if k not in ("pull_counts", "drawn", "seeds", "raw_files"):
                 out += [f"**{k}**", "", "```", json.dumps(d[k], indent=1, sort_keys=True), "```", ""]
+    if m.get("arms"):
+        out += ["## Systems under test", "",
+                "Recorded by `python -m bench.arms.run` from each arm's meta sidecar",
+                "(`bench/results/spans/<arm>/*.meta.json`); every arm runs offline.", ""]
+        for arm, rec in sorted(m["arms"].items()):
+            out += [f"### {arm}", "", f"Interpreter `{rec['interpreter']}/bin/python`, seed {rec['seed']}.", "",
+                    "```", json.dumps(rec["config"], indent=1, sort_keys=True), "```", ""]
+    if m.get("labels"):
+        out += ["## Silver labels", "", "```", json.dumps(m["labels"], indent=1, sort_keys=True), "```", ""]
     out += ["## Frozen files (SHA-256)", "", "| file | SHA-256 |", "|---|---|"]
     for f, h in sorted(m.get("frozen", {}).items()):
         out.append(f"| `bench/realdata/{f}` | `{h}` |")

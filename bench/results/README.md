@@ -25,6 +25,7 @@ Summaries written by the bench scripts (counts only — no message text).
 | `j15_perf_final.json` | `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python bench/perf.py --json bench/results/j15_perf_final.json` | 31fcabc (J15 re-run) |
 | `ablation_synth_dev.json` | `python offline_eval.py --key experiment/synth_dev_key.json --ablation --json bench/results/ablation_synth_dev.json` | 7a81253 (A9 ablation, cascade re-run per configuration; synth dev, tuned on) |
 | `phase8.json` | `python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json` | c9fa81d (Phase 8 live run, 251 provider calls; synth test, seen) |
+| `spans/<arm>/natural-<dataset>.jsonl` (+ `.meta.json`) | `.venv/bin/python -m bench.arms.run --natural` (after `python -m bench.realdata.build`) | dcec6ac (E4: six span producers on the 2,251 natural user turns; offsets, type, replacement length and a copied flag only, no text; arm configs in `bench/realdata/manifest.json`) |
 
 The Phase 2 numbers show overfitting. On dev, leaked went from 25.6 % to 0 % and spurious from 28.1 % to 0.75 %. On test, leaked went from 32.3 % to 19.3 % and spurious from 37.5 % to 21.7 %. J2 fails on test. After this run the test split counts as *seen*: later test numbers are reported next to these and are not tuned on.
 
