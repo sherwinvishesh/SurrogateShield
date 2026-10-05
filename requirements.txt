@@ -31,3 +31,4 @@ ollama>=0.1.8
 
 # Development — test suite (python -m pytest tests/)
 pytest>=8.0.0
+pytest-cov>=5.0.0      # CI: --cov-fail-under=85 on python-library/surrogateshield/core
