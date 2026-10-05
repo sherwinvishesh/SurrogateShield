@@ -231,7 +231,7 @@ def _phone_validator(m: "re.Match") -> bool:
 
 
 def _card_validator(m: "re.Match") -> bool:
-    digits = re.sub(r"[\s\-]", "", m.group())
+    digits = re.sub(r"\D", "", m.group())      # the digits, whatever separates them
     if not (13 <= len(digits) <= 19):
         return False
     if not _luhn_valid(digits):
@@ -1272,11 +1272,14 @@ _PATTERNS: list = [
     ),
 
     # ── UK phone ───────────────────────────────────────────────────────────────
+    # phone_intl leaves every "+44" followed by a space, "-" or "." to this
+    # rule, so the +44 form takes those separators too ("+44.7700.900123").
     (
         "phone_uk",
         re.compile(
-            r"(?<![A-Za-z0-9_.\-])(\+44\s?|0)"
-            r"(\d{4}[\s\-]?\d{6}|\d{3}[\s\-]?\d{3}[\s\-]?\d{4}|\d{2}[\s\-]?\d{4}[\s\-]?\d{4})"
+            r"(?<![A-Za-z0-9_.\-])"
+            r"(?:\+44[\s.\-]?(?:\d{4}[\s.\-]?\d{6}|\d{3}[\s.\-]?\d{3}[\s.\-]?\d{4}|\d{2}[\s.\-]?\d{4}[\s.\-]?\d{4})"
+            r"|0(?:\d{4}[\s\-]?\d{6}|\d{3}[\s\-]?\d{3}[\s\-]?\d{4}|\d{2}[\s\-]?\d{4}[\s\-]?\d{4}))"
             r"(?![A-Za-z0-9_])"
         ),
         _phone_validator,

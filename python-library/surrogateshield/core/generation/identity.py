@@ -410,8 +410,10 @@ class People:
 
     def _free(self, cand: str, original_cf: str) -> bool:
         cf = cand.casefold()
+        # an empty original (the empty label of "x@y..com") is in every
+        # string; testing it made every candidate taken and _draw spin forever
         return not (cf in self._owner or cf in self._originals or cf in self._message_words
-                    or original_cf in cf or cf in original_cf)
+                    or original_cf and (original_cf in cf or cf in original_cf))
 
     def _draw(self, role: str, original_cf: str, locale: str, gender: str,
               length: Optional[int] = None) -> str:
