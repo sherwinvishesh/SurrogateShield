@@ -102,6 +102,15 @@ def read_messages(path: Path) -> List[dict]:
     return rows
 
 
+def arm_env() -> dict:
+    """Environment for an arm subprocess: offline, and a fixed string-hash
+    seed. Presidio breaks ties between same-span, same-score entities in set
+    order, so without it a rerun can label one span NRP or URL and draw a
+    different Faker value for it."""
+    return {**os.environ, "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false",
+            "PYTHONHASHSEED": "0"}
+
+
 def rel(path: Path) -> str:
     path = Path(path).resolve()
     return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)

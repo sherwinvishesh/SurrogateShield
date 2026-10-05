@@ -32,7 +32,7 @@ from typing import Dict, List, Optional
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from bench.arms.base import ROOT, read_messages, rel
+from bench.arms.base import ROOT, arm_env, read_messages, rel
 
 ARMS: Dict[str, str] = {
     "ss": ".venv",
@@ -72,7 +72,7 @@ def run_arm(arm: str, src: Path, name: str) -> dict:
     full = PRIVATE / arm / f"{name}.jsonl"
     full.parent.mkdir(parents=True, exist_ok=True)
     os.chmod(PRIVATE, 0o700)
-    env = {**os.environ, "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false"}
+    env = arm_env()
     proc = subprocess.run(command(arm, src, full), cwd=ROOT, env=env, capture_output=True, text=True)
     if proc.returncode != 0:
         tail = "\n".join(proc.stderr.strip().splitlines()[-15:])

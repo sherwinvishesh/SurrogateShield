@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess
 from collections import Counter
 from pathlib import Path
@@ -36,6 +35,7 @@ from types import SimpleNamespace
 from typing import Callable, Dict, List, Optional, Sequence
 
 from bench import realworld as rw
+from bench.arms.base import arm_env
 from bench.realdata import score as S
 from bench.realdata.common import BUILD, DATASETS, RD, ROOT, derive_seed, read_jsonl
 
@@ -47,7 +47,7 @@ FIELDS = ("leak", "message_leak", "macro_leak_rate", "edits", "spurious", "refus
 
 
 def run_ablate(src: Path, out_dir: Path, seed: int) -> None:
-    env = {**os.environ, "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false"}
+    env = arm_env()
     cmd = [str(ROOT / ".venv" / "bin" / "python"), "-m", "bench.arms.ss_ablate", "--in", str(src),
            "--out-dir", str(out_dir), "--seed", str(seed)]
     proc = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)

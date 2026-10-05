@@ -34,6 +34,7 @@ import time
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence
 
+from bench.arms.base import arm_env
 from bench.arms.run import ARMS, command
 from bench.realdata.common import BUILD, DATASETS, ROOT, derive_seed, file_sha256, read_jsonl, write_jsonl
 
@@ -60,7 +61,7 @@ def rss_mb(maxrss: int) -> float:
 
 
 def spawn(cmd: List[str]) -> dict:
-    env = {**os.environ, "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1", "TOKENIZERS_PARALLELISM": "false"}
+    env = arm_env()
     t = time.perf_counter()
     with open(os.devnull, "w") as null, subprocess.Popen(cmd, cwd=ROOT, env=env, stdout=null,
                                                          stderr=subprocess.PIPE, text=True) as p:

@@ -16,6 +16,12 @@ with no argument, so ``scan()`` raises ``TypeError`` whenever one of those
 types is detected (of the default types, CRYPTO). ``fix_faker_arity`` wraps
 exactly those entries to pass the argument they ignore, so the values are the
 ones the authors wrote; the patched keys are recorded in the meta.
+
+LLM Guard puts its NER pipeline on ``mps`` when Apple's GPU is present, and
+MPS float results vary between runs: on the dev split one message gained or
+lost six two-character IP_ADDRESS spans from run to run (the DeBERTa span
+edges moved, so conflict removal kept different regex hits). The arm pins the
+pipeline to the CPU, like every other arm, and records the device.
 """
 
 from __future__ import annotations
@@ -45,6 +51,13 @@ def fix_faker_arity(fmap: dict) -> list:
     return sorted(fixed)
 
 
+def pin_cpu() -> None:
+    """Run the default recogniser's pipeline on the CPU (see the module note)."""
+    import torch
+    from llm_guard.input_scanners.anonymize_helpers import DEBERTA_AI4PRIVACY_v2_CONF
+    DEBERTA_AI4PRIVACY_v2_CONF["DEFAULT_MODEL"].pipeline_kwargs["device"] = torch.device("cpu")
+
+
 def load():
     import logging
     from llm_guard.input_scanners import Anonymize
@@ -53,6 +66,7 @@ def load():
 
     logging.getLogger("llm_guard").setLevel(logging.ERROR)
     fix_faker_arity(lg_faker._entity_faker_map)
+    pin_cpu()
     try:
         import structlog
         structlog.configure(wrapper_class=structlog.make_filtering_bound_logger(logging.ERROR))
@@ -86,6 +100,7 @@ def config() -> dict:
             "model": DEBERTA_AI4PRIVACY_v2_CONF["DEFAULT_MODEL"].path,
             "model_revision": DEBERTA_AI4PRIVACY_v2_CONF["DEFAULT_MODEL"].revision,
             "entity_types": list(DEFAULT_ENTITY_TYPES), "threshold": 0.5,
+            "device": "cpu (pinned; LLM Guard would pick mps or cuda)",
             "faker": "module Faker re-seeded per message (seed_instance)",
             "faker_arity_shim": "one-argument lambdas in _entity_faker_map called with a dummy argument (0.3.16 bug)",
             "versions": versions("llm-guard", "presidio-analyzer", "transformers", "torch", "faker")}
