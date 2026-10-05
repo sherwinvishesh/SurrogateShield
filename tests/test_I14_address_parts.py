@@ -26,7 +26,7 @@ def covered(text):
 
 @pytest.mark.parametrize("text, parts", [
     ("abito a Modena in via Emilia Est 211. Il mio codice", ["via Emilia Est 211"]),
-    ("lives alone at 14 birchwood close, wokingham rg40 2hd. any tips", ["14 birchwood close"]),
+    ("lives alone at 14 birchwood close, wokingham rg40 2hd. any tips", ["14 birchwood close", "wokingham"]),
     ("Her address is Laugavegur 52, 101 Reykjavík.", ["Laugavegur 52", "101 Reykjavík"]),
     ("Shipping name was Ludmila Horvatová, 17 Hlavná, 040 01 Košice.",
      ["17 Hlavná", "040 01 Košice"]),

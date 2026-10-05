@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import re
+from functools import lru_cache
 from typing import Callable, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity
@@ -124,9 +125,19 @@ def _components(text: str, ents: Sequence[DetectedEntity]):
             for m in re.finditer(r"(?<![\w@.\-])" + re.escape(tok) + r"(?![\w@\-]|\.\w)", text, flags):
                 if not lower and not m.group(0)[:1].isupper():
                     continue
-                if _overlaps(m.start(), m.end(), list(ents) + added):
-                    continue
-                added.append(_ent(text, m.start(), m.end(), "PERSON", 0.85))
+                start = m.start()
+                # "van der Merwe" from "Pieter van der Merwe": the particles
+                # the name carries come along
+                own = re.search(r"(?i)((?:\b(?:" + _PARTICLES + r")\s+)+)" + re.escape(tok) + r"\b", p.text)
+                if own:
+                    pm = re.search(r"(?i)(?:\b(?:" + _PARTICLES + r")\s+)+$", text[max(0, start - 30):start])
+                    if pm:
+                        start -= len(pm.group())
+                if _overlaps(start, m.end(), list(ents) + added):
+                    if start == m.start() or _overlaps(m.start(), m.end(), list(ents) + added):
+                        continue
+                    start = m.start()
+                added.append(_ent(text, start, m.end(), "PERSON", 0.85))
     return added, []
 
 
@@ -170,6 +181,95 @@ def _display_names(text: str, ents: Sequence[DetectedEntity]):
             continue
         removed.extend(x for x in over if x not in removed)
         added.append(_ent(text, s, t, "PERSON", 0.85))
+    return added, removed
+
+
+# ── 3c. named institutions ───────────────────────────────────────────────────
+
+_CAP_W = r"[A-ZÀ-ÝČŠŽ][^\W\d_][\w'’\-]*"
+_INST_PART = r"(?:(?:de|del|da|do|dos|das|di|du|des|de\s+la|der|des|von)\s+)?"
+# "Clinique Saint-Vincent", "Escola Básica de Alvalade", "Université Laval"
+_INSTITUTION = re.compile(
+    r"\b(?:Clinique|H[ôo]pital|Centre\s+[Hh]ospitalier|[ÉE]cole|Escola|Lyc[ée]e|Coll[èe]ge"
+    r"|Universit[ée]|Universidad|Universidade|Universit[äa]t|Universit[àa]|Hospital|Cl[íi]nica"
+    r"|Klinik|Krankenhaus|Ospedale|Scuola|Colegio|Col[ée]gio|Instituto|Liceo|Gymnasium|Grundschule"
+    r"|Gesamtschule|Realschule)"
+    r"(?:\s+(?:B[áa]sica|Secund[áa]ria|Primaria|Prim[áa]ria|Primaire|[ÉE]l[ée]mentaire|Elementare"
+    r"|Superior|Municipal|Nacional|Estadual|Statale|Priv[ée]e?|Saint|Sainte|Santa|San|São))?"
+    r"\s+" + _INST_PART + _CAP_W + r"(?:[ \t]+" + _INST_PART + _CAP_W + r"){0,2}"
+)
+_INSTITUTION_LOWER = re.compile(
+    r"\b(?:universit[ée]|universidad|universidade|universit[äa]t|clinique|escola|[ée]cole|lyc[ée]e)"
+    r"\s+" + _INST_PART + r"([^\W\d_][\w'’\-]{2,})(?=\s*[?.!,;)]|\s*$)"
+)
+# "my doctor at riverside family clinic" from a writer who capitalises nothing
+_EN_LOWER_INSTITUTION = re.compile(
+    r"\b(?:at|from|to)\s+(?:the\s+)?((?:[a-z][a-z'’\-]+\s+){1,3}"
+    r"(?:clinic|hospital|medical\s+cent(?:er|re)|health\s+cent(?:er|re)|surgery|elementary(?:\s+school)?"
+    r"|middle\s+school|high\s+school|primary\s+school|academy))\b"
+)
+_GENERIC_INST_WORD = frozenset("""
+a an the my our your his her their this that same new old local nearest nearby closest
+urgent walk-in walk free dental vet veterinary eye children's childrens kids women's
+womens public private community mental sexual fertility pain sleep cancer va er any
+another some every one big small main family general medical health care primary
+specialist specialty city county state best good cheap private regional teaching
+""".split())
+
+
+_INST_STOP = frozenset("""
+is are was were be been has have had will can and or but the a an of for to in on at
+by with closed open opens near general central regional national university hospital
+school college clinic medical
+""".split())
+
+
+def _generic_inst(word: str) -> bool:
+    """"dermatology clinic", "pediatric hospital": a specialty, not a name."""
+    w = word.lower()
+    return w in _GENERIC_INST_WORD or bool(re.search(
+        r"(?:ology|ologic(?:al)?|iatric|iatry|ics|ist|ists|ic|ical|ary|ive|ent|ant|al|ed|ing)$", w))
+
+
+def _lowercase_writer(text: str) -> bool:
+    return bool(re.search(r"(?<![\w'’])i(?:['’]?m)?\s+(?:am|was|have|had|do|did|don['’]?t|can|will"
+                          r"|need|want|just|got|think|feel|graduated|live|work|went)\b|(?<![\w'’])im\b", text)) \
+        or not re.search(r"\b[A-Z][a-z]", text)
+
+
+def _institutions(text: str, ents: Sequence[DetectedEntity]):
+    added: List[DetectedEntity] = []
+    removed: List[DetectedEntity] = []
+
+    def add(s, e):
+        over = [x for x in list(ents) + added if x.start < e and s < x.end]
+        if any(x.source == "pattern" or x.type == "PERSON" and x.source != "slm"
+               and not (s <= x.start and x.end <= e) for x in over):
+            return
+        removed.extend(x for x in over if x in ents and x not in removed)
+        added.append(_ent(text, s, e, "ORG", 0.9))
+
+    for m in _INSTITUTION.finditer(text):
+        words = re.findall(r"[^\W\d_]+", m.group())
+        if any(w.lower() in pattern_scan._NOT_NAME_WORD or w.lower() in _INST_STOP
+               for w in words[1:]):
+            continue                        # "The Hospital Is Closed", "Hospital General"
+        add(m.start(), m.end())
+    lower = None
+    for rx in (_INSTITUTION_LOWER, _EN_LOWER_INSTITUTION):
+        for m in rx.finditer(text):
+            if lower is None:
+                lower = _lowercase_writer(text)
+            if not lower:
+                break
+            name = m.group(1).split()
+            generic = _generic_inst(name[0]) if rx is _EN_LOWER_INSTITUTION else (
+                name[0].lower() in _GENERIC_INST_WORD)
+            if generic or name[0].lower() in pattern_scan._NOT_NAME_WORD:
+                continue
+            if rx is _EN_LOWER_INSTITUTION and all(_generic_inst(w) for w in name[:-1]):
+                continue
+            add(m.start() if rx is _INSTITUTION_LOWER else m.start(1), m.end(1))
     return added, removed
 
 
@@ -477,12 +577,64 @@ def _kin_names(text: str, ents: Sequence[DetectedEntity]):
     return added, []
 
 
+_KANA = r"[\u4e00-\u9fff\u3040-\u30ff々]"
+# "はじめまして、佐々木 美咲です" — a self-introduction after a greeting
+_JA_NAME = re.compile(r"(?:はじめまして|初めまして|私の名前は|名前は)[、,]?\s*"
+                      r"(" + _KANA + r"{1,4}(?:[ 　]" + _KANA + r"{1,4})?)(?:です|と申します|といいます)")
+_JA_PLACE = re.compile(r"(" + r"[\u4e00-\u9fff々ァ-ヶー]{1,6})(?:に住んで|在住|出身)")
+# "李梅的身份证号", "在北京协和医院工作"
+_ZH_PII_AFTER = r"(?=的(?:身份证|电话|手机|地址|邮箱|护照|生日|银行卡|病历))"
+_ZH_ORG = re.compile(r"在(" + _HAN + r"{2,10}?(?:医院|诊所|学校|大学|中学|小学|幼儿园|公司|银行))"
+                     r"(?:工作|上班|上学|读书|就诊|看病|住院)")
+_HI_KIN = (r"(?:मेरी|मेरा|मेरे|हमारी|हमारा|हमारे)\s+(?:माँ|मां|माता|पिता|पापा|बहन|भाई|बेटी|बेटा"
+           r"|पत्नी|पति|दोस्त|सहेली|दादी|दादा|नानी|नाना)\s+")
+_HI_CITIES = ("दिल्ली मुंबई लखनऊ कोलकाता चेन्नई बेंगलुरु बैंगलोर हैदराबाद पुणे जयपुर कानपुर पटना "
+              "भोपाल इंदौर अहमदाबाद वाराणसी आगरा नागपुर सूरत चंडीगढ़ देहरादून रांची गुवाहाटी").split()
+_HI_CITY = re.compile(r"(?<!\S)(" + "|".join(_HI_CITIES) + r")(?=\s+(?:में|से|का|की|के)(?!\S))")
+
+
+@lru_cache(maxsize=1)
+def _lexicons():
+    """CJK surnames and Hindi given / family names from Faker's locale lists."""
+    from faker.providers.person.zh_CN import Provider as ZH
+    from faker.providers.person.hi_IN import Provider as HI
+    zh = sorted({n for n in ZH.last_names if 1 <= len(n) <= 2}, key=len, reverse=True)
+    hi_first = frozenset(tuple(HI.first_names_male) + tuple(HI.first_names_female))
+    hi_last = frozenset(tuple(HI.last_names) + ("देवी", "कुमारी", "कुमार", "बाई"))
+    return zh, hi_first, hi_last
+
+
 def _names_intl(text: str, ents: Sequence[DetectedEntity]):
     added: List[DetectedEntity] = []
-    for rx in (_ZH_NAME, _HI_NAME):
+
+    def add(s, e, typ):
+        if s < e and not _overlaps(s, e, list(ents) + added):
+            added.append(_ent(text, s, e, typ, 0.9))
+
+    for rx in (_ZH_NAME, _HI_NAME, _JA_NAME):
         for m in rx.finditer(text):
-            if not _overlaps(m.start(1), m.end(1), list(ents) + added):
-                added.append(_ent(text, m.start(1), m.end(1), "PERSON", 0.9))
+            add(m.start(1), m.end(1), "PERSON")
+    if re.search(_HAN, text):
+        zh, _, _ = _lexicons()
+        rx = re.compile(r"(?:^|(?<=[，,。：:；;\s]))((?:" + "|".join(zh) + r")" + _HAN + r"{1,2}?)" + _ZH_PII_AFTER)
+        for m in rx.finditer(text):
+            add(m.start(1), m.end(1), "PERSON")
+        for m in _ZH_ORG.finditer(text):
+            add(m.start(1), m.end(1), "ORG")
+        for m in _JA_PLACE.finditer(text):
+            add(m.start(1), m.end(1), "GPE")
+    if re.search(r"[\u0900-\u097f]", text):
+        _, hi_first, hi_last = _lexicons()
+        for m in re.finditer(_HI_KIN + r"([\u0900-\u097f]+)(?:\s+([\u0900-\u097f]+))?", text):
+            first, last = m.group(1), m.group(2)
+            if last in hi_last:
+                add(m.start(1), m.end(2), "PERSON")
+            elif first in hi_first:
+                add(m.start(1), m.end(1), "PERSON")
+        # a city in a message that already names a person
+        if any(e.type == "PERSON" for e in list(ents) + added):
+            for m in _HI_CITY.finditer(text):
+                add(m.start(1), m.end(1), "GPE")
     return added, []
 
 
@@ -534,6 +686,10 @@ _LOWER_UK_STREET = re.compile(
     r"|walk|gardens|view|park|chase|mews|crescent|terrace|lane|road|street|drive|avenue|place|court|row)\b"
     r"(?=[^\n]{0,40}\b[a-z]{1,2}\d[a-z\d]?\s?\d[a-z]{2}\b)", re.IGNORECASE
 )
+# the town between a street and a UK postcode
+_TOWN_UK_POSTCODE = re.compile(
+    r"[ \t]*,[ \t]*([A-Za-z][a-z'’\-]+(?:[ \-][A-Za-z][a-z'’\-]+)?)[ \t]*,?[ \t]+"
+    r"(?=[A-Za-z]{1,2}\d[A-Za-z\d]?[ \t]?\d[A-Za-z]{2}\b)")
 # a flat or unit number in front of a street address: "flat 4, 70 Cowley Road"
 _UNIT_BEFORE = re.compile(
     r"(?i)\b(?:flat|apt\.?|apartment|unit|suite|ste\.?)\s*#?\s*\d{1,4}[a-z]?\s*,?\s*$")
@@ -564,6 +720,9 @@ def _address_parts(text: str, ents: Sequence[DetectedEntity]):
         if m and not any(w.lower() in pattern_scan._NOT_NAME_WORD
                          for w in re.findall(r"[^\W\d_]+", town)):
             _add(m.start("pc") if m.group("pc") else m.start("t2"), m.end())
+        t = _TOWN_UK_POSTCODE.match(text, st.end)
+        if t and t.group(1).lower() not in pattern_scan._NOT_NAME_WORD:
+            _add(t.start(1), t.end(1))     # "14 birchwood close, wokingham rg40 2hd"
         ls = text.rfind("\n", 0, st.start) + 1
         u = _UNIT_BEFORE.search(text, ls, st.start)
         if u:
@@ -628,6 +787,7 @@ def detect(
         lambda t, es: _kin_names(t, es),
         lambda t, es: _verb_frames(t, es),
         lambda t, es: _display_names(t, es),
+        lambda t, es: _institutions(t, es),
         lambda t, es: _components(t, es),
     ]
     if not skip_locations:
