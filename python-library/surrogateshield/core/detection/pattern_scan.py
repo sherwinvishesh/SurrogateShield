@@ -481,6 +481,7 @@ _URL_TLDS = (
     r"com|org|net|edu|gov|io|dev|me|app|co|ai|gg|tv|xyz|info|biz|site|page"
     r"|blog|online|tech|us|uk|ca|de|fr|es|it|nl|br|au|jp|cn|ru|ch|se|no|fi"
     r"|dk|pl|pt|ie|nz|in|ly|to|sh|so|link|social|art|design|studio|email"
+    r"|ng|za|ke|ar|mx|cl|pe|co\.uk|photo|photography|photos|name|portfolio|bio|cv|family|shop|store"
 )
 _URL_RE = re.compile(
     r"(?:https?://|\bwww\.)[^\s<>()\[\]{}\"'`|]+[^\s<>()\[\]{}\"'`|.,;:!?]"
@@ -500,6 +501,7 @@ _PROFILE_HOSTS = frozenset({
     "snapchat.com", "twitch.tv", "soundcloud.com", "patreon.com",
     "calendly.com", "stackoverflow.com", "kaggle.com", "huggingface.co",
     "mastodon.social", "orcid.org", "scholar.google.com", "vimeo.com",
+    "ko-fi.com", "buymeacoffee.com", "depop.com", "gumroad.com", "onlyfans.com",
 })
 _PERSONAL_HOST_SUFFIXES = (
     ".github.io", ".gitlab.io", ".substack.com", ".wordpress.com",
@@ -507,8 +509,20 @@ _PERSONAL_HOST_SUFFIXES = (
     ".vercel.app", ".bsky.social", ".tumblr.com", ".firebaseapp.com",
     ".web.app", ".herokuapp.com", ".pages.dev", ".wixsite.com", ".weebly.com",
     ".neocities.org", ".onrender.com", ".fly.dev", ".glitch.me",
-    ".squarespace.com",
+    ".squarespace.com", ".gumroad.com", ".myshopify.com", ".bigcartel.com", ".itch.io",
+    ".square.site", ".etsy.com",
 )
+# Marketplace hosts and the path segment before a seller ("etsy.com/shop/…").
+_SELLER_PATHS = {
+    "etsy.com": ("shop", "people"), "ebay.com": ("usr", "str"), "ebay.co.uk": ("usr", "str"),
+    "poshmark.com": ("closet",), "vinted.com": ("member",), "amazon.com": ("shops",),
+    "redbubble.com": ("people",), "society6.com": ("",), "mercari.com": ("u",),
+}
+# Top-level domains that are mostly personal sites ("analuisakr.photo").
+_PERSONAL_TLDS = ("me", "name", "photo", "photography", "photos", "art", "design", "studio",
+                  "portfolio", "blog", "bio", "cv", "family")
+# "okeke-family.ng", "thejonesfamily.com"
+_FAMILY_HOST = re.compile(r"(?:^|[.\-])(?:the)?[a-z]+-?family\.|(?:^|\.)family-")
 # File-sharing hosts: a link carrying a document token grants access to
 # someone's file ("docs.google.com/document/d/1xQ7vB…/edit?usp=sharing").
 _SHARE_HOSTS = frozenset({
@@ -542,7 +556,9 @@ _PERSON_PATH_MARKERS = re.compile(
     re.IGNORECASE,
 )
 _PERSONAL_URL_CONTEXT = re.compile(
-    r"\b(?:my|our|his|her|their)\s+(?:own\s+|personal\s+)?(?:site|website"
+    r"\b(?:my|our)\s+(?:own|personal|self[\s\-]?hosted|home|family)\s+[\w\- ]{1,25}?"
+    r"\s*(?:at|is|on|:|-|–)?\s*$"           # "my personal nextcloud at …"
+    r"|\b(?:my|our|his|her|their)\s+(?:own\s+|personal\s+)?(?:site|website"
     r"|portfolio|blog|homepage|home\s+page|page|profile|r[ée]sum[ée]|cv|link"
     r"|linkedin|github|twitter|instagram|domain|channel)\b[^.\n]{0,25}$",
     re.IGNORECASE,
@@ -576,8 +592,15 @@ def _is_personal_url(url: str, before: str) -> bool:
         return first not in _NON_PROFILE_SEGMENTS
     if host.endswith(_PERSONAL_HOST_SUFFIXES):
         return True
-    if (host in _SHARE_HOSTS or host.endswith(".sharepoint.com")) and _SHARE_TOKEN.search(path):
-        return True
+    if (host in _SHARE_HOSTS or host.endswith(".sharepoint.com")) and (
+            _SHARE_TOKEN.search(path) or path.strip("/").count("/") >= 2 and re.search(
+                r"/(?=[\w\-]*\d)(?=[\w\-]*[A-Za-z])[\w\-]{6,}(?:/|$|\?)|/[^/?#]+\.\w{2,4}(?:\?|$)", path)):
+        return True                         # a document link grants access
+    segs = path.strip("/").split("/")
+    if host in _SELLER_PATHS and len(segs) >= 2 and segs[0].lower() in _SELLER_PATHS[host] and segs[1]:
+        return True                         # "etsy.com/shop/KnotsByNaledi"
+    if host.rsplit(".", 1)[-1] in _PERSONAL_TLDS or _FAMILY_HOST.search(host):
+        return True                         # "analuisakr.photo", "okeke-family.ng"
     if _PERSONAL_URL_LABEL.search(before):
         return True
     if _PERSON_PATH_MARKERS.search(path):
