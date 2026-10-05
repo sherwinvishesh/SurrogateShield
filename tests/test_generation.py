@@ -546,3 +546,20 @@ def test_J5_D3_town_surrogates_have_no_padding():
     for seed in range(40):
         s = MimicGen(seed=seed).generate(DetectedEntity("Tempe", 0, 5, "GPE", 0.9, "ner"))
         assert s == s.strip() and "  " not in s, (seed, s)
+
+
+@pytest.mark.parametrize("name, url", [
+    ("Mara", "https://files.acme-cdn.com/view/x/9quarterly-notes_v2/page?ref=share_mara"),   # query
+    ("Priyam", "priyam.blogs.site"),                    # first of three host labels
+])
+def test_J4_url_carrying_a_name_takes_that_names_surrogate(name, url):
+    # Before: the URL generator rewrites one host label and keeps the rest, so
+    # every draw still held the separately detected name and generate_all
+    # raised "could not generate a surrogate for a url entity" (E4, two
+    # natural ShareGPT / WildChat prompts); the chat loop does not catch it
+    text = f"{name} shared {url} with me."
+    for seed in range(RUNS):
+        m = _all([(name, "PERSON"), (url, "url")], seed, text=text)
+        sur = m[url]
+        assert not re.search(rf"(?i)(?<![^\W_]){name}(?![^\W_])", sur), (seed, sur)
+        assert m[name].replace(" ", "").lower() in sur.lower(), (seed, m)

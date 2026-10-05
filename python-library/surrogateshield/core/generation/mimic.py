@@ -28,7 +28,7 @@ from faker import Faker
 
 from ..detection import address_parser
 from ..detection.geo_data import MAJOR_COUNTRIES, US_STATE_ABBREVS
-from ..consistency import is_low_entropy, occurs
+from ..consistency import find_all, is_low_entropy, match_case, occurs
 from ..entities import DetectedEntity
 from . import places
 from .identity import People
@@ -1212,6 +1212,21 @@ class MimicGen:
                        and (not o.replace(" ", "").isalpha() or occurs(surrogate, o))
                        for o in contained)
 
+        def carry_mapped(surrogate: str) -> str:
+            # a value built from the original's layout keeps the parts it does
+            # not regenerate (a URL's other host labels, path and query); one
+            # of them can be another entity's original ("…?u=mark",
+            # "priya.blog.example"). It takes that entity's surrogate there,
+            # as the text does, instead of failing every draw.
+            for key, sur in mapping.items():
+                if is_low_entropy(key):
+                    continue
+                flat = re.sub(r"\s+", "", sur)
+                for m in reversed(find_all(surrogate, key)):
+                    surrogate = (surrogate[:m.start()] + match_case(m.group(), key, flat)
+                                 + surrogate[m.end():])
+            return surrogate
+
         self._context = text or ""
         self._avoid = set(equal_blocked)
         self.people.observe([e.text for e in entities]
@@ -1242,6 +1257,8 @@ class MimicGen:
                         address_shift_range=address_shift_range,
                         forbidden=frozenset(blocked),
                     )
+                    if not identity and ent.type != "address":
+                        surrogate = carry_mapped(surrogate)
                     reject = surrogate.strip().lower() in equal_blocked or (
                         ent.type != "address" and (
                             contains_original(surrogate)
