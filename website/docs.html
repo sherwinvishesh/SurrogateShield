@@ -422,7 +422,6 @@ python -m venv .venv
           <tr><td>sentence-transformers</td><td>≥2.7.0</td><td>RAG embeddings (all-MiniLM-L6-v2)</td></tr>
           <tr><td>transformers</td><td>≥4.40.0</td><td>ContextGuard (distilbert-NER)</td></tr>
           <tr><td>torch</td><td>≥2.0.0</td><td>ContextGuard inference</td></tr>
-          <tr><td>requests</td><td>≥2.31.0</td><td>Address verification via Nominatim</td></tr>
           <tr><td>bert-score</td><td>≥0.3.13</td><td>Utility preservation scoring (optional)</td></tr>
           <tr><td>ollama</td><td>≥0.1.8</td><td>Local LLM support (optional)</td></tr>
           <tr><td>presidio-analyzer</td><td>≥2.2.0</td><td>Presidio comparison panel (optional)</td></tr>
@@ -580,7 +579,7 @@ echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
       </div>
     </div>
 
-    <p>Address existence is optionally verified via OpenStreetMap Nominatim (disable with <code>SERVICE_QUERY_VERIFY_ADDRESSES = False</code> in <code>config.py</code> for offline use).</p>
+    <p>No address is sent to a geocoder or any other third party: the house number is shifted locally and the city is kept; for a sensitive query (a clinic, a shelter) the street line is sent as “my area”.</p>
   </section>
 
   <!-- ============================================================ -->
@@ -1237,7 +1236,6 @@ Banner Health Hospital  →  Riverside Medical Center</code></pre>
           <tr><td>ENTITY_TRACE_FALLBACK_THRESHOLD</td><td>0.65</td><td>Score used when ContextGuard is disabled to promote borderline entities</td></tr>
           <tr><td>FUZZY_MATCH_THRESHOLD</td><td>85</td><td>rapidfuzz partial_ratio threshold for ResolvePass reconstruction</td></tr>
           <tr><td>SERVICE_QUERY_DETECTION_ENABLED</td><td>True</td><td>Enable the lightweight address-fuzzing path for location queries</td></tr>
-          <tr><td>SERVICE_QUERY_VERIFY_ADDRESSES</td><td>True</td><td>Verify fuzzed addresses via OpenStreetMap Nominatim (disable for offline use)</td></tr>
           <tr><td>SHOW_API_TRANSPARENCY</td><td>True</td><td>Show the sent / received / restored transparency panel after each chat turn</td></tr>
           <tr><td>RAG_TOP_K</td><td>3</td><td>Number of document chunks retrieved per RAG query</td></tr>
           <tr><td>RAG_CHUNK_SIZE</td><td>512</td><td>Characters per chunk when splitting indexed documents</td></tr>
@@ -1635,11 +1633,6 @@ pip install -r requirements.txt   # reinstall into venv</code></pre>
 
     <h3>BERTScore takes very long</h3>
     <p>BERTScore uses <code>roberta-large</code> (~1.4 GB). On CPU, scoring a batch of 50 questions can take 15–30 minutes. The model is only downloaded if you enable BERTScore fields in JSON Test. If you have a GPU, it will be used automatically.</p>
-
-    <h3>Address verification fails in offline environments</h3>
-    <p>ServiceQueryDetector optionally verifies fuzzed addresses via OpenStreetMap Nominatim. In offline environments, disable this:</p>
-    <pre><code># In config.py
-SERVICE_QUERY_VERIFY_ADDRESSES = False</code></pre>
 
     <h3>Conversations are not found after moving the project</h3>
     <p>Conversations are stored in <code>conversations/</code> relative to the project root. If you move the project directory, the existing <code>.shadowmap</code> files are no longer decryptable with the device key at <code>~/.surrogateshield/device.key</code> — but the device key itself stays in place, so new conversations in the new location will work normally.</p>
