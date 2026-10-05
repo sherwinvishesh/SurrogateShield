@@ -189,16 +189,18 @@ print("\n[4] ContextGuard — distilbert-NER (detection/context_guard.py)")
 import detection.context_guard as cg
 from detection.context_guard import guard
 
-# ── 4a: Graceful degradation when NER pipeline is unavailable ─────────────
-# Patch _get_ner to return None, simulating missing transformers install
-with patch.object(cg, "_get_ner", return_value=None):
-    confirmed_deg, uncertain_deg = guard("Alice Johnson visited Paris.", [])
+# ── 4a: Fail closed when the NER pipeline is unavailable (audit I17) ──────
+# Simulate a missing transformers install: the stage must raise, not
+# return "no entities".
+from surrogateshield.core.errors import DetectorUnavailable
+with patch.object(cg, "_get_ner", side_effect=DetectorUnavailable("no transformers")):
+    try:
+        guard("Alice Johnson visited Paris.", [])
+        _raised = False
+    except DetectorUnavailable:
+        _raised = True
 
-check(
-    "Graceful degradation: returns empty lists when NER unavailable",
-    confirmed_deg == [] and uncertain_deg == [],
-    f"confirmed={confirmed_deg}, uncertain={uncertain_deg}"
-)
+check("Fail closed: DetectorUnavailable when NER unavailable", _raised)
 
 # ── 4b: Borderline entity verification ────────────────────────────────────
 from util import DetectedEntity
@@ -231,7 +233,10 @@ check(
 )
 
 # ── 4c: Live NER detection (skipped gracefully if model not available) ────
-ner_available = cg._get_ner() is not None
+try:
+    ner_available = cg._get_ner() is not None
+except DetectorUnavailable:
+    ner_available = False
 
 if ner_available:
     confirmed_person, _ = guard("John Smith is the CEO.", [])

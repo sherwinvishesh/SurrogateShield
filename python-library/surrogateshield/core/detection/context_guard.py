@@ -17,42 +17,59 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
 from typing import Dict, List, Tuple
 
 from ..entities import DetectedEntity
+from ..errors import DetectorUnavailable
 
 logger = logging.getLogger(__name__)
 
-# Cache pipelines keyed by model name
-_ner_pipelines: Dict[str, object] = {}
+# Cache pipelines (or the reason loading failed) keyed by (model, device)
+_ner_pipelines: Dict[object, object] = {}
+_ner_lock = threading.Lock()
 
 
 def _get_ner(model_name: str = "dslim/distilbert-NER", device: int = -1):
-    """Lazy-load and cache the HuggingFace NER pipeline by (model, device)."""
-    global _ner_pipelines
+    """Lazy-load and cache the HuggingFace NER pipeline by (model, device).
+
+    Raises DetectorUnavailable if it cannot be loaded (audit I17): an
+    enabled stage is never skipped silently.
+    """
     cache_key = (model_name, device)
-    if cache_key in _ner_pipelines:
-        return _ner_pipelines[cache_key]
+    cached = _ner_pipelines.get(cache_key)
+    if cached is None:
+        with _ner_lock:
+            cached = _ner_pipelines.get(cache_key)
+            if cached is None:
+                cached = _ner_pipelines[cache_key] = _load_ner(model_name, device)
+    if isinstance(cached, DetectorUnavailable):
+        raise cached
+    return cached
+
+
+def _load_ner(model_name: str, device: int):
     try:
         from transformers import pipeline as hf_pipeline
+    except ImportError:
+        return DetectorUnavailable(
+            "ContextGuard needs transformers and torch, which are not installed. "
+            "Run: pip install transformers torch — or switch ContextGuard off."
+        )
+    try:
         pipeline = hf_pipeline(
             "ner",
             model=model_name,
             aggregation_strategy="simple",
             device=device,
         )
-        _ner_pipelines[cache_key] = pipeline
-        logger.info(f"[ContextGuard] Loaded NER model: {model_name} (device={device})")
-    except ImportError:
-        logger.warning(
-            "[ContextGuard] transformers not installed — skipping. "
-            "Run: pip install transformers torch"
+    except (OSError, ValueError) as exc:
+        return DetectorUnavailable(
+            f"ContextGuard could not load {model_name!r} ({exc}). Download it once "
+            "with network access (HF_HUB_OFFLINE unset), or switch ContextGuard off."
         )
-        _ner_pipelines[cache_key] = None
-    except Exception as exc:
-        logger.warning(f"[ContextGuard] Failed to load NER model: {exc}")
-        _ner_pipelines[cache_key] = None
-    return _ner_pipelines[cache_key]
+    logger.info(f"[ContextGuard] Loaded NER model: {model_name} (device={device})")
+    return pipeline
 
 
 _LABEL_MAP = {
@@ -139,14 +156,10 @@ def guard(
         return confirmed, uncertain
 
     ner = _get_ner(model_name, device)
-    if ner is None:
-        return confirmed, uncertain
-
     try:
         results = ner(clean)
     except Exception as exc:
-        logger.warning(f"[ContextGuard] NER inference failed: {exc}")
-        return confirmed, uncertain
+        raise DetectorUnavailable(f"ContextGuard failed on this input: {exc!r}") from exc
 
     for r in results:
         label = r.get("entity_group", r.get("entity", ""))

@@ -6,7 +6,9 @@
 
 anthropic>=0.25.0
 python-dotenv>=1.0.0
-spacy>=3.7.0
+spacy>=3.8,<3.9
+# EntityTrace model — detection fails closed without it (audit I17).
+en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl
 faker>=24.0.0
 cryptography>=42.0.0
 rapidfuzz>=3.6.0

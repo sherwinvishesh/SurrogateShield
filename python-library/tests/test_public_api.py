@@ -32,7 +32,8 @@ def test_version_matches_pyproject():
 
 
 def test_public_all():
-    assert set(ss.__all__) == {"config", "scan", "pii_finder", "mask", "unmask", "flush"}
+    assert set(ss.__all__) == {"config", "scan", "pii_finder", "mask", "unmask", "flush",
+                               "DetectorUnavailable"}
     assert ss.pii_finder is ss.scan
 
 

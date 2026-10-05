@@ -53,7 +53,17 @@ from rich.table import Table
 from rich.text import Text
 from rich import box
 
+from surrogateshield.core.errors import DetectorUnavailable
 from surrogateshield.core.storage.shadow_map import StorageError
+
+
+def _print_detector_unavailable(exc: DetectorUnavailable) -> None:
+    """Detection failed closed (audit I17): say so loudly; nothing was sent."""
+    console.print(Panel(
+        f"{exc}\n\n[dim]Nothing was masked and nothing was sent.[/dim]",
+        title="[bold red]Detector unavailable[/bold red]",
+        border_style="red",
+    ))
 
 console = Console()
 
@@ -229,7 +239,7 @@ def _run_pii_finder() -> None:
     _settings  = _ls()
     _detailed  = _settings.get("detailed_view", False)
     _show_pres = _settings.get("presidio_comparison", True)
-    logging.getLogger().setLevel(logging.INFO if _detailed else logging.ERROR)
+    logging.getLogger().setLevel(logging.INFO if _detailed else logging.WARNING)
     """
     Interactive PII detection sandbox — no API calls, no credits spent.
 
@@ -371,7 +381,10 @@ def _run_pii_finder() -> None:
             # In service-query mode "auto" resolves to shift (±N house number).
             sq_mode = resolve_address_mode(ADDRESS_MODE, True)
 
-            sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
+            try:
+                sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
+            except DetectorUnavailable as exc:
+                _print_detector_unavailable(exc); continue
             sq_confirmed = deduplicate(sq_confirmed)
             sq_skipped   = getattr(sq_confirmed, '_skipped_entities', [])
             sq_surrogate_map = (
@@ -447,7 +460,10 @@ def _run_pii_finder() -> None:
             continue
 
         # ── Standard PII detection path ───────────────────────────────────────
-        confirmed, needs_confirmation = run_cascade(user_input)
+        try:
+            confirmed, needs_confirmation = run_cascade(user_input)
+        except DetectorUnavailable as exc:
+            _print_detector_unavailable(exc); continue
         confirmed = deduplicate(confirmed)
         skipped   = getattr(confirmed, '_skipped_entities', [])
 
@@ -1384,7 +1400,7 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
     from settings_manager import load_settings as _ls
     _settings = _ls()
     _detailed = _settings.get("detailed_view", False)
-    logging.getLogger().setLevel(logging.INFO if _detailed else logging.ERROR)
+    logging.getLogger().setLevel(logging.INFO if _detailed else logging.WARNING)
 
     provider_slug = getattr(pipeline.chat, "_provider", "claude")
     provider_name = next((n for s, n, _ in _PROVIDERS if s == provider_slug), "LLM")
@@ -1413,6 +1429,9 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
 
         try:
             response, _, _ = pipeline.process_turn(user_input, interactive=True)
+        except DetectorUnavailable as exc:
+            _print_detector_unavailable(exc)
+            break
         except EnvironmentError as exc:
             console.print(f"[red]Configuration error.[/red]  [dim]{exc}[/dim]")
             break
@@ -1498,6 +1517,8 @@ def add_document(
             f"[green]✓[/green]  {n} chunks indexed  "
             f"[dim](total: {rag_store.document_count()})[/dim]"
         )
+    except DetectorUnavailable as exc:
+        _print_detector_unavailable(exc); raise typer.Exit(1)
     except Exception as exc:
         console.print(f"[red]Indexing failed:[/red] {exc}"); raise typer.Exit(1)
 

@@ -10,38 +10,50 @@ entities. Skips any span already covered by PatternScan results.
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Dict, List, Optional, Tuple
 
 from ..entities import DetectedEntity, remove_span_overlap
+from ..errors import DetectorUnavailable
 
 logger = logging.getLogger(__name__)
 
-# Cache loaded models by model name string
+# Cache loaded models (or the reason loading failed) by model name
 _nlp: Dict[str, object] = {}
+_nlp_lock = threading.Lock()
 
 
 def _get_nlp(model_name: str = "en_core_web_lg"):
-    global _nlp
-    if model_name in _nlp:
-        return _nlp[model_name]
+    """Return the loaded spaCy model; raise DetectorUnavailable if it cannot
+    be loaded (audit I17: never skip the NER stage silently)."""
+    cached = _nlp.get(model_name)
+    if cached is None:
+        with _nlp_lock:
+            cached = _nlp.get(model_name)
+            if cached is None:
+                cached = _nlp[model_name] = _load_nlp(model_name)
+    if isinstance(cached, DetectorUnavailable):
+        raise cached
+    return cached
+
+
+def _load_nlp(model_name: str):
     try:
         import spacy
-        _nlp[model_name] = spacy.load(model_name)
-        logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
     except ImportError:
-        logger.error("[EntityTrace] spaCy is not installed. Run: pip install spacy")
-        _nlp[model_name] = None
+        return DetectorUnavailable(
+            "EntityTrace needs spaCy, which is not installed. Run: pip install spacy"
+        )
+    try:
+        nlp = spacy.load(model_name)
     except OSError:
         # Never download from library code (audit I10): tell the user how.
-        logger.error(
-            f"[EntityTrace] spaCy model '{model_name}' not found. "
-            f"Run: python -m spacy download {model_name}"
+        return DetectorUnavailable(
+            f"EntityTrace needs the spaCy model {model_name!r}, which is not "
+            f"installed. Run: python -m spacy download {model_name}"
         )
-        _nlp[model_name] = None
-    except Exception as exc:
-        logger.error(f"[EntityTrace] Failed to load spaCy model '{model_name}': {exc}")
-        _nlp[model_name] = None
-    return _nlp[model_name]
+    logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
+    return nlp
 
 
 _TARGET_LABELS = {"PERSON", "GPE", "LOC", "ORG", "FAC"}
@@ -102,15 +114,11 @@ def trace(
     borderline: List[DetectedEntity] = []
 
     nlp = _get_nlp(spacy_model)
-    if nlp is None:
-        logger.warning("[EntityTrace] spaCy unavailable — skipping NER stage")
-        return confirmed, borderline
-
     try:
         doc = nlp(text)
     except Exception as exc:
-        logger.error(f"[EntityTrace] spaCy processing failed: {exc}")
-        return confirmed, borderline
+        # fail closed: an input spaCy cannot process is not "no entities"
+        raise DetectorUnavailable(f"EntityTrace failed on this input: {exc!r}") from exc
 
     for ent in doc.ents:
         if ent.label_ not in _TARGET_LABELS:

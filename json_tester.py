@@ -34,6 +34,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple
 
+from surrogateshield.core.errors import DetectorUnavailable
+
 EXPERIMENT_DIR = Path(__file__).parent / "experiment"
 FLUSH_EVERY = 25
 DEFAULT_SEED = 20260101
@@ -479,8 +481,8 @@ def run_batch(
             try:
                 result = _process_one(question, chat, fields, seed=seed + i)
                 status = "ok"
-            except SendMismatch:
-                raise
+            except (SendMismatch, DetectorUnavailable):
+                raise  # a missing model is not a per-row error (audit I17)
             except Exception as exc:  # recorded per row, counted by the evaluator
                 result = {"question": question, "error": str(exc),
                           "error_type": type(exc).__name__}

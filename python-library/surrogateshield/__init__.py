@@ -26,10 +26,12 @@ from .core.detection import address_parser as _address_parser
 from .core.detection import pipeline as _pipeline
 from .core.detection import service_query as _service_query
 from .core.entities import apply_entity_surrogates as _apply_entity_surrogates
+from .core.errors import DetectorUnavailable
 from .core.reconstruction.resolve import ResolvePass as _ResolvePass
 
 __version__ = "2.1.0"
-__all__ = ["config", "scan", "pii_finder", "mask", "unmask", "flush"]
+__all__ = ["config", "scan", "pii_finder", "mask", "unmask", "flush",
+           "DetectorUnavailable"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -226,6 +228,10 @@ def scan(text: str) -> Dict[str, str]:
 
     Returns:
         Dict mapping detected_value → pii_type_string.
+
+    Raises:
+        DetectorUnavailable: a detection model is missing or failed; the
+            text is not masked (fail closed, audit I17).
         Example: {"john@example.com": "email", "John Smith": "PERSON"}
     """
     confirmed, _ = _pipeline.run_cascade(
@@ -269,6 +275,10 @@ def mask(text: str) -> str:
 
     Returns:
         Sanitized text with PII replaced by surrogates.
+
+    Raises:
+        DetectorUnavailable: a detection model is missing or failed; the
+            text is not masked (fail closed, audit I17).
     """
     # Service-query detection: suppress standalone location entities and
     # resolve the effective address mode for this message.

@@ -58,5 +58,13 @@ if [ -z "$ANTHROPIC_API_KEY" ]; then
     exit 1
 fi
 
-# ── 4. Launch ─────────────────────────────────────────────────────────────
+# ── 4. Check the spaCy model (detection fails closed without it, audit I17) ─
+SPACY_MODEL="$(python -c 'import config; print(config.SPACY_MODEL)')"
+if ! python -c "import spacy.util, sys; sys.exit(0 if spacy.util.is_package('$SPACY_MODEL') else 1)" 2>/dev/null; then
+    echo -e "${RED}Error: spaCy model '$SPACY_MODEL' is not installed.${NC}"
+    echo -e "Install it with: ${DIM}python -m spacy download $SPACY_MODEL${NC}"
+    exit 1
+fi
+
+# ── 5. Launch ─────────────────────────────────────────────────────────────
 python main.py "$@"
