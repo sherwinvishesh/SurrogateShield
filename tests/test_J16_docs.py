@@ -90,3 +90,22 @@ def test_J16_published_numbers_match_results():
     for cfg in configs.values():
         f1 = str(Decimal(str(cfg["micro"]["f1"])).quantize(Decimal("0.001"), ROUND_HALF_UP))
         assert f1 in readme and f1 in site, f1
+
+
+def test_J16_phase8_numbers_match_results():
+    d = json.loads((RESULTS / "phase8.json").read_text(encoding="utf-8"))
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    site = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
+    bs = d["bertscore"]
+    for v in (bs["bertscore_ss_output"]["mean_f1"], bs["bertscore_presidio_output"]["mean_f1"],
+              bs["paired_output_ss_minus_presidio"]["mean_diff"]):
+        r = str(Decimal(str(v)).quantize(Decimal("0.001"), ROUND_HALF_UP))
+        assert r in readme and r in site, v
+    ss, prs = d["attacker"]["ss"], d["attacker"]["presidio"]
+    assert ss["exact"] == prs["exact"] == 0
+    assert f"0 of {ss['inference_targets']}" in readme
+    for arm in (ss, prs):
+        for rate in (arm["exact_or_partial_rate"], arm["leaked_verbatim_rate"]):
+            assert f"{rate * 100:.1f}" in readme and f"{rate * 100:.1f}" in site, rate
+    assert d["attacker_model"] != d["responder_model"]
+    assert d["command"] in readme

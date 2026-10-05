@@ -673,8 +673,17 @@ BERTScore (`roberta-large`, rescaled with its baseline) is computed for two pair
   when `clean_llm_response` is collected (synthetic data only).
 
 Input fidelity favours realistic surrogates by construction, so only the
-utility pair says whether answers stay useful. No measured result is
-published yet. `python bench/phase8.py` produces one.
+utility pair says whether answers stay useful.
+
+Measured on 50 synthetic questions (Phase 8; responder Claude Sonnet 4.6):
+
+| arm | utility: answer vs answer to the original (rescaled F1) | input fidelity |
+|---|---|---|
+| SurrogateShield | **0.563** | 0.637 |
+| Presidio (placeholders) | 0.384 | 0.317 |
+
+Paired difference in utility: +0.178 (95 % CI +0.116 to +0.246).
+Command: `python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json`.
 
 Enable the `BERTScore SS` and `BERTScore Presidio` fields in JSON Test to generate data for this table. The `roberta-large` model (~1.4 GB) is downloaded automatically on first use and can take 15–30 minutes to score on CPU.
 
@@ -730,9 +739,31 @@ The attacker is given a carefully constructed adversarial prompt that discloses 
 
 The experiment counts how many values an attacker model recovers from each
 arm, exactly or in part. A value that an arm left in plain text is counted
-as leaked, not recovered. No measured result is published yet;
-`python bench/phase8.py` produces one, and results are listed in
+as leaked, not recovered. Results are listed in
 [`bench/results/README.md`](bench/results/README.md).
+
+Measured in Phase 8: 50 synthetic questions, attacker Claude Opus 5.5,
+responder Claude Sonnet 4.6. Command: `python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json`.
+
+- **No value was recovered exactly** from either system: 0 of 149 for
+  SurrogateShield, 0 of 108 for Presidio.
+- **What can be recovered from SurrogateShield's text are small details**
+  that the surrogates keep so the answer stays useful: the kind of
+  business in an organisation name ("Pharmacy", "LLP"), the e-mail
+  provider (`gmail.com`), a birth year. The name, the account and the
+  number itself stay hidden. Counting such partial details, the attacker
+  got something for 17.4 % of SurrogateShield's values (26 of 149) and
+  4.6 % of Presidio's (5 of 108): a placeholder keeps nothing to guess from.
+- In 2 of those 26 cases the surrogate kept a real first name
+  ("aarav torres" sent as "aarav riley"). That is a bug, not a design
+  choice, and it is being fixed.
+- **Presidio sent 25.5 % of the values in plain text** (37 of 145,
+  including every organisation name), SurrogateShield 1.3 % (2 of 151).
+  Counting plain text and partial details together, 18.5 % of
+  SurrogateShield's values and 29.0 % of Presidio's were exposed in some
+  form.
+- 50 questions of generated data is a small sample. Three attacker replies
+  were not valid JSON and are excluded, so the denominators differ.
 
 ### Running the experiment
 
@@ -1128,8 +1159,17 @@ by the project's own seeded generator. Same command.
 - 0 of 250 turns were restored incorrectly when the provider echoed the
   surrogates back, over seeds 0–7.
 
-**Utility (BERTScore on answers) and attacker recovery.** Not yet
-measured; `python bench/phase8.py` runs both.
+**Utility and attacker recovery (50 synthetic questions, one live run).**
+`python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json`
+- Answers stay closer to the answer to the original: rescaled BERTScore
+  F1 0.563 against Presidio's 0.384 (difference +0.178, 95 % CI +0.116 to
+  +0.246).
+- An attacker model (Claude Opus 5.5) recovered no value exactly from
+  either system. From SurrogateShield it recovered small details the
+  surrogates keep, such as an e-mail provider or "LLP", for 17.4 % of
+  values; the identifying part stayed hidden. Presidio sent 25.5 % of
+  values in plain text, SurrogateShield 1.3 %. See
+  [Attacker experiment](#what-it-measures) for the full breakdown.
 
 ## Limitations
 

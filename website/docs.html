@@ -1073,7 +1073,7 @@ python main.py add-doc path/to/document.txt</code></pre>
     </div>
 
     <h3>What it measures</h3>
-    <p>How many gold values an attacker model, different from the responder, recovers from each arm, exact or partial. A value an arm left in plain text counts as leaked, not recovered. No measured result is published yet; <code>python bench/phase8.py</code> runs the protocol, and results are listed in <code>bench/results/README.md</code> with their commands.</p>
+    <p>How many gold values an attacker model, different from the responder, recovers from each arm, exact or partial. A value an arm left in plain text counts as leaked, not recovered. Measured on 50 synthetic questions with Claude Opus 5.5 as the attacker: no value was recovered exactly from either system. From SurrogateShield's text it recovered small details the surrogates keep (an e-mail provider, "LLP", a birth year) for 17.4% of values, while the identifying part stayed hidden; Presidio sent 25.5% of values in plain text, against 1.3%. Full numbers and the command are in <code>bench/results/README.md</code>.</p>
 
     <h3>Running the experiment</h3>
     <p>Press <span class="key">A</span> in the dashboard. The four-screen flow will:</p>
