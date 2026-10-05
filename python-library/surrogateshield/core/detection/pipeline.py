@@ -43,7 +43,7 @@ from dataclasses import replace as _dc_replace
 from typing import Dict, List, Optional, Set, Tuple
 
 from ..entities import DetectedEntity, mask_spans
-from . import pattern_scan, entity_trace, context_guard, relation_gate
+from . import pattern_scan, entity_trace, context_guard, relation_gate, structural
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -920,6 +920,23 @@ def _reclassify_location_orgs(
 # Main cascade
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _spacy_place_verifier(model_name: str):
+    """Pass S place check: does spaCy tag the candidate GPE/LOC once it is
+    capitalised ("she lives alone in Flagstaff")? Only reached for a
+    lowercase word right after a residence or work cue."""
+    def verify(sentence: str, s: int, e: int) -> bool:
+        cand = sentence[s:e]
+        cased = " ".join(w[:1].upper() + w[1:] for w in cand.split(" "))
+        if len(cased) != len(cand):
+            return False
+        probe = sentence[:s] + cased + sentence[e:]
+        probe = probe[:1].upper() + probe[1:]
+        doc = entity_trace._get_nlp(model_name)(probe)
+        return any(ent.label_ in ("GPE", "LOC") and ent.start_char <= s and e <= ent.end_char
+                   for ent in doc.ents)
+    return verify
+
+
 def run_cascade(
     text: str,
     skip_values: Optional[Set[str]] = None,
@@ -1124,6 +1141,29 @@ def run_cascade(
             confirmed = ents
         else:
             needs_confirmation = ents
+
+    # ── Pass S: structural / frame detection (I8, I13) — CSV columns, chat
+    # speakers, name components, particles, residence cues, payees, zh/hi
+    # frames, European streets. Runs after the gate: each rule carries its
+    # own evidence of a tie to a person.
+    if use_post_passes:
+        # Only confirmed entities block a structural span; an uncertain one
+        # it overlaps is superseded (it would never be replaced unattended).
+        added, removed = structural.detect(
+            text, list(confirmed),
+            place_verifier=_spacy_place_verifier(spacy_model) if use_entity_trace else None,
+            skip_locations=skip_location_entities,
+        )
+        if removed:
+            gone = {id(e) for e in removed}
+            confirmed          = [e for e in confirmed          if id(e) not in gone]
+            needs_confirmation = [e for e in needs_confirmation if id(e) not in gone]
+        if added:
+            added = _outside_opaque(added, opaque) if opaque else added
+            needs_confirmation = [e for e in needs_confirmation if not any(
+                a.start < e.end and e.start < a.end for a in added)]
+            confirmed = list(confirmed) + added
+            logger.info(f"[SentinelLayer] Pass S: +{len(added)} structural entit(ies)")
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment

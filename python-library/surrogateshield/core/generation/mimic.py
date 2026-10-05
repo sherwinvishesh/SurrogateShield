@@ -152,6 +152,18 @@ def _swap_gender(text: str, rng) -> str:
 _MAX_ORIGINAL_RETRIES = 20
 
 
+_EURO_STREET_WORD = re.compile(
+    r"(?i)\b(?:rue|avenue|av\.|boulevard|bd|chemin|all[ée]e|impasse|place|quai|route|cours"
+    r"|rua|avenida|travessa|alameda|calle|paseo|plaza|carrer|via|viale|piazza|corso"
+    r"|apto|apartamento|apt|piso|depto|dpto|appartement|appt|[ée]tage|wohnung|interno|sala"
+    r"|bloco|bloque|escalera|\w+(?:stra(?:ß|ss)e|weg|platz|allee|gasse))\b"
+)
+_EURO_JOINERS = frozenset("de des du la le da do dos das del della di von der bis ter".split())
+_EURO_STREET_NAMES = ("Flores", "Liberdade", "Garibaldi", "Mozart", "Pasteur", "Castelo",
+                      "Oliveira", "Roma", "Goethe", "Mayor", "Vitória", "Tilleuls",
+                      "Sol", "Lumière", "Lindenhof")
+
+
 class MimicGen:
     """Generates realistic, collision-resistant surrogates for detected PII.
 
@@ -274,8 +286,40 @@ class MimicGen:
                     self.used_surrogates.add(candidate)
                     return candidate
 
+        # A European street the US parser cannot read ("14 rue des Lilas",
+        # "Rua Augusta 1508", "apto 52"): keep its words and shape, swap the
+        # numbers and the name words (I13).
+        if entity is not None and _EURO_STREET_WORD.search(entity.text):
+            for _ in range(20):
+                candidate = self._euro_street_like(entity.text)
+                if candidate not in blocked and candidate != entity.text:
+                    self.used_surrogates.add(candidate)
+                    return candidate
+
         # Last resort: no structure available.
         return self._unique(lambda: self._fake.address().replace("\n", ", "))
+
+    def _euro_street_like(self, text: str) -> str:
+        def digits(m):
+            d = m.group(0)
+            out = str(self._rng.randint(1, 9)) + "".join(
+                str(self._rng.randint(0, 9)) for _ in d[1:])
+            return out
+        out = re.sub(r"\d+", digits, text)
+
+        def word(m):
+            w = m.group(0)
+            de = re.fullmatch(r"(?i)(\w+?)(stra(?:ß|ss)e|weg|platz|allee|gasse)", w)
+            if de:   # German compound: the prefix IS the street name
+                stem = self._rng.choice([n for n in ("Linden", "Berg", "Garten", "Schiller",
+                                                     "Mühlen", "Kirch", "Wald")
+                                         if n.lower() != de.group(1).lower()])
+                return stem + de.group(2)
+            if _EURO_STREET_WORD.fullmatch(w) or w.lower() in _EURO_JOINERS:
+                return w
+            choice = self._rng.choice([n for n in _EURO_STREET_NAMES if n != w])
+            return choice.upper() if w.isupper() else choice
+        return re.sub(r"[A-ZÀ-Ý][\w'’\-]+", word, out)
 
     def _replace_address(self, parsed: "address_parser.ParsedAddress") -> str:
         """Build a structure-preserving fake: same components, same separators,
