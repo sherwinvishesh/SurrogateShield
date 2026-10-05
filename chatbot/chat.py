@@ -15,17 +15,10 @@ module connects everything. chatbot.chat only talks to the API.
 from __future__ import annotations
 
 import json
-import os
-import time
 from pathlib import Path
 from typing import List, Optional
 
-import anthropic
-
-from config import (
-    CLAUDE_MODEL,
-    GEMINI_MODEL, OPENAI_MODEL, LOCAL_LLM_MODEL, LOCAL_LLM_HOST,
-)
+from chatbot import providers
 from settings_manager import load_settings
 from storage.logic import (
     KIND_TRANSCRIPT,
@@ -68,7 +61,7 @@ class ClaudeChat:
 
     Attributes:
         conversation: The Conversation dataclass holding all state.
-        _client:      Anthropic API client instance.
+        _client:      provider adapter (chatbot/providers.py).
     """
 
     def __init__(self, conversation: Optional[Conversation] = None) -> None:
@@ -86,134 +79,21 @@ class ClaudeChat:
         logger.debug(f"[ClaudeChat] Conversation ID: {self.conversation.id} provider={self._provider}")
 
     def _init_client(self):
-        """Initialise and return the API client for the configured provider."""
-        if self._provider == "claude":
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            if not api_key:
-                raise EnvironmentError(
-                    "ANTHROPIC_API_KEY is not set. Add it to your .env file."
-                )
-            return anthropic.Anthropic(api_key=api_key)
-
-        if self._provider == "gemini":
-            api_key = os.environ.get("GEMINI_API_KEY")
-            if not api_key:
-                raise EnvironmentError(
-                    "GEMINI_API_KEY is not set. Add it to your .env file."
-                )
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=api_key)
-                return genai
-            except ImportError:
-                raise EnvironmentError(
-                    "google-generativeai package not installed. Run: pip install google-generativeai"
-                )
-
-        if self._provider == "chatgpt":
-            api_key = os.environ.get("OPENAI_API_KEY")
-            if not api_key:
-                raise EnvironmentError(
-                    "OPENAI_API_KEY is not set. Add it to your .env file."
-                )
-            try:
-                import openai
-                return openai.OpenAI(api_key=api_key)
-            except ImportError:
-                raise EnvironmentError(
-                    "openai package not installed. Run: pip install openai"
-                )
-
-        if self._provider == "local":
-            host = os.environ.get("LOCAL_LLM_HOST", LOCAL_LLM_HOST)
-            try:
-                import ollama
-                return ollama.Client(host=host)
-            except ImportError:
-                raise EnvironmentError(
-                    "ollama package not installed. Run: pip install ollama"
-                )
-
-        raise EnvironmentError(f"Unknown LLM provider: {self._provider!r}")
+        """Build the adapter for the configured provider (chatbot/providers.py)."""
+        return providers.build(self._provider)
 
     def _send_to_api(self, api_payload: list) -> str:
-        """Route the API call to the configured provider and return the response text."""
-        _retryable = (anthropic.RateLimitError, anthropic.APIConnectionError)
-        _base_delay = 5  # seconds
+        """Send *api_payload* and return the reply text.
 
-        for attempt in range(3):
-            try:
-                if self._provider == "claude":
-                    response = self._client.messages.create(
-                        model=CLAUDE_MODEL,
-                        max_tokens=4096,
-                        system=SYSTEM_PROMPT,
-                        messages=api_payload,
-                    )
-                    return response.content[0].text
-
-                if self._provider == "gemini":
-                    model = self._client.GenerativeModel(
-                        model_name=GEMINI_MODEL,
-                        system_instruction=SYSTEM_PROMPT,
-                    )
-                    history = [
-                        {
-                            "role": "user" if m["role"] == "user" else "model",
-                            "parts": [m["content"]],
-                        }
-                        for m in api_payload[:-1]
-                    ]
-                    chat = model.start_chat(history=history)
-                    response = chat.send_message(api_payload[-1]["content"])
-                    return response.text
-
-                if self._provider == "chatgpt":
-                    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + api_payload
-                    response = self._client.chat.completions.create(
-                        model=OPENAI_MODEL,
-                        max_tokens=4096,
-                        messages=messages,
-                    )
-                    return response.choices[0].message.content
-
-                if self._provider == "local":
-                    model = os.environ.get("LOCAL_LLM_MODEL", LOCAL_LLM_MODEL)
-                    messages = [{"role": "system", "content": SYSTEM_PROMPT}] + api_payload
-                    response = self._client.chat(model=model, messages=messages)
-                    return response.message.content
-
-                raise EnvironmentError(f"Unknown provider: {self._provider!r}")
-
-            except anthropic.AuthenticationError:
-                logger.error("[ClaudeChat] Authentication failed — check ANTHROPIC_API_KEY")
-                raise
-
-            except _retryable as exc:
-                if attempt < 2:
-                    delay = _base_delay * (2 ** attempt)
-                    if isinstance(exc, anthropic.RateLimitError):
-                        try:
-                            ra = exc.response.headers.get("retry-after")
-                            if ra:
-                                delay = float(ra)
-                        except Exception:
-                            pass
-                        label = "Rate limited"
-                    else:
-                        label = "Connection error"
-                    logger.warning(
-                        f"[ClaudeChat] {label} — retrying in {delay:.0f}s"
-                        f" (attempt {attempt + 1}/3)"
-                    )
-                    time.sleep(delay)
-                else:
-                    logger.error(f"[ClaudeChat] API call failed after 3 attempts: {exc}")
-                    raise
-
-            except Exception as exc:
-                logger.error(f"[ClaudeChat] API call failed ({self._provider}): {exc}")
-                raise
+        Raises providers.ProviderError (incl. EmptyResponse and
+        ProviderAuthError) — never returns None or an empty string.
+        """
+        try:
+            return providers.complete(self._client, api_payload, SYSTEM_PROMPT,
+                                      provider=self._provider)
+        except providers.ProviderError as exc:
+            logger.error(f"[ClaudeChat] {exc}")
+            raise
 
     def send(self, sanitised_message: str) -> str:
         """

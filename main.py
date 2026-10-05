@@ -1019,7 +1019,7 @@ _PROVIDER_INSTRUCTIONS: dict = {
         "3. Add to your [bold white].env[/bold white] file (then [cyan]chmod 600 .env[/cyan]):\n\n"
         "       [cyan]GEMINI_API_KEY=AIza...[/cyan]",
         "4. Install the SDK:\n\n"
-        "       [cyan]pip install google-generativeai[/cyan]",
+        "       [cyan]pip install google-genai[/cyan]",
         "5. Press [bold white]T[/bold white] to test your current key.",
     ],
     "chatgpt": [
@@ -1051,53 +1051,15 @@ def _test_provider(slug: str, name: str) -> None:
     # shell keeps precedence, as at start-up (audit I27).
     load_dotenv(override=False)
     console.print(f"\n  [dim]Testing {name} connection…[/dim]")
+    # Same adapter, model id and retry policy as the chat itself (F2, I20,
+    # I21): "successful" means the configured production model answered.
+    from chatbot import providers
     try:
-        if slug == "claude":
-            api_key = os.environ.get("ANTHROPIC_API_KEY")
-            if not api_key:
-                console.print("  [red]✗[/red]  ANTHROPIC_API_KEY not set in .env")
-                time.sleep(1.5); return
-            import anthropic as _ant
-            r = _ant.Anthropic(api_key=api_key).messages.create(
-                model=_cfg.CLAUDE_MODEL, max_tokens=5,
-                messages=[{"role": "user", "content": "Hi"}],
-            )
-            _ = r.content[0].text
-
-        elif slug == "gemini":
-            api_key = os.environ.get("GEMINI_API_KEY")
-            if not api_key:
-                console.print("  [red]✗[/red]  GEMINI_API_KEY not set in .env")
-                time.sleep(1.5); return
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            _ = genai.GenerativeModel(_cfg.GEMINI_MODEL).generate_content("Hi").text
-
-        elif slug == "chatgpt":
-            api_key = os.environ.get("OPENAI_API_KEY")
-            if not api_key:
-                console.print("  [red]✗[/red]  OPENAI_API_KEY not set in .env")
-                time.sleep(1.5); return
-            import openai as _oai
-            r = _oai.OpenAI(api_key=api_key).chat.completions.create(
-                model=_cfg.OPENAI_MODEL, max_tokens=5,
-                messages=[{"role": "user", "content": "Hi"}],
-            )
-            _ = r.choices[0].message.content
-
-        elif slug == "local":
-            import ollama as _ol
-            host  = os.environ.get("LOCAL_LLM_HOST", _cfg.LOCAL_LLM_HOST)
-            model = os.environ.get("LOCAL_LLM_MODEL", _cfg.LOCAL_LLM_MODEL)
-            r = _ol.Client(host=host).chat(
-                model=model, messages=[{"role": "user", "content": "Hi"}]
-            )
-            _ = r.message.content
-
+        adapter = providers.build(slug)
+        providers.complete(adapter, [{"role": "user", "content": "Hi"}],
+                           "Reply with one word.", provider=slug)
         console.print(f"  [green]✓[/green]  [green]{name} connection successful![/green]")
-    except ImportError as exc:
-        console.print(f"  [red]✗[/red]  Package not installed: {exc}")
-    except Exception as exc:
+    except (EnvironmentError, providers.ProviderError) as exc:
         console.print(f"  [red]✗[/red]  {exc}")
     time.sleep(1.8)
 

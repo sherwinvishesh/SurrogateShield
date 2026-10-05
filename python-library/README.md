@@ -203,18 +203,17 @@ shield.flush()
 ## Google Gemini
 
 ```python
-import google.generativeai as genai
+from google import genai          # pip install google-genai
 import surrogateshield as shield
 
-genai.configure(api_key="YOUR_API_KEY")
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client()            # reads GEMINI_API_KEY
 
 user_message = "My credit card number is 4532015112830366 and my IP is 192.168.1.100."
 
 sanitized = shield.mask(user_message)
 # Credit card (Luhn-validated) and IP address are replaced with fakes
 
-response = model.generate_content(sanitized)
+response = client.models.generate_content(model="gemini-2.5-flash", contents=sanitized)
 
 # shield.unmask() accepts Gemini response objects directly via response.text
 restored = shield.unmask(response)

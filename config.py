@@ -33,14 +33,16 @@ CONTEXT_GUARD_MODEL: str = "dslim/distilbert-NER"
 CONTEXT_GUARD_DEVICE: int = -1                # -1 = CPU, >= 0 = GPU device id
 CONTEXT_GUARD_ENABLED: bool = True            # always on — no Ollama required
 
-CLAUDE_MODEL: str = "claude-sonnet-4-6"          # Claude API model
+# Model ids live here only (audit F2); each can be overridden from the
+# environment without editing code.
+CLAUDE_MODEL: str = os.getenv("SURROGATESHIELD_CLAUDE_MODEL") or "claude-sonnet-4-6"
 # Attacker experiment (attacker.py). Must differ from the model that answered
 # the questions (audit I30); there is no default — set it explicitly or via
 # SURROGATESHIELD_ATTACKER_MODEL.
 ATTACKER_MODEL: Optional[str] = os.getenv("SURROGATESHIELD_ATTACKER_MODEL") or None
-GEMINI_MODEL: str = "gemini-1.5-flash"            # Gemini API model
-OPENAI_MODEL: str = "gpt-4o-mini"                 # OpenAI API model
-LOCAL_LLM_MODEL: str = "llama3.2"                 # Default Ollama model
+GEMINI_MODEL: str = os.getenv("SURROGATESHIELD_GEMINI_MODEL") or "gemini-2.5-flash"
+OPENAI_MODEL: str = os.getenv("SURROGATESHIELD_OPENAI_MODEL") or "gpt-4o-mini"
+LOCAL_LLM_MODEL: str = "llama3.2"                 # Default Ollama model (LOCAL_LLM_MODEL env)
 LOCAL_LLM_HOST: str = "http://localhost:11434"     # Default Ollama server host
 EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"        # sentence-transformers for RAG
 SPACY_MODEL: str = "en_core_web_lg"              # spaCy NER model

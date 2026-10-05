@@ -274,9 +274,9 @@ All five components above; PatternScan, EntityTrace, ContextGuard, MimicGen, Sha
 
 | Provider | Model | Env var required |
 |---|---|---|
-| Claude (default) | `claude-sonnet-4-6` | `ANTHROPIC_API_KEY` |
-| Gemini | `gemini-1.5-flash` | `GEMINI_API_KEY` |
-| ChatGPT | `gpt-4o-mini` | `OPENAI_API_KEY` |
+| Claude (default) | `claude-sonnet-4-6` (`SURROGATESHIELD_CLAUDE_MODEL`) | `ANTHROPIC_API_KEY` |
+| Gemini | `gemini-2.5-flash` (`SURROGATESHIELD_GEMINI_MODEL`; SDK `google-genai`) | `GEMINI_API_KEY` |
+| ChatGPT | `gpt-4o-mini` (`SURROGATESHIELD_OPENAI_MODEL`) | `OPENAI_API_KEY` |
 | Local (Ollama) | `llama3.2` (configurable) | None: runs fully offline |
 
 Switch providers from the **Settings** menu inside the dashboard (press `S`).
@@ -861,10 +861,10 @@ print(shield.unmask(response))   # passes ChatCompletion object directly
 shield.flush()
 
 # Gemini
-import google.generativeai as genai
-model = genai.GenerativeModel("gemini-1.5-flash")
+from google import genai
+client = genai.Client()
 sanitized = shield.mask(user_text)
-response = model.generate_content(sanitized)
+response = client.models.generate_content(model="gemini-2.5-flash", contents=sanitized)
 print(shield.unmask(response))   # passes GenerateContentResponse directly
 shield.flush()
 
