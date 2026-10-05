@@ -1,0 +1,132 @@
+{
+ "datasets": {
+  "oasst1": {
+   "drawn": {
+    "multi_dev": 20,
+    "multi_test": 80,
+    "single_dev": 100,
+    "single_test": 400
+   },
+   "pull_counts": {
+    "drawn_multi": 100,
+    "drawn_single": 500,
+    "drop_deleted": 1,
+    "drop_first_turn_jailbreak": 3,
+    "drop_first_turn_only_code": 2,
+    "drop_first_turn_too_long": 6,
+    "drop_first_turn_too_short": 1775,
+    "drop_multi_later_turn_too_long": 1,
+    "drop_not_english": 6693,
+    "first_turn_kept": 1884,
+    "multi_candidates": 1399,
+    "multi_exact_duplicates": 0,
+    "multi_kept": 1398,
+    "single_exact_duplicates": 1,
+    "source_roots": 10364
+   },
+   "raw_files": {
+    "data/train-00000-of-00001-b42a775f407cee45.parquet": "bbfadf5ed1278ba2208c837fdcad865adf65f5df55d80abadab2745db13fcb5e",
+    "data/validation-00000-of-00001-134b8fd0c89408b6.parquet": "24002597bb13a7edd42d92f773762f25e285f72c31a70449393d0ded1dc7b416"
+   },
+   "seeds": {
+    "multi": 8297385324506450750,
+    "multi/split": 51635376429254779,
+    "single": 4200958982437220154,
+    "single/split": 149393221693701657
+   }
+  },
+  "sharegpt": {
+   "drawn": {
+    "multi_dev": 20,
+    "multi_test": 80,
+    "single_dev": 100,
+    "single_test": 400
+   },
+   "english_heuristic_vs_wildchat_label": {
+    "false_neg": 291,
+    "false_pos": 117,
+    "n": 8518,
+    "precision": 0.9808,
+    "recall": 0.9535,
+    "true_neg": 2140,
+    "true_pos": 5970
+   },
+   "pull_counts": {
+    "drawn_multi": 100,
+    "drawn_single": 500,
+    "drop_first_turn_empty": 5,
+    "drop_first_turn_jailbreak": 286,
+    "drop_first_turn_not_english": 14651,
+    "drop_first_turn_only_code": 106,
+    "drop_first_turn_too_long": 1929,
+    "drop_first_turn_too_short": 9369,
+    "drop_multi_later_turn_empty": 1,
+    "drop_multi_later_turn_jailbreak": 4,
+    "drop_multi_later_turn_not_english": 859,
+    "drop_multi_later_turn_too_long": 421,
+    "drop_not_starting_with_user": 1673,
+    "first_turn_kept": 17313,
+    "multi_candidates": 12464,
+    "multi_exact_duplicates": 1445,
+    "multi_kept": 11179,
+    "single_exact_duplicates": 2158,
+    "single_near_duplicates_skipped": 2,
+    "source_conversations": 45332
+   },
+   "raw_files": {
+    "sg_90k_part1.json": "ed0e3af68ed968aed86aafd3796dacdb6fc2bb91f82edec880086ffcb7280f56"
+   },
+   "seeds": {
+    "multi": 7337422658528046808,
+    "multi/split": 2737957914994815187,
+    "single": 1727909325923492305,
+    "single/split": 6632606893631942324
+   }
+  },
+  "wildchat": {
+   "drawn": {
+    "multi_dev": 20,
+    "multi_test": 80,
+    "single_dev": 100,
+    "single_test": 400
+   },
+   "pull_counts": {
+    "drawn_multi": 100,
+    "drawn_single": 500,
+    "drop_duplicate_hash": 1428,
+    "drop_first_turn_empty": 204,
+    "drop_first_turn_jailbreak": 148,
+    "drop_first_turn_only_code": 601,
+    "drop_first_turn_too_long": 13276,
+    "drop_first_turn_too_short": 16212,
+    "drop_multi_later_turn_empty": 301,
+    "drop_multi_later_turn_jailbreak": 3,
+    "drop_multi_later_turn_too_long": 299,
+    "drop_not_english": 51104,
+    "first_turn_kept": 36740,
+    "multi_candidates": 10678,
+    "multi_exact_duplicates": 706,
+    "multi_kept": 10075,
+    "single_exact_duplicates": 6271,
+    "single_near_duplicates_skipped": 11,
+    "source_conversations": 119713
+   },
+   "raw_files": {
+    "data/train-00004-of-00014.parquet": "08c7e0c31edc120606d67cfa82486471d82945a7a414761501ea44b1ab0cd804",
+    "data/train-00008-of-00014.parquet": "a69578183dde5de1aa94134da2d7c2d13f00d88a577ef91140a492fbbbf10792"
+   },
+   "seeds": {
+    "multi": 8004489117543738831,
+    "multi/split": 8872168885709066928,
+    "single": 8280196155434402060,
+    "single/split": 6786772035386712793
+   }
+  }
+ },
+ "frozen": {
+  "oasst1/pool.jsonl": "0573dfdfdc2ace6524d3979b5cbe16f0f528892472cf505cbcbb01b127482dc0",
+  "sharegpt/pool.jsonl": "f9d7636ffeb99beba8487fdbf3bf39d94f877823f86c42aa945723798dc2564d",
+  "wildchat/pool.jsonl": "912b55e509227bdf0a2c6442352ac668d44153febd369d3930489c0154843c9f"
+ },
+ "seed": 20261005
+}

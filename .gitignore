@@ -8,6 +8,7 @@ __pycache__/
 
 # ── Virtual environments ───────────────────────────────────────────
 .venv/
+.venv-baselines/
 venv/
 env/
 ENV/
@@ -28,6 +29,11 @@ experiment/*_eval_results*.json
 experiment/*_Attacker_Experiment*.json
 experiment/*.tmp
 experiment/phase8/
+# Real-data run (PROMPT_FOR_OPUS_NEW): raw downloads and rebuilt natural-slice
+# text hold real people's prompts; live outputs hold prompts and answers.
+bench/realdata/raw/
+bench/realdata/build/
+experiment/realdata/
 *.json.tmp
 
 # Device secret — NEVER commit this

@@ -12,6 +12,7 @@ en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_
 faker>=24.0.0
 cryptography>=42.0.0
 rapidfuzz>=3.6.0
+pyarrow>=15.0.0       # bench/realdata: reads the pinned OASST1 / WildChat parquet files
 typer>=0.12.0
 rich>=13.7.0
 presidio-analyzer>=2.2.0
