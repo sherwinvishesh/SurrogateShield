@@ -27,6 +27,7 @@ experiment/*_answers*.json
 experiment/*_eval_results*.json
 experiment/*_Attacker_Experiment*.json
 experiment/*.tmp
+experiment/phase8/
 *.json.tmp
 
 # Device secret — NEVER commit this
