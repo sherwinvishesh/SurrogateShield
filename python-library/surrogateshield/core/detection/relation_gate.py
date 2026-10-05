@@ -97,7 +97,7 @@ _EDGE_WORDS = frozenset("""
 ich bin und ik ben je uit naam hai hoon hain mein main se ka ki ke ko aur kya
 karna nome é me llamo soy suis est como sono chiamo heet heiße heisse i am im
 is and the name called named from at with to for in of on hi hello hey dear
-hallo bonjour hola oi ciao
+hallo bonjour hola oi ciao tiene tenía tem tinha vive mora estudia trabaja está
 """.split())
 # The same frame words written with a capital at the start of a sentence
 # ("Ich heiße …", "Hallo, ik ben …"); "Ben", "Main" and "Bin" are names.
@@ -295,11 +295,23 @@ _WORK_AFTER = re.compile(
 )
 
 
+# "this introductory statement written by Olwethu Dlamini": the author of
+# the user's own draft, not of a public work.
+_OWN_DRAFT_BY = re.compile(
+    r"(?i)\b(?:this|that|my|our|his|her|their|the\s+attached|the\s+following)\s+"
+    r"(?:[\w'’\-]+\s+){0,5}(?:statements?|bios?|biography|essays?|letters?|paragraphs?|drafts?"
+    r"|introductions?|intros?|e-?mails?|notes?|posts?|messages?|cvs?|resumes?|résumés?|summary"
+    r"|profiles?|proposals?|reports?|applications?|speech|story|stories|poems?|texts?)\s+"
+    r"(?:written|drafted|prepared|composed|sent|submitted|put\s+together)\s+by\s+$")
+
+
 def is_public_person(ent: DetectedEntity, text: str) -> bool:
     core = _core(ent.text)
     low = core.lower()
     before = text[max(0, ent.start - 40):ent.start]
     if _PERSONAL_BEFORE_PERSON.search(before):
+        return False
+    if _OWN_DRAFT_BY.search(text[max(0, ent.start - 120):ent.start]):
         return False
     if low in PUBLIC_PEOPLE or _EPITHET.search(core) or (
             low in PUBLIC_ORGS and low not in _NAME_LIKE_ORGS):
@@ -507,7 +519,10 @@ _PUBLIC_CUE = re.compile(
     r"(?i)(?:\b(?:work(?:s|ed|ing)?|job|employed|intern(?:ing)?|hired|stud(?:y|ying|ied|ent)"
     r"|enrolled|graduated|attend(?:s|ed|ing)?|teach(?:es|ing)?|taught)\b[^.!?\n]{0,25}"
     r"|\b(?:i['’]?m|i\s+am|im)\s+(?:a|an)\s+[^.!?\n,]{1,40}?\s+)"
-    r"\b(?:at|for|with|by|from|in)\s+(?:the\s+)?$")
+    r"\b(?:at|for|with|by|from|in)\s+(?:the\s+)?$"
+    # "our cloud infrastructure at Microsoft": the writer's employer
+    r"|\bour\s+(?!(?:[\w'’\-]+\s+){0,3}?(?:account|subscription|order|plan|card|membership)s?\b)"
+    r"(?:[\w'’\-]+\s+){1,4}at\s+$")
 
 
 _PRODUCT_WORD = re.compile(

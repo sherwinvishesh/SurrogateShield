@@ -146,6 +146,7 @@ Bonjour | Bonsoir | Salut | Merci | Cordialement | Hola | Gracias | Saludos | Bu
 Buenas | Oi | Olá | Ola | Obrigado | Obrigada | Atenciosamente | Hallo | Danke
 Grüße | Gruß | Ciao | Grazie | Namaste | Como | Cómo | Qué | Que | Porque | Pourquoi
 Comment | Wie | Warum | Was | Wo | Por favor | Please | Router | Modem | Wifi | WiFi
+irl | lol | lmao | tbh | imo | imho | idk | btw | omg | ngl | fyi | brb | afaik | smh
 """)
 
 # Given names that are also ordinary English words (virtues, gems, flowers,

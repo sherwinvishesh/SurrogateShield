@@ -380,12 +380,15 @@ def _detect_structural_persons(
     span wins so "WASHINGTON, DESHAWN M" replaces "WASHINGTON, DESHAWN").
     """
     candidates: List[Tuple[int, int, str]] = []
+    # "my name is X" says what X is, whatever type NER gave it
+    strong: Set[Tuple[int, int]] = set()
 
     for m in _INTRO_STRONG.finditer(text):
         toks = _trim_trailing_stopwords(m.group(1).split())
         if toks and _person_tokens_ok(toks):
             span_text = " ".join(toks)
             candidates.append((m.start(1), m.start(1) + len(span_text), span_text))
+            strong.add((m.start(1), m.start(1) + len(span_text)))
 
     for m in _INTRO_WEAK.finditer(text):
         toks = _trim_trailing_stopwords(m.group(1).split())
@@ -490,7 +493,8 @@ def _detect_structural_persons(
                 # washington").  Any other overlap blocks the candidate.
                 if (ent.type in ("PERSON", "GPE", "ORG", "LOC", "FAC")
                         and ent.start >= start and ent.end <= end
-                        and (ent.end - ent.start) < (end - start)):
+                        and ((ent.end - ent.start) < (end - start)
+                             or ((start, end) in strong and ent.type != "PERSON"))):
                     superseded.append(ent)
                 else:
                     blocking = ent

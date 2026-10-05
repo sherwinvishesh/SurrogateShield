@@ -1031,7 +1031,8 @@ _PATTERNS: list = [
             r"(?<![A-Za-z0-9.\-])(?<![A-Za-z0-9]_)"
             # not the national part of "+44 116 296 4471" (phone_uk / _intl)
             r"(?<!\+\d )(?<!\+\d\d )(?<!\+\d\d\d )(?<!\+\d\d)(?<!\+\d\d\d)"
-            r"(\+?1[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}"
+            # area-code brackets come in pairs: "(875.228.2393)" is a bracketed number
+            r"(\+?1[\s\-.]?)?(?:\(\d{3}\)|\d{3})[\s\-.]?\d{3}[\s\-.]?\d{4}"
             r"(?:\s*(?:ext|extension|x)\.?\s*\d{1,6})?"
             r"(?![A-Za-z0-9])(?!_[A-Za-z0-9])",
             re.IGNORECASE,

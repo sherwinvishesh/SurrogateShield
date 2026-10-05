@@ -448,7 +448,7 @@ _EN_RESIDENCE = re.compile(
     r"|is|are|was|were|comes?|came)\s+from\s+)"
 )
 _PERSON_FROM = re.compile(r"\s+from\s+")
-_LOWER_PLACE = re.compile(r"([a-z][a-z'’\-]{2,}(?:\s+[a-z][a-z'’\-]{2,})?)\b")
+_LOWER_PLACE = re.compile(r"([a-zß-ÿ][a-zß-ÿ'’\-]{2,}(?:\s+[a-zß-ÿ][a-zß-ÿ'’\-]{2,})?)(?![\w'’\-])")
 _PLACE_STOP = frozenset("""
 the a an my his her our their your this that it there here home town work school
 college fear love debt poverty peace hell bed person general advance order total
@@ -574,6 +574,175 @@ def _kin_names(text: str, ents: Sequence[DetectedEntity]):
             continue                        # only the last line of the message
         if not _overlaps(m.start(1), m.end(1), list(ents) + added):
             added.append(_ent(text, m.start(1), m.end(1), "PERSON", 0.8))
+    return added, []
+
+
+# ── 7c. affiliation, age and contact-block frames ───────────────────────────
+
+# "estudia en Redfern Physiotherapy", "trabalho na Copperleaf", "arbeite bei
+# Kestrel Analytics": the place a person studies or works, in the languages
+# whose NER gate drops model ORGs.
+_AFFIL_VERB = (
+    r"(?i:\b(?:estudia|estudio|estudian|estudiaba|trabaja|trabajo|trabajan|trabajaba)"
+    r"\s+(?:en|para)\s+(?:el\s+|la\s+)?"
+    r"|\b(?:estuda|estudo|estudava|trabalha|trabalho|trabalhava)\s+(?:na|no|em|para)\s+"
+    r"|\b(?:travaille|travaillais|travaillait|étudie|étudiais)\s+(?:à|a|chez|pour|au)\s+(?:la\s+|l['’])?"
+    r"|\b(?:lavora|lavoro|lavoravo|studia|studio)\s+(?:presso|da|al|alla|per)\s+"
+    r"|\b(?:arbeite|arbeitet|arbeitete|studiere|studiert)\s+(?:bei|für|an\s+der|am)\s+(?:der\s+)?"
+    r"|\b(?:werk|werkt|studeer|studeert)\s+(?:bij|aan|voor)\s+(?:de\s+|het\s+)?)"
+)
+_AFFIL_NAME = _CAP_W + r"(?:[ \t]+(?:(?:&|y|e|et|und|en|de|del|di|da|do|du|van)[ \t]+)?" + _CAP_W + r"){0,4}"
+_AFFIL = re.compile(_AFFIL_VERB + r"(" + _AFFIL_NAME + r")")
+
+# "<Name> tiene 25 años", "Noa a 71 ans", "Jonas ist 41 Jahre alt"
+_NAME_AGE = re.compile(
+    r"(?<![\w@#./-])(" + _CAP_W + r"(?:[ \t]+" + _CAP_W + r")?)[ \t]+"
+    r"(?:tiene|tenía|tem|tinha|a|avait|ha|aveva|hat|hatte|ist|heeft|is|was|turned|turns)"
+    r"[ \t]+\d{1,3}[ \t]+(?:años|anos|ans|anni|jahre|jaar|years?[ \t]+old)\b", re.I)
+_NAME_AGE_STOP = frozenset("""
+el ella él yo ele ela il elle er sie es he she it lui lei hij zij mein meine mijn mon ma
+mi su tu who this that there which mio mia sua suo nostro nostra unser unsere notre
+""".split())
+
+# An all-caps name: "FOLAKE BANERJEE" on the line above a street, or
+# "URGENT: ULRIKE REYES (875.228.2393)" before a bracketed contact detail.
+_CAPS_NAME = r"[A-ZÀ-Ý][A-ZÀ-Ý'’\-]+(?:[ \t]+[A-ZÀ-Ý][A-ZÀ-Ý'’\-]+){1,2}"
+_CAPS_BEFORE_CONTACT = re.compile(r"(?:^|(?<=[:;,\n])[ \t]*)(" + _CAPS_NAME + r")[ \t]*\(")
+_BLOCK_LINE = re.compile(r"[ \t]*([^\W\d_][\w'’.\-]*(?:[ \t]+[^\W\d_][\w'’.\-]*){1,3})[ \t]*")
+_NOT_CAPS_NAME = frozenset("""
+urgent call contact phone tel fax mobile cell office home work email please note attn
+customer service hotline help desk support ship shipping billing bill deliver delivery
+mailing return address to from my our the name re fwd subject order refund invoice
+account dear sir madam team dept department
+""".split())
+
+# "im bongani from moncton": one given name after "I'm", then "from" — words
+# that are no name ("im back from", "im fresh from") are listed.
+_IM_FROM = re.compile(r"(?i:\b(?:i\s*['’]?m|i\s+am)[ \t]+)([^\W\d_][\w'’\-]{2,15})[ \t]+from[ \t]+\S")
+_NOT_IM_FROM = frozenset("""
+back home free far away fresh just originally coming calling writing texting tired sick
+different safe sore here there out up down done also still now really actually not too
+so very only literally apart separate divorced estranged banned blocked exempt immune
+protected absent missing gone retired fired suspended released discharged hiding running
+glad happy proud sorry new young old native local based located currently straight right
+recovering visiting moving travelling traveling returning flying driving graduating
+transferring escaping fleeing a an the from your his her their our
+""".split())
+
+
+# "Can Lumen Credit Union fire Bilal Park for …": the object of a personnel
+# verb is a person, its subject the employer — whatever type NER guessed.
+_PERSONNEL = (r"(?:fire|fired|firing|hire|hired|hiring|promote|promoted|demote|demoted"
+              r"|discipline|disciplined|terminate|terminated|dismiss|dismissed|lay\s+off|laid\s+off)")
+_PERSONNEL_FRAME = re.compile(
+    r"(?:\b(?i:can|could|did|does|will|would|should|may|might)[ \t]+("
+    + _CAP_W + r"(?:[ \t]+" + _CAP_W + r"){0,3})[ \t]+(?i:legally[ \t]+)?)?"
+    r"\b(?i:" + _PERSONNEL + r")[ \t]+(" + _CAP_W + r"(?:[ \t]+" + _CAP_W + r"){1,2})"
+    r"(?=[ \t]+(?i:for|because|after|over|without|while)\b|[ \t]*[.?!,;]|$)")
+
+
+def _caps_ok(words: Sequence[str]) -> bool:
+    return not any(w.lower().strip("'’.-") in _NOT_CAPS_NAME or w.lower() in NOT_NAMES
+                   or _LEGAL.search(w) or w.lower() in _GENERIC_INST_WORD for w in words)
+
+
+def _contact_frames(text: str, ents: Sequence[DetectedEntity]):
+    from . import relation_gate as rg       # relation_gate imports this module
+    added: List[DetectedEntity] = []
+
+    def add(s, e, typ, score=0.85):
+        cand = _ent(text, s, e, typ, score)
+        if s < e and not _overlaps(s, e, list(ents) + added) and not rg.is_junk(cand, text):
+            added.append(cand)
+
+    for m in _AFFIL.finditer(text):
+        name = m.group(1)
+        words = name.split()
+        if words[0].lower() in NOT_NAMES or words[0].lower() in _INST_STOP:
+            continue
+        typ = "GPE" if name.lower() in MAJOR_CITIES else "ORG"
+        add(m.start(1), m.end(1), typ)
+    for m in _NAME_AGE.finditer(text):
+        words = m.group(1).split()
+        if words[0].lower() in _NAME_AGE_STOP or words[0].lower() in NOT_NAMES:
+            continue
+        if words[0].lower() in PUBLIC_PEOPLE or m.group(1).lower() in PUBLIC_ORGS:
+            continue
+        add(m.start(1), m.end(1), "PERSON")
+    # all-caps names in a contact block
+    for m in _CAPS_BEFORE_CONTACT.finditer(text):
+        words = m.group(1).split()
+        close = text.find(")", m.end())
+        inside = [e for e in ents if e.source == "pattern" and m.end() - 1 <= e.start < (close if close > 0 else len(text))]
+        if inside and _caps_ok(words):
+            add(m.start(1), m.end(1), "PERSON")
+    starts = {e.start for e in ents if e.type in ("address", "street", "ADDRESS", "FAC")}
+    pos = 0
+    for line in text.split("\n"):
+        nxt = pos + len(line) + 1
+        lm = _BLOCK_LINE.fullmatch(line)
+        if lm and line.strip() and nxt in starts and not line.rstrip().endswith(":"):
+            words = lm.group(1).split()
+            if _caps_ok(words) and all(w[:1].isupper() for w in words):
+                add(pos + lm.start(1), pos + lm.end(1), "PERSON")
+        pos = nxt
+    for m in _PERSONNEL_FRAME.finditer(text):
+        obj = m.group(2).split()
+        if _caps_ok(obj) and not any(w.lower() in PUBLIC_PEOPLE for w in obj):
+            add(m.start(2), m.end(2), "PERSON")
+            if m.group(1) and not rg.is_public_org(m.group(1)) and m.group(1).split()[0].lower() not in (
+                    "they", "we", "i", "you", "he", "she", "my", "our", "the", "a", "an"):
+                add(m.start(1), m.end(1), "ORG")
+    lower_writer = _lowercase_writer(text)
+    for m in _IM_FROM.finditer(text):
+        name = m.group(1)
+        key = name.lower()
+        if key in _NOT_IM_FROM or key in NOT_NAMES or key in _NOT_NICKNAMES:
+            continue
+        if re.search(r"(?:ing|ed|ly)$", key):
+            continue
+        if not (name[:1].isupper() or lower_writer):
+            continue
+        add(m.start(1), m.end(1), "PERSON")
+    return added, []
+
+
+# A company line under the name in a sign-off ("Thanks,\nAndrei Ruiz\n
+# Orbital Freight\n+1-379-…"). A job-title line is skipped, not masked.
+_TITLE_LINE = re.compile(r"[ \t]*((?:[A-Z][\w'’.\-]*|&)(?:[ \t]+(?:[A-Z][\w'’.\-]*|&|of|and|for|the|de|y)){0,5})[ \t]*")
+
+
+def _signature_orgs(text: str, ents: Sequence[DetectedEntity]):
+    from . import relation_gate as rg
+    if "\n" not in text:
+        return [], []
+    added: List[DetectedEntity] = []
+    lines, starts, pos = text.split("\n"), [], 0
+    for line in lines:
+        starts.append(pos)
+        pos += len(line) + 1
+    persons = [e for e in ents if e.type == "PERSON"]
+    contacts = [e for e in ents if e.source == "pattern" and e.type in ("email", "phone_us", "phone_uk",
+                "phone_intl", "phone", "url")]
+    for i, line in enumerate(lines):
+        if not any(p.start >= starts[i] and p.end <= starts[i] + len(line) and
+                   not line.replace(p.text, "").strip(" \t,") for p in persons):
+            continue                        # a line that holds only a name
+        closing = any(rg._CLOSING.match(l) for l in lines[max(0, i - 2):i])
+        for j in range(i + 1, min(i + 3, len(lines))):
+            lm = _TITLE_LINE.fullmatch(lines[j])
+            if not lm or _overlaps(starts[j], starts[j] + len(lines[j]), ents):
+                break
+            core = lm.group(1)
+            if rg._JOB_TITLE.search(core) or core.lower() in NOT_NAMES:
+                continue                    # "Senior Analyst"
+            follows = j + 1 < len(lines) and any(starts[j + 1] <= c.start < starts[j + 1] + len(lines[j + 1])
+                                                 for c in contacts)
+            if closing or follows:
+                cand = _ent(text, starts[j] + lm.start(1), starts[j] + lm.end(1), "ORG", 0.85)
+                if not rg.is_junk(cand, text):
+                    added.append(cand)
+            break
     return added, []
 
 
@@ -779,6 +948,8 @@ def detect(
     rules = [
         lambda t, es: _trim_intros(t, es),
         lambda t, es: _extend_particles(t, es),
+        # before _places: "im olumide from valparaíso" needs the person first
+        lambda t, es: _contact_frames(t, es),
         lambda t, es: _streets(t, es),
         lambda t, es: _address_parts(t, es),
         lambda t, es: _csv(t, es),
@@ -789,10 +960,11 @@ def detect(
         lambda t, es: _verb_frames(t, es),
         lambda t, es: _display_names(t, es),
         lambda t, es: _institutions(t, es),
+        lambda t, es: _signature_orgs(t, es),
         lambda t, es: _components(t, es),
     ]
     if not skip_locations:
-        rules.insert(3, lambda t, es: _places(t, es, place_verifier))
+        rules.insert(4, lambda t, es: _places(t, es, place_verifier))
     for rule in rules:
         added, removed = rule(text, current)
         removed_ids = {id(x) for x in removed}
