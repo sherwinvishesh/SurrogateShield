@@ -1,0 +1,466 @@
+{
+  "command": "python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json",
+  "generator": {
+    "commit": "c9fa81d5d9924a843b80690ca33c958996e62662",
+    "dirty": false
+  },
+  "split": "experiment/synth_test_key.json (seen; questions with gold PII only)",
+  "sample": 50,
+  "seed": 0,
+  "indices": [
+    16,
+    22,
+    26,
+    36,
+    37,
+    51,
+    54,
+    70,
+    73,
+    86,
+    88,
+    95,
+    101,
+    104,
+    105,
+    110,
+    116,
+    117,
+    127,
+    133,
+    140,
+    144,
+    146,
+    156,
+    160,
+    162,
+    168,
+    169,
+    173,
+    179,
+    184,
+    185,
+    187,
+    196,
+    205,
+    208,
+    212,
+    220,
+    234,
+    240,
+    246,
+    257,
+    258,
+    259,
+    266,
+    275,
+    281,
+    283,
+    287,
+    290
+  ],
+  "responder_model": "claude-sonnet-4-6",
+  "attacker_model": "claude-opus-5-5",
+  "attacker_prompt_version": "2",
+  "provider_calls": {
+    "responder": 151,
+    "attacker": 100,
+    "total": 251,
+    "cap": 292
+  },
+  "answer_rows_with_error": 0,
+  "bertscore": {
+    "model": "roberta-large",
+    "rescaled": true,
+    "bertscore_ss": {
+      "n": 50,
+      "mean_f1": 0.6365,
+      "median_f1": 0.6511
+    },
+    "bertscore_presidio": {
+      "n": 50,
+      "mean_f1": 0.317,
+      "median_f1": 0.28
+    },
+    "bertscore_ss_output": {
+      "n": 50,
+      "mean_f1": 0.5625,
+      "median_f1": 0.5582
+    },
+    "bertscore_presidio_output": {
+      "n": 50,
+      "mean_f1": 0.3843,
+      "median_f1": 0.3745
+    },
+    "paired_input_ss_minus_presidio": {
+      "n": 50,
+      "mean_diff": 0.3195,
+      "ci95": [
+        0.2454,
+        0.3962
+      ]
+    },
+    "paired_output_ss_minus_presidio": {
+      "n": 50,
+      "mean_diff": 0.1782,
+      "ci95": [
+        0.1161,
+        0.2463
+      ]
+    },
+    "rows_with_error": 0
+  },
+  "attacker": {
+    "questions": 50,
+    "ss": {
+      "rows_available": 49,
+      "rows_unavailable": 1,
+      "errors": {
+        "json_parse_error": 1
+      },
+      "gold_values": 151,
+      "leaked_verbatim": 2,
+      "inference_targets": 149,
+      "exact": 0,
+      "partial": 26,
+      "exact_rate": 0.0,
+      "exact_or_partial_rate": 0.1745,
+      "leaked_verbatim_rate": 0.0132,
+      "exact_rate_ci95": [
+        0.0,
+        0.0251
+      ],
+      "exact_or_partial_rate_ci95": [
+        0.122,
+        0.2434
+      ],
+      "by_type": {
+        "GPE": {
+          "gold_values": 11,
+          "leaked_verbatim": 0,
+          "inference_targets": 11,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "ORG": {
+          "gold_values": 16,
+          "leaked_verbatim": 0,
+          "inference_targets": 16,
+          "exact": 0,
+          "partial": 13,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.8125
+        },
+        "PERSON": {
+          "gold_values": 40,
+          "leaked_verbatim": 2,
+          "inference_targets": 38,
+          "exact": 0,
+          "partial": 4,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.1053
+        },
+        "address": {
+          "gold_values": 10,
+          "leaked_verbatim": 0,
+          "inference_targets": 10,
+          "exact": 0,
+          "partial": 2,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.2
+        },
+        "age": {
+          "gold_values": 2,
+          "leaked_verbatim": 0,
+          "inference_targets": 2,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "api_key": {
+          "gold_values": 3,
+          "leaked_verbatim": 0,
+          "inference_targets": 3,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "credit_card": {
+          "gold_values": 1,
+          "leaked_verbatim": 0,
+          "inference_targets": 1,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "dob": {
+          "gold_values": 5,
+          "leaked_verbatim": 0,
+          "inference_targets": 5,
+          "exact": 0,
+          "partial": 1,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.2
+        },
+        "email": {
+          "gold_values": 12,
+          "leaked_verbatim": 0,
+          "inference_targets": 12,
+          "exact": 0,
+          "partial": 6,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.5
+        },
+        "handle": {
+          "gold_values": 5,
+          "leaked_verbatim": 0,
+          "inference_targets": 5,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "iban": {
+          "gold_values": 6,
+          "leaked_verbatim": 0,
+          "inference_targets": 6,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "ip_address": {
+          "gold_values": 4,
+          "leaked_verbatim": 0,
+          "inference_targets": 4,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "phone": {
+          "gold_values": 22,
+          "leaked_verbatim": 0,
+          "inference_targets": 22,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "postal_code": {
+          "gold_values": 6,
+          "leaked_verbatim": 0,
+          "inference_targets": 6,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "ssn": {
+          "gold_values": 5,
+          "leaked_verbatim": 0,
+          "inference_targets": 5,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "url": {
+          "gold_values": 3,
+          "leaked_verbatim": 0,
+          "inference_targets": 3,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        }
+      },
+      "non_gold_redacted": 0,
+      "non_gold_recovered": 0,
+      "tokens": {
+        "input_tokens": 18121,
+        "output_tokens": 12191
+      }
+    },
+    "presidio": {
+      "rows_available": 48,
+      "rows_unavailable": 2,
+      "errors": {
+        "json_parse_error": 2
+      },
+      "gold_values": 145,
+      "leaked_verbatim": 37,
+      "inference_targets": 108,
+      "exact": 0,
+      "partial": 5,
+      "exact_rate": 0.0,
+      "exact_or_partial_rate": 0.0463,
+      "leaked_verbatim_rate": 0.2552,
+      "exact_rate_ci95": [
+        0.0,
+        0.0343
+      ],
+      "exact_or_partial_rate_ci95": [
+        0.0199,
+        0.1038
+      ],
+      "by_type": {
+        "GPE": {
+          "gold_values": 10,
+          "leaked_verbatim": 2,
+          "inference_targets": 8,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "ORG": {
+          "gold_values": 16,
+          "leaked_verbatim": 16,
+          "inference_targets": 0,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": null,
+          "exact_or_partial_rate": null
+        },
+        "PERSON": {
+          "gold_values": 39,
+          "leaked_verbatim": 2,
+          "inference_targets": 37,
+          "exact": 0,
+          "partial": 3,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0811
+        },
+        "address": {
+          "gold_values": 9,
+          "leaked_verbatim": 3,
+          "inference_targets": 6,
+          "exact": 0,
+          "partial": 1,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.1667
+        },
+        "age": {
+          "gold_values": 2,
+          "leaked_verbatim": 2,
+          "inference_targets": 0,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": null,
+          "exact_or_partial_rate": null
+        },
+        "api_key": {
+          "gold_values": 3,
+          "leaked_verbatim": 3,
+          "inference_targets": 0,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": null,
+          "exact_or_partial_rate": null
+        },
+        "credit_card": {
+          "gold_values": 1,
+          "leaked_verbatim": 0,
+          "inference_targets": 1,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "dob": {
+          "gold_values": 4,
+          "leaked_verbatim": 0,
+          "inference_targets": 4,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "email": {
+          "gold_values": 12,
+          "leaked_verbatim": 0,
+          "inference_targets": 12,
+          "exact": 0,
+          "partial": 1,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0833
+        },
+        "handle": {
+          "gold_values": 5,
+          "leaked_verbatim": 4,
+          "inference_targets": 1,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "iban": {
+          "gold_values": 6,
+          "leaked_verbatim": 1,
+          "inference_targets": 5,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "ip_address": {
+          "gold_values": 4,
+          "leaked_verbatim": 0,
+          "inference_targets": 4,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "phone": {
+          "gold_values": 22,
+          "leaked_verbatim": 1,
+          "inference_targets": 21,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "postal_code": {
+          "gold_values": 5,
+          "leaked_verbatim": 3,
+          "inference_targets": 2,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "ssn": {
+          "gold_values": 4,
+          "leaked_verbatim": 0,
+          "inference_targets": 4,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        },
+        "url": {
+          "gold_values": 3,
+          "leaked_verbatim": 0,
+          "inference_targets": 3,
+          "exact": 0,
+          "partial": 0,
+          "exact_rate": 0.0,
+          "exact_or_partial_rate": 0.0
+        }
+      },
+      "non_gold_redacted": 16,
+      "non_gold_recovered": 0,
+      "tokens": {
+        "input_tokens": 17132,
+        "output_tokens": 17024
+      }
+    }
+  }
+}

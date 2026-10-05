@@ -24,6 +24,7 @@ Summaries written by the bench scripts (counts only — no message text).
 | `compare_final_test_seen.json` | `python bench/compare.py --final --json bench/results/compare_final_test_seen.json` | b653f50 (third run on test; test is *seen*, not held out) |
 | `j15_perf_final.json` | `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python bench/perf.py --json bench/results/j15_perf_final.json` | 31fcabc (J15 re-run) |
 | `ablation_synth_dev.json` | `python offline_eval.py --key experiment/synth_dev_key.json --ablation --json bench/results/ablation_synth_dev.json` | 7a81253 (A9 ablation, cascade re-run per configuration; synth dev, tuned on) |
+| `phase8.json` | `python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json` | c9fa81d (Phase 8 live run, 251 provider calls; synth test, seen) |
 
 The Phase 2 numbers show overfitting. On dev, leaked went from 25.6 % to 0 % and spurious from 28.1 % to 0.75 %. On test, leaked went from 32.3 % to 19.3 % and spurious from 37.5 % to 21.7 %. J2 fails on test. After this run the test split counts as *seen*: later test numbers are reported next to these and are not tuned on.
 
@@ -56,4 +57,37 @@ bootstrap over messages (2,000 resamples).
 ContextGuard adds no measurable F1 on this split: the interval includes
 0. It costs about 27 ms per message (J15). The split was used for tuning,
 so these numbers describe fit, not unseen text.
+
+Phase 8 (J10, A8, A10) is the only live run. 50 questions with gold
+personal data were sampled with seed 0 from the synthetic test split
+(seen). The responder is claude-sonnet-4-6 and the attacker is
+claude-opus-5-5, a different and stronger model, with prompt version 2.
+The run made 251 provider calls (151 responder, one a timeout retry; 100
+attacker); no answer row failed.
+
+Utility is BERTScore F1 (roberta-large, rescaled) of each arm's answer
+against the answer to the original message. Mean 0.563 for
+SurrogateShield and 0.384 for Presidio; the paired difference is +0.178
+[+0.116, +0.246] (bootstrap, 2,000 resamples). Input fidelity (sanitised
+message against the original) is 0.637 against 0.317, but it favours
+realistic surrogates by construction and is not a utility measure.
+
+The attacker recovered no value exactly from either arm (0 of 149
+inference targets for SurrogateShield, Wilson 95 % upper bound 2.5 %; 0 of
+108 for Presidio, upper bound 3.4 %). Partial recovery (same e-mail
+domain, phone area code, a shared name token, street or city, or birth
+year) was 26 of 149 (17.4 %) for SurrogateShield and 5 of 108 (4.6 %) for
+Presidio. Most of SurrogateShield's partials come from what its
+surrogates keep on purpose: the category word of an organisation name (13
+of 16, e.g. "Pharmacy", "LLP"), the e-mail domain (6 of 12) and the birth
+year (1 of 5). Four are name tokens: two kept first names and two
+shared "der" particles. Two are addresses.
+Presidio's exposure is mostly verbatim: 37 of 145 gold values (25.5 %)
+were left in plain text, all 16 organisation names among them, against 2
+of 151 (1.3 %) for SurrogateShield. Counting a value as exposed when it
+was sent verbatim or partly recovered, SurrogateShield exposed 28 of 151
+(18.5 %) and Presidio 42 of 145 (29.0 %). One SurrogateShield and two
+Presidio attacker replies were not valid JSON; those rows are excluded,
+which is why the denominators differ. 50 questions on generated data is
+a small sample.
 
