@@ -193,10 +193,15 @@ _INSTITUTION = re.compile(
     r"\b(?:Clinique|H[ôo]pital|Centre\s+[Hh]ospitalier|[ÉE]cole|Escola|Lyc[ée]e|Coll[èe]ge"
     r"|Universit[ée]|Universidad|Universidade|Universit[äa]t|Universit[àa]|Hospital|Cl[íi]nica"
     r"|Klinik|Krankenhaus|Ospedale|Scuola|Colegio|Col[ée]gio|Instituto|Liceo|Gymnasium|Grundschule"
-    r"|Gesamtschule|Realschule)"
+    r"|Gesamtschule|Realschule|Studio\s+(?:[Mm]edico|[Dd]entistico|[Ll]egale|[Nn]otarile)"
+    r"|Farmacia|Parrocchia|Poliambulatorio|Ambulatorio|Pharmacie|Parroquia|Paróquia|Praxis"
+    r"|(?-i:(?<=\b[a-zà-ÿ]{2} )|(?<=\b[a-zà-ÿ]{3} )|(?<=\b[a-zà-ÿ]{4} )|(?<=\bl['’]))"
+    r"(?:coll[èe]ge|[ée]cole|lyc[ée]e|scuola|escola|colegio|liceo|clinique|cl[íi]nica|universit[àée]))"
     r"(?:\s+(?:B[áa]sica|Secund[áa]ria|Primaria|Prim[áa]ria|Primaire|[ÉE]l[ée]mentaire|Elementare"
-    r"|Superior|Municipal|Nacional|Estadual|Statale|Priv[ée]e?|Saint|Sainte|Santa|San|São))?"
-    r"\s+" + _INST_PART + _CAP_W + r"(?:[ \t]+" + _INST_PART + _CAP_W + r"){0,2}"
+    r"|Superior|Municipal|Nacional|Estadual|Statale|Priv[ée]e?|Saint|Sainte|Santa|San|São"
+    r"|b[áa]sica|secund[áa]ria|primaria|prim[áa]ria|primaire|[ée]l[ée]mentaire|elementare|media"
+    r"|secondaria|statale|privada|privata|priv[ée]e?))?"
+    r"\s+" + _INST_PART + _CAP_W + r"(?:[ \t]+" + _INST_PART + _CAP_W + r"){0,3}"
 )
 _INSTITUTION_LOWER = re.compile(
     r"\b(?:universit[ée]|universidad|universidade|universit[äa]t|clinique|escola|[ée]cole|lyc[ée]e)"
@@ -206,8 +211,18 @@ _INSTITUTION_LOWER = re.compile(
 _EN_LOWER_INSTITUTION = re.compile(
     r"\b(?:at|from|to)\s+(?:the\s+)?((?:[a-z][a-z'’\-]+\s+){1,3}"
     r"(?:clinic|hospital|medical\s+cent(?:er|re)|health\s+cent(?:er|re)|surgery|elementary(?:\s+school)?"
-    r"|middle\s+school|high\s+school|primary\s+school|academy))\b"
+    r"|middle\s+school|high\s+school|primary\s+school|academy|practice|pharmacy|parish|church"
+    r"|pediatrics|paediatrics|dental))\b"
 )
+_EN_INSTITUTION = re.compile(
+    r"\b((?:St\.?|Saint|Our\s+Lady\s+of)\s+[A-Z][a-z]+(?:['’]s)?"
+    r"|[A-Z][a-z'’]+(?:\s+[A-Z][a-z'’]+){0,2}|[A-Z]{3,}(?:\s+[A-Z]{3,}){0,2})"
+    r"\s+(?:Parish|Church|Cathedral|Chapel|Practice|Surgery|Pharmacy|Pediatrics|Paediatrics"
+    r"|Dental(?:\s+(?:Clinic|Practice|Care|Group|Surgery))?|Medical\s+(?:Practice|Group|Cent(?:er|re))"
+    r"|Family\s+(?:Practice|Medicine)|Health\s+Cent(?:er|re)|Primary\s+School|Elementary(?:\s+School)?"
+    r"|High\s+School|Academy|PARISH|CHURCH|PRACTICE|PHARMACY|DENTAL|CLINIC)\b")
+_BANK_WORDS = frozenset("PAYROLL DIRECT DEPOSIT DEP PAYMENT PMT TRANSFER XFER POS ACH DEBIT "
+                        "CREDIT PURCHASE REFUND SALARY CHECKCARD CARD VISA".split())
 _GENERIC_INST_WORD = frozenset("""
 a an the my our your his her their this that same new old local nearest nearby closest
 urgent walk-in walk free dental vet veterinary eye children's childrens kids women's
@@ -251,10 +266,24 @@ def _institutions(text: str, ents: Sequence[DetectedEntity]):
 
     for m in _INSTITUTION.finditer(text):
         words = re.findall(r"[^\W\d_]+", m.group())
-        if any(w.lower() in pattern_scan._NOT_NAME_WORD or w.lower() in _INST_STOP
-               for w in words[1:]):
+        _saints = ("saint", "sainte", "santa", "san", "são", "santo", "sant")
+        if any((w.lower() in pattern_scan._NOT_NAME_WORD and w.lower() not in _saints)
+               or w.lower() in _INST_STOP for w in words[1:]):
             continue                        # "The Hospital Is Closed", "Hospital General"
         add(m.start(), m.end())
+    for m in _EN_INSTITUTION.finditer(text):
+        words = m.group(1).split()
+        s0 = m.start()
+        while words and words[0] in _BANK_WORDS:    # "PAYROLL HEXAGON DENTAL"
+            s0 = text.index(words[1], s0 + len(words[0])) if len(words) > 1 else m.end(1)
+            words = words[1:]
+        if not words:
+            continue
+        first = words[0].lower().rstrip(".")
+        if first in ("st", "saint") or m.group(1).startswith("Our Lady") or not (
+                first == "our" or _generic_inst(first) or first in pattern_scan._NOT_NAME_WORD
+                or first in NOT_NAMES):
+            add(s0, m.end())
     lower = None
     for rx in (_INSTITUTION_LOWER, _EN_LOWER_INSTITUTION):
         for m in rx.finditer(text):
@@ -265,7 +294,8 @@ def _institutions(text: str, ents: Sequence[DetectedEntity]):
             name = m.group(1).split()
             generic = _generic_inst(name[0]) if rx is _EN_LOWER_INSTITUTION else (
                 name[0].lower() in _GENERIC_INST_WORD)
-            if generic or name[0].lower() in pattern_scan._NOT_NAME_WORD:
+            saint = name[0].lower().rstrip(".") in ("st", "saint") and len(name) > 2
+            if not saint and (generic or name[0].lower() in pattern_scan._NOT_NAME_WORD):
                 continue
             if rx is _EN_LOWER_INSTITUTION and all(_generic_inst(w) for w in name[:-1]):
                 continue
@@ -881,6 +911,65 @@ def _signature_orgs(text: str, ents: Sequence[DetectedEntity]):
     return added, []
 
 
+_ORG_LABEL = re.compile(
+    r"(?im)^[ \t\-*•]*(?:employer|company|organi[sz]ation|workplace|business(?:\s+name)?|firm"
+    r"|employer\s+name|company\s+name|empresa|empleador|arbeitgeber|employeur|datore\s+di\s+lavoro"
+    r"|entreprise|firma|werkgever)[ \t]*[:=][ \t]*"
+    r"([^\n,;]{2,60}?)[ \t]*(?=,|;|$)")
+_LEGAL_SUFFIX = re.compile(
+    r"((?:[A-ZÀ-Ý][\w&'’\-]*[ \t]+){1,4})(?:S\.A\.C\.|S\.A\.S\.?|S\.A\.|S\.R\.L\.|S\.r\.l\.|S\.L\.U?\.?"
+    r"|S\.p\.A\.|Ltda\.?|GmbH|B\.V\.|N\.V\.|Pty\.?[ \t]+Ltd\.?|Sdn\.?[ \t]+Bhd\.?|Pvt\.?[ \t]+Ltd\.?"
+    r"|K\.K\.|A/S|SARL|S\.?à\s?r\.?l\.?|Kft\.?|s\.r\.o\.|sp\.[ \t]*z[ \t]*o\.o\.|Oy|AB|AG)(?![\w])")
+_PAYROLL = re.compile(r"\b(?:PAYROLL|DIRECT[ \t]+DEP(?:OSIT)?|SALARY|PAYCHECK)[ \t]+(?:FROM[ \t]+)?"
+                      r"([A-Z][A-Z&'’\-]+(?:[ \t]+[A-Z][A-Z&'’\-]+){0,3})")
+_CALLED = re.compile(
+    r"\b(?i:shop|caf[eé]|coffee\s+shop|restaurant|bar|pub|bakery|salon|gym|store|company|business"
+    r"|startup|firm|daycare|nursery|agency|practice)"
+    # "the coffee shop where i work its called X"
+    r"(?:[^.\n]{0,40}?\b(?i:it['’]?s|it\s+is)(?=[ \t]+(?i:called|named)))?"
+    r"[ \t]+(?i:(?:is|was|i\s+work\s+at\s+is)[ \t]+)?(?i:called|named)[ \t]+[\"“']?"
+    # the longest run up to a preposition, never across a clause word
+    r"((?:[\w'’&\-]+)(?:(?![ \t]+(?i:and|but|so|which|where|what|who|when|i|we|it|is|was|are"
+    r"|on|in|at|near|by)\b)[ \t]+[\w'’&\-]+){0,4})[\"”']?"
+    r"(?=[ \t]+(?i:on|in|at|near|by|and|but|so|which|that|where|what|who|downtown)\b|[ \t]*[,.;!?)\n]|$)")
+
+
+def _org_frames(text: str, ents: Sequence[DetectedEntity]):
+    from . import relation_gate as rg
+    added: List[DetectedEntity] = []
+
+    def add(s, e):
+        while e > s and text[e - 1] in " \t.'\"”" and not (     # keep "S.A.C."
+                text[e - 1] == "." and re.search(r"\b[A-Za-z]\.[A-Za-z]\.$", text[s:e])):
+            e -= 1
+        if e - s < 2 or _overlaps(s, e, list(ents) + added):
+            return
+        cand = _ent(text, s, e, "ORG", 0.85)
+        if not rg.is_public_org(cand.text) and cand.text.lower() not in NOT_NAMES:
+            added.append(cand)
+
+    for m in _ORG_LABEL.finditer(text):
+        v = m.group(1).strip()
+        if v.lower() not in ("n/a", "na", "none", "self", "self-employed", "unemployed", "retired",
+                             "student", "-", "tbd", "same"):
+            add(m.start(1), m.start(1) + len(m.group(1).rstrip()))
+    for m in _LEGAL_SUFFIX.finditer(text):
+        add(m.start(1), m.end())
+    for m in _PAYROLL.finditer(text):
+        add(m.start(1), m.end(1))
+    for m in _CALLED.finditer(text):
+        v, quoted = m.group(1), text[m.start(1) - 1:m.start(1)] in "\"“'"
+        stop = re.match(r"[ \t]+[a-z]+\b", text[m.end(1):])
+        if quoted or v[:1].isupper() or (stop and _lowercase_writer(text)):
+            add(m.start(1), m.end(1))
+    for m in re.finditer(r"(?m)^[ \t]*([^|\n]{3,60}?)[ \t]+\|[ \t]+([^|\n]{3,60}?)[ \t]*$", text):
+        lm = _TITLE_LINE.fullmatch(m.group(2))
+        if (rg._JOB_TITLE.search(m.group(1)) and lm and not rg._JOB_TITLE.search(m.group(2))
+                and len(m.group(2).split()) >= 2):
+            add(m.start(2), m.end(2))           # "Events Coordinator | Lantern Hall Collective"
+    return added, []
+
+
 _KANA = r"[\u4e00-\u9fff\u3040-\u30ff々]"
 # "はじめまして、佐々木 美咲です" — a self-introduction after a greeting
 _JA_NAME = re.compile(r"(?:はじめまして|初めまして|私の名前は|名前は)[、,]?\s*"
@@ -888,6 +977,14 @@ _JA_NAME = re.compile(r"(?:はじめまして|初めまして|私の名前は|�
 _JA_PLACE = re.compile(r"(" + r"[\u4e00-\u9fff々ァ-ヶー]{1,6})(?:に住んで|在住|出身)")
 # "李梅的身份证号", "在北京协和医院工作"
 _ZH_PII_AFTER = r"(?=的(?:身份证|电话|手机|地址|邮箱|护照|生日|银行卡|病历))"
+_JA_ORG = re.compile(r"(?<=[ぁ-んるたのはがでにを、。「（\s])([\u4e00-\u9fff々ァ-ヶー]{1,8}[ぁ-ん]{0,4}"
+                     r"(?:小学校|中学校|高等学校|高校|大学|幼稚園|保育園|病院|医院|クリニック|株式会社))")
+_JA_HONORIFIC = re.compile(r"(?<=[のとは、。「\s])([\u4e00-\u9fff々]{2,3})(?=くん|君|さん|ちゃん|様|先生)")
+_JA_NOT_NAME = frozenset("皆様 皆さん お客 奥様 先生 担任 校長 店長 部長 課長 社長 医者 患者 生徒 同級 友達".split())
+# "一家叫“蓝鲸数智”的小公司"
+_ZH_CALLED_ORG = re.compile(r"叫[“\"「]([^”\"」]{2,20})[”\"」]的?(?:小|大)?(?:公司|店|餐厅|学校|机构|工作室|诊所)")
+_ZH_ROLE = (r"(?:房东|老板|经理|老师|医生|同事|朋友|邻居|室友|丈夫|妻子|老公|老婆|儿子|女儿|妈妈|爸爸"
+            r"|哥哥|姐姐|弟弟|妹妹|客户|律师|主任|上司|领导|男朋友|女朋友)")
 _ZH_ORG = re.compile(r"在(" + _HAN + r"{2,10}?(?:医院|诊所|学校|大学|中学|小学|幼儿园|公司|银行))"
                      r"(?:工作|上班|上学|读书|就诊|看病|住院)")
 # "深圳南山区桃园路88号5栋1203", "成都高新区": a city (Faker's zh_CN list), a
@@ -896,8 +993,12 @@ _ZH_NAME_CH = r"[^\W\d_A-Za-z在住是我你他她们的了和与到从于为把
 _ZH_ROAD = (r"(?P<road>" + _ZH_NAME_CH + r"{1,4}?(?:路|街|大道|巷|弄|胡同)\d{1,5}号"
             r"(?:\d{1,4}(?:栋|幢|座|单元|号楼|楼|层|室|号))*(?:\d{1,5}室?)?)")
 _ZH_DISTRICT = r"(?P<dist>" + _ZH_NAME_CH + r"{1,3}?[区县])"
-_HI_KIN = (r"(?:मेरी|मेरा|मेरे|हमारी|हमारा|हमारे)\s+(?:माँ|मां|माता|पिता|पापा|बहन|भाई|बेटी|बेटा"
-           r"|पत्नी|पति|दोस्त|सहेली|दादी|दादा|नानी|नाना)\s+")
+_HI_KIN = (r"(?:मेरी|मेरा|मेरे|हमारी|हमारा|हमारे)\s+(?:माँ|मां|माता|माताजी|पिता|पिताजी|पापा|मम्मी|बहन"
+           r"|भाई|बेटी|बेटा|पत्नी|पति|दोस्त|सहेली|दादी|दादा|नानी|नाना|चाचा|चाची|मामा|मामी|बुआ"
+           r"|ससुर|सास|पड़ोसी|बॉस)\s+")
+# words that end the name after a kin word: case markers, verbs, "years"
+_HI_STOP = frozenset("का की के ने को से में है हैं था थी थे और भी तो जी साल वर्ष बहुत अभी कल आज "
+                     "एक दो डॉक्टर".split())
 _HI_CITIES = ("दिल्ली मुंबई लखनऊ कोलकाता चेन्नई बेंगलुरु बैंगलोर हैदराबाद पुणे जयपुर कानपुर पटना "
               "भोपाल इंदौर अहमदाबाद वाराणसी आगरा नागपुर सूरत चंडीगढ़ देहरादून रांची गुवाहाटी").split()
 _HI_CITY = re.compile(r"(?<!\S)(" + "|".join(_HI_CITIES) + r")(?=\s+(?:में|से|का|की|के)(?!\S))")
@@ -941,6 +1042,16 @@ def _names_intl(text: str, ents: Sequence[DetectedEntity]):
             add(m.start(1), m.end(1), "PERSON")
         for m in _ZH_ORG.finditer(text):
             add(m.start(1), m.end(1), "ORG")
+        for m in _ZH_CALLED_ORG.finditer(text):
+            add(m.start(1), m.end(1), "ORG")
+        role = re.compile(_ZH_ROLE + r"((?:" + "|".join(zh) + r")" + _HAN + r"{1,2})(?=[，,。：:；;、\s]|$)")
+        for m in role.finditer(text):
+            add(m.start(1), m.end(1), "PERSON")
+        for m in _JA_ORG.finditer(text):
+            add(m.start(1), m.end(1), "ORG")
+        for m in _JA_HONORIFIC.finditer(text):
+            if m.group(1) not in _JA_NOT_NAME and not m.group(1).endswith(("生", "長")):
+                add(m.start(1), m.end(1), "PERSON")
         for m in _JA_PLACE.finditer(text):
             add(m.start(1), m.end(1), "GPE")
         for m in (m for rx in _zh_address() for m in rx.finditer(text)):
@@ -949,12 +1060,16 @@ def _names_intl(text: str, ents: Sequence[DetectedEntity]):
                     add(m.start(g), m.end(g), typ)
     if re.search(r"[\u0900-\u097f]", text):
         _, hi_first, hi_last = _lexicons()
-        for m in re.finditer(_HI_KIN + r"([\u0900-\u097f]+)(?:\s+([\u0900-\u097f]+))?", text):
-            first, last = m.group(1), m.group(2)
-            if last in hi_last:
-                add(m.start(1), m.end(2), "PERSON")
-            elif first in hi_first:
-                add(m.start(1), m.end(1), "PERSON")
+        for m in re.finditer(_HI_KIN + r"([\u0900-\u097f]+(?:\s+[\u0900-\u097f]+){0,2})", text):
+            toks = list(re.finditer(r"[\u0900-\u097f]+", m.group(1)))
+            n = next((i for i, t in enumerate(toks) if t.group() in _HI_STOP), len(toks))
+            # a kin word then a name: the words before a case marker or verb,
+            # if the run ends there (not "मेरे पिता बहुत …")
+            # one word then a copula is a predicate ("मेरी माँ बीमार हैं")
+            copula = n == 1 and n < len(toks) and toks[1].group() in ("है", "हैं", "था", "थी", "थे")
+            if n and not copula and (n < len(toks) or re.match(r"\s+(?:\d|[,।]|[\u0900-\u097f]+\s)", text[m.end():])) \
+                    and toks[0].group() not in _HI_STOP:
+                add(m.start(1) + toks[0].start(), m.start(1) + toks[n - 1].end(), "PERSON")
         # a city in a message that already names a person
         if any(e.type == "PERSON" for e in list(ents) + added):
             for m in _HI_CITY.finditer(text):
@@ -1151,6 +1266,7 @@ def detect(
         lambda t, es: _display_names(t, es),
         lambda t, es: _institutions(t, es),
         lambda t, es: _signature_orgs(t, es),
+        lambda t, es: _org_frames(t, es),
         lambda t, es: _components(t, es),
     ]
     if not skip_locations:

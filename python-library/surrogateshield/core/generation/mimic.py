@@ -220,7 +220,11 @@ _GENERIC = frozenset("""
     general memorial united american first city county state federal department office agency
     school schools academy university college institute elementary middle high primary
     secondary preschool kindergarten daycare montessori charter learning education
-    church temple mosque synagogue ministries chapel cathedral parish
+    church temple mosque synagogue ministries chapel cathedral parish practice
+    medico medica dentistico legale notarile parrocchia farmacia ambulatorio poliambulatorio
+    scuola primaria secondaria media statale liceo collège college école ecole lycée lycee
+    primaire élémentaire elementare escola básica basica secundária colegio clínica clinica
+    clinique hôpital hopital ospedale klinik praxis apotheke pharmacie parroquia paróquia
     consulting solutions systems technologies technology tech software digital data networks
     media marketing design creative studio studios productions entertainment publishing press
     construction builders building contractors roofing plumbing electric electrical hvac
@@ -492,6 +496,8 @@ class MimicGen:
         industry words kept, name words replaced (one surrogate surname per
         word per conversation, shared with people), "of <place>" → another
         real place. Adds no comma."""
+        if re.search(r"[\u3040-\u30ff\u4e00-\u9fff]", original):
+            return self._cjk_institution(original)
         # "of New Mexico", "at Fort Collins": a known place after a preposition
         place_at = {}
         for m in re.finditer(r"\b(?:of|at|in)\s+((?:[A-Z][\w.'’-]*)(?:\s+[A-Z][\w.'’-]*){0,2})",
@@ -522,7 +528,9 @@ class MimicGen:
             stem = bare[:poss.start()] if poss else bare
             tail = w[len(stem):]
             low = stem.lower()
-            if (_LEGAL.match(bare) or low in _GENERIC or low in ("st", "saint", "mt")
+            if (_LEGAL.match(bare) or low in _GENERIC
+                    or low in ("st", "saint", "mt", "san", "santa", "sainte", "são", "sant", "santo",
+                               "our", "lady")
                     or titled and not stem[:1].isupper() and not stem[:1].isdigit()):
                 rep = w
             elif prev.lower().rstrip(".") in ("st", "saint", "san", "santa", "sainte"):
@@ -877,6 +885,23 @@ class MimicGen:
                 p = new.split()[0] if p[:1].isupper() else new.split()[0].lower()
             out.append(p)
         return "".join(out)
+
+    _CJK_KIND = re.compile(r"(?:小学校|中学校|高等学校|高校|大学|幼稚園|保育園|病院|医院|クリニック"
+                           r"|株式会社|小学|中学|幼儿园|诊所|公司|银行|学校|餐厅|工作室)$")
+
+    def _cjk_institution(self, original: str) -> str:
+        """"青葉台さくら小学校" -> "<ja town>小学校"; "蓝鲸数智" -> a zh
+        company name: the kind word stays, the name becomes a real one."""
+        kind = self._CJK_KIND.search(original)
+        stem = original[:kind.start()] if kind else original
+        if re.search(r"[\u3040-\u30ff]", original):
+            from faker.providers.address.ja_JP import Provider as A
+            names = A.towns
+        else:
+            from faker.providers.company.zh_CN import Provider as C
+            names = C.company_prefixes
+        pool = [n for n in names if n != stem and n not in original]
+        return self._rng.choice(pool) + (kind.group() if kind else "")
 
     def _gen_age_like(self, original: str) -> str:
         m = re.search(r"\d+", original)

@@ -260,7 +260,12 @@ def _known_family(cf: str) -> bool:
 
 # ── parsing a name ───────────────────────────────────────────────────────────
 
-_WORD = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*\.?")
+# combining marks (Devanagari and other Indic vowel signs, decomposed
+# accents) are not \w: without them "रमेश" would read as "रम" + "श"
+_MARKS = "".join(chr(c) for c in range(0x0300, 0x1100)
+                 if unicodedata.category(chr(c)).startswith("M"))
+_LETTERS = r"[^\W\d_](?:[^\W\d_]|[" + _MARKS + r"])*"
+_WORD = re.compile(_LETTERS + r"(?:['’]" + _LETTERS + r")*\.?")
 
 
 @dataclass
