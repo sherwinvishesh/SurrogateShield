@@ -105,7 +105,7 @@ hall wood stone hill lane rich penny sky star gay page ward bell rich
 def _components(text: str, ents: Sequence[DetectedEntity]):
     persons = [e for e in ents if e.type == "PERSON"]
     added: List[DetectedEntity] = []
-    seen: Set[str] = set()
+    seen: Set[Tuple[str, bool]] = set()
     for p in persons:
         toks = re.findall(r"[^\W\d_][\w'’\-]*", p.text)
         if len(toks) < 2:
@@ -113,11 +113,14 @@ def _components(text: str, ents: Sequence[DetectedEntity]):
         lower = p.text.islower()
         for tok in toks:
             key = tok.lower()
-            if (len(tok) < 3 or key in seen or key in _AMBIGUOUS_COMPONENTS
+            # "JAVIER MONTOYA" must not hide the "Javier" of a later
+            # "Javier Montoya": seen is keyed on the exact token
+            if (len(tok) < 3 or (tok, lower) in seen or key in _AMBIGUOUS_COMPONENTS
                     or key in NOT_NAMES or re.fullmatch(_PARTICLES, key)):
                 continue
-            seen.add(key)
-            flags = re.IGNORECASE if lower else 0
+            seen.add((tok, lower))
+            # an all-caps or lower-case name also finds its title-case form
+            flags = re.IGNORECASE if lower or tok.isupper() else 0
             for m in re.finditer(r"(?<![\w@.\-])" + re.escape(tok) + r"(?![\w@\-]|\.\w)", text, flags):
                 if not lower and not m.group(0)[:1].isupper():
                     continue
@@ -125,6 +128,49 @@ def _components(text: str, ents: Sequence[DetectedEntity]):
                     continue
                 added.append(_ent(text, m.start(), m.end(), "PERSON", 0.85))
     return added, []
+
+
+# ── 3b. display names and greetings ──────────────────────────────────────────
+
+_ANGLE_EMAIL = re.compile(r"\s*<([^@\s<>]+)@[^\s<>]+>")
+_GREETING = re.compile(
+    r"(?m)(?:^|(?<=[.!?]\s))[ \t]*(?:Hi|Hello|Hey|Dear|Hallo|Hej|Hoi|Bonjour|Hola|Ciao|Olá|Oi)"
+    r"[ \t]+([A-ZÀ-ÖØ-Þ][^\W\d_][\w'’\-]*)(?=[ \t]*[,!:\n])")
+_NOT_GREETED = frozenset("all team everyone everybody there sir madam folks guys "
+                         "friends again world support hr admin".split())
+
+
+def _fold(s: str) -> str:
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFKD", s.lower()) if c.isalnum())
+
+
+def _display_names(text: str, ents: Sequence[DetectedEntity]):
+    """A company/place-typed name that is an e-mail display name whose local
+    part spells it ("Ifeoma Chukwu <ifeoma@chukwustudio.com>") is a person;
+    so is a name greeted at the start of a line or sentence ("Hi Ifeoma,")."""
+    added: List[DetectedEntity] = []
+    removed: List[DetectedEntity] = []
+    for e in ents:
+        if e.type not in ("ORG", "GPE", "LOC", "FAC") or e.source == "pattern":
+            continue
+        m = _ANGLE_EMAIL.match(text, e.end)
+        local = _fold(m.group(1)) if m else ""
+        toks = [_fold(t) for t in re.findall(r"[^\W\d_]+", e.text)]
+        if local and any(len(t) >= 3 and t in local for t in toks):
+            removed.append(e)
+            added.append(_ent(text, e.start, e.end, "PERSON", 0.9))
+    for m in _GREETING.finditer(text):
+        name = m.group(1)
+        if name.lower() in _NOT_GREETED or name.lower() in NOT_NAMES:
+            continue
+        s, t = m.start(1), m.end(1)
+        over = [x for x in ents if x.start < t and s < x.end]
+        if any(x.type == "PERSON" or x.source == "pattern" for x in over):
+            continue
+        removed.extend(x for x in over if x not in removed)
+        added.append(_ent(text, s, t, "PERSON", 0.85))
+    return added, removed
 
 
 # ── 4. CSV / TSV columns ─────────────────────────────────────────────────────
@@ -374,6 +420,63 @@ def _places(text: str, ents: Sequence[DetectedEntity],
     return added, []
 
 
+# "my sister ines,", "a minha filha Beatriz", "meine Tochter Lena"
+_KIN_ANY = (
+    pattern_scan._KIN[:-1] + r"|irm[ãa]o?|filh[ao]|m[ãa]e|pai|espos[ao]|marido|namorad[ao]"
+    r"|hij[ao]|herman[ao]|madre|padre|novi[ao]|fille|fils|s(?:œ|oe)ur|fr[èe]re|femme|mari"
+    r"|copine|copain|tochter|sohn|schwester|bruder|frau|mann|freundin|freund|dochter"
+    r"|zoon|zus|broer|vriendin|vriend)"
+)
+_KIN_NAME = re.compile(
+    r"(?i:\b(?:my|our|his|her|their|(?:a\s+|o\s+)?minha|(?:a\s+|o\s+)?meu|mi|mis|mon|ma"
+    r"|mein|meine|meinem|meiner|mijn)\s+(?:(?:little|older|younger|big|baby|best|eldest"
+    r"|youngest|kleine|petite|petit|mayor|menor|mais\s+nova|mais\s+velha)\s+)?"
+    + _KIN_ANY + r"s?\s*,?\s+)"
+    r"([^\W\d_][\w'’\-]{1,20})(?![\w'’\-])"
+)
+_KIN_NAME_STOP = frozenset("""
+is was has had and or but the a an to too also again here there now today who
+which that this just still always never will would can could should did does do
+lives lived works worked turns turned says said asked told got gets wants needs
+loves likes thinks keeps kept went goes came comes made makes took takes in on at
+for of with from by about after before when if because so as is's isn't wasn't
+tem é e de da do que se está foi und ist hat war en het is et est a le la les
+""".split())
+# a dash sign-off at the end of a message or line: "... is 4091. -tash"
+_SIGN_OFF = re.compile(r"(?m)(?:^|(?<=\s))[-–—~]\s?([A-Za-z][a-z]{2,15}|[A-Z][a-z]{1,15})[ \t]*$")
+_NOT_SIGN_OFF = frozenset("ish esque ly ness able ful less like sama san kun chan".split())
+
+
+def _kin_names(text: str, ents: Sequence[DetectedEntity]):
+    added: List[DetectedEntity] = []
+    lower_writer = None
+    for m in _KIN_NAME.finditer(text):
+        name = m.group(1)
+        key = name.lower()
+        if key in _KIN_NAME_STOP or key in NOT_NAMES or key in _NOT_NICKNAMES:
+            continue
+        if re.search(r"[-’'][a-z]", name) and name[:1].isupper():
+            continue                        # "my wife Facebook-stalks", not "Ana-Maria"
+        if not name[:1].isupper():
+            if lower_writer is None:
+                lower_writer = not any(w[:1].isupper()
+                                       for w in re.findall(r"[^\W\d_][\w'’\-]*", text))
+            # a lower-case name only from a writer who capitalises nothing,
+            # and only with a comma or a pronoun after it ("my sister ines, she")
+            if not lower_writer or not re.match(r"\s*[,;:!?)]|\s+(?:who|she|he)\b", text[m.end(1):]):
+                continue
+        if not _overlaps(m.start(1), m.end(1), list(ents) + added):
+            added.append(_ent(text, m.start(1), m.end(1), "PERSON", 0.85))
+    for m in _SIGN_OFF.finditer(text):
+        if m.group(1).lower() in _NOT_SIGN_OFF or m.group(1).lower() in NOT_NAMES:
+            continue
+        if text[m.end():].strip():
+            continue                        # only the last line of the message
+        if not _overlaps(m.start(1), m.end(1), list(ents) + added):
+            added.append(_ent(text, m.start(1), m.end(1), "PERSON", 0.8))
+    return added, []
+
+
 def _names_intl(text: str, ents: Sequence[DetectedEntity]):
     added: List[DetectedEntity] = []
     for rx in (_ZH_NAME, _HI_NAME):
@@ -522,7 +625,9 @@ def detect(
         lambda t, es: _speakers(t, es),
         lambda t, es: _payments(t),
         lambda t, es: _names_intl(t, es),
+        lambda t, es: _kin_names(t, es),
         lambda t, es: _verb_frames(t, es),
+        lambda t, es: _display_names(t, es),
         lambda t, es: _components(t, es),
     ]
     if not skip_locations:

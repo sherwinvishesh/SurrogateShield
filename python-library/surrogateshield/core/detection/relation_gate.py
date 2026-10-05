@@ -70,6 +70,12 @@ _CODE = re.compile(
 _MODEL = re.compile(r"_|\b(?=[A-Za-z]*\d)(?=\d*[A-Za-z])[A-Za-z\d]{3,}\b")
 
 
+def _unquote(core: str) -> str:
+    """Matching outer quotes removed: '"Kalinda Whitehorse"' -> 'Kalinda Whitehorse'."""
+    m = re.fullmatch(r"([\"'“‘«`])([^\"'“”‘’«»`]+)([\"'”’»`])", core)
+    return m.group(2) if m else core
+
+
 def _core(text: str) -> str:
     return _POSSESSIVE.sub("", text.strip()).strip(" .,;:!?")
 
@@ -187,8 +193,8 @@ def is_junk(ent: DetectedEntity, text: str = "") -> bool:
         return True
     if ent.type == "PERSON" and core == core.lower() and _CLAUSE_WORD.search(core):
         return True                         # "je veux vérifier la clé" is a clause
-    if _CODE.search(core):
-        return True
+    if _CODE.search(_unquote(core)):
+        return True                         # a quoted name ("Kalinda Whitehorse") is not code
     if ent.type != "PERSON" and _MODEL.search(core):
         return True
     if _ACRONYM.match(core) and not (text and _shouting(text)):
