@@ -223,8 +223,8 @@ def is_common_noun(ent: DetectedEntity, text: str) -> bool:
 
 def is_junk(ent: DetectedEntity, text: str = "") -> bool:
     core = _core(ent.text)
-    if not core:
-        return True
+    if not core or not any(c.isalpha() for c in core):
+        return True                         # "&" from "Mr. & Mrs. Castellano"
     if core.lower() in NOT_NAMES:
         return True
     words = core.split()

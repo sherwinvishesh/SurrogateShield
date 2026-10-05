@@ -380,6 +380,14 @@ _NOT_HANDLE = frozenset({
     "deprecated", "see", "type", "example", "todo", "component", "test",
 })
 
+# default system accounts identify nobody
+_SYSTEM_ACCOUNTS = frozenset({
+    "root", "admin", "administrator", "guest", "postgres", "ubuntu", "pi", "user",
+    "test", "default", "anonymous", "nobody", "sa", "oracle", "mysql", "ftp",
+    "www-data", "nginx", "apache", "git", "jenkins", "deploy", "ec2-user", "centos",
+    "debian", "support", "operator", "daemon", "bin", "sys", "backup", "service",
+})
+
 _HANDLE_STOP = frozenset({
     "is", "was", "the", "a", "an", "and", "or", "my", "your", "for", "to",
     "not", "name", "names", "here", "there", "below", "above", "same",
@@ -388,10 +396,7 @@ _HANDLE_STOP = frozenset({
     "password", "username", "account", "login", "email", "please", "help",
     "gamertag", "handle", "id", "tag", "on", "in", "at", "with",
     "one", "ones", "too", "also", "got", "has", "had", "and", "but", "it",
-    # default system accounts identify nobody
-    "root", "admin", "administrator", "guest", "postgres", "ubuntu", "pi",
-    "user", "test", "default", "anonymous", "nobody", "sa",
-})
+}) | _SYSTEM_ACCOUNTS
 
 
 def _at_handle_validator(m: "re.Match") -> bool:
@@ -888,7 +893,7 @@ _PATTERNS: list = [
             r"\s+for\s+(?:invalid\s+user\s+)?(?P<v>[a-z_][a-z0-9_.\-]{1,31})\b",
             re.IGNORECASE,
         ),
-        None,
+        lambda m: m.group("v").lower() not in _SYSTEM_ACCOUNTS,   # "invalid user admin"
     ),
 
     # ── Cryptocurrency wallet address ────────────────────────────────────────

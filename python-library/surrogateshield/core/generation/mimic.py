@@ -797,7 +797,12 @@ class MimicGen:
         prefix, body, tag = m.group(1), m.group(2), m.group(3)
         if tag:
             tag = "#" + "".join(str(self._rng.randint(0, 9)) for _ in range(4))
-        return f"{prefix}{self._slug(body)}{tag or ''}"
+        slug = self._slug(body)
+        if slug.casefold() == body.casefold():
+            # a role name ("admin", "support") is kept as an e-mail local
+            # part, but a handle that keeps it is the original
+            slug = self.people._slug_like(body)
+        return f"{prefix}{slug}{tag or ''}"
 
     def _gen_url_like(self, original: str) -> str:
         """Same scheme and host style; the identifying part (profile path
