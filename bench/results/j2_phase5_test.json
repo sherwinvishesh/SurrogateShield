@@ -1,0 +1,143 @@
+{
+  "split": "test",
+  "corpus": {
+    "messages": 240,
+    "negatives": 65,
+    "negative_share": 0.271,
+    "service_query": 15,
+    "types": {
+      "ADDRESS": 40,
+      "AGE": 30,
+      "CREDENTIAL": 16,
+      "DATE_OF_BIRTH": 14,
+      "EMAIL": 22,
+      "ETHNICITY": 6,
+      "HANDLE": 12,
+      "HEALTH": 30,
+      "ID": 43,
+      "LOCATION": 98,
+      "NETWORK": 20,
+      "ORG": 24,
+      "ORIENTATION": 2,
+      "PERSON": 159,
+      "PHONE": 28,
+      "POLITICAL": 3,
+      "RELIGION": 4,
+      "URL": 7
+    },
+    "langs": {
+      "en": 222,
+      "es": 4,
+      "de": 3,
+      "fr": 3,
+      "hi": 3,
+      "pt": 2,
+      "zh": 2,
+      "ja": 1
+    },
+    "categories": 39
+  },
+  "protect_values": 513,
+  "leaked": 81,
+  "policy": 19,
+  "leak_rate": 0.164,
+  "edits": 544,
+  "spurious": 104,
+  "spurious_rate": 0.1912,
+  "keep_hits": 96,
+  "messages_with_spurious": 62,
+  "negatives_untouched": 41,
+  "negatives": 65,
+  "sensitive_values": 45,
+  "sensitive_leaked": 43,
+  "leak_by_type": {
+    "ADDRESS": {
+      "values": 40,
+      "leaked": 6
+    },
+    "AGE": {
+      "values": 30,
+      "leaked": 9
+    },
+    "CREDENTIAL": {
+      "values": 16,
+      "leaked": 6
+    },
+    "DATE_OF_BIRTH": {
+      "values": 14,
+      "leaked": 2
+    },
+    "EMAIL": {
+      "values": 22,
+      "leaked": 0
+    },
+    "HANDLE": {
+      "values": 12,
+      "leaked": 2
+    },
+    "ID": {
+      "values": 43,
+      "leaked": 13
+    },
+    "LOCATION": {
+      "values": 98,
+      "leaked": 13
+    },
+    "NETWORK": {
+      "values": 20,
+      "leaked": 3
+    },
+    "ORG": {
+      "values": 24,
+      "leaked": 5
+    },
+    "PERSON": {
+      "values": 159,
+      "leaked": 18
+    },
+    "PHONE": {
+      "values": 28,
+      "leaked": 1
+    },
+    "URL": {
+      "values": 7,
+      "leaked": 3
+    }
+  },
+  "leak_by_lang": {
+    "de": {
+      "values": 15,
+      "leaked": 1
+    },
+    "en": {
+      "values": 450,
+      "leaked": 61
+    },
+    "es": {
+      "values": 15,
+      "leaked": 6
+    },
+    "fr": {
+      "values": 12,
+      "leaked": 3
+    },
+    "hi": {
+      "values": 7,
+      "leaked": 5
+    },
+    "ja": {
+      "values": 3,
+      "leaked": 2
+    },
+    "pt": {
+      "values": 7,
+      "leaked": 0
+    },
+    "zh": {
+      "values": 4,
+      "leaked": 3
+    }
+  },
+  "latency_ms_p50": 25.8,
+  "J2": "FAIL"
+}
