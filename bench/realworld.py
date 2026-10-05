@@ -23,7 +23,7 @@ Definitions (character spans in the original message):
 * sensitive  — ``sensitive`` values leaked; reported separately (not in J2).
 
 J2 passes when leaked ≤ 2 % and spurious ≤ 3 %. Offline: no provider calls,
-Nominatim off.
+no geocoder.
 """
 
 from __future__ import annotations
@@ -199,8 +199,6 @@ def run(split: str, show: bool) -> dict:
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     sys.path.insert(0, str(ROOT))
-    import config
-    config.SERVICE_QUERY_VERIFY_ADDRESSES = False          # no Nominatim egress
     from generation.logic import MimicGen
     from json_tester import prepare_send
 

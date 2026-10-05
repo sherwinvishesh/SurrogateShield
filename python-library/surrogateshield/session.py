@@ -27,7 +27,6 @@ from typing import Dict, Iterator, List, Optional, Tuple
 
 from . import _display, _response_parser
 from ._state import Config, cfg as _default_config
-from .core.detection import address_parser as _address_parser
 from .core.detection import pipeline as _pipeline
 from .core.detection import service_query as _service_query
 from .core.entities import plan_substitutions, splice
@@ -165,10 +164,6 @@ class Session:
 
     def _substitute(self, text, is_svc, address_mode, detections, masked) -> MaskResult:
         c = self.config
-        if c.verify_addresses:
-            for ent in masked:
-                if ent.type == "address" and getattr(ent, "parsed", None) is not None:
-                    _address_parser.verify_address_exists(ent.parsed)
         unique = _pipeline.deduplicate(masked)
         replacements: Dict[str, str] = {}
         new_entities = []

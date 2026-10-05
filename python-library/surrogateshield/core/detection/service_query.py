@@ -180,6 +180,9 @@ def fuzz_addresses(
     (generation.shift_house_number). Use those directly, or simply call
     mask() with address_mode="shift" (or "auto" for service queries).
 
+    *verify* is ignored: the Nominatim existence check sent each street
+    to a third party and its result never changed the output (audit F3).
+
     Returns:
         Tuple of (fuzzed_text, {original_address: fuzzed_address}).
     """
@@ -199,8 +202,6 @@ def fuzz_addresses(
     for parsed in parsed_list:
         if parsed.full_text in mappings:
             continue
-        if verify:
-            address_parser.verify_address_exists(parsed)
         fuzzed = shift_house_number(parsed, forbidden=frozenset(forbidden))
         if fuzzed is None:
             continue

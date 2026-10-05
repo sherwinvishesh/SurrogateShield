@@ -60,7 +60,6 @@ from util import (
     print_detection_table,
     print_needs_confirmation,
 )
-from detection import address_parser
 from detection import logic as sentinel_layer
 from detection.service_query import resolve as resolve_service
 from detection.quasi_identifier import format_warning as _qi_format_warning
@@ -72,7 +71,6 @@ from config import (
     ADDRESS_MODE,
     ADDRESS_SHIFT_RANGE,
     SERVICE_QUERY_DETECTION_ENABLED,
-    SERVICE_QUERY_VERIFY_ADDRESSES,
 )
 
 if TYPE_CHECKING:
@@ -217,12 +215,6 @@ class Pipeline:
         # ── Step 3: Generate surrogates ───────────────────────────────────────
         surrogate_map: Dict[str, str] = {}
         if confirmed:
-            # Opt-in address existence verification (network — off by default)
-            if SERVICE_QUERY_VERIFY_ADDRESSES:
-                for ent in confirmed:
-                    if ent.type == "address" and getattr(ent, "parsed", None) is not None:
-                        address_parser.verify_address_exists(ent.parsed)
-
             # Reuse surrogates for originals seen in earlier turns (O(1)
             # forward-index lookups), generate only for the new ones.
             new_entities = []

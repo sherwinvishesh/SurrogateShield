@@ -181,7 +181,7 @@ Identifies messages like "restaurants near 1126 E Apache Blvd, Tempe, AZ" and ap
 - City/state names are **not replaced**: the LLM needs them to give useful answers
 - Drives the shift-vs-replace decision when `ADDRESS_MODE="auto"`
 - A sensitive-topic override (medical, legal, shelter, immigration keywords) forces full anonymisation regardless of query structure
-- Address existence can be verified via OpenStreetMap Nominatim (`SERVICE_QUERY_VERIFY_ADDRESSES=True`; **off by default** — it is a network call per address)
+- No address is ever sent to a geocoder: v2 removed the Nominatim existence check, which sent the street to a third party and never changed the output
 
 #### Quasi-Identifier Scorer (`detection/quasi_identifier.py`)
 
@@ -385,7 +385,6 @@ chromadb>=0.4.0             # RAG vector store
 sentence-transformers>=2.7.0  # RAG embeddings
 transformers>=4.40.0        # ContextGuard (distilbert-NER)
 torch>=2.0.0                # ContextGuard inference
-requests>=2.31.0            # Address verification (Nominatim)
 bert-score>=0.3.13          # Utility preservation scoring (BERTScore comparison)
 ollama>=0.1.8               # Local LLM (optional)
 presidio-analyzer>=2.2.0    # Presidio comparison panel in PII Finder
@@ -444,7 +443,6 @@ Hard-coded thresholds and flags. Edit the file directly to change them; no resta
 | `ADDRESS_MODE` | `"shift"` | Address surrogation: `"shift"` (house number ±range), `"replace"` (structure-preserving fake), or `"auto"` (context-aware) |
 | `ADDRESS_SHIFT_RANGE` | `1` | Max house-number delta for shift mode (~one building at ±1) |
 | `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Suppress standalone city/state replacement for location queries; drives `ADDRESS_MODE="auto"` |
-| `SERVICE_QUERY_VERIFY_ADDRESSES` | `False` | Verify addresses via OpenStreetMap Nominatim. **Off by default** — a network call per address |
 | `CONTEXT_GUARD_DEVICE` | `-1` | ContextGuard inference device: `-1` = CPU, `0+` = GPU id |
 | `SHOW_API_TRANSPARENCY` | `True` | Show the sent / received / restored transparency panel after each chat turn |
 | `RAG_TOP_K` | `3` | Number of document chunks retrieved per RAG query |

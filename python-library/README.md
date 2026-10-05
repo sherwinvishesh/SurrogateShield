@@ -74,7 +74,6 @@ The core package installs the following automatically:
 | `faker` | Generates realistic fake values for each PII type |
 | `cryptography` | AES-256-GCM encryption for the persistent shadow map |
 | `rapidfuzz` | Fuzzy string matching in the reconstruction pass |
-| `requests` | Address verification via OpenStreetMap Nominatim |
 | `spacy` | Named-entity recognition (Stage 2) |
 | `en-core-web-lg` | spaCy English NER model: downloaded automatically on first use (~750 MB, cached) |
 | `transformers` | HuggingFace NER pipeline (Stage 3 ContextGuard) |
@@ -355,9 +354,8 @@ conversation ("789 Crescent Row" and "790 Crescent Row" both present are
 shifted apart automatically), and the same original always maps to the same
 surrogate within a session.
 
-Set `verify_addresses=True` to have each detected address checked against
-OpenStreetMap Nominatim. This makes a **network call per address** and is off
-by default — v2 never touches the network unless you opt in.
+No address is sent to a geocoder. `verify_addresses` (a Nominatim existence
+check whose result never changed the output) is deprecated and has no effect.
 
 
 ## Service query detection
@@ -571,11 +569,6 @@ shield.config(
     address_shift_range=1,
     # Maximum house-number delta for shift mode. Must be an integer >= 1.
     # ±1 keeps the geographic error to roughly one building.
-
-    verify_addresses=False,
-    # When True, each detected address is checked against OpenStreetMap
-    # Nominatim. This makes a NETWORK call per address (~1-2 s) — keep it
-    # False (default) unless you explicitly need existence verification.
 
     context_guard_model="dslim/distilbert-NER",
     # The HuggingFace model used by ContextGuard. Any token-classification

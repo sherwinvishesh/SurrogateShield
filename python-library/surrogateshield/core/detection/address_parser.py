@@ -516,29 +516,3 @@ def parse(fragment: str) -> Optional[ParsedAddress]:
     """Parse a standalone address string. Returns None if no address found."""
     results = find_addresses(fragment)
     return results[0] if results else None
-
-
-def verify_address_exists(parsed: ParsedAddress, timeout: float = 2.0) -> bool:
-    """
-    OPT-IN network check against OpenStreetMap Nominatim.
-
-    Never called on the hot path unless the user enables address
-    verification in config. Returns True when Nominatim knows the address;
-    False on no-result or any network failure.
-    """
-    try:
-        import requests
-        query_parts = [p for p in (
-            f"{parsed.house_number} {parsed.street_name or ''} {parsed.suffix or ''}".strip(),
-            parsed.city, parsed.state,
-        ) if p]
-        r = requests.get(
-            "https://nominatim.openstreetmap.org/search",
-            params={"q": ", ".join(query_parts), "format": "json", "limit": 1},
-            headers={"User-Agent": "SurrogateShield-Research/2.0"},
-            timeout=timeout,
-        )
-        return bool(r.json())
-    except Exception as exc:
-        logger.debug(f"[AddressParser] Nominatim verify failed: {exc}")
-        return False

@@ -194,7 +194,7 @@ def test_I10_silent_by_default(stub, capsys):
     s.scan("Alice Brown")
     assert capsys.readouterr() == ("", "")
     assert ss.Config().detailed_view is False
-    assert ss.Config().verify_addresses is False
+    assert not hasattr(ss.Config(), "verify_addresses")   # F3: removed
 
 
 def test_I10_config_changes_only_what_is_passed():

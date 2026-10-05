@@ -32,9 +32,6 @@ class Config:
     # "auto"    → shift for service queries, replace otherwise
     address_mode: str = "auto"
     address_shift_range: int = 1
-    # Opt-in Nominatim existence check (network!). Never on the hot path
-    # unless explicitly enabled.
-    verify_addresses: bool = False
     # ── ContextGuard model (v2: configurable, was hard-coded) ────────────
     context_guard_model: str = "dslim/distilbert-NER"
     context_guard_device: int = -1

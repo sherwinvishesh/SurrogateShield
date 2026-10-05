@@ -14,10 +14,14 @@ from typing import Optional
 # Detection thresholds
 # ─────────────────────────────────────────────
 
-ENTITY_TRACE_HIGH_THRESHOLD: float = 0.85   # spaCy score → confirmed
-ENTITY_TRACE_LOW_THRESHOLD: float = 0.60    # spaCy score → borderline (sent to ContextGuard)
+# spaCy's NER gives no per-entity confidence, so EntityTrace assigns one per
+# label: PERSON 0.88, GPE/ORG 0.85, LOC 0.74, FAC 0.70. These thresholds are
+# therefore TYPE GATES, not confidence cut-offs: with the defaults PERSON/GPE/
+# ORG are confirmed and LOC/FAC are borderline (tests/test_F3_settings.py).
+ENTITY_TRACE_HIGH_THRESHOLD: float = 0.85   # type score ≥ this → confirmed
+ENTITY_TRACE_LOW_THRESHOLD: float = 0.60    # type score ≥ this → borderline (sent to ContextGuard)
 
-CONTEXT_GUARD_CONFIDENCE_THRESHOLD: float = 0.70  # ContextGuard confidence → confirmed
+CONTEXT_GUARD_CONFIDENCE_THRESHOLD: float = 0.70  # borderline type score ≥ this → confirmed
 
 # ─────────────────────────────────────────────
 # Model names
@@ -28,7 +32,6 @@ CONTEXT_GUARD_CONFIDENCE_THRESHOLD: float = 0.70  # ContextGuard confidence → 
 CONTEXT_GUARD_MODEL: str = "dslim/distilbert-NER"
 CONTEXT_GUARD_DEVICE: int = -1                # -1 = CPU, >= 0 = GPU device id
 CONTEXT_GUARD_ENABLED: bool = True            # always on — no Ollama required
-CONTEXT_GUARD_FALLBACK_TO_OLLAMA: bool = False  # set True to use phi3:mini instead
 
 CLAUDE_MODEL: str = "claude-sonnet-4-6"          # Claude API model
 # Attacker experiment (attacker.py). Must differ from the model that answered
@@ -105,16 +108,12 @@ ADDRESS_SHIFT_RANGE: int = 1
 # replacement (preserves answer utility) and drive ADDRESS_MODE="auto".
 SERVICE_QUERY_DETECTION_ENABLED: bool = True
 
-# If True, each detected address is verified via OpenStreetMap Nominatim
-# (~1-2s NETWORK call per address). Off by default — opt-in only.
-SERVICE_QUERY_VERIFY_ADDRESSES: bool = False
 
 # ─────────────────────────────────────────────
 # Logging / display
 # ─────────────────────────────────────────────
 
-LOG_LEVEL: str = "INFO"
-SHOW_DETECTION_TABLE: bool = True                # Print detection results in chat mode
+# Log level: SURROGATESHIELD_LOG_LEVEL (environment), read in main.py.
 
 # Show a transparency panel after each turn: what was sent to Anthropic,
 # what raw response came back, and what the final restored output is.

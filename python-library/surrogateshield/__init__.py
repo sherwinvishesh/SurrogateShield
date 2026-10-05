@@ -22,6 +22,7 @@ Public API
 from __future__ import annotations
 
 import os
+import warnings
 from typing import Dict, List, Union
 
 from ._state import Config, cfg
@@ -189,9 +190,9 @@ def config(
                                         "replace" — structure-preserving fake address
                                                     (every component faked, same shape).
         address_shift_range:            Max house-number delta for shift mode (>= 1).
-        verify_addresses:               Opt-in Nominatim existence check for detected
-                                        addresses. Makes a NETWORK call per address —
-                                        off by default.
+        verify_addresses:               Deprecated, no effect. The Nominatim check sent
+                                        each street to a third party and never changed
+                                        the output (audit F3).
         context_guard_model:            HuggingFace model for ContextGuard.
         context_guard_device:           Device for ContextGuard (-1 = CPU, >= 0 = GPU id).
 
@@ -201,6 +202,10 @@ def config(
         RuntimeError: pii_mem changed while the current session holds mappings.
     """
     changes = {k: v for k, v in locals().items() if v is not _UNSET}
+    if changes.pop("verify_addresses", None) is not None:
+        warnings.warn("config(verify_addresses=...) has no effect and will be removed "
+                      "(audit F3: the Nominatim check never changed the output)",
+                      DeprecationWarning, stacklevel=2)
     if "pii_off" in changes:
         changes["pii_off"] = list(changes["pii_off"] or [])
     merged = {f: getattr(cfg, f) for f in Config.__dataclass_fields__}
