@@ -5,7 +5,7 @@ chatbot/chat.py — Claude API Conversation Handler
 
 Manages multi-turn conversations with the Claude API.
 Maintains conversation history as a list of {role, content} dicts
-and persists conversations to conversations/<conv_id>.json.
+and persists conversations to <conversations_dir>/<conv_id>.json (sealed).
 
 This module is intentionally isolated — it has NO imports from
 detection, generation, storage, or reconstruction. The pipeline.py
@@ -22,15 +22,23 @@ from typing import List, Optional
 
 import anthropic
 
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-
 from config import (
-    CLAUDE_MODEL, SHADOWMAP_DIR,
+    CLAUDE_MODEL,
     GEMINI_MODEL, OPENAI_MODEL, LOCAL_LLM_MODEL, LOCAL_LLM_HOST,
-    AES_NONCE_SIZE,
 )
 from settings_manager import load_settings
-from storage.logic import _derive_key
+from storage.logic import (
+    KIND_TRANSCRIPT,
+    CorruptStoreError,
+    StorageError,
+    _derive_key,
+    _legacy_key,
+    conversations_dir,
+    seal,
+    unseal,
+    validate_id,
+    write_private,
+)
 from util import Conversation, ConversationMessage, get_logger, new_conversation_id
 
 logger = get_logger(__name__)
@@ -270,80 +278,74 @@ class ClaudeChat:
 
     def save(self) -> None:
         """
-        Persist both display and API histories to conversations/<conv_id>.json.
+        Persist both display and API histories to <conversations_dir>/<id>.json.
 
         Two lists are saved:
           messages     — display history (real values, for the user to read)
           api_messages — API history (surrogates only, for Claude context)
 
-        The file is AES-256-GCM encrypted (same scheme as ShadowMap):
-          nonce (12 bytes) || ciphertext
-        Key is derived via HKDF-SHA256 from device secret + conversation_id.
+        Sealed with the transcript key and AAD (storage.logic, audit I11);
+        written atomically, mode 0600. Raises OSError if the write fails.
         """
+        conv_id = validate_id(self.conversation.id)
+
+        def _serialise(msgs):
+            return [
+                {"role": m.role, "content": m.content, "timestamp": m.timestamp}
+                for m in msgs
+            ]
+
+        data = {
+            "id": conv_id,
+            "created": self.conversation.created,
+            "rag_mode": self.conversation.rag_mode,
+            "messages": _serialise(self.conversation.messages),
+            "api_messages": _serialise(self.conversation.api_messages),
+        }
+        plaintext = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
+        path = conversations_dir() / f"{conv_id}.json"
+        write_private(path, seal(_derive_key(conv_id, KIND_TRANSCRIPT), conv_id,
+                                 KIND_TRANSCRIPT, plaintext))
+        logger.debug(f"[ClaudeChat] Saved conversation → {path}")
+
+    @staticmethod
+    def _read_transcript(conversation_id: str, path: Path) -> dict:
+        """Decrypt a transcript. Plaintext legacy files start with ``{``;
+        anything else must decrypt, else ValueError (audit I19)."""
+        raw = path.read_bytes()
+        if raw[:1] == b"{":
+            logger.warning(
+                f"[ClaudeChat] Conversation {conversation_id!r} is a legacy "
+                "plaintext file — it is re-encrypted on the next save."
+            )
+            return json.loads(raw.decode("utf-8"))
         try:
-            Path(SHADOWMAP_DIR).mkdir(parents=True, exist_ok=True)
-            path = Path(SHADOWMAP_DIR) / f"{self.conversation.id}.json"
-
-            def _serialise(msgs):
-                return [
-                    {"role": m.role, "content": m.content, "timestamp": m.timestamp}
-                    for m in msgs
-                ]
-
-            data = {
-                "id": self.conversation.id,
-                "created": self.conversation.created,
-                "rag_mode": self.conversation.rag_mode,
-                "messages": _serialise(self.conversation.messages),
-                "api_messages": _serialise(self.conversation.api_messages),
-            }
-            plaintext = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
-            key = _derive_key(self.conversation.id)
-            nonce = os.urandom(AES_NONCE_SIZE)
-            ciphertext = AESGCM(key).encrypt(nonce, plaintext, None)
-            path.write_bytes(nonce + ciphertext)
-            logger.debug(f"[ClaudeChat] Saved conversation → {path}")
-        except OSError as exc:
-            logger.error(f"[ClaudeChat] Failed to save conversation: {exc}")
+            plaintext = unseal(_derive_key(conversation_id, KIND_TRANSCRIPT), conversation_id,
+                               KIND_TRANSCRIPT, raw, legacy=_legacy_key(conversation_id))
+        except CorruptStoreError as exc:
+            raise ValueError(
+                f"conversation {conversation_id} cannot be decrypted with this "
+                f"device key ({exc})"
+            ) from exc
+        return json.loads(plaintext.decode("utf-8"))
 
     @classmethod
     def load(cls, conversation_id: str) -> "ClaudeChat":
         """
         Load an existing conversation from disk and return a ClaudeChat instance.
 
-        Args:
-            conversation_id: The UUID of the conversation to load.
-
-        Returns:
-            ClaudeChat instance with history populated from disk.
-
         Raises:
-            FileNotFoundError: If the conversation file does not exist.
+            ValueError:        invalid id, or the file cannot be decrypted/parsed.
+            FileNotFoundError: the conversation does not exist.
         """
-        path = Path(SHADOWMAP_DIR) / f"{conversation_id}.json"
+        conversation_id = validate_id(conversation_id)
+        path = conversations_dir() / f"{conversation_id}.json"
         if not path.exists():
             raise FileNotFoundError(
                 f"Conversation '{conversation_id}' not found at {path}"
             )
         try:
-            raw = path.read_bytes()
-            data = None
-            # Try encrypted format first (nonce || ciphertext)
-            if len(raw) > AES_NONCE_SIZE:
-                try:
-                    key = _derive_key(conversation_id)
-                    nonce, ct = raw[:AES_NONCE_SIZE], raw[AES_NONCE_SIZE:]
-                    plaintext = AESGCM(key).decrypt(nonce, ct, None)
-                    data = json.loads(plaintext.decode("utf-8"))
-                except Exception:
-                    pass
-            # Backward compat: old plaintext JSON files
-            if data is None:
-                logger.warning(
-                    f"[ClaudeChat] Conversation {conversation_id!r} is unencrypted "
-                    "(legacy format) — loading as plaintext."
-                )
-                data = json.loads(raw.decode("utf-8"))
+            data = cls._read_transcript(conversation_id, path)
 
             def _deserialise(raw_list):
                 return [
@@ -383,7 +385,7 @@ class ClaudeChat:
                 f"({len(messages)} display msgs, {len(api_messages)} api msgs)"
             )
             return cls(conversation=conv)
-        except (json.JSONDecodeError, KeyError) as exc:
+        except (json.JSONDecodeError, UnicodeDecodeError, KeyError, TypeError) as exc:
             raise ValueError(
                 f"Conversation file at {path} is corrupt or invalid: {exc}"
             ) from exc
@@ -391,24 +393,16 @@ class ClaudeChat:
     @staticmethod
     def delete(conversation_id: str) -> None:
         """
-        Delete conversation JSON file from disk.
+        Delete the conversation transcript (no decryption needed).
 
-        The ShadowMap file is deleted separately by ShadowMap.delete().
-
-        Args:
-            conversation_id: UUID of the conversation to delete.
+        The shadow map is deleted separately by storage.logic.erase().
         """
-        path = Path(SHADOWMAP_DIR) / f"{conversation_id}.json"
+        path = conversations_dir() / f"{validate_id(conversation_id)}.json"
         try:
-            if path.exists():
-                path.unlink()
-                logger.info(f"[ClaudeChat] Deleted conversation file: {path}")
-            else:
-                logger.warning(
-                    f"[ClaudeChat] Conversation file not found: {path}"
-                )
-        except OSError as exc:
-            logger.error(f"[ClaudeChat] Failed to delete {path}: {exc}")
+            path.unlink()
+            logger.info(f"[ClaudeChat] Deleted conversation file: {path}")
+        except FileNotFoundError:
+            logger.warning(f"[ClaudeChat] Conversation file not found: {path}")
 
     @staticmethod
     def list_conversations() -> List[dict]:
@@ -416,32 +410,27 @@ class ClaudeChat:
         Return metadata for all saved conversations.
 
         Returns:
-            List of dicts with 'id', 'created', 'message_count', 'rag_mode'.
+            List of dicts with 'id', 'created', 'message_count', 'rag_mode'
+            and 'readable' (False if the file cannot be decrypted or parsed).
         """
-        conv_dir = Path(SHADOWMAP_DIR)
+        conv_dir = conversations_dir()
         if not conv_dir.exists():
             return []
         results = []
         for json_file in sorted(conv_dir.glob("*.json")):
+            conv_id = json_file.stem
             try:
-                raw = json_file.read_bytes()
-                data = None
-                if len(raw) > AES_NONCE_SIZE:
-                    try:
-                        key = _derive_key(json_file.stem)
-                        nonce, ct = raw[:AES_NONCE_SIZE], raw[AES_NONCE_SIZE:]
-                        plaintext = AESGCM(key).decrypt(nonce, ct, None)
-                        data = json.loads(plaintext.decode("utf-8"))
-                    except Exception:
-                        pass
-                if data is None:
-                    data = json.loads(raw.decode("utf-8"))
+                validate_id(conv_id)
+                data = ClaudeChat._read_transcript(conv_id, json_file)
                 results.append({
-                    "id": data.get("id", json_file.stem),
+                    "id": data.get("id", conv_id),
                     "created": data.get("created", "unknown"),
                     "message_count": len(data.get("messages", [])),
                     "rag_mode": data.get("rag_mode", False),
+                    "readable": True,
                 })
-            except Exception:
-                results.append({"id": json_file.stem, "created": "?", "message_count": 0})
+            except (ValueError, OSError, StorageError) as exc:
+                logger.warning(f"[ClaudeChat] Unreadable conversation {json_file.name}: {exc}")
+                results.append({"id": conv_id, "created": "unreadable",
+                                "message_count": 0, "rag_mode": False, "readable": False})
         return results

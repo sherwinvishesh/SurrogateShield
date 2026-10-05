@@ -53,6 +53,8 @@ from rich.table import Table
 from rich.text import Text
 from rich import box
 
+from surrogateshield.core.storage.shadow_map import StorageError
+
 console = Console()
 
 app = typer.Typer(
@@ -1322,10 +1324,14 @@ def _get_rag():
 
 
 def _delete_conversation(conv_id: str) -> None:
+    """Delete transcript and shadow map without decrypting either (so an
+    unreadable conversation can still be removed). Raises ValueError on an
+    invalid id."""
     from chatbot.chat import ClaudeChat
-    from storage.logic import ShadowMap
+    from storage.logic import erase, validate_id
+    validate_id(conv_id)
     ClaudeChat.delete(conv_id)
-    ShadowMap(conv_id).delete()
+    erase(conv_id)
 
 
 def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
@@ -1346,6 +1352,9 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
             console.print("[green]New conversation started.[/green]")
     except FileNotFoundError as exc:
         console.print(f"[red]Not found:[/red] {exc}"); return
+    except (ValueError, StorageError) as exc:
+        # invalid id, undecryptable transcript, unusable device key (I11, I19)
+        console.print(f"[red]Cannot open conversation:[/red] {exc}"); return
     except EnvironmentError as exc:
         console.print(f"[red bold]Configuration error:[/red bold] {exc}")
         console.print("[dim]Press S from the dashboard to configure your LLM provider.[/dim]"); return
@@ -1363,7 +1372,12 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
             console.print(f"[yellow]RAG unavailable:[/yellow] {exc}")
             rag_store = None
 
-    _run_chat_loop(Pipeline(chat=chat_handler, rag=rag_store), rag_mode=bool(effective_rag))
+    try:
+        pipeline = Pipeline(chat=chat_handler, rag=rag_store)
+    except StorageError as exc:
+        # corrupt shadow map (moved aside) or unusable device key
+        console.print(f"[red]Cannot open the surrogate map:[/red] {exc}"); return
+    _run_chat_loop(pipeline, rag_mode=bool(effective_rag))
 
 
 def _run_chat_loop(pipeline, rag_mode: bool) -> None:
@@ -1434,7 +1448,11 @@ def chat(
     _print_compact_banner()
     if delete:
         console.print(f"[yellow]Deleting:[/yellow] {delete}")
-        _delete_conversation(delete)
+        try:
+            _delete_conversation(delete)
+        except ValueError as exc:
+            console.print(f"[red]{exc}[/red]")
+            raise typer.Exit(2)
         console.print("[green]✓[/green]  Deleted.")
         return
     _start_chat(load=load, rag=rag)

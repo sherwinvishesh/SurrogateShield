@@ -83,6 +83,6 @@ For background on the tool's threat model and cryptographic design, see the
 - Only surrogates are transmitted; real values never leave the device.
 - Surrogate → original mappings are stored **AES-256-GCM encrypted**, never in plaintext.
 - Per-conversation keys are derived via HKDF-SHA256 from a device-local secret.
-- `.gitignore` excludes `*.shadowmap`, `conversations/*.json`, `device.key`, and `.env`.
+- Runtime data lives under `~/.surrogateshield/` (`0o700`), outside the repository; `.gitignore` also excludes `*.shadowmap`, `conversations/*.json`, `device.key`, and `.env`.
 
 Thank you for helping keep sensitive data where it belongs — on-device.

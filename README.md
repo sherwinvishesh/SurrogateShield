@@ -230,10 +230,14 @@ An encrypted, per-conversation mapping of `surrogate → original`.
 | Property | Detail |
 |---|---|
 | Encryption | AES-256-GCM with a fresh 12-byte nonce per save |
-| Key derivation | HKDF-SHA256 with device secret as IKM and conversation ID as salt |
-| Device secret | Generated once at `~/.surrogateshield/device.key` with `0o600` permissions |
-| File location | `conversations/<conv_id>.shadowmap` (binary, not human-readable) |
-| Graceful degradation | Missing or corrupt file → empty mapping, no crash |
+| Key derivation | HKDF-SHA256: device secret as IKM, conversation ID as salt, file kind (`shadowmap-v1` / `transcript-v1`) as info |
+| Binding | Kind and ID are AES-GCM associated data: a file only opens as what it was written for |
+| Device secret | Generated once at `~/.surrogateshield/device.key` (`$SURROGATESHIELD_HOME` overrides the directory); `0o600`, directory `0o700`, loose permissions are tightened, a key of the wrong length is refused |
+| File location | `~/.surrogateshield/conversations/<conv_id>.shadowmap`; IDs must match `^[A-Za-z0-9_-]{1,64}$` |
+| Writes | Atomic (temp file, fsync, rename), files `0o600` |
+| Missing file | Empty mapping |
+| Corrupt file | Moved aside to `<name>.corrupt-<ts>` and an error is raised: never silently replaced by an empty map |
+| Key unavailable | Error (`ShadowMapStorageError`); an ephemeral key is opt-in via `config.ALLOW_EPHEMERAL_KEY` |
 
 
 
@@ -925,7 +929,7 @@ shield.config(pii_mem="/var/app/shadowmaps")
 
 sanitized = shield.mask("My name is Clara Oswald, phone 555-123-4567.")
 restored  = shield.unmask(llm.chat(sanitized))
-shield.flush()   # deletes the .shadowmap and .key files for this session
+shield.flush()   # deletes this session's .shadowmap file
 ```
 
 
@@ -1032,9 +1036,12 @@ SurrogateShield/
 │           └── reconstruction/
 │               └── resolve.py           # ResolvePass — exact / component / fuzzy restoration
 │
-└── conversations/           # Runtime — auto-created on first use
-    ├── <conv_id>.json        # Conversation history (surrogate text only, not originals)
-    └── <conv_id>.shadowmap   # AES-256-GCM encrypted surrogate→original mapping
+~/.surrogateshield/           # Runtime ($SURROGATESHIELD_HOME), 0700, created on first use
+├── device.key                # 32-byte device secret, 0600
+├── settings.json
+└── conversations/
+    ├── <conv_id>.json        # Encrypted transcript: display history (real values) + API history (surrogates)
+    └── <conv_id>.shadowmap   # Encrypted surrogate→original mapping
 ```
 
 
@@ -1043,12 +1050,12 @@ SurrogateShield/
 
 | Component | Mechanism |
 |---|---|
-| Device secret | 32-byte random key at `~/.surrogateshield/device.key`, `0o600` permissions |
-| Per-conversation key | HKDF-SHA256 with device secret as IKM and conversation ID as salt |
-| ShadowMap encryption | AES-256-GCM with fresh 12-byte nonce per write |
-| ShadowMap format | `nonce (12 bytes) ‖ AES-GCM ciphertext`: unreadable without device key |
+| Device secret | 32-byte random key at `~/.surrogateshield/device.key`, `0o600` permissions, directory `0o700` |
+| Per-conversation key | HKDF-SHA256: device secret as IKM, conversation ID as salt, file kind as info |
+| ShadowMap encryption | AES-256-GCM with fresh 12-byte nonce per write; kind and ID as associated data |
+| ShadowMap format | `"SSv1" ‖ nonce (12 bytes) ‖ AES-GCM ciphertext`: unreadable without device key |
 | API transmission | Only surrogates sent: real values never leave the device |
-| Conversation history | Stored locally in `conversations/`; JSON holds surrogate text, not originals |
+| Conversation history | Stored locally in `~/.surrogateshield/conversations/`, encrypted like the ShadowMap; it contains the real values you typed (display history) as well as the surrogate text sent to the API |
 | `.gitignore` | `*.shadowmap`, `conversations/*.json`, `device.key`, `.env` excluded |
 
 

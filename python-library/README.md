@@ -368,9 +368,8 @@ os.makedirs("/var/app/shadowmaps", exist_ok=True)
 
 shield.config(pii_mem="/var/app/shadowmaps")
 
-# Now every call to mask() writes an encrypted .shadowmap file
-# and a per-session .key file (owner-read-only, 0o600 permissions).
-# shield.flush() deletes both files and resets the session.
+# Now every call to mask() atomically writes an encrypted .shadowmap file
+# (owner-only, 0o600). shield.flush() deletes it and resets the session.
 sanitized = shield.mask("My name is Clara Oswald and my phone is 555-123-4567.")
 response_text = "Thanks Clara, I've noted your phone."
 restored = shield.unmask(response_text)
@@ -379,7 +378,7 @@ print(restored)
 shield.flush()
 ```
 
-The encryption scheme: a 32-byte random session key is generated per session and stored at `storage_dir/session_id.key` with owner-only permissions. An AES-256-GCM key is derived from the session key using HKDF-SHA256 with the session ID as salt. The shadow map file stores a fresh 12-byte nonce followed by the ciphertext. The nonce is regenerated on every save.
+The encryption scheme: a 32-byte device secret is generated once at `~/.surrogateshield/device.key` (`$SURROGATESHIELD_HOME` overrides the directory; file `0o600`, directory `0o700`). No key is stored next to the data. The AES-256-GCM key for a session is derived with HKDF-SHA256 (device secret as input, session ID as salt, `shadowmap-v1` as info), and the session ID is bound into the ciphertext as associated data. The file is `"SSv1"`, a fresh 12-byte nonce, then the ciphertext. A file that cannot be decrypted raises `CorruptStoreError` (it is moved aside, not deleted); a device secret that cannot be stored raises `ShadowMapStorageError`. Files written by 0.x (with a `<session>.key` beside them) are still read and are upgraded on the next save.
 
 
 ## Turning off detailed output

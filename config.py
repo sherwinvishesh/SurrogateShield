@@ -54,21 +54,19 @@ RAG_CHUNK_SIZE: int = 512                        # Characters per chunk when spl
 # Storage paths
 # ─────────────────────────────────────────────
 
-SHADOWMAP_DIR: str = "conversations"             # Relative to project root
-DEVICE_KEY_PATH: str = "~/.surrogateshield/device.key"
+# None → under $SURROGATESHIELD_HOME (default ~/.surrogateshield), never the
+# current directory (audit I11): <home>/conversations and <home>/device.key.
+SHADOWMAP_DIR: Optional[str] = None
+DEVICE_KEY_PATH: Optional[str] = None
+# If the device secret cannot be persisted, raise (default) instead of using a
+# process-lifetime secret whose data is unreadable after exit (audit F1).
+ALLOW_EPHEMERAL_KEY: bool = False
 
 # ─────────────────────────────────────────────
 # Reconstruction
 # ─────────────────────────────────────────────
 
 FUZZY_MATCH_THRESHOLD: int = 85                  # rapidfuzz partial_ratio threshold (0–100)
-
-# ─────────────────────────────────────────────
-# Crypto
-# ─────────────────────────────────────────────
-
-HKDF_INFO: bytes = b"shadowmap"                  # HKDF derivation info label
-AES_NONCE_SIZE: int = 12                         # GCM nonce length in bytes
 
 # ─────────────────────────────────────────────
 # Detection (fallback)

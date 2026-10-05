@@ -140,7 +140,9 @@ with tempfile.TemporaryDirectory() as tmpdir:
     map_path = os.path.join(tmpdir, f"{session_id}.shadowmap")
     key_path = os.path.join(tmpdir, f"{session_id}.key")
     check("Persistent mode creates .shadowmap file", os.path.exists(map_path))
-    check("Persistent mode creates .key file",       os.path.exists(key_path))
+    # audit I11: the key is the device secret under SURROGATESHIELD_HOME,
+    # never a file beside the ciphertext
+    check("Persistent mode writes no key beside the map", not os.path.exists(key_path))
 
     # File must be binary (encrypted), not plain JSON
     with open(map_path, "rb") as f:
@@ -148,10 +150,13 @@ with tempfile.TemporaryDirectory() as tmpdir:
     check("Shadowmap file is not plain JSON (encrypted)",
           b"SurrogatePerson" not in raw_bytes)
 
-    # Key file must be exactly 32 bytes, owner-only permissions
-    key_stat = os.stat(key_path)
-    check("Session key file is 32 bytes", key_stat.st_size == 32)
-    check("Session key file has 0o600 permissions",
+    # Map file is owner-only; device secret is 32 bytes, owner-only
+    from surrogateshield.core.storage.shadow_map import home as _ss_home
+    check("Shadowmap file has 0o600 permissions",
+          oct(os.stat(map_path).st_mode)[-3:] == "600")
+    key_stat = os.stat(_ss_home() / "device.key")
+    check("Device secret is 32 bytes", key_stat.st_size == 32)
+    check("Device secret has 0o600 permissions",
           oct(key_stat.st_mode)[-3:] == "600")
 
     # Round-trip: load from disk into fresh ShadowMap instance
@@ -167,7 +172,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
     sm2.flush()
     check("flush() clears in-memory mappings",      len(sm2) == 0)
     check("flush() deletes .shadowmap file",         not os.path.exists(map_path))
-    check("flush() deletes .key file",               not os.path.exists(key_path))
+    check("flush() leaves no key file",              not os.path.exists(key_path))
 
     # A fresh load after delete starts empty (graceful)
     sm3 = ShadowMap(session_id=session_id, storage_dir=tmpdir)
