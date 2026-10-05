@@ -64,6 +64,11 @@ KEY_TYPE_MAP: Dict[str, str] = {
     "driver_license": "us_driver_license", "us_driver_license": "us_driver_license",
     "drivers_license": "us_driver_license", "dl": "us_driver_license",
     "license": "us_driver_license",
+    # audit I14 families (identity)
+    "url": "url", "handle": "handle", "username": "handle",
+    "credential": "credential", "password": "credential", "age": "age",
+    "id_number": "id_number", "passport": "passport", "iban": "iban",
+    "vin": "vin", "mac_address": "mac_address", "license_plate": "license_plate",
 }
 
 # SurrogateShield detector type → canonical type (identity otherwise).

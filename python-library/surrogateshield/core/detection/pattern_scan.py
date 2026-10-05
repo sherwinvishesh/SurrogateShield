@@ -9,7 +9,21 @@ birth, IPv4 + IPv6, MAC addresses, API keys/secrets, IBAN (mod-97
 validated), VIN (check-digit validated), crypto wallets, US routing
 numbers (ABA checksum), driver's licenses, passports, license plates,
 generic labelled ID numbers (MRN, insurance/member IDs, account numbers,
-KTN/PASSID, USCIS, Aadhaar…), UK postcodes, US ZIP codes.
+KTN/PASSID, USCIS, Aadhaar, EIN/ITIN, customer/student/client numbers,
+CPF/DNI/NIF…), UK postcodes, US ZIP codes, ages ("34 years old", "my mom
+is 72"), years of birth, social/chat/game handles, personal URLs, and
+credentials (passwords, one-time and backup codes, tokens) — audit I14.
+
+• URLs are found first (audit I1). A personal URL (a profile on a known
+  host, a person path such as /in/ or /team/, a personal domain introduced
+  as "my site") is one "url" entity. Any other URL is opaque: nothing inside
+  it is matched except secret query parameters (?t=, token=) and e-mail
+  addresses, and opaque_spans() lets the pipeline hide it from the NER
+  stages.
+
+• dates are a DOB only with a birth cue in the 40 characters before them,
+  or when the year is at least five years in the past; ISO timestamps,
+  version strings and future dates (deadlines, lease ends) are kept.
 
 Key design decisions
 ────────────────────
@@ -42,6 +56,7 @@ overlap earlier ones.
 
 from __future__ import annotations
 
+import datetime
 import logging
 import re
 from typing import List, Optional, Set
@@ -250,10 +265,38 @@ def _plate_validator(m: "re.Match") -> bool:
     return any(c.isdigit() for c in v) and any(c.isalpha() for c in v)
 
 
+_BIRTH_CUE = re.compile(
+    r"(?:born|birth|\bdob\b|d\.o\.b|b-?day|nacimiento|naissance|geburt|nascimento"
+    r"|nacido|n[ée]e?\s+le|geboren)",
+    re.IGNORECASE,
+)
+
+# A date with no birth cue is treated as a date of birth only when its year
+# is at least this many years in the past (audit I8). Ship dates, deadlines,
+# lease ends and log timestamps are recent or future and stay in the text;
+# an old date in personal prose is still masked (fail closed).
+_DOB_MIN_AGE_WITHOUT_CUE = 5
+_THIS_YEAR = datetime.date.today().year
+
+
+def _date_year(s: str) -> Optional[int]:
+    """The year of a date string, or None when it has no recognisable year."""
+    m = re.search(r"(?:19|20)\d{2}", s)
+    if m:
+        return int(m.group())
+    m = re.search(r"(?:'|[/\-.])(\d{2})$", s.strip())
+    if m:
+        yy = int(m.group(1))
+        return 2000 + yy if yy <= _THIS_YEAR % 100 else 1900 + yy
+    return None
+
+
 def _dob_validator(m: "re.Match") -> bool:
     s = m.group()
     if _before(m, 1) in ("v", "V"):
         return False  # "v2.5.10" is a version, not a date
+    if _after(m, 1) == "T":
+        return False  # ISO-8601 timestamp ("2026-10-03T14:21:55Z")
     # short-year form (mm/dd/yy) is the weakest shape — reject it in
     # counter/version contexts ("release 2.5.24") and impossible dates
     if re.fullmatch(r"\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2}", s):
@@ -263,7 +306,309 @@ def _dob_validator(m: "re.Match") -> bool:
         a, b = int(a), int(b)
         if not (1 <= a <= 31 and 1 <= b <= 31 and (a <= 12 or b <= 12)):
             return False
-    return True
+    if _BIRTH_CUE.search(_before(m, 40)):
+        return True
+    year = _date_year(s)
+    return year is not None and year <= _THIS_YEAR - _DOB_MIN_AGE_WITHOUT_CUE
+
+
+def _ipv4_validator(m: "re.Match") -> bool:
+    # loopback, "any" and netmasks identify nobody (audit I8)
+    s = m.group()
+    return not (s.startswith(("127.", "0.", "255.")) or s == "0.0.0.0")
+
+
+# ── age ──────────────────────────────────────────────────────────────────────
+
+_KIN = (
+    r"(?:mom|mum|mother|dad|father|son|daughter|kid|child|baby|toddler|brother"
+    r"|sister|grandma|grandmother|granny|grandpa|grandfather|grandson|granddaughter"
+    r"|wife|husband|partner|spouse|boyfriend|girlfriend|fianc[ée]e?|aunt|uncle"
+    r"|niece|nephew|cousin|friend|roommate|boss|patient|client|neighbou?r|stepson"
+    r"|stepdaughter)"
+)
+# Words that turn "I'm 30" into a measurement or a count, not an age.
+_NOT_AGE_AFTER = re.compile(
+    r"\s*(?:%|percent|['\"′″]|[.:,]\d|/|[-–]\d|x\b|k\b|am\b|pm\b|st\b|nd\b|rd\b|th\b"
+    r"|(?:minutes?|mins?|hours?|hrs?|days?|weeks?|months?|seconds?|secs?|lbs?|kg|kilos?"
+    r"|pounds|cm|mm|inch(?:es)?|in\b|feet|ft|foot|miles?|mi\b|km|meters?|metres?"
+    r"|dollars?|bucks|euros?|times|of\b|out\b|minutes|points?|pts|degrees?"
+    r"|steps?|items?|pages?|people|units?|cents?)\b)",
+    re.IGNORECASE,
+)
+
+
+def _age_validator(m: "re.Match") -> bool:
+    digits = re.findall(r"\d+", m.group("v"))
+    if not digits or not (0 < int(digits[0]) <= 120):
+        return False
+    return not _NOT_AGE_AFTER.match(_after(m, 12))
+
+
+# ── handles, credentials ─────────────────────────────────────────────────────
+
+# "@token" forms that are code or chat syntax, not a person's handle.
+_NOT_HANDLE = frozenset({
+    "media", "import", "keyframes", "font-face", "charset", "supports", "page",
+    "layer", "container", "tailwind", "apply", "use", "include", "mixin",
+    "extend", "return", "if", "else", "each", "function", "property",
+    "dataclass", "staticmethod", "classmethod", "override", "here", "channel",
+    "everyone", "all", "param", "returns", "throws", "author", "since",
+    "deprecated", "see", "type", "example", "todo", "component", "test",
+})
+
+_HANDLE_STOP = frozenset({
+    "is", "was", "the", "a", "an", "and", "or", "my", "your", "for", "to",
+    "not", "name", "names", "here", "there", "below", "above", "same",
+    "different", "wrong", "correct", "incorrect", "invalid", "taken",
+    "available", "required", "missing", "blank", "empty", "changed", "field",
+    "password", "username", "account", "login", "email", "please", "help",
+    "gamertag", "handle", "id", "tag", "on", "in", "at", "with",
+})
+
+
+def _at_handle_validator(m: "re.Match") -> bool:
+    v = m.group("v")[1:]
+    if v.lower() in _NOT_HANDLE:
+        return False
+    if _after(m, 1) == "(":
+        return False                      # "@app.route(" — a decorator call
+    line_start = m.string.rfind("\n", 0, m.start()) + 1
+    line_end = m.string.find("\n", m.end())
+    line = m.string[line_start:line_end if line_end >= 0 else None].strip()
+    return line != m.group("v")           # "@dataclass" alone on its line
+
+
+def _tag_handle_validator(m: "re.Match") -> bool:
+    name = m.group("v").split("#")[0]
+    return (any(c.islower() for c in name)
+            and name.lower() not in {"issue", "pr", "ticket", "order", "item",
+                                     "room", "no", "case", "bug", "build", "ref",
+                                     "apt", "unit", "suite", "page", "step",
+                                     "line", "rule", "task", "store", "table"})
+
+
+def _keyword_handle_validator(m: "re.Match") -> bool:
+    v = m.group("v")
+    if v.lower() in _HANDLE_STOP:
+        return False
+    # a plain lowercase word is a handle only behind an explicit username label
+    distinctive = (any(c.isdigit() or c in "._-" for c in v)
+                   or (v[:1].islower() and any(c.isupper() for c in v[1:]))
+                   or (any(c.isupper() for c in v) and any(c.islower() for c in v)
+                       and "_" in v))
+    return distinctive or bool(m.group("strong"))
+
+
+_CODE_REFERENCE = re.compile(
+    r"^(?:[$%{<]|[A-Za-z_][\w.]*[\[(]|[A-Z][A-Z0-9_]*$|(?:os|process|env|config"
+    r"|settings|self|this|request|req)\.)"
+)
+
+
+def _credential_validator(m: "re.Match") -> bool:
+    v = m.group("v").rstrip(".,;:)]}")
+    if _CODE_REFERENCE.match(v):
+        return False          # a variable, env lookup or template, not a secret
+    has_digit = any(c.isdigit() for c in v)
+    has_symbol = any(not c.isalnum() for c in v)
+    mixed = any(c.isupper() for c in v) and any(c.islower() for c in v)
+    return has_digit or (has_symbol and len(v) >= 6) or (mixed and len(v) >= 8)
+
+
+def _id_value_validator(m: "re.Match") -> bool:
+    return sum(c.isdigit() for c in (m.group("v") or "")) >= 4
+
+
+def _phone_ctx_validator(m: "re.Match") -> bool:
+    n = len(re.sub(r"\D", "", m.group("v")))
+    return 8 <= n <= 13 and not _NEG_NUM_CONTEXT.search(_before(m, 30))
+
+
+# ── URLs ─────────────────────────────────────────────────────────────────────
+
+_URL_TLDS = (
+    r"com|org|net|edu|gov|io|dev|me|app|co|ai|gg|tv|xyz|info|biz|site|page"
+    r"|blog|online|tech|us|uk|ca|de|fr|es|it|nl|br|au|jp|cn|ru|ch|se|no|fi"
+    r"|dk|pl|pt|ie|nz|in|ly|to|sh|so|link|social|art|design|studio|email"
+)
+_URL_RE = re.compile(
+    r"(?:https?://|\bwww\.)[^\s<>()\[\]{}\"'`|]+[^\s<>()\[\]{}\"'`|.,;:!?]"
+    # bare host.tld/path or host.tld (lowercase TLD; never after "@" or ".")
+    r"|(?<![\w@.%+\-/])(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+"
+    r"(?-i:" + _URL_TLDS + r")\b(?![@\-])"
+    r"(?:/[^\s<>()\[\]{}\"'`|]*[^\s<>()\[\]{}\"'`|.,;:!?])?",
+)
+
+# Hosts whose first path segment (or the one after /in/, /u/, …) is a person.
+_PROFILE_HOSTS = frozenset({
+    "linkedin.com", "github.com", "gitlab.com", "bitbucket.org", "twitter.com",
+    "x.com", "instagram.com", "facebook.com", "fb.com", "tiktok.com",
+    "youtube.com", "medium.com", "reddit.com", "behance.net", "dribbble.com",
+    "threads.net", "bsky.app", "t.me", "wa.me", "venmo.com", "paypal.me",
+    "cash.app", "linktr.ee", "about.me", "keybase.io", "pinterest.com",
+    "snapchat.com", "twitch.tv", "soundcloud.com", "patreon.com",
+    "calendly.com", "stackoverflow.com", "kaggle.com", "huggingface.co",
+    "mastodon.social", "orcid.org", "scholar.google.com", "vimeo.com",
+})
+_PERSONAL_HOST_SUFFIXES = (
+    ".github.io", ".gitlab.io", ".substack.com", ".wordpress.com",
+    ".blogspot.com", ".medium.com", ".carrd.co", ".netlify.app",
+    ".vercel.app", ".bsky.social", ".tumblr.com",
+)
+# Platform pages that are not a person ("github.com/features").
+_NON_PROFILE_SEGMENTS = frozenset({
+    "", "about", "help", "settings", "login", "signup", "search", "explore",
+    "topics", "pricing", "docs", "blog", "features", "jobs", "company",
+    "school", "home", "watch", "results", "hashtag", "i", "intent", "share",
+    "sharer", "p", "reel", "groups", "events", "pages", "marketplace",
+    "orgs", "organizations", "enterprise", "marketplace", "apps", "r",
+    "questions", "tags", "c", "playlist", "embed", "status", "policies",
+    "legal", "privacy", "terms", "security", "sponsors", "collections",
+    "trending", "notifications", "messages", "feed", "news",
+})
+_PERSON_PATH_MARKERS = re.compile(
+    r"/(?:in|pub|u|user|users|profile|profiles|people|person|team|staff"
+    r"|members?|author|authors|employees?|faculty|directory)/[^/?#]+"
+    r"|/~[^/?#]+|/@[^/?#]+",
+    re.IGNORECASE,
+)
+_PERSONAL_URL_CONTEXT = re.compile(
+    r"\b(?:my|our|his|her|their)\s+(?:own\s+|personal\s+)?(?:site|website"
+    r"|portfolio|blog|homepage|home\s+page|page|profile|r[ée]sum[ée]|cv|link"
+    r"|linkedin|github|twitter|instagram|domain|channel)\b[^.\n]{0,25}$",
+    re.IGNORECASE,
+)
+# Query parameters whose value is a secret ("reset?t=8f3a91c2e7").
+_SECRET_PARAM = re.compile(
+    r"[?&#](?:t|token|access_token|refresh_token|id_token|key|api_key|apikey"
+    r"|code|auth|sig|signature|session|sid|otp|reset|secret|password|pwd"
+    r"|pass|ticket)=(?P<v>[^&#\s]{4,})",
+    re.IGNORECASE,
+)
+
+
+def _split_url(url: str):
+    """(host, path) of a URL with or without a scheme; host is lowercased
+    without "www."."""
+    rest = re.sub(r"(?i)^https?://", "", url)
+    host, _, path = rest.partition("/")
+    host = host.split("@")[-1].split(":")[0].lower()
+    if host.startswith("www."):
+        host = host[4:]
+    return host, "/" + path if path else ""
+
+
+def _is_personal_url(url: str, before: str) -> bool:
+    host, path = _split_url(url)
+    if host in _PROFILE_HOSTS:
+        first = path.strip("/").split("/")[0].split("?")[0].lower()
+        if host == "linkedin.com":
+            return bool(re.match(r"/(?:in|pub)/[^/?#]+", path))
+        return first not in _NON_PROFILE_SEGMENTS
+    if host.endswith(_PERSONAL_HOST_SUFFIXES):
+        return True
+    if _PERSON_PATH_MARKERS.search(path):
+        return True
+    return bool(_PERSONAL_URL_CONTEXT.search(before))
+
+
+def find_urls(text: str) -> List[tuple]:
+    """``(start, end, personal)`` for every URL or bare domain in *text*.
+
+    Personal URLs (a profile on a social or code host, a personal domain
+    introduced as "my site", a page under /team/ or /people/) are PII and get
+    a surrogate. Every other URL is opaque: no pattern or NER stage may match
+    inside it, so "api.example.com/v1?key=…" never yields a phone number and
+    "github.com/Microsoft" never yields an ORG (audit I1, I8)."""
+    out = []
+    for m in _URL_RE.finditer(text):
+        url = m.group()
+        if "." not in url:
+            continue
+        out.append((m.start(), m.end(), _is_personal_url(url, text[max(0, m.start() - 60):m.start()])))
+    return out
+
+
+def opaque_spans(text: str) -> List[tuple]:
+    """Spans the NER stages must not see: every URL in *text*."""
+    return [(s, e) for s, e, _ in find_urls(text)]
+
+
+# ── labelled ID numbers ──────────────────────────────────────────────────────
+
+_NUM = r"(?:number|no\.?|num|nr\.?|#|id)"
+_ID_KEYWORDS = (
+    r"\bmrn\b|medical[\s_]+record(?:[\s_]+(?:number|no\.?))?"
+    rf"|insurance[\s_]*{_NUM}|medicare[\s_]*{_NUM}|medicaid[\s_]*{_NUM}"
+    rf"|policy[\s_]*{_NUM}|member(?:ship)?[\s_]*{_NUM}|subscriber[\s_]*{_NUM}"
+    rf"|acc(?:oun)?t(?:[\s_]*{_NUM})?|patient[\s_]*(?:identifier|{_NUM})"
+    rf"|employee[\s_]*{_NUM}|badge[\s_]*{_NUM}|customer[\s_]*{_NUM}"
+    rf"|client[\s_]*{_NUM}|student[\s_]*{_NUM}|loyalty[\s_]*{_NUM}"
+    r"|\bktn\b|known\s+traveler(?:\s+number)?"
+    r"|\bpassid\b|global\s+entry(?:\s+passid)?"
+    r"|uscis(?:\s*(?:number|no\.?|#))?|\ba-number|alien\s+(?:registration\s+)?number"
+    r"|aadha{1,2}r(?:\s+(?:number|no\.?|card))?"
+    r"|national[\s_]+(?:id|identity|insurance)(?:\s+(?:number|no\.?|card))?"
+    r"|tax[\s_]*(?:id|identification)(?:[\s_]*(?:number|no\.?))?"
+    r"|\bf?ein\b|\bitin\b|\btin\b|\bvat[\s_]*(?:id|number|no\.?)"
+    r"|\bnhs[\s_]*(?:number|no\.?)|social\s+insurance\s+number|\bpan\s+card"
+    r"|card\s+(?:ending|ends)(?:\s+(?:in|with))?"
+    r"|(?:device[\s_]+)?serial(?:[\s_]*(?:number|no\.?|#|num))?|\bs/n\b"
+    r"|num[ée]ro\s+(?:de\s+)?client|n[úu]mero\s+de\s+(?:cliente|cuenta|socio)"
+    r"|kunden(?:nummer|-?nr\.?)|\bcpf\b|\bcnpj\b|\bdni\b|\bnie\b|\bnif\b|\bpesel\b"
+    r"|\bbsn\b|steuer-?id|personalausweis(?:nummer)?"
+)
+_ID_VALUE = (
+    r"\d{3}\.\d{3}\.\d{3}-\d{2}"                 # CPF
+    r"|\d{1,6}(?:[ \-]\d{1,8}){1,5}"             # grouped digits
+    r"|(?-i:[A-Z0-9][A-Z0-9\-]{3,19})"
+)
+_ID_PATTERN = re.compile(
+    rf"(?:{_ID_KEYWORDS})[\"'\s:=\-#]*"
+    r"(?:(?:is|was|est|es|ist|é)\s+)?[\"']?"
+    rf"(?P<v>{_ID_VALUE})(?![\w\-])",
+    re.IGNORECASE,
+)
+# A second value of the same shape after a list separator
+# ("Passport: A09382716 / A11746620").
+_LIST_CONTINUATION = re.compile(r"\s*(?:/|,|&|\band\b|\bor\b|\by\b|\bund\b|\bet\b)\s*")
+
+
+def _shape(s: str) -> str:
+    return re.sub(r"[A-Za-z]", "A", re.sub(r"\d", "9", s))
+
+
+# ── age and year of birth ────────────────────────────────────────────────────
+
+_AGE_PATTERNS = [
+    # "34 years old", "a 41 year old", "34yo", "34 y/o"
+    re.compile(
+        r"\b(?P<v>\d{1,3}[\s\-]*(?:(?:years?|yrs?)[\s\-]*old|yo|y/o|y\.o\.)(?![\w/]))",
+        re.IGNORECASE,
+    ),
+    re.compile(r"(?<!\d)(?P<v>\d{1,3}\s*(?:años|ans|jahre\s+alt|anos|岁|歳|साल))",
+               re.IGNORECASE),
+    # "turned 7", "aged 34", "age: 34", "turning 40"
+    re.compile(
+        r"\b(?P<v>(?:aged?|turn(?:ed|s|ing)?)(?:\s*(?:is|was|:|=|-))?\s+\d{1,3})\b",
+        re.IGNORECASE,
+    ),
+    # "I'm 29", "they're 5", "my grandma Evelyn is 89"
+    re.compile(
+        r"(?:\b(?:i'?m|i\s+am|she'?s|he'?s|they'?re|they\s+are|she\s+is|he\s+is"
+        r"|who'?s|who\s+is)"
+        rf"|\b(?:my|our|his|her|their)\s+{_KIN}(?:\s+[A-Z][\w'\-]+)?\s+"
+        r"(?:is|was|turns|just\s+turned))"
+        r"\s+(?:(?:only|just|almost|nearly|about)\s+)?(?P<v>\d{1,3})\b",
+        re.IGNORECASE,
+    ),
+    # "My daughter Ava Lindqvist (14)"
+    re.compile(
+        rf"\b{_KIN}(?:\s+[A-Z][\w'\-]+){{0,3}}\s*\((?P<v>\d{{1,2}})\)",
+        re.IGNORECASE,
+    ),
+]
 
 
 # ─────────────────────────────────────────────
@@ -274,6 +619,10 @@ def _dob_validator(m: "re.Match") -> bool:
 _GROUP1_TYPES = frozenset({
     "us_driver_license", "passport", "id_number", "license_plate",
 })
+
+# Types whose value may be followed by more values of the same shape
+# ("Passport: A09382716 / A11746620").
+_LIST_TYPES = frozenset({"us_driver_license", "passport", "id_number"})
 
 _PATTERNS: list = [
     # NOTE: street addresses are detected by the canonical structured parser
@@ -314,6 +663,65 @@ _PATTERNS: list = [
             r"(?=[A-Za-z0-9_]*\d{6,})"
             r"[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+\b"
             r")"
+        ),
+        None,
+    ),
+
+    # ── Credentials (keyword-gated, value = group "v") ───────────────────────
+    # Passwords, PINs, one-time / backup / verification codes, tokens. The
+    # value must look like a secret (a digit, a symbol, or mixed case), so
+    # "reset my password for Gmail" never matches (audit I1, I14).
+    (
+        "credential",
+        re.compile(
+            r"(?:pass(?:word|wd|phrase|code)|\bpwd\b|\bpin(?:\s*(?:code|number))?\b"
+            r"|(?:2fa|mfa|otp|backup|recovery|verification|verify|security"
+            r"|one[\s-]?time|login|auth(?:entication)?|access|sms)\s+codes?"
+            r"|\botp\b|(?:api|secret|access|auth|refresh|session)[\s_]*(?:key|token)"
+            r"|\btoken\b|\bsecret\b|contrase[ñn]a|mot\s+de\s+passe|passwort|senha)"
+            r"\s*(?:(?:is|was|are|=|:|-|of|es|est|ist|é)\s*)?"
+            r"(?:(?:now|still|set\s+to|changed\s+to)\s+)?[\"'`]?"
+            r"(?P<v>[^\s\"'`]{4,128})",
+            re.IGNORECASE,
+        ),
+        _credential_validator,
+    ),
+
+    # ── Social / chat / game handles ─────────────────────────────────────────
+    (
+        "handle",
+        re.compile(
+            r"(?<![\w@./])(?P<v>@[A-Za-z0-9_](?:[A-Za-z0-9_.\-]{0,28}[A-Za-z0-9_])?)"
+            r"(?![\w@])"
+        ),
+        _at_handle_validator,
+    ),
+    (
+        "handle",
+        re.compile(r"(?<![\w.#])(?P<v>[A-Za-z0-9_.]{2,32}#\d{4})\b"),
+        _tag_handle_validator,
+    ),
+    (
+        "handle",
+        re.compile(
+            r"(?:(?P<strong>(?:(?:xbox|psn|steam|discord|epic|switch|ps\d)\s+)?"
+            r"(?:gamer\s*tag|user\s*name|screen\s*name|login\s+name|user\s*id)"
+            r"|\bpsn(?:\s+id)?|\bhandle|\buser(?=\s*[=:]))"
+            r"|\b(?:discord|insta(?:gram)?|\big|twitter|tiktok|snap(?:chat)?|telegram"
+            r"|reddit|twitch|steam|nick(?:name)?|alias|login))"
+            r"\s*(?:(?:is|was|=|:|-)\s*)?@?"
+            r"(?P<v>[A-Za-z0-9][A-Za-z0-9_.\-]{1,30}[A-Za-z0-9])(?![\w@])",
+            re.IGNORECASE,
+        ),
+        _keyword_handle_validator,
+    ),
+    # auth-log user names ("Failed password for jmorales from …")
+    (
+        "handle",
+        re.compile(
+            r"(?:failed|accepted|invalid)\s+(?:password|publickey|keyboard-interactive)"
+            r"\s+for\s+(?:invalid\s+user\s+)?(?P<v>[a-z_][a-z0-9_.\-]{1,31})\b",
+            re.IGNORECASE,
         ),
         None,
     ),
@@ -374,7 +782,7 @@ _PATTERNS: list = [
             r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}"
             r"(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b"
         ),
-        None,
+        _ipv4_validator,
     ),
 
     # ── VIN (check-digit validated — no keyword needed) ──────────────────────
@@ -395,6 +803,15 @@ _PATTERNS: list = [
         lambda m: _iban_valid(m.group()),
     ),
 
+    # ── Labelled ID numbers (keyword-gated, value = group 1) ─────────────────
+    # Runs before every phone pattern: a labelled number ("customer no.
+    # 55-019283", "Account 8774 10 223 1186654") is an ID, not a phone.
+    (
+        "id_number",
+        _ID_PATTERN,
+        _id_value_validator,
+    ),
+
     # ── International phone (non-US, non-UK) ───────────────────────────────────
     # MUST appear before phone_us (so "+7 495 374 8120" is claimed whole and
     # phone_us cannot grab just the "495 374 8120" tail) and before zip_us.
@@ -410,13 +827,25 @@ _PATTERNS: list = [
         lambda m: 9 <= len(re.sub(r"\D", "", m.group())) <= 15,
     ),
 
+    # ── Chinese mobile (11 digits, 1[3-9]x) ────────────────────────────────────
+    (
+        "phone_intl",
+        re.compile(
+            r"(?<![0-9A-Za-z_.\-])(?:\+?86[\s\-]?)?1[3-9]\d(?:[\s\-]?\d{4}){2}(?![0-9A-Za-z])"
+        ),
+        _phone_validator,
+    ),
+
     # ── US phone (alnum-guarded, optional extension) ───────────────────────────
+    # A markdown "_" wrapper ("_312-849-2031_") is not part of a token; an
+    # underscore glued to a word ("PO_4805550123") still is.
     (
         "phone_us",
         re.compile(
-            r"(?<![A-Za-z0-9_.\-])(\+?1[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}"
+            r"(?<![A-Za-z0-9.\-])(?<![A-Za-z0-9]_)"
+            r"(\+?1[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}"
             r"(?:\s*(?:ext|extension|x)\.?\s*\d{1,6})?"
-            r"(?![A-Za-z0-9_])",
+            r"(?![A-Za-z0-9])(?!_[A-Za-z0-9])",
             re.IGNORECASE,
         ),
         _phone_validator,
@@ -431,6 +860,21 @@ _PATTERNS: list = [
             r"(?![A-Za-z0-9_])"
         ),
         _phone_validator,
+    ),
+
+    # ── National-format phone behind a phone word ("teléfono 612 345 678",
+    # "फ़ोन नंबर 98765 43210") — no country code, so it needs the label.
+    (
+        "phone_intl",
+        re.compile(
+            r"(?:phone|\bph\b|\btel\b|tel[ée]fono|telefon|mobile|\bmob\b|cell(?:ular)?"
+            r"|celular|m[óo]vil|handy|whats\s?app|call|text|contact|portable"
+            r"|फ़ोन|फोन|电话|手机|携帯|전화)"
+            r"[^\n\d+]{0,25}?(?P<v>\+?\d{2,5}(?:[\s.\-]\d{2,5}){1,4}|\d{8,13})"
+            r"(?![0-9A-Za-z])",
+            re.IGNORECASE,
+        ),
+        _phone_ctx_validator,
     ),
 
     # ── Payment card (Luhn-validated, 13-19 digits) ────────────────────────────
@@ -472,36 +916,6 @@ _PATTERNS: list = [
             r"passport(?:\s+(?:number|no\.?|num|card|#))?"
             r"\s*[:\-#]*\s*(?:is\s+|was\s+)?"
             r"(?-i:([A-Z0-9]{6,9}))\b",
-            re.IGNORECASE,
-        ),
-        _has_digit,
-    ),
-
-    # ── Labelled ID numbers (keyword-gated, value = group 1) ─────────────────
-    # MRN, insurance/member/subscriber IDs, account numbers, patient IDs,
-    # employee/badge IDs, KTN/PASSID, USCIS/A-numbers, Aadhaar.
-    (
-        "id_number",
-        re.compile(
-            r"(?:\bmrn\b|medical\s+record(?:\s+(?:number|no\.?))?"
-            r"|insurance\s*(?:id|number|no\.?|#)"
-            r"|medicare\s*(?:id|number|no\.?|#)|medicaid\s*(?:id|number|no\.?|#)"
-            r"|policy\s*(?:id|number|no\.?|#)"
-            r"|member(?:ship)?\s*(?:id|number|no\.?|#)"
-            r"|subscriber\s*(?:id|number|no\.?)"
-            r"|acc(?:oun)?t\s*(?:number|no\.?|num|#)"
-            r"|patient\s*(?:id|identifier|number|no\.?)"
-            r"|employee\s*(?:id|number|no\.?)"
-            r"|badge\s*(?:id|number|no\.?)"
-            r"|\bktn\b|known\s+traveler(?:\s+number)?"
-            r"|\bpassid\b|global\s+entry(?:\s+passid)?"
-            r"|uscis(?:\s*(?:number|no\.?|#))?|a-?number"
-            r"|alien\s+(?:registration\s+)?number"
-            r"|aadha{1,2}r(?:\s+(?:number|no\.?|card))?"
-            r"|national\s+id(?:\s+(?:number|no\.?))?"
-            r")"
-            r"\s*[:\-#]*\s*(?:is\s+|was\s+)?"
-            r"(\d{4}\s\d{4}\s\d{4}|(?-i:[A-Z0-9][A-Z0-9\-]{3,19}))\b",
             re.IGNORECASE,
         ),
         _has_digit,
@@ -562,16 +976,29 @@ _PATTERNS: list = [
             r"\d{1,2}(?:st|nd|rd|th)?[\s,\-]+(?:of\s+)?"
             r"(?:January|February|March|April|May|June|July|August|September|"
             r"October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
-            r"[\s,\-]+\d{4}"
+            r"[\s,\-]+(?:\d{4}|'\d{2})"
             r"|"
             r"(?:January|February|March|April|May|June|July|August|September|"
             r"October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
-            r"[\s,]+\d{1,2}(?:st|nd|rd|th)?[\s,]+\d{4}"
+            r"[\s,]+\d{1,2}(?:st|nd|rd|th)?[\s,]+(?:\d{4}|'\d{2})"
             r")\b",
             re.IGNORECASE,
         ),
         _dob_validator,
     ),
+
+    # ── Year of birth ("born in 1990", "b. 1990") ────────────────────────────
+    (
+        "dob",
+        re.compile(
+            r"\b(?:born|b\.)\s+(?:in\s+|on\s+)?(?P<v>(?:19|20)\d{2})\b(?![/\-.]\d)",
+            re.IGNORECASE,
+        ),
+        None,
+    ),
+
+    # ── Age (audit I14) ──────────────────────────────────────────────────────
+    *[("age", _p, _age_validator) for _p in _AGE_PATTERNS],
 
     # ── Gender indicator ───────────────────────────────────────────────────────
     (
@@ -647,7 +1074,30 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
                     return True
         return False
 
-    # ── Street addresses first: the canonical parser claims the FULL span
+    def _claim(entity_type: str, s: int, e: int) -> None:
+        results.append(DetectedEntity(text=text[s:e], start=s, end=e,
+                                      type=entity_type, score=1.0, source="pattern"))
+        occupied_spans.append((s, e))
+        logger.debug(f"[PatternScan] {entity_type}: {text[s:e]!r} at [{s}:{e}]")
+
+    # ── URLs first: a personal URL is one entity; any other URL is opaque
+    # (nothing inside it is matched) except secret query parameters and
+    # e-mail addresses.
+    for us, ue, personal in find_urls(text):
+        url = text[us:ue]
+        if personal:
+            if not _should_skip(url):
+                _claim("url", us, ue)
+            continue
+        for m in _SECRET_PARAM.finditer(url):
+            if _credential_validator(m) and not _should_skip(m.group("v")):
+                _claim("credential", us + m.start("v"), us + m.end("v"))
+        for m in _PATTERNS[0][1].finditer(url):          # e-mail
+            if _span_free(us + m.start(), us + m.end()):
+                _claim("email", us + m.start(), us + m.end())
+        occupied_spans.append((us, ue))
+
+    # ── Street addresses next: the canonical parser claims the FULL span
     # (street + unit + city + state + ZIP) as one entity.
     for parsed in address_parser.find_addresses(text):
         if not _span_free(parsed.start, parsed.end):
@@ -670,23 +1120,45 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
             f"[PatternScan] address: {entity.text!r} at [{parsed.start}:{parsed.end}]"
         )
 
+    def _claim_list_continuation(entity_type: str, pos: int, first: str) -> None:
+        shape = _shape(first)
+        while True:
+            sep = _LIST_CONTINUATION.match(text, pos)
+            if not sep:
+                return
+            s, e = sep.end(), sep.end() + len(first)
+            cand = text[s:e]
+            if (_shape(cand) != shape or (e < len(text) and text[e].isalnum())
+                    or not _span_free(s, e) or _should_skip(cand)):
+                return
+            _claim(entity_type, s, e)
+            pos = e
+
     for entity_type, pattern, validator in _PATTERNS:
         for match in pattern.finditer(text):
             start, end = match.start(), match.end()
 
-            if not _span_free(start, end):
+            if "v" not in pattern.groupindex and not _span_free(start, end):
                 continue
 
-            if entity_type in _GROUP1_TYPES:
-                matched_text = (match.group(1) or "").strip()
-                if not matched_text:
+            if "v" in pattern.groupindex:
+                if match.group("v") is None:
                     continue
-                start = match.start(1)
-                end   = match.end(1)
-                if not _span_free(start, end):
+                start, end = match.span("v")
+            elif entity_type in _GROUP1_TYPES:
+                if not match.group(1):
                     continue
-            else:
-                matched_text = match.group().strip()
+                start, end = match.span(1)
+            # trim whitespace (and sentence punctuation after a credential)
+            # so the span and the text always agree
+            while start < end and text[start].isspace():
+                start += 1
+            while start < end and (text[end - 1].isspace() or (
+                    entity_type == "credential" and text[end - 1] in ".,;:)]}")):
+                end -= 1
+            if start >= end or not _span_free(start, end):
+                continue
+            matched_text = text[start:end]
 
             if _should_skip(matched_text):
                 logger.debug(f"[PatternScan] Skipping (skip_values): {matched_text!r}")
@@ -695,17 +1167,10 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
             if validator is not None and not validator(match):
                 continue
 
-            entity = DetectedEntity(
-                text=matched_text,
-                start=start,
-                end=end,
-                type=entity_type,
-                score=1.0,
-                source="pattern",
-            )
-            results.append(entity)
-            occupied_spans.append((start, end))
-            logger.debug(f"[PatternScan] {entity_type}: {entity.text!r} at [{start}:{end}]")
+            _claim(entity_type, start, end)
+
+            if entity_type in _LIST_TYPES:
+                _claim_list_continuation(entity_type, end, matched_text)
 
     results.sort(key=lambda e: e.start)
     logger.info(f"[PatternScan] Found {len(results)} entities")

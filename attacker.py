@@ -111,7 +111,7 @@ class AttackerConfigError(ValueError):
 # ─────────────────────────────────────────────
 
 _DIGIT_TYPES = {"phone", "ssn", "credit_card", "us_bank_number", "us_driver_license",
-                "postal_code", "ip_address"}
+                "postal_code", "ip_address", "id_number", "passport"}
 _WORD = re.compile(r"[a-z]+")
 
 

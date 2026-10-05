@@ -28,8 +28,25 @@ Faker.seed(None)
 # Types whose surrogates mirror the original's exact character shape
 # (an ID number swaps to a same-shape ID number).
 _SHAPE_TYPES = frozenset({
-    "mac_address", "vin", "passport", "id_number", "license_plate",
+    "mac_address", "vin", "passport", "id_number", "license_plate", "credential",
 })
+
+# Types whose surrogate is built from the original's format (audit I14): a
+# URL keeps its host and path layout, a handle its @/#1234 frame, an age its
+# words, a date its separators and month-name style.
+_FORMAT_TYPES = frozenset({"url", "handle", "age", "dob"})
+
+_MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+           "August", "September", "October", "November", "December"]
+_MONTH_RE = re.compile(
+    r"(?i)\b(?:" + "|".join(m if len(m) <= 4 else f"{m[:3]}(?:{m[3:]})?" for m in _MONTHS)
+    + r"|Sept)\b")
+
+
+def _ordinal(m: "re.Match") -> str:
+    n, suffix = int(m.group(1)), m.group(2)
+    right = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return m.group(1) + (right.upper() if suffix.isupper() else right)
 
 
 def _aba_check(number: str) -> bool:
@@ -396,6 +413,100 @@ class MimicGen:
                 i += 1
         return "".join(out)
 
+    # ── Format-preserving generators (url, handle, age, dob) ──────────────────
+
+    def _slug(self, like: str = "") -> str:
+        """A fake person-like slug in the style of *like*: the same separator
+        (. _ - or none), case style and trailing-digit count."""
+        sep = next((c for c in "._-" if c in like), "")
+        first = self._fake.first_name().lower()
+        last = self._fake.last_name().lower().replace(" ", "").replace("'", "")
+        body = f"{first}{sep}{last}" if sep or self._rng.random() < 0.5 else f"{first[0]}{last}"
+        if like[:1].isupper() or (sep and like.split(sep)[-1][:1].isupper()):
+            body = sep.join(w.capitalize() for w in body.split(sep)) if sep else body.capitalize()
+        digits = re.search(r"\d+$", like)
+        if digits:
+            body += "".join(str(self._rng.randint(0, 9)) for _ in digits.group())
+        return body
+
+    def _gen_handle_like(self, original: str) -> str:
+        m = re.fullmatch(r"(@?)(.+?)(#\d{4})?", original)
+        prefix, body, tag = m.group(1), m.group(2), m.group(3)
+        if tag:
+            tag = "#" + "".join(str(self._rng.randint(0, 9)) for _ in range(4))
+        return f"{prefix}{self._slug(body)}{tag or ''}"
+
+    def _gen_url_like(self, original: str) -> str:
+        """Same scheme and host style; the identifying part (profile path
+        segment, personal sub-domain or domain label) becomes a fake slug."""
+        from ..detection import pattern_scan as ps
+        m = re.match(r"(?i)((?:https?://)?(?:www\.)?)([^/?#\s]+)(.*)", original)
+        lead, host, path = m.groups()
+        hl = host.lower()
+        marker = ps._PERSON_PATH_MARKERS.search(path)
+        if hl in ps._PROFILE_HOSTS or marker:
+            segs = path.split("/")
+            # the segment after a person marker, or the first path segment
+            idx = 1
+            if marker:
+                idx = path[:marker.start()].count("/") + 2
+                if marker.group().startswith(("/~", "/@")):
+                    idx -= 1
+            if idx < len(segs) and segs[idx]:
+                seg = segs[idx]
+                pre = seg[:1] if seg[:1] in "~@" else ""
+                segs[idx] = pre + self._slug(seg.lstrip("~@"))
+                return lead + host + "/".join(segs)
+        labels = host.split(".")
+        if hl.endswith(ps._PERSONAL_HOST_SUFFIXES):
+            i = 0                                   # name.github.io → sub-domain
+        else:
+            i = max(0, len(labels) - 2)             # sarahmitchell.dev → label
+        labels[i] = self._slug(labels[i]).replace(".", "-").replace("_", "-").lower()
+        return lead + ".".join(labels) + path
+
+    def _gen_age_like(self, original: str) -> str:
+        m = re.search(r"\d+", original)
+        n = int(m.group())
+        step = self._rng.randint(1, 3) * self._rng.choice((-1, 1))
+        new = n + step if n + step >= 1 else n + abs(step)
+        return original[:m.start()] + str(new) + original[m.end():]
+
+    def _gen_dob_like(self, original: str) -> str:
+        """A different date in the original's exact format: separators,
+        zero-padding, field order, two/four-digit year, month-name style."""
+        rng = self._rng
+        nums = list(re.finditer(r"\d+", original))
+        year_m = next((n for n in nums if len(n.group()) == 4), None)
+        if year_m is None and nums and (original[nums[-1].start() - 1:nums[-1].start()] == "'"
+                                        or len(nums) >= 3):
+            year_m = nums[-1]
+        out, pos = [], 0
+        for n in nums:
+            out.append(original[pos:n.start()])
+            g = n.group()
+            if n is year_m:
+                y = int(g) + rng.choice((-1, 1)) * rng.randint(1, 6)
+                out.append(f"{y % 100:02d}" if len(g) == 2 else str(y))
+            else:
+                v = int(g)
+                new = rng.randint(1, 12) if v <= 12 else rng.randint(13, 28)
+                out.append(f"{new:0{len(g)}d}" if g.startswith("0") or len(g) == 2 and v < 10
+                           else str(new))
+            pos = n.end()
+        out.append(original[pos:])
+        result = re.sub(r"(?i)(\d+)(st|nd|rd|th)\b", _ordinal, "".join(out))
+
+        def month(mm: "re.Match") -> str:
+            word = mm.group()
+            pick = rng.choice([x for x in _MONTHS if x[:3].lower() != word[:3].lower()])
+            full = len(word) > 4 or word.lower() in ("may", "june", "july")
+            name = pick if full and word.lower() != "may" or len(word) > 4 else pick[:3]
+            if word.isupper():
+                return name.upper()
+            return name.lower() if word.islower() else name
+        return _MONTH_RE.sub(month, result)
+
     def _gen_credit_card(self) -> str:
         return _fake.credit_card_number(card_type=None)
 
@@ -518,6 +629,13 @@ class MimicGen:
         if entity.type == "iban":
             surrogate = self._unique(lambda: self._gen_iban_like(entity.text))
             logger.debug(f"[MimicGen] iban: {entity.text!r} → {surrogate!r}")
+            return surrogate
+        if entity.type in _FORMAT_TYPES:
+            fn = getattr(self, f"_gen_{entity.type}_like")
+            if entity.type == "dob" and not re.search(r"\d", entity.text):
+                fn = lambda _t: self._gen_dob()          # noqa: E731 — no digits to keep
+            surrogate = self._unique(lambda: fn(entity.text))
+            logger.debug(f"[MimicGen] {entity.type}: {entity.text!r} → {surrogate!r}")
             return surrogate
         if entity.type in _SHAPE_TYPES or (
             entity.type == "ip_address" and ":" in entity.text

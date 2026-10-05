@@ -66,6 +66,8 @@ _PII_OFF_ALIASES: Dict[str, Set[str]] = {
     "crypto":      {"crypto"},
     "bank":        {"us_bank_number"},
     "license":     {"us_driver_license"},
+    "username":    {"handle"},
+    "password":    {"credential"},
 }
 
 
@@ -759,7 +761,7 @@ _GEO_FILTERABLE = {"GPE", "LOC"}
 _PERSONAL_ANCHOR_TYPES = {
     "PERSON", "email", "phone_intl", "phone_us", "phone_uk", "ssn", "dob",
     "address", "credit_card", "us_driver_license", "passport", "id_number",
-    "us_bank_number", "iban",
+    "us_bank_number", "iban", "handle", "url", "age", "credential",
 }
 
 
@@ -979,6 +981,11 @@ def run_cascade(
     pattern_results = pattern_scan.scan(text, skip_values=skip_values)
     confirmed.extend(pattern_results)
     remaining_text = mask_spans(text, pattern_results)
+    # URLs are opaque to the NER stages (audit I1): a model never sees
+    # "github.com/Microsoft" or a query string, so it cannot tag a fragment.
+    opaque = pattern_scan.opaque_spans(text)
+    remaining_text = mask_spans(remaining_text, [
+        DetectedEntity(text[s:e], s, e, "opaque", 0.0, "url") for s, e in opaque])
     _lap("pattern_scan_ms")
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
@@ -1078,6 +1085,12 @@ def run_cascade(
         confirmed          = _deduplicate_person_components(confirmed)
         needs_confirmation = _deduplicate_person_components(needs_confirmation)
 
+    # Structural passes read the raw text; nothing they find inside a URL is
+    # kept (the URL is either a pattern entity already or not PII).
+    if opaque:
+        confirmed          = _outside_opaque(confirmed, opaque)
+        needs_confirmation = _outside_opaque(needs_confirmation, opaque)
+
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
         anchored = _has_personal_anchor(confirmed, needs_confirmation)
@@ -1114,6 +1127,12 @@ def run_cascade(
         f"needs_confirmation={len(needs_confirmation)}"
     )
     return confirmed, needs_confirmation
+
+
+def _outside_opaque(entities: List[DetectedEntity], spans) -> List[DetectedEntity]:
+    """Drop every non-pattern entity that overlaps an opaque (URL) span."""
+    return [e for e in entities
+            if e.source == "pattern" or not any(e.start < b and a < e.end for a, b in spans)]
 
 
 def deduplicate(entities: List[DetectedEntity]) -> List[DetectedEntity]:
