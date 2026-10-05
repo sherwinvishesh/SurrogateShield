@@ -103,9 +103,22 @@ def test_I17_runner_aborts_instead_of_recording_rows():
     assert "except (SendMismatch, DetectorUnavailable):" in src
 
 
-def test_I17_warnings_visible_when_detailed_view_off():
+def test_I17_root_logger_never_below_warning():
     import inspect
+    import logging
     import main
     src = inspect.getsource(main)
-    assert "logging.INFO if _detailed else logging.ERROR" not in src
-    assert src.count("logging.INFO if _detailed else logging.WARNING") == 2
+    assert "getLogger().setLevel(logging.ERROR" not in src
+    assert "getLogger().setLevel(logging.INFO" not in src
+    root = logging.getLogger()
+    before = root.level
+    try:
+        main._set_detailed_logging(True)
+        assert root.level == before                    # root untouched
+        assert logging.getLogger("surrogateshield.x").getEffectiveLevel() == logging.INFO
+        assert logging.getLogger("pipeline").getEffectiveLevel() == logging.INFO
+        main._set_detailed_logging(False)
+        assert root.level == before
+        assert logging.getLogger("surrogateshield.x").getEffectiveLevel() == before
+    finally:
+        main._set_detailed_logging(False)

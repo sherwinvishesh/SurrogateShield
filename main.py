@@ -42,6 +42,15 @@ logging.basicConfig(
     datefmt="[%X]",
     handlers=[RichHandler(console=_LogConsole(), rich_tracebacks=True, markup=True)],
 )
+
+# Our own loggers. Detailed View raises only these to INFO; the root logger
+# (and with it httpx, transformers, …) never drops below WARNING (audit I17).
+_APP_LOGGERS = ("surrogateshield", "pipeline", "chatbot", "__main__")
+
+
+def _set_detailed_logging(detailed: bool) -> None:
+    for name in _APP_LOGGERS:
+        logging.getLogger(name).setLevel(logging.INFO if detailed else logging.NOTSET)
 # ─────────────────────────────────────────────────────────────────────────────
 
 import typer
@@ -239,7 +248,7 @@ def _run_pii_finder() -> None:
     _settings  = _ls()
     _detailed  = _settings.get("detailed_view", False)
     _show_pres = _settings.get("presidio_comparison", True)
-    logging.getLogger().setLevel(logging.INFO if _detailed else logging.WARNING)
+    _set_detailed_logging(_detailed)
     """
     Interactive PII detection sandbox — no API calls, no credits spent.
 
@@ -1400,7 +1409,7 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
     from settings_manager import load_settings as _ls
     _settings = _ls()
     _detailed = _settings.get("detailed_view", False)
-    logging.getLogger().setLevel(logging.INFO if _detailed else logging.WARNING)
+    _set_detailed_logging(_detailed)
 
     provider_slug = getattr(pipeline.chat, "_provider", "claude")
     provider_name = next((n for s, n, _ in _PROVIDERS if s == provider_slug), "LLM")
