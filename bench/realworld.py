@@ -8,6 +8,7 @@ planned edits against the gold lists described in ``bench/realworld/GUIDE.md``.
     python bench/realworld.py --lint bench/realworld/test.jsonl
     python bench/realworld.py --split dev  [--show]      # tune on this
     python bench/realworld.py --split test               # J2; never tune on it
+    python bench/realworld.py --file PATH [--id-prefix P] # any corpus in this format
 
 Definitions (character spans in the original message):
 
@@ -86,12 +87,17 @@ def _entries(rec, name):
             yield item.get("value"), item.get("type")
 
 
-def lint(records) -> list:
+def id_pattern(prefix: str):
+    """Ids ``<prefix><anything>-NNNN`` for a corpus outside the known families."""
+    return re.compile(rf"^{re.escape(prefix)}[A-Za-z0-9-]*-\d{{4}}$")
+
+
+def lint(records, id_re=ID_RE) -> list:
     """Return ``(id, problem)`` pairs. Never echoes message text."""
     errors, seen = [], set()
     for n, rec in enumerate(records):
         rid = rec.get("id", f"<line {n + 1}>")
-        if not isinstance(rid, str) or not ID_RE.match(rid):
+        if not isinstance(rid, str) or not id_re.match(rid):
             errors.append((rid, "bad id"))
         if rid in seen:
             errors.append((rid, "duplicate id"))
@@ -208,12 +214,15 @@ def ss_prepare():
     return lambda text, i: prepare_send(text, MimicGen(seed=i))     # reproducible run
 
 
-def run(split: str, show: bool, prepare=None) -> dict:
-    """Score *split* with *prepare* (default: SurrogateShield, ``ss_prepare``)."""
+def run(split: str | None, show: bool, prepare=None, path: Path | None = None, id_re=ID_RE) -> dict:
+    """Score *split* (or the corpus at *path*) with *prepare* (default:
+    SurrogateShield, ``ss_prepare``). A file is scored exactly as a split is;
+    its summary is labelled with the file's stem."""
     prepare = prepare or ss_prepare()
-    path = CORPUS / f"{split}.jsonl"
+    path = path or CORPUS / f"{split}.jsonl"
+    split = split or path.stem
     records = load(path)
-    errors = lint(records)
+    errors = lint(records, id_re)
     if errors:
         for rid, problem in errors:
             print(f"  {rid}: {problem}")
@@ -282,25 +291,32 @@ def run(split: str, show: bool, prepare=None) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--split", choices=SPLITS)
+    ap.add_argument("--file", type=Path, help="score this corpus file instead of a split")
+    ap.add_argument("--id-prefix", help="accept ids <prefix>…-NNNN (default: the rw-/rd- families)")
     ap.add_argument("--lint", type=Path, help="validate a corpus file and print its stats")
     ap.add_argument("--show", action="store_true", help="print every failing message (dev only)")
     ap.add_argument("--json", type=Path, help="also write the summary here")
     args = ap.parse_args()
 
+    id_re = id_pattern(args.id_prefix) if args.id_prefix else ID_RE
     if args.lint:
         records = load(args.lint)
-        errors = lint(records)
+        errors = lint(records, id_re)
         print(json.dumps(stats(records) if records else {}, indent=2))
         for rid, problem in errors:
             print(f"  {rid}: {problem}")
         print(f"{len(errors)} lint errors")
         return 1 if errors else 0
-    if not args.split:
-        ap.error("--split or --lint is required")
+    if not args.split and not args.file:
+        ap.error("--split, --file or --lint is required")
+    if args.split and args.file:
+        ap.error("--split and --file are exclusive")
     if args.show and args.split in ("test", "dev4"):
         ap.error("--show is for dev; test and dev4 are not inspected while tuning")
+    if args.show and args.file:
+        ap.error("--show prints message text; a --file corpus may hold real text, so it is never shown")
 
-    summary = run(args.split, args.show)
+    summary = run(args.split, args.show, path=args.file, id_re=id_re)
     print(json.dumps(summary, indent=2))
     if args.json:
         args.json.write_text(json.dumps(summary, indent=2) + "\n")

@@ -2,7 +2,10 @@
 clean, ids are unique across splits, and the shape the gate relies on holds.
 Reads only annotations and counts; no model, no network."""
 
+import hashlib
 import importlib.util
+import json
+import re
 from pathlib import Path
 
 import pytest
@@ -66,3 +69,51 @@ def test_J2_run_scores_any_system_with_the_same_code():
     assert s["leaked"] == s["protect_values"] - s["policy"] and s["leak_rate"] == 1.0
     assert s["edits"] == s["spurious"] == 0
     assert s["negatives_untouched"] == s["negatives"]
+
+
+# Phase 4b (E4): the scorer takes --file and any id prefix without changing
+# what it computes. These sha256s are of the five split summaries under a fixed
+# stub system, computed with the scorer as of 8d2dccf, before --file existed.
+GOLDEN = {"dev": "874931514c96d2699ee172ae082b1a14f9cf50d825f4551218a41ff92bef3779",
+          "dev2": "fec8c27c88b303a5a4ad3e22454e8ceb21974a6465a4c2167d26ded31b793225",
+          "dev3": "713638dd745062401d4edc48cc5a8812e18c9ba662ee1394b999d5e89ad9ef01",
+          "dev4": "f71e04d3f6aed581adf1c3528703e65c01965c1591260e5a0f27f6714f8a4a59",
+          "test": "3347fbad3fe6b36364c6e660a74400e769e4b04f6ac411bbc1a5117416ae71ed"}
+
+
+def _stub(text, i):
+    from types import SimpleNamespace
+    edits = [(m.start(), m.end(), m.group(), "Q" * (len(m.group()) + i % 3))
+             for m in re.finditer(r"\b[A-Z][a-z]+\b|\d+|\S+@\S+", text)]
+    return SimpleNamespace(edits=edits, sanitized=text)
+
+
+@pytest.mark.parametrize("split", rw.SPLITS)
+def test_J2_file_mode_gives_byte_identical_summaries(split, monkeypatch):
+    monkeypatch.setattr(rw.time, "perf_counter", lambda: 0.0)
+    by_split = json.dumps(rw.run(split, show=False, prepare=_stub), indent=2)
+    by_file = json.dumps(rw.run(None, show=False, prepare=_stub,
+                                path=ROOT / "bench" / "realworld" / f"{split}.jsonl"), indent=2)
+    assert by_split == by_file
+    assert hashlib.sha256(by_split.encode()).hexdigest() == GOLDEN[split]
+
+
+def test_J2_any_id_prefix(tmp_path):
+    rec = {"id": "zz-pilot-0007", "text": "Write to Ada Byrne today.", "category": "qa", "lang": "en",
+           "service_query": False, "protect": [{"value": "Ada Byrne", "type": "PERSON"}]}
+    assert rw.lint([rec]) == [("zz-pilot-0007", "bad id")]
+    assert rw.lint([rec], rw.id_pattern("zz-")) == []
+    assert rw.lint([dict(rec, id="zz-pilot-07")], rw.id_pattern("zz-")) == [("zz-pilot-07", "bad id")]
+    f = tmp_path / "pilot.jsonl"
+    f.write_text(json.dumps(rec) + "\n")
+    s = rw.run(None, show=False, prepare=_stub, path=f, id_re=rw.id_pattern("zz-"))
+    assert s["split"] == "pilot" and s["protect_values"] == 1 and s["leaked"] == 0
+
+
+@pytest.mark.parametrize("argv, message", [(["--file", "x.jsonl", "--show"], "never shown"),
+                                           (["--file", "x.jsonl", "--split", "dev"], "exclusive")])
+def test_J2_file_mode_refuses_show_and_split(argv, message, monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["realworld.py", *argv])
+    with pytest.raises(SystemExit) as e:
+        rw.main()
+    assert e.value.code == 2 and message in capsys.readouterr().err
