@@ -257,3 +257,56 @@ def render(result: dict, console: Console) -> None:
         if result.get(key) is not None:
             fn(result[key], console)
             console.print()
+
+
+def render_attacker(analysis: dict, meta: dict, console: Console) -> None:
+    """Attacker experiment results (attacker.compute_analysis) — counts only."""
+    console.print(f"  [dim]attacker {meta.get('attacker_model', 'n/a')} · responder "
+                  f"{meta.get('responder_model', 'n/a')} · prompt v{meta.get('prompt_version', 'n/a')} · "
+                  f"{_num(analysis.get('questions'))} questions (seed {meta.get('seed', 'n/a')}, "
+                  f"sample {meta.get('sample') if meta.get('sample') is not None else 'all'})[/dim]")
+    t = Table(title="Attacker — per gold value", box=box.SIMPLE_HEAVY, title_justify="left")
+    t.add_column("")
+    arms = [("ss", "SurrogateShield"), ("presidio", "Presidio")]
+    for _a, label in arms:
+        t.add_column(label, justify="right")
+
+    def ci(v):
+        return NA if not v else f"[{v[0]:.3f}, {v[1]:.3f}]"
+
+    rows = [
+        ("rows scored / unavailable", lambda a: f"{_num(a.get('rows_available'))} / {_num(a.get('rows_unavailable'))}"),
+        ("gold values", lambda a: _num(a.get("gold_values"))),
+        ("visible verbatim (leak-through)", lambda a: f"{_num(a.get('leaked_verbatim'))} ({_pct(a.get('leaked_verbatim_rate'))})"),
+        ("inference targets", lambda a: _num(a.get("inference_targets"))),
+        ("recovered exactly", lambda a: f"{_num(a.get('exact'))} ({_pct(a.get('exact_rate'))})"),
+        ("  95% Wilson CI", lambda a: ci(a.get("exact_rate_ci95"))),
+        ("recovered exactly or partially", lambda a: f"{_num(a.get('exact') + a.get('partial') if a.get('exact') is not None else None)} ({_pct(a.get('exact_or_partial_rate'))})"),
+        ("  95% Wilson CI", lambda a: ci(a.get("exact_or_partial_rate_ci95"))),
+        ("non-gold redactions recovered", lambda a: f"{_num(a.get('non_gold_recovered'))} of {_num(a.get('non_gold_redacted'))}"),
+        ("tokens in / out", lambda a: f"{_num((a.get('tokens') or {}).get('input_tokens'))} / {_num((a.get('tokens') or {}).get('output_tokens'))}"),
+    ]
+    for label, fn in rows:
+        t.add_row(label, *(fn(analysis.get(a) or {}) for a, _l in arms))
+    console.print(t)
+    for a, label in arms:
+        errs = (analysis.get(a) or {}).get("errors") or {}
+        if errs:
+            console.print(f"  [yellow]{label} unavailable rows:[/yellow] "
+                          + ", ".join(f"{k} {v}" for k, v in errs.items()))
+
+    bt = Table(title="Per type (exact / partial / targets / leaked)", box=box.SIMPLE_HEAVY, title_justify="left")
+    bt.add_column("type")
+    for _a, label in arms:
+        bt.add_column(label, justify="right")
+    types = sorted(set((analysis.get("ss") or {}).get("by_type", {}))
+                   | set((analysis.get("presidio") or {}).get("by_type", {})))
+    for typ in types:
+        cells = []
+        for a, _l in arms:
+            d = ((analysis.get(a) or {}).get("by_type") or {}).get(typ)
+            cells.append(NA if not d else
+                         f"{d['exact']} / {d['partial']} / {d['inference_targets']} / {d['leaked_verbatim']}")
+        bt.add_row(typ, *cells)
+    if types:
+        console.print(bt)

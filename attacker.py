@@ -1,520 +1,503 @@
 # Paper available on arXiv: https://arxiv.org/abs/2606.29567
 
 """
-attacker.py — Adversarial PII recovery experiment for SurrogateShield.
+attacker.py — can a second model recover the original values from what was sent?
 
-Simulates an informed adversary who intercepts sanitized API traffic and
-attempts to recover original PII values from both SurrogateShield and
-Presidio sanitized text. No UI, no Rich — mirrors evaluator.py pattern.
+For each sampled question, a separate *attacker* model reads the text each
+system sent to the provider (SurrogateShield's ``sanitized_input`` and
+Presidio's ``presidio_sanitized_input``) and estimates the original value of
+every personal value it can see. Protocol (audit A10, I30, J10):
+
+* **Neutral prompt.** The attacker is told a filter may have replaced some
+  values, changed parts of others, or left them unchanged — not that recovery
+  is impossible or that null is expected. The Presidio arm gets a prompt that
+  describes its ``<TYPE>`` placeholders.
+* **Gold denominators, per value.** Both arms are scored against the same
+  gold values from the key file (each distinct value present in the
+  question), so per-type and overall rates share units.
+* **Leak-through is not inference.** A gold value still visible verbatim in
+  the arm's text is counted as ``leaked_verbatim`` and is not an inference
+  target. Values an arm redacted that are not in the key (false positives,
+  public figures) are scored separately as ``non_gold``.
+* **Exact and partial recovery.** Exact after type-aware normalisation;
+  partial = same email domain, same phone area code, a shared name token,
+  shared street/city words, same birth year.
+* **Attacker ≠ responder.** The model is a setting
+  (``config.ATTACKER_MODEL`` / ``SURROGATESHIELD_ATTACKER_MODEL``) and must
+  differ from ``config.CLAUDE_MODEL``.
+* **Failures are unavailable, not zero.** An API error, a truncated reply or
+  unparseable JSON marks the arm ``available: False``; it is excluded from
+  the rates and counted.
+* **Reproducible sample.** ``--sample N --seed S`` picks question indices with
+  ``random.Random(S)``; the indices, model, prompt version and token usage
+  are stored with the results.
+
+Usage::
+
+    python attacker.py --answers test_answers.json --key test_key.json \\
+        --sample 50 --seed 0 --model <attacker model> --dry-run
+
+``--dry-run`` prints the number of provider calls and makes none.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
+import math
 import os
+import random
+import re
 import time
+from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Optional
 
-from config import CLAUDE_MODEL
-from evaluator import NORMALIZE_TYPE
+import eval_metrics as em
+from config import ATTACKER_MODEL, CLAUDE_MODEL
 
 EXPERIMENT_DIR = Path(__file__).parent / "experiment"
-ATTACKER_MODEL = CLAUDE_MODEL
-ATTACKER_MAX_TOKENS = 1500
-FLUSH_EVERY = 25
+ATTACKER_MAX_TOKENS = 4096
+PROMPT_VERSION = "2"
+FLUSH_EVERY = 5
 
-ADDRESS_TYPES = {"address"}
+ARMS = ("ss", "presidio")
+_ARM_TEXT = {"ss": "sanitized_input", "presidio": "presidio_sanitized_input"}
 
-ALL_PII_TYPES = [
-    "PERSON", "GPE", "LOC", "ORG", "FAC", "email", "phone", "ssn", "address",
-    "dob", "credit_card", "ip_address", "api_key", "postal_code", "gender_indicator",
-    "crypto", "us_bank_number", "us_driver_license",
-]
-
-_TYPE_LABELS = {
-    "PERSON":            "name (PERSON)",
-    "email":             "email address",
-    "phone":             "phone number",
-    "ssn":               "Social Security Number (SSN)",
-    "dob":               "date of birth",
-    "address":           "street address",
-    "GPE":               "location/city (GPE)",
-    "ORG":               "organisation name",
-    "credit_card":       "credit card number",
-    "ip_address":        "IP address",
-    "api_key":           "API key or secret token",
-    "postal_code":       "postal/ZIP code",
-    "crypto":            "cryptocurrency wallet address",
-    "us_bank_number":    "bank routing number",
-    "us_driver_license": "driver's license number",
-    "gender_indicator":  "gender indicator",
-    "FAC":               "facility name (FAC)",
-    "LOC":               "location (LOC)",
-}
-
-# Presidio entity type → normalized attacker type
-_PRESIDIO_TYPE_MAP = {
-    "PERSON":            "PERSON",
-    "EMAIL_ADDRESS":     "email",
-    "PHONE_NUMBER":      "phone",
-    "US_SSN":            "ssn",
-    "CREDIT_CARD":       "credit_card",
-    "IP_ADDRESS":        "ip_address",
-    "DATE_TIME":         "dob",
-    "LOCATION":          "GPE",
-    "CRYPTO":            "crypto",
-    "US_BANK_NUMBER":    "us_bank_number",
-    "US_DRIVER_LICENSE": "us_driver_license",
-}
-
-ATTACKER_PROMPT_TEMPLATE = (
-    "You are a cybersecurity researcher conducting an adversarial privacy "
-    "audit. The text below was intercepted from an API call to a large language model. Before "
-    "transmission, the message was processed by a privacy-preserving proxy that replaced all personally "
-    "identifiable information (PII) with realistic-looking fake values called \"surrogates.\"\n\n"
-    "The following PII types were replaced in this message:\n"
-    "{pii_types_list}\n\n"
-    "The proxy uses a surrogate generation system that produces type-consistent replacements — fake "
-    "names look like real names, fake SSNs follow the correct format, fake emails look genuine. "
-    "Surrogates have no cryptographic or statistical relationship to the original values.\n\n"
-    "Your objective: Use every available inference technique to attempt recovery of the original PII "
-    "values. Apply linguistic analysis, contextual reasoning, demographic inference, cross-referencing "
-    "between fields, format pattern analysis, or any other method available to you. Be as thorough "
-    "and aggressive as possible.\n\n"
-    "Intercepted message:\n"
-    "\"{sanitized_text}\"\n\n"
-    "For each PII value visible in the intercepted text, attempt to determine the original value.\n\n"
-    "Respond ONLY with a valid JSON object — no preamble, no text outside the JSON:\n"
-    "{{\n"
-    "  \"recovery_attempts\": [\n"
-    "    {{\n"
-    "      \"surrogate_seen\": \"<the fake value visible in the text>\",\n"
-    "      \"pii_type\": \"<PERSON / email / phone / ssn / dob / address / GPE / ORG / credit_card / "
-    "ip_address / api_key / postal_code / crypto / gender_indicator / other>\",\n"
-    "      \"guessed_original\": \"<your best guess at the original value, or null if unrecoverable>\",\n"
-    "      \"confidence\": <float 0.0 to 1.0>,\n"
-    "      \"method\": \"<one-line description of the inference method attempted>\"\n"
-    "    }}\n"
-    "  ],\n"
-    "  \"overall_assessment\": \"<one or two sentences on the overall recoverability of this message>\"\n"
-    "}}\n\n"
-    "Critical: Only provide a non-null guessed_original if you have a genuine reasoned basis for the "
-    "guess. Null is the correct and expected response when the surrogate provides no recoverable signal. "
-    "Do not fabricate plausible-sounding values."
+SS_PROMPT = (
+    "The message below was sent to a language-model API. Before it was sent, a "
+    "privacy filter processed it. The filter may have replaced some personal "
+    "values (names, contact details, identifiers, addresses, dates, places, "
+    "organisations) with realistic substitutes, may have changed only part of a "
+    "value, and may have left some values unchanged. You are not told which "
+    "values were changed or how substitutes were chosen.\n\n"
+    "For each personal value you can see, give your best estimate of the value "
+    "that was in the message before filtering. Use anything in the text: "
+    "context, consistency between fields, formats, regional cues, and values "
+    "that look unchanged. If you think a value was not changed, give it as your "
+    "estimate. Use null only when you have no basis for an estimate.\n\n"
+    "Message:\n<<<\n{text}\n>>>\n\n"
+    "Reply with JSON only, in this form:\n"
+    '{{"estimates": [{{"seen": "<text as it appears>", "type": "<kind of value>", '
+    '"original_estimate": "<estimate or null>", "confidence": <0.0-1.0>}}]}}'
 )
 
+PRESIDIO_PROMPT = (
+    "The message below was sent to a language-model API. Before it was sent, a "
+    "privacy filter processed it. The filter replaced some personal values with "
+    "type placeholders such as <PERSON>, <LOCATION> or <EMAIL_ADDRESS>, and may "
+    "have left other personal values unchanged.\n\n"
+    "For each placeholder, and for each personal value you can see, give your "
+    "best estimate of the value that was in the message before filtering. Use "
+    "anything in the text: context, the remaining details, formats and regional "
+    "cues. If you think a visible value was not changed, give it as your "
+    "estimate. Use null only when you have no basis for an estimate.\n\n"
+    "Message:\n<<<\n{text}\n>>>\n\n"
+    "Reply with JSON only, in this form:\n"
+    '{{"estimates": [{{"seen": "<placeholder or text as it appears>", "type": "<kind of value>", '
+    '"original_estimate": "<estimate or null>", "confidence": <0.0-1.0>}}]}}'
+)
 
-def _build_types_list(types: list) -> str:
-    """Format a list of normalized type strings as a bullet-pointed readable string."""
-    if not types:
-        return "  • one or more PII values of unknown type"
-    return "\n".join(f"  • {_TYPE_LABELS.get(t, t)}" for t in types)
-
-
-def _types_from_pii_detail(pii_detail: dict) -> list:
-    """Extract unique normalized type strings from a pii_detail dict."""
-    seen: set = set()
-    result = []
-    for detail in pii_detail.values():
-        raw = detail.get("type", "") if isinstance(detail, dict) else ""
-        normalized = NORMALIZE_TYPE.get(raw, raw)
-        if normalized and normalized not in seen:
-            seen.add(normalized)
-            result.append(normalized)
-    return result
+_PROMPTS = {"ss": SS_PROMPT, "presidio": PRESIDIO_PROMPT}
 
 
-def _types_from_presidio_found(presidio_found: list) -> list:
-    """Extract unique normalized type strings from presidio_found_piis entries."""
-    seen: set = set()
-    result = []
-    for entry in presidio_found:
-        if not isinstance(entry, dict):
-            continue
-        raw = entry.get("type", "")
-        normalized = _PRESIDIO_TYPE_MAP.get(raw, NORMALIZE_TYPE.get(raw, raw))
-        if normalized and normalized not in seen:
-            seen.add(normalized)
-            result.append(normalized)
-    return result
+class AttackerConfigError(ValueError):
+    """The attacker model is missing or is the responder model."""
 
 
-def run_attacker_call(sanitized_text: str, pii_types_str: str, anthropic_client) -> dict:
-    """Make one attacker API call and return the parsed JSON response."""
-    prompt = ATTACKER_PROMPT_TEMPLATE.format(
-        pii_types_list=pii_types_str,
-        sanitized_text=sanitized_text,
-    )
-    try:
-        response = anthropic_client.messages.create(
-            model=ATTACKER_MODEL,
-            max_tokens=ATTACKER_MAX_TOKENS,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw = response.content[0].text
+# ─────────────────────────────────────────────
+# Scoring (pure, no network)
+# ─────────────────────────────────────────────
 
-        # Strip whitespace and ``` fences
-        text = raw.strip()
-        if text.startswith("```"):
-            lines = [ln for ln in text.split("\n") if not ln.strip().startswith("```")]
-            text = "\n".join(lines).strip()
-
-        # Direct parse
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            pass
-
-        # Extract outermost JSON object
-        first = text.find("{")
-        last  = text.rfind("}")
-        if first != -1 and last != -1 and last > first:
-            try:
-                return json.loads(text[first:last + 1])
-            except json.JSONDecodeError:
-                pass
-
-        return {
-            "recovery_attempts":   [],
-            "overall_assessment":  "parse_error",
-            "_error":              "Could not parse JSON response",
-            "_raw":                raw[:500],
-        }
-
-    except Exception as exc:
-        return {
-            "recovery_attempts":  [],
-            "overall_assessment": "error",
-            "_error":             str(exc),
-        }
+_DIGIT_TYPES = {"phone", "ssn", "credit_card", "us_bank_number", "us_driver_license",
+                "postal_code", "ip_address"}
+_WORD = re.compile(r"[a-z]+")
 
 
-def score_recovery(
-    attacker_parsed: dict,
-    original_values_set: set,
-    exclude_types: Optional[set] = None,
-) -> dict:
-    """Score whether the attacker recovered any original PII values.
+def _norm(typ: str, value: str) -> str:
+    v = str(value).strip().casefold()
+    if typ in _DIGIT_TYPES:
+        d = re.sub(r"\D", "", v)
+        if d:
+            return d
+    return re.sub(r"\s+", " ", v).strip(" .,;:'\"")
+
+
+def _phone_area(digits: str) -> str:
+    if len(digits) == 11 and digits.startswith("1"):
+        digits = digits[1:]
+    return digits[:3] if len(digits) == 10 else ""
+
+
+def _words(v: str) -> set:
+    return {w for w in _WORD.findall(v.casefold()) if len(w) > 2}
+
+
+def _year(v: str) -> Optional[str]:
+    m = re.search(r"\b(1[89]\d\d|20\d\d)\b", v)
+    return m.group(1) if m else None
+
+
+def match_level(typ: str, guess: str, gold: str) -> Optional[str]:
+    """``"exact"``, ``"partial"`` or ``None`` for one guess against one gold value."""
+    if not guess or not gold:
+        return None
+    g, t = _norm(typ, guess), _norm(typ, gold)
+    if g == t:
+        return "exact"
+    if typ == "email" and "@" in g and "@" in t:
+        return "partial" if g.rsplit("@", 1)[1] == t.rsplit("@", 1)[1] else None
+    if typ == "phone":
+        a = _phone_area(t)
+        return "partial" if a and a == _phone_area(g) else None
+    if typ == "dob":
+        y = _year(gold)
+        return "partial" if y and y == _year(guess) else None
+    if typ in ("PERSON", "ORG", "address", "GPE", "LOC", "FAC"):
+        gw, tw = _words(guess), _words(gold)
+        if typ == "address":
+            tw -= {"street", "avenue", "road", "drive", "lane", "court", "suite", "apt"}
+        return "partial" if gw & tw else None
+    return None
+
+
+def wilson(k: int, n: int, z: float = 1.96) -> Optional[list]:
+    """95% Wilson score interval for k successes out of n."""
+    if n == 0:
+        return None
+    p = k / n
+    den = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / den
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
+    return [round(max(0.0, centre - half), 4), round(min(1.0, centre + half), 4)]
+
+
+def gold_targets(question: str, answer_key) -> list[tuple[str, str]]:
+    """Distinct ``(type, value)`` gold pairs that occur in the question."""
+    seen, out = set(), []
+    for t, v in em.key_values(answer_key):
+        k = (t, v.casefold())
+        if k not in seen and em.find_occurrences(question, v):
+            seen.add(k)
+            out.append((t, v))
+    return out
+
+
+def _guesses(parsed: dict) -> list[str]:
+    out = []
+    for e in parsed.get("estimates") or []:
+        if isinstance(e, dict):
+            g = e.get("original_estimate")
+            if isinstance(g, (str, int, float)) and str(g).strip() and str(g).strip().lower() != "null":
+                out.append(str(g).strip())
+    return out
+
+
+def score_arm(parsed: dict, gold: list[tuple[str, str]], sent_text: str,
+              redacted_values: list[str] = ()) -> dict:
+    """Score one arm of one question.
 
     Args:
-        attacker_parsed:     Parsed JSON dict from run_attacker_call.
-        original_values_set: Set of lowercased original PII values to recover.
-        exclude_types:       PII type strings tracked separately (not penalised).
-
-    Returns:
-        Dict with recovered list and counts.
+        parsed:          the attacker's JSON (``{"estimates": [...]}``).
+        gold:            ``gold_targets(question, key)``.
+        sent_text:       the text this arm sent (what the attacker read).
+        redacted_values: values this arm replaced; those not in *gold* are
+                         scored as ``non_gold`` (false positives, public figures).
     """
-    if exclude_types is None:
-        exclude_types = set()
-
-    recovered = []
-    address_recovered_count = 0
-
-    for attempt in attacker_parsed.get("recovery_attempts", []):
-        guessed = attempt.get("guessed_original")
-        if not guessed:
+    guesses = _guesses(parsed)
+    values = []
+    for typ, val in gold:
+        if em.contains_value(sent_text, val):
+            values.append({"type": typ, "value": val, "outcome": "leaked_verbatim"})
             continue
-        guessed_lower = str(guessed).lower()
-        if guessed_lower in original_values_set:
-            pii_type = attempt.get("pii_type", "")
-            is_addr  = pii_type in exclude_types
-            recovered.append({
-                "value":        guessed,
-                "type":         pii_type,
-                "confidence":   attempt.get("confidence", 0.0),
-                "address_type": is_addr,
-            })
-            if is_addr:
-                address_recovered_count += 1
+        best = None
+        for g in guesses:
+            lvl = match_level(typ, g, val)
+            if lvl == "exact":
+                best = "exact"
+                break
+            if lvl == "partial":
+                best = "partial"
+        values.append({"type": typ, "value": val, "outcome": best or "not_recovered"})
 
-    non_address_recovered_count = len(recovered) - address_recovered_count
+    gold_cf = [v.casefold() for _t, v in gold]
+    non_gold = []
+    for r in redacted_values:
+        rc = r.strip().casefold()
+        if not rc or any(rc in g or g in rc for g in gold_cf):
+            continue
+        if em.contains_value(sent_text, r):
+            continue
+        recovered = any(_norm("", g) == _norm("", r) for g in guesses)
+        non_gold.append({"value": r, "recovered": recovered})
+    return {"values": values, "non_gold": non_gold, "n_guesses": len(guesses)}
 
-    return {
-        "recovered":                   recovered,
-        "recovered_count":             len(recovered),
-        "address_recovered_count":     address_recovered_count,
-        "non_address_recovered_count": non_address_recovered_count,
-    }
+
+def parse_reply(raw: str) -> Optional[dict]:
+    """The JSON object in an attacker reply, or None."""
+    text = raw.strip()
+    if text.startswith("```"):
+        text = "\n".join(ln for ln in text.split("\n") if not ln.strip().startswith("```")).strip()
+    for candidate in (text, text[text.find("{"): text.rfind("}") + 1] if "{" in text else ""):
+        if not candidate:
+            continue
+        try:
+            obj = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict) and isinstance(obj.get("estimates"), list):
+            return obj
+    return None
+
+
+# ─────────────────────────────────────────────
+# Provider call
+# ─────────────────────────────────────────────
+
+def resolve_model(model: Optional[str] = None, responder: str = CLAUDE_MODEL) -> str:
+    m = model or ATTACKER_MODEL
+    if not m:
+        raise AttackerConfigError(
+            "No attacker model set: pass --model or set SURROGATESHIELD_ATTACKER_MODEL "
+            "(it must differ from the responder model)")
+    if m == responder:
+        raise AttackerConfigError(
+            f"Attacker model {m!r} is the responder model; use a different model (audit I30)")
+    return m
+
+
+def call_attacker(client, model: str, arm: str, text: str) -> dict:
+    """One attacker call. Never raises for provider/parse failures; returns
+    ``{"available": bool, "error": str|None, "parsed": dict|None, "usage": {...}}``."""
+    import anthropic
+
+    prompt = _PROMPTS[arm].format(text=text)
+    try:
+        resp = client.messages.create(
+            model=model, max_tokens=ATTACKER_MAX_TOKENS,
+            messages=[{"role": "user", "content": prompt}],
+        )
+    except (anthropic.APIError, OSError) as exc:
+        return {"available": False, "error": f"{type(exc).__name__}: {exc}"[:300],
+                "parsed": None, "usage": None}
+    usage = getattr(resp, "usage", None)
+    usage = ({"input_tokens": getattr(usage, "input_tokens", None),
+              "output_tokens": getattr(usage, "output_tokens", None)} if usage else None)
+    if getattr(resp, "stop_reason", None) == "max_tokens":
+        return {"available": False, "error": "truncated (max_tokens)", "parsed": None, "usage": usage}
+    raw = "".join(getattr(b, "text", "") for b in (resp.content or []))
+    parsed = parse_reply(raw)
+    if parsed is None:
+        return {"available": False, "error": "json_parse_error", "parsed": None,
+                "usage": usage, "raw": raw[:500]}
+    return {"available": True, "error": None, "parsed": parsed, "usage": usage}
+
+
+# ─────────────────────────────────────────────
+# Experiment
+# ─────────────────────────────────────────────
+
+def _load_inputs(base: Path, answers_filename: str, key_filename: str):
+    answers = json.loads((base / answers_filename).read_text(encoding="utf-8"))
+    keys = json.loads((base / key_filename).read_text(encoding="utf-8"))
+    if len(answers) != len(keys):
+        raise ValueError(f"answers ({len(answers)}) and key ({len(keys)}) differ in length")
+    for i, (a, k) in enumerate(zip(answers, keys)):
+        if isinstance(a, dict) and isinstance(k, dict) and a.get("question") is not None \
+                and k.get("Question") is not None and a["question"] != k["Question"]:
+            raise ValueError(f"row {i}: answers question differs from key question")
+    return answers, keys
+
+
+def plan(answers: list, sample: Optional[int], seed: int) -> tuple[list[int], int]:
+    """Sampled question indices and the number of provider calls they need."""
+    eligible = [i for i, a in enumerate(answers) if isinstance(a, dict) and "error" not in a
+                and any(a.get(_ARM_TEXT[arm]) is not None for arm in ARMS)]
+    if sample is not None and sample < len(eligible):
+        idx = sorted(random.Random(seed).sample(eligible, sample))
+    else:
+        idx = eligible
+    calls = sum(1 for i in idx for arm in ARMS if answers[i].get(_ARM_TEXT[arm]) is not None)
+    return idx, calls
+
+
+def _atomic_write(path: Path, obj) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(obj, indent=2, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def run_experiment(
     answers_filename: str,
-    progress_cb: Optional[Callable] = None,
-) -> str:
-    """Run the attacker experiment on an existing answers file.
+    key_filename: str,
+    *,
+    sample: Optional[int] = None,
+    seed: int = 0,
+    model: Optional[str] = None,
+    max_calls: Optional[int] = None,
+    client=None,
+    progress_cb: Optional[Callable[[int, int, str], None]] = None,
+    experiment_dir: Optional[Path] = None,
+) -> Path:
+    """Run the attacker on sampled rows; returns the results path.
 
-    Args:
-        answers_filename: Filename inside experiment/ (e.g. "test_answers.json").
-        progress_cb:      Called as (i, total, preview, status, elapsed_s).
-                          status one of: "running", "ok", "error", "done".
-
-    Returns:
-        Absolute path to the saved _Attacker_Experiment.json file.
+    The results file holds ``{"meta": …, "rows": […], "analysis": …}`` and is
+    written atomically every ``FLUSH_EVERY`` rows. An existing file with the
+    same meta (files, model, seed, sample, prompt version) is resumed; a
+    different one raises.
 
     Raises:
-        EnvironmentError: If ANTHROPIC_API_KEY is not set.
+        AttackerConfigError: no attacker model, or it equals the responder.
+        ValueError: misaligned files, or the planned calls exceed *max_calls*.
+        EnvironmentError: no client given and ANTHROPIC_API_KEY unset.
     """
-    import anthropic
+    base = Path(experiment_dir) if experiment_dir is not None else EXPERIMENT_DIR
+    model = resolve_model(model)
+    answers, keys = _load_inputs(base, answers_filename, key_filename)
+    indices, calls = plan(answers, sample, seed)
+    if max_calls is not None and calls > max_calls:
+        raise ValueError(f"planned {calls} provider calls exceeds max_calls={max_calls}")
 
-    EXPERIMENT_DIR.mkdir(parents=True, exist_ok=True)
-
-    in_path = EXPERIMENT_DIR / answers_filename
-    answers = json.loads(in_path.read_text(encoding="utf-8"))
-    total   = len(answers)
-
-    stem          = Path(answers_filename).stem
-    out_path      = EXPERIMENT_DIR / f"{stem}_Attacker_Experiment.json"
-    analysis_path = EXPERIMENT_DIR / f"{stem}_Attacker_Experiment_Analysis.json"
-
-    # Resume support
-    results: list = []
+    meta = {
+        "answers_file": answers_filename, "key_file": key_filename,
+        "attacker_model": model, "responder_model": CLAUDE_MODEL,
+        "prompt_version": PROMPT_VERSION, "max_tokens": ATTACKER_MAX_TOKENS,
+        "seed": seed, "sample": sample, "indices": indices, "planned_calls": calls,
+    }
+    out_path = base / f"{Path(answers_filename).stem}_Attacker_Experiment.json"
+    rows: list = []
     if out_path.exists():
-        try:
-            results = json.loads(out_path.read_text(encoding="utf-8"))
-        except Exception:
-            results = []
-    start_idx = len(results)
+        prev = json.loads(out_path.read_text(encoding="utf-8"))
+        if not isinstance(prev, dict):
+            raise ValueError(f"{out_path.name} is a pre-v2 results file; move it away to start over")
+        prev_meta = {k: v for k, v in (prev.get("meta") or {}).items() if k in meta}
+        if prev_meta != meta:
+            raise ValueError(f"{out_path.name} exists with different settings; move it away to start over")
+        rows = prev.get("rows") or []
+    done = {r["index"] for r in rows}
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise EnvironmentError(
-            "ANTHROPIC_API_KEY not set. Configure it in your .env file."
-        )
-
-    client = anthropic.Anthropic(api_key=api_key)
+    if client is None:
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            raise EnvironmentError("ANTHROPIC_API_KEY is not set")
+        import anthropic
+        client = anthropic.Anthropic()
 
     def _flush() -> None:
-        out_path.write_text(
-            json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8"
-        )
+        _atomic_write(out_path, {"meta": {**meta, "updated": datetime.now(timezone.utc).isoformat()},
+                                 "rows": rows, "analysis": compute_analysis(rows)})
 
-    t_start = time.time()
-
-    for i, entry in enumerate(answers[start_idx:], start=start_idx):
-        question           = entry.get("question", "")
-        sanitized_input    = entry.get("sanitized_input", "") or ""
-        surrogate_map      = entry.get("surrogate_map") or {}
-        pii_detail         = entry.get("pii_detail") or {}
-        presidio_sanitized = entry.get("presidio_sanitized_input")
-        presidio_found     = entry.get("presidio_found_piis") or []
-
-        preview = (question[:120] + "…") if len(question) > 120 else question
-
-        if progress_cb:
-            progress_cb(i, total, preview, "running", 0.0)
-
-        t0          = time.time()
-        entry_error = None
-
-        # ── Original PII value sets (lowercased for exact-match scoring) ────────
-        original_values_ss       = {k.lower() for k in surrogate_map}
-        original_values_presidio = {
-            e["value"].lower()
-            for e in presidio_found
-            if isinstance(e, dict) and e.get("value")
-        }
-
-        # ── PII type strings for the attacker prompt ─────────────────────────
-        types_ss       = _types_from_pii_detail(pii_detail)
-        pii_types_str_ss       = _build_types_list(types_ss)
-
-        types_presidio = _types_from_presidio_found(presidio_found)
-        pii_types_str_presidio = _build_types_list(types_presidio)
-
-        # ── SurrogateShield attacker ─────────────────────────────────────────
-        if not sanitized_input:
-            ss_result: dict = {
-                "available":                   False,
-                "total_targeted":              0,
-                "recovered_count":             0,
-                "address_recovered_count":     0,
-                "non_address_recovered_count": 0,
-                "recovery_rate":               0.0,
-                "recovered_values":            [],
-                "attacker_response":           None,
-                "error":                       None,
-            }
-        else:
-            ss_parsed = run_attacker_call(sanitized_input, pii_types_str_ss, client)
-            ss_score  = score_recovery(ss_parsed, original_values_ss, exclude_types=ADDRESS_TYPES)
-
-            if "_raw" in ss_parsed:
-                entry_error = "json_parse_error"
-            elif "_error" in ss_parsed:
-                entry_error = ss_parsed["_error"]
-
-            total_targeted_ss = len(surrogate_map)
-            ss_result = {
-                "available":                   True,
-                "total_targeted":              total_targeted_ss,
-                "recovered_count":             ss_score["recovered_count"],
-                "address_recovered_count":     ss_score["address_recovered_count"],
-                "non_address_recovered_count": ss_score["non_address_recovered_count"],
-                "recovery_rate":               (
-                    ss_score["recovered_count"] / total_targeted_ss
-                    if total_targeted_ss > 0 else 0.0
-                ),
-                "recovered_values": [
-                    {"value": r["value"], "type": r["type"], "confidence": r["confidence"]}
-                    for r in ss_score["recovered"]
-                ],
-                "attacker_response": ss_parsed,
-                "error":             entry_error,
-            }
-
-        # ── Presidio attacker ────────────────────────────────────────────────
-        if presidio_sanitized is None:
-            presidio_result: dict = {
-                "available":                   False,
-                "total_targeted":              0,
-                "recovered_count":             0,
-                "address_recovered_count":     0,
-                "non_address_recovered_count": 0,
-                "recovery_rate":               0.0,
-                "recovered_values":            [],
-                "attacker_response":           None,
-                "error":                       None,
-            }
-        else:
-            prs_parsed = run_attacker_call(presidio_sanitized, pii_types_str_presidio, client)
-            prs_score  = score_recovery(prs_parsed, original_values_presidio, exclude_types=ADDRESS_TYPES)
-
-            prs_error = None
-            if "_raw" in prs_parsed:
-                prs_error = "json_parse_error"
-            elif "_error" in prs_parsed:
-                prs_error = prs_parsed["_error"]
-            if prs_error and not entry_error:
-                entry_error = prs_error
-
-            total_targeted_prs = len(presidio_found)
-            presidio_result = {
-                "available":                   True,
-                "total_targeted":              total_targeted_prs,
-                "recovered_count":             prs_score["recovered_count"],
-                "address_recovered_count":     prs_score["address_recovered_count"],
-                "non_address_recovered_count": prs_score["non_address_recovered_count"],
-                "recovery_rate":               (
-                    prs_score["recovered_count"] / total_targeted_prs
-                    if total_targeted_prs > 0 else 0.0
-                ),
-                "recovered_values": [
-                    {"value": r["value"], "type": r["type"], "confidence": r["confidence"]}
-                    for r in prs_score["recovered"]
-                ],
-                "attacker_response": prs_parsed,
-                "error":             prs_error,
-            }
-
-        # ── Assemble per-entry result ────────────────────────────────────────
-        result_entry = {
-            "question_index":    i,
-            "question_preview":  preview,
-            "pii_types_targeted": [NORMALIZE_TYPE.get(t, t) for t in types_ss],
-            "original_pii_count": len(surrogate_map),
-            "ss":                ss_result,
-            "presidio":          presidio_result,
-        }
-        results.append(result_entry)
-
-        elapsed   = time.time() - t0
-        status    = "error" if entry_error else "ok"
-        processed = i + 1 - start_idx
-
-        if processed % FLUSH_EVERY == 0 or (i + 1) == total:
-            _flush()
-
-        if progress_cb:
-            progress_cb(i, total, preview, status, elapsed)
-
-    # Final flush (in case total was 0 or last flush already happened)
-    _flush()
-
-    total_elapsed = time.time() - t_start
-    if progress_cb:
-        progress_cb(total, total, "", "done", total_elapsed)
-
-    # Compute and save analysis once at the end
-    analysis = compute_analysis(results, answers_filename)
-    analysis_path.write_text(
-        json.dumps(analysis, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
-
-    return str(out_path)
-
-
-def compute_analysis(results: list, answers_filename: str) -> dict:
-    """Aggregate per-entry results into a summary analysis dict."""
-    total_questions = len(results)
-
-    def _agg(key: str) -> dict:
-        questions_available  = 0
-        total_targeted       = 0
-        total_recovered      = 0
-        total_recovered_excl = 0
-
-        by_type: dict = {t: {"targeted": 0, "recovered": 0} for t in ALL_PII_TYPES}
-
-        for entry in results:
-            side = entry.get(key, {})
-            if not side.get("available", False):
+    todo = [i for i in indices if i not in done]
+    for n, i in enumerate(todo):
+        a, k = answers[i], keys[i]
+        question = a.get("question") or k.get("Question", "")
+        gold = gold_targets(question, k.get("Answer-Key"))
+        row = {"index": i, "gold_values": len(gold)}
+        for arm in ARMS:
+            text = a.get(_ARM_TEXT[arm])
+            if text is None:
+                row[arm] = {"available": False, "error": "no text for this arm", "usage": None}
                 continue
+            t0 = time.time()
+            res = call_attacker(client, model, arm, text)
+            res["seconds"] = round(time.time() - t0, 2)
+            if res["available"]:
+                redacted = ([kk for kk, vv in (a.get("surrogate_map") or {}).items() if vv != kk]
+                            if arm == "ss" else
+                            [e["value"] for e in (a.get("presidio_found_piis") or [])
+                             if isinstance(e, dict) and e.get("value")])
+                res["score"] = score_arm(res["parsed"], gold, text, redacted)
+            row[arm] = res
+        rows.append(row)
+        if progress_cb:
+            ok = all(row[arm]["available"] for arm in ARMS if a.get(_ARM_TEXT[arm]) is not None)
+            progress_cb(n, len(todo), "ok" if ok else "error")
+        if (n + 1) % FLUSH_EVERY == 0:
+            _flush()
+    _flush()
+    return out_path
 
-            questions_available  += 1
-            total_targeted       += side.get("total_targeted", 0)
-            total_recovered      += side.get("recovered_count", 0)
-            total_recovered_excl += side.get("non_address_recovered_count", 0)
 
-            # Targeted count per type: one question → one count per type present
-            for ptype in (entry.get("pii_types_targeted") or []):
-                if ptype in by_type:
-                    by_type[ptype]["targeted"] += 1
+def compute_analysis(rows: list) -> dict:
+    """Per-arm totals with per-value units throughout."""
+    out = {"questions": len(rows)}
+    for arm in ARMS:
+        avail = [r[arm] for r in rows if r.get(arm, {}).get("available")]
+        errors = Counter(r[arm]["error"] for r in rows
+                         if not r.get(arm, {}).get("available") and r.get(arm, {}).get("error") != "no text for this arm")
+        c: Counter = Counter()
+        by_type: dict = {}
+        ng = Counter()
+        tokens = Counter()
+        for res in avail:
+            for v in res["score"]["values"]:
+                c[v["outcome"]] += 1
+                bt = by_type.setdefault(v["type"], Counter())
+                bt[v["outcome"]] += 1
+            for g in res["score"]["non_gold"]:
+                ng["redacted"] += 1
+                ng["recovered"] += g["recovered"]
+        for r in rows:
+            u = (r.get(arm) or {}).get("usage") or {}
+            for k in ("input_tokens", "output_tokens"):
+                if isinstance(u.get(k), int):
+                    tokens[k] += u[k]
+        gold_n = sum(c.values())
+        targets = gold_n - c["leaked_verbatim"]
 
-            # Recovered count per type: from recovered_values in this side
-            for rv in side.get("recovered_values", []):
-                rtype_norm = NORMALIZE_TYPE.get(rv.get("type", ""), rv.get("type", ""))
-                if rtype_norm in by_type:
-                    by_type[rtype_norm]["recovered"] += 1
-
-        recovery_rate = (
-            total_recovered / total_targeted if total_targeted > 0 else 0.0
-        )
-
-        # Exclude-address rate: denominator reduces by address-type targeted count
-        addr_targeted    = by_type["address"]["targeted"]
-        non_addr_denom   = max(1, total_targeted - addr_targeted)
-        non_addr_rate    = total_recovered_excl / non_addr_denom
-
-        by_type_out: dict = {}
-        for t, counts in by_type.items():
-            tgt  = counts["targeted"]
-            rec  = counts["recovered"]
-            by_type_out[t] = {
-                "targeted":  tgt,
-                "recovered": rec,
-                "rate":      round(rec / tgt, 4) if tgt > 0 else 0.0,
+        def _rates(cc: Counter) -> dict:
+            g = sum(cc.values())
+            tg = g - cc["leaked_verbatim"]
+            rec = cc["exact"] + cc["partial"]
+            return {
+                "gold_values": g,
+                "leaked_verbatim": cc["leaked_verbatim"],
+                "inference_targets": tg,
+                "exact": cc["exact"],
+                "partial": cc["partial"],
+                "exact_rate": round(cc["exact"] / tg, 4) if tg else None,
+                "exact_or_partial_rate": round(rec / tg, 4) if tg else None,
             }
 
-        return {
-            "questions_available":              questions_available,
-            "total_targeted":                   total_targeted,
-            "total_recovered":                  total_recovered,
-            "total_recovered_excluding_address": total_recovered_excl,
-            "recovery_rate":                    round(recovery_rate, 4),
-            "recovery_rate_excluding_address":  round(non_addr_rate, 4),
-            "by_type":                          by_type_out,
+        out[arm] = {
+            "rows_available": len(avail),
+            "rows_unavailable": sum(errors.values()),
+            "errors": dict(errors),
+            **_rates(c),
+            "leaked_verbatim_rate": round(c["leaked_verbatim"] / gold_n, 4) if gold_n else None,
+            "exact_rate_ci95": wilson(c["exact"], targets),
+            "exact_or_partial_rate_ci95": wilson(c["exact"] + c["partial"], targets),
+            "by_type": {t: _rates(bt) for t, bt in sorted(by_type.items())},
+            "non_gold_redacted": ng["redacted"],
+            "non_gold_recovered": ng["recovered"],
+            "tokens": dict(tokens),
         }
+    return out
 
-    return {
-        "source_file":     answers_filename,
-        "total_questions": total_questions,
-        "ss":              _agg("ss"),
-        "presidio":        _agg("presidio"),
-        "address_note": (
-            "Address values in service queries receive house-number fuzzing rather than full "
-            "replacement. Exact recovery is still impossible but proximity-based recovery is "
-            "theoretically possible. Address results are tracked separately and excluded from "
-            "the primary recovery rate."
-        ),
-    }
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("--answers", required=True, help="answers file inside experiment/")
+    ap.add_argument("--key", required=True, help="key file inside experiment/")
+    ap.add_argument("--sample", type=int, default=None)
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--model", default=None, help="attacker model (≠ responder)")
+    ap.add_argument("--max-calls", type=int, default=None)
+    ap.add_argument("--dry-run", action="store_true", help="print the plan; no provider calls")
+    args = ap.parse_args(argv)
+
+    answers, _keys = _load_inputs(EXPERIMENT_DIR, args.answers, args.key)
+    indices, calls = plan(answers, args.sample, args.seed)
+    print(f"questions: {len(indices)}   provider calls: {calls}   seed: {args.seed}")
+    if args.dry_run:
+        return 0
+    path = run_experiment(args.answers, args.key, sample=args.sample, seed=args.seed,
+                          model=args.model, max_calls=args.max_calls,
+                          progress_cb=lambda n, t, s: print(f"  {n + 1}/{t} {s}"))
+    print(json.dumps(json.loads(path.read_text())["analysis"], indent=2))
+    print(f"results → {path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

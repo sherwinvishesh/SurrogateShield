@@ -16,7 +16,10 @@ import pytest
 pytestmark = pytest.mark.heavy
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-LEGACY = [f"test{i}.py" for i in range(1, 8)]
+# test6.py (old attacker protocol) retired with audit A10/I30: it asserted
+# per-question denominators and exact-only scoring, the bugs being fixed.
+# tests/test_attacker.py replaces it (model-free).
+LEGACY = [f"test{i}.py" for i in range(1, 8) if i != 6]
 
 _RESULT_RE = re.compile(r"Results?:\s*(\d+)\s*/\s*(\d+)")
 

@@ -7,6 +7,9 @@ All constants, model names, thresholds, and paths used across the project.
 Centralised here so every module reads from one source of truth.
 """
 
+import os
+from typing import Optional
+
 # ─────────────────────────────────────────────
 # Detection thresholds
 # ─────────────────────────────────────────────
@@ -28,6 +31,10 @@ CONTEXT_GUARD_ENABLED: bool = True            # always on — no Ollama required
 CONTEXT_GUARD_FALLBACK_TO_OLLAMA: bool = False  # set True to use phi3:mini instead
 
 CLAUDE_MODEL: str = "claude-sonnet-4-6"          # Claude API model
+# Attacker experiment (attacker.py). Must differ from the model that answered
+# the questions (audit I30); there is no default — set it explicitly or via
+# SURROGATESHIELD_ATTACKER_MODEL.
+ATTACKER_MODEL: Optional[str] = os.getenv("SURROGATESHIELD_ATTACKER_MODEL") or None
 GEMINI_MODEL: str = "gemini-1.5-flash"            # Gemini API model
 OPENAI_MODEL: str = "gpt-4o-mini"                 # OpenAI API model
 LOCAL_LLM_MODEL: str = "llama3.2"                 # Default Ollama model
