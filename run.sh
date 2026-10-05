@@ -18,53 +18,45 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # ── Colours ───────────────────────────────────────────────────────────────
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 DIM='\033[2m'
 NC='\033[0m' # No Colour
 
-# ── 1. Find and activate virtual environment ──────────────────────────────
-if [ -d ".venv" ]; then
-    source .venv/bin/activate
-elif [ -d "venv" ]; then
-    source venv/bin/activate
+# ── 1. Pick the interpreter (venv first; stock macOS has no `python`) ─────
+if [ -x ".venv/bin/python" ]; then
+    PY=".venv/bin/python"
+elif [ -x "venv/bin/python" ]; then
+    PY="venv/bin/python"
 else
-    echo -e "${YELLOW}No .venv found. Running with system Python.${NC}"
-    echo -e "${DIM}To create one: python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt${NC}"
+    PY="$(command -v python3 || true)"
+    if [ -z "$PY" ]; then
+        echo -e "${RED}Error: python3 not found.${NC}"
+        exit 1
+    fi
+    echo -e "${YELLOW}No .venv found. Running with $PY.${NC}"
+    echo -e "${DIM}To create one: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt${NC}"
 fi
 
-# ── 2. Load .env if it exists ─────────────────────────────────────────────
+# ── 2. API keys ───────────────────────────────────────────────────────────
+# main.py loads .env itself (python-dotenv) and the selected provider reports
+# its own missing key, so Gemini / ChatGPT / Ollama users are not blocked by
+# an Anthropic check here (audit I24). The file is never parsed or printed
+# by this script; only its permissions are checked.
 if [ -f ".env" ]; then
-    export $(grep -v '^#' .env | xargs) 2>/dev/null || true
+    ENV_MODE="$(stat -f '%Lp' .env 2>/dev/null || stat -c '%a' .env 2>/dev/null || echo 600)"
+    if [ "${ENV_MODE#?}" != "00" ]; then
+        echo -e "${YELLOW}Warning: .env is readable by other users (mode $ENV_MODE). Run: chmod 600 .env${NC}"
+    fi
 fi
 
-# ── 3. Check ANTHROPIC_API_KEY ────────────────────────────────────────────
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo -e "${RED}Error: ANTHROPIC_API_KEY is not set.${NC}"
-    echo ""
-    echo "Fix it one of these ways:"
-    echo ""
-    echo -e "  ${BLUE}Option A${NC} — add to your shell profile (permanent):"
-    echo -e "  ${DIM}echo 'export ANTHROPIC_API_KEY=sk-ant-...' >> ~/.zshrc && source ~/.zshrc${NC}"
-    echo ""
-    echo -e "  ${BLUE}Option B${NC} — create a .env file in this folder (per-project):"
-    echo -e "  ${DIM}echo 'ANTHROPIC_API_KEY=sk-ant-...' > .env${NC}"
-    echo ""
-    echo -e "  ${BLUE}Option C${NC} — set it just for this run:"
-    echo -e "  ${DIM}ANTHROPIC_API_KEY=sk-ant-... ./run.sh${NC}"
-    echo ""
-    exit 1
-fi
-
-# ── 4. Check the spaCy model (detection fails closed without it, audit I17) ─
-SPACY_MODEL="$(python -c 'import config; print(config.SPACY_MODEL)')"
-if ! python -c "import spacy.util, sys; sys.exit(0 if spacy.util.is_package('$SPACY_MODEL') else 1)" 2>/dev/null; then
+# ── 3. Check the spaCy model (detection fails closed without it, audit I17) ─
+SPACY_MODEL="$("$PY" -c 'import config; print(config.SPACY_MODEL)')"
+if ! "$PY" -c "import spacy.util, sys; sys.exit(0 if spacy.util.is_package('$SPACY_MODEL') else 1)" 2>/dev/null; then
     echo -e "${RED}Error: spaCy model '$SPACY_MODEL' is not installed.${NC}"
-    echo -e "Install it with: ${DIM}python -m spacy download $SPACY_MODEL${NC}"
+    echo -e "Install it with: ${DIM}$PY -m spacy download $SPACY_MODEL${NC}"
     exit 1
 fi
 
-# ── 5. Launch ─────────────────────────────────────────────────────────────
-python main.py "$@"
+# ── 4. Launch ─────────────────────────────────────────────────────────────
+exec "$PY" main.py "$@"
