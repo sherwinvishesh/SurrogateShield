@@ -90,11 +90,13 @@ def run(messages: List[str], turns: int, *, cascade: Optional[Callable] = None) 
         return sent[-1]
     providers.build = lambda provider: echo
     try:
-        p = pipeline.Pipeline(chat=ClaudeChat(Conversation(id="echo-bench")))
+        p = pipeline.Pipeline(chat=ClaudeChat(Conversation(id="echo-bench")), seed=0)
         corrupted, first, seen = [], None, defaultdict(set)
         same_turn_overlap = []
         known_originals: set = set()
         latencies = []
+        issued_at: Dict[str, int] = {}         # casefold surrogate → first turn
+        typed_at: Dict[str, int] = {}          # casefold original → first turn
         for i in range(turns):
             msg = messages[i % len(messages)]
             t = time.perf_counter()
@@ -103,11 +105,15 @@ def run(messages: List[str], turns: int, *, cascade: Optional[Callable] = None) 
             for original, surrogate in surrogate_map.items():
                 seen[original].add(surrogate)
                 # a surrogate equal to a real value of this turn or, unless
-                # low-entropy, of any earlier turn
-                if (surrogate in surrogate_map or surrogate in known_originals
+                # low-entropy, issued now equal to a value of an earlier turn
+                fresh = surrogate.casefold() not in issued_at
+                if (surrogate in surrogate_map or fresh and surrogate in known_originals
                         and not is_low_entropy(surrogate)):
                     same_turn_overlap.append(surrogate)
             known_originals.update(surrogate_map)
+            for original, surrogate in surrogate_map.items():
+                typed_at.setdefault(original.casefold(), i)
+                issued_at.setdefault(surrogate.casefold(), i)
             if restored != msg:
                 first = i if first is None else first
                 corrupted.append({"turn": i, "map_size": len(p.shadow.all_mappings()),
@@ -116,8 +122,16 @@ def run(messages: List[str], turns: int, *, cascade: Optional[Callable] = None) 
                                   "map": surrogate_map})
         mappings = p.shadow.all_mappings()
         originals = set(mappings.values())
-        overlap = sorted(set(same_turn_overlap)
-                         | {s for s in set(mappings) & originals if not is_low_entropy(s)})
+        # A surrogate equal to an original already known when it was issued
+        # is a bug (gated). A user who later types a value issued earlier as
+        # a surrogate ("Ann Arbor" for "Tempe", then a user in Ann Arbor) is
+        # masked as a new original and restored correctly; real-place
+        # surrogates (I7) make it possible, so it is reported, not gated.
+        both = {s for s in set(mappings) if not is_low_entropy(s)
+                and s.casefold() in {o.casefold() for o in originals}}
+        later = sorted(s for s in both
+                       if typed_at.get(s.casefold(), -1) > issued_at.get(s.casefold(), turns))
+        overlap = sorted(set(same_turn_overlap) | (both - set(later)))
         latencies.sort()
         return {
             "turns": turns,
@@ -130,6 +144,7 @@ def run(messages: List[str], turns: int, *, cascade: Optional[Callable] = None) 
             "low_entropy_with_several_surrogates": sum(
                 1 for o, s in seen.items() if len(s) > 1 and is_low_entropy(o)),
             "surrogate_equals_original": overlap,
+            "later_original_equals_earlier_surrogate": later,
             "low_entropy_reused_as_value": sorted(
                 s for s in set(mappings) & originals if is_low_entropy(s)),
             "latency_ms_p50": round(latencies[len(latencies) // 2], 1) if latencies else 0.0,

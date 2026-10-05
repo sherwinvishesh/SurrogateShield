@@ -168,6 +168,32 @@ def test_J4_echo_round_trip_model_free():
     assert result["J4"] == "PASS"
 
 
+def test_J4_later_original_equal_to_earlier_surrogate_is_reported_not_gated(monkeypatch):
+    # echo seed 0: "Tempe" → "Ann Arbor", later a user in Ann Arbor. The
+    # user's value is masked as a new original and restored; the harness
+    # reports it apart from a surrogate issued equal to a known original.
+    from bench.echo import run
+    from surrogateshield.core.generation import places
+
+    real = places.real_place
+    monkeypatch.setattr(places, "real_place", lambda o, c, choose, avoid:
+                        "Ann Arbor" if o == "Tempe" else real(o, c, choose, avoid))
+    town = re.compile(r"\b(?:Tempe|Ann Arbor|Leeds)\b")
+
+    def cascade(text, skip_values=None, **kw):
+        found, _ = fake_cascade(text, skip_values, **kw)
+        found += [DetectedEntity(m.group(), m.start(), m.end(), "GPE", 0.9, "fake")
+                  for m in town.finditer(text)]
+        return sorted(found, key=lambda e: e.start), []
+
+    result = run(["Lee moved to Tempe.", "I live in Ann Arbor.", "Lee moved to Tempe."], 3,
+                 cascade=cascade)
+    assert result["_corrupted"] == []
+    assert result["surrogate_equals_original"] == []
+    assert result["later_original_equals_earlier_surrogate"] == ["Ann Arbor"]
+    assert result["J4"] == "PASS"
+
+
 def test_I3_same_person_same_surrogate_across_turns():
     from bench.echo import run
 
