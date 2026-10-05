@@ -266,7 +266,8 @@ def _plate_validator(m: "re.Match") -> bool:
     v = m.group(1) or ""
     # real plates virtually always mix letters and digits; requiring both
     # stops "price tag is 45000" from becoming a plate
-    return any(c.isdigit() for c in v) and any(c.isalpha() for c in v)
+    return (any(c.isdigit() for c in v) and any(c.isalpha() for c in v)
+            and sum(c.isalnum() for c in v) <= 8)
 
 
 _BIRTH_CUE = re.compile(
@@ -458,7 +459,8 @@ def _credential_validator(m: "re.Match") -> bool:
 
 
 def _id_value_validator(m: "re.Match") -> bool:
-    return sum(c.isdigit() for c in (m.group("v") or "")) >= 4
+    v = m.group("v") or ""
+    return sum(c.isdigit() for c in v) >= 4 and not re.fullmatch(r"(?:19|20)\d\d", v)
 
 
 _SSN_SHAPE = re.compile(r"\d{3}-\d{2}-\d{4}")
@@ -610,7 +612,7 @@ _NUM = r"(?:number|no\.?|num|nr\.?|#|id)"
 _ID_KEYWORDS = (
     r"\bmrn\b|medical[\s_]+record(?:[\s_]+(?:number|no\.?))?"
     rf"|insurance[\s_]*{_NUM}|medicare[\s_]*{_NUM}|medicaid[\s_]*{_NUM}"
-    rf"|policy[\s_]*{_NUM}|member(?:ship)?[\s_]*{_NUM}|subscriber[\s_]*{_NUM}"
+    rf"|policy(?:[\s_]*{_NUM})?|member(?:ship)?[\s_]*{_NUM}|subscriber[\s_]*{_NUM}"
     rf"|acc(?:oun)?t(?:[\s_]*{_NUM})?|patient[\s_]*(?:identifier|{_NUM})"
     rf"|employee[\s_]*{_NUM}|badge[\s_]*{_NUM}|customer[\s_]*{_NUM}"
     rf"|client[\s_]*{_NUM}|student[\s_]*{_NUM}|loyalty[\s_]*{_NUM}"
@@ -625,10 +627,19 @@ _ID_KEYWORDS = (
     r"|card\s+(?:ending|ends)(?:\s+(?:in|with))?"
     r"|(?:device[\s_]+)?serial(?:[\s_]*(?:number|no\.?|#|num))?|\bs/n\b"
     r"|num[ée]ro\s+(?:de\s+)?client|n[úu]mero\s+de\s+(?:cliente|cuenta|socio)"
-    r"|kunden(?:nummer|-?nr\.?)|\bcpf\b|\bcnpj\b|\bdni\b|\bnie\b|\bnif\b|\bpesel\b"
+    r"|kunden(?:nummer|-?nr\.?)|mitglieds?(?:nummer|-?nr\.?)|versicherungsnummer"
+    r"|c[óo]digo\s+(?:de\s+)?cliente|(?-i:\bSIN\b)|\bcpf\b|\bcnpj\b|\bdni\b|\bnie\b|\bnif\b|\bpesel\b"
     r"|\bbsn\b|steuer-?id|personalausweis(?:nummer)?"
     # national / tax / academic identifiers named in other languages
     r"|codice\s+fiscale|s[ée]curit[ée]\s+sociale|\bnir\b|\bird\b|\borcid\b"
+    # national, tax and health numbers by their usual names (general knowledge)
+    r"|(?-i:\b(?:TFN|ABN|BSB|OHIP|PPSN?|CURP|RFC|RUT|CUI[TL]|NRIC|HKID|BVN|NIN|NINO"
+    r"|EPIC|UAN|GSTIN|NIP|REGON|OIB|EGN|JMBG|CPR|NSS|AHV|CNH|RG|PAN|NPI|IRD)\b)"
+    r"|emirates\s+id|\biqama\b|mykad|personnummer|f[øo]dselsnummer|henkil[öo]tunnus"
+    r"|burgerservicenummer|steuer(?:nummer|-?identifikationsnummer)|sozialversicherungsnummer"
+    r"|tessera\s+sanitaria|num[ée]ro\s+fiscal|t\.?c\.?\s+kimlik|kimlik\s+no"
+    r"|health\s+(?:card|insurance)(?:\s+(?:number|no\.?|#))?|\bni\s+(?:number|no\.?)"
+    r"|license\s*#|licence\s*#"
     r"|matr[ií]cul[ae]|身份证号?码?|sort\s*code"
     # "ID number", "steam id", court / benefit case numbers
     r"|\b(?:id|identity|identification)\s+(?:card\s+)?(?:number|no\.?|num|#)"
@@ -636,6 +647,8 @@ _ID_KEYWORDS = (
 )
 _ID_VALUE = (
     r"\d{3}\.\d{3}\.\d{3}-\d{2}"                 # CPF
+    r"|\d{1,3}(?:\.\d{3}){2,3}-?[\dkKxX]{0,2}"     # RUT, RG, DNI with dots
+    r"|(?-i:[A-Z]{2} ?\d{2} ?\d{2} ?\d{2} ?[A-D])"  # UK NI number
     r"|\d{1,6}(?:[ \-]\d{1,8}){1,5}"             # grouped digits
     r"|(?-i:[A-Z0-9][A-Z0-9\-]{3,19})"
 )
@@ -1111,7 +1124,7 @@ _PATTERNS: list = [
             r"|licen[sc]e(?=[\s:\-#]*(?:is\s+|was\s+)?[A-Z]?\d{3}-\d{3}-\d{2}-\d{3}-\d)"
             r")"
             r"[\s:\-#]*(?:is\s+|was\s+)?"
-            r"(?-i:([A-Z]?\d{3}-\d{3}-\d{2}-\d{3}-\d|[A-Z0-9]{5,20}))\b",
+            r"(?-i:([A-Z]?\d{3}-\d{3}-\d{2}-\d{3}-\d|[A-Z0-9]{1,6}(?:-[A-Z0-9]{2,8}){1,4}|[A-Z0-9]{5,20}))\b",
             re.IGNORECASE,
         ),
         _has_digit,
@@ -1134,9 +1147,11 @@ _PATTERNS: list = [
     (
         "license_plate",
         re.compile(
-            r"(?:licen[sc]e\s+plate|number\s+plate|\bplate\b|\btag\b)"
-            r"\s*(?:number|no\.?|#)?\s*[:\-#]*\s*(?:is\s+|was\s+)?"
-            r"(?-i:([A-Z0-9]{2,3}[\- ]?[A-Z0-9]{2,5}))\b",
+            r"(?:licen[sc]e\s+plate|number\s+plate|\bplate\b|\btag\b|\brego\b|\breg\b"
+            r"|registration(?:\s+(?:plate|mark))?|kenteken|kennzeichen|immatriculation"
+            r"|\btarga\b|\bplaca\b)"
+            r"\s*(?:number|no\.?|#)?\s*[:\-#]*\s*(?:(?:is|was|its|it's|es|ist|is\s+now)\s+)?"
+            r"(?-i:([A-Z0-9]{1,4}(?:[\- ]?[A-Z0-9]{1,4}){1,2}))\b",
             re.IGNORECASE,
         ),
         _plate_validator,
@@ -1146,8 +1161,8 @@ _PATTERNS: list = [
     (
         "license_plate",
         re.compile(
-            r"(?:licen[sc]e\s+plate|number\s+plate|\bplate\b)"
-            r"\s*(?:number|no\.?|#)?\s*[:\-#]*\s*(?:is\s+|was\s+)?"
+            r"(?:licen[sc]e\s+plate|number\s+plate|\bplate\b|\brego\b)"
+            r"\s*(?:number|no\.?|#)?\s*[:\-#]*\s*(?:(?:is|was|its|it's)\s+)?"
             r"(?-i:([a-z0-9]{2,4}[\- ]?[a-z0-9]{2,4}))\b",
             re.IGNORECASE,
         ),
