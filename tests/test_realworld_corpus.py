@@ -29,6 +29,15 @@ def test_J2_ids_unique_across_splits():
     assert len(ids) == len(set(ids))
 
 
+@pytest.mark.parametrize("rid, ok", [("rw-dev-0001", True), ("rw-dev3-0200", True), ("rw-test-0001", True),
+                                     ("rd-oasst1-dev-0001", True), ("rd-wildchat-test-0250", True),
+                                     ("rw-dev5-0001", False), ("rd-oasst1-dev2-0001", False),
+                                     ("rd-Oasst1-dev-0001", False), ("rd-oasst1-test-001", False), ("x-0001", False)])
+def test_J2_lint_accepts_the_real_data_ids_and_nothing_else(rid, ok):
+    rec = {"id": rid, "text": "hi", "category": "qa", "lang": "en", "service_query": False}
+    assert (rw.lint([rec]) == []) is ok
+
+
 def test_J2_cjk_values_are_matched():
     assert rw.occurrences("请联系王伟，电话13812345678", "王伟") == [(3, 5)]
 

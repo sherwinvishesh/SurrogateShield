@@ -46,7 +46,7 @@ PROTECT_TYPES = {"PERSON", "EMAIL", "PHONE", "ADDRESS", "LOCATION", "ORG", "DATE
 SENSITIVE_TYPES = {"HEALTH", "RELIGION", "ETHNICITY", "ORIENTATION", "POLITICAL"}
 POLICY_TYPES = {"ADDRESS", "LOCATION"}
 LISTS = ("protect", "sensitive", "optional", "keep")
-ID_RE = re.compile(r"^rw-(dev[234]?|test)-\d{4}$")
+ID_RE = re.compile(r"^(rw-(dev[234]?|test)|rd-[a-z0-9]+-(dev|test))-\d{4}$")   # rd-: the real-data benchmark
 SPLITS = ("dev", "dev2", "dev3", "dev4", "test")  # dev–dev3 tune; dev4 checks a fix; test is J2
 
 LEAK_GATE = 0.02
