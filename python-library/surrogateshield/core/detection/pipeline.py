@@ -1154,6 +1154,24 @@ def run_cascade(
     # verbatim: acronyms, code, greetings, public figures/companies and
     # places that are only the topic.  Pattern entities are never gated.
     skip_reasons = {}
+    # a model PERSON spoken inside a sentence frame is cut to the name
+    # ("ich bin Jörg Baumgartner", "Mera naam Rohit Bhardwaj hai"); a frame
+    # with no name in it ("Mein Vermieter", "Kun je mijn …") is dropped
+    for bucket in ("confirmed", "needs_confirmation"):
+        ents, framed = [], []
+        for e in (confirmed if bucket == "confirmed" else needs_confirmation):
+            t = (relation_gate.trim_person(e, text)
+                 if e.type == "PERSON" and e.source != "pattern" else e)
+            if t is None:
+                framed.append(e)
+                skip_reasons[(e.start, e.end)] = "sentence_frame"
+            else:
+                ents.append(t)
+        all_skipped = list(all_skipped) + framed
+        if bucket == "confirmed":
+            confirmed = ents
+        else:
+            needs_confirmation = ents
     for bucket in ("confirmed", "needs_confirmation"):
         ents = confirmed if bucket == "confirmed" else needs_confirmation
         # NER/SLM entities, plus structural PERSONs (Pass E) — those only

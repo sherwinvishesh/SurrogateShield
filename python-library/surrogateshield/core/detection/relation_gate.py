@@ -39,6 +39,7 @@ documented policy ``not_tied_to_person`` (eval_metrics.POLICY_REASONS).
 from __future__ import annotations
 
 import re
+from dataclasses import replace as _dc_replace
 from typing import Iterable, List, Tuple
 
 from ..entities import DetectedEntity
@@ -78,8 +79,104 @@ def _core(text: str) -> str:
 _CLAUSE_WORD = re.compile(
     r"(?<![\w'])(?:i|you|we|they|is|are|was|were|want|need|have|has|the|and|to"
     r"|je|tu|nous|vous|veux|veut|est|suis|sont|c'est|ich|wir|ist|und"
-    r"|yo|quiero|tengo|es|eu|quero|sou)(?![\w'])"
+    r"|yo|quiero|tengo|es|eu|quero|sou|como|hai|hoon|hain|mein|karna|kya|aur)(?![\w'])"
 )
+
+
+# ── non-English frames around a name (en NER on de / nl / hi / pt text) ─────
+
+# Lower-case words that never start or end a name: "ich bin Jörg Baumgartner",
+# "Mera naam Rohit Bhardwaj hai", "ik ben Sanne", "PAN se".
+_EDGE_WORDS = frozenset("""
+ich bin und ik ben je uit naam hai hoon hain mein main se ka ki ke ko aur kya
+karna nome é me llamo soy suis est como sono chiamo heet heiße heisse i am im
+is and the name called named from at with to for in of on hi hello hey dear
+hallo bonjour hola oi ciao
+""".split())
+# The same frame words written with a capital at the start of a sentence
+# ("Ich heiße …", "Hallo, ik ben …"); "Ben", "Main" and "Bin" are names.
+_EDGE_CAPITAL = frozenset("ich ik je hallo bonjour hola hi hello hey dear naam".split())
+# Possessives that make the next word a noun ("Mein Vermieter", "Mijn BSN").
+# "Mia" and "Ma" are names, so they are not listed.
+_POSSESSIVE_DET = frozenset("""
+my mein meine meinem meinen meiner unser unsere mijn onze mon mes notre mi mis
+nuestro nuestra meu minha nosso nossa mio nostro nostra mera meri mere hamara
+hamari
+""".split())
+_NAME_PARTICLES = frozenset("""
+de del della der den di da das do dos du la le van von zu ten ter bin binti
+ibn al el y e wa ap af av st
+""".split())
+
+
+_COORD = frozenset("and und en et y e & + / , og och i".split())
+
+
+def _is_name_word(w: str) -> bool:
+    return w[:1].isupper() or w.lower() in _NAME_PARTICLES
+
+
+def trim_person(ent: DetectedEntity, text: str):
+    """A model PERSON cut down to the name inside a sentence frame, or None
+    when no name is left. ``ent`` itself when nothing changes.
+
+    "ich bin Jörg Baumgartner" -> "Jörg Baumgartner"; "Mera naam Rohit
+    Bhardwaj hai" -> "Rohit Bhardwaj"; "Mein Vermieter" (my landlord) and
+    "Kun je mijn bezwaarschrift aan de Belastingdienst" -> None. A lower-case
+    remainder is left to is_junk; one stray lower-case word ("maria Lopez")
+    keeps the whole span (fail closed)."""
+    toks = list(re.finditer(r"\S+", ent.text))
+    i, j = 0, len(toks)
+    had_possessive = False
+    while i < j:
+        w = toks[i].group()
+        if w.lower() in _POSSESSIVE_DET:
+            had_possessive = True
+        elif not (w.lower() in _EDGE_WORDS and (w.islower() or w.lower() in _EDGE_CAPITAL)):
+            break
+        i += 1
+    while j > i and toks[j - 1].group().islower() and toks[j - 1].group() in _EDGE_WORDS:
+        j -= 1
+    if i == j:
+        return None
+    words = [t.group() for t in toks[i:j]]
+    if not any(w[:1].isupper() for w in words):
+        return ent                          # lower-case chat: is_junk decides
+    if had_possessive and len(words) == 1:
+        return None                         # "Mein Vermieter": my landlord
+    loose = [w for w in words if not _is_name_word(w)]
+    if loose:
+        runs, run = [], []
+        for k in range(i, j):
+            w = toks[k].group()
+            if w[:1].isupper() or (run and w.lower() in _NAME_PARTICLES):
+                run.append(k)
+            else:
+                runs.append(run)
+                run = []
+        runs.append(run)
+        named = [r for r in runs if any(toks[k].group()[:1].isupper() for k in r)]
+        if all(w.lower() in _COORD for w in loose):
+            return ent                      # "Ngozi Adeyemi + Chidi Adeyemi"
+        for r in runs:
+            while r and not toks[r[-1]].group()[:1].isupper():
+                r.pop()                     # no trailing particle
+        long_runs = [r for r in runs if len(r) >= 2]
+        if len(long_runs) == 1:
+            i, j = long_runs[0][0], long_runs[0][-1] + 1   # "Kun je Anna Müller bellen"
+        elif long_runs:
+            return ent                      # two names in a clause: keep it all
+        elif len(loose) >= 2 or any(w.lower() in _EDGE_WORDS or _CLAUSE_WORD.fullmatch(w.lower())
+                                    for w in loose):
+            return None                     # a clause with a capital in it
+        else:
+            return ent
+    if (i, j) == (0, len(toks)):
+        return ent
+    s, e = ent.start + toks[i].start(), ent.start + toks[j - 1].end()
+    if text[s:e] != ent.text[toks[i].start():toks[j - 1].end()]:
+        return ent                          # offsets disagree: fail closed
+    return _dc_replace(ent, text=text[s:e], start=s, end=e)
 
 
 def is_junk(ent: DetectedEntity, text: str = "") -> bool:
