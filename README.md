@@ -545,20 +545,29 @@ LLM calls, nothing leaves the machine. It is the fastest way to measure
 detection accuracy while iterating:
 
 ```bash
-# Overall + per-type precision / recall / F1 against the 1124-question set
-python offline_eval.py --key experiment/test_key.json
+# Overall + per-type precision / recall / F1 on the seeded dev split
+# (experiment/make_dataset.py; tune on dev, never on synth_test_key.json)
+python offline_eval.py --key experiment/synth_dev_key.json
 
-# Write full results (including every miss and false positive) to JSON
-python offline_eval.py --key experiment/test_key.json --json experiment/offline_eval_v2.json
+# Gate J1: gold values that reach the sent text, intended or not
+python offline_eval.py --key experiment/synth_dev_key.json --protection --json out.json
 
 # Focus on one type, cap the run, or use exact (v1-comparable) matching
-python offline_eval.py --key experiment/test_key.json --types address --limit 200
-python offline_eval.py --key experiment/test_key.json --strict
+python offline_eval.py --key experiment/synth_dev_key.json --types address --limit 200
+python offline_eval.py --key experiment/synth_dev_key.json --strict
 
 # Lint a key file for corrupt ground-truth values (values absent from the
 # question, addresses that don't parse) — no models needed
 python offline_eval.py --key experiment/experiment_key.json --lint-key
 ```
+
+`experiment/test_key.json` (1,124 questions) is the legacy key. The detector
+was tuned on it and the key was edited in the same commits, and
+`experiment/lint_key.py` reports label errors in it (B1–B3), so a score on
+it measures fit, not accuracy. The 0.9996 F1 in
+`experiment/offline_eval_v2.json` came from that key and is not a claim.
+Held-out numbers, measured once on splits that were never tuned on, are in
+`bench/results/README.md` (`python bench/compare.py --final`).
 
 Default matching is span-aware: because v2 detects addresses as full spans
 (`6720 Palm Dr, Phoenix, AZ`) while the ground truth annotates components
