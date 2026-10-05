@@ -282,7 +282,7 @@ else:
 # ─────────────────────────────────────────────────────────────
 print("\n[5] ServiceQueryDetector (detection/service_query.py)")
 
-from detection.service_query import is_service_query, fuzz_addresses
+from detection.service_query import classify, is_service_query, fuzz_addresses
 
 # ── 5a: is_service_query classification ──────────────────────────────────
 check(
@@ -293,9 +293,11 @@ check(
     "'What is my SSN?' → is_service_query False (no service pattern)",
     not is_service_query("What is my SSN?"),
 )
+# Audit I6: a sensitive service query is still a service query (the city is
+# kept so the answer is useful) but its street line is coarsened.
 check(
-    "HIV clinic query → is_service_query False (sensitive override)",
-    not is_service_query("Find an HIV clinic near 1126 E Apache Blvd, Tempe, AZ"),
+    "HIV clinic query → service_coarse (sensitive: street coarsened)",
+    classify("Find an HIV clinic near 1126 E Apache Blvd, Tempe, AZ") == "service_coarse",
 )
 check(
     "Directions query → is_service_query True",
@@ -306,8 +308,8 @@ check(
     not is_service_query("What is the capital of France?"),
 )
 check(
-    "Rehab/mental-health override → is_service_query False",
-    not is_service_query("Find a rehab centre near 500 Main St, Chicago, IL"),
+    "Rehab/mental-health query → service_coarse",
+    classify("Find a rehab centre near 500 Main St, Chicago, IL") == "service_coarse",
 )
 
 # ── 5b: fuzz_addresses — address with full city+state ────────────────────

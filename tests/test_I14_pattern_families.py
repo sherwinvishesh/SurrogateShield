@@ -196,3 +196,10 @@ def test_I14_new_types_accepted_by_pii_off():
     from surrogateshield.core.detection.pipeline import resolve_pii_off
     ss.config(pii_off=["url", "handle", "credential", "age", "password"])
     assert {"url", "handle", "credential", "age"} <= resolve_pii_off(ss.config().pii_off)
+
+
+def test_I14_label_phone_does_not_claim_an_ssn():
+    # "Contact" is a phone label; the SSN 25 characters later is not a phone
+    ents = ps.scan("Contact alice@corp.com, SSN 123-45-6789.")
+    assert {(e.text, e.type) for e in ents} >= {("alice@corp.com", "email"), ("123-45-6789", "ssn")}
+    assert [e.type for e in ps.scan("teléfono 612 345 678")] == ["phone_intl"]

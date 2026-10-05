@@ -423,9 +423,15 @@ def _id_value_validator(m: "re.Match") -> bool:
     return sum(c.isdigit() for c in (m.group("v") or "")) >= 4
 
 
+_SSN_SHAPE = re.compile(r"\d{3}-\d{2}-\d{4}")
+
+
 def _phone_ctx_validator(m: "re.Match") -> bool:
+    # The label may be far back ("Contact alice@corp.com, SSN 123-45-6789"):
+    # the gap never crosses an e-mail, and the US SSN shape is left to "ssn".
     n = len(re.sub(r"\D", "", m.group("v")))
-    return 8 <= n <= 13 and not _NEG_NUM_CONTEXT.search(_before(m, 30))
+    return (8 <= n <= 13 and not _SSN_SHAPE.fullmatch(m.group("v"))
+            and not _NEG_NUM_CONTEXT.search(_before(m, 30)))
 
 
 # ── URLs ─────────────────────────────────────────────────────────────────────
@@ -875,7 +881,7 @@ _PATTERNS: list = [
             r"(?:phone|\bph\b|\btel\b|tel[ée]fono|telefon|mobile|\bmob\b|cell(?:ular)?"
             r"|celular|m[óo]vil|handy|whats\s?app|call|text|contact|portable"
             r"|फ़ोन|फोन|电话|手机|携帯|전화)"
-            r"[^\n\d+]{0,25}?(?P<v>\+?\d{2,5}(?:[\s.\-]\d{2,5}){1,4}|\d{8,13})"
+            r"[^\n\d+@]{0,25}?(?P<v>\+?\d{2,5}(?:[\s.\-]\d{2,5}){1,4}|\d{8,13})"
             r"(?![0-9A-Za-z])",
             re.IGNORECASE,
         ),
