@@ -32,6 +32,16 @@ _GENDER_TERMS = frozenset({
     "male", "female", "man", "woman", "non-binary", "nonbinary", "non-binary person",
     "he/him", "she/her", "they/them", "m", "f", "x",
 })
+# Names that are also ordinary words: a capitalised "Grace" or "May" in an
+# answer is not evidence of the person (audit I5), and the generator never
+# picks one as a surrogate (audit I7).
+COMMON_WORD_NAMES = frozenset("""grace hope faith joy may june april august summer autumn dawn rose
+    lily ivy daisy holly iris violet ruby pearl amber crystal sky skye rain storm will mark bill
+    bob jack pat sue rob art guy ray don frank grant hunter chase mason carter cooper parker
+    taylor bishop king price young rich long little black white brown green gray grey rice hill
+    wood lane ford banks bell page booth cash love major miles penny sterling star angel destiny
+    harmony trinity justice liberty patience charity precious royal reign sunny honey hazel olive
+    sage basil jade jasmine pepper river brook glen dale forest north west south east""".split())
 _CLITIC = re.compile(r"(?:'s|’s|'|’)$")
 
 

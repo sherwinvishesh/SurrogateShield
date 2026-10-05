@@ -1,9 +1,18 @@
 """
 generation/mimic.py — MimicGen
 
-Realistic surrogate generation for each PII entity type.
-Uses Python Faker. Guarantees no collisions within a session via
-a session-level used_surrogates set.
+Surrogates that keep what an answer may depend on and nothing that
+identifies (audit D1–D4, I7):
+
+* people and e-mails are linked — one surrogate person per real person,
+  same gender, locale and form (:mod:`.identity`);
+* a phone keeps its country code, trunk digit and grouping; a date of birth
+  moves by at most two years in the same format; a town becomes a real town
+  of the same country (:mod:`.places`); an organisation keeps its legal and
+  industry words; card, SSN, routing and IBAN numbers stay valid;
+* one seeded RNG per generator: the same seed gives the same surrogates.
+
+No surrogate equals or contains an original of the conversation (J4).
 """
 
 from __future__ import annotations
@@ -14,17 +23,17 @@ import re
 import string
 from typing import Dict, FrozenSet, List, Optional, Set
 
+import datetime
 from faker import Faker
 
 from ..detection import address_parser
-from ..detection.geo_data import US_STATE_ABBREVS
+from ..detection.geo_data import MAJOR_COUNTRIES, US_STATE_ABBREVS
 from ..consistency import is_low_entropy, occurs
 from ..entities import DetectedEntity
+from . import places
+from .identity import People
 
 logger = logging.getLogger(__name__)
-
-_fake = Faker()
-Faker.seed(None)
 
 # Types whose surrogates mirror the original's exact character shape
 # (an ID number swaps to a same-shape ID number).
@@ -165,22 +174,120 @@ _EURO_STREET_NAMES = ("Flores", "Liberdade", "Garibaldi", "Mozart", "Pasteur", "
                       "Sol", "Lumière", "Lindenhof")
 
 
+_WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+_WEEKDAY_RE = re.compile(r"(?i)\b(?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)(?:day|nesday|rsday|urday)?\b")
+
+# ITU-T E.164 country codes: one digit (1, 7) and the two-digit ones; the
+# rest are three digits.
+_CC2 = frozenset("""20 27 30 31 32 33 34 36 39 40 41 43 44 45 46 47 48 49 51 52 53 54 55 56 57 58
+    60 61 62 63 64 65 66 81 82 84 86 90 91 92 93 94 95 98""".split())
+_TOLL_FREE = frozenset({"800", "833", "844", "855", "866", "877", "888"})
+
+_KEY_PREFIXES = ("sk-ant-api03-", "sk-ant-", "sk-proj-", "sk_live_", "sk_test_", "pk_live_",
+                 "pk_test_", "rk_live_", "github_pat_", "ghp_", "gho_", "ghs_", "ghu_", "glpat-",
+                 "xoxb-", "xoxp-", "xoxa-", "xapp-", "AKIA", "ASIA", "AIza", "SG.", "hf_", "sk-")
+_B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+_BECH32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
+
+# Words of an organisation or facility name that say what it is, not who:
+# kept as written ("Mitchell Family Dental LLC" → "Garrison Family Dental LLC").
+_LEGAL = re.compile(r"(?i)^(?:inc|llc|l\.l\.c|ltd|limited|gmbh|plc|corp|corporation|co|company"
+                    r"|llp|lp|s\.a|sa|ag|pty|pvt|bv|nv|srl|spa|sarl|oy|ab|kk|pc|pllc)\.?$")
+_GENERIC = frozenset("""
+    the of and for at in on de la le del des du di da y und
+    hospital medical center centre clinic health healthcare care dental dentistry pharmacy
+    family pediatrics pediatric orthopedics surgery surgical urgent emergency rehab rehabilitation
+    therapy wellness vision eye animal veterinary vet labs lab laboratory diagnostics imaging
+    bank credit union savings trust financial capital investments investment insurance mutual
+    wealth advisors advisory accounting tax law legal attorneys lawyers firm partners associates
+    group holdings enterprises industries international global national regional community
+    general memorial united american first city county state federal department office agency
+    school schools academy university college institute elementary middle high primary
+    secondary preschool kindergarten daycare montessori charter learning education
+    church temple mosque synagogue ministries chapel cathedral parish
+    consulting solutions systems technologies technology tech software digital data networks
+    media marketing design creative studio studios productions entertainment publishing press
+    construction builders building contractors roofing plumbing electric electrical hvac
+    landscaping cleaning services service logistics transport transportation trucking freight
+    shipping motors auto automotive airlines airways energy power utilities water gas oil
+    foods food restaurant restaurants cafe coffee bakery grill kitchen bar pizza deli market
+    supermarket grocery store stores shop shops boutique salon spa fitness gym yoga
+    realty real estate properties property homes housing apartments management
+    library museum gallery theater theatre hotel inn resort motel airport station terminal
+    stadium arena mall plaza tower towers hall park center court courthouse bridge tunnel
+    building complex campus warehouse factory plant mill farm farms ranch vineyard winery
+    brewery distillery foundation society association council club league network alliance
+    corp inc llc ltd co company corporation
+    dermatology cardiology oncology neurology radiology urology gynecology obstetrics psychiatry
+    psychology optometry chiropractic physiotherapy podiatry orthodontics
+    """.split())
+
+_FUNCTION_WORDS = frozenset("the of and for at in on de la le del des du di da y und".split())
+_STREET_WORDS = frozenset("""ave avenue st street rd road blvd boulevard dr drive ln lane way pl
+    place ct court pkwy parkway hwy highway sq square ter terrace cir circle""".split())
+_GENERIC = _GENERIC | _STREET_WORDS
+# the word that says what a facility is: kept when a name has no name word
+_KIND_WORDS = _STREET_WORDS | frozenset("""hospital clinic center centre school university
+    college academy institute bank church temple mosque synagogue library museum gallery hotel
+    airport station stadium arena mall plaza tower hall park building office pharmacy""".split())
+
+
+_SAINTS = ("Mary", "Luke", "Francis", "Vincent", "Anthony", "Jude", "Elizabeth", "Catherine",
+           "Michael", "Thomas", "Patrick", "Anne", "Peter", "Paul", "John", "Mark", "Clare",
+           "Agnes", "Andrew", "Joseph", "Bernard", "Teresa")
+
+
+def _luhn_digit(payload: str) -> str:
+    total = 0
+    for i, c in enumerate(reversed(payload)):
+        d = int(c)
+        if i % 2 == 0:
+            d *= 2
+            d -= 9 if d > 9 else 0
+        total += d
+    return str((10 - total % 10) % 10)
+
+
+def _splice_digits(original: str, digits: str) -> str:
+    it = iter(digits)
+    return "".join(next(it) if c.isdigit() else c for c in original)
+
+
+def _case_like(model: str, value: str) -> str:
+    if len(model) > 1 and model.isupper():
+        return value.upper()
+    if model.islower():
+        return value.lower()
+    return value
+
+
 class MimicGen:
     """Generates realistic, collision-resistant surrogates for detected PII.
 
     Args:
-        seed: Optional seed for reproducible surrogate generation (tests).
-              When None (default), generation is entropy-seeded.
+        seed: Seed for this generator's RNG. The same seed gives the same
+              surrogates for the same inputs; None draws one from the OS.
     """
 
     def __init__(self, seed: Optional[int] = None) -> None:
         self.used_surrogates: Set[str] = set()
-        self._rng = random.Random(seed) if seed is not None else random
-        if seed is not None:
-            self._fake = Faker()
-            self._fake.seed_instance(seed)
-        else:
-            self._fake = _fake
+        self._rng = random.Random(seed)
+        self._fake = Faker()
+        self._fake.seed_instance(self._rng.getrandbits(64))
+        self.people = People(self._rng)
+        self._context = ""                  # the message being masked
+        self._avoid: Set[str] = set()       # casefold originals of the conversation
+        self._fresh = False                 # retrying a rejected person surrogate
+        self._used_cf: Set[str] = set()     # casefold used_surrogates (see _taken)
+        self._used_cf_n = 0
+
+    def _taken(self, candidate: str) -> bool:
+        """*candidate* was issued before, in any case: restoration matches
+        case-insensitively, so "Shreveport" and "shreveport" are one value."""
+        if self._used_cf_n != len(self.used_surrogates):      # the set only grows
+            self._used_cf = {u.casefold() for u in self.used_surrogates}
+            self._used_cf_n = len(self.used_surrogates)
+        return candidate.casefold() in self._used_cf
 
     def _unique(self, generator_fn, max_attempts: int = 50) -> str:
         for _ in range(max_attempts):
@@ -190,7 +297,7 @@ class MimicGen:
             # there are only a handful of near ages (audit I5).
             if is_low_entropy(candidate):
                 return candidate
-            if candidate not in self.used_surrogates:
+            if not self._taken(candidate):
                 self.used_surrogates.add(candidate)
                 return candidate
         fallback = str(generator_fn()) + "_" + "".join(
@@ -199,37 +306,232 @@ class MimicGen:
         self.used_surrogates.add(fallback)
         return fallback
 
+    def _digits(self, n: int) -> str:
+        return "".join(str(self._rng.randint(0, 9)) for _ in range(n))
+
     # ── Per-type generators ────────────────────────────────────────────────────
 
-    def _gen_email(self) -> str:
-        return _fake.email()
+    def _nxx(self, area: bool) -> str:
+        """A valid NANP area code or exchange: N in 2–9, not N11; an area
+        code is not N9X or toll-free, an exchange is not 555."""
+        while True:
+            v = str(self._rng.randint(2, 9)) + self._digits(2)
+            if v[1:] == "11" or (area and (v[1] == "9" or v in _TOLL_FREE)) \
+                    or (not area and v == "555"):
+                continue
+            return v
 
-    def _gen_ssn(self) -> str:
-        return _fake.ssn()
+    def _gen_phone_like(self, original: str) -> str:
+        """Same country code, trunk prefix, first national digit and every
+        separator; a NANP number keeps a valid area code and exchange (and a
+        toll-free prefix)."""
+        ds = "".join(c for c in original if c.isdigit())
+        lead = original.lstrip()
+        keep, nanp = 0, False
+        if lead.startswith(("+", "00")):
+            off = 2 if lead.startswith("00") else 0
+            cc = 1 if ds[off:off + 1] in ("1", "7") else 2 if ds[off:off + 2] in _CC2 else 3
+            keep, nanp = off + cc, ds[off:off + 1] == "1"
+        elif len(ds) == 11 and ds[0] == "1":
+            keep, nanp = 1, True
+        elif len(ds) == 10 and ds[0] in "23456789":
+            nanp = True
+        nat = ds[keep:]
+        for _ in range(50):
+            if nanp and len(nat) == 10:
+                area = nat[:3] if nat[:3] in _TOLL_FREE else self._nxx(area=True)
+                new = area + self._nxx(area=False) + self._digits(4)
+            else:
+                k = min(2 if nat[:1] == "0" else 1, max(0, len(nat) - 2))
+                new = nat[:k] + self._digits(len(nat) - k)
+            if ds[:keep] + new != ds:
+                break
+        return _splice_digits(original, ds[:keep] + new)
 
-    def _gen_phone_us(self) -> str:
-        return _fake.numerify("+1-###-###-####")
+    def _gen_ssn_like(self, original: str) -> str:
+        """A valid SSN (area 001–899 except 666, non-zero group and serial)
+        in the original's layout."""
+        ds = "".join(c for c in original if c.isdigit())
+        if len(ds) != 9:
+            return self._shape_like(original)
+        while True:
+            area = self._rng.randint(1, 899)
+            if area == 666:
+                continue
+            new = f"{area:03d}{self._rng.randint(1, 99):02d}{self._rng.randint(1, 9999):04d}"
+            if new != ds:
+                return _splice_digits(original, new)
 
-    def _gen_phone_uk(self) -> str:
-        return _fake.numerify("+44 7### ######")
+    def _gen_card_like(self, original: str) -> str:
+        """Same length, separators and network prefix (two digits); valid
+        Luhn check digit."""
+        ds = "".join(c for c in original if c.isdigit())
+        if len(ds) < 12:
+            return self._shape_like(original)
+        while True:
+            payload = ds[:2] + self._digits(len(ds) - 3)
+            new = payload + _luhn_digit(payload)
+            if new != ds:
+                return _splice_digits(original, new)
 
-    def _gen_phone_intl(self) -> str:
-        country_codes = [
-            "+49", "+33", "+39", "+34", "+31", "+32", "+41", "+43", "+46",
-            "+47", "+48", "+30", "+36", "+351", "+353",
-            "+91", "+86", "+81", "+82", "+66", "+65", "+60", "+63",
-            "+55", "+52", "+54", "+57", "+56", "+58",
-            "+61", "+64",
-            "+27", "+20", "+234", "+254", "+971", "+966",
-        ]
-        code = random.choice(country_codes)
-        block1 = _fake.numerify("####")
-        block2 = _fake.numerify("######")
-        return f"{code} {block1} {block2}"
+    def _gen_zip_like(self, original: str) -> str:
+        return re.sub(r"\d+", lambda m: self._fake_number_like(m.group()), original)
 
-    def _gen_person(self) -> str:
-        return _fake.name()
+    def _gen_ip_like(self, original: str) -> str:
+        """IPv4: a private address keeps its private prefix, a public one
+        stays public; a CIDR suffix or port is kept. IPv6: same shape."""
+        m = re.fullmatch(r"(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(.*)", original)
+        if not m or any(int(g) > 255 for g in m.groups()[:4]):
+            return self._shape_like(original)
+        o = [int(g) for g in m.groups()[:4]]
+        if o[0] in (10, 127):
+            keep = 1
+        elif (o[0], o[1]) in ((192, 168), (169, 254)) or (o[0] == 172 and 16 <= o[1] <= 31) \
+                or (o[0] == 100 and 64 <= o[1] <= 127):
+            keep = 2
+        else:
+            keep = 0
+        while True:
+            new = o[:keep]
+            if keep == 0:
+                first = self._rng.randint(1, 223)
+                if first in (10, 100, 127, 169, 172, 192):
+                    continue
+                new = [first]
+            new += [self._rng.randint(0, 255) for _ in range(3 - len(new))] + \
+                   [self._rng.randint(1, 254)]
+            if new != o:
+                return ".".join(map(str, new)) + m.group(5)
 
+    def _token_like(self, value: str) -> str:
+        """A random string of the same shape; hexadecimal stays hexadecimal."""
+        if len(value) >= 8 and re.fullmatch(r"[0-9a-f]+", value) and re.search(r"[a-f]", value):
+            return "".join(self._rng.choice("0123456789abcdef") for _ in value)
+        if len(value) >= 8 and re.fullmatch(r"[0-9A-F]+", value) and re.search(r"[A-F]", value):
+            return "".join(self._rng.choice("0123456789ABCDEF") for _ in value)
+        return self._shape_like(value)
+
+    def _gen_api_key_like(self, original: str) -> str:
+        """The provider prefix ("sk-", "AKIA", "ghp_") and the shape kept."""
+        pre = next((p for p in _KEY_PREFIXES if original.startswith(p)), "")
+        rest = original[len(pre):]
+        return pre + self._token_like(rest) if rest else self._token_like(original)
+
+    def _gen_crypto_like(self, original: str) -> str:
+        """Same chain prefix, length and alphabet (base58, bech32, hex)."""
+        rng = self._rng
+        if original[:2].lower() == "0x":
+            body = original[2:]
+            hexd = "0123456789ABCDEF" if body.isupper() else "0123456789abcdef"
+            return original[:2] + "".join(rng.choice(hexd) for _ in body)
+        m = re.match(r"(?i)(bc1|tb1|ltc1)", original)
+        if m:
+            body = "".join(rng.choice(_BECH32) for _ in original[m.end():])
+            return m.group() + (body.upper() if original.isupper() else body)
+        return original[:1] + "".join(rng.choice(_B58) for _ in original[1:])
+
+    def _gen_bank_like(self, original: str) -> str:
+        """A routing number stays ABA-valid; an account number keeps its shape."""
+        ds = "".join(c for c in original if c.isdigit())
+        if len(ds) != 9 or not _aba_check(ds):
+            return self._shape_like(original)
+        weights = [3, 7, 1, 3, 7, 1, 3, 7]
+        while True:
+            digits = [self._rng.randint(0, 9) for _ in range(8)]
+            digits[0] = self._rng.choice([0, 1, 2, 3])
+            check = (10 - sum(w * d for w, d in zip(weights, digits)) % 10) % 10
+            new = "".join(map(str, digits)) + str(check)
+            if new != ds and _aba_check(new):
+                return _splice_digits(original, new)
+
+    def _place_taken(self, candidate: str) -> bool:
+        return (candidate.casefold() in self._avoid or self._taken(candidate)
+                or bool(self._context and occurs(self._context, candidate)))
+
+    def _gen_place(self, original: str) -> str:
+        """A real place of the same kind (audit I7): a town of the same
+        country, a state for a state, a lake for a lake."""
+        cf = original.strip().casefold()
+        if cf in MAJOR_COUNTRIES:
+            pool = sorted(c.title() for c in MAJOR_COUNTRIES if len(c) > 3 and c != cf
+                          and not self._place_taken(c.title()))
+            if pool:
+                return _case_like(original, self._rng.choice(pool))
+        parts = re.split(r"(,\s*)", original)
+        out = []
+        for part in parts:
+            if not part.strip() or part.lstrip().startswith(","):
+                out.append(part)
+                continue
+            place = places.real_place(part, self._context, self._rng.choice, self._place_taken)
+            out.append(place if place is not None else self._fake.city())
+        return "".join(out)
+
+    def _gen_institution(self, original: str) -> str:
+        """An organisation or facility of the same kind: legal suffix and
+        industry words kept, name words replaced (one surrogate surname per
+        word per conversation, shared with people), "of <place>" → another
+        real place. Adds no comma."""
+        # "of New Mexico", "at Fort Collins": a known place after a preposition
+        place_at = {}
+        for m in re.finditer(r"\b(?:of|at|in)\s+((?:[A-Z][\w.'’-]*)(?:\s+[A-Z][\w.'’-]*){0,2})",
+                             original):
+            words = m.group(1).split()
+            for n in range(len(words), 0, -1):
+                name = " ".join(words[:n])
+                if places.is_known_place(name):
+                    place_at[m.start(1)] = m.start(1) + len(name)
+                    break
+        out, pos, prev, replaced = [], 0, "", False
+        skip_to = -1
+        # in a lowercase name ("mill ave") the lowercase words are the name
+        titled = any(c.isupper() for c in original)
+        for m in re.finditer(r"[^\W_][\w'’.\-]*", original):
+            if m.start() < skip_to:
+                continue
+            if m.start() in place_at:
+                end = place_at[m.start()]
+                rep = self._gen_place(original[m.start():end])
+                out += [original[pos:m.start()], rep]
+                pos = skip_to = end
+                replaced = True
+                continue
+            w = m.group()
+            bare = w.rstrip(".")
+            poss = re.search(r"['’]s$", bare)
+            stem = bare[:poss.start()] if poss else bare
+            tail = w[len(stem):]
+            low = stem.lower()
+            if (_LEGAL.match(bare) or low in _GENERIC or low in ("st", "saint", "mt")
+                    or titled and not stem[:1].isupper() and not stem[:1].isdigit()):
+                rep = w
+            elif prev.lower().rstrip(".") in ("st", "saint", "san", "santa", "sainte"):
+                rep = _case_like(stem, self._rng.choice([n for n in _SAINTS if n.lower() != low])
+                                 ) + tail
+            elif stem.isdigit():
+                rep = self._fake_number_like(stem) + tail
+            elif stem.isupper() and len(stem) <= 5:
+                rep = "".join(self._rng.choice(string.ascii_uppercase) for _ in stem) + tail
+            else:
+                rep = _case_like(stem, self.people.surname(stem)) + tail
+            replaced |= rep != w
+            out += [original[pos:m.start()], rep]
+            pos, prev = m.end(), bare
+        out.append(original[pos:])
+        result = "".join(out)
+        if not replaced:
+            # only generic words ("Medical Center", "mill ave"): the first word
+            # that is not the facility's kind becomes a name ("Hampton Center").
+            # A surname in front would leave the original whole in the surrogate.
+            words = list(re.finditer(r"[^\W_][\w'’\-]*", original))
+            plain = [m for m in words if m.group().lower() not in _FUNCTION_WORDS]
+            pick = next((m for m in plain if m.group().lower() not in _KIND_WORDS
+                         and not _LEGAL.match(m.group())), plain[0] if plain else None)
+            if pick is None:
+                return self.people.surname(original) + " " + original
+            name = _case_like(pick.group(), self.people.surname(pick.group()))
+            result = original[:pick.start()] + name + original[pick.end():]
+        return result
     # ── Address surrogates (mode-aware) ────────────────────────────────────────
 
     def _gen_address(
@@ -288,7 +590,7 @@ class MimicGen:
         if parsed is not None:
             for _ in range(20):
                 candidate = self._replace_address(parsed)
-                if candidate not in blocked:
+                if candidate not in blocked and not self._taken(candidate):
                     self.used_surrogates.add(candidate)
                     return candidate
 
@@ -298,7 +600,8 @@ class MimicGen:
         if entity is not None and _EURO_STREET_WORD.search(entity.text):
             for _ in range(20):
                 candidate = self._euro_street_like(entity.text)
-                if candidate not in blocked and candidate != entity.text:
+                if candidate not in blocked and candidate != entity.text \
+                        and not self._taken(candidate):
                     self.used_surrogates.add(candidate)
                     return candidate
 
@@ -381,7 +684,9 @@ class MimicGen:
         if parsed.city:
             span = locate(parsed.city)
             if span:
-                replacements.append((span[0], span[1], self._fake.city()))
+                town = places.real_place(parsed.city, self._context, self._rng.choice,
+                                         self._place_taken) or self._fake.city()
+                replacements.append((span[0], span[1], town))
 
         # State: different state, same form (2-letter stays 2-letter).
         if parsed.state:
@@ -483,18 +788,9 @@ class MimicGen:
     # ── Format-preserving generators (url, handle, age, dob) ──────────────────
 
     def _slug(self, like: str = "") -> str:
-        """A fake person-like slug in the style of *like*: the same separator
-        (. _ - or none), case style and trailing-digit count."""
-        sep = next((c for c in "._-" if c in like), "")
-        first = self._fake.first_name().lower()
-        last = self._fake.last_name().lower().replace(" ", "").replace("'", "")
-        body = f"{first}{sep}{last}" if sep or self._rng.random() < 0.5 else f"{first[0]}{last}"
-        if like[:1].isupper() or (sep and like.split(sep)[-1][:1].isupper()):
-            body = sep.join(w.capitalize() for w in body.split(sep)) if sep else body.capitalize()
-        digits = re.search(r"\d+$", like)
-        if digits:
-            body += "".join(str(self._rng.randint(0, 9)) for _ in digits.group())
-        return body
+        """A user name in the style of *like*, linked to the surrogate of the
+        person it names ("sarah.mitchell" → "mia.lopez")."""
+        return self.people.local(like) if like else self.people.local("user")
 
     def _gen_handle_like(self, original: str) -> str:
         m = re.fullmatch(r"(@?)(.+?)(#\d{4})?", original)
@@ -539,10 +835,162 @@ class MimicGen:
         new = n + step if n + step >= 1 else n + abs(step)
         return original[:m.start()] + str(new) + original[m.end():]
 
+    # ── dates of birth (audit D2) ──────────────────────────────────────────────
+
+    @staticmethod
+    def _read_date(text: str):
+        """The fields of a date as written: ``(fields, kind, ambiguous)`` with
+        fields {"year"|"month"|"day"|"monthname"|"weekday": match}, kind
+        "ymd", "ym", "y" or "m"; None when it is not a date."""
+        months = list(_MONTH_RE.finditer(text))
+        nums = list(re.finditer(r"(\d+)(st|nd|rd|th)?", text, re.IGNORECASE))
+        if len(months) > 1 or len(nums) > 3 or (not nums and not months):
+            return None
+        f: Dict[str, "re.Match"] = {}
+        wd = _WEEKDAY_RE.search(text)
+        if wd and not (months and months[0].start() <= wd.start() < months[0].end()):
+            f["weekday"] = wd
+        if months:
+            f["monthname"] = months[0]
+        year = next((n for n in nums if len(n.group(1)) == 4), None)
+        if year is None:
+            apos = next((n for n in nums if n.start() and text[n.start() - 1] in "'’"), None)
+            if apos is not None:
+                year = apos
+            elif len(nums) == 3 or (months and len(nums) == 2):
+                year = nums[-1]
+        rest = [n for n in nums if n is not year]
+        if year is not None:
+            f["year"] = year
+        ambiguous = False
+        if months:
+            if len(rest) > 1:
+                return None
+            if rest:
+                f["day"] = rest[0]
+        elif len(rest) == 2:
+            a, b = int(rest[0].group(1)), int(rest[1].group(1))
+            if year is not None and nums[0] is year:          # ISO: year, month, day
+                f["month"], f["day"] = rest
+            elif a > 12 >= b:
+                f["day"], f["month"] = rest
+            elif b > 12 >= a:
+                f["month"], f["day"] = rest
+            elif a <= 12 and b <= 12:
+                f["month"], f["day"] = rest
+                ambiguous = True
+            else:
+                return None
+        elif len(rest) == 1:
+            if year is None:
+                return None
+            f["month"] = rest[0]
+        elif rest:
+            return None
+        if "year" not in f:
+            return (f, "m", False) if months and not nums else None
+        if not ("month" in f or "monthname" in f):
+            return f, "y", False
+        return f, ("ymd" if "day" in f else "ym"), ambiguous
+
     def _gen_dob_like(self, original: str) -> str:
-        """A different date in the original's exact format: separators,
-        zero-padding, field order, two/four-digit year, month-name style."""
+        """The date moved by 30 days to two years, never into the future, in
+        the original's exact format: field order, separators, zero padding,
+        ordinal suffix, month-name style and case, two-digit year, weekday."""
+        read = self._read_date(original)
+        if read is None:
+            return self._dob_legacy(original)
+        f, kind, ambiguous = read
         rng = self._rng
+        today = datetime.date.today()
+
+        def val(name):
+            return int(f[name].group(1))
+
+        if kind == "m":
+            month = _MONTHS.index(next(m for m in _MONTHS
+                                       if m[:3].lower() == f["monthname"].group()[:3].lower()))
+            new_month = (month + rng.choice((-1, 1)) * rng.randint(1, 3)) % 12 + 1
+            return self._render_date(original, f, None, new_month, None)
+        y_raw = f["year"].group(1)
+        year = int(y_raw)
+        if len(y_raw) == 2:
+            year += 1900 if year > today.year % 100 else 2000
+        if "monthname" in f:
+            word = f["monthname"].group()[:3].lower()
+            month = next(i for i, m in enumerate(_MONTHS, 1) if m[:3].lower() == word)
+        elif "month" in f:
+            month = val("month")
+        if kind == "y":
+            step = rng.randint(1, 2)
+            new_year = year + step if year + step <= today.year else year - step
+            return self._render_date(original, f, new_year, None, None)
+        if kind == "ym":
+            if not 1 <= month <= 12:
+                return self._dob_legacy(original)
+            step = rng.randint(1, 24)
+            idx = year * 12 + month - 1
+            new = idx + step if idx + step <= today.year * 12 + today.month - 1 else idx - step
+            return self._render_date(original, f, new // 12, new % 12 + 1, None)
+        try:
+            date = datetime.date(year, month, val("day"))
+        except ValueError:
+            return self._dob_legacy(original)
+        for _ in range(100):
+            delta = datetime.timedelta(days=rng.randint(30, 730))
+            new = date + delta if date + delta <= today else date - delta
+            if not ambiguous or new.day <= 12:
+                break
+        return self._render_date(original, f, new.year, new.month, new.day, new)
+
+    @staticmethod
+    def _render_date(original: str, f, year, month, day, date=None) -> str:
+        edits = []
+
+        def number(name, value):
+            m = f[name]
+            raw = m.group(1)
+            if name == "year":
+                text = f"{value % 100:02d}" if len(raw) == 2 else str(value)
+            else:
+                text = f"{value:02d}" if len(raw) == 2 else str(value)
+            if m.group(2):
+                suf = "th" if 10 <= value % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(
+                    value % 10, "th")
+                text += suf.upper() if m.group(2).isupper() else suf
+            edits.append((m.start(), m.end(), text))
+
+        if year is not None:
+            number("year", year)
+        if month is not None and "month" in f:
+            number("month", month)
+        if day is not None and "day" in f:
+            number("day", day)
+        if month is not None and "monthname" in f:
+            m = f["monthname"]
+            word = m.group()
+            full = _MONTHS[month - 1]
+            abbr = len(word) < len(next(x for x in _MONTHS if x[:3].lower() == word[:3].lower()))
+            edits.append((m.start(), m.end(), _case_like(word, full[:3] if abbr else full)))
+        if date is not None and "weekday" in f:
+            m = f["weekday"]
+            name = _WEEKDAYS[date.weekday()]
+            edits.append((m.start(), m.end(),
+                          _case_like(m.group(), name if len(m.group()) > 4 else name[:3])))
+        out = original
+        for s, e, t in sorted(edits, reverse=True):
+            out = out[:s] + t + out[e:]
+        return out
+
+    def _dob_legacy(self, original: str) -> str:
+        """A date the reader cannot parse: every number replaced in place
+        (a year by at most two years), month names swapped."""
+        rng = self._rng
+        if not re.search(r"\d", original):
+            if _MONTH_RE.search(original):
+                return _MONTH_RE.sub(lambda m: _case_like(m.group(), rng.choice(
+                    [x for x in _MONTHS if x[:3].lower() != m.group()[:3].lower()])), original)
+            return self._fake.date_of_birth(minimum_age=18, maximum_age=80).strftime("%m/%d/%Y")
         nums = list(re.finditer(r"\d+", original))
         year_m = next((n for n in nums if len(n.group()) == 4), None)
         if year_m is None and nums and (original[nums[-1].start() - 1:nums[-1].start()] == "'"
@@ -553,7 +1001,7 @@ class MimicGen:
             out.append(original[pos:n.start()])
             g = n.group()
             if n is year_m:
-                y = int(g) + rng.choice((-1, 1)) * rng.randint(1, 6)
+                y = int(g) + rng.choice((-1, 1)) * rng.randint(1, 2)
                 out.append(f"{y % 100:02d}" if len(g) == 2 else str(y))
             else:
                 v = int(g)
@@ -562,111 +1010,43 @@ class MimicGen:
                            else str(new))
             pos = n.end()
         out.append(original[pos:])
-        result = re.sub(r"(?i)(\d+)(st|nd|rd|th)\b", _ordinal, "".join(out))
-
-        def month(mm: "re.Match") -> str:
-            word = mm.group()
-            pick = rng.choice([x for x in _MONTHS if x[:3].lower() != word[:3].lower()])
-            full = len(word) > 4 or word.lower() in ("may", "june", "july")
-            name = pick if full and word.lower() != "may" or len(word) > 4 else pick[:3]
-            if word.isupper():
-                return name.upper()
-            return name.lower() if word.islower() else name
-        return _MONTH_RE.sub(month, result)
-
-    def _gen_credit_card(self) -> str:
-        return _fake.credit_card_number(card_type=None)
-
-    def _gen_dob(self) -> str:
-        dob = _fake.date_of_birth(minimum_age=18, maximum_age=80)
-        return dob.strftime("%m/%d/%Y")
-
-    def _gen_ip(self) -> str:
-        return _fake.ipv4()
-
-    def _gen_zip_us(self) -> str:
-        return _fake.zipcode()
-
-    def _gen_postcode_uk(self) -> str:
-        return _fake.postcode()
-
-    def _gen_api_key(self) -> str:
-        return "sk-" + _fake.lexify("?" * 32)
-
-    def _gen_implicit_location(self) -> str:
-        return _fake.city() + " area"
-
-    def _gen_gpe(self) -> str:
-        return _fake.city()
-
-    def _gen_loc(self) -> str:
-        return _fake.city() + " region"
-
-    def _gen_org(self) -> str:
-        return _fake.company()
-
-    def _gen_fac(self) -> str:
-        return _fake.company() + " Building"
-
-    def _gen_crypto(self) -> str:
-        b58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        length = random.randint(26, 34)
-        return "1" + "".join(random.choices(b58, k=length - 1))
-
-    def _gen_us_bank_number(self) -> str:
-        weights = [3, 7, 1, 3, 7, 1, 3, 7]
-        for _ in range(100):
-            digits = [random.randint(0, 9) for _ in range(8)]
-            digits[0] = random.choice([0, 1, 2, 3])
-            partial = sum(w * d for w, d in zip(weights, digits))
-            check = (10 - (partial % 10)) % 10
-            result = "".join(str(d) for d in digits) + str(check)
-            if _aba_check(result):
-                return result
-        return "021000021"
-
-    def _gen_us_driver_license(self) -> str:
-        letter = random.choice("ABCDEFGHJKLMNPRSTUVWXYZ")
-        digits = _fake.numerify("#######")
-        return f"{letter}{digits}"
-
-    def _gen_default(self) -> str:
-        return _fake.bothify("??##??##")
+        return re.sub(r"(?i)(\d+)(st|nd|rd|th)\b", _ordinal, "".join(out))
 
     def _gen_gender(self, original: str = "") -> str:
         """Different gender term in the same grammatical form as *original*.
 
         Readable sentences survive ('I am a female nurse' → 'I am a male
-        nurse'); the original term is never returned.
-        """
+        nurse'); the original term is never returned. A term that agrees
+        with a named person of the message is not masked at all (detection,
+        ``gender_follows_name``)."""
         return _swap_gender(original, self._rng)
 
-    # ── Dispatch table ─────────────────────────────────────────────────────────
+    # ── Dispatch ───────────────────────────────────────────────────────────────
 
+    _IDENTITY_TYPES = frozenset({"person", "PERSON", "email"})
     _GENERATORS: Dict[str, str] = {
-        "email":             "_gen_email",
-        "ssn":               "_gen_ssn",
-        "phone_us":          "_gen_phone_us",
-        "phone_uk":          "_gen_phone_uk",
-        "phone_intl":        "_gen_phone_intl",
-        "address":           "_gen_address",
-        "person":            "_gen_person",
-        "PERSON":            "_gen_person",
-        "credit_card":       "_gen_credit_card",
-        "dob":               "_gen_dob",
-        "ip_address":        "_gen_ip",
-        "zip_us":            "_gen_zip_us",
-        "postcode_uk":       "_gen_postcode_uk",
-        "api_key":           "_gen_api_key",
-        "crypto":            "_gen_crypto",
-        "us_bank_number":    "_gen_us_bank_number",
-        "us_driver_license": "_gen_us_driver_license",
-        "implicit_location": "_gen_implicit_location",
-        "GPE":               "_gen_gpe",
-        "LOC":               "_gen_loc",
-        "ORG":               "_gen_org",
-        "FAC":               "_gen_fac",
-        "gender_indicator":  "_gen_gender",
+        "ssn":               "_gen_ssn_like",
+        "phone_us":          "_gen_phone_like",
+        "phone_uk":          "_gen_phone_like",
+        "phone_intl":        "_gen_phone_like",
+        "credit_card":       "_gen_card_like",
+        "ip_address":        "_gen_ip_like",
+        "zip_us":            "_gen_zip_like",
+        "postcode_uk":       "_shape_like",
+        "api_key":           "_gen_api_key_like",
+        "crypto":            "_gen_crypto_like",
+        "us_bank_number":    "_gen_bank_like",
+        "us_driver_license": "_shape_like",
+        "iban":              "_gen_iban_like",
+        "implicit_location": "_gen_place",
+        "GPE":               "_gen_place",
+        "LOC":               "_gen_place",
+        "ORG":               "_gen_institution",
+        "FAC":               "_gen_institution",
+        "url":               "_gen_url_like",
+        "handle":            "_gen_handle_like",
+        "age":               "_gen_age_like",
+        "dob":               "_gen_dob_like",
     }
 
     def generate(
@@ -678,43 +1058,28 @@ class MimicGen:
     ) -> str:
         if entity.type == "gender_indicator":
             surrogate = self._gen_gender(entity.text)
-            logger.debug(f"[MimicGen] gender_indicator: {entity.text!r} → {surrogate!r}")
-            return surrogate
-
-        if entity.type == "address":
+        elif entity.type == "address":
             surrogate = self._gen_address(
                 entity,
                 mode=address_mode,
                 shift_range=address_shift_range,
                 forbidden=forbidden,
             )
-            logger.debug(f"[MimicGen] address: {entity.text!r} → {surrogate!r}")
-            return surrogate
-
-        # Shape-preserving types: the surrogate keeps the exact format of the
-        # original (an ID number swaps to an ID number of the same shape).
-        if entity.type == "iban":
-            surrogate = self._unique(lambda: self._gen_iban_like(entity.text))
-            logger.debug(f"[MimicGen] iban: {entity.text!r} → {surrogate!r}")
-            return surrogate
-        if entity.type in _FORMAT_TYPES:
-            fn = getattr(self, f"_gen_{entity.type}_like")
-            if entity.type == "dob" and not re.search(r"\d", entity.text):
-                fn = lambda _t: self._gen_dob()          # noqa: E731 — no digits to keep
-            surrogate = self._unique(lambda: fn(entity.text))
-            logger.debug(f"[MimicGen] {entity.type}: {entity.text!r} → {surrogate!r}")
-            return surrogate
-        if entity.type in _SHAPE_TYPES or (
-            entity.type == "ip_address" and ":" in entity.text
-        ):
-            surrogate = self._unique(lambda: self._shape_like(entity.text))
-            logger.debug(f"[MimicGen] {entity.type}: {entity.text!r} → {surrogate!r}")
-            return surrogate
-
-        method_name = self._GENERATORS.get(entity.type, "_gen_default")
-        method = getattr(self, method_name)
-        surrogate = self._unique(method)
-        logger.debug(f"[MimicGen] {entity.type}: {entity.text!r} → {surrogate!r}")
+        elif entity.type in ("person", "PERSON"):
+            # one surrogate person per real person: not "unique" per value
+            surrogate = self.people.name(entity.text.strip(), self._context, fresh=self._fresh)
+        elif entity.type == "email":
+            surrogate = self.people.email(entity.text.strip(), fresh=self._fresh)
+        else:
+            name = self._GENERATORS.get(entity.type)
+            if name is None:
+                name = "_shape_like" if re.search(r"[^\W_]", entity.text) else None
+            if name is None:
+                surrogate = self._unique(lambda: self._fake.bothify("??##??##"))
+            else:
+                fn = getattr(self, name)
+                surrogate = self._unique(lambda: fn(entity.text.strip()))
+        logger.debug(f"[MimicGen] {entity.type}: generated a surrogate")
         return surrogate
 
     def generate_all(
@@ -742,6 +1107,10 @@ class MimicGen:
                                  (audit I5). Equality with an original, or
                                  (except for addresses) containing one as a
                                  whole value, is never accepted.
+
+        People come first, longest names first, then e-mails, so "Sarah",
+        "Ms. Mitchell" and ``sarah.m@…`` link to the surrogate of "Sarah
+        Mitchell" in the same message.
         """
         blocked: Set[str] = set(forbidden or ())
         # A shifted address must never equal ANOTHER real address in the same
@@ -767,27 +1136,50 @@ class MimicGen:
                        and (not o.replace(" ", "").isalpha() or occurs(surrogate, o))
                        for o in contained)
 
+        self._context = text or ""
+        self._avoid = set(equal_blocked)
+        self.people.observe([e.text for e in entities]
+                            + [f for f in blocked if not is_low_entropy(f)], self._context)
+
+        def order(item):
+            i, ent = item
+            if ent.type in ("person", "PERSON"):
+                return (0, -len(ent.text.split()), i)
+            return (1 if ent.type == "email" else 2, 0, i)
+
         mapping: Dict[str, str] = {}
         chosen: Set[str] = set()
-        for ent in entities:
-            key = ent.text.strip()
-            if key not in mapping:
+        try:
+            for _, ent in sorted(enumerate(entities), key=order):
+                key = ent.text.strip()
+                if key in mapping:
+                    continue
+                identity = ent.type in self._IDENTITY_TYPES
                 fallback = None
-                for _ in range(_MAX_ORIGINAL_RETRIES):
+                for attempt in range(_MAX_ORIGINAL_RETRIES):
+                    if identity:
+                        self.people.begin()
+                        self._fresh = attempt > 0
                     surrogate = self.generate(
                         ent,
                         address_mode=address_mode,
                         address_shift_range=address_shift_range,
                         forbidden=frozenset(blocked),
                     )
-                    if surrogate.strip().lower() in equal_blocked:
-                        continue
-                    if ent.type != "address" and (
+                    reject = surrogate.strip().lower() in equal_blocked or (
+                        ent.type != "address" and (
                             contains_original(surrogate)
-                            or len(key) >= 3 and key.lower() in surrogate.lower()):
-                        continue                 # not even "Will" in "Williams"
-                    if surrogate in chosen or (text is not None and occurs(text, surrogate)):
+                            or len(key) >= 3 and key.lower() in surrogate.lower()))
+                    # a surrogate issued earlier stands for another original
+                    # (originals already mapped are reused by the caller)
+                    reject = reject or identity and self._taken(surrogate)
+                    if not reject and (surrogate in chosen
+                                       or (text is not None and occurs(text, surrogate))):
                         fallback = fallback or surrogate
+                        reject = True
+                    if reject:
+                        if identity:
+                            self.people.rollback()
                         continue
                     break
                 else:
@@ -801,6 +1193,11 @@ class MimicGen:
                     surrogate = fallback
                 mapping[key] = surrogate
                 chosen.add(surrogate)
+                self.used_surrogates.add(surrogate)
                 blocked.add(surrogate)
+                self._avoid.add(surrogate.strip().casefold())
+        finally:
+            self._fresh = False
+            self._context = ""
         logger.info(f"[MimicGen] Generated {len(mapping)} surrogate mappings")
         return mapping

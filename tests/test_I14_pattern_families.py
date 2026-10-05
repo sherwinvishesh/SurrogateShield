@@ -181,7 +181,9 @@ def test_I14_surrogate_formats(seed):
     assert 1 <= int(_gen("age", "1", seed)) <= 4
 
     d = _gen("dob", "14 March '90", seed)
-    assert re.fullmatch(r"\d{1,2} [A-Z][a-z]+ '\d{2}", d) and "March" not in d
+    # D2 (Phase 4): the date moves by at most two years, so the month may stay
+    assert re.fullmatch(r"\d{1,2} [A-Z][a-z]+ '\d{2}", d) and d != "14 March '90"
+    assert abs(int(d[-2:]) - 90) <= 2
     assert re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", _gen("dob", "14.03.1990", seed))
     assert re.fullmatch(r"(19|20)\d{2}", _gen("dob", "1990", seed))
     assert re.fullmatch(r"[A-Z][a-z]{2} \d{1,2}(st|nd|rd|th), \d{4}",

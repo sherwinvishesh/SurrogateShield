@@ -144,13 +144,16 @@ def anonymise_text(text: str, mimic: Optional[MimicGen] = None, *,
 class Pipeline:
     """End-to-end SurrogateShield pipeline for a single conversation."""
 
-    def __init__(self, chat: ClaudeChat, rag=None) -> None:
+    def __init__(self, chat: ClaudeChat, rag=None, seed: Optional[int] = None) -> None:
         self.chat   = chat
         self.shadow = ShadowMap(chat.conversation.id)
         self.resolve = ResolvePass()
 
-        self.mimic = MimicGen()
-        existing_surrogates = set(self.shadow.all_mappings().keys())
+        self.mimic = MimicGen(seed)
+        existing = self.shadow.all_mappings()
+        existing_surrogates = set(existing.keys())
+        for surrogate, original in existing.items():
+            self.mimic.people.learn(surrogate, original)     # a reopened conversation
         if existing_surrogates:
             self.mimic.used_surrogates.update(existing_surrogates)
             logger.debug(

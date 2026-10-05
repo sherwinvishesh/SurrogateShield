@@ -212,9 +212,9 @@ def run(split: str, show: bool) -> dict:
 
     random.seed(0)
     results, ms = [], []
-    for rec in records:
+    for i, rec in enumerate(records):
         t = time.perf_counter()
-        prepared = prepare_send(rec["text"], MimicGen())
+        prepared = prepare_send(rec["text"], MimicGen(seed=i))     # reproducible run
         ms.append((time.perf_counter() - t) * 1000)
         res = score_message(rec, prepared)
         res.update(category=rec["category"], lang=rec["lang"])

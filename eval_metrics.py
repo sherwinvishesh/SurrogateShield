@@ -439,7 +439,16 @@ POLICY_REASONS = frozenset({
     # in the message ties it to a person (acronyms, code, public figures and
     # companies, topical places) — bench/realworld/GUIDE.md "keep" rules.
     "not_tied_to_person",
+    # D1: a gender term of the same gender as a named person of the message;
+    # the person's surrogate keeps that gender, so the term adds nothing.
+    "gender_follows_name",
+    # J5/D3: a phone surrogate keeps the original's country calling code
+    # ("+7 916 …" → "+7 9xx …"); a gold value that is only that code ("+7")
+    # goes out inside the surrogate by design.
+    "phone_country_code_kept",
 })
+
+_PHONE_TYPES = frozenset({"phone", "phone_us", "phone_uk", "phone_intl"})
 
 
 def classify_sent_leaks(
@@ -475,6 +484,11 @@ def classify_sent_leaks(
         if address_mode == "coarse" and s["replaced"]
         and normalize_type(s["type"]) == "address"
     ]
+    # Phones: the country code is carried into the surrogate (J5).
+    phones = [
+        (s["start"], s["end"], surrogate_map.get(s["text"]) or "") for s in spans
+        if s["replaced"] and s["type"] in _PHONE_TYPES
+    ]
     n_gold = 0
     leaks = []
     for t, v in key_values(answer_key):
@@ -493,6 +507,11 @@ def classify_sent_leaks(
         if any(sb <= b and e <= se and contains_value(sur, v)
                for b, e in occ for sb, se, sur in coarse):
             reasons.add("service_query_address_coarse")
+        code = v.strip()
+        if re.fullmatch(r"\+?\d{1,3}", code) and any(
+                sb <= b and e <= se and sur.lstrip().startswith(code)
+                for b, e in occ for sb, se, sur in phones):
+            reasons.add("phone_country_code_kept")
         reasons = sorted(reasons)
         leaks.append({
             "type": t,

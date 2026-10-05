@@ -74,6 +74,9 @@ class Session:
         storage_dir: Directory for an encrypted persistent map. ``None``
                      (default) keeps the map in memory only; the default also
                      follows ``config.pii_mem``.
+        seed:        Seed for the surrogate generator. The same seed and the
+                     same messages give the same surrogates (tests, audits);
+                     ``None`` (default) draws a fresh seed from the OS.
     """
 
     def __init__(
@@ -82,6 +85,7 @@ class Session:
         *,
         config: Optional[Config] = None,
         storage_dir: Optional[str] = None,
+        seed: Optional[int] = None,
     ) -> None:
         self.id = validate_id(session_id) if session_id is not None else uuid.uuid4().hex
         self.config = dataclasses.replace(config if config is not None else _default_config)
@@ -89,8 +93,10 @@ class Session:
             storage_dir = self.config.pii_mem
         self._lock = threading.RLock()
         self._shadow = ShadowMap(self.id, storage_dir=storage_dir)
-        self._mimic = MimicGen()
+        self._mimic = MimicGen(seed)
         self._mimic.used_surrogates.update(self._shadow.get_all())
+        for surrogate, original in self._shadow.get_all().items():
+            self._mimic.people.learn(surrogate, original)    # a reopened session
         self._resolver = ResolvePass()
         self._last_surrogates: frozenset = frozenset()
         self._last_sent: Optional[str] = None

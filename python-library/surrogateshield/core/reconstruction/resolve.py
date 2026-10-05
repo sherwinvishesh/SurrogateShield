@@ -39,7 +39,7 @@ import logging
 import re
 from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
-from ..consistency import glued, is_low_entropy, match_case, occurs
+from ..consistency import COMMON_WORD_NAMES as _COMMON_WORD_NAMES, glued, is_low_entropy, match_case, occurs
 
 logger = logging.getLogger(__name__)
 
@@ -51,15 +51,6 @@ _SUFFIXES = frozenset("jr sr ii iii iv md phd dds dvm esq rn cpa".split())
 _ORG_WORDS = frozenset("""inc llc ltd corp co company group partners associates holdings bank
     university college school hospital clinic foundation institute labs systems solutions
     services technologies consulting agency studio center centre church club and of the &""".split())
-# Given names that are also ordinary words: a capitalised "Grace" or "May"
-# in an answer is not evidence of the person (audit I5).
-_COMMON_WORD_NAMES = frozenset("""grace hope faith joy may june april august summer autumn dawn rose
-    lily ivy daisy holly iris violet ruby pearl amber crystal sky skye rain storm will mark bill
-    bob jack pat sue rob art guy ray don frank grant hunter chase mason carter cooper parker
-    taylor bishop king price young rich long little black white brown green gray grey rice hill
-    wood lane ford banks bell page booth cash love major miles penny sterling star angel destiny
-    harmony trinity justice liberty patience charity precious royal reign sunny honey hazel olive
-    sage basil jade jasmine pepper river brook glen dale forest north west south east""".split())
 _NAME_TOKEN = re.compile(r"[^\W\d_][^\W\d_'’.-]*(?:['’-][^\W\d_]+)*\.?")
 _NEXT_CAPITALISED = re.compile(r"[ \t]+[A-Z]")
 _TITLE_BEFORE = re.compile(r"(?i)\b(?:mr|mrs|ms|miss|mx|dr|prof)\.?\s+$")

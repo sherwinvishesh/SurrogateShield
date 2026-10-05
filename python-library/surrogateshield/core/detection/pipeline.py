@@ -937,6 +937,30 @@ def _spacy_place_verifier(model_name: str):
     return verify
 
 
+_TERM_GENDER = {"m": frozenset("male man boy guy he/him he him m gentleman".split()),
+                "f": frozenset("female woman girl lady she/her she her f".split())}
+
+
+def gender_follows_name(entities):
+    """(entities to mask, gender terms kept as typed): a gender term of the
+    same gender as a named person among *entities* is kept (Pass G)."""
+    if not any(e.type == "gender_indicator" for e in entities):
+        return list(entities), []
+    from ..generation.identity import name_gender
+    named = {name_gender(e.text) for e in entities if e.type in ("PERSON", "person")}
+    named.discard(None)
+    follows = [e for e in entities
+               if e.type == "gender_indicator" and term_gender(e.text) in named]
+    gone = {id(e) for e in follows}
+    return [e for e in entities if id(e) not in gone], follows
+
+
+def term_gender(text: str) -> Optional[str]:
+    """"m" / "f" for a gender term ("female", "gender: M", "she/her"), else None."""
+    term = re.sub(r"(?i)^(?:gender|sex|pronouns?)\s*[:=]?\s*", "", text.strip()).lower()
+    return next((g for g, terms in _TERM_GENDER.items() if term in terms), None)
+
+
 def run_cascade(
     text: str,
     skip_values: Optional[Set[str]] = None,
@@ -1164,6 +1188,17 @@ def run_cascade(
                 a.start < e.end and e.start < a.end for a in added)]
             confirmed = list(confirmed) + added
             logger.info(f"[SentinelLayer] Pass S: +{len(added)} structural entit(ies)")
+
+    # ── Pass G: a gender term that agrees with a named person (D1) ─────────
+    # The person's surrogate keeps their gender, so "Sarah … female" →
+    # "Mia … male" would only make the message incoherent. A term of the
+    # same gender as a named person of the message stays as typed: the
+    # surrogate name already says as much. Any other term is still masked.
+    confirmed, follows = gender_follows_name(confirmed)
+    for e in follows:
+        skip_reasons[(e.start, e.end)] = "gender_follows_name"
+    if follows:
+        all_skipped = list(all_skipped) + follows
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
