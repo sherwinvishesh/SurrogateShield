@@ -1087,6 +1087,13 @@ def run_cascade(
             confirmed.extend(promoted)
     _lap("context_guard_ms")
 
+    # A model span may run across a line break and come back with the break
+    # normalised to a space ("University of Leicester\nORCID"): its text no
+    # longer matches the message, so no edit could be planned for it and the
+    # name would go out unmasked. Re-anchor every span on the message itself.
+    confirmed          = _anchor_to_lines(confirmed, text)
+    needs_confirmation = _anchor_to_lines(needs_confirmation, text)
+
     if use_post_passes:
         # ── Pass A: Structural ORG detection ─────────────────────────────────────
         structural_orgs = _detect_structural_orgs(text, confirmed)
@@ -1231,6 +1238,33 @@ def run_cascade(
         f"needs_confirmation={len(needs_confirmation)}"
     )
     return confirmed, needs_confirmation
+
+
+def _anchor_to_lines(entities: List[DetectedEntity], text: str) -> List[DetectedEntity]:
+    """Each model entity's text is the message slice at its offsets, cut to
+    the line holding most of its letters (an entity never spans a line
+    break). Pattern entities are exact already and pass through."""
+    out = []
+    for e in entities:
+        if e.source == "pattern" or not (0 <= e.start < e.end <= len(text)):
+            out.append(e)
+            continue
+        raw = text[e.start:e.end]
+        if raw == e.text and "\n" not in raw:
+            out.append(e)
+            continue
+        best = None
+        for m in re.finditer(r"[^\n]+", raw):
+            seg = m.group()
+            s = e.start + m.start() + (len(seg) - len(seg.lstrip()))
+            t = e.start + m.end() - (len(seg) - len(seg.rstrip()))
+            letters = sum(c.isalpha() for c in text[s:t])
+            if s < t and (best is None or letters > best[0]):
+                best = (letters, s, t)
+        if best is None or best[0] == 0:
+            continue
+        out.append(_dc_replace(e, text=text[best[1]:best[2]], start=best[1], end=best[2]))
+    return out
 
 
 def _outside_opaque(entities: List[DetectedEntity], spans) -> List[DetectedEntity]:

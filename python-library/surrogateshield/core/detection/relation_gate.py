@@ -72,12 +72,23 @@ def _core(text: str) -> str:
     return _POSSESSIVE.sub("", text.strip()).strip(" .,;:!?")
 
 
+# Pronouns, auxiliaries and verbs that never sit inside a person's name
+# (particles such as "de", "du", "la", "van", "bin" do, so they are not listed).
+_CLAUSE_WORD = re.compile(
+    r"(?<![\w'])(?:i|you|we|they|is|are|was|were|want|need|have|has|the|and|to"
+    r"|je|tu|nous|vous|veux|veut|est|suis|sont|c'est|ich|wir|ist|und"
+    r"|yo|quiero|tengo|es|eu|quero|sou)(?![\w'])"
+)
+
+
 def is_junk(ent: DetectedEntity, text: str = "") -> bool:
     core = _core(ent.text)
     if not core:
         return True
     if core.lower() in NOT_NAMES:
         return True
+    if ent.type == "PERSON" and core == core.lower() and _CLAUSE_WORD.search(core):
+        return True                         # "je veux vérifier la clé" is a clause
     if _CODE.search(core):
         return True
     if ent.type != "PERSON" and _MODEL.search(core):
