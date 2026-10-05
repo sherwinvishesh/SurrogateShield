@@ -86,8 +86,6 @@ app = typer.Typer(
 )
 
 _rag_store = None
-VERSION = "v1.0"
-TAGLINE = "Privacy-preserving proxy for LLMs  ·  PII never leaves your device"
 
 # (slug, display name, short description)
 # Model ids come from config.py — the ones chatbot/chat.py actually calls.
@@ -224,41 +222,28 @@ def _print_menu(has_convs: bool) -> None:
     console.print()
     console.print(Rule("[blue]Actions[/blue]", style="blue"))
     console.print()
-    rows = [
-        ("[bold blue]N[/bold blue]",         "New conversation"),
-        ("[bold blue]R[/bold blue]",         "New conversation + RAG mode"),
-        ("[bold blue]P[/bold blue]",         "PII Finder  — test detection, zero API calls"),
-    ]
-    if has_convs:
-        rows += [
-            ("[bold blue]1 – 9[/bold blue]",   "Open conversation by number"),
-            ("[bold blue]D1 – D9[/bold blue]", "Delete conversation by number"),
-        ]
-    rows.append(("[bold blue]J[/bold blue]", "JSON Test  — batch evaluation from a JSON file"))
-    rows.append(("[bold blue]E[/bold blue]", "Evaluation  — score pipeline quality from JSON files"))
-    rows.append(("[bold blue]A[/bold blue]", "Attacker Experiment  — simulate adversarial PII recovery"))
-    rows.append(("[bold blue]S[/bold blue]", "Settings"))
-    rows.append(("[bold blue]H[/bold blue]", "Help"))
-    rows.append(("[bold blue]Q[/bold blue]", "Quit"))
+    from help_screen import MENU_ITEMS
+    rows = [(key, name if key in {"N", "R", "S", "H", "Q"} else f"{name}  — {desc}")
+            for key, name, desc, convs_only in MENU_ITEMS if has_convs or not convs_only]
     for key, desc in rows:
-        console.print(f"  {key}    [dim]{desc}[/dim]")
+        console.print(f"  [bold blue]{key}[/bold blue]    [dim]{desc}[/dim]")
     console.print()
 
 
 # ─── PII Finder ───────────────────────────────────────────────────────────────
 
 def _run_pii_finder() -> None:
-    from settings_manager import load_settings as _ls
-    _settings  = _ls()
-    _detailed  = _settings["detailed_view"]
-    _show_pres = _settings["presidio_comparison"]
-    _set_detailed_logging(_detailed)
     """
     Interactive PII detection sandbox — no API calls, no credits spent.
 
     Shows the SAME logic that process_turn() would apply, including the
     service-query path (address fuzzing + location suppression).
     """
+    from settings_manager import load_settings as _ls
+    _settings  = _ls()
+    _detailed  = _settings["detailed_view"]
+    _show_pres = _settings["presidio_comparison"]
+    _set_detailed_logging(_detailed)
     from detection.logic import run_cascade, deduplicate
     from detection.service_query import resolve as resolve_service
     from generation.logic import MimicGen
