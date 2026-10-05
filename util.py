@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from rich.console import Console
@@ -74,7 +74,7 @@ class ConversationMessage:
     """A single turn in a conversation."""
     role: str        # 'user' or 'assistant'
     content: str     # Final content (real values restored)
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 @dataclass
@@ -100,7 +100,7 @@ class Conversation:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     messages: List[ConversationMessage] = field(default_factory=list)
     api_messages: List[ConversationMessage] = field(default_factory=list)
-    created: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     rag_mode: bool = False
 
     def to_api_history(self) -> list:

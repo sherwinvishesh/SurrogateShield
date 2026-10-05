@@ -255,16 +255,19 @@ class Pipeline:
             self.shadow.save()
 
         # ── Step 6: RAG context retrieval ─────────────────────────────────────
+        # The context goes into this request only, never into the history
+        # (audit I18).
+        context_prefix = ""
         if self.rag is not None:
             chunks = self.rag.query(sanitised)
             if chunks:
                 context_prefix = self.rag.build_context_prompt(chunks)
-                sanitised = context_prefix + sanitised
                 logger.info(f"[Pipeline] RAG: prepended {len(chunks)} chunks")
 
         # ── Step 7: Send to LLM API ──────────────────────────────────────────
         logger.info(f"[Pipeline] Sending sanitised message to {provider} API")
-        raw_response = self.chat.send(sanitised)
+        raw_response = self.chat.send(sanitised, display_message=user_message,
+                                      context_prefix=context_prefix)
 
         # ── Step 8: Reconstruct originals ─────────────────────────────────────
         all_mappings = self.shadow.all_mappings()

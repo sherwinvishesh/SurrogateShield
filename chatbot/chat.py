@@ -95,48 +95,42 @@ class ClaudeChat:
             logger.error(f"[ClaudeChat] {exc}")
             raise
 
-    def send(self, sanitised_message: str) -> str:
+    def send(self, sanitised_message: str, *, display_message: Optional[str] = None,
+             context_prefix: str = "") -> str:
         """
-        Send a sanitised message to Claude and return the raw API response.
+        Send a sanitised message and return the raw reply (still surrogates).
 
-        Maintains two separate histories:
-          - api_messages: sanitised text (surrogates) — sent to Claude every turn
-          - messages:     display text (real values) — updated by pipeline after
-                          ResolvePass runs, never sent to the API
+        Two histories (audit I18):
+          - api_messages: sanitised text (surrogates) — re-sent every turn
+          - messages:     what the user typed and (after the pipeline calls
+                          update_last_assistant_message) the restored reply
 
-        This separation is what prevents real PII from leaking into the
-        multi-turn context window on subsequent turns.
+        *context_prefix* (RAG excerpts) goes into this request only; it is
+        never stored, so it is not re-sent on later turns. Nothing is
+        appended until the provider has answered: a failed call leaves both
+        histories unchanged (no dangling user turn).
 
         Args:
-            sanitised_message: User message with PII already replaced by surrogates.
+            sanitised_message: User message with PII already replaced.
+            display_message:   The real user text for the display history
+                               (defaults to *sanitised_message*).
+            context_prefix:    Text prepended to this request only.
 
-        Returns:
-            Raw assistant response text (still containing surrogates).
+        Raises:
+            providers.ProviderError: the call failed; nothing was recorded.
         """
-        # Append sanitised user turn to the API history
-        self.conversation.api_messages.append(
-            ConversationMessage(role="user", content=sanitised_message)
-        )
-
-        # Build API payload using to_api_history() — uses api_messages (surrogates only)
-        api_payload = self.conversation.to_api_history()
-
+        api_payload = self.conversation.to_api_history() + [
+            {"role": "user", "content": context_prefix + sanitised_message}]
         assistant_text = self._send_to_api(api_payload)
 
-        # Append raw assistant response (surrogates) to API history
-        self.conversation.api_messages.append(
-            ConversationMessage(role="assistant", content=assistant_text)
-        )
-
-        # Append a placeholder to display history — pipeline will restore
-        # real values and call update_last_assistant_message() immediately after
-        self.conversation.messages.append(
-            ConversationMessage(role="user", content=sanitised_message)
-        )
-        self.conversation.messages.append(
-            ConversationMessage(role="assistant", content=assistant_text)
-        )
-
+        conv = self.conversation
+        conv.api_messages.append(ConversationMessage(role="user", content=sanitised_message))
+        conv.api_messages.append(ConversationMessage(role="assistant", content=assistant_text))
+        # placeholder reply: the pipeline restores originals and calls
+        # update_last_assistant_message() right after
+        conv.messages.append(ConversationMessage(
+            role="user", content=sanitised_message if display_message is None else display_message))
+        conv.messages.append(ConversationMessage(role="assistant", content=assistant_text))
         return assistant_text
 
     def update_last_assistant_message(self, restored_text: str) -> None:

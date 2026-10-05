@@ -21,7 +21,7 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -184,7 +184,7 @@ def _print_how_it_works() -> None:
 def _relative_time(iso_str: str) -> str:
     try:
         dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
-        diff = datetime.utcnow() - dt.replace(tzinfo=None)
+        diff = datetime.now(timezone.utc).replace(tzinfo=None) - dt.replace(tzinfo=None)
         s = int(diff.total_seconds())
         if s < 60:    return "just now"
         if s < 3600:  return f"{s // 60}m ago"
@@ -1379,6 +1379,7 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
 
 
 def _run_chat_loop(pipeline, rag_mode: bool) -> None:
+    from chatbot.providers import ProviderAuthError
     from settings_manager import load_settings as _ls
     _settings = _ls()
     _detailed = _settings["detailed_view"]
@@ -1414,11 +1415,13 @@ def _run_chat_loop(pipeline, rag_mode: bool) -> None:
         except DetectorUnavailable as exc:
             _print_detector_unavailable(exc)
             break
-        except EnvironmentError as exc:
+        except (EnvironmentError, ProviderAuthError) as exc:
             console.print(f"[red]Configuration error.[/red]  [dim]{exc}[/dim]")
             break
         except Exception as exc:
-            console.print(f"[red bold]Error:[/red bold] {exc}"); continue
+            # the turn was not recorded (audit I18): the user can retype it
+            console.print(f"[red bold]Error:[/red bold] {exc}  [dim](not sent — try again)[/dim]")
+            continue
 
         console.print()
         console.print(Panel(
