@@ -37,7 +37,7 @@ from typing import Callable, Dict, List, Optional, Sequence
 from bench import realworld as rw
 from bench.arms.base import arm_env
 from bench.realdata import score as S
-from bench.realdata.common import BUILD, DATASETS, RD, ROOT, derive_seed, read_jsonl
+from bench.realdata.common import BUILD, DATASETS, RD, ROOT, commit_note, derive_seed, git_state, read_jsonl
 
 PRIVATE = BUILD / "spans"
 REFERENCE = "presidio_default"
@@ -182,6 +182,7 @@ def ablate_split(split: str, datasets: Sequence[str] = DATASETS, reuse: bool = F
     first = run_info[datasets[0]]
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.regex_ablation "
                       f"--split {split} --out {S.rel(out)}",
+           "git": git_state(),
            "split": split, "role": "the paper's robustness numbers" if split == "test" else "diagnosis only",
            "frozen": hashes, "draw_seed": DRAW_SEED, "families": first["families"],
            "conditions": first["conditions"], "versions": first["versions"],
@@ -206,7 +207,7 @@ def markdown(doc: dict) -> str:
     res, ref = doc["results"][g0], doc["reference"][g0]
     names = [c["name"] for c in doc["conditions"]]
     lines = [f"# Regex robustness (E6), split `{doc['split']}` ({doc['role']})", "",
-             f"Command: `{doc['command']}`", "",
+             f"Command: `{doc['command']}`" + commit_note(doc.get("git")), "",
              f"Families: {len(doc['families'])}; conditions: {len(names)}; draw seed {doc['draw_seed']}. "
              f"`none` vs arm `ss` (messages whose edits differ): {doc['none_vs_ss_messages_differing']}.", "",
              f"## Pooled ({g0}): leak rate per condition", "",

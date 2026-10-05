@@ -315,6 +315,8 @@ def test_end_to_end_counts_privacy_and_byte_identical_rerun(bench, tmp_path):
     d = doc["differences"][DS]["injected"]["presidio_default"]["leak_rate"]
     assert d["diff"] == -1.0
     assert doc["command"].split()[-1].endswith("realdata_dev.json")
+    assert len(doc["git"]["commit"]) == 40 and isinstance(doc["git"]["modified"], list)
+    assert f"at commit `{doc['git']['commit'][:12]}`" in out.with_suffix(".md").read_text()
     assert doc["hypotheses"][DS]["H1_per_baseline"] == {"presidio_default": True}
     # counts only: no text and no value in the outputs
     blob = first.decode() + out.with_suffix(".md").read_text()
@@ -336,3 +338,10 @@ def test_reuse_refuses_spans_of_another_input(bench, tmp_path):
     meta.write_text(json.dumps({"input_sha256": "0" * 64}))
     with pytest.raises(SystemExit, match="another input"):
         _score(bench, tmp_path, reuse=True)
+
+
+def test_commit_note_flags_a_dirty_tree():
+    from bench.realdata.common import commit_note
+    assert commit_note(None) == ""
+    assert commit_note({"commit": "a" * 40, "modified": []}) == " at commit `aaaaaaaaaaaa`"
+    assert commit_note({"commit": "a" * 40, "modified": ["x.py", "y.py"]}).endswith("with 2 modified tracked file(s)")

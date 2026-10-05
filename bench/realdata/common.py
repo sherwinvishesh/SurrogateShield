@@ -64,6 +64,26 @@ def file_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def git_state() -> dict:
+    """The commit a result was produced at, and the tracked files that
+    differed from it (empty when the tree was clean)."""
+    import subprocess
+
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+
+    return {"commit": git("rev-parse", "HEAD").strip(),
+            "modified": sorted(line[3:] for line in git("status", "--porcelain", "--untracked-files=no").splitlines())}
+
+
+def commit_note(state) -> str:
+    """' at commit `abc…`' for a result's markdown, flagging a dirty tree."""
+    if not state:
+        return ""
+    dirty = f" with {len(state['modified'])} modified tracked file(s)" if state["modified"] else ""
+    return f" at commit `{state['commit'][:12]}`{dirty}"
+
+
 def derive_seed(*parts) -> int:
     """A stable 63-bit seed from SEED and *parts* (unlike hash(), not salted per process)."""
     h = hashlib.sha256("|".join(str(p) for p in (SEED,) + parts).encode()).digest()

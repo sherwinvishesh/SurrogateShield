@@ -36,7 +36,7 @@ from typing import Callable, Dict, List, Optional, Sequence
 
 from bench.arms.base import arm_env
 from bench.arms.run import ARMS, command
-from bench.realdata.common import BUILD, DATASETS, ROOT, derive_seed, file_sha256, read_jsonl, write_jsonl
+from bench.realdata.common import BUILD, DATASETS, ROOT, commit_note, derive_seed, file_sha256, git_state, read_jsonl, write_jsonl
 
 N = 200
 COLD_RUNS = 3
@@ -122,6 +122,7 @@ def run_all(arms: Sequence[str], out: Path, units_by_ds: Optional[Dict[str, Sequ
             f"cold {r['cold_start_s']:>5.1f} s  RSS {r['peak_rss_mb']:>7.1f} MB")
         rows.append(r)
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.perf_arms --out {_rel(out)}",
+           "git": git_state(),
            "messages": len(msgs), "per_dataset": {ds: sum(m["id"].startswith(f"rd-{ds}-") for m in msgs) for ds in sorted(units_by_ds)},
            "input_sha256": file_sha256(src), "machine": machine(), "cold_runs": cold_runs,
            "p95": "sorted value at index floor(0.95 n), as bench/perf.py", "arms": rows}
@@ -138,7 +139,7 @@ def _rel(path: Path) -> str:
 
 def markdown(doc: dict) -> str:
     m = doc["machine"]
-    lines = ["# Latency of every arm (E7)", "", f"Command: `{doc['command']}`", "",
+    lines = ["# Latency of every arm (E7)", "", f"Command: `{doc['command']}`" + commit_note(doc.get("git")), "",
              f"{doc['messages']} real-data dev messages ({', '.join(f'{k} {v}' for k, v in doc['per_dataset'].items())}), "
              f"offline, one arm at a time on {m['platform']}, {m['cpus']} CPUs, {m['memory_gb']} GB.", "",
              "| arm | venv | warm p50 ms | warm p95 ms | mean ms | max ms | model load s | cold start s | peak RSS MB | refused |",

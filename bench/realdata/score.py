@@ -40,7 +40,8 @@ from types import SimpleNamespace
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from bench import realworld as rw
-from bench.realdata.common import BUILD, DATASETS, RD, ROOT, derive_seed, file_sha256, read_jsonl, sha256, write_jsonl
+from bench.realdata.common import (BUILD, DATASETS, RD, ROOT, commit_note, derive_seed, file_sha256, git_state,
+                                   read_jsonl, sha256, write_jsonl)
 
 ARMS = ("ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii")
 BASELINES = ARMS[1:]
@@ -415,6 +416,7 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
     out = out or ROOT / "bench" / "results" / f"realdata_{split}.json"
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score "
                       f"--split {split} --out {rel(out)}",
+           "git": git_state(),
            "split": split, "role": "the paper's detection numbers" if split == "test" else "diagnosis only",
            "frozen": hashes, "arms": list(arms), "slices": list(SLICES), "corpus": corpus,
            "claimed_types": {a: list(CLAIMED[a]) for a in arms}, "universes": {k: list(v) for k, v in UNIVERSES.items()},
@@ -454,7 +456,7 @@ def _diff(d: Optional[dict]) -> str:
 def markdown(doc: dict) -> str:
     arms, res, dif = doc["arms"], doc["results"], doc["differences"]
     lines = [f"# Real-data detection, split `{doc['split']}` ({doc['role']})", "",
-             f"Command: `{doc['command']}`", "",
+             f"Command: `{doc['command']}`" + commit_note(doc.get("git")), "",
              "Rates with Wilson 95 % intervals; Δ = SS − arm in percentage points with a paired cluster-bootstrap "
              f"95 % interval ({doc['bootstrap']['resamples']} resamples); * = interval excludes 0. "
              "Leak = protect values with a letter or digit reaching the provider (policy values apart); "
