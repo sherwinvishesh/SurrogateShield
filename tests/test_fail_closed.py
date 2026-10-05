@@ -77,7 +77,8 @@ def test_I17_library_mask_raises_and_returns_nothing(monkeypatch):
 
     def unavailable(*a, **k):
         raise DetectorUnavailable("spaCy model missing")
-    monkeypatch.setattr(ss._pipeline, "run_cascade", unavailable)
+    from surrogateshield.core.detection import pipeline
+    monkeypatch.setattr(pipeline, "run_cascade", unavailable)
     with pytest.raises(ss.DetectorUnavailable):
         ss.mask(TEXT)
     with pytest.raises(ss.DetectorUnavailable):

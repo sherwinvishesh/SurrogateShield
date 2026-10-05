@@ -15,3 +15,21 @@ if not os.environ.get("SURROGATESHIELD_TEST_HOME_SET"):
     os.environ["SURROGATESHIELD_HOME"] = _home
     os.environ["SURROGATESHIELD_TEST_HOME_SET"] = "1"
     atexit.register(shutil.rmtree, _home, ignore_errors=True)
+
+
+import sys
+
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _library_defaults():
+    """config() changes only what it is given, so restore the library's
+    default settings and drop the context's session after every test."""
+    yield
+    if "surrogateshield" in sys.modules:
+        import surrogateshield as ss
+        from surrogateshield._state import Config, cfg
+        ss.flush()
+        for name, value in vars(Config()).items():
+            setattr(cfg, name, value)

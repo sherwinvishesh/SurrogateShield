@@ -11,16 +11,12 @@ from pathlib import Path
 import pytest
 
 import surrogateshield as ss
-from surrogateshield._state import cfg, session
 
 
 @pytest.fixture(autouse=True)
 def _clean_session():
-    ss.config(detailed_view=False)
     ss.flush()
     yield
-    ss.flush()
-    ss.config(detailed_view=False)
 
 
 # ── Version ───────────────────────────────────────────────────────────────────
@@ -28,23 +24,30 @@ def _clean_session():
 def test_version_matches_pyproject():
     pyproject = (Path(__file__).resolve().parent.parent / "pyproject.toml").read_text()
     declared = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.M).group(1)
-    assert ss.__version__ == declared == "2.1.0"
+    assert ss.__version__ == declared
 
 
 def test_public_all():
-    assert set(ss.__all__) == {"config", "scan", "pii_finder", "mask", "unmask", "flush",
-                               "DetectorUnavailable"}
+    assert set(ss.__all__) == {
+        "config", "scan", "pii_finder", "mask", "mask_result", "unmask", "forget", "flush",
+        "Session", "Config", "Detection", "MaskResult", "current_session", "use_session",
+        "DetectorUnavailable", "StorageError", "__version__",
+    }
     assert ss.pii_finder is ss.scan
+    for name in ss.__all__:
+        assert hasattr(ss, name), name
 
 
 # ── Session plumbing (no models needed) ───────────────────────────────────────
 
 def test_flush_rotates_session():
-    old_id = session.id
-    session.get_shadow_map().update({"a": "b"})
+    old = ss.current_session()
+    old._shadow.update({"a": "b"})
     ss.flush()
-    assert session.id != old_id
-    assert session.get_shadow_map().lookup_original("b") is None
+    new = ss.current_session()
+    assert new is not old and new.id != old.id
+    assert new.mappings == {}
+    assert old._shadow.get_all() == {}            # the closed session is wiped too
 
 
 def test_unmask_plain_string_without_mappings():
@@ -122,6 +125,6 @@ def test_pii_off_respected():
 
 @heavy
 def test_scan_reports_types():
-    found = ss.scan("email jane@example.com, addr 789 Crescent Row, Tempe, AZ")
+    found = ss.scan("email jane@example.com, addr 789 Crescent Row, Tempe, AZ", as_dict=True)
     assert found.get("jane@example.com") == "email"
     assert found.get("789 Crescent Row, Tempe, AZ") == "address"

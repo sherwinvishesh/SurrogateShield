@@ -1,50 +1,63 @@
 """
-surrogateshield/_response_parser.py — LLM response text extractor
+surrogateshield/_response_parser.py — text of an LLM response (audit I10).
 
-Extracts plain text from any major LLM SDK response object.
+Accepts a str, or an Anthropic / OpenAI / Gemini response as an SDK object or
+as a dict (``model_dump()`` / JSON). Anything else raises ``TypeError`` —
+``unmask()`` must never turn ``None`` or an unknown object into its ``repr``.
 """
 
 from __future__ import annotations
 
 
+def _get(obj, name):
+    if isinstance(obj, dict):
+        return obj.get(name)
+    return getattr(obj, name, None)
+
+
 def extract_text(response) -> str:
-    """
-    Extract the text content from an LLM response object.
+    """Return the text content of *response*.
 
-    Tries in order:
-    1. Anthropic style: response.content[0].text
-    2. OpenAI style:    response.choices[0].message.content
-    3. Gemini style:    response.text  (has .text but no .choices)
-    4. Fallback:        str(response)
+    * Anthropic: every ``text`` block of ``content``, concatenated (tool-use
+      and thinking blocks are skipped).
+    * OpenAI: ``choices[0].message.content`` (``None`` → ``""``, e.g. a
+      tool-call-only reply).
+    * Gemini: ``.text``.
 
-    Args:
-        response: Any LLM SDK response, or a plain string.
-
-    Returns:
-        The extracted text as a string.
+    Raises:
+        TypeError: *response* is None or no text could be found in it.
     """
     if isinstance(response, str):
         return response
+    if response is None:
+        raise TypeError("unmask() got None — pass the LLM response text or object")
 
-    # Anthropic: response.content is a list of content blocks
-    try:
-        if hasattr(response, "content") and isinstance(response.content, list):
-            return response.content[0].text
-    except (AttributeError, IndexError):
-        pass
+    content = _get(response, "content")
+    if isinstance(content, (list, tuple)):
+        parts = []
+        for block in content:
+            kind = _get(block, "type")
+            text = _get(block, "text")
+            if isinstance(text, str) and kind in (None, "text"):
+                parts.append(text)
+        return "".join(parts)
 
-    # OpenAI: response.choices[0].message.content
-    try:
-        if hasattr(response, "choices"):
-            return response.choices[0].message.content
-    except (AttributeError, IndexError):
-        pass
+    choices = _get(response, "choices")
+    if isinstance(choices, (list, tuple)):
+        if not choices:
+            return ""
+        message = _get(choices[0], "message")
+        text = _get(message, "content") if message is not None else _get(choices[0], "text")
+        if text is None:
+            return ""
+        if isinstance(text, str):
+            return text
 
-    # Gemini: response.text (but no .choices attribute)
-    try:
-        if hasattr(response, "text") and not hasattr(response, "choices"):
-            return response.text
-    except AttributeError:
-        pass
+    text = _get(response, "text")
+    if isinstance(text, str):
+        return text
 
-    return str(response)
+    raise TypeError(
+        f"unmask() cannot find text in a {type(response).__name__}; pass a str or an "
+        "Anthropic / OpenAI / Gemini response"
+    )

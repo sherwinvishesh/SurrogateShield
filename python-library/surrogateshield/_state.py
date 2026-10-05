@@ -1,21 +1,21 @@
 """
-surrogateshield/_state.py — Module-level singletons
+surrogateshield/_state.py — library settings.
 
-Holds cfg (Config) and session (Session) as module-level singletons
-so all public API calls share the same state within a Python process.
+``cfg`` holds the settings that new :class:`surrogateshield.Session` objects
+start from. It holds no PII; per-conversation state is in ``session.py``.
 """
 
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
 from typing import List, Optional
 
 
 @dataclass
-class _Config:
-    """Holds all library-wide configuration values."""
-    detailed_view: bool = True
+class Config:
+    """Settings of a session. ``detailed_view`` prints original values to
+    stdout, so it is off by default (audit I10)."""
+    detailed_view: bool = False
     pii_mem: str = "temp"
     pii_off: List[str] = field(default_factory=list)
     service: bool = True
@@ -40,38 +40,6 @@ class _Config:
     context_guard_device: int = -1
 
 
-class _Session:
-    """Holds per-session state: session id, shadow map, and mimic generator."""
-
-    def __init__(self) -> None:
-        self.id: str = str(uuid.uuid4())
-        self._shadow_map = None
-        self._mimic = None
-
-    def reset(self) -> None:
-        """Clear all session state and generate a new session id."""
-        if self._shadow_map is not None:
-            self._shadow_map.flush()
-        self._shadow_map = None
-        self._mimic = None
-        self.id = str(uuid.uuid4())
-
-    def get_mimic(self):
-        """Return the MimicGen for this session, creating it if needed."""
-        if self._mimic is None:
-            from .core.generation.mimic import MimicGen
-            self._mimic = MimicGen()
-        return self._mimic
-
-    def get_shadow_map(self):
-        """Return the ShadowMap for this session, creating it if needed."""
-        if self._shadow_map is None:
-            from .core.storage.shadow_map import ShadowMap
-            storage_dir = None if cfg.pii_mem == "temp" else cfg.pii_mem
-            self._shadow_map = ShadowMap(self.id, storage_dir=storage_dir)
-        return self._shadow_map
-
-
-# Module-level singletons
-cfg = _Config()
-session = _Session()
+# The settings new sessions start from (surrogateshield.config() edits it).
+# PII state lives only in Session objects (audit I9).
+cfg = Config()

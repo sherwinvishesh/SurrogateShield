@@ -48,7 +48,13 @@ Install the package from PyPI:
 pip install surrogateshield
 ```
 
-The spaCy language model (`en_core_web_lg`) downloads automatically on the first call to `mask()` or `scan()`; a one-time ~750 MB download that is cached locally. No manual step needed.
+Then install the spaCy language model once (~600 MB):
+
+```bash
+python -m spacy download en_core_web_lg
+```
+
+Detection fails closed: if a model is missing or fails, `mask()` and `scan()` raise `surrogateshield.DetectorUnavailable` (with the install command in the message) instead of sending text that was only partly checked.
 
 If you want the Rich terminal output (colour tables showing detected PII and surrogates), install the optional display dependency:
 
@@ -56,7 +62,7 @@ If you want the Rich terminal output (colour tables showing detected PII and sur
 pip install "surrogateshield[display]"
 ```
 
-The HuggingFace ContextGuard model (dslim/distilbert-NER, ~250 MB) is downloaded automatically on the first call to `mask()` and cached by the transformers library in your local HuggingFace cache directory. No manual step is required.
+The HuggingFace ContextGuard model (dslim/distilbert-NER, ~250 MB) is downloaded on the first call to `mask()` (network needed once) and cached by the transformers library in your local HuggingFace cache directory. Offline without that cache, `mask()` raises `DetectorUnavailable`; turn ContextGuard off with `shield.config(context_guard_enabled=False)` if you do not want it.
 
 
 ## Dependencies
@@ -92,8 +98,8 @@ user_message = (
 
 # shield.mask() runs the full detection cascade and replaces every detected PII
 # field with a realistic fake. The returned string is safe to send to any LLM.
-# With detailed_view=True (default) it also prints a colour table showing
-# what was detected and what surrogate replaced it.
+# With detailed_view=True (off by default) it also prints a colour table
+# showing what was detected and what surrogate replaced it.
 sanitized = shield.mask(user_message)
 # sanitized might look like:
 # "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,
@@ -112,10 +118,32 @@ restored = shield.unmask(response)
 # restored contains "Sarah Mitchell", "sarah.mitchell@gmail.com", etc.
 print(restored)
 
-# shield.flush() clears the session: discards the shadow map and generates a
-# new session ID. Call it when a conversation or request lifecycle ends.
+# shield.flush() ends the session: discards the shadow map; the next call
+# starts a new session. Call it when a conversation or request lifecycle ends.
 shield.flush()
 ```
+
+
+## Sessions: one per conversation
+
+Every mapping lives in a `Session`. The module-level `mask()` / `unmask()` / `scan()` / `flush()` use the *current* session: one bound with `use_session()`, otherwise one created on first use by the calling thread or asyncio task. A session is never shared between threads or tasks implicitly, so two users of a web server cannot restore each other's values.
+
+In a server, make the session explicit, one per end-user conversation:
+
+```python
+import surrogateshield as shield
+
+session = shield.Session()                 # or Session("conv-42", storage_dir=...) to resume
+sanitized = session.mask(user_text)
+restored = session.unmask(llm_response)
+session.close()                            # discard the mappings
+
+# or bind it for code that calls the module-level functions:
+with shield.use_session(session):
+    shield.unmask(shield.mask(user_text))
+```
+
+A `Session` is thread-safe (one lock per session). `Session.mask_result(text)` returns the sanitized text together with every detection and the replacements made; `Session.forget(value)` erases one value's mappings.
 
 
 ## Multi-turn conversation: OpenAI
@@ -225,7 +253,7 @@ shield.flush()
 
 ## scan(): detect PII without changing anything
 
-`scan()` runs the full detection cascade and returns a dict mapping each detected value to its PII type. It does not generate surrogates, does not update the shadow map, and does not modify the text. Use it when you want to inspect what SurrogateShield would find before committing to masking.
+`scan()` runs the full detection cascade, with the same settings as `mask()`, and returns a list of `Detection` objects (`text`, `type`, `start`, `end`, `score`, `source`, `masked`), one per occurrence, in text order. `masked` is `False` for types in `pii_off`. It does not generate surrogates, does not update the shadow map, and does not modify the text. `scan(text, as_dict=True)` returns the old `{value: type}` dict.
 
 ```python
 import surrogateshield as shield
@@ -236,16 +264,8 @@ text = (
     "or write to 99 Market Street, San Francisco, CA 94105."
 )
 
-found = shield.scan(text)
-# {
-#   "alice.nguyen@company.org": "email",
-#   "Alice Nguyen": "PERSON",
-#   "+1-415-555-0198": "phone_us",
-#   "99 Market Street": "address",
-# }
-
-for value, pii_type in found.items():
-    print(f"{pii_type:20s}  {value}")
+for d in shield.scan(text):
+    print(f"{d.type:20s} {d.start:>4}-{d.end:<4} {d.text}")
 ```
 
 `pii_finder` is an alias for `scan()` provided for readability in data-pipeline contexts:
@@ -257,7 +277,7 @@ found = shield.pii_finder(text)
 
 ## pii_off: detect but do not replace specific types
 
-Sometimes you want SurrogateShield to detect every PII type for awareness but only replace a subset. `pii_off` accepts a list of type names or short aliases. Detected entities whose type matches an entry in `pii_off` are identified in the scan results but are not substituted in the output.
+Sometimes you want SurrogateShield to detect every PII type for awareness but only replace a subset. `pii_off` accepts a list of type names or short aliases. Detected entities whose type matches an entry in `pii_off` are not substituted in the output; they are reported with `masked=False` by `scan()` and in `shield.mask_result(text).unmasked`.
 
 ```python
 import surrogateshield as shield
@@ -381,18 +401,14 @@ shield.flush()
 The encryption scheme: a 32-byte device secret is generated once at `~/.surrogateshield/device.key` (`$SURROGATESHIELD_HOME` overrides the directory; file `0o600`, directory `0o700`). No key is stored next to the data. The AES-256-GCM key for a session is derived with HKDF-SHA256 (device secret as input, session ID as salt, `shadowmap-v1` as info), and the session ID is bound into the ciphertext as associated data. The file is `"SSv1"`, a fresh 12-byte nonce, then the ciphertext. A file that cannot be decrypted raises `CorruptStoreError` (it is moved aside, not deleted); a device secret that cannot be stored raises `ShadowMapStorageError`. Files written by 0.x (with a `<session>.key` beside them) are still read and are upgraded on the next save.
 
 
-## Turning off detailed output
+## Detailed output
 
-By default SurrogateShield prints a table to stdout after each `scan()`, `mask()`, and `unmask()` call. In production or when integrating into an API backend you will want to disable this:
+SurrogateShield prints nothing by default. For debugging, `detailed_view=True` prints a table after each `scan()`, `mask()` and `unmask()` call. The tables show the ORIGINAL values, so never enable it where stdout is logged:
 
 ```python
 import surrogateshield as shield
 
-shield.config(detailed_view=False)
-
-# All operations now run silently
-sanitized = shield.mask("Contact Bob at bob@example.com.")
-restored = shield.unmask("Thanks for reaching out, Bob.")
+shield.config(detailed_view=True)
 ```
 
 
@@ -477,11 +493,12 @@ After the LLM responds, `unmask()` runs three passes to restore original values:
 ## config(): all parameters
 
 ```python
+# config() changes only the arguments you pass; the others keep their values.
 shield.config(
-    detailed_view=True,
+    detailed_view=False,
     # When True, prints Rich-formatted tables to stdout showing what was
-    # detected, what surrogates were assigned, and how many values were
-    # restored. Set to False for silent / production operation.
+    # detected (original values!), what surrogates were assigned, and how
+    # many values were restored. Off by default.
 
     pii_mem="temp",
     # Controls where the session shadow map is stored.
@@ -577,23 +594,34 @@ actionable message instead of failing silently later.
 
 ## Full API reference
 
-**`shield.config(**kwargs)`**
-Updates the global configuration object. All keyword arguments are optional; unspecified parameters retain their current values. Raises `ValueError` if `pii_mem` is not `"temp"` and the specified path does not exist or is not a directory.
+**`shield.config(**kwargs) -> Config`**
+Changes the settings new sessions start from, and the current session's settings. Only the arguments you pass change; the rest keep their current values. Raises `ValueError` on any invalid setting, and `RuntimeError` if `pii_mem` changes while the current session holds mappings.
 
-**`shield.scan(text: str) -> dict`**
-Runs the full detection cascade on `text` and returns `{detected_value: pii_type}`. Does not modify the text, does not generate surrogates, and does not update the shadow map. Always returns all detected PII regardless of `pii_off` settings. If `detailed_view=True`, prints a scan results table to stdout.
+**`shield.Session(session_id=None, *, config=None, storage_dir=None)`**
+The masking state of one conversation, thread-safe. Methods: `mask(text) -> str`, `mask_result(text) -> MaskResult`, `scan(text) -> list[Detection]`, `unmask(response) -> str`, `forget(value) -> int`, `close()`; property `mappings` (a copy of surrogate → original). Usable as a context manager (closes on exit). With `storage_dir`, the same `session_id` reopens the same encrypted map.
+
+**`shield.use_session(session)` / `shield.current_session()`**
+Bind a session for a `with` block (inherited by asyncio tasks and `asyncio.to_thread` started inside it) / return the session the module-level functions use.
+
+**`shield.scan(text: str, *, as_dict=False) -> list[Detection]`**
+Runs the detection cascade with the same settings as `mask()` and returns one `Detection(text, type, start, end, score, source, masked)` per occurrence. Does not modify the text, generate surrogates, or update the shadow map. Detections of `pii_off` types have `masked=False`. `as_dict=True` returns `{value: type}`.
 
 **`shield.pii_finder`**
 An alias for `shield.scan`. Provided for readability in data-pipeline contexts.
 
-**`shield.mask(text: str) -> str`**
-Runs detection, generates surrogates, applies substitutions, and updates the session shadow map. Respects `pii_off` settings; types in that list are detected but not replaced. Returns the sanitized string safe to send to an LLM. If `detailed_view=True`, prints a masking results table.
+**`shield.mask(text: str) -> str`** / **`shield.mask_result(text: str) -> MaskResult`**
+Runs detection, generates surrogates, applies substitutions, and updates the session shadow map. Types in `pii_off` are detected but not replaced; `mask_result()` reports them in `.unmasked`, together with `.detections` and `.replacements`. Raises `DetectorUnavailable` if a model is missing (nothing is masked) and `TypeError` if `text` is not a str.
 
 **`shield.unmask(response) -> str`**
-Accepts any LLM SDK response object or a plain string. Extracts the text content, looks up every surrogate in the session shadow map, and returns the response with original values restored. Tries Anthropic, OpenAI, and Gemini response formats automatically before falling back to `str(response)`. If `detailed_view=True`, prints a one-line restore confirmation.
+Accepts a plain string or an Anthropic / OpenAI / Gemini response (SDK object or dict). Anthropic responses: every text block is concatenated; an OpenAI tool-call reply with no content gives `""`. Raises `TypeError` for `None` or an object with no text. Returns the text with original values restored.
+
+**`shield.forget(value) -> int`**
+Erases every mapping for one original value from the current session.
 
 **`shield.flush()`**
-Resets the session: clears the shadow map (and deletes disk files if in persistent mode), discards the MimicGen instance, and generates a new session ID. Call this at the end of every conversation or request lifecycle to prevent surrogate mappings from one session bleeding into the next. If `detailed_view=True`, prints a confirmation line.
+Ends the current session: clears its shadow map (and deletes its file in persistent mode). The next call starts a new session. Call this at the end of every conversation or request lifecycle.
+
+**Exceptions:** `DetectorUnavailable` (a detection model is missing or failed), `StorageError` (the persistent store cannot be read or written), `TypeError`, `ValueError`.
 
 
 ## Troubleshooting
@@ -609,8 +637,8 @@ Both spaCy and the HuggingFace model are loaded lazily on the first call. Subseq
 ```python
 import surrogateshield as shield
 
-# Pre-warm by scanning an empty string — loads the models now
-shield.scan("")
+# Pre-warm by scanning a short text — loads the models now
+shield.Session().scan("warm up")
 ```
 
 **Disabling ContextGuard for faster inference**

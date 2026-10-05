@@ -69,6 +69,14 @@ _PII_OFF_ALIASES: Dict[str, Set[str]] = {
 }
 
 
+def resolve_pii_off(pii_off) -> Set[str]:
+    """Entity types switched off by *pii_off* (type names or aliases)."""
+    exclude: Set[str] = set()
+    for item in pii_off or ():
+        exclude.update(_PII_OFF_ALIASES.get(item.lower(), {item}))
+    return exclude
+
+
 class _TaggedList(list):
     """list subclass that allows attribute assignment (used for _qi_matches)."""
     pass
@@ -1091,13 +1099,7 @@ def run_cascade(
 
     # ── pii_off filtering ─────────────────────────────────────────────────────
     if pii_off:
-        exclude_types: Set[str] = set()
-        for item in pii_off:
-            item_lower = item.lower()
-            if item_lower in _PII_OFF_ALIASES:
-                exclude_types.update(_PII_OFF_ALIASES[item_lower])
-            else:
-                exclude_types.add(item)
+        exclude_types = resolve_pii_off(pii_off)
 
         old_qi      = confirmed._qi_matches
         old_skipped = confirmed._skipped_entities
