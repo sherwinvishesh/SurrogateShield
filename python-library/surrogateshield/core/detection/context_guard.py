@@ -15,6 +15,7 @@ Tokenization artefact handling:
 
 from __future__ import annotations
 
+import os
 import logging
 import re
 import threading
@@ -48,6 +49,23 @@ def _get_ner(model_name: str = "dslim/distilbert-NER", device: int = -1):
     return cached
 
 
+def _local_model(model_name: str) -> str:
+    """The cached copy of *model_name*, so a load makes no network request
+    (audit N7). Only a model that is not cached yet is fetched, once."""
+    if os.path.isdir(model_name):
+        return model_name
+    try:
+        from huggingface_hub import snapshot_download
+    except ImportError:
+        return model_name
+    try:
+        return snapshot_download(model_name, local_files_only=True)
+    except OSError:         # not cached: LocalEntryNotFoundError
+        if os.environ.get("HF_HUB_OFFLINE", "").lower() in ("1", "true", "yes", "on"):
+            return model_name   # the pipeline raises; _load_ner reports it
+        return snapshot_download(model_name)
+
+
 def _load_ner(model_name: str, device: int):
     try:
         from transformers import pipeline as hf_pipeline
@@ -59,7 +77,7 @@ def _load_ner(model_name: str, device: int):
     try:
         pipeline = hf_pipeline(
             "ner",
-            model=model_name,
+            model=_local_model(model_name),
             aggregation_strategy="simple",
             device=device,
         )
