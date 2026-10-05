@@ -329,8 +329,9 @@ python -m spacy download en_core_web_lg
 # HuggingFace Hub on first use — no manual command needed.
 # Model: dslim/distilbert-NER (~250 MB, cached after the first run).
 
-# Set your API key
-echo "ANTHROPIC_API_KEY=sk-ant-..." > .env
+# Set your API key: create .env readable only by you, then add the key with
+# an editor (not `echo`, which leaves it in your shell history)
+touch .env && chmod 600 .env
 
 # Launch
 ./run.sh
@@ -404,7 +405,10 @@ presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root and make it private
+(`chmod 600 .env`; `run.sh` warns when other users can read it). The keys are
+read by python-dotenv; a variable already exported in your shell takes
+precedence over the file.
 
 ```env
 ANTHROPIC_API_KEY=sk-ant-...       # Required for Claude
@@ -967,7 +971,7 @@ SurrogateShield/
 ├── evaluator.py             # Precision/recall/F1 evaluation logic + Presidio/BERTScore/ablation study
 ├── json_tester.py           # Batch JSON question processing
 ├── attacker.py              # Adversarial PII recovery experiment (Attacker Experiment)
-├── run.sh                   # Launcher script (venv activation, .env loading)
+├── run.sh                   # Launcher: pre-flight checks, then the venv's python main.py
 ├── requirements.txt
 │
 ├── detection/               # SentinelLayer — three-stage PII detection cascade
@@ -1056,7 +1060,7 @@ SurrogateShield/
 | ShadowMap format | `"SSv1" ‖ nonce (12 bytes) ‖ AES-GCM ciphertext`: unreadable without device key |
 | API transmission | Only surrogates sent: real values never leave the device |
 | Conversation history | Stored locally in `~/.surrogateshield/conversations/`, encrypted like the ShadowMap; it contains the real values you typed (display history) as well as the surrogate text sent to the API |
-| `.gitignore` | `*.shadowmap`, `conversations/*.json`, `device.key`, `.env` excluded |
+| `.gitignore` | `*.shadowmap`, `conversations/`, `device.key`, `.env`, and new experiment outputs (`experiment/*_answers*.json`, `*_eval_results*.json`, `*_Attacker_Experiment*.json`) excluded |
 
 
 

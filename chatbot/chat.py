@@ -391,18 +391,20 @@ class ClaudeChat:
             ) from exc
 
     @staticmethod
-    def delete(conversation_id: str) -> None:
+    def delete(conversation_id: str) -> bool:
         """
-        Delete the conversation transcript (no decryption needed).
+        Delete the conversation transcript (no decryption needed). Returns
+        False when there was no transcript.
 
         The shadow map is deleted separately by storage.logic.erase().
         """
         path = conversations_dir() / f"{validate_id(conversation_id)}.json"
         try:
             path.unlink()
-            logger.info(f"[ClaudeChat] Deleted conversation file: {path}")
         except FileNotFoundError:
-            logger.warning(f"[ClaudeChat] Conversation file not found: {path}")
+            return False
+        logger.info(f"[ClaudeChat] Deleted conversation file: {path}")
+        return True
 
     @staticmethod
     def list_conversations() -> List[dict]:

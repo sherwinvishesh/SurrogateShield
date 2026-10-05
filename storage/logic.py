@@ -67,6 +67,7 @@ class ShadowMap(_ShadowMap):
         )
 
 
-def erase(conversation_id: str) -> None:
-    """Delete a conversation's shadow map without decrypting it."""
-    _ShadowMap.erase(conversation_id, conversations_dir())
+def erase(conversation_id: str) -> bool:
+    """Delete a conversation's shadow map without decrypting it. Returns False
+    when there was none."""
+    return _ShadowMap.erase(conversation_id, conversations_dir())

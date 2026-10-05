@@ -367,3 +367,25 @@ def test_I11_delete_removes_unreadable_conversation(app_store):
         p.write_bytes(b"garbage")
     main._delete_conversation("t-4")
     assert list(app_store.iterdir()) == []
+
+
+def test_I27_delete_reports_missing_conversation(app_store):
+    import main
+
+    assert main._delete_conversation("never-existed") is False
+    _chat_with("t-5", "Ann").save()
+    assert main._delete_conversation("t-5") is True
+    assert main._delete_conversation("t-5") is False
+
+
+def test_I27_cli_delete_confirms(app_store):
+    from typer.testing import CliRunner
+    import main
+
+    _chat_with("t-6", "Ann").save()
+    r = CliRunner().invoke(main.app, ["chat", "--delete", "t-6"], input="n\n")
+    assert r.exit_code == 1 and any(app_store.iterdir())
+    r = CliRunner().invoke(main.app, ["chat", "--delete", "t-6"], input="y\n")
+    assert r.exit_code == 0 and "Deleted" in r.output
+    r = CliRunner().invoke(main.app, ["chat", "--delete", "t-6", "--yes"])
+    assert r.exit_code == 1 and "No conversation" in r.output

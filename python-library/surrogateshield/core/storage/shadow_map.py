@@ -406,13 +406,15 @@ class ShadowMap:
                 pass
 
     @staticmethod
-    def erase(session_id: str, storage_dir: PathLike) -> None:
-        """Delete a stored map without opening it (works on unreadable files)."""
+    def erase(session_id: str, storage_dir: PathLike) -> bool:
+        """Delete a stored map without opening it (works on unreadable files).
+        Returns False when there was no stored map."""
         path = Path(storage_dir).expanduser() / f"{validate_id(session_id)}.shadowmap"
         try:
             path.unlink()
         except FileNotFoundError:
-            pass
+            return False
+        return True
 
     def __len__(self) -> int:
         return len(self._mappings)

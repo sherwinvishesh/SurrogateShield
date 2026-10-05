@@ -28,6 +28,8 @@ from typing import Optional
 from dotenv import load_dotenv
 load_dotenv()
 
+import config as _cfg
+
 # ── Logging setup ─────────────────────────────────────────────────────────────
 # Called ONCE here, before any module imports get_logger().
 # util.get_logger() does NOT call basicConfig() itself.
@@ -87,10 +89,11 @@ VERSION = "v1.0"
 TAGLINE = "Privacy-preserving proxy for LLMs  ·  PII never leaves your device"
 
 # (slug, display name, short description)
+# Model ids come from config.py — the ones chatbot/chat.py actually calls.
 _PROVIDERS = [
-    ("claude",  "Claude",    "Anthropic  ·  claude-sonnet-4-6"),
-    ("gemini",  "Gemini",    "Google     ·  gemini-1.5-flash"),
-    ("chatgpt", "ChatGPT",   "OpenAI     ·  gpt-4o-mini"),
+    ("claude",  "Claude",    f"Anthropic  ·  {_cfg.CLAUDE_MODEL}"),
+    ("gemini",  "Gemini",    f"Google     ·  {_cfg.GEMINI_MODEL}"),
+    ("chatgpt", "ChatGPT",   f"OpenAI     ·  {_cfg.OPENAI_MODEL}"),
     ("local",   "Local LLM", "Ollama     ·  runs fully offline"),
 ]
 
@@ -98,7 +101,7 @@ _PROVIDERS = [
 def _current_provider_name() -> str:
     """Return the display name of the currently configured LLM provider."""
     from settings_manager import load_settings
-    slug = load_settings().get("llm_provider", "claude")
+    slug = load_settings()["llm_provider"]
     return next((n for s, n, _ in _PROVIDERS if s == slug), "LLM")
 
 
@@ -150,7 +153,7 @@ def _print_compact_banner() -> None:
 
 def _print_how_it_works() -> None:
     from settings_manager import load_settings
-    provider_slug = load_settings().get("llm_provider", "claude")
+    provider_slug = load_settings()["llm_provider"]
     provider_name = next((n for s, n, _ in _PROVIDERS if s == provider_slug), "LLM")
     steps = [
         ("PatternScan",       "Regex — SSNs, emails, phones, cards, API keys"),
@@ -246,8 +249,8 @@ def _print_menu(has_convs: bool) -> None:
 def _run_pii_finder() -> None:
     from settings_manager import load_settings as _ls
     _settings  = _ls()
-    _detailed  = _settings.get("detailed_view", False)
-    _show_pres = _settings.get("presidio_comparison", True)
+    _detailed  = _settings["detailed_view"]
+    _show_pres = _settings["presidio_comparison"]
     _set_detailed_logging(_detailed)
     """
     Interactive PII detection sandbox — no API calls, no credits spent.
@@ -1002,14 +1005,14 @@ _PROVIDER_INSTRUCTIONS: dict = {
     "claude": [
         "1. Visit [blue]console.anthropic.com[/blue] and sign in.",
         "2. Go to [bold white]API Keys[/bold white] and create a new key.",
-        "3. Add to your [bold white].env[/bold white] file:\n\n"
+        "3. Add to your [bold white].env[/bold white] file (then [cyan]chmod 600 .env[/cyan]):\n\n"
         "       [cyan]ANTHROPIC_API_KEY=sk-ant-...[/cyan]",
         "4. Press [bold white]T[/bold white] to test your current key.",
     ],
     "gemini": [
         "1. Visit [blue]aistudio.google.com[/blue] and sign in.",
         "2. Click [bold white]Get API Key[/bold white] to generate a key.",
-        "3. Add to your [bold white].env[/bold white] file:\n\n"
+        "3. Add to your [bold white].env[/bold white] file (then [cyan]chmod 600 .env[/cyan]):\n\n"
         "       [cyan]GEMINI_API_KEY=AIza...[/cyan]",
         "4. Install the SDK:\n\n"
         "       [cyan]pip install google-generativeai[/cyan]",
@@ -1018,7 +1021,7 @@ _PROVIDER_INSTRUCTIONS: dict = {
     "chatgpt": [
         "1. Visit [blue]platform.openai.com[/blue] and sign in.",
         "2. Go to [bold white]API Keys[/bold white] and create a new secret key.",
-        "3. Add to your [bold white].env[/bold white] file:\n\n"
+        "3. Add to your [bold white].env[/bold white] file (then [cyan]chmod 600 .env[/cyan]):\n\n"
         "       [cyan]OPENAI_API_KEY=sk-...[/cyan]",
         "4. Install the SDK:\n\n"
         "       [cyan]pip install openai[/cyan]",
@@ -1040,7 +1043,9 @@ _PROVIDER_INSTRUCTIONS: dict = {
 
 def _test_provider(slug: str, name: str) -> None:
     """Make a minimal API call to verify the provider is reachable."""
-    load_dotenv(override=True)  # pick up any keys just added to .env
+    # Pick up keys just added to .env; a variable already exported in the
+    # shell keeps precedence, as at start-up (audit I27).
+    load_dotenv(override=False)
     console.print(f"\n  [dim]Testing {name} connection…[/dim]")
     try:
         if slug == "claude":
@@ -1050,7 +1055,7 @@ def _test_provider(slug: str, name: str) -> None:
                 time.sleep(1.5); return
             import anthropic as _ant
             r = _ant.Anthropic(api_key=api_key).messages.create(
-                model="claude-haiku-4-5-20251001", max_tokens=5,
+                model=_cfg.CLAUDE_MODEL, max_tokens=5,
                 messages=[{"role": "user", "content": "Hi"}],
             )
             _ = r.content[0].text
@@ -1062,7 +1067,7 @@ def _test_provider(slug: str, name: str) -> None:
                 time.sleep(1.5); return
             import google.generativeai as genai
             genai.configure(api_key=api_key)
-            _ = genai.GenerativeModel("gemini-1.5-flash").generate_content("Hi").text
+            _ = genai.GenerativeModel(_cfg.GEMINI_MODEL).generate_content("Hi").text
 
         elif slug == "chatgpt":
             api_key = os.environ.get("OPENAI_API_KEY")
@@ -1071,15 +1076,15 @@ def _test_provider(slug: str, name: str) -> None:
                 time.sleep(1.5); return
             import openai as _oai
             r = _oai.OpenAI(api_key=api_key).chat.completions.create(
-                model="gpt-4o-mini", max_tokens=5,
+                model=_cfg.OPENAI_MODEL, max_tokens=5,
                 messages=[{"role": "user", "content": "Hi"}],
             )
             _ = r.choices[0].message.content
 
         elif slug == "local":
             import ollama as _ol
-            host  = os.environ.get("LOCAL_LLM_HOST", "http://localhost:11434")
-            model = os.environ.get("LOCAL_LLM_MODEL", "llama3.2")
+            host  = os.environ.get("LOCAL_LLM_HOST", _cfg.LOCAL_LLM_HOST)
+            model = os.environ.get("LOCAL_LLM_MODEL", _cfg.LOCAL_LLM_MODEL)
             r = _ol.Client(host=host).chat(
                 model=model, messages=[{"role": "user", "content": "Hi"}]
             )
@@ -1190,9 +1195,9 @@ def _run_settings() -> None:
         _print_compact_banner()
         settings   = load_settings()
         cur_label  = _provider_label.get(settings["llm_provider"], settings["llm_provider"].title())
-        dv_on      = settings.get("detailed_view", False)
+        dv_on      = settings["detailed_view"]
         dv_label   = "[green]On[/green]" if dv_on else "[dim]Off[/dim]"
-        pc_on      = settings.get("presidio_comparison", True)
+        pc_on      = settings["presidio_comparison"]
         pc_label   = "[green]On[/green]" if pc_on else "[dim]Off[/dim]"
 
         console.print(Panel(
@@ -1313,8 +1318,10 @@ def _run_dashboard() -> None:
                 except (EOFError, KeyboardInterrupt):
                     continue
                 if confirm == "y":
-                    _delete_conversation(uid)
-                    console.print("[green]✓[/green]  Deleted.")
+                    if _delete_conversation(uid):
+                        console.print("[green]✓[/green]  Deleted.")
+                    else:
+                        console.print("[yellow]Already gone.[/yellow]")
                     time.sleep(0.7)
                 else:
                     console.print("[dim]Cancelled.[/dim]")
@@ -1348,15 +1355,15 @@ def _get_rag():
     return _rag_store
 
 
-def _delete_conversation(conv_id: str) -> None:
+def _delete_conversation(conv_id: str) -> bool:
     """Delete transcript and shadow map without decrypting either (so an
-    unreadable conversation can still be removed). Raises ValueError on an
-    invalid id."""
+    unreadable conversation can still be removed). Returns False when neither
+    existed; raises ValueError on an invalid id."""
     from chatbot.chat import ClaudeChat
     from storage.logic import erase, validate_id
     validate_id(conv_id)
-    ClaudeChat.delete(conv_id)
-    erase(conv_id)
+    removed = ClaudeChat.delete(conv_id)
+    return erase(conv_id) or removed
 
 
 def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
@@ -1408,7 +1415,7 @@ def _start_chat(load: Optional[str] = None, rag: bool = False) -> None:
 def _run_chat_loop(pipeline, rag_mode: bool) -> None:
     from settings_manager import load_settings as _ls
     _settings = _ls()
-    _detailed = _settings.get("detailed_view", False)
+    _detailed = _settings["detailed_view"]
     _set_detailed_logging(_detailed)
 
     provider_slug = getattr(pipeline.chat, "_provider", "claude")
@@ -1470,17 +1477,23 @@ def main_callback(ctx: typer.Context) -> None:
 def chat(
     load:   Optional[str] = typer.Option(None,  "--load",   help="Resume by ID.",  metavar="ID"),
     delete: Optional[str] = typer.Option(None,  "--delete", help="Delete by ID.",  metavar="ID"),
+    yes:    bool           = typer.Option(False, "--yes", "-y", help="Delete without asking."),
     rag:    bool           = typer.Option(False, "--rag",    help="Enable RAG mode."),
 ) -> None:
     """Start, resume, or delete a conversation."""
     _print_compact_banner()
     if delete:
-        console.print(f"[yellow]Deleting:[/yellow] {delete}")
+        if not yes and not typer.confirm(f"Delete conversation {delete}?", default=False):
+            console.print("[dim]Cancelled.[/dim]")
+            raise typer.Exit(1)
         try:
-            _delete_conversation(delete)
+            found = _delete_conversation(delete)
         except ValueError as exc:
             console.print(f"[red]{exc}[/red]")
             raise typer.Exit(2)
+        if not found:
+            console.print(f"[red]No conversation {delete}[/red]")
+            raise typer.Exit(1)
         console.print("[green]✓[/green]  Deleted.")
         return
     _start_chat(load=load, rag=rag)
