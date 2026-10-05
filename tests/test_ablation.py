@@ -26,7 +26,7 @@ def test_A9_run_ablation_signed_deltas(tmp_path):
     from offline_eval import ABLATION_CONFIGS, run_ablation
 
     key = [
-        {"Question": "Call Margaret Okonkwo on 480-555-0199.",
+        {"Question": "Margaret Okonkwo can be reached at 480-555-0199.",
          "Answer-Key": {"name": "Margaret Okonkwo", "phone": "480-555-0199"}},
         {"Question": "How do volcanoes form?", "Answer-Key": {}},
     ]
