@@ -431,6 +431,10 @@ POLICY_REASONS = frozenset({
     "service_query_address_shift",
     "service_query_location_suppressed",
     "topical_geo_filtered",
+    # I12: an ORG/place/name the relation gate kept verbatim because nothing
+    # in the message ties it to a person (acronyms, code, public figures and
+    # companies, topical places) — bench/realworld/GUIDE.md "keep" rules.
+    "not_tied_to_person",
 })
 
 

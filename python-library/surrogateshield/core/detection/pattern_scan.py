@@ -208,6 +208,8 @@ def _zip_validator(m: "re.Match") -> bool:
     pre = _before(m, 30)
     if _NEG_NUM_CONTEXT.search(pre):
         return False
+    if re.search(r"[A-Za-z0-9][\-#/]$", pre):
+        return False                      # tail of a code ("Order #A-77219")
     if _ZIP_POS_CONTEXT.search(pre):
         return True
     # geographic framing nearby ("within the 60611 area", "deliver to 85281")
@@ -364,6 +366,7 @@ _HANDLE_STOP = frozenset({
     "available", "required", "missing", "blank", "empty", "changed", "field",
     "password", "username", "account", "login", "email", "please", "help",
     "gamertag", "handle", "id", "tag", "on", "in", "at", "with",
+    "one", "ones", "too", "also", "got", "has", "had", "and", "but", "it",
 })
 
 
@@ -709,6 +712,8 @@ _PATTERNS: list = [
             r"|\bpsn(?:\s+id)?|\bhandle|\buser(?=\s*[=:]))"
             r"|\b(?:discord|insta(?:gram)?|\big|twitter|tiktok|snap(?:chat)?|telegram"
             r"|reddit|twitch|steam|nick(?:name)?|alias|login))"
+            # "Login: username X" — let the stronger label claim the value
+            r"(?!\s*(?:[=:\-]\s*)?(?:user\s*name|gamer\s*tag|screen\s*name|handle)\b)"
             r"\s*(?:(?:is|was|=|:|-)\s*)?@?"
             r"(?P<v>[A-Za-z0-9][A-Za-z0-9_.\-]{1,30}[A-Za-z0-9])(?![\w@])",
             re.IGNORECASE,

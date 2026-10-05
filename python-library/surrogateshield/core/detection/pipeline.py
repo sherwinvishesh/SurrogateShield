@@ -43,7 +43,7 @@ from dataclasses import replace as _dc_replace
 from typing import Dict, List, Optional, Set, Tuple
 
 from ..entities import DetectedEntity, mask_spans
-from . import pattern_scan, entity_trace, context_guard
+from . import pattern_scan, entity_trace, context_guard, relation_gate
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -377,9 +377,13 @@ def _detect_structural_persons(
         # weak frames ("this is X") need a full 2+-token name, no gerunds
         # anywhere ("im heading home") and no participle in first position
         # ("this is expected behavior")
+        # a properly-cased "I'm"/"I am" says the text is not case-degenerate,
+        # so the name must be capitalised ("I'm risk averse." is not a name)
+        cased_frame = m.group(0)[:1] == "I"
         if (len(toks) >= 2 and _person_tokens_ok(toks)
                 and not any(_token_core(t).endswith("ing") for t in toks)
-                and not _verbish(toks[0])):
+                and not _verbish(toks[0])
+                and not (cased_frame and not toks[0][:1].isupper())):
             span_text = " ".join(toks)
             candidates.append((m.start(1), m.start(1) + len(span_text), span_text))
 
@@ -1098,6 +1102,29 @@ def run_cascade(
         needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text, anchored)
         all_skipped = skipped_confirmed + skipped_nc
 
+    # ── Pass R: relation gate (I12) — names not tied to a person stay ────────
+    # verbatim: acronyms, code, greetings, public figures/companies and
+    # places that are only the topic.  Pattern entities are never gated.
+    skip_reasons = {}
+    for bucket in ("confirmed", "needs_confirmation"):
+        ents = confirmed if bucket == "confirmed" else needs_confirmation
+        # NER/SLM entities, plus structural PERSONs (Pass E) — those only
+        # face the junk and public-figure checks ("Emperor Meiji").
+        gated = [e for e in ents if e.source != "pattern" or e.type == "PERSON"]
+        gated_ids = {id(e) for e in gated}
+        others = [e for e in list(confirmed) + list(needs_confirmation)
+                  if id(e) not in gated_ids]
+        kept, dropped = relation_gate.gate(text, gated, others)
+        kept_ids = {id(e) for e in kept}
+        ents = [e for e in ents if id(e) not in gated_ids or id(e) in kept_ids]
+        for e in dropped:
+            skip_reasons[(e.start, e.end)] = "not_tied_to_person"
+        all_skipped = list(all_skipped) + dropped
+        if bucket == "confirmed":
+            confirmed = ents
+        else:
+            needs_confirmation = ents
+
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
     qi_matches = qi_score(confirmed)
@@ -1109,6 +1136,7 @@ def run_cascade(
             )
     confirmed._qi_matches = qi_matches
     confirmed._skipped_entities = all_skipped
+    confirmed._skip_reasons = skip_reasons
 
     # ── pii_off filtering ─────────────────────────────────────────────────────
     if pii_off:
@@ -1119,6 +1147,7 @@ def run_cascade(
         confirmed = _TaggedList([e for e in confirmed if e.type not in exclude_types])
         confirmed._qi_matches       = old_qi
         confirmed._skipped_entities = old_skipped
+        confirmed._skip_reasons     = skip_reasons
     _lap("post_passes_ms")
 
     logger.info(
@@ -1148,4 +1177,6 @@ def deduplicate(entities: List[DetectedEntity]) -> List[DetectedEntity]:
         result._qi_matches = entities._qi_matches
     if hasattr(entities, "_skipped_entities"):
         result._skipped_entities = entities._skipped_entities
+    if hasattr(entities, "_skip_reasons"):
+        result._skip_reasons = entities._skip_reasons
     return result

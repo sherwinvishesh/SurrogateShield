@@ -104,6 +104,11 @@ class Prepared:
     sanitized: str
     timings: Dict[str, float] = field(default_factory=dict)
     qi_matches: list = field(default_factory=list)
+    # per-entity reason (keyed by (start, end)) that overrides skip_reason
+    skip_reasons: Dict[Tuple[int, int], str] = field(default_factory=dict)
+
+    def reason_for(self, ent) -> str:
+        return self.skip_reasons.get((ent.start, ent.end), self.skip_reason)
 
     def spans(self) -> List[dict]:
         """Every predicted span in question coordinates.
@@ -137,7 +142,7 @@ class Prepared:
                 "replaced": False,
             }
             if ent in self.skipped:
-                row["reason"] = self.skip_reason
+                row["reason"] = self.reason_for(ent)
             else:
                 row["reason"] = "no_surrogate"
             out.append(row)
@@ -197,6 +202,7 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None) -
         sanitized=splice(question, edits),
         timings=timings,
         qi_matches=list(getattr(confirmed, "_qi_matches", [])),
+        skip_reasons=dict(getattr(confirmed, "_skip_reasons", {})),
     )
 
 
@@ -267,7 +273,7 @@ def _process_one(
                 "score": round(e.score, 4),
                 "source": e.source,
                 "surrogate_status": "skipped",
-                "skip_reason": prep.skip_reason,
+                "skip_reason": prep.reason_for(e),
             }
         answer["pii_detail"] = detail
 
@@ -295,7 +301,7 @@ def _process_one(
     if fields.get("recognized_not_replaced"):
         answer["recognized_not_replaced"] = [
             {"value": e.text, "type": e.type, "start": e.start, "end": e.end,
-             "reason": prep.skip_reason}
+             "reason": prep.reason_for(e)}
             for e in skipped
         ]
 
