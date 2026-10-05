@@ -45,7 +45,7 @@ from typing import Iterable, List, Tuple
 from ..entities import DetectedEntity
 from .geo_data import US_STATE_ABBREVS
 from .pattern_scan import _KIN as _KIN_WORDS
-from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE, WORD_NAMES
+from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE, WORD_NAMES, is_listed_public_person
 
 GATED_TYPES = frozenset({"ORG", "GPE", "LOC", "FAC", "PERSON"})
 _PLACE_ORG = frozenset({"ORG", "GPE", "LOC", "FAC"})
@@ -330,7 +330,7 @@ def is_public_person(ent: DetectedEntity, text: str) -> bool:
         return False
     if _OWN_DRAFT_BY.search(text[max(0, ent.start - 120):ent.start]):
         return False
-    if low in PUBLIC_PEOPLE or _EPITHET.search(core) or (
+    if low in PUBLIC_PEOPLE or is_listed_public_person(core) or _EPITHET.search(core) or (
             low in PUBLIC_ORGS and low not in _NAME_LIKE_ORGS):
         return True
     if " " not in core:

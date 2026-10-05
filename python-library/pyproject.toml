@@ -53,4 +53,4 @@ where = ["."]
 include = ["surrogateshield*"]
 
 [tool.setuptools.package-data]
-surrogateshield = ["py.typed"]
+surrogateshield = ["py.typed", "core/detection/public_people.txt"]

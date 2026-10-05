@@ -15,9 +15,17 @@ Three small gazetteers used by the relation gate (relation_gate.py):
 The lists are general world knowledge, written independently of any
 evaluation split; they are deliberately short. Matching is case-insensitive
 on the whole entity (possessive "'s" stripped).
+
+WIKIDATA_PEOPLE / FAMOUS_SURNAMES come from public_people.txt, built from
+Wikidata by tools/build_public_people.py (about 31 000 widely known people,
+names that could as well be a private person's left out); see
+is_listed_public_person().
 """
 
 from __future__ import annotations
+
+import unicodedata
+from importlib import resources
 
 
 def _set(block: str) -> frozenset:
@@ -169,3 +177,32 @@ Rich | Bob | Jack | Max | Bud | Buck | Duke | Earl | King | Prince | Major | Roy
 Cliff | Glen | Dale | Forest | Rock | Stone | Flint | Reed | Heath | Wood | Sterling
 Matt | Matte | Rusty | Lance | Miles | Price | Hunt | Ward | Marsh | Rocky
 """)
+
+
+def fold(name: str) -> str:
+    """Case- and accent-folded form used by the Wikidata gazetteer."""
+    s = unicodedata.normalize("NFKD", name.casefold())
+    return " ".join("".join(c for c in s if not unicodedata.combining(c)).split())
+
+
+def _load_wikidata() -> "tuple[frozenset, frozenset]":
+    text = resources.files(__package__).joinpath("public_people.txt").read_text("utf-8")
+    names, surnames, cur = set(), set(), None
+    for line in text.splitlines():
+        if line.startswith("## surnames"):
+            cur = surnames
+        elif line and not line.startswith("#"):
+            (names if cur is None else surnames).add(line)
+    return frozenset(names), frozenset(surnames)
+
+
+WIKIDATA_PEOPLE, FAMOUS_SURNAMES = _load_wikidata()
+
+
+def is_listed_public_person(name: str) -> bool:
+    """A full name in either gazetteer, or one surname that alone stands for
+    one famous person ("Churchill")."""
+    key = fold(name)
+    if key in PUBLIC_PEOPLE or key in WIKIDATA_PEOPLE:
+        return True
+    return " " not in key and key in FAMOUS_SURNAMES
