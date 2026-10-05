@@ -62,7 +62,7 @@ from util import (
 )
 from detection import address_parser
 from detection import logic as sentinel_layer
-from detection.service_query import is_sensitive_topic, is_service_query
+from detection.service_query import is_service_query, resolve_address_mode
 from detection.quasi_identifier import format_warning as _qi_format_warning
 from generation.logic import MimicGen
 from storage.logic import ShadowMap
@@ -200,12 +200,7 @@ class Pipeline:
         # ADDRESS_MODE decides shift vs replace ("auto" = shift only for
         # non-sensitive service queries — the v1 behaviour).
         is_svc = SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_message)
-        if ADDRESS_MODE == "auto":
-            address_mode = (
-                "shift" if (is_svc and not is_sensitive_topic(user_message)) else "replace"
-            )
-        else:
-            address_mode = ADDRESS_MODE
+        address_mode = resolve_address_mode(ADDRESS_MODE, is_svc)
 
         # ── Step 1: Detection ─────────────────────────────────────────────────
         logger.info("[Pipeline] Running SentinelLayer cascade")

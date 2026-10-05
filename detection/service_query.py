@@ -118,6 +118,18 @@ def is_service_query(text: str) -> bool:
     return False
 
 
+def resolve_address_mode(mode: str, service_query: bool) -> str:
+    """Effective address mode for one message.
+
+    ``"auto"`` shifts only inside a service query (``is_service_query`` is
+    already False for sensitive topics) and replaces everywhere else; explicit
+    ``"shift"``/``"replace"`` pass through.
+    """
+    if mode == "auto":
+        return "shift" if service_query else "replace"
+    return mode
+
+
 # ─── Deprecated compatibility wrapper ─────────────────────────────────────────
 
 def fuzz_addresses(

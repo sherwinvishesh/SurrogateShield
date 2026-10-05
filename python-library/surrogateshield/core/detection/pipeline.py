@@ -687,6 +687,19 @@ _QUERY_FRAME = re.compile(
 
 _GEO_FILTERABLE = {"GPE", "LOC"}
 
+# Direct identifiers of a person. A place that shares a message with one of
+# these is that person's place ("Carlos Mendez … in Naperville"), so the
+# topical-query exemption below does not apply to it.
+_PERSONAL_ANCHOR_TYPES = {
+    "PERSON", "email", "phone_intl", "phone_us", "phone_uk", "ssn", "dob",
+    "address", "credit_card", "us_driver_license", "passport", "id_number",
+    "us_bank_number", "iban",
+}
+
+
+def _has_personal_anchor(*entity_lists: List[DetectedEntity]) -> bool:
+    return any(e.type in _PERSONAL_ANCHOR_TYPES for ents in entity_lists for e in ents)
+
 
 def _all_sub_clauses(text: str) -> List[str]:
     parts = _CLAUSE_SPLIT.split(text)
@@ -717,6 +730,7 @@ def _is_proper_capitalized(entity_text: str, text: str) -> bool:
 def _filter_topical_geo_entities(
     entities: List[DetectedEntity],
     text: str,
+    anchored: bool = False,
 ) -> tuple:
     geo_ents   = [e for e in entities if e.type in _GEO_FILTERABLE]
     other_ents = [e for e in entities if e.type not in _GEO_FILTERABLE]
@@ -749,7 +763,7 @@ def _filter_topical_geo_entities(
                 else:
                     in_personal = True
 
-        if in_query and not in_personal:
+        if in_query and not in_personal and not anchored:
             logger.debug(
                 f"[SentinelLayer] Pass D: topical geo (query-only): {geo_ent.text!r}"
             )
@@ -926,8 +940,9 @@ def run_cascade(
 
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
-        confirmed,          skipped_confirmed = _filter_topical_geo_entities(confirmed,          text)
-        needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text)
+        anchored = _has_personal_anchor(confirmed, needs_confirmation)
+        confirmed,          skipped_confirmed = _filter_topical_geo_entities(confirmed,          text, anchored)
+        needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text, anchored)
         all_skipped = skipped_confirmed + skipped_nc
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────

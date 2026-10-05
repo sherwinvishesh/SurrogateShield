@@ -30,7 +30,7 @@ class _Config:
     # "shift"   → house number ±address_shift_range, everything else kept
     # "replace" → structure-preserving fake address
     # "auto"    → shift for service queries, replace otherwise
-    address_mode: str = "shift"
+    address_mode: str = "auto"
     address_shift_range: int = 1
     # Opt-in Nominatim existence check (network!). Never on the hot path
     # unless explicitly enabled.

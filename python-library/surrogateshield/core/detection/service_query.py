@@ -98,6 +98,18 @@ def is_service_query(text: str) -> bool:
     return False
 
 
+def resolve_address_mode(mode: str, service_query: bool) -> str:
+    """Effective address mode for one message.
+
+    ``"auto"`` shifts only inside a service query (``is_service_query`` is
+    already False for sensitive topics) and replaces everywhere else; explicit
+    ``"shift"``/``"replace"`` pass through.
+    """
+    if mode == "auto":
+        return "shift" if service_query else "replace"
+    return mode
+
+
 # ─── Deprecated compatibility wrapper ─────────────────────────────────────────
 
 def fuzz_addresses(
@@ -110,7 +122,7 @@ def fuzz_addresses(
     Address handling now flows through the canonical parser
     (detection/address_parser.py) and the shift generator
     (generation.shift_house_number). Use those directly, or simply call
-    mask() with address_mode="shift" (the default).
+    mask() with address_mode="shift" (or "auto" for service queries).
 
     Returns:
         Tuple of (fuzzed_text, {original_address: fuzzed_address}).

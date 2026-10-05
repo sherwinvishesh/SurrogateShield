@@ -16,7 +16,7 @@ def _reset_config():
 
 def test_library_defaults():
     ss.config(detailed_view=False)
-    assert cfg.address_mode == "shift"
+    assert cfg.address_mode == "auto"   # I22: shift only under the service-query policy
     assert cfg.address_shift_range == 1
     assert cfg.verify_addresses is False          # network is opt-in
     assert cfg.fuzzy_threshold == 85
@@ -35,7 +35,7 @@ def test_library_defaults():
 
 def test_root_config_defaults_and_validation():
     import config as root_config
-    assert root_config.ADDRESS_MODE == "shift"
+    assert root_config.ADDRESS_MODE == "auto"
     assert root_config.ADDRESS_SHIFT_RANGE == 1
     assert root_config.SERVICE_QUERY_VERIFY_ADDRESSES is False
     assert root_config.FUZZY_MATCH_THRESHOLD == 85

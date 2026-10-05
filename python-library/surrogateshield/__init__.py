@@ -123,7 +123,7 @@ def config(
     context_guard_threshold: float = 0.70,
     entity_trace_fallback_threshold: float = 0.65,
     fuzzy_threshold: int = 85,
-    address_mode: str = "shift",
+    address_mode: str = "auto",
     address_shift_range: int = 1,
     verify_addresses: bool = False,
     context_guard_model: str = "dslim/distilbert-NER",
@@ -153,14 +153,15 @@ def config(
         entity_trace_fallback_threshold: Promotion threshold when ContextGuard is off.
         fuzzy_threshold:                rapidfuzz partial_ratio threshold for unmask().
         address_mode:                   How detected addresses are surrogated:
+                                        "auto"    — shift for non-sensitive service
+                                                    queries, replace for everything
+                                                    else (default);
                                         "shift"   — house number shifted by up to
-                                                    ±address_shift_range; street, city,
-                                                    state, ZIP, and formatting preserved
-                                                    byte-for-byte (default);
+                                                    ±address_shift_range for EVERY
+                                                    address; street, city, state, ZIP
+                                                    and formatting are sent unchanged;
                                         "replace" — structure-preserving fake address
-                                                    (every component faked, same shape);
-                                        "auto"    — shift for service queries,
-                                                    replace for everything else.
+                                                    (every component faked, same shape).
         address_shift_range:            Max house-number delta for shift mode (>= 1).
         verify_addresses:               Opt-in Nominatim existence check for detected
                                         addresses. Makes a NETWORK call per address —
@@ -272,10 +273,7 @@ def mask(text: str) -> str:
     # Service-query detection: suppress standalone location entities and
     # resolve the effective address mode for this message.
     is_svc = cfg.service and _service_query.is_service_query(text)
-    if cfg.address_mode == "auto":
-        address_mode = "shift" if is_svc else "replace"
-    else:
-        address_mode = cfg.address_mode
+    address_mode = _service_query.resolve_address_mode(cfg.address_mode, is_svc)
 
     # Run detection cascade — addresses are detected as FULL single spans by
     # the canonical parser inside PatternScan.

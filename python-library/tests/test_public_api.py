@@ -77,9 +77,23 @@ def test_mask_unmask_roundtrip_shift_mode():
 
 @heavy
 def test_mask_shift_keeps_street_visible():
+    ss.config(detailed_view=False, address_mode="shift")
     masked = ss.mask("I live at 789 Crescent Row, Tempe, AZ 85281.")
     assert "Crescent Row" in masked
     assert "789" not in masked
+
+
+@heavy
+def test_I22_default_auto_replaces_outside_service_queries():
+    masked = ss.mask("I live at 789 Crescent Row, Tempe, AZ 85281.")
+    assert "Crescent Row" not in masked and "Tempe" not in masked
+
+
+@heavy
+def test_I22_default_auto_shifts_service_queries():
+    masked = ss.mask("Find a coffee shop near 789 Crescent Row, Tempe, AZ 85281.")
+    assert "Crescent Row, Tempe, AZ 85281" in masked
+    assert "789 Crescent" not in masked
 
 
 @heavy

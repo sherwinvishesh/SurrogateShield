@@ -110,6 +110,37 @@ def shift_house_number(
     return None
 
 
+# Gender terms grouped by grammatical form, so a surrogate keeps the form of
+# the original ("gender: male" → "gender: female", "she/her" → "he/him").
+_GENDER_FAMILIES = (
+    ("he/him", "she/her", "they/them"),
+    ("male", "female", "non-binary"),
+    ("man", "woman", "non-binary person"),
+)
+_GENDER_TERM = re.compile(
+    r"(?<![\w/-])(he/him|she/her|they/them|non-?binary(?: person)?|female|male|woman|man)(?![\w/-])",
+    re.IGNORECASE,
+)
+
+
+def _swap_gender(text: str, rng) -> str:
+    """Replace the last gender term in *text* with a different term of the same form."""
+    matches = list(_GENDER_TERM.finditer(text))
+    if not matches:
+        return rng.choice(("male", "female", "non-binary"))
+    m = matches[-1]
+    term = m.group(1).lower().replace("nonbinary", "non-binary")
+    family = next((f for f in _GENDER_FAMILIES if term in f), _GENDER_FAMILIES[1])
+    choice = rng.choice([t for t in family if t != term])
+    if m.group(1)[:1].isupper():
+        choice = choice[:1].upper() + choice[1:]
+    return text[: m.start()] + choice + text[m.end():]
+
+
+
+_MAX_ORIGINAL_RETRIES = 20
+
+
 class MimicGen:
     """
     Generates realistic, collision-resistant surrogates for detected PII.
@@ -138,7 +169,7 @@ class MimicGen:
                 self.used_surrogates.add(candidate)
                 return candidate
         fallback = str(generator_fn()) + "_" + "".join(
-            random.choices(string.ascii_lowercase, k=4)
+            self._rng.choices(string.ascii_lowercase, k=4)
         )
         self.used_surrogates.add(fallback)
         return fallback
@@ -454,19 +485,13 @@ class MimicGen:
     def _gen_default(self) -> str:
         return _fake.bothify("??##??##")
 
-    def _gen_gender(self) -> str:
+    def _gen_gender(self, original: str = "") -> str:
+        """Different gender term in the same grammatical form as *original*.
+
+        Readable sentences survive ('I am a female nurse' → 'I am a male
+        nurse'); the original term is never returned.
         """
-        Generate a gender indicator surrogate that preserves grammatical
-        structure. Replaces detected gender with a different valid gender
-        expression so sentences like 'I am a female nurse' remain readable
-        as 'I am a male nurse' rather than breaking into 'I am a xy42ab98 nurse'.
-        """
-        options = [
-            "male", "female", "non-binary",
-            "he/him", "she/her", "they/them",
-            "gender: male", "gender: female", "sex: male", "sex: female",
-        ]
-        return random.choice(options)
+        return _swap_gender(original, self._rng)
 
     # ── Dispatch table ─────────────────────────────────────────────────────────
 
@@ -507,7 +532,7 @@ class MimicGen:
         # because the pool is small and uniqueness is less important than
         # producing a grammatically valid gender expression.
         if entity.type == "gender_indicator":
-            surrogate = self._gen_gender()
+            surrogate = self._gen_gender(entity.text)
             logger.debug(f"[MimicGen] gender_indicator: {entity.text!r} → {surrogate!r}")
             return surrogate
 
@@ -562,17 +587,29 @@ class MimicGen:
         # A shifted address must never equal ANOTHER real address in the same
         # message ("789 X" and "790 X" both present → shift must dodge).
         blocked |= {e.text.strip() for e in entities if e.type == "address"}
+        # No surrogate may equal any original in the message (J4): a value
+        # "replaced" by itself is sent verbatim.
+        originals = {e.text.strip().lower() for e in entities}
 
         mapping: Dict[str, str] = {}
         for ent in entities:
             key = ent.text.strip()
             if key not in mapping:
-                mapping[key] = self.generate(
-                    ent,
-                    address_mode=address_mode,
-                    address_shift_range=address_shift_range,
-                    forbidden=frozenset(blocked),
-                )
-                blocked.add(mapping[key])
+                for _ in range(_MAX_ORIGINAL_RETRIES):
+                    surrogate = self.generate(
+                        ent,
+                        address_mode=address_mode,
+                        address_shift_range=address_shift_range,
+                        forbidden=frozenset(blocked),
+                    )
+                    if surrogate.strip().lower() not in originals:
+                        break
+                else:
+                    raise RuntimeError(
+                        f"could not generate a surrogate for a {ent.type} entity "
+                        f"that differs from every original in the message"
+                    )
+                mapping[key] = surrogate
+                blocked.add(surrogate)
         logger.info(f"[MimicGen] Generated {len(mapping)} surrogate mappings")
         return mapping

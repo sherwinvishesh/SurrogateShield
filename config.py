@@ -77,14 +77,16 @@ ENTITY_TRACE_FALLBACK_THRESHOLD: float = 0.65
 # ─────────────────────────────────────────────
 
 # How detected addresses are surrogated:
-#   "shift"   — house number shifted by up to ±ADDRESS_SHIFT_RANGE; street,
-#               city, state, ZIP, and formatting preserved byte-for-byte
-#               (default — maximum answer utility, ~one-building error).
+#   "auto"    — shift for non-sensitive service queries ("coffee near 12 Elm
+#               St, Tempe, AZ"), replace for everything else; sensitive
+#               topics always force replace (default — the only mode whose
+#               verbatim street/city/ZIP is covered by a documented policy).
+#   "shift"   — house number shifted by up to ±ADDRESS_SHIFT_RANGE for EVERY
+#               address; street, city, state, ZIP, and formatting are sent
+#               unchanged (a billing address in a letter goes out ±1).
 #   "replace" — structure-preserving fake address (every component faked,
 #               same shape — strongest privacy).
-#   "auto"    — shift for service queries, replace for everything else
-#               (sensitive topics always force replace).
-ADDRESS_MODE: str = "shift"
+ADDRESS_MODE: str = "auto"
 
 # Maximum house-number delta for shift mode (>= 1). ±1 keeps the geographic
 # error to roughly one building.

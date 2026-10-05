@@ -725,6 +725,19 @@ _QUERY_FRAME = re.compile(
 
 _GEO_FILTERABLE = {"GPE", "LOC"}
 
+# Direct identifiers of a person. A place that shares a message with one of
+# these is that person's place ("Carlos Mendez … in Naperville"), so the
+# topical-query exemption below does not apply to it.
+_PERSONAL_ANCHOR_TYPES = {
+    "PERSON", "email", "phone_intl", "phone_us", "phone_uk", "ssn", "dob",
+    "address", "credit_card", "us_driver_license", "passport", "id_number",
+    "us_bank_number", "iban",
+}
+
+
+def _has_personal_anchor(*entity_lists: List[DetectedEntity]) -> bool:
+    return any(e.type in _PERSONAL_ANCHOR_TYPES for ents in entity_lists for e in ents)
+
 
 def _all_sub_clauses(text: str) -> List[str]:
     parts = _CLAUSE_SPLIT.split(text)
@@ -766,6 +779,7 @@ def _is_proper_capitalized(entity_text: str, text: str) -> bool:
 def _filter_topical_geo_entities(
     entities: List[DetectedEntity],
     text: str,
+    anchored: bool = False,
 ) -> tuple[List, List]:
     """
     Remove GPE/LOC entities that are query topics rather than personal refs.
@@ -781,6 +795,10 @@ def _filter_topical_geo_entities(
       "The city of Springfield is beautiful"    → non-query  → kept ✓
       "What restaurants are near London?"       → query only → dropped ✓
       "Revanth lives in Wyoming"                → non-query  → kept ✓
+
+    Person anchor: when the message also names a person or carries one of
+    their direct identifiers (``anchored=True``), the query-only exemption is
+    off — "find Carlos Mendez from NovaBuild in Naperville" keeps Naperville.
 
     The capitalisation check (_is_proper_capitalized) additionally filters
     mid-sentence lowercase usages ("phoenix bird", "springfield field team").
@@ -821,7 +839,7 @@ def _filter_topical_geo_entities(
                 else:
                     in_personal = True
 
-        if in_query and not in_personal:
+        if in_query and not in_personal and not anchored:
             logger.debug(
                 f"[SentinelLayer] Pass D: topical geo (query-only): {geo_ent.text!r}"
             )
@@ -872,6 +890,7 @@ def run_cascade(
     text: str,
     skip_values: Optional[Set[str]] = None,
     skip_location_entities: bool = False,
+    timings: Optional[Dict[str, float]] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full SentinelLayer cascade then apply post-processing passes.
@@ -880,7 +899,22 @@ def run_cascade(
         text:                   Raw user message.
         skip_values:            Surrogate strings to skip in PatternScan.
         skip_location_entities: Suppress ALL geo entities (service-query mode).
+        timings:                If given, filled with wall-clock milliseconds
+                                of THIS pass: pattern_scan_ms, entity_trace_ms,
+                                context_guard_ms, post_passes_ms.
     """
+    import time as _time
+
+    _clock = _time.perf_counter
+    _t = _clock()
+
+    def _lap(name: str) -> None:
+        nonlocal _t
+        now = _clock()
+        if timings is not None:
+            timings[name] = round((now - _t) * 1000, 3)
+        _t = now
+
     confirmed: List[DetectedEntity] = []
     needs_confirmation: List[DetectedEntity] = []
     all_skipped: List[DetectedEntity] = []
@@ -890,6 +924,7 @@ def run_cascade(
     pattern_results = pattern_scan.scan(text, skip_values=skip_values)
     confirmed.extend(pattern_results)
     remaining_text = mask_spans(text, pattern_results)
+    _lap("pattern_scan_ms")
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
@@ -909,6 +944,7 @@ def run_cascade(
 
     confirmed.extend(ner_confirmed)
     remaining_text = mask_spans(remaining_text, ner_confirmed)
+    _lap("entity_trace_ms")
 
     # ── Stage 3: ContextGuard ─────────────────────────────────────────────────
     from config import CONTEXT_GUARD_ENABLED, ENTITY_TRACE_FALLBACK_THRESHOLD
@@ -930,6 +966,7 @@ def run_cascade(
         ]
         if promoted:
             confirmed.extend(promoted)
+    _lap("context_guard_ms")
 
     # ── Pass A: Structural ORG detection ─────────────────────────────────────
     structural_orgs = _detect_structural_orgs(text, confirmed)
@@ -975,8 +1012,9 @@ def run_cascade(
 
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
-        confirmed,          skipped_confirmed = _filter_topical_geo_entities(confirmed,          text)
-        needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text)
+        anchored = _has_personal_anchor(confirmed, needs_confirmation)
+        confirmed,          skipped_confirmed = _filter_topical_geo_entities(confirmed,          text, anchored)
+        needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text, anchored)
         all_skipped = skipped_confirmed + skipped_nc
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
@@ -990,6 +1028,7 @@ def run_cascade(
             )
     confirmed._qi_matches = qi_matches
     confirmed._skipped_entities = all_skipped
+    _lap("post_passes_ms")
 
     logger.info(
         f"[SentinelLayer] Final → "
