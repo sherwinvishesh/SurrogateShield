@@ -1,0 +1,741 @@
+{
+ "command": "python bench/compare.py --json bench/results/compare_phase5_baseline_dev.json",
+ "synth": {
+  "dataset": "experiment/synth_dev_key.json",
+  "messages": 1200,
+  "negatives": 300,
+  "gold_spans": 2443,
+  "seed": 20260101,
+  "presidio": {
+   "presidio_analyzer_version": "2.2.362",
+   "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+   "score_threshold": 0.4,
+   "overlap_resolution": "longest span, then highest score"
+  },
+  "any_type": {
+   "ss": {
+    "micro": {
+     "tp": 2356,
+     "fn": 87,
+     "fp": 172,
+     "gold": 2443,
+     "pred": 2409,
+     "precision": 0.9286,
+     "recall": 0.9644,
+     "f1": 0.9462,
+     "exact_boundary_matches": 1972
+    },
+    "macro": {
+     "precision": 0.9286,
+     "recall": 0.9644,
+     "f1": 0.9462,
+     "n_types": 1
+    },
+    "per_type": {
+     "ANY": {
+      "tp": 2356,
+      "fn": 87,
+      "fp": 172,
+      "gold": 2443,
+      "pred": 2409,
+      "precision": 0.9286,
+      "recall": 0.9644,
+      "f1": 0.9462,
+      "exact_boundary_matches": 1972
+     }
+    },
+    "negatives": {
+     "negative_questions": 300,
+     "negative_questions_with_any_prediction": 61,
+     "negative_question_fp_rate": 0.2033,
+     "fp_spans_on_negatives": 81
+    },
+    "questions": 1200
+   },
+   "ss_rnr": {
+    "micro": {
+     "tp": 2377,
+     "fn": 66,
+     "fp": 394,
+     "gold": 2443,
+     "pred": 2651,
+     "precision": 0.8514,
+     "recall": 0.973,
+     "f1": 0.9081,
+     "exact_boundary_matches": 1990
+    },
+    "macro": {
+     "precision": 0.8514,
+     "recall": 0.973,
+     "f1": 0.9081,
+     "n_types": 1
+    },
+    "per_type": {
+     "ANY": {
+      "tp": 2377,
+      "fn": 66,
+      "fp": 394,
+      "gold": 2443,
+      "pred": 2651,
+      "precision": 0.8514,
+      "recall": 0.973,
+      "f1": 0.9081,
+      "exact_boundary_matches": 1990
+     }
+    },
+    "negatives": {
+     "negative_questions": 300,
+     "negative_questions_with_any_prediction": 194,
+     "negative_question_fp_rate": 0.6467,
+     "fp_spans_on_negatives": 252
+    },
+    "questions": 1200
+   },
+   "prs": {
+    "micro": {
+     "tp": 1944,
+     "fn": 499,
+     "fp": 636,
+     "gold": 2443,
+     "pred": 2546,
+     "precision": 0.7502,
+     "recall": 0.7957,
+     "f1": 0.7723,
+     "exact_boundary_matches": 1578
+    },
+    "macro": {
+     "precision": 0.7502,
+     "recall": 0.7957,
+     "f1": 0.7723,
+     "n_types": 1
+    },
+    "per_type": {
+     "ANY": {
+      "tp": 1944,
+      "fn": 499,
+      "fp": 636,
+      "gold": 2443,
+      "pred": 2546,
+      "precision": 0.7502,
+      "recall": 0.7957,
+      "f1": 0.7723,
+      "exact_boundary_matches": 1578
+     }
+    },
+    "negatives": {
+     "negative_questions": 300,
+     "negative_questions_with_any_prediction": 191,
+     "negative_question_fp_rate": 0.6367,
+     "fp_spans_on_negatives": 298
+    },
+    "questions": 1200
+   }
+  },
+  "shared_typed": {
+   "ss_typed": {
+    "micro": {
+     "tp": 1648,
+     "fn": 103,
+     "fp": 116,
+     "gold": 1751,
+     "pred": 1751,
+     "precision": 0.9338,
+     "recall": 0.9412,
+     "f1": 0.9374,
+     "exact_boundary_matches": 1513
+    },
+    "macro": {
+     "precision": 0.9568,
+     "recall": 0.9253,
+     "f1": 0.935,
+     "n_types": 8
+    },
+    "per_type": {
+     "GEO": {
+      "tp": 218,
+      "fn": 42,
+      "fp": 32,
+      "gold": 260,
+      "pred": 250,
+      "precision": 0.872,
+      "recall": 0.8385,
+      "f1": 0.8549,
+      "exact_boundary_matches": 178
+     },
+     "PERSON": {
+      "tp": 701,
+      "fn": 42,
+      "fp": 61,
+      "gold": 743,
+      "pred": 749,
+      "precision": 0.9186,
+      "recall": 0.9435,
+      "f1": 0.9308,
+      "exact_boundary_matches": 621
+     },
+     "credit_card": {
+      "tp": 31,
+      "fn": 19,
+      "fp": 0,
+      "gold": 50,
+      "pred": 31,
+      "precision": 1.0,
+      "recall": 0.62,
+      "f1": 0.7654,
+      "exact_boundary_matches": 31
+     },
+     "dob": {
+      "tp": 124,
+      "fn": 0,
+      "fp": 10,
+      "gold": 124,
+      "pred": 134,
+      "precision": 0.9254,
+      "recall": 1.0,
+      "f1": 0.9612,
+      "exact_boundary_matches": 124
+     },
+     "email": {
+      "tp": 252,
+      "fn": 0,
+      "fp": 0,
+      "gold": 252,
+      "pred": 252,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 252
+     },
+     "ip_address": {
+      "tp": 75,
+      "fn": 0,
+      "fp": 0,
+      "gold": 75,
+      "pred": 75,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 75
+     },
+     "phone": {
+      "tp": 197,
+      "fn": 0,
+      "fp": 13,
+      "gold": 197,
+      "pred": 210,
+      "precision": 0.9381,
+      "recall": 1.0,
+      "f1": 0.9681,
+      "exact_boundary_matches": 182
+     },
+     "ssn": {
+      "tp": 50,
+      "fn": 0,
+      "fp": 0,
+      "gold": 50,
+      "pred": 50,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 50
+     }
+    },
+    "negatives": {
+     "negative_questions": 300,
+     "negative_questions_with_any_prediction": 33,
+     "negative_question_fp_rate": 0.11,
+     "fp_spans_on_negatives": 35
+    },
+    "questions": 1200
+   },
+   "ss_typed_rnr": {
+    "micro": {
+     "tp": 1665,
+     "fn": 86,
+     "fp": 233,
+     "gold": 1751,
+     "pred": 1885,
+     "precision": 0.8764,
+     "recall": 0.9509,
+     "f1": 0.9121,
+     "exact_boundary_matches": 1529
+    },
+    "macro": {
+     "precision": 0.9254,
+     "recall": 0.9328,
+     "f1": 0.9206,
+     "n_types": 8
+    },
+    "per_type": {
+     "GEO": {
+      "tp": 233,
+      "fn": 27,
+      "fp": 127,
+      "gold": 260,
+      "pred": 360,
+      "precision": 0.6472,
+      "recall": 0.8962,
+      "f1": 0.7516,
+      "exact_boundary_matches": 193
+     },
+     "PERSON": {
+      "tp": 703,
+      "fn": 40,
+      "fp": 83,
+      "gold": 743,
+      "pred": 773,
+      "precision": 0.8926,
+      "recall": 0.9462,
+      "f1": 0.9186,
+      "exact_boundary_matches": 622
+     },
+     "credit_card": {
+      "tp": 31,
+      "fn": 19,
+      "fp": 0,
+      "gold": 50,
+      "pred": 31,
+      "precision": 1.0,
+      "recall": 0.62,
+      "f1": 0.7654,
+      "exact_boundary_matches": 31
+     },
+     "dob": {
+      "tp": 124,
+      "fn": 0,
+      "fp": 10,
+      "gold": 124,
+      "pred": 134,
+      "precision": 0.9254,
+      "recall": 1.0,
+      "f1": 0.9612,
+      "exact_boundary_matches": 124
+     },
+     "email": {
+      "tp": 252,
+      "fn": 0,
+      "fp": 0,
+      "gold": 252,
+      "pred": 252,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 252
+     },
+     "ip_address": {
+      "tp": 75,
+      "fn": 0,
+      "fp": 0,
+      "gold": 75,
+      "pred": 75,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 75
+     },
+     "phone": {
+      "tp": 197,
+      "fn": 0,
+      "fp": 13,
+      "gold": 197,
+      "pred": 210,
+      "precision": 0.9381,
+      "recall": 1.0,
+      "f1": 0.9681,
+      "exact_boundary_matches": 182
+     },
+     "ssn": {
+      "tp": 50,
+      "fn": 0,
+      "fp": 0,
+      "gold": 50,
+      "pred": 50,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 50
+     }
+    },
+    "negatives": {
+     "negative_questions": 300,
+     "negative_questions_with_any_prediction": 128,
+     "negative_question_fp_rate": 0.4267,
+     "fp_spans_on_negatives": 150
+    },
+    "questions": 1200
+   },
+   "prs_typed": {
+    "micro": {
+     "tp": 1570,
+     "fn": 181,
+     "fp": 345,
+     "gold": 1751,
+     "pred": 1904,
+     "precision": 0.8188,
+     "recall": 0.8966,
+     "f1": 0.856,
+     "exact_boundary_matches": 1417
+    },
+    "macro": {
+     "precision": 0.771,
+     "recall": 0.8026,
+     "f1": 0.7819,
+     "n_types": 9
+    },
+    "per_type": {
+     "GEO": {
+      "tp": 175,
+      "fn": 85,
+      "fp": 110,
+      "gold": 260,
+      "pred": 285,
+      "precision": 0.614,
+      "recall": 0.6731,
+      "f1": 0.6422,
+      "exact_boundary_matches": 179
+     },
+     "PERSON": {
+      "tp": 707,
+      "fn": 36,
+      "fp": 125,
+      "gold": 743,
+      "pred": 821,
+      "precision": 0.8477,
+      "recall": 0.9515,
+      "f1": 0.8967,
+      "exact_boundary_matches": 578
+     },
+     "credit_card": {
+      "tp": 50,
+      "fn": 0,
+      "fp": 0,
+      "gold": 50,
+      "pred": 50,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 50
+     },
+     "dob": {
+      "tp": 100,
+      "fn": 24,
+      "fp": 100,
+      "gold": 124,
+      "pred": 200,
+      "precision": 0.5,
+      "recall": 0.8065,
+      "f1": 0.6173,
+      "exact_boundary_matches": 100
+     },
+     "email": {
+      "tp": 245,
+      "fn": 7,
+      "fp": 0,
+      "gold": 252,
+      "pred": 245,
+      "precision": 1.0,
+      "recall": 0.9722,
+      "f1": 0.9859,
+      "exact_boundary_matches": 245
+     },
+     "ip_address": {
+      "tp": 71,
+      "fn": 4,
+      "fp": 0,
+      "gold": 75,
+      "pred": 71,
+      "precision": 1.0,
+      "recall": 0.9467,
+      "f1": 0.9726,
+      "exact_boundary_matches": 72
+     },
+     "phone": {
+      "tp": 172,
+      "fn": 25,
+      "fp": 4,
+      "gold": 197,
+      "pred": 176,
+      "precision": 0.9773,
+      "recall": 0.8731,
+      "f1": 0.9223,
+      "exact_boundary_matches": 143
+     },
+     "ssn": {
+      "tp": 50,
+      "fn": 0,
+      "fp": 0,
+      "gold": 50,
+      "pred": 50,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "exact_boundary_matches": 50
+     },
+     "us_driver_license": {
+      "tp": 0,
+      "fn": 0,
+      "fp": 6,
+      "gold": 0,
+      "pred": 6,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "exact_boundary_matches": 0
+     }
+    },
+    "negatives": {
+     "negative_questions": 300,
+     "negative_questions_with_any_prediction": 147,
+     "negative_question_fp_rate": 0.49,
+     "fp_spans_on_negatives": 184
+    },
+    "questions": 1200
+   }
+  },
+  "recall_by_gold_type": {
+   "GPE": {
+    "gold": 260,
+    "ss": 244,
+    "ss_rnr": 259,
+    "presidio": 201
+   },
+   "ORG": {
+    "gold": 184,
+    "ss": 165,
+    "ss_rnr": 167,
+    "presidio": 14
+   },
+   "PERSON": {
+    "gold": 743,
+    "ss": 722,
+    "ss_rnr": 726,
+    "presidio": 711
+   },
+   "address": {
+    "gold": 112,
+    "ss": 112,
+    "ss_rnr": 112,
+    "presidio": 76
+   },
+   "age": {
+    "gold": 113,
+    "ss": 100,
+    "ss_rnr": 100,
+    "presidio": 82
+   },
+   "api_key": {
+    "gold": 25,
+    "ss": 25,
+    "ss_rnr": 25,
+    "presidio": 1
+   },
+   "credit_card": {
+    "gold": 50,
+    "ss": 50,
+    "ss_rnr": 50,
+    "presidio": 50
+   },
+   "dob": {
+    "gold": 124,
+    "ss": 124,
+    "ss_rnr": 124,
+    "presidio": 120
+   },
+   "email": {
+    "gold": 252,
+    "ss": 252,
+    "ss_rnr": 252,
+    "presidio": 252
+   },
+   "handle": {
+    "gold": 101,
+    "ss": 101,
+    "ss_rnr": 101,
+    "presidio": 13
+   },
+   "iban": {
+    "gold": 32,
+    "ss": 32,
+    "ss_rnr": 32,
+    "presidio": 32
+   },
+   "ip_address": {
+    "gold": 75,
+    "ss": 75,
+    "ss_rnr": 75,
+    "presidio": 75
+   },
+   "phone": {
+    "gold": 197,
+    "ss": 197,
+    "ss_rnr": 197,
+    "presidio": 183
+   },
+   "postal_code": {
+    "gold": 68,
+    "ss": 67,
+    "ss_rnr": 67,
+    "presidio": 27
+   },
+   "ssn": {
+    "gold": 50,
+    "ss": 50,
+    "ss_rnr": 50,
+    "presidio": 50
+   },
+   "url": {
+    "gold": 57,
+    "ss": 40,
+    "ss_rnr": 40,
+    "presidio": 57
+   }
+  },
+  "latency_ms_p50": {
+   "ss": 24.5,
+   "presidio": 5.2
+  }
+ },
+ "realworld": {
+  "dataset": "bench/realworld/dev.jsonl",
+  "messages": 120,
+  "presidio": {
+   "presidio_analyzer_version": "2.2.362",
+   "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+   "score_threshold": 0.4,
+   "overlap_resolution": "longest span, then highest score"
+  },
+  "J2": "PASS",
+  "ss": {
+   "leak_rate": 0.0,
+   "leaked": 0,
+   "policy": 7,
+   "protect_values": 268,
+   "spurious_rate": 0.0075,
+   "spurious": 2,
+   "edits": 268,
+   "negatives_untouched": 36,
+   "negatives": 37,
+   "leak_by_type": {
+    "ADDRESS": {
+     "values": 21,
+     "leaked": 0
+    },
+    "AGE": {
+     "values": 8,
+     "leaked": 0
+    },
+    "CREDENTIAL": {
+     "values": 7,
+     "leaked": 0
+    },
+    "DATE_OF_BIRTH": {
+     "values": 9,
+     "leaked": 0
+    },
+    "EMAIL": {
+     "values": 17,
+     "leaked": 0
+    },
+    "HANDLE": {
+     "values": 9,
+     "leaked": 0
+    },
+    "ID": {
+     "values": 28,
+     "leaked": 0
+    },
+    "LOCATION": {
+     "values": 43,
+     "leaked": 0
+    },
+    "NETWORK": {
+     "values": 6,
+     "leaked": 0
+    },
+    "ORG": {
+     "values": 9,
+     "leaked": 0
+    },
+    "PERSON": {
+     "values": 82,
+     "leaked": 0
+    },
+    "PHONE": {
+     "values": 22,
+     "leaked": 0
+    },
+    "URL": {
+     "values": 7,
+     "leaked": 0
+    }
+   },
+   "latency_ms_p50": 24.5
+  },
+  "presidio_result": {
+   "leak_rate": 0.3333,
+   "leaked": 86,
+   "policy": 10,
+   "protect_values": 268,
+   "spurious_rate": 0.3172,
+   "spurious": 92,
+   "edits": 290,
+   "negatives_untouched": 14,
+   "negatives": 37,
+   "leak_by_type": {
+    "ADDRESS": {
+     "values": 21,
+     "leaked": 12
+    },
+    "AGE": {
+     "values": 8,
+     "leaked": 4
+    },
+    "CREDENTIAL": {
+     "values": 7,
+     "leaked": 4
+    },
+    "DATE_OF_BIRTH": {
+     "values": 9,
+     "leaked": 0
+    },
+    "EMAIL": {
+     "values": 17,
+     "leaked": 0
+    },
+    "HANDLE": {
+     "values": 9,
+     "leaked": 7
+    },
+    "ID": {
+     "values": 28,
+     "leaked": 15
+    },
+    "LOCATION": {
+     "values": 43,
+     "leaked": 13
+    },
+    "NETWORK": {
+     "values": 6,
+     "leaked": 1
+    },
+    "ORG": {
+     "values": 9,
+     "leaked": 7
+    },
+    "PERSON": {
+     "values": 82,
+     "leaked": 20
+    },
+    "PHONE": {
+     "values": 22,
+     "leaked": 3
+    },
+    "URL": {
+     "values": 7,
+     "leaked": 0
+    }
+   },
+   "latency_ms_p50": 5.7
+  }
+ }
+}

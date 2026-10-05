@@ -46,7 +46,8 @@ PROTECT_TYPES = {"PERSON", "EMAIL", "PHONE", "ADDRESS", "LOCATION", "ORG", "DATE
 SENSITIVE_TYPES = {"HEALTH", "RELIGION", "ETHNICITY", "ORIENTATION", "POLITICAL"}
 POLICY_TYPES = {"ADDRESS", "LOCATION"}
 LISTS = ("protect", "sensitive", "optional", "keep")
-ID_RE = re.compile(r"^rw-(dev|test)-\d{4}$")
+ID_RE = re.compile(r"^rw-(dev2?|test)-\d{4}$")
+SPLITS = ("dev", "dev2", "test")       # dev and dev2 are for tuning; test is J2
 
 LEAK_GATE = 0.02
 SPURIOUS_GATE = 0.03
@@ -195,13 +196,21 @@ def score_message(rec, prepared) -> dict:
     return out
 
 
-def run(split: str, show: bool) -> dict:
+def ss_prepare():
+    """SurrogateShield's send path: ``prepare(text, i)`` → object with
+    ``edits`` [(start, end, original, surrogate)] and ``sanitized``."""
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     sys.path.insert(0, str(ROOT))
     from generation.logic import MimicGen
     from json_tester import prepare_send
 
+    return lambda text, i: prepare_send(text, MimicGen(seed=i))     # reproducible run
+
+
+def run(split: str, show: bool, prepare=None) -> dict:
+    """Score *split* with *prepare* (default: SurrogateShield, ``ss_prepare``)."""
+    prepare = prepare or ss_prepare()
     path = CORPUS / f"{split}.jsonl"
     records = load(path)
     errors = lint(records)
@@ -214,7 +223,7 @@ def run(split: str, show: bool) -> dict:
     results, ms = [], []
     for i, rec in enumerate(records):
         t = time.perf_counter()
-        prepared = prepare_send(rec["text"], MimicGen(seed=i))     # reproducible run
+        prepared = prepare(rec["text"], i)
         ms.append((time.perf_counter() - t) * 1000)
         res = score_message(rec, prepared)
         res.update(category=rec["category"], lang=rec["lang"])
@@ -272,7 +281,7 @@ def run(split: str, show: bool) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--split", choices=("dev", "test"))
+    ap.add_argument("--split", choices=SPLITS)
     ap.add_argument("--lint", type=Path, help="validate a corpus file and print its stats")
     ap.add_argument("--show", action="store_true", help="print every failing message (dev only)")
     ap.add_argument("--json", type=Path, help="also write the summary here")
