@@ -637,6 +637,9 @@ def _org_is_plausible(ent: DetectedEntity, text: str) -> bool:
     words = ent.text.split()
     if any(w.isdigit() for w in words):
         return False
+    # a product with its model code ("ThinkPad X1 Carbon", "Galaxy S23 Ultra")
+    if len(words) > 1 and any(re.fullmatch(r"[A-Z]{1,3}\d{1,4}[a-z]?", w.strip(",.")) for w in words[1:]):
+        return False
     # an explicit organisational suffix is convincing regardless of case
     # ("the national insurance board", "Meridian Capital Group")
     if any(w.strip(".,").lower() in _ORG_SUFFIX_TOKENS for w in words):

@@ -372,15 +372,32 @@ def _fold(w: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", w.lower()) if not unicodedata.combining(c))
 
 
+def _stop_en() -> frozenset:
+    from .relation_gate import _stop_words
+    return _stop_words()["en"]
+
+
+# words a file name adds to a person's name ("Kateryna_Bondar_Resume_2026")
+_FILE_WORDS = frozenset("""
+resume cv final draft copy scan scanned report letter invoice doc docs photo img image
+screenshot backup old new edit edited signed version rev updated latest
+""".split())
+
+
+@lru_cache(maxsize=1)
+def _common_words() -> frozenset:
+    """English function words and Faker's common-word list."""
+    from .relation_gate import _stop_words
+    from faker.providers.lorem.en_US import Provider as Lorem
+    return frozenset(Lorem.word_list) | _stop_words()["en"]
+
+
 def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
     """The words of a detected e-mail, @handle or profile-URL slug name the
     person elsewhere in the message: "hui.min.tan68@…" makes "TAN HUI MIN"
     a name, "@farshad.m" makes "not again farshad" one. A single word must
     be at least three letters and no function or mailbox word."""
-    from .relation_gate import _stop_words
-    stop = _stop_words()["en"]
-    from faker.providers.lorem.en_US import Provider as Lorem
-    common = frozenset(Lorem.word_list) | stop
+    common = _common_words()
     parts: Set[str] = set()
     lone: Set[str] = set()                 # may stand alone as a name
     for e in ents:
@@ -392,11 +409,11 @@ def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
             local = re.split(r"[/?#]", e.text.rstrip("/"))[-1]
         else:
             continue
-        segs = [w for w in re.split(r"[._\-+\d]+", _fold(local)) if w]
+        segs = [w for w in re.split(r"[._\-+\d]+", _fold(local)) if w and w not in _FILE_WORDS]
         if any(w in _ROLE_WORDS for w in segs):
             continue                        # "svc_payroll", "support.emea": no person
         for n, w in enumerate(segs):
-            if len(w) >= 3 and w not in _ROLE_WORDS and w not in stop:
+            if len(w) >= 3 and w not in _ROLE_WORDS and w not in _stop_en():
                 parts.add(w)
                 if w not in common and (len(w) >= 4 or (n == 0 and len(segs) > 1)):
                     lone.add(w)
@@ -466,6 +483,42 @@ address center centre centers list number log logs history list form forms detai
 info support service services us now today tomorrow tonight later back again
 mr mrs ms mx miss dr prof sir madam
 """.split())
+
+
+# a device named after its owner: "Galaxy-S23-Ritika", "Ritikas-iPhone",
+# "DESKTOP-ritika" — the whole host name is the owner's
+_DEVICE_WORDS = frozenset("""
+iphone ipad ipod galaxy pixel macbook mbp mba imac mac mini pro air max plus ultra laptop
+desktop pc phone tablet android surface thinkpad xps kindle echo watch tv chromebook
+note tab redmi oneplus huawei xiaomi samsung apple dell hp lenovo asus acer oppo vivo
+nokia moto motorola sony xperia nintendo switch ps xbox
+""".split())
+_DEVICE_HOST = re.compile(r"(?<![\w.@/:\-])([A-Za-z][\w]*(?:(?:[-_]|['’]s[-_ ])[\w]+){1,3})(?![\w@:/\-])")
+
+
+def _device_hosts(text: str, ents: Sequence[DetectedEntity]):
+    added: List[DetectedEntity] = []
+    removed: List[DetectedEntity] = []
+    for m in _DEVICE_HOST.finditer(text):
+        host = m.group(1)
+        own = re.match(r"([A-Za-z]+)['’]s[-_ ]", host)
+        if own and own.group(1).lower() in _DEVICE_WORDS:
+            continue                        # "MacBook's serial": the device owns
+        parts = [p for p in re.split(r"[-_ ]|['’]s\b", host) if p]
+        dev = [p for p in parts if p.lower() in _DEVICE_WORDS or re.fullmatch(r"[A-Za-z]{1,3}\d+\w*", p)]
+        names = [p for p in parts if p not in dev]
+        if (len(names) != 1 or not dev or not any(p.lower() in _DEVICE_WORDS for p in dev)
+                or not names[0].isalpha() or len(names[0]) < 3
+                or names[0].lower() in NOT_NAMES or names[0].lower() in _NOT_NICKNAMES
+                or names[0].lower() in _common_words()):
+            continue
+        s, e = m.span(1)
+        inside = [x for x in ents if s <= x.start and x.end <= e]
+        if _overlaps(s, e, [x for x in ents if x not in inside] + added):
+            continue
+        added.append(_ent(text, s, e, "hostname", 0.9))
+        removed.extend(inside)          # "Ritika" inside it is the same person
+    return added, removed
 
 
 # "Contact Bríd on 086 422 7731", "reach Kofi at kofi@x.io": a name with
@@ -1090,6 +1143,7 @@ def detect(
         lambda t, es: _csv(t, es),
         lambda t, es: _speakers(t, es),
         lambda t, es: _local_part_names(t, es),
+        lambda t, es: _device_hosts(t, es),
         lambda t, es: _payments(t),
         lambda t, es: _names_intl(t, es),
         lambda t, es: _kin_names(t, es),

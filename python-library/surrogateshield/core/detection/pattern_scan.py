@@ -136,7 +136,7 @@ def _vin_valid(vin: str) -> bool:
 # Business-prose labels that mean "this number is a counter, not PII".
 _NEG_NUM_CONTEXT = re.compile(
     r"(?:order|invoice|sku|part|batch|build|budget|port|ticket|tracking"
-    r"|item|model|serial|imei|ref|reference|case|confirmation|receipt"
+    r"|item|model|serial|ref|reference|case|confirmation|receipt"
     r"|txn|transaction|version|score|error|hash|artifact|quantity|qty"
     r"|p\.?o\.?)"
     r"\s*(?:number|no\.?|num|id|code)?\s*[:#\-]*\s*$",     # "error code 4631872866"
@@ -431,7 +431,12 @@ def _keyword_handle_validator(m: "re.Match") -> bool:
                    or (v[:1].islower() and any(c.isupper() for c in v[1:]))
                    or (any(c.isupper() for c in v) and any(c.islower() for c in v)
                        and "_" in v))
-    strong = m.group("strong")
+    strong = m.groupdict().get("strong")
+    if not strong and not distinctive and m.re.groupindex.get("strong"):
+        gap = m.string[m.start():m.start("v")]
+        tail = m.string[m.end():m.end() + 2]
+        return (bool(re.search(r"[:=]\s*@?$", gap)) and v.islower()
+                and (tail == "" or tail[:1] in "\n,;)" or tail in (". ", ".\n", ".")))
     if strong and strong.lower() == "handle" and not distinctive:
         # the verb: "which roses handle August heat" — a bare word is a
         # handle only as "my handle is X" / "handle: X"
@@ -459,9 +464,19 @@ def _credential_validator(m: "re.Match") -> bool:
     return has_digit or (has_symbol and len(v) >= 6) or (mixed and len(v) >= 8)
 
 
+_INSURANCE_CUE = re.compile(r"(?i)\b(?:member|policy|insurance|insurer|plan|eob|payer"
+                            r"|subscriber|rx|bin|pcn|copay|deductible|claim)\b")
+
+
 def _id_value_validator(m: "re.Match") -> bool:
     v = m.group("v") or ""
-    return sum(c.isdigit() for c in v) >= 4 and not re.fullmatch(r"(?:19|20)\d\d", v)
+    digits = sum(c.isdigit() for c in v)
+    if re.match(r"(?i)group\b", m.group()):
+        # "group 44190" is a health-plan group number only among plan details
+        return digits >= 4 and bool(_INSURANCE_CUE.search(_before(m, 120)))
+    # a letter-and-digit serial ("serial PF3K8L2M") carries fewer digits
+    mixed = len(v) >= 6 and digits >= 2 and sum(c.isalpha() for c in v) >= 2
+    return (digits >= 4 or mixed) and not re.fullmatch(r"(?:19|20)\d\d", v)
 
 
 _SSN_SHAPE = re.compile(r"\d{3}-\d{2}-\d{4}")
@@ -650,6 +665,7 @@ _ID_KEYWORDS = (
     r"|\bnhs[\s_]*(?:number|no\.?)|social\s+insurance\s+number|\bpan\s+card"
     r"|card\s+(?:ending|ends)(?:\s+(?:in|with))?"
     r"|(?:device[\s_]+)?serial(?:[\s_]*(?:number|no\.?|#|num))?|\bs/n\b"
+    r"|\bimei\d?\b|\bmeid\b|\bgroup\b"
     r"|num[ée]ro\s+(?:de\s+)?client|n[úu]mero\s+de\s+(?:cliente|cuenta|socio)"
     r"|kunden(?:nummer|-?nr\.?)|mitglieds?(?:nummer|-?nr\.?)|versicherungsnummer"
     r"|c[óo]digo\s+(?:de\s+)?cliente|(?-i:\bSIN\b)|\bcpf\b|\bcnpj\b|\bdni\b|\bnie\b|\bnif\b|\bpesel\b"
@@ -689,6 +705,8 @@ _LIST_CONTINUATION = re.compile(r"\s*(?:/|,|&|\band\b|\bor\b|\by\b|\bund\b|\bet\
 
 
 _ID_KEYWORD_RE = re.compile(_ID_KEYWORDS, re.IGNORECASE)
+_MONTH_NAMES = (r"(?i:January|February|March|April|May|June|July|August|September"
+                r"|October|November|December)")
 
 
 def _nearby_id_validator(m: "re.Match") -> bool:
@@ -703,6 +721,12 @@ def _nearby_id_validator(m: "re.Match") -> bool:
     if not hits or _NEG_NUM_CONTEXT.search(before[-30:]):
         return False
     return not re.search(r"\d{3}", before[hits[-1].end():])
+
+
+_CODE_VERB = re.compile(r"(?i)(?:get|set|is|has|on|to|from|make|create|update|delete|handle"
+                        r"|fetch|load|init|use|test|do|run|add|remove|parse|build|with)_")
+_PHONE_EXT = re.compile(r"(?i),?[ \t]*(?:ext\.?|extension|x)[ \t]*\d{1,5}\b")
+_AGE_UNIT = re.compile(r"(?i)[ \t]+(?:years?|yrs?\.?|y/o|yo)(?:[ \t]+old)?\b")
 
 
 def _shape(s: str) -> str:
@@ -1022,6 +1046,48 @@ _PATTERNS: list = [
             re.IGNORECASE,
         ),
         _keyword_handle_validator,
+    ),
+    # "minecraft name is PixelMoth_77", "stream on twitch as lunarkoi_tv",
+    # "a seller called GREENLEAF_GEAR", "with the account r.mwangi.dev"
+    (
+        "handle",
+        re.compile(
+            r"(?:\b(?i:minecraft|roblox|fortnite|xbox|psn|steam|twitch|youtube|kick|valorant"
+            r"|riot|league|epic|battle\.?net|github|gitlab|tiktok|insta(?:gram)?|snap(?:chat)?"
+            r"|reddit|telegram|discord|twitter|threads|bluesky|mastodon|spotify|soundcloud"
+            r"|chess\.com|lichess|osu|genshin)\s+(?i:ign|name|user\s*name|id|handle|tag)"
+            r"\s*(?i:is|was|[:=\-])\s*@?"
+            r"|\b(?i:stream(?:s|ed|ing)?|post(?:s|ed|ing)?|play(?:s|ed|ing)?|go(?:es)?\s+by)"
+            r"\s+(?i:on\s+[a-z]+\s+)?(?i:as|under)\s+@?"
+            r"|\b(?i:seller|buyer|vendor|shop|store|user|player|streamer|channel|account)"
+            r"\s+(?i:called|named)\s+@?)"
+            r"(?P<v>[A-Za-z0-9][A-Za-z0-9_.\-]{1,30}[A-Za-z0-9])(?![\w@])"
+        ),
+        _keyword_handle_validator,
+    ),
+    (
+        "handle",
+        re.compile(r"\b(?i:the|my|his|her|their|your|with)\s+account\s+@?"
+                   r"(?P<v>[a-z][a-z0-9]*(?:[._][a-z0-9]+)+)(?![\w@(/])"),
+        lambda m: not re.search(r"\.(?:json|ya?ml|py|js|ts|txt|csv|xml|env|cfg|ini|conf|log)$",
+                                m.group("v")),
+    ),
+    # a game tag shaped "xX_VoidRunner_Xx": mixed case around underscores
+    (
+        "handle",
+        re.compile(r"(?<![\w.@/`$\-])(?P<v>(?=[A-Za-z0-9_]*[a-z])(?=[A-Za-z0-9_]*[A-Z])"
+                   r"[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+)(?![\w@(=.`\-])"),
+        lambda m: (m.string.count("`", 0, m.start()) % 2 == 0
+                   and "```" not in m.string[:m.start()]
+                   and not _CODE_VERB.match(m.group("v"))
+                   and bool(re.search(r"[a-z][A-Z]|[A-Z][a-z]+_|_[A-Z][a-z]", m.group("v")))),
+    ),
+    # combined / common web-log user ("1.2.3.4 - mbanda_r [12/Mar/2026:…")
+    (
+        "handle",
+        re.compile(r"(?m)^[ \t]*(?:\d{1,3}\.){3}\d{1,3}[ \t]+\S+[ \t]+"
+                   r"(?P<v>[A-Za-z0-9_][A-Za-z0-9_.@\-]{0,63})[ \t]+\[\d{1,2}/[A-Za-z]{3}/\d{4}:"),
+        lambda m: m.group("v") != "-" and m.group("v").lower() not in _SYSTEM_ACCOUNTS,
     ),
     # Reddit user ("u/quietlark_88"); r/subreddits are public
     (
@@ -1363,6 +1429,19 @@ _PATTERNS: list = [
         _dob_validator,
     ),
 
+    # a birthday without its year after a birth cue ("TURNED 18 ON 9 SEPTEMBER",
+    # "her birthday is March 3rd")
+    (
+        "dob",
+        re.compile(
+            r"(?i:\bturn(?:ed|s|ing)\s+\d{1,3}\s+on|\bbirthday\s+(?:is|was|falls\s+on|on)"
+            r"|\bborn\s+on)\s+(?i:the\s+)?"
+            r"(?P<v>\d{1,2}(?i:st|nd|rd|th)?\s+(?i:of\s+)?" + _MONTH_NAMES + r"\b"
+            r"|" + _MONTH_NAMES + r"\s+\d{1,2}(?i:st|nd|rd|th)?\b)(?![\s,]*(?:\d{4}|'\d\d))"
+        ),
+        None,
+    ),
+
     # ── Year of birth ("born in 1990", "b. 1990") ────────────────────────────
     (
         "dob",
@@ -1484,6 +1563,12 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
     # e-mail addresses.
     for us, ue, personal in find_urls(text):
         url = text[us:ue]
+        if (not personal and "/" not in url and url.count(".") >= 2
+                and re.search(r"(?i)\b(?:the|my|his|her|their|your|with)\s+account\s+$",
+                              text[max(0, us - 30):us])):
+            if not _should_skip(url):     # "the account r.mwangi.dev": a login
+                _claim("handle", us, ue)
+            continue
         if personal:
             if not _should_skip(url):
                 _claim("url", us, ue)
@@ -1566,6 +1651,11 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
 
             if validator is not None and not validator(match):
                 continue
+
+            tail = (_PHONE_EXT if entity_type.startswith("phone")
+                    else _AGE_UNIT if entity_type == "age" else None)
+            if tail and (t := tail.match(text, end)) and _span_free(end, t.end()):
+                end = t.end()                 # "0161 496 0732 extension 214", "74 years"
 
             _claim(entity_type, start, end)
 

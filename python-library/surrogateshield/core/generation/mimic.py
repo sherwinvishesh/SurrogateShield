@@ -340,7 +340,11 @@ class MimicGen:
     def _gen_phone_like(self, original: str) -> str:
         """Same country code, trunk prefix, first national digit and every
         separator; a NANP number keeps a valid area code and exchange (and a
-        toll-free prefix)."""
+        toll-free prefix). An extension keeps its label and length."""
+        ext = re.search(r"(?i)(,?[ \t]*(?:ext\.?|extension|x)[ \t]*)(\d{1,5})$", original)
+        if ext and ext.start() > 0:
+            return (self._gen_phone_like(original[:ext.start()]) + ext.group(1)
+                    + self._digits(len(ext.group(2))))
         ds = "".join(c for c in original if c.isdigit())
         lead = original.lstrip()
         keep, nanp = 0, False
@@ -861,6 +865,19 @@ class MimicGen:
         labels[i] = self._slug(labels[i]).replace(".", "-").replace("_", "-").lower()
         return lead + ".".join(labels) + path
 
+    def _gen_hostname_like(self, original: str) -> str:
+        """"Galaxy-S23-Ritika" -> "Galaxy-S23-Priya": the owner's name part
+        becomes the surrogate of that name; the device words stay."""
+        from ..detection.structural import _DEVICE_WORDS
+        parts = re.split(r"([-_'’]s?[-_ ]?|[-_ ])", original)
+        out = []
+        for p in parts:
+            if (p.isalpha() and len(p) >= 3 and p.lower() not in _DEVICE_WORDS):
+                new = self.people.name(p.capitalize())
+                p = new.split()[0] if p[:1].isupper() else new.split()[0].lower()
+            out.append(p)
+        return "".join(out)
+
     def _gen_age_like(self, original: str) -> str:
         m = re.search(r"\d+", original)
         n = int(m.group())
@@ -1079,6 +1096,7 @@ class MimicGen:
         "url":               "_gen_url_like",
         "handle":            "_gen_handle_like",
         "age":               "_gen_age_like",
+        "hostname":          "_gen_hostname_like",
         "dob":               "_gen_dob_like",
     }
 

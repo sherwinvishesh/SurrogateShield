@@ -40,7 +40,7 @@ def test_J2_every_backup_code_in_a_list_is_masked():
      "Isla Ferguson,10,none,0400 111 222", ["8", "10"]),
     ("My grandad Tadeusz is 87 and lives alone", ["87"]),
     ("he farmed sheep for 50 years and turns 80 in december", ["turns 80"]),
-    ("Age – 74 years, DOB", ["Age – 74"]),
+    ("Age – 74 years, DOB", ["Age – 74 years"]),
     ("My twins Noa and Eitan are 11 and my youngest, Talia, is 4. Is", ["11", "4"]),
     ("Esther is 13 and has dyslexia", ["13"]),
     ("so my mum (gloria, 63) has been", ["63"]),
