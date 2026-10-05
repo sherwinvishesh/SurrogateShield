@@ -268,7 +268,7 @@ def run_evaluation(
             else:
                 empty += 1
 
-            gold, missing = em.gold_spans(question, key)
+            gold, missing = em.entry_gold(question, k_entry)
             gold_not_in_text += len(missing)
             spans, src = row_spans(row, question)
             span_sources[src] += 1

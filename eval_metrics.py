@@ -232,6 +232,26 @@ def gold_spans(text: str, answer_key) -> Tuple[List[Span], List[Tuple[str, str]]
     return sorted(spans.values(), key=lambda sp: (sp.start, sp.end)), missing
 
 
+def entry_gold(text: str, entry) -> Tuple[List[Span], List[Tuple[str, str]]]:
+    """Gold spans for one key entry.
+
+    An entry with ``"Spans"`` (the generated set, experiment/make_dataset.py)
+    is scored on those offsets exactly; a span whose value is not at its
+    offsets raises ``ValueError``. Any other entry falls back to
+    :func:`gold_spans` on its ``Answer-Key``.
+    """
+    if not isinstance(entry, dict) or entry.get("Spans") is None:
+        key = entry.get("Answer-Key") if isinstance(entry, dict) else None
+        return gold_spans(text, key)
+    out: List[Span] = []
+    for sp in entry["Spans"]:
+        s, e, v = sp["start"], sp["end"], sp["value"]
+        if text[s:e] != v:
+            raise ValueError(f"gold span {v!r} is not at [{s}:{e}] of the question")
+        out.append(Span(s, e, gold_type(sp["type"]), v))
+    return sorted(out, key=lambda sp: (sp.start, sp.end)), []
+
+
 def locate(text: str, values: Iterable[Tuple[str, str]]) -> List[Span]:
     """Spans for ``(type, value)`` predictions that have no stored offsets."""
     out: Dict[Tuple[int, int], Span] = {}
@@ -439,7 +459,7 @@ POLICY_REASONS = frozenset({
     # in the message ties it to a person (acronyms, code, public figures and
     # companies, topical places) — bench/realworld/GUIDE.md "keep" rules.
     "not_tied_to_person",
-    # D1: a gender term of the same gender as a named person of the message;
+    # D2: a gender term of the same gender as a named person of the message;
     # the person's surrogate keeps that gender, so the term adds nothing.
     "gender_follows_name",
     # J5/D3: a phone surrogate keeps the original's country calling code

@@ -1,0 +1,10 @@
+{
+ "script": "experiment/make_dataset.py",
+ "version": 1,
+ "seed": 7,
+ "n": 1500,
+ "splits": {
+  "dev": 1200,
+  "test": 300
+ }
+}

@@ -1,0 +1,8749 @@
+[
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0000"
+ },
+ {
+  "Question": "Upgrade the firmware to version 8.17.5 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "8.17.5"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0001"
+ },
+ {
+  "Question": "{\"customer\": \"Stefan Patel\", \"email\": \"stefan_patel80@northfieldlaw.co.uk\", \"phone\": \"+44 7555 619125\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Stefan Patel",
+   "email": "stefan_patel80@northfieldlaw.co.uk",
+   "phone": "+44 7555 619125"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 26,
+    "type": "name",
+    "value": "Stefan Patel"
+   },
+   {
+    "start": 39,
+    "end": 73,
+    "type": "email",
+    "value": "stefan_patel80@northfieldlaw.co.uk"
+   },
+   {
+    "start": 86,
+    "end": 101,
+    "type": "phone",
+    "value": "+44 7555 619125"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1074,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0002"
+ },
+ {
+  "Question": "export API_KEY=AKIAOHIHWSH10PNDU8NQ\n# owner: wei.mwangi43@northfieldlaw.co.uk",
+  "Answer-Key": {
+   "api_key": "AKIAOHIHWSH10PNDU8NQ",
+   "email": "wei.mwangi43@northfieldlaw.co.uk"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 35,
+    "type": "api_key",
+    "value": "AKIAOHIHWSH10PNDU8NQ"
+   },
+   {
+    "start": 45,
+    "end": 77,
+    "type": "email",
+    "value": "wei.mwangi43@northfieldlaw.co.uk"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1038,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0003"
+ },
+ {
+  "Question": "is gretagarcia@proton.me still greta's address or should i use linkedin.com/in/greta-garcia-301?",
+  "Answer-Key": {
+   "email": "gretagarcia@proton.me",
+   "name": "greta",
+   "url": "linkedin.com/in/greta-garcia-301"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 24,
+    "type": "email",
+    "value": "gretagarcia@proton.me"
+   },
+   {
+    "start": 31,
+    "end": 36,
+    "type": "name",
+    "value": "greta"
+   },
+   {
+    "start": 63,
+    "end": 95,
+    "type": "url",
+    "value": "linkedin.com/in/greta-garcia-301"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 941,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0004"
+ },
+ {
+  "Question": "Error 3670384199: connection reset after 42841 ms (build 3.14.7).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "3670384199",
+   "42841",
+   "3.14.7"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0005"
+ },
+ {
+  "Question": "Error 7460106817: connection reset after 26752 ms (build 1.1.7).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "7460106817",
+   "26752",
+   "1.1.7"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0006"
+ },
+ {
+  "Question": "export API_KEY=AKIAHBOZJZQJ1CIVB63N\n# owner: ananyabrennan@pinegrove-clinic.org",
+  "Answer-Key": {
+   "api_key": "AKIAHBOZJZQJ1CIVB63N",
+   "email": "ananyabrennan@pinegrove-clinic.org"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 35,
+    "type": "api_key",
+    "value": "AKIAHBOZJZQJ1CIVB63N"
+   },
+   {
+    "start": 45,
+    "end": 79,
+    "type": "email",
+    "value": "ananyabrennan@pinegrove-clinic.org"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1071,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0007"
+ },
+ {
+  "Question": "Our server at 116.170.142.30 is rejecting the key AKIA3BKT10HEHN7VG6G4. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "116.170.142.30",
+   "api_key": "AKIA3BKT10HEHN7VG6G4"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "ip_address",
+    "value": "116.170.142.30"
+   },
+   {
+    "start": 50,
+    "end": 70,
+    "type": "api_key",
+    "value": "AKIA3BKT10HEHN7VG6G4"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1107,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0008"
+ },
+ {
+  "Question": "hey its priya fischer, can u remind me what Ashgrove Veterinary Hospital pays for overtime? my number is +49 30 5180 1034",
+  "Answer-Key": {
+   "name": "priya fischer",
+   "org": "Ashgrove Veterinary Hospital",
+   "phone": "+49 30 5180 1034"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 21,
+    "type": "name",
+    "value": "priya fischer"
+   },
+   {
+    "start": 44,
+    "end": 72,
+    "type": "org",
+    "value": "Ashgrove Veterinary Hospital"
+   },
+   {
+    "start": 105,
+    "end": 121,
+    "type": "phone",
+    "value": "+49 30 5180 1034"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 945,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0009"
+ },
+ {
+  "Question": "Please verify payroll: Gustavo Kowalski, SSN 037-43-0356, card 5393-8681-4787-2398, start date December 1, 2024.",
+  "Answer-Key": {
+   "name": "Gustavo Kowalski",
+   "ssn": "037-43-0356",
+   "credit_card": "5393-8681-4787-2398"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 39,
+    "type": "name",
+    "value": "Gustavo Kowalski"
+   },
+   {
+    "start": 45,
+    "end": 56,
+    "type": "ssn",
+    "value": "037-43-0356"
+   },
+   {
+    "start": 63,
+    "end": 82,
+    "type": "credit_card",
+    "value": "5393-8681-4787-2398"
+   }
+  ],
+  "Keep": [
+   "December 1, 2024"
+  ],
+  "identity_id": 1014,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0010"
+ },
+ {
+  "Question": "Our server at 133.252.73.153 is rejecting the key sk-proj-0jrQAoEBdAFw56MrsnaRr0B5u4n1Ay77cG2xHQ8D. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "133.252.73.153",
+   "api_key": "sk-proj-0jrQAoEBdAFw56MrsnaRr0B5u4n1Ay77cG2xHQ8D"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "ip_address",
+    "value": "133.252.73.153"
+   },
+   {
+    "start": 50,
+    "end": 98,
+    "type": "api_key",
+    "value": "sk-proj-0jrQAoEBdAFw56MrsnaRr0B5u4n1Ay77cG2xHQ8D"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1094,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0011"
+ },
+ {
+  "Question": "Set up a payment of €851 to DE56418052362917624722 (account holder Emery Kim) on June 5, 2024.",
+  "Answer-Key": {
+   "iban": "DE56418052362917624722",
+   "name": "Emery Kim"
+  },
+  "Spans": [
+   {
+    "start": 28,
+    "end": 50,
+    "type": "iban",
+    "value": "DE56418052362917624722"
+   },
+   {
+    "start": 67,
+    "end": 76,
+    "type": "name",
+    "value": "Emery Kim"
+   }
+  ],
+  "Keep": [
+   "€851",
+   "June 5, 2024"
+  ],
+  "identity_id": 1026,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0012"
+ },
+ {
+  "Question": "Tracking PO-7571 says delivered on May 26, 2026 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "PO-7571",
+   "May 26, 2026"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0013"
+ },
+ {
+  "Question": "Upgrade the firmware to version 9.12.9 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "9.12.9"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0014"
+ },
+ {
+  "Question": "Meet Yusuf Torres outside St. Brigid's Primary School in Malmö; his number is +1-322-963-3096.",
+  "Answer-Key": {
+   "name": "Yusuf Torres",
+   "org": "St. Brigid's Primary School",
+   "gpe": "Malmö",
+   "phone": "+1-322-963-3096"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 17,
+    "type": "name",
+    "value": "Yusuf Torres"
+   },
+   {
+    "start": 26,
+    "end": 53,
+    "type": "org",
+    "value": "St. Brigid's Primary School"
+   },
+   {
+    "start": 57,
+    "end": 62,
+    "type": "gpe",
+    "value": "Malmö"
+   },
+   {
+    "start": 78,
+    "end": 93,
+    "type": "phone",
+    "value": "+1-322-963-3096"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1005,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0015"
+ },
+ {
+  "Question": "Applicant: Hannah Watanabe\nDate of birth: July 12, 1960\nSSN: 655-80-6293\nAddress: 5448 Harbor View Rd, Ibadan 96148",
+  "Answer-Key": {
+   "name": "Hannah Watanabe",
+   "dob": "July 12, 1960",
+   "ssn": "655-80-6293",
+   "address": "5448 Harbor View Rd",
+   "gpe": "Ibadan",
+   "zip": "96148"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 26,
+    "type": "name",
+    "value": "Hannah Watanabe"
+   },
+   {
+    "start": 42,
+    "end": 55,
+    "type": "dob",
+    "value": "July 12, 1960"
+   },
+   {
+    "start": 61,
+    "end": 72,
+    "type": "ssn",
+    "value": "655-80-6293"
+   },
+   {
+    "start": 82,
+    "end": 101,
+    "type": "address",
+    "value": "5448 Harbor View Rd"
+   },
+   {
+    "start": 103,
+    "end": 109,
+    "type": "gpe",
+    "value": "Ibadan"
+   },
+   {
+    "start": 110,
+    "end": 115,
+    "type": "zip",
+    "value": "96148"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 920,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0016"
+ },
+ {
+  "Question": "I was born 01.03.1974 and I'm 52. Which retirement accounts can I open with Ironbridge Fitness?",
+  "Answer-Key": {
+   "dob": "01.03.1974",
+   "age": "52",
+   "org": "Ironbridge Fitness"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "dob",
+    "value": "01.03.1974"
+   },
+   {
+    "start": 30,
+    "end": 32,
+    "type": "age",
+    "value": "52"
+   },
+   {
+    "start": 76,
+    "end": 94,
+    "type": "org",
+    "value": "Ironbridge Fitness"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1041,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0017"
+ },
+ {
+  "Question": "Meu nome é Rafael Ferrari, meu telefone é +91 84647 44293 e trabalho na Westbrook Pharmacy.",
+  "Answer-Key": {
+   "name": "Rafael Ferrari",
+   "phone": "+91 84647 44293",
+   "org": "Westbrook Pharmacy"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 25,
+    "type": "name",
+    "value": "Rafael Ferrari"
+   },
+   {
+    "start": 42,
+    "end": 57,
+    "type": "phone",
+    "value": "+91 84647 44293"
+   },
+   {
+    "start": 72,
+    "end": 90,
+    "type": "org",
+    "value": "Westbrook Pharmacy"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1082,
+  "gender": "m",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0018"
+ },
+ {
+  "Question": "Can you check whether IBAN GB48BSKT00030706112792 belongs to Tariq Mwangi? I need to send £849 by March 1.",
+  "Answer-Key": {
+   "iban": "GB48BSKT00030706112792",
+   "name": "Tariq Mwangi"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 49,
+    "type": "iban",
+    "value": "GB48BSKT00030706112792"
+   },
+   {
+    "start": 61,
+    "end": 73,
+    "type": "name",
+    "value": "Tariq Mwangi"
+   }
+  ],
+  "Keep": [
+   "£849",
+   "March 1"
+  ],
+  "identity_id": 937,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0019"
+ },
+ {
+  "Question": "Which is older, Taylor Swift or Marie Curie?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Taylor Swift",
+   "Marie Curie"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-31",
+  "id": "synth-test-0020"
+ },
+ {
+  "Question": "hey its sakura macleod, can u remind me what Copperleaf Software pays for overtime? my number is 322.270.1443",
+  "Answer-Key": {
+   "name": "sakura macleod",
+   "org": "Copperleaf Software",
+   "phone": "322.270.1443"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 22,
+    "type": "name",
+    "value": "sakura macleod"
+   },
+   {
+    "start": 45,
+    "end": 64,
+    "type": "org",
+    "value": "Copperleaf Software"
+   },
+   {
+    "start": 97,
+    "end": 109,
+    "type": "phone",
+    "value": "322.270.1443"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 922,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0021"
+ },
+ {
+  "Question": "SSH from 94.26.89.118 as @cormacferrari failed: Permission denied (publickey). Key owner cferrari@proton.me.",
+  "Answer-Key": {
+   "ip_address": "94.26.89.118",
+   "username": "@cormacferrari",
+   "email": "cferrari@proton.me"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 21,
+    "type": "ip_address",
+    "value": "94.26.89.118"
+   },
+   {
+    "start": 25,
+    "end": 39,
+    "type": "username",
+    "value": "@cormacferrari"
+   },
+   {
+    "start": 89,
+    "end": 107,
+    "type": "email",
+    "value": "cferrari@proton.me"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 971,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0022"
+ },
+ {
+  "Question": "Please text 717-627-1946 and ask Avery Johansson whether they still lives on 7478 Quarry Lane.",
+  "Answer-Key": {
+   "phone": "717-627-1946",
+   "name": "Avery Johansson",
+   "address": "7478 Quarry Lane"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 24,
+    "type": "phone",
+    "value": "717-627-1946"
+   },
+   {
+    "start": 33,
+    "end": 48,
+    "type": "name",
+    "value": "Avery Johansson"
+   },
+   {
+    "start": 77,
+    "end": 93,
+    "type": "address",
+    "value": "7478 Quarry Lane"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1120,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0023"
+ },
+ {
+  "Question": "Is Spotify stock a good buy after the November 24, 2025 earnings call?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Spotify",
+   "November 24, 2025"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-15",
+  "id": "synth-test-0024"
+ },
+ {
+  "Question": "Applicant: Clara Khan\nDate of birth: February 1, 1990\nSSN: 241-94-3946\nAddress: 3793 Pine Road, Ballarat 50182",
+  "Answer-Key": {
+   "name": "Clara Khan",
+   "dob": "February 1, 1990",
+   "ssn": "241-94-3946",
+   "address": "3793 Pine Road",
+   "gpe": "Ballarat",
+   "zip": "50182"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "name",
+    "value": "Clara Khan"
+   },
+   {
+    "start": 37,
+    "end": 53,
+    "type": "dob",
+    "value": "February 1, 1990"
+   },
+   {
+    "start": 59,
+    "end": 70,
+    "type": "ssn",
+    "value": "241-94-3946"
+   },
+   {
+    "start": 80,
+    "end": 94,
+    "type": "address",
+    "value": "3793 Pine Road"
+   },
+   {
+    "start": 96,
+    "end": 104,
+    "type": "gpe",
+    "value": "Ballarat"
+   },
+   {
+    "start": 105,
+    "end": 110,
+    "type": "zip",
+    "value": "50182"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 931,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0025"
+ },
+ {
+  "Question": "Book a table for 4 under Torres, phone 686-582-6653, March 3, 2024 at 7pm.",
+  "Answer-Key": {
+   "name": "Torres",
+   "phone": "686-582-6653"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 31,
+    "type": "name",
+    "value": "Torres"
+   },
+   {
+    "start": 39,
+    "end": 51,
+    "type": "phone",
+    "value": "686-582-6653"
+   }
+  ],
+  "Keep": [
+   "March 3, 2024"
+  ],
+  "identity_id": 900,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0026"
+ },
+ {
+  "Question": "is lindqvist.pranav@pinegrove-clinic.org still pranav's address or should i use https://pranav-lindqvist.dev?",
+  "Answer-Key": {
+   "email": "lindqvist.pranav@pinegrove-clinic.org",
+   "name": "pranav",
+   "url": "https://pranav-lindqvist.dev"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 40,
+    "type": "email",
+    "value": "lindqvist.pranav@pinegrove-clinic.org"
+   },
+   {
+    "start": 47,
+    "end": 53,
+    "type": "name",
+    "value": "pranav"
+   },
+   {
+    "start": 80,
+    "end": 108,
+    "type": "url",
+    "value": "https://pranav-lindqvist.dev"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 923,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0027"
+ },
+ {
+  "Question": "Tracking PO-4156 says delivered on April 12 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "PO-4156",
+   "April 12"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0028"
+ },
+ {
+  "Question": "Please verify payroll: Noor Kowalski, SSN 537-47-6269, card 5371 8161 9737 2518, start date October 9, 2027.",
+  "Answer-Key": {
+   "name": "Noor Kowalski",
+   "ssn": "537-47-6269",
+   "credit_card": "5371 8161 9737 2518"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 36,
+    "type": "name",
+    "value": "Noor Kowalski"
+   },
+   {
+    "start": 42,
+    "end": 53,
+    "type": "ssn",
+    "value": "537-47-6269"
+   },
+   {
+    "start": 60,
+    "end": 79,
+    "type": "credit_card",
+    "value": "5371 8161 9737 2518"
+   }
+  ],
+  "Keep": [
+   "October 9, 2027"
+  ],
+  "identity_id": 910,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0029"
+ },
+ {
+  "Question": "Explain how photosynthesis works and why leaves are green.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-07",
+  "id": "synth-test-0030"
+ },
+ {
+  "Question": "SSH from 74.23.22.161 as @chloe.codes failed: Permission denied (publickey). Key owner cdelgado@tidepoolhealth.org.",
+  "Answer-Key": {
+   "ip_address": "74.23.22.161",
+   "username": "@chloe.codes",
+   "email": "cdelgado@tidepoolhealth.org"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 21,
+    "type": "ip_address",
+    "value": "74.23.22.161"
+   },
+   {
+    "start": 25,
+    "end": 37,
+    "type": "username",
+    "value": "@chloe.codes"
+   },
+   {
+    "start": 87,
+    "end": 114,
+    "type": "email",
+    "value": "cdelgado@tidepoolhealth.org"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1084,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0031"
+ },
+ {
+  "Question": "Applicant: Stefan Takahashi\nDate of birth: 1970-07-02\nSSN: 654-96-9692\nAddress: 5888 Maple Street, Bilbao 40844",
+  "Answer-Key": {
+   "name": "Stefan Takahashi",
+   "dob": "1970-07-02",
+   "ssn": "654-96-9692",
+   "address": "5888 Maple Street",
+   "gpe": "Bilbao",
+   "zip": "40844"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 27,
+    "type": "name",
+    "value": "Stefan Takahashi"
+   },
+   {
+    "start": 43,
+    "end": 53,
+    "type": "dob",
+    "value": "1970-07-02"
+   },
+   {
+    "start": 59,
+    "end": 70,
+    "type": "ssn",
+    "value": "654-96-9692"
+   },
+   {
+    "start": 80,
+    "end": 97,
+    "type": "address",
+    "value": "5888 Maple Street"
+   },
+   {
+    "start": 99,
+    "end": 105,
+    "type": "gpe",
+    "value": "Bilbao"
+   },
+   {
+    "start": 106,
+    "end": 111,
+    "type": "zip",
+    "value": "40844"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 955,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0032"
+ },
+ {
+  "Question": "Grow 9 tomato plants in 90 L pots: how much water per day?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-39",
+  "id": "synth-test-0033"
+ },
+ {
+  "Question": "{\"customer\": \"Camila Esposito\", \"email\": \"camila_esposito30@sunhollow.edu\", \"phone\": \"+44 7836 298210\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Camila Esposito",
+   "email": "camila_esposito30@sunhollow.edu",
+   "phone": "+44 7836 298210"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 29,
+    "type": "name",
+    "value": "Camila Esposito"
+   },
+   {
+    "start": 42,
+    "end": 73,
+    "type": "email",
+    "value": "camila_esposito30@sunhollow.edu"
+   },
+   {
+    "start": 86,
+    "end": 101,
+    "type": "phone",
+    "value": "+44 7836 298210"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 968,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0034"
+ },
+ {
+  "Question": "Is Netflix stock a good buy after the November 20, 2025 earnings call?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Netflix",
+   "November 20, 2025"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-15",
+  "id": "synth-test-0035"
+ },
+ {
+  "Question": "Who is @rosalinddelgado? They keep tagging Rosalind Delgado in posts about Westbrook Pharmacy.",
+  "Answer-Key": {
+   "username": "@rosalinddelgado",
+   "name": "Rosalind Delgado",
+   "org": "Westbrook Pharmacy"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 23,
+    "type": "username",
+    "value": "@rosalinddelgado"
+   },
+   {
+    "start": 43,
+    "end": 59,
+    "type": "name",
+    "value": "Rosalind Delgado"
+   },
+   {
+    "start": 75,
+    "end": 93,
+    "type": "org",
+    "value": "Westbrook Pharmacy"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1080,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0036"
+ },
+ {
+  "Question": "Meu nome é Ananya Garcia, meu telefone é +91 84703 84795 e trabalho na Ironbridge Fitness.",
+  "Answer-Key": {
+   "name": "Ananya Garcia",
+   "phone": "+91 84703 84795",
+   "org": "Ironbridge Fitness"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 24,
+    "type": "name",
+    "value": "Ananya Garcia"
+   },
+   {
+    "start": 41,
+    "end": 56,
+    "type": "phone",
+    "value": "+91 84703 84795"
+   },
+   {
+    "start": 71,
+    "end": 89,
+    "type": "org",
+    "value": "Ironbridge Fitness"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 948,
+  "gender": "f",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0037"
+ },
+ {
+  "Question": "I live at 4457 Hawthorn Close, Tacoma 48445. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "4457 Hawthorn Close",
+   "gpe": "Tacoma",
+   "zip": "48445"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 29,
+    "type": "address",
+    "value": "4457 Hawthorn Close"
+   },
+   {
+    "start": 31,
+    "end": 37,
+    "type": "gpe",
+    "value": "Tacoma"
+   },
+   {
+    "start": 38,
+    "end": 43,
+    "type": "zip",
+    "value": "48445"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 961,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0038"
+ },
+ {
+  "Question": "Tracking ORD-764206 says delivered on June 18, 2027 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "ORD-764206",
+   "June 18, 2027"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0039"
+ },
+ {
+  "Question": "{\"customer\": \"Tobias Hoffmann\", \"email\": \"tobias_hoffmann32@outlook.com\", \"phone\": \"+44 7483 215705\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Tobias Hoffmann",
+   "email": "tobias_hoffmann32@outlook.com",
+   "phone": "+44 7483 215705"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 29,
+    "type": "name",
+    "value": "Tobias Hoffmann"
+   },
+   {
+    "start": 42,
+    "end": 71,
+    "type": "email",
+    "value": "tobias_hoffmann32@outlook.com"
+   },
+   {
+    "start": 84,
+    "end": 99,
+    "type": "phone",
+    "value": "+44 7483 215705"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 954,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0040"
+ },
+ {
+  "Question": "Set up a payment of €723 to DE88 1297 8470 7974 0156 61 (account holder Tomasz Fischer) on September 14, 2024.",
+  "Answer-Key": {
+   "iban": "DE88 1297 8470 7974 0156 61",
+   "name": "Tomasz Fischer"
+  },
+  "Spans": [
+   {
+    "start": 28,
+    "end": 55,
+    "type": "iban",
+    "value": "DE88 1297 8470 7974 0156 61"
+   },
+   {
+    "start": 72,
+    "end": 86,
+    "type": "name",
+    "value": "Tomasz Fischer"
+   }
+  ],
+  "Keep": [
+   "€723",
+   "September 14, 2024"
+  ],
+  "identity_id": 997,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0041"
+ },
+ {
+  "Question": "Please text 891-801-4162 and ask Malik Mansoor whether he still lives on 5021 Willow Lane, Apt 2B.",
+  "Answer-Key": {
+   "phone": "891-801-4162",
+   "name": "Malik Mansoor",
+   "address": "5021 Willow Lane, Apt 2B"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 24,
+    "type": "phone",
+    "value": "891-801-4162"
+   },
+   {
+    "start": 33,
+    "end": 46,
+    "type": "name",
+    "value": "Malik Mansoor"
+   },
+   {
+    "start": 73,
+    "end": 97,
+    "type": "address",
+    "value": "5021 Willow Lane, Apt 2B"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1087,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0042"
+ },
+ {
+  "Question": "Is Google stock a good buy after the April 16 earnings call?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Google",
+   "April 16"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-15",
+  "id": "synth-test-0043"
+ },
+ {
+  "Question": "I live at 4231 Pine Road, Moncton 28422. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "4231 Pine Road",
+   "gpe": "Moncton",
+   "zip": "28422"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 24,
+    "type": "address",
+    "value": "4231 Pine Road"
+   },
+   {
+    "start": 26,
+    "end": 33,
+    "type": "gpe",
+    "value": "Moncton"
+   },
+   {
+    "start": 34,
+    "end": 39,
+    "type": "zip",
+    "value": "28422"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1070,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0044"
+ },
+ {
+  "Question": "I live at 454 Riverbend Drive, Kraków 77716. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "454 Riverbend Drive",
+   "gpe": "Kraków",
+   "zip": "77716"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 29,
+    "type": "address",
+    "value": "454 Riverbend Drive"
+   },
+   {
+    "start": 31,
+    "end": 37,
+    "type": "gpe",
+    "value": "Kraków"
+   },
+   {
+    "start": 38,
+    "end": 43,
+    "type": "zip",
+    "value": "77716"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 976,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0045"
+ },
+ {
+  "Question": "Who is @kai.codes? They keep tagging Kai Mwangi in posts about Orbital Freight.",
+  "Answer-Key": {
+   "username": "@kai.codes",
+   "name": "Kai Mwangi",
+   "org": "Orbital Freight"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 17,
+    "type": "username",
+    "value": "@kai.codes"
+   },
+   {
+    "start": 37,
+    "end": 47,
+    "type": "name",
+    "value": "Kai Mwangi"
+   },
+   {
+    "start": 63,
+    "end": 78,
+    "type": "org",
+    "value": "Orbital Freight"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1076,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0046"
+ },
+ {
+  "Question": "I was born 28.09.1985 and I'm 41. Which retirement accounts can I open with Orbital Freight?",
+  "Answer-Key": {
+   "dob": "28.09.1985",
+   "age": "41",
+   "org": "Orbital Freight"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "dob",
+    "value": "28.09.1985"
+   },
+   {
+    "start": 30,
+    "end": 32,
+    "type": "age",
+    "value": "41"
+   },
+   {
+    "start": 76,
+    "end": 91,
+    "type": "org",
+    "value": "Orbital Freight"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 992,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0047"
+ },
+ {
+  "Question": "Meet Ana Jovanovic outside Saltmarsh Brewing Co in Bozeman; her number is +91 95312 94564.",
+  "Answer-Key": {
+   "name": "Ana Jovanovic",
+   "org": "Saltmarsh Brewing Co",
+   "gpe": "Bozeman",
+   "phone": "+91 95312 94564"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 18,
+    "type": "name",
+    "value": "Ana Jovanovic"
+   },
+   {
+    "start": 27,
+    "end": 47,
+    "type": "org",
+    "value": "Saltmarsh Brewing Co"
+   },
+   {
+    "start": 51,
+    "end": 58,
+    "type": "gpe",
+    "value": "Bozeman"
+   },
+   {
+    "start": 74,
+    "end": 89,
+    "type": "phone",
+    "value": "+91 95312 94564"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 960,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0048"
+ },
+ {
+  "Question": "Upgrade the firmware to version 8.17.6 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "8.17.6"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0049"
+ },
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0050"
+ },
+ {
+  "Question": "Please text (313) 493-9961 and ask Cormac Johansson whether he still lives on 6125 Pine Road.",
+  "Answer-Key": {
+   "phone": "(313) 493-9961",
+   "name": "Cormac Johansson",
+   "address": "6125 Pine Road"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 26,
+    "type": "phone",
+    "value": "(313) 493-9961"
+   },
+   {
+    "start": 35,
+    "end": 51,
+    "type": "name",
+    "value": "Cormac Johansson"
+   },
+   {
+    "start": 78,
+    "end": 92,
+    "type": "address",
+    "value": "6125 Pine Road"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 956,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0051"
+ },
+ {
+  "Question": "Recipe: 3 eggs, 964 g flour, 514 ml milk; bake at 180 C for 3 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0052"
+ },
+ {
+  "Question": "I was born December 23, 1952 and I'm 74. Which retirement accounts can I open with Hollis Middle School?",
+  "Answer-Key": {
+   "dob": "December 23, 1952",
+   "age": "74",
+   "org": "Hollis Middle School"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 28,
+    "type": "dob",
+    "value": "December 23, 1952"
+   },
+   {
+    "start": 37,
+    "end": 39,
+    "type": "age",
+    "value": "74"
+   },
+   {
+    "start": 83,
+    "end": 103,
+    "type": "org",
+    "value": "Hollis Middle School"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 939,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0053"
+ },
+ {
+  "Question": "Gabriela Takahashi (67) from Porto won the Northfield Dental Group raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Gabriela Takahashi",
+   "age": "67",
+   "gpe": "Porto",
+   "org": "Northfield Dental Group"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 18,
+    "type": "name",
+    "value": "Gabriela Takahashi"
+   },
+   {
+    "start": 20,
+    "end": 22,
+    "type": "age",
+    "value": "67"
+   },
+   {
+    "start": 29,
+    "end": 34,
+    "type": "gpe",
+    "value": "Porto"
+   },
+   {
+    "start": 43,
+    "end": 66,
+    "type": "org",
+    "value": "Northfield Dental Group"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 919,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0054"
+ },
+ {
+  "Question": "Set up a payment of £501 to NL28SSAZ3360894301 (account holder Gabriela Kaplan) on October 17, 2027.",
+  "Answer-Key": {
+   "iban": "NL28SSAZ3360894301",
+   "name": "Gabriela Kaplan"
+  },
+  "Spans": [
+   {
+    "start": 28,
+    "end": 46,
+    "type": "iban",
+    "value": "NL28SSAZ3360894301"
+   },
+   {
+    "start": 63,
+    "end": 78,
+    "type": "name",
+    "value": "Gabriela Kaplan"
+   }
+  ],
+  "Keep": [
+   "£501",
+   "October 17, 2027"
+  ],
+  "identity_id": 917,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0055"
+ },
+ {
+  "Question": "Please text 286.567.9020 and ask Katarzyna Garcia whether she still lives on 8930 Oak Avenue.",
+  "Answer-Key": {
+   "phone": "286.567.9020",
+   "name": "Katarzyna Garcia",
+   "address": "8930 Oak Avenue"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 24,
+    "type": "phone",
+    "value": "286.567.9020"
+   },
+   {
+    "start": 33,
+    "end": 49,
+    "type": "name",
+    "value": "Katarzyna Garcia"
+   },
+   {
+    "start": 77,
+    "end": 92,
+    "type": "address",
+    "value": "8930 Oak Avenue"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 916,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0056"
+ },
+ {
+  "Question": "Olga Petrov (41) from Burlington won the Westbrook Pharmacy raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Olga Petrov",
+   "age": "41",
+   "gpe": "Burlington",
+   "org": "Westbrook Pharmacy"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 11,
+    "type": "name",
+    "value": "Olga Petrov"
+   },
+   {
+    "start": 13,
+    "end": 15,
+    "type": "age",
+    "value": "41"
+   },
+   {
+    "start": 22,
+    "end": 32,
+    "type": "gpe",
+    "value": "Burlington"
+   },
+   {
+    "start": 41,
+    "end": 59,
+    "type": "org",
+    "value": "Westbrook Pharmacy"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1018,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0057"
+ },
+ {
+  "Question": "Please text 678-574-6767 and ask Gabriela Garcia whether she still lives on 2893 Harbor View Rd.",
+  "Answer-Key": {
+   "phone": "678-574-6767",
+   "name": "Gabriela Garcia",
+   "address": "2893 Harbor View Rd"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 24,
+    "type": "phone",
+    "value": "678-574-6767"
+   },
+   {
+    "start": 33,
+    "end": 48,
+    "type": "name",
+    "value": "Gabriela Garcia"
+   },
+   {
+    "start": 76,
+    "end": 95,
+    "type": "address",
+    "value": "2893 Harbor View Rd"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 972,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0058"
+ },
+ {
+  "Question": "Which is older, Albert Einstein or Ada Lovelace?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Albert Einstein",
+   "Ada Lovelace"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-31",
+  "id": "synth-test-0059"
+ },
+ {
+  "Question": "SSH from 192.200.98.252 as @samuel_46 failed: Permission denied (publickey). Key owner samueldubois@sunhollow.edu.",
+  "Answer-Key": {
+   "ip_address": "192.200.98.252",
+   "username": "@samuel_46",
+   "email": "samueldubois@sunhollow.edu"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 23,
+    "type": "ip_address",
+    "value": "192.200.98.252"
+   },
+   {
+    "start": 27,
+    "end": 37,
+    "type": "username",
+    "value": "@samuel_46"
+   },
+   {
+    "start": 87,
+    "end": 113,
+    "type": "email",
+    "value": "samueldubois@sunhollow.edu"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 950,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0060"
+ },
+ {
+  "Question": "Book a table for 4 under Sorensen, phone +1-963-978-1158, May 16, 2025 at 7pm.",
+  "Answer-Key": {
+   "name": "Sorensen",
+   "phone": "+1-963-978-1158"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 33,
+    "type": "name",
+    "value": "Sorensen"
+   },
+   {
+    "start": 41,
+    "end": 56,
+    "type": "phone",
+    "value": "+1-963-978-1158"
+   }
+  ],
+  "Keep": [
+   "May 16, 2025"
+  ],
+  "identity_id": 1021,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0061"
+ },
+ {
+  "Question": "hey its gustavo singh, can u remind me what Orbital Freight pays for overtime? my number is (758) 679-6245",
+  "Answer-Key": {
+   "name": "gustavo singh",
+   "org": "Orbital Freight",
+   "phone": "(758) 679-6245"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 21,
+    "type": "name",
+    "value": "gustavo singh"
+   },
+   {
+    "start": 44,
+    "end": 59,
+    "type": "org",
+    "value": "Orbital Freight"
+   },
+   {
+    "start": 92,
+    "end": 106,
+    "type": "phone",
+    "value": "(758) 679-6245"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 906,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0062"
+ },
+ {
+  "Question": "is diego.ferrari@northfieldlaw.co.uk still diego's address or should i use github.com/diego-ferrari?",
+  "Answer-Key": {
+   "email": "diego.ferrari@northfieldlaw.co.uk",
+   "name": "diego",
+   "url": "github.com/diego-ferrari"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 36,
+    "type": "email",
+    "value": "diego.ferrari@northfieldlaw.co.uk"
+   },
+   {
+    "start": 43,
+    "end": 48,
+    "type": "name",
+    "value": "diego"
+   },
+   {
+    "start": 75,
+    "end": 99,
+    "type": "url",
+    "value": "github.com/diego-ferrari"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1063,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0063"
+ },
+ {
+  "Question": "Please text +1-355-476-6258 and ask Ngozi Dubois whether she still lives on 1975 Magnolia Pl.",
+  "Answer-Key": {
+   "phone": "+1-355-476-6258",
+   "name": "Ngozi Dubois",
+   "address": "1975 Magnolia Pl"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+1-355-476-6258"
+   },
+   {
+    "start": 36,
+    "end": 48,
+    "type": "name",
+    "value": "Ngozi Dubois"
+   },
+   {
+    "start": 76,
+    "end": 92,
+    "type": "address",
+    "value": "1975 Magnolia Pl"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 957,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0064"
+ },
+ {
+  "Question": "Who is @nasser_74? They keep tagging Nasser Halvorsen in posts about Ironbridge Fitness.",
+  "Answer-Key": {
+   "username": "@nasser_74",
+   "name": "Nasser Halvorsen",
+   "org": "Ironbridge Fitness"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 17,
+    "type": "username",
+    "value": "@nasser_74"
+   },
+   {
+    "start": 37,
+    "end": 53,
+    "type": "name",
+    "value": "Nasser Halvorsen"
+   },
+   {
+    "start": 69,
+    "end": 87,
+    "type": "org",
+    "value": "Ironbridge Fitness"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 933,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0065"
+ },
+ {
+  "Question": "Write a recommendation letter for Tomasz Dubois, who interned with us at Quayside Accounting in Fresno.",
+  "Answer-Key": {
+   "name": "Tomasz Dubois",
+   "org": "Quayside Accounting",
+   "gpe": "Fresno"
+  },
+  "Spans": [
+   {
+    "start": 34,
+    "end": 47,
+    "type": "name",
+    "value": "Tomasz Dubois"
+   },
+   {
+    "start": 73,
+    "end": 92,
+    "type": "org",
+    "value": "Quayside Accounting"
+   },
+   {
+    "start": 96,
+    "end": 102,
+    "type": "gpe",
+    "value": "Fresno"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1057,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-31",
+  "id": "synth-test-0066"
+ },
+ {
+  "Question": "Please text +91 71184 90702 and ask Ravi Johansson whether he still lives on 4093 Sycamore Blvd.",
+  "Answer-Key": {
+   "phone": "+91 71184 90702",
+   "name": "Ravi Johansson",
+   "address": "4093 Sycamore Blvd"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+91 71184 90702"
+   },
+   {
+    "start": 36,
+    "end": 50,
+    "type": "name",
+    "value": "Ravi Johansson"
+   },
+   {
+    "start": 77,
+    "end": 95,
+    "type": "address",
+    "value": "4093 Sycamore Blvd"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1078,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0067"
+ },
+ {
+  "Question": "Please verify payroll: Noor Takahashi, SSN 803-43-8209, card 5252 4121 4257 7858, start date July 4.",
+  "Answer-Key": {
+   "name": "Noor Takahashi",
+   "ssn": "803-43-8209",
+   "credit_card": "5252 4121 4257 7858"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 37,
+    "type": "name",
+    "value": "Noor Takahashi"
+   },
+   {
+    "start": 43,
+    "end": 54,
+    "type": "ssn",
+    "value": "803-43-8209"
+   },
+   {
+    "start": 61,
+    "end": 80,
+    "type": "credit_card",
+    "value": "5252 4121 4257 7858"
+   }
+  ],
+  "Keep": [
+   "July 4"
+  ],
+  "identity_id": 1106,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0068"
+ },
+ {
+  "Question": "Set up a payment of €42 to GB66ZXMO54238668281116 (account holder Cormac Petrov) on October 14, 2027.",
+  "Answer-Key": {
+   "iban": "GB66ZXMO54238668281116",
+   "name": "Cormac Petrov"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 49,
+    "type": "iban",
+    "value": "GB66ZXMO54238668281116"
+   },
+   {
+    "start": 66,
+    "end": 79,
+    "type": "name",
+    "value": "Cormac Petrov"
+   }
+  ],
+  "Keep": [
+   "€42",
+   "October 14, 2027"
+  ],
+  "identity_id": 1036,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0069"
+ },
+ {
+  "Question": "SSH from 27.225.210.154 as @the_chowdhury failed: Permission denied (publickey). Key owner weichowdhury@proton.me.",
+  "Answer-Key": {
+   "ip_address": "27.225.210.154",
+   "username": "@the_chowdhury",
+   "email": "weichowdhury@proton.me"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 23,
+    "type": "ip_address",
+    "value": "27.225.210.154"
+   },
+   {
+    "start": 27,
+    "end": 41,
+    "type": "username",
+    "value": "@the_chowdhury"
+   },
+   {
+    "start": 91,
+    "end": 113,
+    "type": "email",
+    "value": "weichowdhury@proton.me"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 964,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0070"
+ },
+ {
+  "Question": "I was born 1988-07-06 and I'm 38. Which retirement accounts can I open with Calder & Finch LLP?",
+  "Answer-Key": {
+   "dob": "1988-07-06",
+   "age": "38",
+   "org": "Calder & Finch LLP"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "dob",
+    "value": "1988-07-06"
+   },
+   {
+    "start": 30,
+    "end": 32,
+    "type": "age",
+    "value": "38"
+   },
+   {
+    "start": 76,
+    "end": 94,
+    "type": "org",
+    "value": "Calder & Finch LLP"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 940,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0071"
+ },
+ {
+  "Question": "Who is @mateoivanova? They keep tagging Mateo Ivanova in posts about Hollis Middle School.",
+  "Answer-Key": {
+   "username": "@mateoivanova",
+   "name": "Mateo Ivanova",
+   "org": "Hollis Middle School"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 20,
+    "type": "username",
+    "value": "@mateoivanova"
+   },
+   {
+    "start": 40,
+    "end": 53,
+    "type": "name",
+    "value": "Mateo Ivanova"
+   },
+   {
+    "start": 69,
+    "end": 89,
+    "type": "org",
+    "value": "Hollis Middle School"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1066,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0072"
+ },
+ {
+  "Question": "Meu nome é Olga Mwangi, meu telefone é +1-892-301-3339 e trabalho na Brightwater Logistics.",
+  "Answer-Key": {
+   "name": "Olga Mwangi",
+   "phone": "+1-892-301-3339",
+   "org": "Brightwater Logistics"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 22,
+    "type": "name",
+    "value": "Olga Mwangi"
+   },
+   {
+    "start": 39,
+    "end": 54,
+    "type": "phone",
+    "value": "+1-892-301-3339"
+   },
+   {
+    "start": 69,
+    "end": 90,
+    "type": "org",
+    "value": "Brightwater Logistics"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1116,
+  "gender": "f",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0073"
+ },
+ {
+  "Question": "is ismail.svensson@tidepoolhealth.org still ismail's address or should i use github.com/ismail-svensson?",
+  "Answer-Key": {
+   "email": "ismail.svensson@tidepoolhealth.org",
+   "name": "ismail",
+   "url": "github.com/ismail-svensson"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 37,
+    "type": "email",
+    "value": "ismail.svensson@tidepoolhealth.org"
+   },
+   {
+    "start": 44,
+    "end": 50,
+    "type": "name",
+    "value": "ismail"
+   },
+   {
+    "start": 77,
+    "end": 103,
+    "type": "url",
+    "value": "github.com/ismail-svensson"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1035,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0074"
+ },
+ {
+  "Question": "Book a table for 4 under Ferrari, phone +44 7322 603895, September 26 at 7pm.",
+  "Answer-Key": {
+   "name": "Ferrari",
+   "phone": "+44 7322 603895"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 32,
+    "type": "name",
+    "value": "Ferrari"
+   },
+   {
+    "start": 40,
+    "end": 55,
+    "type": "phone",
+    "value": "+44 7322 603895"
+   }
+  ],
+  "Keep": [
+   "September 26"
+  ],
+  "identity_id": 1059,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0075"
+ },
+ {
+  "Question": "Grow 8 tomato plants in 80 L pots: how much water per day?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-39",
+  "id": "synth-test-0076"
+ },
+ {
+  "Question": "Annual report: 85139 units sold, 6929 returned, net 40654.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "85139",
+   "6929",
+   "40654"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0077"
+ },
+ {
+  "Question": "hey its camila singh, can u remind me what Marlowe Design Studio pays for overtime? my number is +49 30 9023 3829",
+  "Answer-Key": {
+   "name": "camila singh",
+   "org": "Marlowe Design Studio",
+   "phone": "+49 30 9023 3829"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 20,
+    "type": "name",
+    "value": "camila singh"
+   },
+   {
+    "start": 43,
+    "end": 64,
+    "type": "org",
+    "value": "Marlowe Design Studio"
+   },
+   {
+    "start": 97,
+    "end": 113,
+    "type": "phone",
+    "value": "+49 30 9023 3829"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1112,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0078"
+ },
+ {
+  "Question": "Applicant: Chloe Jovanovic\nDate of birth: 17.06.1952\nSSN: 761-68-4230\nAddress: 680 Magnolia Pl, Naperville 25592",
+  "Answer-Key": {
+   "name": "Chloe Jovanovic",
+   "dob": "17.06.1952",
+   "ssn": "761-68-4230",
+   "address": "680 Magnolia Pl",
+   "gpe": "Naperville",
+   "zip": "25592"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 26,
+    "type": "name",
+    "value": "Chloe Jovanovic"
+   },
+   {
+    "start": 42,
+    "end": 52,
+    "type": "dob",
+    "value": "17.06.1952"
+   },
+   {
+    "start": 58,
+    "end": 69,
+    "type": "ssn",
+    "value": "761-68-4230"
+   },
+   {
+    "start": 79,
+    "end": 94,
+    "type": "address",
+    "value": "680 Magnolia Pl"
+   },
+   {
+    "start": 96,
+    "end": 106,
+    "type": "gpe",
+    "value": "Naperville"
+   },
+   {
+    "start": 107,
+    "end": 112,
+    "type": "zip",
+    "value": "25592"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 990,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0079"
+ },
+ {
+  "Question": "Set up a payment of £639 to ES14 0205 6033 8497 3898 6954 (account holder Aisha Petrov) on December 10.",
+  "Answer-Key": {
+   "iban": "ES14 0205 6033 8497 3898 6954",
+   "name": "Aisha Petrov"
+  },
+  "Spans": [
+   {
+    "start": 28,
+    "end": 57,
+    "type": "iban",
+    "value": "ES14 0205 6033 8497 3898 6954"
+   },
+   {
+    "start": 74,
+    "end": 86,
+    "type": "name",
+    "value": "Aisha Petrov"
+   }
+  ],
+  "Keep": [
+   "£639",
+   "December 10"
+  ],
+  "identity_id": 1092,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0080"
+ },
+ {
+  "Question": "Gustavo Hoffmann (46) from Ibadan won the Quayside Accounting raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Gustavo Hoffmann",
+   "age": "46",
+   "gpe": "Ibadan",
+   "org": "Quayside Accounting"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 16,
+    "type": "name",
+    "value": "Gustavo Hoffmann"
+   },
+   {
+    "start": 18,
+    "end": 20,
+    "type": "age",
+    "value": "46"
+   },
+   {
+    "start": 27,
+    "end": 33,
+    "type": "gpe",
+    "value": "Ibadan"
+   },
+   {
+    "start": 42,
+    "end": 61,
+    "type": "org",
+    "value": "Quayside Accounting"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1064,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0081"
+ },
+ {
+  "Question": "Book a table for 4 under Chowdhury, phone +33 6 24 32 39 68, May 19, 2026 at 7pm.",
+  "Answer-Key": {
+   "name": "Chowdhury",
+   "phone": "+33 6 24 32 39 68"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 34,
+    "type": "name",
+    "value": "Chowdhury"
+   },
+   {
+    "start": 42,
+    "end": 59,
+    "type": "phone",
+    "value": "+33 6 24 32 39 68"
+   }
+  ],
+  "Keep": [
+   "May 19, 2026"
+  ],
+  "identity_id": 1010,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0082"
+ },
+ {
+  "Question": "Tracking PO-5769 says delivered on January 28 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "PO-5769",
+   "January 28"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0083"
+ },
+ {
+  "Question": "Recipe: 6 eggs, 974 g flour, 917 ml milk; bake at 180 C for 6 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0084"
+ },
+ {
+  "Question": "Applicant: Rosalind Novak\nDate of birth: 11/04/1953\nSSN: 862-32-3701\nAddress: 1353 Kingsley Road, Bremen 19529",
+  "Answer-Key": {
+   "name": "Rosalind Novak",
+   "dob": "11/04/1953",
+   "ssn": "862-32-3701",
+   "address": "1353 Kingsley Road",
+   "gpe": "Bremen",
+   "zip": "19529"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 25,
+    "type": "name",
+    "value": "Rosalind Novak"
+   },
+   {
+    "start": 41,
+    "end": 51,
+    "type": "dob",
+    "value": "11/04/1953"
+   },
+   {
+    "start": 57,
+    "end": 68,
+    "type": "ssn",
+    "value": "862-32-3701"
+   },
+   {
+    "start": 78,
+    "end": 96,
+    "type": "address",
+    "value": "1353 Kingsley Road"
+   },
+   {
+    "start": 98,
+    "end": 104,
+    "type": "gpe",
+    "value": "Bremen"
+   },
+   {
+    "start": 105,
+    "end": 110,
+    "type": "zip",
+    "value": "19529"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1067,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0085"
+ },
+ {
+  "Question": "Meu nome é Sasha Pham, meu telefone é +33 6 34 76 70 51 e trabalho na Meadowlark Daycare.",
+  "Answer-Key": {
+   "name": "Sasha Pham",
+   "phone": "+33 6 34 76 70 51",
+   "org": "Meadowlark Daycare"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "name",
+    "value": "Sasha Pham"
+   },
+   {
+    "start": 38,
+    "end": 55,
+    "type": "phone",
+    "value": "+33 6 34 76 70 51"
+   },
+   {
+    "start": 70,
+    "end": 88,
+    "type": "org",
+    "value": "Meadowlark Daycare"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 988,
+  "gender": "x",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0086"
+ },
+ {
+  "Question": "I was born 24 January 1976 and I'm 50. Which retirement accounts can I open with Hollis Middle School?",
+  "Answer-Key": {
+   "dob": "24 January 1976",
+   "age": "50",
+   "org": "Hollis Middle School"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 26,
+    "type": "dob",
+    "value": "24 January 1976"
+   },
+   {
+    "start": 35,
+    "end": 37,
+    "type": "age",
+    "value": "50"
+   },
+   {
+    "start": 81,
+    "end": 101,
+    "type": "org",
+    "value": "Hollis Middle School"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 970,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0087"
+ },
+ {
+  "Question": "Our server at 144.11.237.201 is rejecting the key sk-proj-KSsmMlvpgo0hxSVRLxPOHd1NYJBH3uBiYNC8i0qv. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "144.11.237.201",
+   "api_key": "sk-proj-KSsmMlvpgo0hxSVRLxPOHd1NYJBH3uBiYNC8i0qv"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "ip_address",
+    "value": "144.11.237.201"
+   },
+   {
+    "start": 50,
+    "end": 98,
+    "type": "api_key",
+    "value": "sk-proj-KSsmMlvpgo0hxSVRLxPOHd1NYJBH3uBiYNC8i0qv"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1051,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0088"
+ },
+ {
+  "Question": "Our server at 121.128.240.2 is rejecting the key AKIALC9X9WQ5H7MTV3R2. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "121.128.240.2",
+   "api_key": "AKIALC9X9WQ5H7MTV3R2"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "ip_address",
+    "value": "121.128.240.2"
+   },
+   {
+    "start": 49,
+    "end": 69,
+    "type": "api_key",
+    "value": "AKIALC9X9WQ5H7MTV3R2"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 979,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0089"
+ },
+ {
+  "Question": "Camila Pham (39) from Arusha won the Quayside Accounting raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Camila Pham",
+   "age": "39",
+   "gpe": "Arusha",
+   "org": "Quayside Accounting"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 11,
+    "type": "name",
+    "value": "Camila Pham"
+   },
+   {
+    "start": 13,
+    "end": 15,
+    "type": "age",
+    "value": "39"
+   },
+   {
+    "start": 22,
+    "end": 28,
+    "type": "gpe",
+    "value": "Arusha"
+   },
+   {
+    "start": 37,
+    "end": 56,
+    "type": "org",
+    "value": "Quayside Accounting"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 949,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0090"
+ },
+ {
+  "Question": "Please verify payroll: Noor Adeyemi, SSN 339-92-8728, card 5500-8685-3161-4067, start date July 16.",
+  "Answer-Key": {
+   "name": "Noor Adeyemi",
+   "ssn": "339-92-8728",
+   "credit_card": "5500-8685-3161-4067"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 35,
+    "type": "name",
+    "value": "Noor Adeyemi"
+   },
+   {
+    "start": 41,
+    "end": 52,
+    "type": "ssn",
+    "value": "339-92-8728"
+   },
+   {
+    "start": 59,
+    "end": 78,
+    "type": "credit_card",
+    "value": "5500-8685-3161-4067"
+   }
+  ],
+  "Keep": [
+   "July 16"
+  ],
+  "identity_id": 1062,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0091"
+ },
+ {
+  "Question": "Grow 8 tomato plants in 80 L pots: how much water per day?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-39",
+  "id": "synth-test-0092"
+ },
+ {
+  "Question": "Who is @the_mansoor? They keep tagging Sofia Mansoor in posts about Hollis Middle School.",
+  "Answer-Key": {
+   "username": "@the_mansoor",
+   "name": "Sofia Mansoor",
+   "org": "Hollis Middle School"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 19,
+    "type": "username",
+    "value": "@the_mansoor"
+   },
+   {
+    "start": 39,
+    "end": 52,
+    "type": "name",
+    "value": "Sofia Mansoor"
+   },
+   {
+    "start": 68,
+    "end": 88,
+    "type": "org",
+    "value": "Hollis Middle School"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1042,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0093"
+ },
+ {
+  "Question": "Book a table for 4 under Svensson, phone 524.464.2023, July 16 at 7pm.",
+  "Answer-Key": {
+   "name": "Svensson",
+   "phone": "524.464.2023"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 33,
+    "type": "name",
+    "value": "Svensson"
+   },
+   {
+    "start": 41,
+    "end": 53,
+    "type": "phone",
+    "value": "524.464.2023"
+   }
+  ],
+  "Keep": [
+   "July 16"
+  ],
+  "identity_id": 907,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0094"
+ },
+ {
+  "Question": "hey its aarav torres, can u remind me what Hollis Middle School pays for overtime? my number is +49 30 1404 3971",
+  "Answer-Key": {
+   "name": "aarav torres",
+   "org": "Hollis Middle School",
+   "phone": "+49 30 1404 3971"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 20,
+    "type": "name",
+    "value": "aarav torres"
+   },
+   {
+    "start": 43,
+    "end": 63,
+    "type": "org",
+    "value": "Hollis Middle School"
+   },
+   {
+    "start": 96,
+    "end": 112,
+    "type": "phone",
+    "value": "+49 30 1404 3971"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1025,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0095"
+ },
+ {
+  "Question": "Error 0515282787: connection reset after 93917 ms (build 5.10.4).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "0515282787",
+   "93917",
+   "5.10.4"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0096"
+ },
+ {
+  "Question": "SSH from 72.182.184.140 as @henrik.codes failed: Permission denied (publickey). Key owner henrik.nguyen@kestrel-analytics.com.",
+  "Answer-Key": {
+   "ip_address": "72.182.184.140",
+   "username": "@henrik.codes",
+   "email": "henrik.nguyen@kestrel-analytics.com"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 23,
+    "type": "ip_address",
+    "value": "72.182.184.140"
+   },
+   {
+    "start": 27,
+    "end": 40,
+    "type": "username",
+    "value": "@henrik.codes"
+   },
+   {
+    "start": 90,
+    "end": 125,
+    "type": "email",
+    "value": "henrik.nguyen@kestrel-analytics.com"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1090,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0097"
+ },
+ {
+  "Question": "Aarav Osei (25) from Pueblo won the Hollis Middle School raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Aarav Osei",
+   "age": "25",
+   "gpe": "Pueblo",
+   "org": "Hollis Middle School"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 10,
+    "type": "name",
+    "value": "Aarav Osei"
+   },
+   {
+    "start": 12,
+    "end": 14,
+    "type": "age",
+    "value": "25"
+   },
+   {
+    "start": 21,
+    "end": 27,
+    "type": "gpe",
+    "value": "Pueblo"
+   },
+   {
+    "start": 36,
+    "end": 56,
+    "type": "org",
+    "value": "Hollis Middle School"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1054,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0098"
+ },
+ {
+  "Question": "export API_KEY=AKIAPQDDUURGUX6PV7TX\n# owner: malik_mahlangu27@brightwater.io",
+  "Answer-Key": {
+   "api_key": "AKIAPQDDUURGUX6PV7TX",
+   "email": "malik_mahlangu27@brightwater.io"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 35,
+    "type": "api_key",
+    "value": "AKIAPQDDUURGUX6PV7TX"
+   },
+   {
+    "start": 45,
+    "end": 76,
+    "type": "email",
+    "value": "malik_mahlangu27@brightwater.io"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1117,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0099"
+ },
+ {
+  "Question": "I live at 5199 Birchwood Way, Cuenca 68966. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "5199 Birchwood Way",
+   "gpe": "Cuenca",
+   "zip": "68966"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 28,
+    "type": "address",
+    "value": "5199 Birchwood Way"
+   },
+   {
+    "start": 30,
+    "end": 36,
+    "type": "gpe",
+    "value": "Cuenca"
+   },
+   {
+    "start": 37,
+    "end": 42,
+    "type": "zip",
+    "value": "68966"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 967,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0100"
+ },
+ {
+  "Question": "Meu nome é Cormac Takahashi, meu telefone é +44 7393 436437 e trabalho na Westbrook Pharmacy.",
+  "Answer-Key": {
+   "name": "Cormac Takahashi",
+   "phone": "+44 7393 436437",
+   "org": "Westbrook Pharmacy"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 27,
+    "type": "name",
+    "value": "Cormac Takahashi"
+   },
+   {
+    "start": 44,
+    "end": 59,
+    "type": "phone",
+    "value": "+44 7393 436437"
+   },
+   {
+    "start": 74,
+    "end": 92,
+    "type": "org",
+    "value": "Westbrook Pharmacy"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1015,
+  "gender": "m",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0101"
+ },
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0102"
+ },
+ {
+  "Question": "Set up a payment of $2157.37 to ES5070089226112391351221 (account holder Daniel Nguyen) on April 20.",
+  "Answer-Key": {
+   "iban": "ES5070089226112391351221",
+   "name": "Daniel Nguyen"
+  },
+  "Spans": [
+   {
+    "start": 32,
+    "end": 56,
+    "type": "iban",
+    "value": "ES5070089226112391351221"
+   },
+   {
+    "start": 73,
+    "end": 86,
+    "type": "name",
+    "value": "Daniel Nguyen"
+   }
+  ],
+  "Keep": [
+   "$2157.37",
+   "April 20"
+  ],
+  "identity_id": 1077,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0103"
+ },
+ {
+  "Question": "Write a recommendation letter for Ismail Adeyemi, who interned with us at Copperleaf Software in Utrecht.",
+  "Answer-Key": {
+   "name": "Ismail Adeyemi",
+   "org": "Copperleaf Software",
+   "gpe": "Utrecht"
+  },
+  "Spans": [
+   {
+    "start": 34,
+    "end": 48,
+    "type": "name",
+    "value": "Ismail Adeyemi"
+   },
+   {
+    "start": 74,
+    "end": 93,
+    "type": "org",
+    "value": "Copperleaf Software"
+   },
+   {
+    "start": 97,
+    "end": 104,
+    "type": "gpe",
+    "value": "Utrecht"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 935,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-31",
+  "id": "synth-test-0104"
+ },
+ {
+  "Question": "is hartmann.daniel@gmail.com still daniel's address or should i use https://daniel-hartmann.dev?",
+  "Answer-Key": {
+   "email": "hartmann.daniel@gmail.com",
+   "name": "daniel",
+   "url": "https://daniel-hartmann.dev"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 28,
+    "type": "email",
+    "value": "hartmann.daniel@gmail.com"
+   },
+   {
+    "start": 35,
+    "end": 41,
+    "type": "name",
+    "value": "daniel"
+   },
+   {
+    "start": 68,
+    "end": 95,
+    "type": "url",
+    "value": "https://daniel-hartmann.dev"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1072,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0105"
+ },
+ {
+  "Question": "Who is @the_horvat? They keep tagging Gustavo Horvat in posts about St. Brigid's Primary School.",
+  "Answer-Key": {
+   "username": "@the_horvat",
+   "name": "Gustavo Horvat",
+   "org": "St. Brigid's Primary School"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 18,
+    "type": "username",
+    "value": "@the_horvat"
+   },
+   {
+    "start": 38,
+    "end": 52,
+    "type": "name",
+    "value": "Gustavo Horvat"
+   },
+   {
+    "start": 68,
+    "end": 95,
+    "type": "org",
+    "value": "St. Brigid's Primary School"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1029,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0106"
+ },
+ {
+  "Question": "Error 6646155164: connection reset after 53595 ms (build 3.17.9).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "6646155164",
+   "53595",
+   "3.17.9"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0107"
+ },
+ {
+  "Question": "Please text +1-675-799-1538 and ask Aisha Ivanova whether she still lives on 2349 Pine Road.",
+  "Answer-Key": {
+   "phone": "+1-675-799-1538",
+   "name": "Aisha Ivanova",
+   "address": "2349 Pine Road"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+1-675-799-1538"
+   },
+   {
+    "start": 36,
+    "end": 49,
+    "type": "name",
+    "value": "Aisha Ivanova"
+   },
+   {
+    "start": 77,
+    "end": 91,
+    "type": "address",
+    "value": "2349 Pine Road"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 993,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0108"
+ },
+ {
+  "Question": "Ibrahim Jovanovic (78) from Flagstaff won the Sunhollow Community College raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Ibrahim Jovanovic",
+   "age": "78",
+   "gpe": "Flagstaff",
+   "org": "Sunhollow Community College"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 17,
+    "type": "name",
+    "value": "Ibrahim Jovanovic"
+   },
+   {
+    "start": 19,
+    "end": 21,
+    "type": "age",
+    "value": "78"
+   },
+   {
+    "start": 28,
+    "end": 37,
+    "type": "gpe",
+    "value": "Flagstaff"
+   },
+   {
+    "start": 46,
+    "end": 73,
+    "type": "org",
+    "value": "Sunhollow Community College"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1105,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0109"
+ },
+ {
+  "Question": "I was born June 21, 1976 and I'm 50. Which retirement accounts can I open with Pinegrove Family Clinic?",
+  "Answer-Key": {
+   "dob": "June 21, 1976",
+   "age": "50",
+   "org": "Pinegrove Family Clinic"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 24,
+    "type": "dob",
+    "value": "June 21, 1976"
+   },
+   {
+    "start": 33,
+    "end": 35,
+    "type": "age",
+    "value": "50"
+   },
+   {
+    "start": 79,
+    "end": 102,
+    "type": "org",
+    "value": "Pinegrove Family Clinic"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1019,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0110"
+ },
+ {
+  "Question": "Book a table for 4 under Kim, phone +91 98044 57129, April 16, 2024 at 7pm.",
+  "Answer-Key": {
+   "name": "Kim",
+   "phone": "+91 98044 57129"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 28,
+    "type": "name",
+    "value": "Kim"
+   },
+   {
+    "start": 36,
+    "end": 51,
+    "type": "phone",
+    "value": "+91 98044 57129"
+   }
+  ],
+  "Keep": [
+   "April 16, 2024"
+  ],
+  "identity_id": 1009,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0111"
+ },
+ {
+  "Question": "Who is @the_fischer? They keep tagging Noor Fischer in posts about Northfield Dental Group.",
+  "Answer-Key": {
+   "username": "@the_fischer",
+   "name": "Noor Fischer",
+   "org": "Northfield Dental Group"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 19,
+    "type": "username",
+    "value": "@the_fischer"
+   },
+   {
+    "start": 39,
+    "end": 51,
+    "type": "name",
+    "value": "Noor Fischer"
+   },
+   {
+    "start": 67,
+    "end": 90,
+    "type": "org",
+    "value": "Northfield Dental Group"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1056,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0112"
+ },
+ {
+  "Question": "is gustavo_kim30@marlowe-studio.fr still gustavo's address or should i use github.com/gustavo-kim?",
+  "Answer-Key": {
+   "email": "gustavo_kim30@marlowe-studio.fr",
+   "name": "gustavo",
+   "url": "github.com/gustavo-kim"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 34,
+    "type": "email",
+    "value": "gustavo_kim30@marlowe-studio.fr"
+   },
+   {
+    "start": 41,
+    "end": 48,
+    "type": "name",
+    "value": "gustavo"
+   },
+   {
+    "start": 75,
+    "end": 97,
+    "type": "url",
+    "value": "github.com/gustavo-kim"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1031,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0113"
+ },
+ {
+  "Question": "SSH from 105.253.196.116 as @olgasorensen failed: Permission denied (publickey). Key owner olga.sorensen@hotmail.com.",
+  "Answer-Key": {
+   "ip_address": "105.253.196.116",
+   "username": "@olgasorensen",
+   "email": "olga.sorensen@hotmail.com"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 24,
+    "type": "ip_address",
+    "value": "105.253.196.116"
+   },
+   {
+    "start": 28,
+    "end": 41,
+    "type": "username",
+    "value": "@olgasorensen"
+   },
+   {
+    "start": 91,
+    "end": 116,
+    "type": "email",
+    "value": "olga.sorensen@hotmail.com"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1121,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0114"
+ },
+ {
+  "Question": "Book a table for 4 under Novak, phone +1-501-739-6257, September 19, 2027 at 7pm.",
+  "Answer-Key": {
+   "name": "Novak",
+   "phone": "+1-501-739-6257"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 30,
+    "type": "name",
+    "value": "Novak"
+   },
+   {
+    "start": 38,
+    "end": 53,
+    "type": "phone",
+    "value": "+1-501-739-6257"
+   }
+  ],
+  "Keep": [
+   "September 19, 2027"
+  ],
+  "identity_id": 938,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0115"
+ },
+ {
+  "Question": "Book a table for 4 under Dubois, phone 208-530-1365, December 13 at 7pm.",
+  "Answer-Key": {
+   "name": "Dubois",
+   "phone": "208-530-1365"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 31,
+    "type": "name",
+    "value": "Dubois"
+   },
+   {
+    "start": 39,
+    "end": 51,
+    "type": "phone",
+    "value": "208-530-1365"
+   }
+  ],
+  "Keep": [
+   "December 13"
+  ],
+  "identity_id": 1119,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0116"
+ },
+ {
+  "Question": "Please text 431.349.4190 and ask Emeka Esposito whether he still lives on 6737 Maple Street.",
+  "Answer-Key": {
+   "phone": "431.349.4190",
+   "name": "Emeka Esposito",
+   "address": "6737 Maple Street"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 24,
+    "type": "phone",
+    "value": "431.349.4190"
+   },
+   {
+    "start": 33,
+    "end": 47,
+    "type": "name",
+    "value": "Emeka Esposito"
+   },
+   {
+    "start": 74,
+    "end": 91,
+    "type": "address",
+    "value": "6737 Maple Street"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1124,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0117"
+ },
+ {
+  "Question": "Is Amazon stock a good buy after the August 1 earnings call?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Amazon",
+   "August 1"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-15",
+  "id": "synth-test-0118"
+ },
+ {
+  "Question": "Is Microsoft stock a good buy after the August 11, 2024 earnings call?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Microsoft",
+   "August 11, 2024"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-15",
+  "id": "synth-test-0119"
+ },
+ {
+  "Question": "Meet Gustavo Novak outside Redfern Physiotherapy in Split; his number is 437-556-2485.",
+  "Answer-Key": {
+   "name": "Gustavo Novak",
+   "org": "Redfern Physiotherapy",
+   "gpe": "Split",
+   "phone": "437-556-2485"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 18,
+    "type": "name",
+    "value": "Gustavo Novak"
+   },
+   {
+    "start": 27,
+    "end": 48,
+    "type": "org",
+    "value": "Redfern Physiotherapy"
+   },
+   {
+    "start": 52,
+    "end": 57,
+    "type": "gpe",
+    "value": "Split"
+   },
+   {
+    "start": 73,
+    "end": 85,
+    "type": "phone",
+    "value": "437-556-2485"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1001,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0120"
+ },
+ {
+  "Question": "Grow 9 tomato plants in 90 L pots: how much water per day?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-39",
+  "id": "synth-test-0121"
+ },
+ {
+  "Question": "Write a recommendation letter for Clara Nilsen, who interned with us at Tidepool Health Clinic in Bilbao.",
+  "Answer-Key": {
+   "name": "Clara Nilsen",
+   "org": "Tidepool Health Clinic",
+   "gpe": "Bilbao"
+  },
+  "Spans": [
+   {
+    "start": 34,
+    "end": 46,
+    "type": "name",
+    "value": "Clara Nilsen"
+   },
+   {
+    "start": 72,
+    "end": 94,
+    "type": "org",
+    "value": "Tidepool Health Clinic"
+   },
+   {
+    "start": 98,
+    "end": 104,
+    "type": "gpe",
+    "value": "Bilbao"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1115,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-31",
+  "id": "synth-test-0122"
+ },
+ {
+  "Question": "Book a table for 4 under Oliveira, phone 461-824-7556, July 20, 2025 at 7pm.",
+  "Answer-Key": {
+   "name": "Oliveira",
+   "phone": "461-824-7556"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 33,
+    "type": "name",
+    "value": "Oliveira"
+   },
+   {
+    "start": 41,
+    "end": 53,
+    "type": "phone",
+    "value": "461-824-7556"
+   }
+  ],
+  "Keep": [
+   "July 20, 2025"
+  ],
+  "identity_id": 984,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0123"
+ },
+ {
+  "Question": "Book a table for 4 under Nguyen, phone +49 30 4746 1887, September 23, 2026 at 7pm.",
+  "Answer-Key": {
+   "name": "Nguyen",
+   "phone": "+49 30 4746 1887"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 31,
+    "type": "name",
+    "value": "Nguyen"
+   },
+   {
+    "start": 39,
+    "end": 55,
+    "type": "phone",
+    "value": "+49 30 4746 1887"
+   }
+  ],
+  "Keep": [
+   "September 23, 2026"
+  ],
+  "identity_id": 914,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0124"
+ },
+ {
+  "Question": "I live at 9386 Foxglove Ct, Spokane 85584. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "9386 Foxglove Ct",
+   "gpe": "Spokane",
+   "zip": "85584"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 26,
+    "type": "address",
+    "value": "9386 Foxglove Ct"
+   },
+   {
+    "start": 28,
+    "end": 35,
+    "type": "gpe",
+    "value": "Spokane"
+   },
+   {
+    "start": 36,
+    "end": 41,
+    "type": "zip",
+    "value": "85584"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1033,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0125"
+ },
+ {
+  "Question": "export API_KEY=xoxb-682560304852-053237627912-ktUB4JSytYYAX0nVYlXmblse\n# owner: tpatel@quayside.nl",
+  "Answer-Key": {
+   "api_key": "xoxb-682560304852-053237627912-ktUB4JSytYYAX0nVYlXmblse",
+   "email": "tpatel@quayside.nl"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 70,
+    "type": "api_key",
+    "value": "xoxb-682560304852-053237627912-ktUB4JSytYYAX0nVYlXmblse"
+   },
+   {
+    "start": 80,
+    "end": 98,
+    "type": "email",
+    "value": "tpatel@quayside.nl"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1100,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0126"
+ },
+ {
+  "Question": "Set up a payment of £690 to NL41TFPH5389023206 (account holder Jae-won Ferrari) on August 23, 2026.",
+  "Answer-Key": {
+   "iban": "NL41TFPH5389023206",
+   "name": "Jae-won Ferrari"
+  },
+  "Spans": [
+   {
+    "start": 28,
+    "end": 46,
+    "type": "iban",
+    "value": "NL41TFPH5389023206"
+   },
+   {
+    "start": 63,
+    "end": 78,
+    "type": "name",
+    "value": "Jae-won Ferrari"
+   }
+  ],
+  "Keep": [
+   "£690",
+   "August 23, 2026"
+  ],
+  "identity_id": 1101,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0127"
+ },
+ {
+  "Question": "Meu nome é Oluwaseun Kaplan, meu telefone é +91 93334 64300 e trabalho na Kestrel Analytics.",
+  "Answer-Key": {
+   "name": "Oluwaseun Kaplan",
+   "phone": "+91 93334 64300",
+   "org": "Kestrel Analytics"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 27,
+    "type": "name",
+    "value": "Oluwaseun Kaplan"
+   },
+   {
+    "start": 44,
+    "end": 59,
+    "type": "phone",
+    "value": "+91 93334 64300"
+   },
+   {
+    "start": 74,
+    "end": 91,
+    "type": "org",
+    "value": "Kestrel Analytics"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1052,
+  "gender": "f",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0128"
+ },
+ {
+  "Question": "Please verify payroll: Kavya Khan, SSN 630-36-2292, card 5214624609378474, start date March 21.",
+  "Answer-Key": {
+   "name": "Kavya Khan",
+   "ssn": "630-36-2292",
+   "credit_card": "5214624609378474"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 33,
+    "type": "name",
+    "value": "Kavya Khan"
+   },
+   {
+    "start": 39,
+    "end": 50,
+    "type": "ssn",
+    "value": "630-36-2292"
+   },
+   {
+    "start": 57,
+    "end": 73,
+    "type": "credit_card",
+    "value": "5214624609378474"
+   }
+  ],
+  "Keep": [
+   "March 21"
+  ],
+  "identity_id": 1089,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0129"
+ },
+ {
+  "Question": "Meet Isabel Esposito outside Meadowlark Daycare in Utrecht; her number is +49 30 2748 3901.",
+  "Answer-Key": {
+   "name": "Isabel Esposito",
+   "org": "Meadowlark Daycare",
+   "gpe": "Utrecht",
+   "phone": "+49 30 2748 3901"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 20,
+    "type": "name",
+    "value": "Isabel Esposito"
+   },
+   {
+    "start": 29,
+    "end": 47,
+    "type": "org",
+    "value": "Meadowlark Daycare"
+   },
+   {
+    "start": 51,
+    "end": 58,
+    "type": "gpe",
+    "value": "Utrecht"
+   },
+   {
+    "start": 74,
+    "end": 90,
+    "type": "phone",
+    "value": "+49 30 2748 3901"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 991,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0130"
+ },
+ {
+  "Question": "Annual report: 59414 units sold, 7723 returned, net 23695.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "59414",
+   "7723",
+   "23695"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0131"
+ },
+ {
+  "Question": "Please text +91 75345 25067 and ask Greta Fischer whether she still lives on 2366 Sycamore Blvd.",
+  "Answer-Key": {
+   "phone": "+91 75345 25067",
+   "name": "Greta Fischer",
+   "address": "2366 Sycamore Blvd"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+91 75345 25067"
+   },
+   {
+    "start": 36,
+    "end": 49,
+    "type": "name",
+    "value": "Greta Fischer"
+   },
+   {
+    "start": 77,
+    "end": 95,
+    "type": "address",
+    "value": "2366 Sycamore Blvd"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1085,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0132"
+ },
+ {
+  "Question": "Applicant: Camila Fischer\nDate of birth: 15 July 2004\nSSN: 678-72-7273\nAddress: 6539 Elm Terrace, Leeds 45709",
+  "Answer-Key": {
+   "name": "Camila Fischer",
+   "dob": "15 July 2004",
+   "ssn": "678-72-7273",
+   "address": "6539 Elm Terrace",
+   "gpe": "Leeds",
+   "zip": "45709"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 25,
+    "type": "name",
+    "value": "Camila Fischer"
+   },
+   {
+    "start": 41,
+    "end": 53,
+    "type": "dob",
+    "value": "15 July 2004"
+   },
+   {
+    "start": 59,
+    "end": 70,
+    "type": "ssn",
+    "value": "678-72-7273"
+   },
+   {
+    "start": 80,
+    "end": 96,
+    "type": "address",
+    "value": "6539 Elm Terrace"
+   },
+   {
+    "start": 98,
+    "end": 103,
+    "type": "gpe",
+    "value": "Leeds"
+   },
+   {
+    "start": 104,
+    "end": 109,
+    "type": "zip",
+    "value": "45709"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1043,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0133"
+ },
+ {
+  "Question": "Write a recommendation letter for Felipe Ivanova, who interned with us at Meadowlark Daycare in Norwich.",
+  "Answer-Key": {
+   "name": "Felipe Ivanova",
+   "org": "Meadowlark Daycare",
+   "gpe": "Norwich"
+  },
+  "Spans": [
+   {
+    "start": 34,
+    "end": 48,
+    "type": "name",
+    "value": "Felipe Ivanova"
+   },
+   {
+    "start": 74,
+    "end": 92,
+    "type": "org",
+    "value": "Meadowlark Daycare"
+   },
+   {
+    "start": 96,
+    "end": 103,
+    "type": "gpe",
+    "value": "Norwich"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1020,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-31",
+  "id": "synth-test-0134"
+ },
+ {
+  "Question": "Upgrade the firmware to version 8.20.6 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "8.20.6"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0135"
+ },
+ {
+  "Question": "Who is @the_johansson? They keep tagging Daniel Johansson in posts about Calder & Finch LLP.",
+  "Answer-Key": {
+   "username": "@the_johansson",
+   "name": "Daniel Johansson",
+   "org": "Calder & Finch LLP"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 21,
+    "type": "username",
+    "value": "@the_johansson"
+   },
+   {
+    "start": 41,
+    "end": 57,
+    "type": "name",
+    "value": "Daniel Johansson"
+   },
+   {
+    "start": 73,
+    "end": 91,
+    "type": "org",
+    "value": "Calder & Finch LLP"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 963,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0136"
+ },
+ {
+  "Question": "Annual report: 88298 units sold, 7168 returned, net 66459.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "88298",
+   "7168",
+   "66459"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0137"
+ },
+ {
+  "Question": "SELECT id, created_at FROM orders WHERE total > 2807 AND status = 'SHIPPED';",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "2807"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-23",
+  "id": "synth-test-0138"
+ },
+ {
+  "Question": "Can you check whether IBAN ES21 9997 7311 9923 2505 9340 belongs to Felipe Khan? I need to send €763 by June 26, 2027.",
+  "Answer-Key": {
+   "iban": "ES21 9997 7311 9923 2505 9340",
+   "name": "Felipe Khan"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 56,
+    "type": "iban",
+    "value": "ES21 9997 7311 9923 2505 9340"
+   },
+   {
+    "start": 68,
+    "end": 79,
+    "type": "name",
+    "value": "Felipe Khan"
+   }
+  ],
+  "Keep": [
+   "€763",
+   "June 26, 2027"
+  ],
+  "identity_id": 924,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0139"
+ },
+ {
+  "Question": "Please text +44 7386 974991 and ask Aarav Fischer whether he still lives on 3729 Magnolia Pl.",
+  "Answer-Key": {
+   "phone": "+44 7386 974991",
+   "name": "Aarav Fischer",
+   "address": "3729 Magnolia Pl"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+44 7386 974991"
+   },
+   {
+    "start": 36,
+    "end": 49,
+    "type": "name",
+    "value": "Aarav Fischer"
+   },
+   {
+    "start": 76,
+    "end": 92,
+    "type": "address",
+    "value": "3729 Magnolia Pl"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 977,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0140"
+ },
+ {
+  "Question": "I live at 9551 Oak Avenue, Galway 92929. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "9551 Oak Avenue",
+   "gpe": "Galway",
+   "zip": "92929"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 25,
+    "type": "address",
+    "value": "9551 Oak Avenue"
+   },
+   {
+    "start": 27,
+    "end": 33,
+    "type": "gpe",
+    "value": "Galway"
+   },
+   {
+    "start": 34,
+    "end": 39,
+    "type": "zip",
+    "value": "92929"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 921,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0141"
+ },
+ {
+  "Question": "I live at 1306 Riverbend Drive, Reading 35650. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "1306 Riverbend Drive",
+   "gpe": "Reading",
+   "zip": "35650"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 30,
+    "type": "address",
+    "value": "1306 Riverbend Drive"
+   },
+   {
+    "start": 32,
+    "end": 39,
+    "type": "gpe",
+    "value": "Reading"
+   },
+   {
+    "start": 40,
+    "end": 45,
+    "type": "zip",
+    "value": "35650"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1023,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0142"
+ },
+ {
+  "Question": "Our server at 24.49.252.221 is rejecting the key AKIABDAJJVKXJ8EJP7RL. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "24.49.252.221",
+   "api_key": "AKIABDAJJVKXJ8EJP7RL"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "ip_address",
+    "value": "24.49.252.221"
+   },
+   {
+    "start": 49,
+    "end": 69,
+    "type": "api_key",
+    "value": "AKIABDAJJVKXJ8EJP7RL"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1058,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0143"
+ },
+ {
+  "Question": "hey its aisha mansoor, can u remind me what Brightwater Logistics pays for overtime? my number is 732-304-2101",
+  "Answer-Key": {
+   "name": "aisha mansoor",
+   "org": "Brightwater Logistics",
+   "phone": "732-304-2101"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 21,
+    "type": "name",
+    "value": "aisha mansoor"
+   },
+   {
+    "start": 44,
+    "end": 65,
+    "type": "org",
+    "value": "Brightwater Logistics"
+   },
+   {
+    "start": 98,
+    "end": 110,
+    "type": "phone",
+    "value": "732-304-2101"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1000,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0144"
+ },
+ {
+  "Question": "Set up a payment of €527 to GB95 KTDQ 6626 0451 4793 59 (account holder Jordan Chowdhury) on April 15.",
+  "Answer-Key": {
+   "iban": "GB95 KTDQ 6626 0451 4793 59",
+   "name": "Jordan Chowdhury"
+  },
+  "Spans": [
+   {
+    "start": 28,
+    "end": 55,
+    "type": "iban",
+    "value": "GB95 KTDQ 6626 0451 4793 59"
+   },
+   {
+    "start": 72,
+    "end": 88,
+    "type": "name",
+    "value": "Jordan Chowdhury"
+   }
+  ],
+  "Keep": [
+   "€527",
+   "April 15"
+  ],
+  "identity_id": 1113,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0145"
+ },
+ {
+  "Question": "Who is @rania.codes? They keep tagging Rania Pham in posts about Marlowe Design Studio.",
+  "Answer-Key": {
+   "username": "@rania.codes",
+   "name": "Rania Pham",
+   "org": "Marlowe Design Studio"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 19,
+    "type": "username",
+    "value": "@rania.codes"
+   },
+   {
+    "start": 39,
+    "end": 49,
+    "type": "name",
+    "value": "Rania Pham"
+   },
+   {
+    "start": 65,
+    "end": 86,
+    "type": "org",
+    "value": "Marlowe Design Studio"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1048,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0146"
+ },
+ {
+  "Question": "Can you check whether IBAN GB98GMMW52904263899530 belongs to Mateo Nilsen? I need to send $3508.02 by September 1.",
+  "Answer-Key": {
+   "iban": "GB98GMMW52904263899530",
+   "name": "Mateo Nilsen"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 49,
+    "type": "iban",
+    "value": "GB98GMMW52904263899530"
+   },
+   {
+    "start": 61,
+    "end": 73,
+    "type": "name",
+    "value": "Mateo Nilsen"
+   }
+  ],
+  "Keep": [
+   "$3508.02",
+   "September 1"
+  ],
+  "identity_id": 1073,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0147"
+ },
+ {
+  "Question": "Meet Priya Ivanova outside Sunhollow Community College in Graz; her number is (651) 943-1913.",
+  "Answer-Key": {
+   "name": "Priya Ivanova",
+   "org": "Sunhollow Community College",
+   "gpe": "Graz",
+   "phone": "(651) 943-1913"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 18,
+    "type": "name",
+    "value": "Priya Ivanova"
+   },
+   {
+    "start": 27,
+    "end": 54,
+    "type": "org",
+    "value": "Sunhollow Community College"
+   },
+   {
+    "start": 58,
+    "end": 62,
+    "type": "gpe",
+    "value": "Graz"
+   },
+   {
+    "start": 78,
+    "end": 92,
+    "type": "phone",
+    "value": "(651) 943-1913"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1065,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0148"
+ },
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0149"
+ },
+ {
+  "Question": "Please verify payroll: Sakura Takahashi, SSN 246-47-5959, card 5565 1379 1675 2096, start date April 4.",
+  "Answer-Key": {
+   "name": "Sakura Takahashi",
+   "ssn": "246-47-5959",
+   "credit_card": "5565 1379 1675 2096"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 39,
+    "type": "name",
+    "value": "Sakura Takahashi"
+   },
+   {
+    "start": 45,
+    "end": 56,
+    "type": "ssn",
+    "value": "246-47-5959"
+   },
+   {
+    "start": 63,
+    "end": 82,
+    "type": "credit_card",
+    "value": "5565 1379 1675 2096"
+   }
+  ],
+  "Keep": [
+   "April 4"
+  ],
+  "identity_id": 1103,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0150"
+ },
+ {
+  "Question": "I was born 05/07/1970 and I'm 56. Which retirement accounts can I open with Meadowlark Daycare?",
+  "Answer-Key": {
+   "dob": "05/07/1970",
+   "age": "56",
+   "org": "Meadowlark Daycare"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "dob",
+    "value": "05/07/1970"
+   },
+   {
+    "start": 30,
+    "end": 32,
+    "type": "age",
+    "value": "56"
+   },
+   {
+    "start": 76,
+    "end": 94,
+    "type": "org",
+    "value": "Meadowlark Daycare"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1030,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0151"
+ },
+ {
+  "Question": "Tracking PO-1621 says delivered on September 27 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "PO-1621",
+   "September 27"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0152"
+ },
+ {
+  "Question": "Explain how photosynthesis works and why leaves are green.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-07",
+  "id": "synth-test-0153"
+ },
+ {
+  "Question": "Arash Halvorsen (64) from Norwich won the Kestrel Analytics raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Arash Halvorsen",
+   "age": "64",
+   "gpe": "Norwich",
+   "org": "Kestrel Analytics"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 15,
+    "type": "name",
+    "value": "Arash Halvorsen"
+   },
+   {
+    "start": 17,
+    "end": 19,
+    "type": "age",
+    "value": "64"
+   },
+   {
+    "start": 26,
+    "end": 33,
+    "type": "gpe",
+    "value": "Norwich"
+   },
+   {
+    "start": 42,
+    "end": 59,
+    "type": "org",
+    "value": "Kestrel Analytics"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 983,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0154"
+ },
+ {
+  "Question": "Set up a payment of $4607.46 to NL59CBGU4775035107 (account holder Vikram Watanabe) on March 24.",
+  "Answer-Key": {
+   "iban": "NL59CBGU4775035107",
+   "name": "Vikram Watanabe"
+  },
+  "Spans": [
+   {
+    "start": 32,
+    "end": 50,
+    "type": "iban",
+    "value": "NL59CBGU4775035107"
+   },
+   {
+    "start": 67,
+    "end": 82,
+    "type": "name",
+    "value": "Vikram Watanabe"
+   }
+  ],
+  "Keep": [
+   "$4607.46",
+   "March 24"
+  ],
+  "identity_id": 913,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0155"
+ },
+ {
+  "Question": "{\"customer\": \"Emeka Johansson\", \"email\": \"ejohansson@gmail.com\", \"phone\": \"+1-262-461-6710\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Emeka Johansson",
+   "email": "ejohansson@gmail.com",
+   "phone": "+1-262-461-6710"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 29,
+    "type": "name",
+    "value": "Emeka Johansson"
+   },
+   {
+    "start": 42,
+    "end": 62,
+    "type": "email",
+    "value": "ejohansson@gmail.com"
+   },
+   {
+    "start": 75,
+    "end": 90,
+    "type": "phone",
+    "value": "+1-262-461-6710"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 958,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0156"
+ },
+ {
+  "Question": "Rank Amazon, Elon Musk biographies, and Surface Pro 9 reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Amazon",
+   "Elon Musk",
+   "Surface Pro 9"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0157"
+ },
+ {
+  "Question": "Recipe: 3 eggs, 850 g flour, 160 ml milk; bake at 180 C for 3 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0158"
+ },
+ {
+  "Question": "Our server at 144.99.69.253 is rejecting the key sk-proj-ugw0VlylDyagGyffjZWQWoV0JtUvcKU27Px1Xavb. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "144.99.69.253",
+   "api_key": "sk-proj-ugw0VlylDyagGyffjZWQWoV0JtUvcKU27Px1Xavb"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "ip_address",
+    "value": "144.99.69.253"
+   },
+   {
+    "start": 49,
+    "end": 97,
+    "type": "api_key",
+    "value": "sk-proj-ugw0VlylDyagGyffjZWQWoV0JtUvcKU27Px1Xavb"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 947,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0159"
+ },
+ {
+  "Question": "Please verify payroll: Florian Svensson, SSN 787-80-7569, card 5337 9166 1206 5060, start date September 8.",
+  "Answer-Key": {
+   "name": "Florian Svensson",
+   "ssn": "787-80-7569",
+   "credit_card": "5337 9166 1206 5060"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 39,
+    "type": "name",
+    "value": "Florian Svensson"
+   },
+   {
+    "start": 45,
+    "end": 56,
+    "type": "ssn",
+    "value": "787-80-7569"
+   },
+   {
+    "start": 63,
+    "end": 82,
+    "type": "credit_card",
+    "value": "5337 9166 1206 5060"
+   }
+  ],
+  "Keep": [
+   "September 8"
+  ],
+  "identity_id": 928,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0160"
+ },
+ {
+  "Question": "Write a recommendation letter for Samuel Becker, who interned with us at Orbital Freight in Coimbra.",
+  "Answer-Key": {
+   "name": "Samuel Becker",
+   "org": "Orbital Freight",
+   "gpe": "Coimbra"
+  },
+  "Spans": [
+   {
+    "start": 34,
+    "end": 47,
+    "type": "name",
+    "value": "Samuel Becker"
+   },
+   {
+    "start": 73,
+    "end": 88,
+    "type": "org",
+    "value": "Orbital Freight"
+   },
+   {
+    "start": 92,
+    "end": 99,
+    "type": "gpe",
+    "value": "Coimbra"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 962,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-31",
+  "id": "synth-test-0161"
+ },
+ {
+  "Question": "Set up a payment of $1961.04 to ES36 7415 7073 7361 2352 5736 (account holder Ismail Watanabe) on February 21.",
+  "Answer-Key": {
+   "iban": "ES36 7415 7073 7361 2352 5736",
+   "name": "Ismail Watanabe"
+  },
+  "Spans": [
+   {
+    "start": 32,
+    "end": 61,
+    "type": "iban",
+    "value": "ES36 7415 7073 7361 2352 5736"
+   },
+   {
+    "start": 78,
+    "end": 93,
+    "type": "name",
+    "value": "Ismail Watanabe"
+   }
+  ],
+  "Keep": [
+   "$1961.04",
+   "February 21"
+  ],
+  "identity_id": 1027,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0162"
+ },
+ {
+  "Question": "Annual report: 43989 units sold, 5500 returned, net 31000.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "43989",
+   "5500",
+   "31000"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0163"
+ },
+ {
+  "Question": "Book a table for 4 under Delgado, phone +1-587-890-6716, December 13 at 7pm.",
+  "Answer-Key": {
+   "name": "Delgado",
+   "phone": "+1-587-890-6716"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 32,
+    "type": "name",
+    "value": "Delgado"
+   },
+   {
+    "start": 40,
+    "end": 55,
+    "type": "phone",
+    "value": "+1-587-890-6716"
+   }
+  ],
+  "Keep": [
+   "December 13"
+  ],
+  "identity_id": 1008,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0164"
+ },
+ {
+  "Question": "hey its aisha fischer, can u remind me what Pinegrove Family Clinic pays for overtime? my number is +33 6 95 14 15 50",
+  "Answer-Key": {
+   "name": "aisha fischer",
+   "org": "Pinegrove Family Clinic",
+   "phone": "+33 6 95 14 15 50"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 21,
+    "type": "name",
+    "value": "aisha fischer"
+   },
+   {
+    "start": 44,
+    "end": 67,
+    "type": "org",
+    "value": "Pinegrove Family Clinic"
+   },
+   {
+    "start": 100,
+    "end": 117,
+    "type": "phone",
+    "value": "+33 6 95 14 15 50"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 901,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0165"
+ },
+ {
+  "Question": "SSH from 83.183.159.169 as @ana.codes failed: Permission denied (publickey). Key owner ana_dubois98@proton.me.",
+  "Answer-Key": {
+   "ip_address": "83.183.159.169",
+   "username": "@ana.codes",
+   "email": "ana_dubois98@proton.me"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 23,
+    "type": "ip_address",
+    "value": "83.183.159.169"
+   },
+   {
+    "start": 27,
+    "end": 37,
+    "type": "username",
+    "value": "@ana.codes"
+   },
+   {
+    "start": 87,
+    "end": 109,
+    "type": "email",
+    "value": "ana_dubois98@proton.me"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 936,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0166"
+ },
+ {
+  "Question": "Meet Dmitri Ivanova outside Quayside Accounting in Malmö; his number is 465-837-1175.",
+  "Answer-Key": {
+   "name": "Dmitri Ivanova",
+   "org": "Quayside Accounting",
+   "gpe": "Malmö",
+   "phone": "465-837-1175"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 19,
+    "type": "name",
+    "value": "Dmitri Ivanova"
+   },
+   {
+    "start": 28,
+    "end": 47,
+    "type": "org",
+    "value": "Quayside Accounting"
+   },
+   {
+    "start": 51,
+    "end": 56,
+    "type": "gpe",
+    "value": "Malmö"
+   },
+   {
+    "start": 72,
+    "end": 84,
+    "type": "phone",
+    "value": "465-837-1175"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1069,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0167"
+ },
+ {
+  "Question": "is ravivanderberg@yahoo.com still ravi's address or should i use github.com/ravi-van-der-berg?",
+  "Answer-Key": {
+   "email": "ravivanderberg@yahoo.com",
+   "name": "ravi",
+   "url": "github.com/ravi-van-der-berg"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 27,
+    "type": "email",
+    "value": "ravivanderberg@yahoo.com"
+   },
+   {
+    "start": 34,
+    "end": 38,
+    "type": "name",
+    "value": "ravi"
+   },
+   {
+    "start": 65,
+    "end": 93,
+    "type": "url",
+    "value": "github.com/ravi-van-der-berg"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1007,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0168"
+ },
+ {
+  "Question": "I live at 5793 Linden Avenue, Split 22894. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "5793 Linden Avenue",
+   "gpe": "Split",
+   "zip": "22894"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 28,
+    "type": "address",
+    "value": "5793 Linden Avenue"
+   },
+   {
+    "start": 30,
+    "end": 35,
+    "type": "gpe",
+    "value": "Split"
+   },
+   {
+    "start": 36,
+    "end": 41,
+    "type": "zip",
+    "value": "22894"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 987,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0169"
+ },
+ {
+  "Question": "I was born June 15, 1997 and I'm 29. Which retirement accounts can I open with Lumen Credit Union?",
+  "Answer-Key": {
+   "dob": "June 15, 1997",
+   "age": "29",
+   "org": "Lumen Credit Union"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 24,
+    "type": "dob",
+    "value": "June 15, 1997"
+   },
+   {
+    "start": 33,
+    "end": 35,
+    "type": "age",
+    "value": "29"
+   },
+   {
+    "start": 79,
+    "end": 97,
+    "type": "org",
+    "value": "Lumen Credit Union"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1110,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0170"
+ },
+ {
+  "Question": "Our server at 171.152.177.88 is rejecting the key xoxb-764399068973-573888823403-QtYzaIZq3m2LXaoz3c1911Bw. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "171.152.177.88",
+   "api_key": "xoxb-764399068973-573888823403-QtYzaIZq3m2LXaoz3c1911Bw"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "ip_address",
+    "value": "171.152.177.88"
+   },
+   {
+    "start": 50,
+    "end": 105,
+    "type": "api_key",
+    "value": "xoxb-764399068973-573888823403-QtYzaIZq3m2LXaoz3c1911Bw"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1083,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0171"
+ },
+ {
+  "Question": "Rank Google, Marie Curie biographies, and Kindle Paperwhite reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Google",
+   "Marie Curie",
+   "Kindle Paperwhite"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0172"
+ },
+ {
+  "Question": "Please text +49 30 7501 6079 and ask Rania Torres whether she still lives on 1796 Riverbend Drive.",
+  "Answer-Key": {
+   "phone": "+49 30 7501 6079",
+   "name": "Rania Torres",
+   "address": "1796 Riverbend Drive"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 28,
+    "type": "phone",
+    "value": "+49 30 7501 6079"
+   },
+   {
+    "start": 37,
+    "end": 49,
+    "type": "name",
+    "value": "Rania Torres"
+   },
+   {
+    "start": 77,
+    "end": 97,
+    "type": "address",
+    "value": "1796 Riverbend Drive"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1011,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0173"
+ },
+ {
+  "Question": "SSH from 24.137.66.177 as @gretaoliveira failed: Permission denied (publickey). Key owner oliveira.greta@northfieldlaw.co.uk.",
+  "Answer-Key": {
+   "ip_address": "24.137.66.177",
+   "username": "@gretaoliveira",
+   "email": "oliveira.greta@northfieldlaw.co.uk"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 22,
+    "type": "ip_address",
+    "value": "24.137.66.177"
+   },
+   {
+    "start": 26,
+    "end": 40,
+    "type": "username",
+    "value": "@gretaoliveira"
+   },
+   {
+    "start": 90,
+    "end": 124,
+    "type": "email",
+    "value": "oliveira.greta@northfieldlaw.co.uk"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1003,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0174"
+ },
+ {
+  "Question": "Explain how photosynthesis works and why leaves are green.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-07",
+  "id": "synth-test-0175"
+ },
+ {
+  "Question": "Our server at 217.169.200.165 is rejecting the key xoxb-101267642958-501664161557-tPKHu2FaS2suBKoLWOCrJNBR. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "217.169.200.165",
+   "api_key": "xoxb-101267642958-501664161557-tPKHu2FaS2suBKoLWOCrJNBR"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 29,
+    "type": "ip_address",
+    "value": "217.169.200.165"
+   },
+   {
+    "start": 51,
+    "end": 106,
+    "type": "api_key",
+    "value": "xoxb-101267642958-501664161557-tPKHu2FaS2suBKoLWOCrJNBR"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 944,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0176"
+ },
+ {
+  "Question": "Upgrade the firmware to version 2.7.6 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "2.7.6"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0177"
+ },
+ {
+  "Question": "Recipe: 4 eggs, 809 g flour, 543 ml milk; bake at 180 C for 4 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0178"
+ },
+ {
+  "Question": "Applicant: Katarzyna Lindqvist\nDate of birth: 19.03.1976\nSSN: 450-97-7204\nAddress: 3584 Aspen Trail, Aarhus 63551",
+  "Answer-Key": {
+   "name": "Katarzyna Lindqvist",
+   "dob": "19.03.1976",
+   "ssn": "450-97-7204",
+   "address": "3584 Aspen Trail",
+   "gpe": "Aarhus",
+   "zip": "63551"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 30,
+    "type": "name",
+    "value": "Katarzyna Lindqvist"
+   },
+   {
+    "start": 46,
+    "end": 56,
+    "type": "dob",
+    "value": "19.03.1976"
+   },
+   {
+    "start": 62,
+    "end": 73,
+    "type": "ssn",
+    "value": "450-97-7204"
+   },
+   {
+    "start": 83,
+    "end": 99,
+    "type": "address",
+    "value": "3584 Aspen Trail"
+   },
+   {
+    "start": 101,
+    "end": 107,
+    "type": "gpe",
+    "value": "Aarhus"
+   },
+   {
+    "start": 108,
+    "end": 113,
+    "type": "zip",
+    "value": "63551"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1061,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0179"
+ },
+ {
+  "Question": "Applicant: Esperanza Dubois\nDate of birth: 1950-07-01\nSSN: 127-61-7190\nAddress: 9686 Harbor View Rd, Split 39311",
+  "Answer-Key": {
+   "name": "Esperanza Dubois",
+   "dob": "1950-07-01",
+   "ssn": "127-61-7190",
+   "address": "9686 Harbor View Rd",
+   "gpe": "Split",
+   "zip": "39311"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 27,
+    "type": "name",
+    "value": "Esperanza Dubois"
+   },
+   {
+    "start": 43,
+    "end": 53,
+    "type": "dob",
+    "value": "1950-07-01"
+   },
+   {
+    "start": 59,
+    "end": 70,
+    "type": "ssn",
+    "value": "127-61-7190"
+   },
+   {
+    "start": 80,
+    "end": 99,
+    "type": "address",
+    "value": "9686 Harbor View Rd"
+   },
+   {
+    "start": 101,
+    "end": 106,
+    "type": "gpe",
+    "value": "Split"
+   },
+   {
+    "start": 107,
+    "end": 112,
+    "type": "zip",
+    "value": "39311"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1068,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0180"
+ },
+ {
+  "Question": "Book a table for 4 under Becker, phone +44 7974 718238, December 16, 2024 at 7pm.",
+  "Answer-Key": {
+   "name": "Becker",
+   "phone": "+44 7974 718238"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 31,
+    "type": "name",
+    "value": "Becker"
+   },
+   {
+    "start": 39,
+    "end": 54,
+    "type": "phone",
+    "value": "+44 7974 718238"
+   }
+  ],
+  "Keep": [
+   "December 16, 2024"
+  ],
+  "identity_id": 929,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0181"
+ },
+ {
+  "Question": "Upgrade the firmware to version 4.6.5 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "4.6.5"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0182"
+ },
+ {
+  "Question": "Our server at 188.240.112.184 is rejecting the key sk-proj-38Z959di3fNktwDYlfqWziRr5y9mcKxzY5UgCwJK. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "188.240.112.184",
+   "api_key": "sk-proj-38Z959di3fNktwDYlfqWziRr5y9mcKxzY5UgCwJK"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 29,
+    "type": "ip_address",
+    "value": "188.240.112.184"
+   },
+   {
+    "start": 51,
+    "end": 99,
+    "type": "api_key",
+    "value": "sk-proj-38Z959di3fNktwDYlfqWziRr5y9mcKxzY5UgCwJK"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1102,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0183"
+ },
+ {
+  "Question": "is felipe_becker75@sunhollow.edu still felipe's address or should i use github.com/felipe-becker?",
+  "Answer-Key": {
+   "email": "felipe_becker75@sunhollow.edu",
+   "name": "felipe",
+   "url": "github.com/felipe-becker"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 32,
+    "type": "email",
+    "value": "felipe_becker75@sunhollow.edu"
+   },
+   {
+    "start": 39,
+    "end": 45,
+    "type": "name",
+    "value": "felipe"
+   },
+   {
+    "start": 72,
+    "end": 96,
+    "type": "url",
+    "value": "github.com/felipe-becker"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1109,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0184"
+ },
+ {
+  "Question": "Meet Noor Khan outside Calder & Finch LLP in Graz; her number is +33 6 25 65 70 73.",
+  "Answer-Key": {
+   "name": "Noor Khan",
+   "org": "Calder & Finch LLP",
+   "gpe": "Graz",
+   "phone": "+33 6 25 65 70 73"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 14,
+    "type": "name",
+    "value": "Noor Khan"
+   },
+   {
+    "start": 23,
+    "end": 41,
+    "type": "org",
+    "value": "Calder & Finch LLP"
+   },
+   {
+    "start": 45,
+    "end": 49,
+    "type": "gpe",
+    "value": "Graz"
+   },
+   {
+    "start": 65,
+    "end": 82,
+    "type": "phone",
+    "value": "+33 6 25 65 70 73"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 953,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0185"
+ },
+ {
+  "Question": "Please verify payroll: Camila Ferrari, SSN 221-39-7172, card 4727889349304576, start date July 15.",
+  "Answer-Key": {
+   "name": "Camila Ferrari",
+   "ssn": "221-39-7172",
+   "credit_card": "4727889349304576"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 37,
+    "type": "name",
+    "value": "Camila Ferrari"
+   },
+   {
+    "start": 43,
+    "end": 54,
+    "type": "ssn",
+    "value": "221-39-7172"
+   },
+   {
+    "start": 61,
+    "end": 77,
+    "type": "credit_card",
+    "value": "4727889349304576"
+   }
+  ],
+  "Keep": [
+   "July 15"
+  ],
+  "identity_id": 980,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0186"
+ },
+ {
+  "Question": "Can you check whether IBAN NL61 EWUC 3704 6744 21 belongs to Nasser Nguyen? I need to send $3895.89 by May 27.",
+  "Answer-Key": {
+   "iban": "NL61 EWUC 3704 6744 21",
+   "name": "Nasser Nguyen"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 49,
+    "type": "iban",
+    "value": "NL61 EWUC 3704 6744 21"
+   },
+   {
+    "start": 61,
+    "end": 74,
+    "type": "name",
+    "value": "Nasser Nguyen"
+   }
+  ],
+  "Keep": [
+   "$3895.89",
+   "May 27"
+  ],
+  "identity_id": 1060,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0187"
+ },
+ {
+  "Question": "Tracking #45878 says delivered on June 13, 2025 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "#45878",
+   "June 13, 2025"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0188"
+ },
+ {
+  "Question": "Meu nome é Yusuf Mwangi, meu telefone é +91 88384 43839 e trabalho na Redfern Physiotherapy.",
+  "Answer-Key": {
+   "name": "Yusuf Mwangi",
+   "phone": "+91 88384 43839",
+   "org": "Redfern Physiotherapy"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 23,
+    "type": "name",
+    "value": "Yusuf Mwangi"
+   },
+   {
+    "start": 40,
+    "end": 55,
+    "type": "phone",
+    "value": "+91 88384 43839"
+   },
+   {
+    "start": 70,
+    "end": 91,
+    "type": "org",
+    "value": "Redfern Physiotherapy"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1079,
+  "gender": "m",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0189"
+ },
+ {
+  "Question": "Meu nome é Gustavo Johansson, meu telefone é 329.745.8804 e trabalho na Ashgrove Veterinary Hospital.",
+  "Answer-Key": {
+   "name": "Gustavo Johansson",
+   "phone": "329.745.8804",
+   "org": "Ashgrove Veterinary Hospital"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 28,
+    "type": "name",
+    "value": "Gustavo Johansson"
+   },
+   {
+    "start": 45,
+    "end": 57,
+    "type": "phone",
+    "value": "329.745.8804"
+   },
+   {
+    "start": 72,
+    "end": 100,
+    "type": "org",
+    "value": "Ashgrove Veterinary Hospital"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 918,
+  "gender": "m",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0190"
+ },
+ {
+  "Question": "Please text +44 7117 256919 and ask Cormac Adeyemi whether he still lives on 2121 Riverbend Drive.",
+  "Answer-Key": {
+   "phone": "+44 7117 256919",
+   "name": "Cormac Adeyemi",
+   "address": "2121 Riverbend Drive"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+44 7117 256919"
+   },
+   {
+    "start": 36,
+    "end": 50,
+    "type": "name",
+    "value": "Cormac Adeyemi"
+   },
+   {
+    "start": 77,
+    "end": 97,
+    "type": "address",
+    "value": "2121 Riverbend Drive"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 934,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0191"
+ },
+ {
+  "Question": "Please verify payroll: Ibrahim Hoffmann, SSN 075-45-0156, card 5117 2774 3045 2824, start date July 25.",
+  "Answer-Key": {
+   "name": "Ibrahim Hoffmann",
+   "ssn": "075-45-0156",
+   "credit_card": "5117 2774 3045 2824"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 39,
+    "type": "name",
+    "value": "Ibrahim Hoffmann"
+   },
+   {
+    "start": 45,
+    "end": 56,
+    "type": "ssn",
+    "value": "075-45-0156"
+   },
+   {
+    "start": 63,
+    "end": 82,
+    "type": "credit_card",
+    "value": "5117 2774 3045 2824"
+   }
+  ],
+  "Keep": [
+   "July 25"
+  ],
+  "identity_id": 969,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0192"
+ },
+ {
+  "Question": "SELECT id, created_at FROM orders WHERE total > 5997 AND status = 'SHIPPED';",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "5997"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-23",
+  "id": "synth-test-0193"
+ },
+ {
+  "Question": "I was born September 20, 1957 and I'm 69. Which retirement accounts can I open with Ironbridge Fitness?",
+  "Answer-Key": {
+   "dob": "September 20, 1957",
+   "age": "69",
+   "org": "Ironbridge Fitness"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 29,
+    "type": "dob",
+    "value": "September 20, 1957"
+   },
+   {
+    "start": 38,
+    "end": 40,
+    "type": "age",
+    "value": "69"
+   },
+   {
+    "start": 84,
+    "end": 102,
+    "type": "org",
+    "value": "Ironbridge Fitness"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1024,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0194"
+ },
+ {
+  "Question": "Grow 9 tomato plants in 90 L pots: how much water per day?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-39",
+  "id": "synth-test-0195"
+ },
+ {
+  "Question": "Set up a payment of $1163.94 to DE38444154771441937725 (account holder Aarav Garcia) on September 17, 2026.",
+  "Answer-Key": {
+   "iban": "DE38444154771441937725",
+   "name": "Aarav Garcia"
+  },
+  "Spans": [
+   {
+    "start": 32,
+    "end": 54,
+    "type": "iban",
+    "value": "DE38444154771441937725"
+   },
+   {
+    "start": 71,
+    "end": 83,
+    "type": "name",
+    "value": "Aarav Garcia"
+   }
+  ],
+  "Keep": [
+   "$1163.94",
+   "September 17, 2026"
+  ],
+  "identity_id": 975,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-39",
+  "id": "synth-test-0196"
+ },
+ {
+  "Question": "Book a table for 4 under Mahlangu, phone (202) 260-3310, October 7, 2025 at 7pm.",
+  "Answer-Key": {
+   "name": "Mahlangu",
+   "phone": "(202) 260-3310"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 33,
+    "type": "name",
+    "value": "Mahlangu"
+   },
+   {
+    "start": 41,
+    "end": 55,
+    "type": "phone",
+    "value": "(202) 260-3310"
+   }
+  ],
+  "Keep": [
+   "October 7, 2025"
+  ],
+  "identity_id": 1118,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0197"
+ },
+ {
+  "Question": "hey its ngozi kowalski, can u remind me what Lumen Credit Union pays for overtime? my number is +91 86586 34772",
+  "Answer-Key": {
+   "name": "ngozi kowalski",
+   "org": "Lumen Credit Union",
+   "phone": "+91 86586 34772"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 22,
+    "type": "name",
+    "value": "ngozi kowalski"
+   },
+   {
+    "start": 45,
+    "end": 63,
+    "type": "org",
+    "value": "Lumen Credit Union"
+   },
+   {
+    "start": 96,
+    "end": 111,
+    "type": "phone",
+    "value": "+91 86586 34772"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 986,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0198"
+ },
+ {
+  "Question": "Book a table for 4 under Delgado, phone +1-702-829-4493, October 1, 2025 at 7pm.",
+  "Answer-Key": {
+   "name": "Delgado",
+   "phone": "+1-702-829-4493"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 32,
+    "type": "name",
+    "value": "Delgado"
+   },
+   {
+    "start": 40,
+    "end": 55,
+    "type": "phone",
+    "value": "+1-702-829-4493"
+   }
+  ],
+  "Keep": [
+   "October 1, 2025"
+  ],
+  "identity_id": 1091,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0199"
+ },
+ {
+  "Question": "SELECT id, created_at FROM orders WHERE total > 2778 AND status = 'SHIPPED';",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "2778"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-23",
+  "id": "synth-test-0200"
+ },
+ {
+  "Question": "Error 5786617604: connection reset after 31553 ms (build 10.3.4).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "5786617604",
+   "31553",
+   "10.3.4"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0201"
+ },
+ {
+  "Question": "Explain how photosynthesis works and why leaves are green.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-07",
+  "id": "synth-test-0202"
+ },
+ {
+  "Question": "hey its sam mwangi, can u remind me what St. Brigid's Primary School pays for overtime? my number is +1-489-629-5903",
+  "Answer-Key": {
+   "name": "sam mwangi",
+   "org": "St. Brigid's Primary School",
+   "phone": "+1-489-629-5903"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 18,
+    "type": "name",
+    "value": "sam mwangi"
+   },
+   {
+    "start": 41,
+    "end": 68,
+    "type": "org",
+    "value": "St. Brigid's Primary School"
+   },
+   {
+    "start": 101,
+    "end": 116,
+    "type": "phone",
+    "value": "+1-489-629-5903"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 994,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0203"
+ },
+ {
+  "Question": "Rank Microsoft, Serena Williams biographies, and Surface Pro 9 reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Microsoft",
+   "Serena Williams",
+   "Surface Pro 9"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0204"
+ },
+ {
+  "Question": "Meet Emeka Kapoor outside Quayside Accounting in Galway; his number is +91 85278 31641.",
+  "Answer-Key": {
+   "name": "Emeka Kapoor",
+   "org": "Quayside Accounting",
+   "gpe": "Galway",
+   "phone": "+91 85278 31641"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 17,
+    "type": "name",
+    "value": "Emeka Kapoor"
+   },
+   {
+    "start": 26,
+    "end": 45,
+    "type": "org",
+    "value": "Quayside Accounting"
+   },
+   {
+    "start": 49,
+    "end": 55,
+    "type": "gpe",
+    "value": "Galway"
+   },
+   {
+    "start": 71,
+    "end": 86,
+    "type": "phone",
+    "value": "+91 85278 31641"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 995,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0205"
+ },
+ {
+  "Question": "Applicant: Rosalind Dubois\nDate of birth: April 11, 1996\nSSN: 632-52-7906\nAddress: 5670 Magnolia Pl, Fresno 91955",
+  "Answer-Key": {
+   "name": "Rosalind Dubois",
+   "dob": "April 11, 1996",
+   "ssn": "632-52-7906",
+   "address": "5670 Magnolia Pl",
+   "gpe": "Fresno",
+   "zip": "91955"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 26,
+    "type": "name",
+    "value": "Rosalind Dubois"
+   },
+   {
+    "start": 42,
+    "end": 56,
+    "type": "dob",
+    "value": "April 11, 1996"
+   },
+   {
+    "start": 62,
+    "end": 73,
+    "type": "ssn",
+    "value": "632-52-7906"
+   },
+   {
+    "start": 83,
+    "end": 99,
+    "type": "address",
+    "value": "5670 Magnolia Pl"
+   },
+   {
+    "start": 101,
+    "end": 107,
+    "type": "gpe",
+    "value": "Fresno"
+   },
+   {
+    "start": 108,
+    "end": 113,
+    "type": "zip",
+    "value": "91955"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1046,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0206"
+ },
+ {
+  "Question": "Which is older, Barack Obama or Ada Lovelace?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Barack Obama",
+   "Ada Lovelace"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-31",
+  "id": "synth-test-0207"
+ },
+ {
+  "Question": "Can you check whether IBAN ES6807175085420135514913 belongs to Rafael Pham? I need to send £382 by May 19, 2027.",
+  "Answer-Key": {
+   "iban": "ES6807175085420135514913",
+   "name": "Rafael Pham"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 51,
+    "type": "iban",
+    "value": "ES6807175085420135514913"
+   },
+   {
+    "start": 63,
+    "end": 74,
+    "type": "name",
+    "value": "Rafael Pham"
+   }
+  ],
+  "Keep": [
+   "£382",
+   "May 19, 2027"
+  ],
+  "identity_id": 915,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0208"
+ },
+ {
+  "Question": "Rank Netflix, Serena Williams biographies, and Pixel 8 reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Netflix",
+   "Serena Williams",
+   "Pixel 8"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0209"
+ },
+ {
+  "Question": "Book a table for 4 under Garcia, phone 634.712.8057, July 12, 2027 at 7pm.",
+  "Answer-Key": {
+   "name": "Garcia",
+   "phone": "634.712.8057"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 31,
+    "type": "name",
+    "value": "Garcia"
+   },
+   {
+    "start": 39,
+    "end": 51,
+    "type": "phone",
+    "value": "634.712.8057"
+   }
+  ],
+  "Keep": [
+   "July 12, 2027"
+  ],
+  "identity_id": 909,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0210"
+ },
+ {
+  "Question": "Which is older, Barack Obama or Albert Einstein?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Barack Obama",
+   "Albert Einstein"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-31",
+  "id": "synth-test-0211"
+ },
+ {
+  "Question": "export API_KEY=sk-proj-SBFMGPzKT5ic4wSVTAoq4vz2C3fEG6A6LrvgORi2\n# owner: esposito.ngozi@quayside.nl",
+  "Answer-Key": {
+   "api_key": "sk-proj-SBFMGPzKT5ic4wSVTAoq4vz2C3fEG6A6LrvgORi2",
+   "email": "esposito.ngozi@quayside.nl"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 63,
+    "type": "api_key",
+    "value": "sk-proj-SBFMGPzKT5ic4wSVTAoq4vz2C3fEG6A6LrvgORi2"
+   },
+   {
+    "start": 73,
+    "end": 99,
+    "type": "email",
+    "value": "esposito.ngozi@quayside.nl"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1044,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0212"
+ },
+ {
+  "Question": "{\"customer\": \"Dmitri Novak\", \"email\": \"dmitri.novak@quayside.nl\", \"phone\": \"(502) 829-8411\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Dmitri Novak",
+   "email": "dmitri.novak@quayside.nl",
+   "phone": "(502) 829-8411"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 26,
+    "type": "name",
+    "value": "Dmitri Novak"
+   },
+   {
+    "start": 39,
+    "end": 63,
+    "type": "email",
+    "value": "dmitri.novak@quayside.nl"
+   },
+   {
+    "start": 76,
+    "end": 90,
+    "type": "phone",
+    "value": "(502) 829-8411"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1055,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0213"
+ },
+ {
+  "Question": "Please text +44 7813 949488 and ask Isabel Petrov whether she still lives on 3119 Laurel Street, Apt 13D.",
+  "Answer-Key": {
+   "phone": "+44 7813 949488",
+   "name": "Isabel Petrov",
+   "address": "3119 Laurel Street, Apt 13D"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 27,
+    "type": "phone",
+    "value": "+44 7813 949488"
+   },
+   {
+    "start": 36,
+    "end": 49,
+    "type": "name",
+    "value": "Isabel Petrov"
+   },
+   {
+    "start": 77,
+    "end": 104,
+    "type": "address",
+    "value": "3119 Laurel Street, Apt 13D"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 903,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0214"
+ },
+ {
+  "Question": "Our server at 19.174.174.48 is rejecting the key xoxb-168552320877-682832245668-u7KXp8outwQzvx1WZTnRjxOw. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "19.174.174.48",
+   "api_key": "xoxb-168552320877-682832245668-u7KXp8outwQzvx1WZTnRjxOw"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "ip_address",
+    "value": "19.174.174.48"
+   },
+   {
+    "start": 49,
+    "end": 104,
+    "type": "api_key",
+    "value": "xoxb-168552320877-682832245668-u7KXp8outwQzvx1WZTnRjxOw"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1049,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0215"
+ },
+ {
+  "Question": "Rank Nvidia, Nelson Mandela biographies, and iPhone 15 reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Nvidia",
+   "Nelson Mandela",
+   "iPhone 15"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0216"
+ },
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0217"
+ },
+ {
+  "Question": "Please verify payroll: Olga Horvat, SSN 119-43-9604, card 5461545938012932, start date March 4.",
+  "Answer-Key": {
+   "name": "Olga Horvat",
+   "ssn": "119-43-9604",
+   "credit_card": "5461545938012932"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 34,
+    "type": "name",
+    "value": "Olga Horvat"
+   },
+   {
+    "start": 40,
+    "end": 51,
+    "type": "ssn",
+    "value": "119-43-9604"
+   },
+   {
+    "start": 58,
+    "end": 74,
+    "type": "credit_card",
+    "value": "5461545938012932"
+   }
+  ],
+  "Keep": [
+   "March 4"
+  ],
+  "identity_id": 1013,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0218"
+ },
+ {
+  "Question": "Annual report: 10858 units sold, 5604 returned, net 44327.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "10858",
+   "5604",
+   "44327"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0219"
+ },
+ {
+  "Question": "Meet Diego Van der Berg outside Ironbridge Fitness in Galway; his number is +49 30 8566 8778.",
+  "Answer-Key": {
+   "name": "Diego Van der Berg",
+   "org": "Ironbridge Fitness",
+   "gpe": "Galway",
+   "phone": "+49 30 8566 8778"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 23,
+    "type": "name",
+    "value": "Diego Van der Berg"
+   },
+   {
+    "start": 32,
+    "end": 50,
+    "type": "org",
+    "value": "Ironbridge Fitness"
+   },
+   {
+    "start": 54,
+    "end": 60,
+    "type": "gpe",
+    "value": "Galway"
+   },
+   {
+    "start": 76,
+    "end": 92,
+    "type": "phone",
+    "value": "+49 30 8566 8778"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 999,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0220"
+ },
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0221"
+ },
+ {
+  "Question": "Please text (625) 772-2527 and ask Henrik Osei whether he still lives on 4047 Hawthorn Close.",
+  "Answer-Key": {
+   "phone": "(625) 772-2527",
+   "name": "Henrik Osei",
+   "address": "4047 Hawthorn Close"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 26,
+    "type": "phone",
+    "value": "(625) 772-2527"
+   },
+   {
+    "start": 35,
+    "end": 46,
+    "type": "name",
+    "value": "Henrik Osei"
+   },
+   {
+    "start": 73,
+    "end": 92,
+    "type": "address",
+    "value": "4047 Hawthorn Close"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1093,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0222"
+ },
+ {
+  "Question": "Our server at 62.156.80.33 is rejecting the key AKIAKDWM90XHUHQU3G8R. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "62.156.80.33",
+   "api_key": "AKIAKDWM90XHUHQU3G8R"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 26,
+    "type": "ip_address",
+    "value": "62.156.80.33"
+   },
+   {
+    "start": 48,
+    "end": 68,
+    "type": "api_key",
+    "value": "AKIAKDWM90XHUHQU3G8R"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 902,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0223"
+ },
+ {
+  "Question": "Applicant: Dmitri Hoffmann\nDate of birth: 02/07/1968\nSSN: 521-30-7380\nAddress: 8374 Foxglove Ct, Boulder 46088",
+  "Answer-Key": {
+   "name": "Dmitri Hoffmann",
+   "dob": "02/07/1968",
+   "ssn": "521-30-7380",
+   "address": "8374 Foxglove Ct",
+   "gpe": "Boulder",
+   "zip": "46088"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 26,
+    "type": "name",
+    "value": "Dmitri Hoffmann"
+   },
+   {
+    "start": 42,
+    "end": 52,
+    "type": "dob",
+    "value": "02/07/1968"
+   },
+   {
+    "start": 58,
+    "end": 69,
+    "type": "ssn",
+    "value": "521-30-7380"
+   },
+   {
+    "start": 79,
+    "end": 95,
+    "type": "address",
+    "value": "8374 Foxglove Ct"
+   },
+   {
+    "start": 97,
+    "end": 104,
+    "type": "gpe",
+    "value": "Boulder"
+   },
+   {
+    "start": 105,
+    "end": 110,
+    "type": "zip",
+    "value": "46088"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1016,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0224"
+ },
+ {
+  "Question": "Meet Ismail Lindqvist outside Tidepool Health Clinic in Ithaca; his number is 491-815-4380.",
+  "Answer-Key": {
+   "name": "Ismail Lindqvist",
+   "org": "Tidepool Health Clinic",
+   "gpe": "Ithaca",
+   "phone": "491-815-4380"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 21,
+    "type": "name",
+    "value": "Ismail Lindqvist"
+   },
+   {
+    "start": 30,
+    "end": 52,
+    "type": "org",
+    "value": "Tidepool Health Clinic"
+   },
+   {
+    "start": 56,
+    "end": 62,
+    "type": "gpe",
+    "value": "Ithaca"
+   },
+   {
+    "start": 78,
+    "end": 90,
+    "type": "phone",
+    "value": "491-815-4380"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 951,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0225"
+ },
+ {
+  "Question": "Can you check whether IBAN DE30 9188 0269 2971 7548 54 belongs to Ngozi Kaplan? I need to send £687 by August 25, 2026.",
+  "Answer-Key": {
+   "iban": "DE30 9188 0269 2971 7548 54",
+   "name": "Ngozi Kaplan"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 54,
+    "type": "iban",
+    "value": "DE30 9188 0269 2971 7548 54"
+   },
+   {
+    "start": 66,
+    "end": 78,
+    "type": "name",
+    "value": "Ngozi Kaplan"
+   }
+  ],
+  "Keep": [
+   "£687",
+   "August 25, 2026"
+  ],
+  "identity_id": 1017,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0226"
+ },
+ {
+  "Question": "Book a table for 4 under Lindqvist, phone +44 7414 529165, September 26, 2027 at 7pm.",
+  "Answer-Key": {
+   "name": "Lindqvist",
+   "phone": "+44 7414 529165"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 34,
+    "type": "name",
+    "value": "Lindqvist"
+   },
+   {
+    "start": 42,
+    "end": 57,
+    "type": "phone",
+    "value": "+44 7414 529165"
+   }
+  ],
+  "Keep": [
+   "September 26, 2027"
+  ],
+  "identity_id": 911,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0227"
+ },
+ {
+  "Question": "I live at 1394 Juniper Drive, Tartu 61443. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "1394 Juniper Drive",
+   "gpe": "Tartu",
+   "zip": "61443"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 28,
+    "type": "address",
+    "value": "1394 Juniper Drive"
+   },
+   {
+    "start": 30,
+    "end": 35,
+    "type": "gpe",
+    "value": "Tartu"
+   },
+   {
+    "start": 36,
+    "end": 41,
+    "type": "zip",
+    "value": "61443"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1050,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0228"
+ },
+ {
+  "Question": "I was born 10 November 1990 and I'm 36. Which retirement accounts can I open with Quayside Accounting?",
+  "Answer-Key": {
+   "dob": "10 November 1990",
+   "age": "36",
+   "org": "Quayside Accounting"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 27,
+    "type": "dob",
+    "value": "10 November 1990"
+   },
+   {
+    "start": 36,
+    "end": 38,
+    "type": "age",
+    "value": "36"
+   },
+   {
+    "start": 82,
+    "end": 101,
+    "type": "org",
+    "value": "Quayside Accounting"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 981,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0229"
+ },
+ {
+  "Question": "Recipe: 7 eggs, 719 g flour, 753 ml milk; bake at 180 C for 7 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0230"
+ },
+ {
+  "Question": "is nora.johansson@sunhollow.edu still nora's address or should i use github.com/nora-johansson?",
+  "Answer-Key": {
+   "email": "nora.johansson@sunhollow.edu",
+   "name": "nora",
+   "url": "github.com/nora-johansson"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 31,
+    "type": "email",
+    "value": "nora.johansson@sunhollow.edu"
+   },
+   {
+    "start": 38,
+    "end": 42,
+    "type": "name",
+    "value": "nora"
+   },
+   {
+    "start": 69,
+    "end": 94,
+    "type": "url",
+    "value": "github.com/nora-johansson"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1108,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0231"
+ },
+ {
+  "Question": "Please verify payroll: Cormac Patel, SSN 546-94-3863, card 5312 7409 2987 9511, start date April 28, 2026.",
+  "Answer-Key": {
+   "name": "Cormac Patel",
+   "ssn": "546-94-3863",
+   "credit_card": "5312 7409 2987 9511"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 35,
+    "type": "name",
+    "value": "Cormac Patel"
+   },
+   {
+    "start": 41,
+    "end": 52,
+    "type": "ssn",
+    "value": "546-94-3863"
+   },
+   {
+    "start": 59,
+    "end": 78,
+    "type": "credit_card",
+    "value": "5312 7409 2987 9511"
+   }
+  ],
+  "Keep": [
+   "April 28, 2026"
+  ],
+  "identity_id": 1053,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0232"
+ },
+ {
+  "Question": "hey its camila fernandes, can u remind me what Brightwater Logistics pays for overtime? my number is +44 7372 362296",
+  "Answer-Key": {
+   "name": "camila fernandes",
+   "org": "Brightwater Logistics",
+   "phone": "+44 7372 362296"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 24,
+    "type": "name",
+    "value": "camila fernandes"
+   },
+   {
+    "start": 47,
+    "end": 68,
+    "type": "org",
+    "value": "Brightwater Logistics"
+   },
+   {
+    "start": 101,
+    "end": 116,
+    "type": "phone",
+    "value": "+44 7372 362296"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 912,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0233"
+ },
+ {
+  "Question": "SSH from 142.199.246.105 as @the_oliveira failed: Permission denied (publickey). Key owner ravi_oliveira10@hotmail.com.",
+  "Answer-Key": {
+   "ip_address": "142.199.246.105",
+   "username": "@the_oliveira",
+   "email": "ravi_oliveira10@hotmail.com"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 24,
+    "type": "ip_address",
+    "value": "142.199.246.105"
+   },
+   {
+    "start": 28,
+    "end": 41,
+    "type": "username",
+    "value": "@the_oliveira"
+   },
+   {
+    "start": 91,
+    "end": 118,
+    "type": "email",
+    "value": "ravi_oliveira10@hotmail.com"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 927,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0234"
+ },
+ {
+  "Question": "{\"customer\": \"Sofia Oliveira\", \"email\": \"sofia_oliveira57@yahoo.com\", \"phone\": \"+91 79191 59178\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Sofia Oliveira",
+   "email": "sofia_oliveira57@yahoo.com",
+   "phone": "+91 79191 59178"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "name",
+    "value": "Sofia Oliveira"
+   },
+   {
+    "start": 41,
+    "end": 67,
+    "type": "email",
+    "value": "sofia_oliveira57@yahoo.com"
+   },
+   {
+    "start": 80,
+    "end": 95,
+    "type": "phone",
+    "value": "+91 79191 59178"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 998,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0235"
+ },
+ {
+  "Question": "Maite Kapoor (75) from Rosario won the Sunhollow Community College raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Maite Kapoor",
+   "age": "75",
+   "gpe": "Rosario",
+   "org": "Sunhollow Community College"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 12,
+    "type": "name",
+    "value": "Maite Kapoor"
+   },
+   {
+    "start": 14,
+    "end": 16,
+    "type": "age",
+    "value": "75"
+   },
+   {
+    "start": 23,
+    "end": 30,
+    "type": "gpe",
+    "value": "Rosario"
+   },
+   {
+    "start": 39,
+    "end": 66,
+    "type": "org",
+    "value": "Sunhollow Community College"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1032,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0236"
+ },
+ {
+  "Question": "{\"customer\": \"Kavya Mwangi\", \"email\": \"kavya.mwangi@orbitalfreight.com\", \"phone\": \"369.652.4645\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Kavya Mwangi",
+   "email": "kavya.mwangi@orbitalfreight.com",
+   "phone": "369.652.4645"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 26,
+    "type": "name",
+    "value": "Kavya Mwangi"
+   },
+   {
+    "start": 39,
+    "end": 70,
+    "type": "email",
+    "value": "kavya.mwangi@orbitalfreight.com"
+   },
+   {
+    "start": 83,
+    "end": 95,
+    "type": "phone",
+    "value": "369.652.4645"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 982,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0237"
+ },
+ {
+  "Question": "Explain how photosynthesis works and why leaves are green.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-07",
+  "id": "synth-test-0238"
+ },
+ {
+  "Question": "{\"customer\": \"Sakura Ivanova\", \"email\": \"sakura.ivanova@tidepoolhealth.org\", \"phone\": \"+91 96550 86073\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Sakura Ivanova",
+   "email": "sakura.ivanova@tidepoolhealth.org",
+   "phone": "+91 96550 86073"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "name",
+    "value": "Sakura Ivanova"
+   },
+   {
+    "start": 41,
+    "end": 74,
+    "type": "email",
+    "value": "sakura.ivanova@tidepoolhealth.org"
+   },
+   {
+    "start": 87,
+    "end": 102,
+    "type": "phone",
+    "value": "+91 96550 86073"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1037,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0239"
+ },
+ {
+  "Question": "I live at 6192 Riverbend Drive, Moncton 56981. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "6192 Riverbend Drive",
+   "gpe": "Moncton",
+   "zip": "56981"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 30,
+    "type": "address",
+    "value": "6192 Riverbend Drive"
+   },
+   {
+    "start": 32,
+    "end": 39,
+    "type": "gpe",
+    "value": "Moncton"
+   },
+   {
+    "start": 40,
+    "end": 45,
+    "type": "zip",
+    "value": "56981"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1006,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0240"
+ },
+ {
+  "Question": "is gabrielawatanabe@lumenbank.es still gabriela's address or should i use linkedin.com/in/gabriela-watanabe-771?",
+  "Answer-Key": {
+   "email": "gabrielawatanabe@lumenbank.es",
+   "name": "gabriela",
+   "url": "linkedin.com/in/gabriela-watanabe-771"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 32,
+    "type": "email",
+    "value": "gabrielawatanabe@lumenbank.es"
+   },
+   {
+    "start": 39,
+    "end": 47,
+    "type": "name",
+    "value": "gabriela"
+   },
+   {
+    "start": 74,
+    "end": 111,
+    "type": "url",
+    "value": "linkedin.com/in/gabriela-watanabe-771"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 985,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0241"
+ },
+ {
+  "Question": "Our server at 13.77.181.135 is rejecting the key ghp_gyEBsCj0PXYWLn55liKUv2tZ6QWoRlQx4at1. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "13.77.181.135",
+   "api_key": "ghp_gyEBsCj0PXYWLn55liKUv2tZ6QWoRlQx4at1"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "ip_address",
+    "value": "13.77.181.135"
+   },
+   {
+    "start": 49,
+    "end": 89,
+    "type": "api_key",
+    "value": "ghp_gyEBsCj0PXYWLn55liKUv2tZ6QWoRlQx4at1"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1097,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0242"
+ },
+ {
+  "Question": "I was born 07/15/1990 and I'm 36. Which retirement accounts can I open with Ashgrove Veterinary Hospital?",
+  "Answer-Key": {
+   "dob": "07/15/1990",
+   "age": "36",
+   "org": "Ashgrove Veterinary Hospital"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 21,
+    "type": "dob",
+    "value": "07/15/1990"
+   },
+   {
+    "start": 30,
+    "end": 32,
+    "type": "age",
+    "value": "36"
+   },
+   {
+    "start": 76,
+    "end": 104,
+    "type": "org",
+    "value": "Ashgrove Veterinary Hospital"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1088,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0243"
+ },
+ {
+  "Question": "Book a table for 4 under Fernandes, phone 259.355.8608, October 3 at 7pm.",
+  "Answer-Key": {
+   "name": "Fernandes",
+   "phone": "259.355.8608"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 34,
+    "type": "name",
+    "value": "Fernandes"
+   },
+   {
+    "start": 42,
+    "end": 54,
+    "type": "phone",
+    "value": "259.355.8608"
+   }
+  ],
+  "Keep": [
+   "October 3"
+  ],
+  "identity_id": 1122,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0244"
+ },
+ {
+  "Question": "Our server at 158.76.231.56 is rejecting the key AKIA805RK5DCS60TQ4G4. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "158.76.231.56",
+   "api_key": "AKIA805RK5DCS60TQ4G4"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "ip_address",
+    "value": "158.76.231.56"
+   },
+   {
+    "start": 49,
+    "end": 69,
+    "type": "api_key",
+    "value": "AKIA805RK5DCS60TQ4G4"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 965,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0245"
+ },
+ {
+  "Question": "export API_KEY=xoxb-786514986600-660977608319-R2Jlk5gCL8sqIW76DzGY3cyO\n# owner: ismail.pham36@copperleaf.in",
+  "Answer-Key": {
+   "api_key": "xoxb-786514986600-660977608319-R2Jlk5gCL8sqIW76DzGY3cyO",
+   "email": "ismail.pham36@copperleaf.in"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 70,
+    "type": "api_key",
+    "value": "xoxb-786514986600-660977608319-R2Jlk5gCL8sqIW76DzGY3cyO"
+   },
+   {
+    "start": 80,
+    "end": 107,
+    "type": "email",
+    "value": "ismail.pham36@copperleaf.in"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1075,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0246"
+ },
+ {
+  "Question": "is aarav.kapoor38@gmail.com still aarav's address or should i use github.com/aarav-kapoor?",
+  "Answer-Key": {
+   "email": "aarav.kapoor38@gmail.com",
+   "name": "aarav",
+   "url": "github.com/aarav-kapoor"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 27,
+    "type": "email",
+    "value": "aarav.kapoor38@gmail.com"
+   },
+   {
+    "start": 34,
+    "end": 39,
+    "type": "name",
+    "value": "aarav"
+   },
+   {
+    "start": 66,
+    "end": 89,
+    "type": "url",
+    "value": "github.com/aarav-kapoor"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1081,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0247"
+ },
+ {
+  "Question": "Error 8064906815: connection reset after 18851 ms (build 1.15.6).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "8064906815",
+   "18851",
+   "1.15.6"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0248"
+ },
+ {
+  "Question": "Please text (664) 498-8154 and ask Florian Mwangi whether he still lives on 6904 Linden Avenue.",
+  "Answer-Key": {
+   "phone": "(664) 498-8154",
+   "name": "Florian Mwangi",
+   "address": "6904 Linden Avenue"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 26,
+    "type": "phone",
+    "value": "(664) 498-8154"
+   },
+   {
+    "start": 35,
+    "end": 49,
+    "type": "name",
+    "value": "Florian Mwangi"
+   },
+   {
+    "start": 76,
+    "end": 94,
+    "type": "address",
+    "value": "6904 Linden Avenue"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 943,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0249"
+ },
+ {
+  "Question": "Tracking #31637 says delivered on September 2, 2027 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "#31637",
+   "September 2, 2027"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0250"
+ },
+ {
+  "Question": "Wie funktioniert die Photosynthese bei Pflanzen?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "de",
+  "template": "neg-35",
+  "id": "synth-test-0251"
+ },
+ {
+  "Question": "Please text +33 6 94 55 29 77 and ask Rosalind Patel whether she still lives on 9131 Aspen Trail.",
+  "Answer-Key": {
+   "phone": "+33 6 94 55 29 77",
+   "name": "Rosalind Patel",
+   "address": "9131 Aspen Trail"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 29,
+    "type": "phone",
+    "value": "+33 6 94 55 29 77"
+   },
+   {
+    "start": 38,
+    "end": 52,
+    "type": "name",
+    "value": "Rosalind Patel"
+   },
+   {
+    "start": 80,
+    "end": 96,
+    "type": "address",
+    "value": "9131 Aspen Trail"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 974,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0252"
+ },
+ {
+  "Question": "Is Tesla stock a good buy after the October 23, 2027 earnings call?",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Tesla",
+   "October 23, 2027"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-15",
+  "id": "synth-test-0253"
+ },
+ {
+  "Question": "Please verify payroll: Rosalind Fischer, SSN 079-85-1446, card 5347-7970-9383-6619, start date January 4.",
+  "Answer-Key": {
+   "name": "Rosalind Fischer",
+   "ssn": "079-85-1446",
+   "credit_card": "5347-7970-9383-6619"
+  },
+  "Spans": [
+   {
+    "start": 23,
+    "end": 39,
+    "type": "name",
+    "value": "Rosalind Fischer"
+   },
+   {
+    "start": 45,
+    "end": 56,
+    "type": "ssn",
+    "value": "079-85-1446"
+   },
+   {
+    "start": 63,
+    "end": 82,
+    "type": "credit_card",
+    "value": "5347-7970-9383-6619"
+   }
+  ],
+  "Keep": [
+   "January 4"
+  ],
+  "identity_id": 904,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-63",
+  "id": "synth-test-0254"
+ },
+ {
+  "Question": "Who is @ismailsorensen? They keep tagging Ismail Sorensen in posts about Ashgrove Veterinary Hospital.",
+  "Answer-Key": {
+   "username": "@ismailsorensen",
+   "name": "Ismail Sorensen",
+   "org": "Ashgrove Veterinary Hospital"
+  },
+  "Spans": [
+   {
+    "start": 7,
+    "end": 22,
+    "type": "username",
+    "value": "@ismailsorensen"
+   },
+   {
+    "start": 42,
+    "end": 57,
+    "type": "name",
+    "value": "Ismail Sorensen"
+   },
+   {
+    "start": 73,
+    "end": 101,
+    "type": "org",
+    "value": "Ashgrove Veterinary Hospital"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1034,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-67",
+  "id": "synth-test-0255"
+ },
+ {
+  "Question": "Book a table for 4 under Lindqvist, phone +44 7899 473114, February 9 at 7pm.",
+  "Answer-Key": {
+   "name": "Lindqvist",
+   "phone": "+44 7899 473114"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 34,
+    "type": "name",
+    "value": "Lindqvist"
+   },
+   {
+    "start": 42,
+    "end": 57,
+    "type": "phone",
+    "value": "+44 7899 473114"
+   }
+  ],
+  "Keep": [
+   "February 9"
+  ],
+  "identity_id": 1040,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0256"
+ },
+ {
+  "Question": "Our server at 144.142.53.124 is rejecting the key AKIAQ12X33VK7MO6WJR7. What is wrong with this curl command?",
+  "Answer-Key": {
+   "ip_address": "144.142.53.124",
+   "api_key": "AKIAQ12X33VK7MO6WJR7"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 28,
+    "type": "ip_address",
+    "value": "144.142.53.124"
+   },
+   {
+    "start": 50,
+    "end": 70,
+    "type": "api_key",
+    "value": "AKIAQ12X33VK7MO6WJR7"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1039,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-11",
+  "id": "synth-test-0257"
+ },
+ {
+  "Question": "hey its lorenzo chowdhury, can u remind me what Kestrel Analytics pays for overtime? my number is +1-330-959-1488",
+  "Answer-Key": {
+   "name": "lorenzo chowdhury",
+   "org": "Kestrel Analytics",
+   "phone": "+1-330-959-1488"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 25,
+    "type": "name",
+    "value": "lorenzo chowdhury"
+   },
+   {
+    "start": 48,
+    "end": 65,
+    "type": "org",
+    "value": "Kestrel Analytics"
+   },
+   {
+    "start": 98,
+    "end": 113,
+    "type": "phone",
+    "value": "+1-330-959-1488"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1104,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0258"
+ },
+ {
+  "Question": "Applicant: Florian Dubois\nDate of birth: August 26, 1988\nSSN: 789-03-0420\nAddress: 425 Willow Lane, Tartu 65166",
+  "Answer-Key": {
+   "name": "Florian Dubois",
+   "dob": "August 26, 1988",
+   "ssn": "789-03-0420",
+   "address": "425 Willow Lane",
+   "gpe": "Tartu",
+   "zip": "65166"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 25,
+    "type": "name",
+    "value": "Florian Dubois"
+   },
+   {
+    "start": 41,
+    "end": 56,
+    "type": "dob",
+    "value": "August 26, 1988"
+   },
+   {
+    "start": 62,
+    "end": 73,
+    "type": "ssn",
+    "value": "789-03-0420"
+   },
+   {
+    "start": 83,
+    "end": 98,
+    "type": "address",
+    "value": "425 Willow Lane"
+   },
+   {
+    "start": 100,
+    "end": 105,
+    "type": "gpe",
+    "value": "Tartu"
+   },
+   {
+    "start": 106,
+    "end": 111,
+    "type": "zip",
+    "value": "65166"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1086,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0259"
+ },
+ {
+  "Question": "Error 3179846414: connection reset after 11056 ms (build 14.19.4).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "3179846414",
+   "11056",
+   "14.19.4"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0260"
+ },
+ {
+  "Question": "SSH from 133.26.119.191 as @ana_88 failed: Permission denied (publickey). Key owner watanabe.ana@outlook.com.",
+  "Answer-Key": {
+   "ip_address": "133.26.119.191",
+   "username": "@ana_88",
+   "email": "watanabe.ana@outlook.com"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 23,
+    "type": "ip_address",
+    "value": "133.26.119.191"
+   },
+   {
+    "start": 27,
+    "end": 34,
+    "type": "username",
+    "value": "@ana_88"
+   },
+   {
+    "start": 84,
+    "end": 108,
+    "type": "email",
+    "value": "watanabe.ana@outlook.com"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1004,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0261"
+ },
+ {
+  "Question": "Annual report: 32878 units sold, 5259 returned, net 36866.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "32878",
+   "5259",
+   "36866"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0262"
+ },
+ {
+  "Question": "is ines.watanabe96@outlook.com still ines's address or should i use github.com/ines-watanabe?",
+  "Answer-Key": {
+   "email": "ines.watanabe96@outlook.com",
+   "name": "ines",
+   "url": "github.com/ines-watanabe"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 30,
+    "type": "email",
+    "value": "ines.watanabe96@outlook.com"
+   },
+   {
+    "start": 37,
+    "end": 41,
+    "type": "name",
+    "value": "ines"
+   },
+   {
+    "start": 68,
+    "end": 92,
+    "type": "url",
+    "value": "github.com/ines-watanabe"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 959,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0263"
+ },
+ {
+  "Question": "is ismail_hoffmann21@orbitalfreight.com still ismail's address or should i use linkedin.com/in/ismail-hoffmann-422?",
+  "Answer-Key": {
+   "email": "ismail_hoffmann21@orbitalfreight.com",
+   "name": "ismail",
+   "url": "linkedin.com/in/ismail-hoffmann-422"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 39,
+    "type": "email",
+    "value": "ismail_hoffmann21@orbitalfreight.com"
+   },
+   {
+    "start": 46,
+    "end": 52,
+    "type": "name",
+    "value": "ismail"
+   },
+   {
+    "start": 79,
+    "end": 114,
+    "type": "url",
+    "value": "linkedin.com/in/ismail-hoffmann-422"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 973,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0264"
+ },
+ {
+  "Question": "Book a table for 4 under Kowalski, phone +49 30 2616 6453, February 16 at 7pm.",
+  "Answer-Key": {
+   "name": "Kowalski",
+   "phone": "+49 30 2616 6453"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 33,
+    "type": "name",
+    "value": "Kowalski"
+   },
+   {
+    "start": 41,
+    "end": 57,
+    "type": "phone",
+    "value": "+49 30 2616 6453"
+   }
+  ],
+  "Keep": [
+   "February 16"
+  ],
+  "identity_id": 905,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0265"
+ },
+ {
+  "Question": "Book a table for 4 under Van der Berg, phone +44 7229 686657, January 25 at 7pm.",
+  "Answer-Key": {
+   "name": "Van der Berg",
+   "phone": "+44 7229 686657"
+  },
+  "Spans": [
+   {
+    "start": 25,
+    "end": 37,
+    "type": "name",
+    "value": "Van der Berg"
+   },
+   {
+    "start": 45,
+    "end": 60,
+    "type": "phone",
+    "value": "+44 7229 686657"
+   }
+  ],
+  "Keep": [
+   "January 25"
+  ],
+  "identity_id": 978,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-47",
+  "id": "synth-test-0266"
+ },
+ {
+  "Question": "Annual report: 36257 units sold, 9562 returned, net 44369.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "36257",
+   "9562",
+   "44369"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-11",
+  "id": "synth-test-0267"
+ },
+ {
+  "Question": "Ravi Patel (72) from Puebla won the Sunhollow Community College raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Ravi Patel",
+   "age": "72",
+   "gpe": "Puebla",
+   "org": "Sunhollow Community College"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 10,
+    "type": "name",
+    "value": "Ravi Patel"
+   },
+   {
+    "start": 12,
+    "end": 14,
+    "type": "age",
+    "value": "72"
+   },
+   {
+    "start": 21,
+    "end": 27,
+    "type": "gpe",
+    "value": "Puebla"
+   },
+   {
+    "start": 36,
+    "end": 63,
+    "type": "org",
+    "value": "Sunhollow Community College"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1095,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0268"
+ },
+ {
+  "Question": "Please text +49 30 1639 2070 and ask Hana Johansson whether she still lives on 6373 Magnolia Pl.",
+  "Answer-Key": {
+   "phone": "+49 30 1639 2070",
+   "name": "Hana Johansson",
+   "address": "6373 Magnolia Pl"
+  },
+  "Spans": [
+   {
+    "start": 12,
+    "end": 28,
+    "type": "phone",
+    "value": "+49 30 1639 2070"
+   },
+   {
+    "start": 37,
+    "end": 51,
+    "type": "name",
+    "value": "Hana Johansson"
+   },
+   {
+    "start": 79,
+    "end": 95,
+    "type": "address",
+    "value": "6373 Magnolia Pl"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1099,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-07",
+  "id": "synth-test-0269"
+ },
+ {
+  "Question": "Meet Ana Singh outside Westbrook Pharmacy in Dayton; her number is +44 7558 565888.",
+  "Answer-Key": {
+   "name": "Ana Singh",
+   "org": "Westbrook Pharmacy",
+   "gpe": "Dayton",
+   "phone": "+44 7558 565888"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 14,
+    "type": "name",
+    "value": "Ana Singh"
+   },
+   {
+    "start": 23,
+    "end": 41,
+    "type": "org",
+    "value": "Westbrook Pharmacy"
+   },
+   {
+    "start": 45,
+    "end": 51,
+    "type": "gpe",
+    "value": "Dayton"
+   },
+   {
+    "start": 67,
+    "end": 82,
+    "type": "phone",
+    "value": "+44 7558 565888"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1045,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0270"
+ },
+ {
+  "Question": "export API_KEY=sk-proj-M1DqCsiEflgqX1YMw2WdNlwXEHZCtRXQSN3f4Ov6\n# owner: imani.petrov49@lumenbank.es",
+  "Answer-Key": {
+   "api_key": "sk-proj-M1DqCsiEflgqX1YMw2WdNlwXEHZCtRXQSN3f4Ov6",
+   "email": "imani.petrov49@lumenbank.es"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 63,
+    "type": "api_key",
+    "value": "sk-proj-M1DqCsiEflgqX1YMw2WdNlwXEHZCtRXQSN3f4Ov6"
+   },
+   {
+    "start": 73,
+    "end": 100,
+    "type": "email",
+    "value": "imani.petrov49@lumenbank.es"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1096,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0271"
+ },
+ {
+  "Question": "I live at 8512 Sycamore Blvd, Cork 30087. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "8512 Sycamore Blvd",
+   "gpe": "Cork",
+   "zip": "30087"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 28,
+    "type": "address",
+    "value": "8512 Sycamore Blvd"
+   },
+   {
+    "start": 30,
+    "end": 34,
+    "type": "gpe",
+    "value": "Cork"
+   },
+   {
+    "start": 35,
+    "end": 40,
+    "type": "zip",
+    "value": "30087"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 966,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0272"
+ },
+ {
+  "Question": "Error 9852677488: connection reset after 48235 ms (build 5.2.4).",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "9852677488",
+   "48235",
+   "5.2.4"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-43",
+  "id": "synth-test-0273"
+ },
+ {
+  "Question": "is felipe_lindqvist91@lumenbank.es still felipe's address or should i use https://felipe-lindqvist.dev?",
+  "Answer-Key": {
+   "email": "felipe_lindqvist91@lumenbank.es",
+   "name": "felipe",
+   "url": "https://felipe-lindqvist.dev"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 34,
+    "type": "email",
+    "value": "felipe_lindqvist91@lumenbank.es"
+   },
+   {
+    "start": 41,
+    "end": 47,
+    "type": "name",
+    "value": "felipe"
+   },
+   {
+    "start": 74,
+    "end": 102,
+    "type": "url",
+    "value": "https://felipe-lindqvist.dev"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 926,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0274"
+ },
+ {
+  "Question": "{\"customer\": \"Imani Ivanova\", \"email\": \"imaniivanova@brightwater.io\", \"phone\": \"(208) 807-3139\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Imani Ivanova",
+   "email": "imaniivanova@brightwater.io",
+   "phone": "(208) 807-3139"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "name",
+    "value": "Imani Ivanova"
+   },
+   {
+    "start": 40,
+    "end": 67,
+    "type": "email",
+    "value": "imaniivanova@brightwater.io"
+   },
+   {
+    "start": 80,
+    "end": 94,
+    "type": "phone",
+    "value": "(208) 807-3139"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1012,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0275"
+ },
+ {
+  "Question": "Tracking ORD-627324 says delivered on May 27 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "ORD-627324",
+   "May 27"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0276"
+ },
+ {
+  "Question": "Ananya Oliveira (60) from Aarhus won the Kestrel Analytics raffle; announce it without the prize amount.",
+  "Answer-Key": {
+   "name": "Ananya Oliveira",
+   "age": "60",
+   "gpe": "Aarhus",
+   "org": "Kestrel Analytics"
+  },
+  "Spans": [
+   {
+    "start": 0,
+    "end": 15,
+    "type": "name",
+    "value": "Ananya Oliveira"
+   },
+   {
+    "start": 17,
+    "end": 19,
+    "type": "age",
+    "value": "60"
+   },
+   {
+    "start": 26,
+    "end": 32,
+    "type": "gpe",
+    "value": "Aarhus"
+   },
+   {
+    "start": 41,
+    "end": 58,
+    "type": "org",
+    "value": "Kestrel Analytics"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1111,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-71",
+  "id": "synth-test-0277"
+ },
+ {
+  "Question": "export API_KEY=ghp_TfK22fS69c7qGyDTbtQCSiyjFIk7zFjSdqyM\n# owner: kenjinguyen@sunhollow.edu",
+  "Answer-Key": {
+   "api_key": "ghp_TfK22fS69c7qGyDTbtQCSiyjFIk7zFjSdqyM",
+   "email": "kenjinguyen@sunhollow.edu"
+  },
+  "Spans": [
+   {
+    "start": 15,
+    "end": 55,
+    "type": "api_key",
+    "value": "ghp_TfK22fS69c7qGyDTbtQCSiyjFIk7zFjSdqyM"
+   },
+   {
+    "start": 65,
+    "end": 90,
+    "type": "email",
+    "value": "kenjinguyen@sunhollow.edu"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1028,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-35",
+  "id": "synth-test-0278"
+ },
+ {
+  "Question": "Meet Oluwaseun Nguyen outside Ironbridge Fitness in Tacoma; her number is +91 99678 59073.",
+  "Answer-Key": {
+   "name": "Oluwaseun Nguyen",
+   "org": "Ironbridge Fitness",
+   "gpe": "Tacoma",
+   "phone": "+91 99678 59073"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 21,
+    "type": "name",
+    "value": "Oluwaseun Nguyen"
+   },
+   {
+    "start": 30,
+    "end": 48,
+    "type": "org",
+    "value": "Ironbridge Fitness"
+   },
+   {
+    "start": 52,
+    "end": 58,
+    "type": "gpe",
+    "value": "Tacoma"
+   },
+   {
+    "start": 74,
+    "end": 89,
+    "type": "phone",
+    "value": "+91 99678 59073"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1098,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0279"
+ },
+ {
+  "Question": "I live at 3040 Juniper Drive, Tacoma 55475. What should I bring to the DMV?",
+  "Answer-Key": {
+   "address": "3040 Juniper Drive",
+   "gpe": "Tacoma",
+   "zip": "55475"
+  },
+  "Spans": [
+   {
+    "start": 10,
+    "end": 28,
+    "type": "address",
+    "value": "3040 Juniper Drive"
+   },
+   {
+    "start": 30,
+    "end": 36,
+    "type": "gpe",
+    "value": "Tacoma"
+   },
+   {
+    "start": 37,
+    "end": 42,
+    "type": "zip",
+    "value": "55475"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1022,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-03",
+  "id": "synth-test-0280"
+ },
+ {
+  "Question": "hey its lorenzo hoffmann, can u remind me what Copperleaf Software pays for overtime? my number is +33 6 56 51 37 48",
+  "Answer-Key": {
+   "name": "lorenzo hoffmann",
+   "org": "Copperleaf Software",
+   "phone": "+33 6 56 51 37 48"
+  },
+  "Spans": [
+   {
+    "start": 8,
+    "end": 24,
+    "type": "name",
+    "value": "lorenzo hoffmann"
+   },
+   {
+    "start": 47,
+    "end": 66,
+    "type": "org",
+    "value": "Copperleaf Software"
+   },
+   {
+    "start": 99,
+    "end": 116,
+    "type": "phone",
+    "value": "+33 6 56 51 37 48"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 925,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-15",
+  "id": "synth-test-0281"
+ },
+ {
+  "Question": "Applicant: Sofia Esposito\nDate of birth: 04/19/2002\nSSN: 302-32-0702\nAddress: 28 Riverbend Drive, Fresno 55893",
+  "Answer-Key": {
+   "name": "Sofia Esposito",
+   "dob": "04/19/2002",
+   "ssn": "302-32-0702",
+   "address": "28 Riverbend Drive",
+   "gpe": "Fresno",
+   "zip": "55893"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 25,
+    "type": "name",
+    "value": "Sofia Esposito"
+   },
+   {
+    "start": 41,
+    "end": 51,
+    "type": "dob",
+    "value": "04/19/2002"
+   },
+   {
+    "start": 57,
+    "end": 68,
+    "type": "ssn",
+    "value": "302-32-0702"
+   },
+   {
+    "start": 78,
+    "end": 96,
+    "type": "address",
+    "value": "28 Riverbend Drive"
+   },
+   {
+    "start": 98,
+    "end": 104,
+    "type": "gpe",
+    "value": "Fresno"
+   },
+   {
+    "start": 105,
+    "end": 110,
+    "type": "zip",
+    "value": "55893"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 952,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-43",
+  "id": "synth-test-0282"
+ },
+ {
+  "Question": "{\"customer\": \"Kai Kowalski\", \"email\": \"kkowalski@tidepoolhealth.org\", \"phone\": \"+49 30 5264 9526\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Kai Kowalski",
+   "email": "kkowalski@tidepoolhealth.org",
+   "phone": "+49 30 5264 9526"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 26,
+    "type": "name",
+    "value": "Kai Kowalski"
+   },
+   {
+    "start": 39,
+    "end": 67,
+    "type": "email",
+    "value": "kkowalski@tidepoolhealth.org"
+   },
+   {
+    "start": 80,
+    "end": 96,
+    "type": "phone",
+    "value": "+49 30 5264 9526"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 932,
+  "gender": "x",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0283"
+ },
+ {
+  "Question": "I was born February 19, 1958 and I'm 68. Which retirement accounts can I open with Brightwater Logistics?",
+  "Answer-Key": {
+   "dob": "February 19, 1958",
+   "age": "68",
+   "org": "Brightwater Logistics"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 28,
+    "type": "dob",
+    "value": "February 19, 1958"
+   },
+   {
+    "start": 37,
+    "end": 39,
+    "type": "age",
+    "value": "68"
+   },
+   {
+    "start": 83,
+    "end": 104,
+    "type": "org",
+    "value": "Brightwater Logistics"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1123,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-27",
+  "id": "synth-test-0284"
+ },
+ {
+  "Question": "Recipe: 6 eggs, 737 g flour, 963 ml milk; bake at 180 C for 6 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0285"
+ },
+ {
+  "Question": "Rank NASA, Leonardo da Vinci biographies, and Galaxy S23 reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "NASA",
+   "Leonardo da Vinci",
+   "Galaxy S23"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0286"
+ },
+ {
+  "Question": "{\"customer\": \"Aarav Mansoor\", \"email\": \"amansoor@veltra.de\", \"phone\": \"+33 6 33 36 99 37\", \"plan\": \"premium\"}",
+  "Answer-Key": {
+   "name": "Aarav Mansoor",
+   "email": "amansoor@veltra.de",
+   "phone": "+33 6 33 36 99 37"
+  },
+  "Spans": [
+   {
+    "start": 14,
+    "end": 27,
+    "type": "name",
+    "value": "Aarav Mansoor"
+   },
+   {
+    "start": 40,
+    "end": 58,
+    "type": "email",
+    "value": "amansoor@veltra.de"
+   },
+   {
+    "start": 71,
+    "end": 88,
+    "type": "phone",
+    "value": "+33 6 33 36 99 37"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 942,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-19",
+  "id": "synth-test-0287"
+ },
+ {
+  "Question": "Meu nome é Camila Sorensen, meu telefone é (956) 666-2832 e trabalho na Sunhollow Community College.",
+  "Answer-Key": {
+   "name": "Camila Sorensen",
+   "phone": "(956) 666-2832",
+   "org": "Sunhollow Community College"
+  },
+  "Spans": [
+   {
+    "start": 11,
+    "end": 26,
+    "type": "name",
+    "value": "Camila Sorensen"
+   },
+   {
+    "start": 43,
+    "end": 57,
+    "type": "phone",
+    "value": "(956) 666-2832"
+   },
+   {
+    "start": 72,
+    "end": 99,
+    "type": "org",
+    "value": "Sunhollow Community College"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1047,
+  "gender": "f",
+  "lang": "pt",
+  "template": "pos-59",
+  "id": "synth-test-0288"
+ },
+ {
+  "Question": "SSH from 120.216.49.13 as @the_petrov failed: Permission denied (publickey). Key owner ngozipetrov@proton.me.",
+  "Answer-Key": {
+   "ip_address": "120.216.49.13",
+   "username": "@the_petrov",
+   "email": "ngozipetrov@proton.me"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 22,
+    "type": "ip_address",
+    "value": "120.216.49.13"
+   },
+   {
+    "start": 26,
+    "end": 37,
+    "type": "username",
+    "value": "@the_petrov"
+   },
+   {
+    "start": 87,
+    "end": 108,
+    "type": "email",
+    "value": "ngozipetrov@proton.me"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 946,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0289"
+ },
+ {
+  "Question": "Can you check whether IBAN FR4053129918716065679622810 belongs to Daniel Svensson? I need to send £527 by March 20.",
+  "Answer-Key": {
+   "iban": "FR4053129918716065679622810",
+   "name": "Daniel Svensson"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 54,
+    "type": "iban",
+    "value": "FR4053129918716065679622810"
+   },
+   {
+    "start": 66,
+    "end": 81,
+    "type": "name",
+    "value": "Daniel Svensson"
+   }
+  ],
+  "Keep": [
+   "£527",
+   "March 20"
+  ],
+  "identity_id": 908,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0290"
+ },
+ {
+  "Question": "Rank Amazon, Leonardo da Vinci biographies, and Surface Pro 9 reviews by popularity.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "Amazon",
+   "Leonardo da Vinci",
+   "Surface Pro 9"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-47",
+  "id": "synth-test-0291"
+ },
+ {
+  "Question": "SSH from 131.143.19.171 as @gabrielaferrari failed: Permission denied (publickey). Key owner gabriela_ferrari93@gmail.com.",
+  "Answer-Key": {
+   "ip_address": "131.143.19.171",
+   "username": "@gabrielaferrari",
+   "email": "gabriela_ferrari93@gmail.com"
+  },
+  "Spans": [
+   {
+    "start": 9,
+    "end": 23,
+    "type": "ip_address",
+    "value": "131.143.19.171"
+   },
+   {
+    "start": 27,
+    "end": 43,
+    "type": "username",
+    "value": "@gabrielaferrari"
+   },
+   {
+    "start": 93,
+    "end": 121,
+    "type": "email",
+    "value": "gabriela_ferrari93@gmail.com"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1002,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-75",
+  "id": "synth-test-0292"
+ },
+ {
+  "Question": "Upgrade the firmware to version 14.11.3 and reboot the router.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "14.11.3"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-03",
+  "id": "synth-test-0293"
+ },
+ {
+  "Question": "is nguyen.nora@brightwater.io still nora's address or should i use linkedin.com/in/nora-nguyen-23?",
+  "Answer-Key": {
+   "email": "nguyen.nora@brightwater.io",
+   "name": "nora",
+   "url": "linkedin.com/in/nora-nguyen-23"
+  },
+  "Spans": [
+   {
+    "start": 3,
+    "end": 29,
+    "type": "email",
+    "value": "nguyen.nora@brightwater.io"
+   },
+   {
+    "start": 36,
+    "end": 40,
+    "type": "name",
+    "value": "nora"
+   },
+   {
+    "start": 67,
+    "end": 97,
+    "type": "url",
+    "value": "linkedin.com/in/nora-nguyen-23"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 930,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-55",
+  "id": "synth-test-0294"
+ },
+ {
+  "Question": "Meet Jae-won Singh outside Tidepool Health Clinic in Bilbao; his number is +33 6 73 10 31 23.",
+  "Answer-Key": {
+   "name": "Jae-won Singh",
+   "org": "Tidepool Health Clinic",
+   "gpe": "Bilbao",
+   "phone": "+33 6 73 10 31 23"
+  },
+  "Spans": [
+   {
+    "start": 5,
+    "end": 18,
+    "type": "name",
+    "value": "Jae-won Singh"
+   },
+   {
+    "start": 27,
+    "end": 49,
+    "type": "org",
+    "value": "Tidepool Health Clinic"
+   },
+   {
+    "start": 53,
+    "end": 59,
+    "type": "gpe",
+    "value": "Bilbao"
+   },
+   {
+    "start": 75,
+    "end": 92,
+    "type": "phone",
+    "value": "+33 6 73 10 31 23"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 1114,
+  "gender": "m",
+  "lang": "en",
+  "template": "pos-51",
+  "id": "synth-test-0295"
+ },
+ {
+  "Question": "Tracking ORD-805659 says delivered on February 21, 2027 but nothing arrived.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [
+   "ORD-805659",
+   "February 21, 2027"
+  ],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-27",
+  "id": "synth-test-0296"
+ },
+ {
+  "Question": "Recipe: 6 eggs, 218 g flour, 237 ml milk; bake at 180 C for 6 minutes.",
+  "Answer-Key": {},
+  "Spans": [],
+  "Keep": [],
+  "identity_id": null,
+  "gender": null,
+  "lang": "en",
+  "template": "neg-19",
+  "id": "synth-test-0297"
+ },
+ {
+  "Question": "Write a recommendation letter for Lucia Mahlangu, who interned with us at Orbital Freight in Graz.",
+  "Answer-Key": {
+   "name": "Lucia Mahlangu",
+   "org": "Orbital Freight",
+   "gpe": "Graz"
+  },
+  "Spans": [
+   {
+    "start": 34,
+    "end": 48,
+    "type": "name",
+    "value": "Lucia Mahlangu"
+   },
+   {
+    "start": 74,
+    "end": 89,
+    "type": "org",
+    "value": "Orbital Freight"
+   },
+   {
+    "start": 93,
+    "end": 97,
+    "type": "gpe",
+    "value": "Graz"
+   }
+  ],
+  "Keep": [],
+  "identity_id": 989,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-31",
+  "id": "synth-test-0298"
+ },
+ {
+  "Question": "Can you check whether IBAN DE79 9634 2945 5753 7021 88 belongs to Noor Patel? I need to send £349 by August 4.",
+  "Answer-Key": {
+   "iban": "DE79 9634 2945 5753 7021 88",
+   "name": "Noor Patel"
+  },
+  "Spans": [
+   {
+    "start": 27,
+    "end": 54,
+    "type": "iban",
+    "value": "DE79 9634 2945 5753 7021 88"
+   },
+   {
+    "start": 66,
+    "end": 76,
+    "type": "name",
+    "value": "Noor Patel"
+   }
+  ],
+  "Keep": [
+   "£349",
+   "August 4"
+  ],
+  "identity_id": 996,
+  "gender": "f",
+  "lang": "en",
+  "template": "pos-23",
+  "id": "synth-test-0299"
+ }
+]

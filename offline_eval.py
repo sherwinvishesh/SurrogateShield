@@ -126,7 +126,7 @@ def run_offline_eval(
     for i, entry in enumerate(entries):
         question = entry.get("Question", "")
         key = entry.get("Answer-Key")
-        gold, missing = em.gold_spans(question, key)
+        gold, missing = em.entry_gold(question, entry)
         for t, v in missing:
             gold_not_in_text.append({"entry": i, "type": t, "value": v})
 
@@ -223,7 +223,7 @@ def run_ablation(key_path: Path, limit: int | None = None, seed: int = SEED) -> 
     start = time.time()
     for i, entry in enumerate(entries):
         question = entry.get("Question", "")
-        gold, _missing = em.gold_spans(question, entry.get("Answer-Key"))
+        gold, _missing = em.entry_gold(question, entry)
         for name, _label, opts in ABLATION_CONFIGS:
             prep = prepare_send(question, MimicGen(seed=seed + i), cascade_options=opts)
             pred = _pred_spans(prep.spans(), replaced_only=True)
