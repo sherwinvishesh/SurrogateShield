@@ -13,6 +13,7 @@ Or use direct commands:
     python main.py list                  — list conversations
     python main.py pii-finder            — test PII detection (no API call)
     python main.py add-doc <filepath>    — index a document into RAG
+    python main.py rag [--forget DOC]    — list / remove indexed documents
 """
 
 from __future__ import annotations
@@ -1503,7 +1504,7 @@ def add_document(
     try:
         from pipeline import anonymise_for_rag
         rag_store = _get_rag()
-        n, _ = anonymise_for_rag(raw_text, rag_store)
+        n, _ = anonymise_for_rag(raw_text, rag_store, source=path.name)
         console.print(
             f"[green]✓[/green]  {n} chunks indexed  "
             f"[dim](total: {rag_store.document_count()})[/dim]"
@@ -1512,6 +1513,30 @@ def add_document(
         _print_detector_unavailable(exc); raise typer.Exit(1)
     except Exception as exc:
         console.print(f"[red]Indexing failed:[/red] {exc}"); raise typer.Exit(1)
+
+
+@app.command(name="rag")
+def rag_command(
+    forget: Optional[str] = typer.Option(None, "--forget", metavar="DOC",
+                                         help="Remove a document (file name or id) and its mappings."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Do not ask for confirmation."),
+) -> None:
+    """List indexed RAG documents, or remove one with --forget."""
+    from pipeline import forget_rag_document
+    rag_store = _get_rag()
+    docs = rag_store.documents()
+    if forget is None:
+        if not docs:
+            console.print("[dim]No documents indexed.[/dim]"); return
+        for doc_id, row in sorted(docs.items(), key=lambda kv: kv[1]["source"]):
+            console.print(f"  [white]{row['source']}[/white]  [dim]{doc_id} · {row['chunks']} chunks[/dim]")
+        return
+    if not any(forget in (d, row["source"]) for d, row in docs.items()):
+        console.print(f"[red]No indexed document named {forget!r}.[/red]"); raise typer.Exit(1)
+    if not yes and not typer.confirm(f"Remove {forget!r} from the RAG index?"):
+        raise typer.Exit(0)
+    removed, erased = forget_rag_document(forget, rag_store)
+    console.print(f"[green]✓[/green]  removed {removed} chunks, erased {erased} mappings")
 
 
 if __name__ == "__main__":

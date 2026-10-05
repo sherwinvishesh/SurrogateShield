@@ -71,3 +71,31 @@ def erase(conversation_id: str) -> bool:
     """Delete a conversation's shadow map without decrypting it. Returns False
     when there was none."""
     return _ShadowMap.erase(conversation_id, conversations_dir())
+
+
+RAG_STORE_ID = "rag_global"
+
+
+def surrogates_in_use(exclude: str = RAG_STORE_ID) -> set:
+    """Every surrogate issued by any conversation's shadow map, read without
+    side effects (an unreadable map is skipped with a warning, not moved
+    aside). add-doc uses it so a document surrogate never equals a chat
+    surrogate that means someone else (audit I16)."""
+    used: set = set()
+    directory = conversations_dir()
+    if not directory.is_dir():
+        return used
+    import json
+    from util import get_logger
+    for path in sorted(directory.glob("*.shadowmap")):
+        store_id = path.stem
+        if store_id == exclude:
+            continue
+        try:
+            blob = path.read_bytes()
+            plaintext = unseal(_derive_key(store_id), store_id, KIND_SHADOWMAP, blob,
+                               legacy=_legacy_key(store_id))
+            used.update(json.loads(plaintext))
+        except (OSError, ValueError, CorruptStoreError) as exc:
+            get_logger(__name__).warning(f"[storage] skipped unreadable map {path.name}: {exc}")
+    return used

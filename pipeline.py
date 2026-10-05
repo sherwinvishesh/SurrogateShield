@@ -64,7 +64,7 @@ from detection import logic as sentinel_layer
 from detection.service_query import resolve as resolve_service
 from detection.quasi_identifier import format_warning as _qi_format_warning
 from generation.logic import MimicGen
-from storage.logic import ShadowMap
+from storage.logic import RAG_STORE_ID, ShadowMap, surrogates_in_use
 from reconstruction.logic import ResolvePass
 from chatbot.chat import ClaudeChat
 from config import (
@@ -107,27 +107,40 @@ def _show_transparency(sanitised: str, raw_response: str, restored: str, provide
 # Standalone anonymiser (no API key required)
 # ─────────────────────────────────────────────
 
-def anonymise_text(text: str, mimic: Optional[MimicGen] = None) -> Tuple[str, Dict[str, str]]:
+def anonymise_text(text: str, mimic: Optional[MimicGen] = None, *,
+                   shadow: Optional[ShadowMap] = None) -> Tuple[str, Dict[str, str]]:
     """
     Detect and replace PII in *text* without constructing a ClaudeChat.
 
-    Used by add-doc to anonymise documents before indexing.
+    Used by add-doc to anonymise documents before indexing. With *shadow*,
+    an original it already maps keeps its surrogate, and no new surrogate
+    equals one of its originals.
+
+    Raises:
+        DetectorUnavailable: detection failed; nothing is returned.
     """
     if mimic is None:
         mimic = MimicGen()
-    confirmed, _ = sentinel_layer.run_cascade(text)
+    known = shadow.all_mappings() if shadow is not None else {}
+    confirmed, _ = sentinel_layer.run_cascade(text, skip_values=set(known) or None)
     confirmed = sentinel_layer.deduplicate(confirmed)
     # Documents have no service-query context: "auto" resolves to replace.
     doc_address_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "replace"
-    surrogate_map = (
-        mimic.generate_all(
-            confirmed,
+    surrogate_map: Dict[str, str] = {}
+    new = []
+    for ent in confirmed:
+        existing = shadow.lookup_original(ent.text.strip()) if shadow is not None else None
+        if existing is not None:
+            surrogate_map[ent.text.strip()] = existing
+        else:
+            new.append(ent)
+    if new:
+        surrogate_map.update(mimic.generate_all(
+            new,
             address_mode=doc_address_mode,
             address_shift_range=ADDRESS_SHIFT_RANGE,
-        )
-        if confirmed
-        else {}
-    )
+            forbidden=set(shadow.originals()) if shadow is not None else None,
+        ))
     sanitised = apply_entity_surrogates(text, confirmed, surrogate_map)
     return sanitised, surrogate_map
 
@@ -153,9 +166,15 @@ class Pipeline:
                 "existing surrogates from ShadowMap"
             )
 
-        if rag is not None:
-            from chatbot.rag import RAGStore  # noqa: F401
         self.rag = rag
+
+    def _rag_shadow(self) -> Optional[ShadowMap]:
+        """The document map (re-read every turn: add-doc may run meanwhile)."""
+        if self.rag is None:
+            return None
+        rag_shadow = ShadowMap(RAG_STORE_ID)
+        self.mimic.used_surrogates.update(rag_shadow.all_mappings().keys())
+        return rag_shadow
 
     def _invert_map(self, surrogate_map: Dict[str, str]) -> Dict[str, str]:
         return {v: k for k, v in surrogate_map.items()}
@@ -196,7 +215,12 @@ class Pipeline:
 
         # ── Step 1: Detection ─────────────────────────────────────────────────
         logger.info("[Pipeline] Running SentinelLayer cascade")
-        existing_surrogates = set(self.shadow.all_mappings().keys())
+        # In RAG mode the document map is shared with this conversation
+        # (audit I16): a name the documents already contain gets the same
+        # surrogate here, so retrieval matches and quoted excerpts restore.
+        rag_shadow = self._rag_shadow()
+        rag_map = rag_shadow.all_mappings() if rag_shadow is not None else {}
+        existing_surrogates = set(self.shadow.all_mappings().keys()) | set(rag_map)
         confirmed, needs_confirmation = sentinel_layer.run_cascade(
             user_message,
             skip_values=existing_surrogates,
@@ -221,6 +245,8 @@ class Pipeline:
             for ent in confirmed:
                 key = ent.text.strip()
                 existing = self.shadow.lookup_original(key)
+                if existing is None and rag_shadow is not None:
+                    existing = rag_shadow.lookup_original(key)
                 if existing is not None:
                     surrogate_map[key] = existing
                 else:
@@ -232,7 +258,7 @@ class Pipeline:
                     new_entities,
                     address_mode=address_mode,
                     address_shift_range=ADDRESS_SHIFT_RANGE,
-                    forbidden=set(self.shadow.originals()),
+                    forbidden=set(self.shadow.originals()) | set(rag_map.values()),
                 )
                 surrogate_map.update(new_map)
 
@@ -270,7 +296,7 @@ class Pipeline:
                                       context_prefix=context_prefix)
 
         # ── Step 8: Reconstruct originals ─────────────────────────────────────
-        all_mappings = self.shadow.all_mappings()
+        all_mappings = {**rag_map, **self.shadow.all_mappings()}   # conversation pairs win
         restored_response = self.resolve.resolve(raw_response, all_mappings)
 
         self.chat.update_last_assistant_message(restored_response)
@@ -287,32 +313,77 @@ class Pipeline:
 
         return restored_response, confirmed, surrogate_map
 
-    def add_rag_document(self, raw_text: str, metadata: Optional[dict] = None) -> int:
-        if self.rag is None:
-            raise RuntimeError("RAG is not enabled. Use --rag flag.")
-        sanitised, surrogate_map = anonymise_text(raw_text, mimic=self.mimic)
-        if surrogate_map:
-            self.shadow.update(self._invert_map(surrogate_map))
-            self.shadow.save()
-        return self.rag.add_document(sanitised, metadata=metadata)
-
 
 # ─────────────────────────────────────────────
 # Convenience: anonymise without any chat handler
 # ─────────────────────────────────────────────
 
-def anonymise_for_rag(raw_text: str, rag_store) -> Tuple[int, ShadowMap]:
-    """Anonymise raw_text and index it without requiring ANTHROPIC_API_KEY."""
-    mimic = MimicGen()
-    rag_shadow = ShadowMap("rag_global")
+DOC_SEGMENT_CHARS = 20_000   # detection unit for documents (spaCy limit is 1,000,000)
+
+
+def split_segments(text: str, max_chars: int = DOC_SEGMENT_CHARS) -> List[str]:
+    """Split *text* into pieces of at most *max_chars* that join back to
+    *text* exactly, cutting at a paragraph break, else a line break, else a
+    space when one is available."""
+    pieces, start = [], 0
+    while len(text) - start > max_chars:
+        window = text[start:start + max_chars]
+        cut = max(window.rfind("\n\n"), window.rfind("\n"), window.rfind(" "))
+        cut = cut + 1 if cut > 0 else max_chars
+        pieces.append(text[start:start + cut])
+        start += cut
+    pieces.append(text[start:])
+    return pieces
+
+
+def anonymise_for_rag(raw_text: str, rag_store, *, source: Optional[str] = None,
+                      mimic: Optional[MimicGen] = None) -> Tuple[int, ShadowMap]:
+    """Anonymise *raw_text* and index it (no provider key needed).
+
+    The document is detected in segments of at most ``DOC_SEGMENT_CHARS``;
+    a detection failure in any segment raises before anything is stored
+    (fail closed, audit I16/I17). Pairs go to the shared ``rag_global`` map:
+    an original already seen in another document keeps its surrogate, and
+    a new surrogate never equals one issued by any conversation.
+
+    Returns:
+        (chunks indexed, the rag_global map).
+    """
+    rag_shadow = ShadowMap(RAG_STORE_ID)
+    mimic = mimic or MimicGen()
     mimic.used_surrogates.update(rag_shadow.all_mappings().keys())
+    mimic.used_surrogates.update(surrogates_in_use())
 
-    sanitised, surrogate_map = anonymise_text(raw_text, mimic=mimic)
+    parts, new_pairs = [], {}
+    for segment in split_segments(raw_text):
+        sanitised, surrogate_map = anonymise_text(segment, mimic=mimic, shadow=rag_shadow)
+        parts.append(sanitised)
+        pairs = {v: k for k, v in surrogate_map.items()}
+        rag_shadow.update(pairs)          # later segments reuse these (in memory)
+        new_pairs.update(pairs)
 
-    if surrogate_map:
-        inverted = {v: k for k, v in surrogate_map.items()}
-        rag_shadow.update(inverted)
+    if new_pairs:
         rag_shadow.save()
-
-    n = rag_store.add_document(sanitised)
+    n = rag_store.add_document("".join(parts),
+                               metadata={"source": source} if source else None)
     return n, rag_shadow
+
+
+def forget_rag_document(doc: str, rag_store) -> Tuple[int, int]:
+    """Remove *doc* (doc_id or source name) from the index, then erase every
+    ``rag_global`` pair whose surrogate no remaining chunk contains.
+
+    Returns:
+        (chunks removed, mappings erased).
+    """
+    removed = rag_store.forget(doc)
+    if not removed:
+        return 0, 0
+    remaining = "\n".join(rag_store.texts())
+    rag_shadow = ShadowMap(RAG_STORE_ID)
+    by_original: Dict[str, List[str]] = {}
+    for surrogate, original in rag_shadow.all_mappings().items():
+        by_original.setdefault(original, []).append(surrogate)
+    erased = sum(rag_shadow.forget(o) for o, surrogates in by_original.items()
+                 if not any(s in remaining for s in surrogates))
+    return removed, erased

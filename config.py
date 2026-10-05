@@ -54,6 +54,7 @@ SPACY_MODEL: str = "en_core_web_lg"              # spaCy NER model
 RAG_TOP_K: int = 3                               # Number of chunks to retrieve
 RAG_COLLECTION_NAME: str = "surrogateshield_rag"
 RAG_CHUNK_SIZE: int = 512                        # Characters per chunk when splitting docs
+RAG_DIR: Optional[str] = None                    # chroma index; None → ~/.surrogateshield/rag
 
 # ─────────────────────────────────────────────
 # Storage paths

@@ -257,11 +257,12 @@ Every failure is categorised as `exact_miss`, `fuzzy_hit`, or `fuzzy_miss` for r
 
 Local Retrieval-Augmented Generation backed by [ChromaDB](https://www.trychroma.com/) and [sentence-transformers](https://www.sbert.net/) (`all-MiniLM-L6-v2`).
 
-- No server required; ChromaDB runs in-process with persistent storage in `./chroma_db`
-- Documents are **anonymised through the full SentinelLayer pipeline before indexing**: real PII never enters the vector store
+- No server required; ChromaDB runs in-process with telemetry off, storing its index in `~/.surrogateshield/rag` (mode 0700; `RAG_DIR` in `config.py`)
+- Documents are **anonymised through the full SentinelLayer pipeline before indexing**: real PII never enters the vector store. Detection runs in segments of at most 20,000 characters; if detection fails, nothing is indexed
+- Surrogate mappings from indexed documents are stored in the encrypted `rag_global` ShadowMap. In a RAG chat, a name that already appears in a document gets the document's surrogate, so retrieval matches it and quoted excerpts are restored in the answer
 - Queries are anonymised before retrieval
-- Retrieved context is prepended to the sanitised message before the LLM call
-- Surrogate mappings from indexed documents are stored in a shared `rag_global` ShadowMap so they can be restored in responses
+- Retrieved context goes into the current request only; it is not stored in the conversation history or sent again on later turns
+- `python main.py rag` lists the indexed documents. `python main.py rag --forget <file>` removes a document's chunks and every mapping that no other document still uses
 
 
 ### 6. Python Library (`python-library/surrogateshield`)
@@ -475,8 +476,10 @@ python main.py list
 # PII detection sandbox (no API calls, no credits)
 python main.py pii-finder
 
-# Index a document into the RAG store
+# Index a document into the RAG store; list or remove indexed documents
 python main.py add-doc path/to/document.txt
+python main.py rag
+python main.py rag --forget document.txt
 ```
 
 ### Dashboard Keyboard Shortcuts
