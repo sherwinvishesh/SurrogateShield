@@ -185,8 +185,9 @@ def _label_row(mid, text, status="ok", protect=(), keep=()):
             "protect": [{"type": t, "occ": occ(v)} for v, t in protect], "keep": [{"occ": occ(v)} for v in keep]}
 
 
-@pytest.fixture()
-def bench(tmp_path):
+def make_bench(tmp_path):
+    """A synthetic benchmark: rd (injected dev split, public pool, labels),
+    build (private pool), a spans directory and the frozen hashes."""
     rd, build, spans = tmp_path / "rd", tmp_path / "build", tmp_path / "spans"
     (rd / DS).mkdir(parents=True)
     (build / DS).mkdir(parents=True)
@@ -208,6 +209,11 @@ def bench(tmp_path):
         path.write_text("".join(json.dumps(r) + "\n" for r in rows))
     frozen = {f"{DS}/{n}": file_sha256(rd / DS / n) for n in ("dev.jsonl", "pool.jsonl", "labels.jsonl")}
     return rd, build, spans, frozen
+
+
+@pytest.fixture()
+def bench(tmp_path):
+    return make_bench(tmp_path)
 
 
 def _runner(spans):

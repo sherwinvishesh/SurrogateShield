@@ -353,16 +353,16 @@ def hypotheses(results: dict, diffs: dict, datasets: Sequence[str], arms: Sequen
 
 # ── 6. run ───────────────────────────────────────────────────────────────────
 
-def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[str] = ARMS, reuse: bool = False,
-                out: Optional[Path] = None, rd: Path = RD, build: Path = BUILD, frozen: Optional[dict] = None,
-                runner: Optional[Callable] = None, spans: Optional[Path] = None, log=print) -> dict:
+def load_split(split: str, datasets: Sequence[str] = DATASETS, rd: Path = RD, build: Path = BUILD,
+               frozen: Optional[dict] = None) -> Tuple[Dict[str, str], Dict[str, dict]]:
+    """Check the frozen hashes, rebuild and lint the records, write one arm
+    input per dataset. Returns the hashes and, per dataset, ``units``,
+    ``src`` (the arm input), ``input_sha`` and ``corpus`` (counts)."""
     if frozen is None:
         from bench.realdata import manifest
         frozen = manifest.load()["frozen"]
     hashes = check_frozen(datasets, split, frozen, rd)
-    all_units: Dict[str, List[dict]] = {}
-    all_scores: Dict[str, Dict[str, List[dict]]] = {}
-    corpus = {}
+    out = {}
     for ds in datasets:
         injected = read_jsonl(rd / ds / f"{split}.jsonl")
         natural = natural_records(ds, split, rd, build)
@@ -373,17 +373,31 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
         units = messages(injected) + messages(natural)
         src = build / "score" / split / f"{ds}.jsonl"
         input_sha = write_input(units, src)
+        corpus = {"injected_records": len(injected), "natural_records": len(natural),
+                  "natural_turns_excluded": sum(1 for r in natural for t in (r["turns"] or [r])
+                                                if t.get("label_status", "ok") != "ok"),
+                  "messages": dict(sorted(Counter(sl for u in units for sl in u["slices"]).items())),
+                  "arm_input_sha256": input_sha}
+        out[ds] = {"units": units, "src": src, "input_sha": input_sha, "corpus": corpus}
+    return hashes, out
+
+
+def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[str] = ARMS, reuse: bool = False,
+                out: Optional[Path] = None, rd: Path = RD, build: Path = BUILD, frozen: Optional[dict] = None,
+                runner: Optional[Callable] = None, spans: Optional[Path] = None, log=print) -> dict:
+    hashes, loaded = load_split(split, datasets, rd, build, frozen)
+    all_units: Dict[str, List[dict]] = {}
+    all_scores: Dict[str, Dict[str, List[dict]]] = {}
+    corpus = {}
+    for ds in datasets:
+        units, src, input_sha = loaded[ds]["units"], loaded[ds]["src"], loaded[ds]["input_sha"]
         all_units[ds] = units
         all_scores[ds] = {}
         for arm in arms:
             rows = produce(arm, src, f"{split}-{ds}", reuse, input_sha, units, runner, spans)
             all_scores[ds][arm] = [score_unit(u, rows[u["mid"]]) for u in units]
             log(f"{split} {ds:9} {arm:22} scored {len(units)} messages")
-        corpus[ds] = {"injected_records": len(injected), "natural_records": len(natural),
-                      "natural_turns_excluded": sum(1 for r in natural for t in (r["turns"] or [r])
-                                                    if t.get("label_status", "ok") != "ok"),
-                      "messages": dict(sorted(Counter(sl for u in units for sl in u["slices"]).items())),
-                      "arm_input_sha256": input_sha}
+        corpus[ds] = loaded[ds]["corpus"]
     pooled = "all" if len(datasets) > 1 else None
     groups = list(datasets) + ([pooled] if pooled else [])
     results, diffs = {}, {}
