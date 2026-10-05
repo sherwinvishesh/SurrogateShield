@@ -113,11 +113,18 @@ def test_I12_anchored_message_keeps_places_masked():
     assert dropped(text + " Amazon says", ("Amazon", "ORG"), context=[dl]) == ["Amazon"]
 
 
-def test_I12_card_brand_tied_to_card_number():
+def test_I12_card_brand_next_to_card_number_is_public():
+    # GUIDE.md: a protect ORG is an employer / school / clinic tied to a
+    # person; a public company is keep, even next to the user's card number
     text = "a charge on my corporate Visa card, which is 4111111111111111."
     card = DetectedEntity("4111111111111111", text.index("4111"), text.index("4111") + 16,
                           "credit_card", 1.0, "pattern")
-    assert dropped(text, ("Visa", "ORG"), context=[card]) == []
+    assert dropped(text, ("Visa", "ORG"), context=[card]) == ["Visa"]
+
+
+def test_I12_public_company_as_employer_stays_masked():
+    assert dropped("I work at Microsoft and my boss is mean", ("Microsoft", "ORG")) == []
+    assert dropped("I'm a nurse at Kaiser in Oakland", ("Kaiser", "ORG")) == []
 
 
 def test_I12_ties_propagate_through_person_and_org():

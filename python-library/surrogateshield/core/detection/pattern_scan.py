@@ -185,6 +185,8 @@ def _after(m: "re.Match", n: int) -> str:
 
 def _ssn_validator(m: "re.Match") -> bool:
     s = m.group()
+    if _NEG_NUM_CONTEXT.search(_before(m, 30)):
+        return False  # "item 219-44-8812 is listed twice"
     if re.search(r"[ -]", s):
         return True  # formatted SSN is distinctive on its own
     if _aba_routing_valid(s):
@@ -273,6 +275,13 @@ _BIRTH_CUE = re.compile(
     re.IGNORECASE,
 )
 
+# A labelled date that is not a birth date
+_NOT_BIRTH_DATE = re.compile(
+    r"(?i)(?:\bdate\s+of\s+(?:entry|arrival|departure|issue|expiry|expiration|purchase|service"
+    r"|incident|loss|travel|hire|admission|discharge|marriage|death)|\b(?:entry|arrival|departure"
+    r"|issue|expiry|expiration|purchase|hire|start|end|due|ship|delivery)\s+date"
+    r"|\bday\s+of\s+the\s+week\s+(?:was|is|will\s+be|fell\s+on)?)\W{0,4}$")
+
 # A date with no birth cue is treated as a date of birth only when its year
 # is at least this many years in the past (audit I8). Ship dates, deadlines,
 # lease ends and log timestamps are recent or future and stay in the text;
@@ -310,6 +319,8 @@ def _dob_validator(m: "re.Match") -> bool:
             return False
     if _BIRTH_CUE.search(_before(m, 40)):
         return True
+    if _NOT_BIRTH_DATE.search(_before(m, 40)):
+        return False              # "Date of entry: 04/12/2019", "what day of the week was …"
     year = _date_year(s)
     return year is not None and year <= _THIS_YEAR - _DOB_MIN_AGE_WITHOUT_CUE
 
@@ -413,7 +424,16 @@ def _keyword_handle_validator(m: "re.Match") -> bool:
                    or (v[:1].islower() and any(c.isupper() for c in v[1:]))
                    or (any(c.isupper() for c in v) and any(c.islower() for c in v)
                        and "_" in v))
-    return distinctive or bool(m.group("strong"))
+    strong = m.group("strong")
+    if strong and strong.lower() == "handle" and not distinctive:
+        # the verb: "which roses handle August heat" — a bare word is a
+        # handle only as "my handle is X" / "handle: X"
+        gap = m.string[m.end("strong"):m.start("v")]
+        before = m.string[max(0, m.start() - 12):m.start()].lower()
+        if not re.search(r"[=:@]|\b(?:is|was)\b", gap) and not re.search(
+                r"\b(?:my|his|her|their|your|our|the)\s+$", before):
+            return False
+    return distinctive or bool(strong)
 
 
 _CODE_REFERENCE = re.compile(

@@ -185,6 +185,42 @@ def trim_person(ent: DetectedEntity, text: str):
     return _dc_replace(ent, text=text[s:e], start=s, end=e)
 
 
+# "user.getFirstName", "UserDTO.lastName" — a member access, never a name
+_MEMBER_ACCESS = re.compile(r"\w\.[a-z]+[A-Z]\w*|^[a-z]+\.[a-z_]\w*$")
+_DEGREES = frozenset("msc bsc ba ma mba phd dphil mphil md llb llm bed med beng meng ms bs "
+                     "mres pgce bcom mcom btech mtech".split())
+_JOB_TITLE = re.compile(
+    r"(?i)\b(?:analyst|engineer|developer|designer|scientist|manager|specialist|coordinator"
+    r"|assistant|officer|director|consultant|administrator|architect|technician|associate"
+    r"|representative|intern|lead|executive|accountant)$")
+# the noun of an automated sender ("Chase Alert", "Amazon Support")
+_SENDER_NOUNS = frozenset("alert alerts notification notifications notice support team "
+                          "service services update updates reminder security billing".split())
+# Single capitalised common nouns NER calls a place or company ("Port of
+# entry", "Passport C7HX…", "met at Uni", "Budget: $25k"); with a number
+# they are a room or a port ("Room 1208", "Port 22").
+_COMMON_NOUNS = frozenset("""
+port passport uni university college school budget room suite floor gate terminal
+platform office lobby reception kitchen garden visa account invoice receipt order
+ticket station airport hotel hospital clinic church court bank branch department
+dept building block level unit hall campus library pharmacy embassy consulate
+""".split())
+_DE_ARTICLE = re.compile(r"(?i)\b(?:der|die|das|den|dem|des|ein|eine|einen|einem|einer|keine?n?"
+                         r"|meine?[nmrs]?|deine?[nmrs]?|seine?[nmrs]?|ihre?[nmrs]?|unse?re?[nmrs]?)\s+$")
+_DE_TEXT = re.compile(r"(?i)\b(?:und|ich|nicht|ist|wie|kann|mein|meine|will|zurück\w*|was|wir)\b")
+
+
+def is_common_noun(ent: DetectedEntity, text: str) -> bool:
+    """A place/company that is an ordinary noun: dropped unless tied."""
+    core = _core(ent.text)
+    words = core.split()
+    if not words or not words[0].lower() in _COMMON_NOUNS and not (
+            len(words) == 1 and _DE_ARTICLE.search(text[max(0, ent.start - 12):ent.start])
+            and len(_DE_TEXT.findall(text)) >= 2):
+        return False                        # "die Kaution" in German
+    return len(words) == 1 or (len(words) == 2 and re.fullmatch(r"[A-Z]?\d{1,5}[A-Z]?", words[1]) is not None)
+
+
 def is_junk(ent: DetectedEntity, text: str = "") -> bool:
     core = _core(ent.text)
     if not core:
@@ -193,8 +229,16 @@ def is_junk(ent: DetectedEntity, text: str = "") -> bool:
         return True
     if ent.type == "PERSON" and core == core.lower() and _CLAUSE_WORD.search(core):
         return True                         # "je veux vérifier la clé" is a clause
-    if _CODE.search(_unquote(core)):
+    if _CODE.search(_unquote(core)) or _MEMBER_ACCESS.search(core):
         return True                         # a quoted name ("Kalinda Whitehorse") is not code
+    if core.lower() in _DEGREES:
+        return True                         # "MSc from Politehnica"
+    words = core.split()
+    if ent.type != "PERSON" and len(words) >= 2 and _JOB_TITLE.search(core) and text and re.match(
+            r"\s+(?:role|position|job|post|vacancy|opening|internship)\b", text[ent.end:ent.end + 20], re.I):
+        return True                         # "a Data Analyst role at Spotify"
+    if ent.type == "PERSON" and len(words) >= 2 and words[-1].lower() in _SENDER_NOUNS:
+        return True                         # "Chase Alert: verify …"
     if ent.type != "PERSON" and _MODEL.search(core):
         return True
     if _ACRONYM.match(core) and not (text and _shouting(text)):
@@ -271,7 +315,8 @@ def is_public_person(ent: DetectedEntity, text: str) -> bool:
 # Something that points to a person next to a word-name: a greeting or an
 # addressee before it, a person's action or relation after it, a sign-off.
 _PERSON_BEFORE = re.compile(
-    r"(?i)(?:\b(?:to|from|tell|ask|told|asked|met|meet|call|text|email|cc|thanks"
+    r"(?i)(?:\b(?:(?<!compared\s)(?<!similar\s)(?<!next\s)(?<!close\s)(?<!equal\s)(?<!relative\s)to"
+    r"|from|tell|ask|told|asked|met|meet|call|text|email|cc|thanks"
     r"|thank\s+you|dear|hi|hey|hello|love|sincerely|regards)\s*,?\s*$|(?:^|\n)\s*[-–—~]\s*$)"
 )
 _PERSON_AFTER = re.compile(
@@ -301,7 +346,15 @@ def is_word_name(ent: DetectedEntity, text: str) -> bool:
     before = text[max(0, ent.start - 40):ent.start]
     if core.islower() and re.search(r"(?i)\b(?:the|a|an|this|that)\s+$", before):
         return True
-    if core.lower() not in WORD_NAMES:
+    devanagari = re.fullmatch(r"[\u0900-\u097f]+", core) is not None
+    if devanagari:
+        # NER tags Hindi adjectives as PERSON ("अच्छे" = good); a lone word
+        # that is no known Hindi name is a word
+        from .structural import _lexicons
+        _, hi_first, hi_last = _lexicons()
+        if core in hi_first or core in hi_last:
+            return False
+    elif core.lower() not in WORD_NAMES:
         return False
     # read the evidence around the whole list: "my friends Hope and Will are …"
     lead = _LIST_BEFORE.search(before)
@@ -447,16 +500,41 @@ _ISSUED_TYPES = frozenset({"credit_card", "us_bank_number", "iban", "id_number",
                            "passport", "us_driver_license"})
 
 
+# A public company is personal only as an employer or school: "my Chase
+# account", "my MacBook's serial", "Vodafone customer number" name a customer
+# of a company millions use, and masking it protects nobody.
+_PUBLIC_CUE = re.compile(
+    r"(?i)(?:\b(?:work(?:s|ed|ing)?|job|employed|intern(?:ing)?|hired|stud(?:y|ying|ied|ent)"
+    r"|enrolled|graduated|attend(?:s|ed|ing)?|teach(?:es|ing)?|taught)\b[^.!?\n]{0,25}"
+    r"|\b(?:i['’]?m|i\s+am|im)\s+(?:a|an)\s+[^.!?\n,]{1,40}?\s+)"
+    r"\b(?:at|for|with|by|from|in)\s+(?:the\s+)?$")
+
+
+_PRODUCT_WORD = re.compile(
+    r"(?i)^(?:marketplace|store|shop|pay|music|prime|drive|maps|support|account|card|app"
+    r"|plus|premium|business|terminal(?:\s*\d)?|t\d|airport)$")
+
+
+def is_public_org(core: str) -> bool:
+    """"Chase", "Facebook Marketplace", "Heathrow T5"."""
+    low = core.lower()
+    if low in PUBLIC_ORGS:
+        return True
+    words = core.split()
+    return len(words) == 2 and words[0].lower() in PUBLIC_ORGS and bool(_PRODUCT_WORD.match(words[1]))
+
+
 def is_tied(ent: DetectedEntity, text: str, persons: List[DetectedEntity],
             context: Iterable[DetectedEntity] = ()) -> bool:
-    if _DEVICE.match(_core(ent.text)):
+    public = is_public_org(_core(ent.text))
+    if _DEVICE.match(_core(ent.text)) and not public:
         return True
     for c in context:
-        if (c.type in _ISSUED_TYPES and 0 <= c.start - ent.end <= 60
+        if (c.type in _ISSUED_TYPES and 0 <= c.start - ent.end <= 60 and not public
                 and not re.search(r"[.!?\n]", text[ent.end:c.start])):
             return True
     before = _sentence_before(text, ent.start)
-    if _CUE_BEFORE.search(before):
+    if (_PUBLIC_CUE if public else _CUE_BEFORE).search(before):
         return True
     ls, _ = _line_bounds(text, ent.start)
     if _FIELD_LABEL.search(text[ls:ent.start]):
@@ -529,7 +607,7 @@ def gate(
               and _LEGAL_SUFFIX.search(_core(e.text))
               and _core(e.text).lower() not in PUBLIC_ORGS):
             kept.append(e)
-        elif _core(e.text).lower() in PUBLIC_ORGS:
+        elif is_public_org(_core(e.text)) or is_common_noun(e, text):
             _drop(e)
         elif anchored:
             kept.append(e)

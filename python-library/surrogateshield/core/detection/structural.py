@@ -650,7 +650,8 @@ _INTL_STREET = re.compile(
     r"|\b(?:Rua|Avenida|Av\.|Travessa|Alameda|Calle|Paseo|Plaza|Carrer|Via|Viale|Piazza|Corso)"
     r"\s+" + _JOIN + _W + r"(?:\s+" + _JOIN + _W + r"){0,3},?\s+(?:n[º°o]\.?\s*)?\d{1,5}[A-Za-z]?\b"
     # de: "Hauptstraße 5", "Lindenweg 12a"
-    r"|\b[A-ZÄÖÜ][\wäöüß]+(?:stra(?:ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm)\s+\d{1,4}[a-z]?\b"
+    r"|\b(?!(?:Spring|String|Offspring|Boring|Swing|Sing|Bring|Wing|Sling|Sting|Spa)\b)"
+    r"[A-ZÄÖÜ][\wäöüß]+(?:stra(?:ß|ss)e|str\.|weg|platz|allee|gasse|ring|damm)\s+\d{1,4}[a-z]?\b"
 )
 _W_ANY = r"[^\W\d_][\w'’\-]*"
 _CITY_W = r"[A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*(?:[ \-][A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*)?"

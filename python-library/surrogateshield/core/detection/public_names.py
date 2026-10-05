@@ -30,6 +30,7 @@ def _set(block: str) -> frozenset:
 
 
 PUBLIC_PEOPLE = _set("""
+Earl Grey | Lady Grey
 Abraham Lincoln | Adele | Adolf Hitler | Albert Einstein | Alexander Hamilton
 Alexander the Great | Alexandria Ocasio-Cortez | Andy Warhol | Angela Merkel
 Ariana Grande | Aristotle | Arnold Schwarzenegger | Barack Obama | Beethoven
@@ -80,6 +81,7 @@ Benjamin Netanyahu | Mohammed bin Salman | Lula | Javier Milei | Claudia Sheinba
 """)
 
 PUBLIC_ORGS = _set("""
+Kaiser | Kaiser Permanente | Dyson | Heathrow | Gatwick | Stansted | Schiphol
 Alphabet | Google | YouTube | Gmail | Android | Chrome | Microsoft | Windows | Excel
 Word | Outlook | Teams | Azure | LinkedIn | GitHub | Xbox | Apple | iPhone | iPad | Mac
 MacBook | iCloud | iOS | macOS | Siri | Amazon | AWS | Alexa | Kindle | Prime
@@ -151,7 +153,7 @@ Comment | Wie | Warum | Was | Wo | Por favor | Please | Router | Modem | Wifi | 
 # to a person, such a word is the word ("rhymes with Joy", "Amber or Jade",
 # "Bill of Sale").
 WORD_NAMES = _set("""
-Joy | Hope | Faith | Charity | Grace | Mercy | Honor | Honour | Victory | Destiny
+Madeleine | Joy | Hope | Faith | Charity | Grace | Mercy | Honor | Honour | Victory | Destiny
 Patience | Prudence | Constance | Harmony | Melody | Serenity | Trinity | Liberty
 Justice | Journey | Chance | Angel | Glory | Bliss | Felicity | Verity | Unity
 Amber | Jade | Pearl | Ruby | Crystal | Jewel | Opal | Garnet | Coral | Diamond
