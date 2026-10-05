@@ -11,7 +11,7 @@ annotator adjudicates and extends (TREC-style pooling; REALDATA_PROGRESS D4).
     python -m bench.realdata.label --estimate            # groups and calls, no network
     python -m bench.realdata.label --pilot               # 1 call, 10 messages, token count
     python -m bench.realdata.label --run                 # Message Batches, resumable
-    python -m bench.realdata.label --write               # labels, prevalence, PII-free sets
+    python -m bench.realdata.label --run --write [--out F] # labels, prevalence, PII-free sets
     python -m bench.realdata.label --human-check         # 100 rows for a person to correct
     python -m bench.realdata.label --agreement FILE      # Sonnet vs the corrected rows
 
@@ -550,7 +550,7 @@ def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, lo
     return out
 
 
-def write(result: dict, datasets=DATASETS, model: Optional[str] = None, log=print) -> dict:
+def write(result: dict, datasets=DATASETS, model: Optional[str] = None, log=print, out: Path = PREVALENCE) -> dict:
     from bench.realdata import manifest
     from bench.realdata.provider import SONNET
     model = model or SONNET
@@ -578,9 +578,9 @@ def write(result: dict, datasets=DATASETS, model: Optional[str] = None, log=prin
     prev = prevalence(labels, kinds)
     for ds in datasets:
         prev[ds]["pii_free_sources"] = summary[ds]
-    doc = {"command": "python -m bench.realdata.label --run --write", "annotator": model,
+    doc = {"command": f"python -m bench.realdata.label --run --write --out {out.relative_to(ROOT)}", "annotator": model,
            "prompt_version": prompt_version(), "per_call": PER_CALL, "datasets": prev}
-    PREVALENCE.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
+    out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
     m.setdefault("labels", {}).update({"annotator": model, "prompt_version": prompt_version(),
                                        "pooled_arms": list(ARMS), "literal_rule_arms": list(LITERAL_ARMS)})
     manifest.save(m)
@@ -620,6 +620,7 @@ def main(argv=None) -> int:
     g.add_argument("--human-check", action="store_true")
     g.add_argument("--agreement", type=Path)
     ap.add_argument("--write", action="store_true", help="with --run: write labels, prevalence, PII-free sets")
+    ap.add_argument("--out", type=Path, default=PREVALENCE, help="with --write: the prevalence counts file")
     ap.add_argument("--datasets", nargs="*", choices=list(DATASETS), default=list(DATASETS))
     args = ap.parse_args(argv)
     if args.estimate:
@@ -650,7 +651,7 @@ def main(argv=None) -> int:
         from bench.realdata.provider import Ledger, client
         result = run(args.datasets, cl=client(), ledger=Ledger(run="label"))
         if args.write:
-            write(result, args.datasets)
+            write(result, args.datasets, out=args.out.resolve())
         return 0
     if args.human_check:
         ids = write_human_check()

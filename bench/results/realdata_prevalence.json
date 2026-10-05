@@ -1,0 +1,241 @@
+{
+ "annotator": "claude-sonnet-4-6",
+ "command": "python -m bench.realdata.label --run --write --out bench/results/realdata_prevalence.json",
+ "datasets": {
+  "oasst1": {
+   "by_kind": {
+    "multi": {
+     "messages": 214,
+     "with_pii": 1
+    },
+    "single": {
+     "messages": 496,
+     "with_pii": 6
+    }
+   },
+   "by_task": {
+    "advice": {
+     "messages": 73,
+     "with_pii": 4
+    },
+    "business": {
+     "messages": 5,
+     "with_pii": 0
+    },
+    "coding": {
+     "messages": 118,
+     "with_pii": 0
+    },
+    "other": {
+     "messages": 21,
+     "with_pii": 0
+    },
+    "qa": {
+     "messages": 340,
+     "with_pii": 1
+    },
+    "roleplay": {
+     "messages": 33,
+     "with_pii": 0
+    },
+    "translation": {
+     "messages": 1,
+     "with_pii": 0
+    },
+    "writing": {
+     "messages": 119,
+     "with_pii": 2
+    }
+   },
+   "failed": 5,
+   "labelled": 710,
+   "messages": 715,
+   "messages_with_type": {
+    "DATE_OF_BIRTH": 1,
+    "HEALTH": 4,
+    "PERSON": 2
+   },
+   "pii_free_sources": {
+    "multi": {
+     "adjudicated": 98,
+     "literal": 11
+    },
+    "single": {
+     "adjudicated": 490,
+     "literal": 109
+    }
+   },
+   "service_query": 0,
+   "values_by_type": {
+    "DATE_OF_BIRTH": 1,
+    "HEALTH": 5,
+    "PERSON": 3
+   },
+   "with_pii": 7,
+   "with_protect": 3,
+   "with_sensitive": 4
+  },
+  "sharegpt": {
+   "by_kind": {
+    "multi": {
+     "messages": 264,
+     "with_pii": 3
+    },
+    "single": {
+     "messages": 477,
+     "with_pii": 17
+    }
+   },
+   "by_task": {
+    "advice": {
+     "messages": 46,
+     "with_pii": 3
+    },
+    "business": {
+     "messages": 37,
+     "with_pii": 0
+    },
+    "coding": {
+     "messages": 171,
+     "with_pii": 3
+    },
+    "other": {
+     "messages": 31,
+     "with_pii": 0
+    },
+    "qa": {
+     "messages": 207,
+     "with_pii": 2
+    },
+    "roleplay": {
+     "messages": 55,
+     "with_pii": 1
+    },
+    "translation": {
+     "messages": 4,
+     "with_pii": 0
+    },
+    "writing": {
+     "messages": 190,
+     "with_pii": 11
+    }
+   },
+   "failed": 36,
+   "labelled": 741,
+   "messages": 777,
+   "messages_with_type": {
+    "EMAIL": 2,
+    "ETHNICITY": 1,
+    "HEALTH": 5,
+    "NETWORK": 2,
+    "PERSON": 12
+   },
+   "pii_free_sources": {
+    "multi": {
+     "adjudicated": 91,
+     "literal": 9
+    },
+    "single": {
+     "adjudicated": 460,
+     "literal": 51
+    }
+   },
+   "service_query": 0,
+   "values_by_type": {
+    "EMAIL": 2,
+    "ETHNICITY": 2,
+    "HEALTH": 9,
+    "NETWORK": 3,
+    "PERSON": 24
+   },
+   "with_pii": 20,
+   "with_protect": 15,
+   "with_sensitive": 6
+  },
+  "wildchat": {
+   "by_kind": {
+    "multi": {
+     "messages": 253,
+     "with_pii": 8
+    },
+    "single": {
+     "messages": 477,
+     "with_pii": 25
+    }
+   },
+   "by_task": {
+    "advice": {
+     "messages": 13,
+     "with_pii": 2
+    },
+    "business": {
+     "messages": 14,
+     "with_pii": 0
+    },
+    "coding": {
+     "messages": 80,
+     "with_pii": 0
+    },
+    "other": {
+     "messages": 21,
+     "with_pii": 0
+    },
+    "qa": {
+     "messages": 146,
+     "with_pii": 2
+    },
+    "roleplay": {
+     "messages": 33,
+     "with_pii": 2
+    },
+    "translation": {
+     "messages": 8,
+     "with_pii": 0
+    },
+    "writing": {
+     "messages": 415,
+     "with_pii": 27
+    }
+   },
+   "failed": 29,
+   "labelled": 730,
+   "messages": 759,
+   "messages_with_type": {
+    "ETHNICITY": 2,
+    "HEALTH": 4,
+    "ID": 1,
+    "LOCATION": 1,
+    "ORIENTATION": 2,
+    "PERSON": 24,
+    "RELIGION": 1,
+    "URL": 1
+   },
+   "pii_free_sources": {
+    "multi": {
+     "adjudicated": 91,
+     "literal": 4
+    },
+    "single": {
+     "adjudicated": 452,
+     "literal": 71
+    }
+   },
+   "service_query": 0,
+   "values_by_type": {
+    "ETHNICITY": 2,
+    "HEALTH": 9,
+    "ID": 1,
+    "LOCATION": 1,
+    "ORIENTATION": 2,
+    "PERSON": 33,
+    "RELIGION": 1,
+    "URL": 1
+   },
+   "with_pii": 33,
+   "with_protect": 24,
+   "with_sensitive": 9
+  }
+ },
+ "per_call": 10,
+ "prompt_version": "bebc6e281801fa74"
+}
