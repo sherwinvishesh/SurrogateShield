@@ -144,11 +144,12 @@ class Prepared:
         return out
 
 
-def prepare_send(question: str, mimic) -> Prepared:
+def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None) -> Prepared:
     """Detect, generate surrogates and build the exact text to send.
 
     This is the single code path used by the runner and by
-    ``offline_eval.py --protection``.
+    ``offline_eval.py --protection`` / ``--ablation``. *cascade_options* are
+    passed to ``run_cascade`` (stage switches for the ablation).
     """
     from config import (
         ADDRESS_MODE,
@@ -164,7 +165,8 @@ def prepare_send(question: str, mimic) -> Prepared:
     address_mode = resolve_address_mode(ADDRESS_MODE, is_svc)
 
     timings: Dict[str, float] = {}
-    confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings)
+    confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings,
+                               **(cascade_options or {}))
     confirmed = deduplicate(confirmed)
     skipped = list(getattr(confirmed, "_skipped_entities", []))
 

@@ -24,10 +24,16 @@ of the documented ``POLICY_REASONS``) and unintended. Shift-mode addresses must
 appear in the sent text exactly as their shifted surrogate. Exit status 1 if
 any unintended leak or shift mismatch exists.
 
+``--ablation`` (audit A9) re-runs the cascade per configuration (PatternScan
+only; + EntityTrace; no post-passes; full) and reports each one's protection
+scores with a signed delta and a question-level bootstrap CI against the full
+cascade.
+
 Usage:
     python offline_eval.py --key experiment/test_key.json
     python offline_eval.py --key experiment/test_key.json --protection --json out.json
     python offline_eval.py --key experiment/test_key.json --types address --limit 200
+    python offline_eval.py --key experiment/test_key.json --ablation --limit 200
     python offline_eval.py --key experiment/test_key.json --lint-key
 """
 
@@ -43,21 +49,8 @@ import eval_metrics as em
 
 SEED = 20260101
 
-# Documented policies under which a gold value may reach the provider verbatim
-# (gate J1). Anything else in the sent text is an unintended leak.
-#   service_query_address_shift      — non-sensitive service query, address
-#                                      mode "shift": only the house number
-#                                      changes; street/city/state/ZIP stay.
-#   service_query_location_suppressed — standalone city/state in a service
-#                                      query ("coffee near Tempe").
-#   topical_geo_filtered             — a place that is only the topic of a
-#                                      question ("Japan's GDP") in a message
-#                                      with no direct identifier of a person.
-POLICY_REASONS = frozenset({
-    "service_query_address_shift",
-    "service_query_location_suppressed",
-    "topical_geo_filtered",
-})
+# Documented J1 policies live in eval_metrics (shared with evaluator.py).
+POLICY_REASONS = em.POLICY_REASONS
 
 
 # ─────────────────────────────────────────────
@@ -96,41 +89,10 @@ def _pred_spans(spans: list, replaced_only: bool) -> list:
 
 def check_sent_text(question: str, answer_key, prep) -> dict:
     """J1 check on one prepared send. Returns leaks and shift mismatches."""
-    rnr = [s for s in prep.spans() if not s["replaced"]]
-    # Service-query shift policy: only the house number changes, so street,
-    # city, state and ZIP inside a shifted address go out verbatim by design.
-    address_texts = {e.text for e in prep.confirmed if e.type == "address"}
-    shifted = [
-        (b, e) for b, e, orig, _sur in prep.edits
-        if prep.address_mode == "shift" and orig in address_texts
-    ]
-    leaks = []
-    for t, v in em.key_values(answer_key):
-        if not em.find_occurrences(question, v):
-            continue  # cannot leak what is not in the input
-        if not em.contains_value(prep.sanitized, v):
-            continue
-        occ = em.find_occurrences(question, v)
-        reasons = {
-            s.get("reason") or "no_reason_recorded" for s in rnr
-            if any(s["start"] < e and b < s["end"] for b, e in occ)
-        }
-        if any(sb <= b and e <= se for b, e in occ for sb, se in shifted):
-            reasons.add("service_query_address_shift")
-        reasons = sorted(reasons)
-        leaks.append({
-            "type": t,
-            "value": v,
-            "deliberate": bool(reasons) and set(reasons) <= POLICY_REASONS,
-            "reasons": reasons,
-        })
-    shift_mismatch = []
-    if prep.address_mode == "shift":
-        for ent in prep.confirmed:
-            if ent.type == "address" and ent.text in prep.surrogate_map:
-                if prep.surrogate_map[ent.text] not in prep.sanitized:
-                    shift_mismatch.append(ent.text)
-    return {"leaks": leaks, "shift_mismatch": shift_mismatch}
+    return em.classify_sent_leaks(
+        question, answer_key, prep.sanitized, prep.spans(),
+        prep.address_mode, prep.surrogate_map,
+    )
 
 
 # ─────────────────────────────────────────────
@@ -235,6 +197,75 @@ def run_offline_eval(
     return result
 
 
+# Real ablation (audit A9): the cascade is re-run with stages switched off and
+# each configuration is scored on protection. Every delta is against the
+# shipped configuration and keeps its sign.
+ABLATION_CONFIGS = [
+    ("pattern_only", "PatternScan only",
+     {"use_entity_trace": False, "use_context_guard": False}),
+    ("pattern_entity_trace", "PatternScan + EntityTrace (ContextGuard off)",
+     {"use_context_guard": False}),
+    ("no_post_passes", "All three stages, post-passes A-C/E-H off",
+     {"use_post_passes": False}),
+    ("full", "Full cascade (shipped)", {}),
+]
+
+
+def run_ablation(key_path: Path, limit: int | None = None, seed: int = SEED) -> dict:
+    from generation.logic import MimicGen
+    from json_tester import prepare_send
+
+    entries = json.loads(key_path.read_text())
+    if limit:
+        entries = entries[:limit]
+    tallies = {name: em.Tally() for name, _l, _o in ABLATION_CONFIGS}
+    counts: dict = {name: [] for name, _l, _o in ABLATION_CONFIGS}
+    start = time.time()
+    for i, entry in enumerate(entries):
+        question = entry.get("Question", "")
+        gold, _missing = em.gold_spans(question, entry.get("Answer-Key"))
+        for name, _label, opts in ABLATION_CONFIGS:
+            prep = prepare_send(question, MimicGen(seed=seed + i), cascade_options=opts)
+            pred = _pred_spans(prep.spans(), replaced_only=True)
+            g_hit, p_hit = tallies[name].add(gold, pred)
+            counts[name].append(em.question_counts(gold, pred, g_hit, p_hit))
+        if (i + 1) % 100 == 0:
+            print(f"  … {i + 1}/{len(entries)} questions ({time.time() - start:.0f}s)",
+                  flush=True)
+
+    full = tallies["full"].micro()
+    configs = {}
+    for name, label, opts in ABLATION_CONFIGS:
+        mi, ma = tallies[name].micro(), tallies[name].macro()
+        row = {"label": label, "options": opts, "micro": mi, "macro": ma}
+        if name != "full":
+            row["delta_micro_f1_vs_full"] = round(mi["f1"] - full["f1"], 4)
+            row["bootstrap_vs_full"] = em.bootstrap_micro_f1_diff(
+                counts[name], counts["full"], seed=seed)
+        configs[name] = row
+    return {
+        "key_file": str(key_path),
+        "questions": len(entries),
+        "seed": seed,
+        "scored_on": "protection (replaced spans only), span overlap",
+        "configurations": configs,
+    }
+
+
+def _print_ablation(result: dict) -> None:
+    print("\n═══ Ablation (cascade re-run per configuration, protection) ═══")
+    print(f"key file:  {result['key_file']}   questions: {result['questions']}")
+    print(f"  {'configuration':<46}{'P':>8}{'R':>8}{'F1':>8}{'ΔF1 vs full':>13}{'95% CI':>20}")
+    for name, row in result["configurations"].items():
+        mi = row["micro"]
+        delta = row.get("delta_micro_f1_vs_full")
+        bs = row.get("bootstrap_vs_full") or {}
+        d = f"{delta:+.4f}" if delta is not None else "—"
+        ci = f"[{bs['ci_low']:+.4f}, {bs['ci_high']:+.4f}]" if bs.get("available") else ""
+        print(f"  {row['label']:<46}{mi['precision']:>8.4f}{mi['recall']:>8.4f}"
+              f"{mi['f1']:>8.4f}{d:>13}{ci:>20}")
+
+
 def _count_reasons(rows: list) -> dict:
     out: dict = {}
     for r in rows:
@@ -299,6 +330,8 @@ def main() -> int:
     parser.add_argument("--protection", action="store_true",
                         help="also check the sent text for verbatim gold values (gate J1)")
     parser.add_argument("--seed", type=int, default=SEED, help="base surrogate seed")
+    parser.add_argument("--ablation", action="store_true",
+                        help="re-run the cascade with stages switched off and score each (A9)")
     parser.add_argument("--lint-key", action="store_true",
                         help="only lint the key file (no models)")
     args = parser.parse_args()
@@ -312,7 +345,19 @@ def main() -> int:
         return 1 if lint_key(entries) else 0
 
     import logging
+    import os
     logging.getLogger().setLevel(logging.WARNING)
+    # No network: models must already be cached (rule: offline evaluation).
+    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+
+    if args.ablation:
+        result = run_ablation(args.key, args.limit, args.seed)
+        _print_ablation(result)
+        if args.json:
+            args.json.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+            print(f"\nfull results → {args.json}")
+        return 0
 
     type_filter = set(args.types.split(",")) if args.types else None
     result = run_offline_eval(args.key, args.limit, type_filter, args.protection, args.seed)

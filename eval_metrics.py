@@ -373,13 +373,185 @@ class Tally:
         }
 
 
-def drop_neutral(pred: Sequence[Span], neutral_gold: Sequence[Span]) -> List[Span]:
+def drop_neutral(
+    pred: Sequence[Span],
+    neutral_gold: Sequence[Span],
+    shared_gold: Sequence[Span] = (),
+) -> List[Span]:
     """Remove predictions that overlap gold of a type outside the universe.
 
     In the Presidio comparison a prediction that lands on, say, a gold postal
-    code is neither credited nor penalised — for either system.
+    code is neither credited nor penalised — for either system. A prediction
+    that also overlaps shared gold (an address span covering a gold city) is
+    kept, so it can still be credited for the shared value.
     """
-    return [p for p in pred if not any(p.overlaps(g) for g in neutral_gold)]
+    return [
+        p for p in pred
+        if not any(p.overlaps(g) for g in neutral_gold)
+        or any(p.overlaps(g) for g in shared_gold)
+    ]
+
+
+def split_shared(gold: Sequence[Span]) -> Tuple[List[Span], List[Span]]:
+    """Split gold into (shared-universe spans retyped, neutral spans)."""
+    shared, neutral = [], []
+    for g in gold:
+        t = to_shared(g.type)
+        if t is None:
+            neutral.append(g)
+        else:
+            shared.append(Span(g.start, g.end, t, g.value))
+    return shared, neutral
+
+
+def same_type(gold_t: str, pred_t: str) -> bool:
+    return gold_t == pred_t
+
+
+# ─────────────────────────────────────────────
+# What reached the provider (A6, gate J1)
+# ─────────────────────────────────────────────
+
+# Documented policies under which a gold value may reach the provider verbatim
+# (gate J1). Anything else in the sent text is an unintended leak.
+#   service_query_address_shift      — non-sensitive service query, address
+#                                      mode "shift": only the house number
+#                                      changes; street/city/state/ZIP stay.
+#   service_query_location_suppressed — standalone city/state in a service
+#                                      query ("coffee near Tempe").
+#   topical_geo_filtered             — a place that is only the topic of a
+#                                      question ("Japan's GDP") in a message
+#                                      with no direct identifier of a person.
+POLICY_REASONS = frozenset({
+    "service_query_address_shift",
+    "service_query_location_suppressed",
+    "topical_geo_filtered",
+})
+
+
+def classify_sent_leaks(
+    question: str,
+    answer_key,
+    sent: str,
+    spans: Sequence[dict],
+    address_mode: Optional[str],
+    surrogate_map: Dict[str, str],
+) -> dict:
+    """Every gold value of *question* that occurs verbatim in *sent*.
+
+    *spans* are prediction dicts in question coordinates
+    (``text, start, end, type, replaced[, reason]``) — ``Prepared.spans()``
+    or the runner's stored ``pii_spans``. A leak is *deliberate* only if every
+    reason covering it is in ``POLICY_REASONS``; a recognised-not-replaced
+    span without a recorded reason counts as ``no_reason_recorded``.
+
+    Returns ``{"gold_values": n, "leaks": [...], "shift_mismatch": [...]}``.
+    """
+    rnr = [s for s in spans if not s["replaced"]]
+    # Service-query shift: only the house number changes, so street, city,
+    # state and ZIP inside a shifted address go out verbatim by design.
+    shift = address_mode == "shift"
+    shifted = [
+        (s["start"], s["end"]) for s in spans
+        if shift and s["replaced"] and normalize_type(s["type"]) == "address"
+    ]
+    n_gold = 0
+    leaks = []
+    for t, v in key_values(answer_key):
+        occ = find_occurrences(question, v)
+        if not occ:
+            continue  # cannot leak what is not in the input
+        n_gold += 1
+        if not contains_value(sent, v):
+            continue
+        reasons = {
+            s.get("reason") or "no_reason_recorded" for s in rnr
+            if any(s["start"] < e and b < s["end"] for b, e in occ)
+        }
+        if any(sb <= b and e <= se for b, e in occ for sb, se in shifted):
+            reasons.add("service_query_address_shift")
+        reasons = sorted(reasons)
+        leaks.append({
+            "type": t,
+            "value": v,
+            "deliberate": bool(reasons) and set(reasons) <= POLICY_REASONS,
+            "reasons": reasons,
+        })
+    shift_mismatch = []
+    if shift:
+        for s in spans:
+            if s["replaced"] and normalize_type(s["type"]) == "address":
+                sur = surrogate_map.get(s["text"])
+                if sur is not None and sur not in sent and s["text"] not in shift_mismatch:
+                    shift_mismatch.append(s["text"])
+    return {"gold_values": n_gold, "leaks": leaks, "shift_mismatch": shift_mismatch}
+
+
+# ─────────────────────────────────────────────
+# Restoration (A7): score the shipped resolver's output
+# ─────────────────────────────────────────────
+
+_TOKEN = re.compile(r"\w+|[^\w\s]")
+
+
+def _tokens(text: str) -> List[str]:
+    return _TOKEN.findall(text or "")
+
+
+def score_restoration(
+    llm_response: str,
+    final_output: str,
+    surrogate_map: Dict[str, str],
+    question: str = "",
+) -> dict:
+    """Compare a provider answer with its restored form.
+
+    * ``surrogates_left`` — a surrogate still present after restoration
+      (ignored when the surrogate text also occurs in the question).
+    * ``over_restored`` — an original appears more often than the answer
+      gave it any reason to (its own occurrences, its surrogate's, and the
+      surrogate's single words). Conservative: it may miss cases, it does not
+      invent them.
+    * ``collateral_edits`` — a changed token run between answer and restored
+      output whose old side is not made of surrogate tokens or whose new side
+      is not made of original tokens ("Annual" → "Zoeual").
+    """
+    import difflib
+
+    pairs = {k: v for k, v in surrogate_map.items() if v and k != v}
+    left = [
+        v for v in pairs.values()
+        if contains_value(final_output, v) and not contains_value(question, v)
+    ]
+    def _sources(v: str) -> int:
+        n = len(find_occurrences(llm_response, v))
+        words = v.split()
+        if len(words) > 1:
+            n += sum(len(find_occurrences(llm_response, w)) for w in words)
+        return n
+
+    over = []
+    for k in pairs:
+        # k may also come back from any original that contains it ("Ann" in
+        # "Ann Lee", restored from the surrogate's first name).
+        expected = len(find_occurrences(llm_response, k)) + sum(
+            _sources(v2) for k2, v2 in pairs.items() if find_occurrences(k2, k))
+        actual = len(find_occurrences(final_output, k))
+        if actual > expected:
+            over.append({"original": k, "extra": actual - expected})
+
+    sur_tok = {t.lower() for v in pairs.values() for t in _tokens(v)}
+    orig_tok = {t.lower() for k in pairs for t in _tokens(k)}
+    a, b = _tokens(llm_response), _tokens(final_output)
+    collateral = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+        if op == "equal":
+            continue
+        old, new = a[i1:i2], b[j1:j2]
+        if all(t.lower() in sur_tok for t in old) and all(t.lower() in orig_tok for t in new):
+            continue
+        collateral.append({"from": " ".join(old), "to": " ".join(new)})
+    return {"surrogates_left": left, "over_restored": over, "collateral_edits": collateral}
 
 
 # ─────────────────────────────────────────────
@@ -410,6 +582,55 @@ def bootstrap_ci(
     lo = means[int((alpha / 2) * n_boot)]
     hi = means[min(n_boot - 1, int((1 - alpha / 2) * n_boot))]
     return (lo, hi)
+
+
+QCounts = Tuple[int, int, int, int]   # (pred_correct, pred, gold_found, gold) per question
+
+
+def question_counts(gold: Sequence[Span], pred: Sequence[Span], g_hit, p_hit) -> QCounts:
+    return (sum(p_hit), len(pred), sum(g_hit), len(gold))
+
+
+def _micro_f1(rows: Sequence[QCounts]) -> float:
+    pc = sum(r[0] for r in rows)
+    pn = sum(r[1] for r in rows)
+    gf = sum(r[2] for r in rows)
+    gn = sum(r[3] for r in rows)
+    return prf(pc, pn, gf, gn)[2]
+
+
+def bootstrap_micro_f1_diff(
+    a: Sequence[QCounts],
+    b: Sequence[QCounts],
+    n_boot: int = 2000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> dict:
+    """Micro-F1(a) − micro-F1(b) with a percentile bootstrap over questions
+    (A12). *a* and *b* are per-question counts on the same questions."""
+    import random
+
+    n = len(a)
+    if n != len(b):
+        raise ValueError("bootstrap_micro_f1_diff needs counts for the same questions")
+    if n == 0:
+        return {"available": False, "n_questions": 0, "reason": "no questions"}
+    rng = random.Random(seed)
+    diffs = []
+    for _ in range(n_boot):
+        idx = [rng.randrange(n) for _ in range(n)]
+        diffs.append(_micro_f1([a[i] for i in idx]) - _micro_f1([b[i] for i in idx]))
+    diffs.sort()
+    return {
+        "available": True,
+        "n_questions": n,
+        "diff": round(_micro_f1(a) - _micro_f1(b), 4),
+        "ci_low": round(diffs[int((alpha / 2) * n_boot)], 4),
+        "ci_high": round(diffs[min(n_boot - 1, int((1 - alpha / 2) * n_boot))], 4),
+        "alpha": alpha,
+        "n_boot": n_boot,
+        "seed": seed,
+    }
 
 
 def paired_stats(a: Sequence[float], b: Sequence[float], alpha: float = 0.05, seed: int = 0) -> dict:

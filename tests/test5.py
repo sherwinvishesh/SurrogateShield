@@ -5,9 +5,8 @@ test5.py — SurrogateShield Evaluator Tests
 
 Covers:
   1. parse_key_entry() — all input formats and type-alias mapping
-  2. run_evaluation() — using the experiment/example files (2 real questions)
-  3. run_evaluation() — edge cases: selective fields, progress_cb,
-                         mismatched lengths, perfect detection
+  2. run_evaluation() — length mismatch raises (the rest lives in
+     tests/test_evaluator.py)
 
 Run from inside SurrogateShield/:
     python tests/test5.py
@@ -19,7 +18,6 @@ import sys
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import patch as _patch
 
 sys.path.insert(0, ".")
 
@@ -171,358 +169,24 @@ check(
 
 
 # ─────────────────────────────────────────────────────────────
-# 2. run_evaluation() — using the real example experiment files
+# 2 and 3 retired (audit A3/A6/A7/A9/A12/I32).
+# They asserted the old result schema, including "nothing to find →
+# precision 1.0", which the audit identified as a bug (A3). The evaluator's
+# behaviour is now covered by tests/test_evaluator.py and
+# tests/test_eval_metrics.py (pytest, model-free).
 # ─────────────────────────────────────────────────────────────
-print("\n[2] run_evaluation() — example experiment files")
-
-all_fields = {k: True for k, _ in EVAL_FIELDS}
-
-eval_result = None
-eval_ok = False
-try:
-    eval_result = run_evaluation(
-        "example.json",
-        "example_answers.json",
-        "example_key.json",
-        all_fields,
-    )
-    eval_ok = True
-except Exception as exc:
-    print(f"  [WARN] run_evaluation raised: {exc}")
-
-check(
-    "run_evaluation() with example files returns a dict",
-    eval_ok and isinstance(eval_result, dict),
-)
-
-if eval_ok and eval_result is not None:
-    # 2a. Basic counts
-    check(
-        "no_of_questions == 2 (example has 2 questions)",
-        eval_result.get("no_of_questions") == 2,
-        f"got: {eval_result.get('no_of_questions')}"
-    )
-    check(
-        "no_of_answers is an int >= 0",
-        isinstance(eval_result.get("no_of_answers"), int),
-        f"got: {eval_result.get('no_of_answers')}"
-    )
-    check(
-        "answer_rate is a float in [0, 1]",
-        isinstance(eval_result.get("answer_rate"), float)
-        and 0.0 <= eval_result["answer_rate"] <= 1.0,
-        f"got: {eval_result.get('answer_rate')}"
-    )
-
-    # 2b. Surrogate quality metrics
-    for metric in ("precision_surrogates", "recall_surrogates", "f1_surrogates",
-                   "accuracy_surrogates", "error_surrogates"):
-        val = eval_result.get(metric)
-        check(
-            f"{metric} is a float in [0, 1]",
-            isinstance(val, float) and 0.0 <= val <= 1.0,
-            f"got: {val}"
-        )
-
-    # 2c. Surrogate counts
-    check(
-        "no_surrogates_found is a non-negative int",
-        isinstance(eval_result.get("no_surrogates_found"), int)
-        and eval_result["no_surrogates_found"] >= 0,
-        f"got: {eval_result.get('no_surrogates_found')}"
-    )
-    check(
-        "avg_surrogates_per_question_found is a non-negative float",
-        isinstance(eval_result.get("avg_surrogates_per_question_found"), float)
-        and eval_result["avg_surrogates_per_question_found"] >= 0.0,
-        f"got: {eval_result.get('avg_surrogates_per_question_found')}"
-    )
-
-    # 2d. Timing averages — all non-negative
-    for timing_key in ("avg_pattern_scan_ms", "avg_entity_trace_ms",
-                       "avg_context_guard_ms", "avg_surrogate_gen_ms"):
-        val = eval_result.get(timing_key)
-        check(
-            f"{timing_key} is a non-negative float",
-            isinstance(val, float) and val >= 0.0,
-            f"got: {val}"
-        )
-
-    # 2e. Resolve quality
-    check(
-        "total_resolve_leaks is an int >= 0",
-        isinstance(eval_result.get("total_resolve_leaks"), int)
-        and eval_result["total_resolve_leaks"] >= 0,
-        f"got: {eval_result.get('total_resolve_leaks')}"
-    )
-    check(
-        "resolve_leak_rate is in [0, 1]",
-        isinstance(eval_result.get("resolve_leak_rate"), float)
-        and 0.0 <= eval_result["resolve_leak_rate"] <= 1.0,
-        f"got: {eval_result.get('resolve_leak_rate')}"
-    )
-
-    # 2f. Sanitisation quality
-    check(
-        "pii_leak_rate is in [0, 1]",
-        isinstance(eval_result.get("pii_leak_rate"), float)
-        and 0.0 <= eval_result["pii_leak_rate"] <= 1.0,
-        f"got: {eval_result.get('pii_leak_rate')}"
-    )
-    check(
-        "accuracy_sanitization is in [0, 1]",
-        isinstance(eval_result.get("accuracy_sanitization"), float)
-        and 0.0 <= eval_result["accuracy_sanitization"] <= 1.0,
-        f"got: {eval_result.get('accuracy_sanitization')}"
-    )
-
-    # 2g. Per-entity type breakdown
-    per_type = eval_result.get("per_entity_type", {})
-    check(
-        "per_entity_type is a dict",
-        isinstance(per_type, dict),
-    )
-    for etype, metrics in per_type.items():
-        check(
-            f"per_entity_type[{etype!r}] has precision/recall/f1/tp/fp/fn keys",
-            all(k in metrics for k in ("precision", "recall", "f1", "tp", "fp", "fn")),
-            f"keys: {list(metrics.keys())}"
-        )
-        break  # spot-check one type
-
-    # 2h. Presidio comparison structure
-    p_cmp = eval_result.get("presidio_comparison", {})
-    check(
-        "presidio_comparison has ss_overall key",
-        "ss_overall" in p_cmp,
-        f"keys: {list(p_cmp.keys())}"
-    )
-    check(
-        "presidio_comparison.ss_overall has precision/recall/f1",
-        all(k in p_cmp.get("ss_overall", {}) for k in ("precision", "recall", "f1")),
-        f"ss_overall: {p_cmp.get('ss_overall')}"
-    )
-    check(
-        "presidio_comparison has data_status key",
-        "data_status" in p_cmp,
-    )
-
-    # 2i. BERTScore comparison structure
-    bs_cmp = eval_result.get("bertscore_comparison", {})
-    check(
-        "bertscore_comparison has 'ss' and 'presidio' keys",
-        "ss" in bs_cmp and "presidio" in bs_cmp,
-        f"keys: {list(bs_cmp.keys())}"
-    )
-    ss_bs = bs_cmp.get("ss", {})
-    check(
-        "bertscore_comparison.ss has f1, data_count, data_status",
-        all(k in ss_bs for k in ("f1", "data_count", "data_status")),
-        f"ss keys: {list(ss_bs.keys())}"
-    )
-
-    # 2j. Ablation study structure
-    abl = eval_result.get("ablation_study", {})
-    check(
-        "ablation_study has 'configurations' key",
-        "configurations" in abl,
-        f"keys: {list(abl.keys())}"
-    )
-    configs = abl.get("configurations", {})
-    check(
-        "ablation_study has all four config keys",
-        all(k in configs for k in ("full", "ps_only", "ps_et", "ps_cg")),
-        f"config keys: {list(configs.keys())}"
-    )
-    full_cfg = configs.get("full", {})
-    check(
-        "ablation_study 'full' config has precision/recall/f1",
-        all(k in full_cfg for k in ("precision", "recall", "f1")),
-        f"full keys: {list(full_cfg.keys())}"
-    )
-
-else:
-    # Pad so the count stays consistent when eval is unavailable
-    for _ in range(28):
-        check("(skipped — run_evaluation failed to load example files)", True,
-              "check experiment/ directory contains example_*.json files")
-
-
-# ─────────────────────────────────────────────────────────────
-# 3. run_evaluation() — edge cases and error handling
-# ─────────────────────────────────────────────────────────────
-print("\n[3] run_evaluation() — edge cases")
-
-
-# 3a. Mismatched file lengths → ValueError
-with tempfile.TemporaryDirectory() as td:
-    tdp = Path(td)
-    (tdp / "q.json").write_text(
-        '[{"input":"q1"},{"input":"q2"}]', encoding="utf-8"
-    )
-    (tdp / "a.json").write_text(
-        '[{"surrogate_map":{},"llm_response":"ok","sanitized_input":"ok"}]',
-        encoding="utf-8"
-    )
-    (tdp / "k.json").write_text(
-        '[{"Answer-Key":{"name":"Alice"}}]', encoding="utf-8"
-    )
-
-    with _patch.object(evaluator, "EXPERIMENT_DIR", tdp):
-        try:
-            run_evaluation("q.json", "a.json", "k.json", {"no_of_questions": True})
-            check("Mismatched file lengths raises ValueError", False,
-                  "no exception was raised")
-        except ValueError as exc:
-            check("Mismatched file lengths raises ValueError", True,
-                  f"got: {exc}")
-        except Exception as exc:
-            check("Mismatched file lengths raises ValueError", False,
-                  f"wrong exception type: {type(exc).__name__}: {exc}")
-
-
-# 3b. Selective fields — only enabled fields appear in result
-with tempfile.TemporaryDirectory() as td:
-    tdp = Path(td)
-    q = [{"input": "test question"}]
-    a = [{
-        "surrogate_map": {"Alice": "Carol"},
-        "llm_response": "hi Carol",
-        "sanitized_input": "hi Carol",
-        "recognized_not_replaced": [],
-    }]
-    k = [{"Answer-Key": {"name": "Alice"}}]
-    for fname, data in [("q.json", q), ("a.json", a), ("k.json", k)]:
-        (tdp / fname).write_text(json.dumps(data), encoding="utf-8")
-
-    selective = {k_: False for k_, _ in EVAL_FIELDS}
-    selective["no_of_questions"]  = True
-    selective["surrogate_counts"] = True
-
-    with _patch.object(evaluator, "EXPERIMENT_DIR", tdp):
-        sel_result = run_evaluation("q.json", "a.json", "k.json", selective)
-
-    check(
-        "Selective fields: no_of_questions present when enabled",
-        "no_of_questions" in sel_result,
-        f"keys: {sorted(sel_result.keys())}"
-    )
-    check(
-        "Selective fields: no_surrogates_found present when surrogate_counts=True",
-        "no_surrogates_found" in sel_result,
-    )
-    check(
-        "Selective fields: precision_surrogates absent when disabled",
-        "precision_surrogates" not in sel_result,
-        f"keys: {sorted(sel_result.keys())}"
-    )
-    check(
-        "Selective fields: avg_pattern_scan_ms absent when timing=False",
-        "avg_pattern_scan_ms" not in sel_result,
-    )
-
-
-# 3c. progress_cb is called once per question with correct arguments
-with tempfile.TemporaryDirectory() as td:
-    tdp = Path(td)
-    q = [{"input": "q1"}, {"input": "q2"}, {"input": "q3"}]
-    a = [{"surrogate_map": {}, "llm_response": f"r{i}", "sanitized_input": f"q{i}"}
-         for i in range(3)]
-    k = [{"Answer-Key": None}] * 3
-    for fname, data in [("q.json", q), ("a.json", a), ("k.json", k)]:
-        (tdp / fname).write_text(json.dumps(data), encoding="utf-8")
-
-    cb_calls = []
-    def _cb(idx, total, status):
-        cb_calls.append((idx, total, status))
-
-    with _patch.object(evaluator, "EXPERIMENT_DIR", tdp):
-        run_evaluation("q.json", "a.json", "k.json",
-                       {"no_of_questions": True}, progress_cb=_cb)
-
-    check(
-        "progress_cb called once per question (3 times)",
-        len(cb_calls) == 3,
-        f"calls: {cb_calls}"
-    )
-    check(
-        "progress_cb receives correct total (3)",
-        all(total == 3 for _, total, _ in cb_calls),
-    )
-    check(
-        "progress_cb receives sequential indices 0, 1, 2",
-        [idx for idx, _, _ in cb_calls] == [0, 1, 2],
-    )
-
-
-# 3d. Perfect detection → precision/recall/F1 all 1.0, pii_leak_rate = 0.0
-with tempfile.TemporaryDirectory() as td:
-    tdp = Path(td)
-    q = [{"input": "hi alice@example.com"}]
-    a = [{
-        "surrogate_map": {"alice@example.com": "fake@example.org"},
-        "llm_response": "noted",
-        "sanitized_input": "hi fake@example.org",
-        "recognized_not_replaced": [],
-        "pii_detail": {"alice@example.com": {"type": "email"}},
-    }]
-    k = [{"Answer-Key": {"email": "alice@example.com"}}]
-    for fname, data in [("q.json", q), ("a.json", a), ("k.json", k)]:
-        (tdp / fname).write_text(json.dumps(data), encoding="utf-8")
-
-    with _patch.object(evaluator, "EXPERIMENT_DIR", tdp):
-        perfect = run_evaluation("q.json", "a.json", "k.json",
-                                 {k_: True for k_, _ in EVAL_FIELDS})
-
-    check(
-        "Perfect detection → precision_surrogates == 1.0",
-        perfect.get("precision_surrogates") == 1.0,
-        f"got: {perfect.get('precision_surrogates')}"
-    )
-    check(
-        "Perfect detection → recall_surrogates == 1.0",
-        perfect.get("recall_surrogates") == 1.0,
-        f"got: {perfect.get('recall_surrogates')}"
-    )
-    check(
-        "Perfect detection → f1_surrogates == 1.0",
-        perfect.get("f1_surrogates") == 1.0,
-        f"got: {perfect.get('f1_surrogates')}"
-    )
-    check(
-        "Perfect detection → pii_leak_rate == 0.0",
-        perfect.get("pii_leak_rate") == 0.0,
-        f"got: {perfect.get('pii_leak_rate')}"
-    )
-    check(
-        "Perfect detection → accuracy_sanitization == 1.0",
-        perfect.get("accuracy_sanitization") == 1.0,
-        f"got: {perfect.get('accuracy_sanitization')}"
-    )
-
-
-# 3e. No key PII → quality metrics still return without crashing
-with tempfile.TemporaryDirectory() as td:
-    tdp = Path(td)
-    q = [{"input": "what time is it?"}]
-    a = [{"surrogate_map": {}, "llm_response": "It is noon.", "sanitized_input": "what time is it?"}]
-    k = [{"Answer-Key": None}]
-    for fname, data in [("q.json", q), ("a.json", a), ("k.json", k)]:
-        (tdp / fname).write_text(json.dumps(data), encoding="utf-8")
-
-    with _patch.object(evaluator, "EXPERIMENT_DIR", tdp):
-        no_key = run_evaluation("q.json", "a.json", "k.json",
-                                {"no_of_questions": True, "surrogate_quality": True})
-
-    check(
-        "No-PII question: evaluation completes without crashing",
-        "no_of_questions" in no_key,
-    )
-    check(
-        "No-PII question: precision_surrogates is 1.0 (nothing to find → no FP/FN)",
-        no_key.get("precision_surrogates") == 1.0,
-        f"got: {no_key.get('precision_surrogates')}"
-    )
+print("\n[2] run_evaluation() — see tests/test_evaluator.py")
+with tempfile.TemporaryDirectory() as _d:
+    _d = Path(_d)
+    (_d / "q.json").write_text(json.dumps([{"input": "a"}, {"input": "b"}]))
+    (_d / "a.json").write_text(json.dumps([{"question": "a"}]))
+    (_d / "k.json").write_text(json.dumps([{"Question": "a", "Answer-Key": {}},
+                                          {"Question": "b", "Answer-Key": {}}]))
+    try:
+        run_evaluation("q.json", "a.json", "k.json", {}, experiment_dir=_d)
+        check("Mismatched file lengths raises ValueError", False, "no exception")
+    except ValueError:
+        check("Mismatched file lengths raises ValueError", True)
 
 
 # ─────────────────────────────────────────────────────────────

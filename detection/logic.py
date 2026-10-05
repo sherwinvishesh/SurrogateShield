@@ -891,6 +891,10 @@ def run_cascade(
     skip_values: Optional[Set[str]] = None,
     skip_location_entities: bool = False,
     timings: Optional[Dict[str, float]] = None,
+    *,
+    use_entity_trace: bool = True,
+    use_context_guard: Optional[bool] = None,
+    use_post_passes: bool = True,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full SentinelLayer cascade then apply post-processing passes.
@@ -902,6 +906,11 @@ def run_cascade(
         timings:                If given, filled with wall-clock milliseconds
                                 of THIS pass: pattern_scan_ms, entity_trace_ms,
                                 context_guard_ms, post_passes_ms.
+        use_entity_trace:       False skips spaCy NER (ablation, audit A9).
+        use_context_guard:      None follows config.CONTEXT_GUARD_ENABLED;
+                                False uses the score-threshold fallback.
+        use_post_passes:        False skips structural passes A, B, C, E–H.
+                                Pass D (topical geo policy) always runs.
     """
     import time as _time
 
@@ -928,9 +937,12 @@ def run_cascade(
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
-    ner_confirmed, ner_borderline = entity_trace.trace(
-        remaining_text, existing_entities=confirmed,
-    )
+    if use_entity_trace:
+        ner_confirmed, ner_borderline = entity_trace.trace(
+            remaining_text, existing_entities=confirmed,
+        )
+    else:
+        ner_confirmed, ner_borderline = [], []
     ner_confirmed  = _reclassify_location_orgs(ner_confirmed,  text)
     ner_borderline = _reclassify_location_orgs(ner_borderline, text)
 
@@ -948,7 +960,9 @@ def run_cascade(
 
     # ── Stage 3: ContextGuard ─────────────────────────────────────────────────
     from config import CONTEXT_GUARD_ENABLED, ENTITY_TRACE_FALLBACK_THRESHOLD
-    if CONTEXT_GUARD_ENABLED:
+    if use_context_guard is None:
+        use_context_guard = CONTEXT_GUARD_ENABLED
+    if use_context_guard:
         logger.info("[SentinelLayer] Stage 3: ContextGuard")
         slm_confirmed, slm_uncertain = context_guard.guard(
             remaining_text=remaining_text,
@@ -968,47 +982,48 @@ def run_cascade(
             confirmed.extend(promoted)
     _lap("context_guard_ms")
 
-    # ── Pass A: Structural ORG detection ─────────────────────────────────────
-    structural_orgs = _detect_structural_orgs(text, confirmed)
-    if structural_orgs:
-        logger.info(
-            f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
+    if use_post_passes:
+        # ── Pass A: Structural ORG detection ─────────────────────────────────────
+        structural_orgs = _detect_structural_orgs(text, confirmed)
+        if structural_orgs:
+            logger.info(
+                f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
+            )
+            confirmed.extend(structural_orgs)
+
+        # ── Pass E: Structural PERSON detection (case-degenerate text) ───────────
+        structural_persons, superseded = _detect_structural_persons(
+            text, confirmed + needs_confirmation,
         )
-        confirmed.extend(structural_orgs)
+        if superseded:
+            confirmed          = [e for e in confirmed          if e not in superseded]
+            needs_confirmation = [e for e in needs_confirmation if e not in superseded]
+        if structural_persons:
+            logger.info(
+                f"[SentinelLayer] Pass E: +{len(structural_persons)} structural PERSON(s)"
+            )
+            confirmed.extend(structural_persons)
 
-    # ── Pass E: Structural PERSON detection (case-degenerate text) ───────────
-    structural_persons, superseded = _detect_structural_persons(
-        text, confirmed + needs_confirmation,
-    )
-    if superseded:
-        confirmed          = [e for e in confirmed          if e not in superseded]
-        needs_confirmation = [e for e in needs_confirmation if e not in superseded]
-    if structural_persons:
-        logger.info(
-            f"[SentinelLayer] Pass E: +{len(structural_persons)} structural PERSON(s)"
-        )
-        confirmed.extend(structural_persons)
+        # ── Pass F: ORG plausibility filter ──────────────────────────────────────
+        confirmed          = _filter_implausible_orgs(confirmed, text)
+        needs_confirmation = _filter_implausible_orgs(needs_confirmation, text)
 
-    # ── Pass F: ORG plausibility filter ──────────────────────────────────────
-    confirmed          = _filter_implausible_orgs(confirmed, text)
-    needs_confirmation = _filter_implausible_orgs(needs_confirmation, text)
+        # ── Pass G: Adjacent-PERSON merge ────────────────────────────────────────
+        confirmed          = _merge_adjacent_persons(confirmed, text)
+        needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
 
-    # ── Pass G: Adjacent-PERSON merge ────────────────────────────────────────
-    confirmed          = _merge_adjacent_persons(confirmed, text)
-    needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
+        # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
+        brand_orgs = _detect_card_brand_orgs(confirmed, text)
+        if brand_orgs:
+            confirmed.extend(brand_orgs)
 
-    # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
-    brand_orgs = _detect_card_brand_orgs(confirmed, text)
-    if brand_orgs:
-        confirmed.extend(brand_orgs)
+        # ── Pass B: Email-username → PERSON reclassification ─────────────────────
+        confirmed          = _reclassify_email_username_orgs(confirmed)
+        needs_confirmation = _reclassify_email_username_orgs(needs_confirmation)
 
-    # ── Pass B: Email-username → PERSON reclassification ─────────────────────
-    confirmed          = _reclassify_email_username_orgs(confirmed)
-    needs_confirmation = _reclassify_email_username_orgs(needs_confirmation)
-
-    # ── Pass C: PERSON component deduplication ────────────────────────────────
-    confirmed          = _deduplicate_person_components(confirmed)
-    needs_confirmation = _deduplicate_person_components(needs_confirmation)
+        # ── Pass C: PERSON component deduplication ────────────────────────────────
+        confirmed          = _deduplicate_person_components(confirmed)
+        needs_confirmation = _deduplicate_person_components(needs_confirmation)
 
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
