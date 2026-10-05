@@ -23,6 +23,7 @@ Summaries written by the bench scripts (counts only — no message text).
 | `compare_final_dev4.json` | `python bench/compare.py --synth none --realworld dev4 --json bench/results/compare_final_dev4.json` | b653f50 (dev4 still scored only; same counts at 31fcabc) |
 | `compare_final_test_seen.json` | `python bench/compare.py --final --json bench/results/compare_final_test_seen.json` | b653f50 (third run on test; test is *seen*, not held out) |
 | `j15_perf_final.json` | `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python bench/perf.py --json bench/results/j15_perf_final.json` | 31fcabc (J15 re-run) |
+| `ablation_synth_dev.json` | `python offline_eval.py --key experiment/synth_dev_key.json --ablation --json bench/results/ablation_synth_dev.json` | 7a81253 (A9 ablation, cascade re-run per configuration; synth dev, tuned on) |
 
 The Phase 2 numbers show overfitting. On dev, leaked went from 25.6 % to 0 % and spurious from 28.1 % to 0.75 %. On test, leaked went from 32.3 % to 19.3 % and spurious from 37.5 % to 21.7 %. J2 fails on test. After this run the test split counts as *seen*: later test numbers are reported next to these and are not tuned on.
 
@@ -39,3 +40,20 @@ dev3 and dev4 (436335e) are two new 240-message splits, written blind to the rul
 The diagnosis on dev3 used rules by category (2ed18ea … b653f50). It moved dev3 from 19.1 % leaked and 18.3 % spurious to 0.9 % (5 of 572) and 11.9 % (84 of 704). dev3 was looked at, so these are tuned numbers. dev4 was never inspected. On it, leaked went from 25.7 % to 21.6 % (153 of 708) and spurious from 18.8 % to 16.5 % (127 of 770). On the seen test split (third run, not tuned on), leaked is 13.2 % (65 of 494) and spurious 16.9 % (93 of 551), against 16.4 % and 19.1 % at Phase 5. Presidio scores the same as before on every split: 40.2 / 35.8 % (dev3), 47.4 / 39.8 % (dev4), 39.0 / 35.8 % (test). Negatives left untouched: SurrogateShield 57/83, 54/77, 46/65; Presidio 26/83, 18/77, 14/65. J2 (≤ 2 % leaked, ≤ 3 % spurious) fails on dev4 and on test. The fix of this phase shows up on unseen text, but it is small: about 4 points of leak rate, against the 18 points it gained on dev3.
 
 J15 re-run at 31fcabc: warm p50 is 47.5 ms without ContextGuard (gate 50) and 74.8 ms with it (gate 150). Both pass, the first by 2.5 ms. Cold first mask takes 3.4 s and 6.0 s, with peak RSS 823 MB and 1090 MB, on a 10-core arm64 Mac with Python 3.13.2 and torch 2.12.0.
+
+The ablation (A9) re-runs the cascade with stages switched off on the
+1,200 synthetic dev messages. It scores protection only: values that were
+replaced, matched by span overlap. The 95 % intervals are a paired
+bootstrap over messages (2,000 resamples).
+
+| configuration | micro F1 | change against the full cascade |
+|---|---|---|
+| PatternScan only | 0.842 (P 0.986, R 0.735) | −0.138 [−0.149, −0.127] |
+| + EntityTrace, ContextGuard off | 0.980 | −0.001 [−0.003, +0.001] |
+| all three stages, post-passes off | 0.968 | −0.013 [−0.016, −0.009] |
+| full cascade | 0.981 (P 0.966, R 0.996) | — |
+
+ContextGuard adds no measurable F1 on this split: the interval includes
+0. It costs about 27 ms per message (J15). The split was used for tuning,
+so these numbers describe fit, not unseen text.
+
