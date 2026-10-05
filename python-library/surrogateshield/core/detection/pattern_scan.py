@@ -1056,6 +1056,20 @@ _PATTERNS: list = [
         _phone_validator,
     ),
 
+    # ── National-format phone with a trunk 0 ───────────────────────────────────
+    # "07412 680 335" (UK mobile), "0412 773 519" (AU), "06 47 21 93 58" (FR),
+    # "0176 4482 1903" (DE), "06-41982277" (NL): a leading 0 and 10–12 digits
+    # in two or more groups. Labelled IDs ("Account 0123 …") are claimed
+    # earlier; a bare 0-led digit run stays an ID.
+    (
+        "phone_intl",
+        re.compile(
+            r"(?<![0-9A-Za-z_.\-/:#])(?<!\d[ \-])0\d{1,4}(?:[ \-]\d{2,8}){1,4}(?![0-9A-Za-z_]|[.\-/]\d)"
+        ),
+        lambda m: (10 <= len(re.sub(r"\D", "", m.group())) <= 12
+                   and _phone_validator(m)),
+    ),
+
     # ── National-format phone behind a phone word ("teléfono 612 345 678",
     # "फ़ोन नंबर 98765 43210") — no country code, so it needs the label.
     (
