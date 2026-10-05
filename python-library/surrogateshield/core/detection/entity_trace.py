@@ -26,28 +26,20 @@ def _get_nlp(model_name: str = "en_core_web_lg"):
         return _nlp[model_name]
     try:
         import spacy
-        try:
-            model = spacy.load(model_name)
-        except OSError:
-            # Model not installed — download it on first use (~750 MB, cached after)
-            logger.info(
-                f"[EntityTrace] spaCy model '{model_name}' not found. "
-                "Downloading — this happens once and is cached locally."
-            )
-            from spacy.cli import download as _spacy_download
-            _spacy_download(model_name)
-            model = spacy.load(model_name)
-        _nlp[model_name] = model
+        _nlp[model_name] = spacy.load(model_name)
         logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
     except ImportError:
+        logger.error("[EntityTrace] spaCy is not installed. Run: pip install spacy")
+        _nlp[model_name] = None
+    except OSError:
+        # Never download from library code (audit I10): tell the user how.
         logger.error(
-            "[EntityTrace] spaCy is not installed. Run: pip install spacy"
+            f"[EntityTrace] spaCy model '{model_name}' not found. "
+            f"Run: python -m spacy download {model_name}"
         )
         _nlp[model_name] = None
     except Exception as exc:
-        logger.error(
-            f"[EntityTrace] Failed to load or download spaCy model '{model_name}': {exc}"
-        )
+        logger.error(f"[EntityTrace] Failed to load spaCy model '{model_name}': {exc}")
         _nlp[model_name] = None
     return _nlp[model_name]
 
@@ -72,10 +64,7 @@ _ENTITY_BLOCKLIST = {
     # contact-channel labels ("Mobile +91…", "Cell: …") — never entities
     "mobile", "cell", "tel",
     # document-field labels NER mistakes for entities ("VIN 1HGB…")
-    "vin", "mrn", "ktn", "agi",
-    # country-level mentions are not identifying (and masking them
-    # destroys utility): "…, UK." / "shipped from the USA"
-    "uk", "usa", "u.k.", "u.s.", "u.s.a.",
+    "vin", "mrn", "ktn", "er", "agi",
 }
 
 _LOCATION_PREPS = {

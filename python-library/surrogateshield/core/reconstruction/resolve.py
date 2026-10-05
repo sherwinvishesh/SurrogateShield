@@ -13,15 +13,21 @@ Three passes in sequence:
        then contiguous surrogate n-grams (longest first, minimum 2 words) are
        searched with whitespace-flexible word-boundary patterns and replaced
        by the aligned original words.  A guarded single-token fallback covers
-       "first name only" echoes.  Scoped to UNRESOLVED surrogates only to
-       prevent component words of already-resolved surrogates from corrupting
-       unrelated text.
+       "first name only" echoes.
+       IMPORTANT: only processes surrogates in the `unresolved` set —
+       running component matching on already-resolved surrogates caused
+       silent corruption (e.g. "Ashley" from resolved "Ashley Wise" wrongly
+       replacing "Ashley" in "Ashley County" in the same response).
     3. Fuzzy match — rapidfuzz.fuzz.partial_ratio_alignment gives the TRUE
        best-match offsets (v1's sliding window anchored the replacement at
        the window start, garbling output).  The span is snapped to word
        boundaries, sanity-checked for length, and re-verified with
-       fuzz.ratio before replacing.  Threshold is configurable
-       (config(fuzzy_threshold=…)).
+       fuzz.ratio before replacing.
+
+Every failure is logged with its failure type for the research taxonomy:
+    exact_miss  — surrogate not found via exact match
+    fuzzy_miss  — surrogate not found even via all passes
+    fuzzy_hit   — surrogate found only via component/fuzzy match
 """
 
 from __future__ import annotations
@@ -33,10 +39,35 @@ from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
+# Default for Pass 3; override per call with resolve(..., fuzzy_threshold=…).
+FUZZY_MATCH_THRESHOLD = 85
 
-# ─────────────────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────
+# Failure event dataclass (lightweight)
+# ─────────────────────────────────────────────
+
+class ResolutionFailure:
+    """Records a single failed or partial resolution for the failure taxonomy."""
+
+    __slots__ = ("surrogate", "original", "failure_type", "context_snippet")
+
+    def __init__(
+        self,
+        surrogate: str,
+        original: str,
+        failure_type: str,
+        context_snippet: str = "",
+    ) -> None:
+        self.surrogate = surrogate
+        self.original = original
+        self.failure_type = failure_type   # 'exact_miss', 'fuzzy_miss', 'fuzzy_hit'
+        self.context_snippet = context_snippet
+
+
+# ─────────────────────────────────────────────
 # Span-tracking primitives (shared by all passes)
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
 def _overlaps_any(start: int, end: int, spans: List[Tuple[int, int]]) -> bool:
     return any(not (end <= s or start >= e) for s, e in spans)
@@ -102,9 +133,9 @@ def _replace_pattern_tracked(
     return text, spans, hits
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
 # Pass 2 helpers — token alignment
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
 def _aligned_original(
     opcodes,
@@ -154,24 +185,40 @@ def _snap_to_word_boundaries(text: str, start: int, end: int) -> Tuple[int, int]
     return start, end
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
 # ResolvePass
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
 class ResolvePass:
-    """Reconstructs original PII values in LLM responses using three passes."""
+    """
+    Reconstructs original PII values in LLM responses.
+
+    Uses three passes:
+      1. Exact replacement (longest surrogate first, span-tracked)
+      2. Alignment-safe component matching — scoped to UNRESOLVED surrogates
+         only, to prevent component words of already-resolved surrogates from
+         corrupting unrelated text.
+      3. Anchored fuzzy matching via rapidfuzz partial_ratio_alignment
+
+    Attributes:
+        failures: Log of ResolutionFailure events, accumulated across calls.
+    """
+
+    def __init__(self) -> None:
+        """Initialise ResolvePass with an empty failure log."""
+        self.failures: List[ResolutionFailure] = []
 
     def resolve(
         self,
         response_text: str,
         shadow_map: Dict[str, str],
-        fuzzy_threshold: int = 85,
+        fuzzy_threshold: int = FUZZY_MATCH_THRESHOLD,
     ) -> str:
         """
         Reconstruct original values in *response_text* using *shadow_map*.
 
         Args:
-            response_text:   The LLM response (may contain surrogates).
+            response_text:   The LLM response text (may contain surrogates).
             shadow_map:      Dict mapping surrogate → original.
             fuzzy_threshold: Minimum rapidfuzz score (0–100) for Pass 3.
 
@@ -185,7 +232,7 @@ class ResolvePass:
         protected: List[Tuple[int, int]] = []
         unresolved: Dict[str, str] = {}
 
-        # ── Pass 1: Exact replacement (longest surrogate first) ──────────────
+        # ── Pass 1: Exact replacement (longest surrogate first) ────────
         for surrogate, original in sorted(
             shadow_map.items(), key=lambda kv: len(kv[0]), reverse=True
         ):
@@ -197,11 +244,24 @@ class ResolvePass:
             else:
                 unresolved[surrogate] = original
                 logger.debug(f"[ResolvePass] Exact miss: {surrogate!r}")
+                self.failures.append(
+                    ResolutionFailure(
+                        surrogate=surrogate,
+                        original=original,
+                        failure_type="exact_miss",
+                        context_snippet=response_text[:120],
+                    )
+                )
 
         if not unresolved:
             return result
 
-        # ── Pass 2: Alignment-safe component matching (UNRESOLVED only) ───────
+        # ── Pass 2: Alignment-safe component matching ──────────────────
+        #
+        # Scoped to `unresolved` only (see module docstring for the
+        # Ashley-County rationale). Words are aligned with SequenceMatcher,
+        # so length-mismatched surrogate/original pairs can never be zipped
+        # out of position (the v1 truncation bug).
         component_resolved: Set[str] = set()
 
         for surrogate, original in list(unresolved.items()):
@@ -240,6 +300,10 @@ class ResolvePass:
 
             if hit:
                 component_resolved.add(surrogate)
+                for f in reversed(self.failures):
+                    if f.surrogate == surrogate and f.failure_type == "exact_miss":
+                        f.failure_type = "fuzzy_hit"
+                        break
 
         for surrogate in component_resolved:
             del unresolved[surrogate]
@@ -247,11 +311,11 @@ class ResolvePass:
         if not unresolved:
             return result
 
-        # ── Pass 3: Anchored fuzzy matching ───────────────────────────────────
+        # ── Pass 3: Anchored fuzzy matching ────────────────────────────
         # Runs BEFORE the single-token fallback so a whole-value typo echo
         # ("Jordn Mercer") is repaired as one unit rather than word-by-word.
         try:
-            from rapidfuzz import fuzz  # noqa: F401
+            from rapidfuzz import fuzz
             fuzzy_available = True
         except ImportError:
             logger.warning("[ResolvePass] rapidfuzz not installed — skipping fuzzy pass")
@@ -268,43 +332,80 @@ class ResolvePass:
                     logger.debug(
                         f"[ResolvePass] Fuzzy hit: {matched_text!r} → {original!r}"
                     )
+                    for f in reversed(self.failures):
+                        if f.surrogate == surrogate and f.failure_type == "exact_miss":
+                            f.failure_type = "fuzzy_hit"
+                            break
                     del unresolved[surrogate]
 
-        # ── Pass 4: Guarded single-token fallback (last resort) ───────────────
+        # ── Pass 4: Guarded single-token fallback (last resort) ────────
         # "First name only" echoes: equal word counts, token ≥3 chars,
         # capitalized, and not a substring of any other shadow key/value.
+        final_unresolved: Dict[str, str] = {}
+
         for surrogate, original in unresolved.items():
             surrogate_words = surrogate.split()
             original_words = original.split()
-            if len(surrogate_words) <= 1 or len(surrogate_words) != len(original_words):
-                continue
-            other_strings = [
-                s
-                for pair in shadow_map.items()
-                for s in pair
-                if s not in (surrogate, original)
-            ]
-            for s_word, o_word in zip(surrogate_words, original_words):
-                if s_word == o_word or len(s_word) < 3 or not s_word[0].isupper():
-                    continue
-                if any(s_word in other for other in other_strings):
-                    continue
-                pattern = _ngram_pattern([s_word])
-                result, protected, hits = _replace_pattern_tracked(
-                    result, pattern, o_word, protected
-                )
-                if hits:
-                    logger.debug(
-                        f"[ResolvePass] Component hit (single token): "
-                        f"{s_word!r} → {o_word!r} (surrogate: {surrogate!r})"
+            hit = False
+            if len(surrogate_words) > 1 and len(surrogate_words) == len(original_words):
+                other_strings = [
+                    s
+                    for pair in shadow_map.items()
+                    for s in pair
+                    if s not in (surrogate, original)
+                ]
+                for s_word, o_word in zip(surrogate_words, original_words):
+                    if s_word == o_word or len(s_word) < 3 or not s_word[0].isupper():
+                        continue
+                    if any(s_word in other for other in other_strings):
+                        continue
+                    pattern = _ngram_pattern([s_word])
+                    result, protected, hits = _replace_pattern_tracked(
+                        result, pattern, o_word, protected
                     )
+                    if hits:
+                        logger.debug(
+                            f"[ResolvePass] Component hit (single token): "
+                            f"{s_word!r} → {o_word!r} (surrogate: {surrogate!r})"
+                        )
+                        hit = True
+
+            if hit:
+                for f in reversed(self.failures):
+                    if f.surrogate == surrogate and f.failure_type == "exact_miss":
+                        f.failure_type = "fuzzy_hit"
+                        break
+            else:
+                final_unresolved[surrogate] = original
+
+        for surrogate, original in final_unresolved.items():
+            self.failures.append(
+                ResolutionFailure(
+                    surrogate=surrogate,
+                    original=original,
+                    failure_type="fuzzy_miss",
+                    context_snippet=result[:120],
+                )
+            )
 
         return result
 
+    def get_failure_summary(self) -> Dict[str, int]:
+        """
+        Return counts of each failure type accumulated across all calls.
 
-# ─────────────────────────────────────────────────────────────────────────────
+        Returns:
+            Dict with keys 'exact_miss', 'fuzzy_miss', 'fuzzy_hit'.
+        """
+        summary: Dict[str, int] = {"exact_miss": 0, "fuzzy_miss": 0, "fuzzy_hit": 0}
+        for f in self.failures:
+            summary[f.failure_type] = summary.get(f.failure_type, 0) + 1
+        return summary
+
+
+# ─────────────────────────────────────────────
 # Fuzzy span finder (anchored)
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
 
 def _find_fuzzy_span(
     text: str,

@@ -3,8 +3,8 @@
 """
 util.py — SurrogateShield Shared Utilities
 
-Logging setup, shared dataclasses (DetectedEntity, Conversation),
-text utilities, and Rich console helpers used across the project.
+Logging setup, the Conversation dataclasses and Rich console helpers.
+DetectedEntity and the span helpers are re-exported from the package.
 
 Note: logging.basicConfig() is intentionally NOT called here.
 It is called once at startup in main.py. Modules that call
@@ -15,15 +15,25 @@ with default settings (which is harmless for tests).
 from __future__ import annotations
 
 import logging
-import re
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import List
 
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+
+# Entity type and span helpers live in the package (single implementation,
+# audit F4); re-exported here for the app.
+from surrogateshield.core.entities import (  # noqa: F401
+    DetectedEntity,
+    apply_entity_surrogates,
+    mask_spans,
+    plan_substitutions,
+    remove_span_overlap,
+    splice,
+)
 
 # ─────────────────────────────────────────────
 # Rich console — shared singleton
@@ -58,35 +68,6 @@ def get_logger(name: str) -> logging.Logger:
 # ─────────────────────────────────────────────
 # Core dataclasses
 # ─────────────────────────────────────────────
-
-@dataclass
-class DetectedEntity:
-    """
-    Represents a single piece of detected PII.
-
-    Attributes:
-        text:   The original text snippet detected as PII.
-        start:  Character start index in the source string.
-        end:    Character end index in the source string.
-        type:   PII type label (e.g. 'email', 'PERSON', 'implicit_location').
-        score:  Confidence score in [0.0, 1.0]. PatternScan always yields 1.0.
-        source: Which detector produced this entity ('pattern', 'ner', 'slm').
-        parsed: Structured payload for entities that carry one (addresses
-                carry a ParsedAddress from the canonical address parser).
-                Optional and unused by all non-address code paths.
-    """
-    text: str
-    start: int
-    end: int
-    type: str
-    score: float = 1.0
-    source: str = "pattern"
-    parsed: Optional[object] = field(default=None, compare=False)
-
-    def overlaps(self, other: "DetectedEntity") -> bool:
-        """Return True if this entity's span overlaps with another entity's span."""
-        return not (self.end <= other.start or self.start >= other.end)
-
 
 @dataclass
 class ConversationMessage:
@@ -132,114 +113,6 @@ class Conversation:
             List of dicts with 'role' and 'content' keys.
         """
         return [{"role": m.role, "content": m.content} for m in self.api_messages]
-
-
-# ─────────────────────────────────────────────
-# Text utilities
-# ─────────────────────────────────────────────
-
-def mask_spans(text: str, entities: List[DetectedEntity], placeholder: str = "█") -> str:
-    """
-    Replace all entity spans in *text* with a placeholder character.
-
-    Used to remove already-detected spans from the text before passing
-    the remainder to the next detection stage.
-
-    Args:
-        text:        Original text string.
-        entities:    Entities whose spans should be masked.
-        placeholder: Single character to fill masked spans.
-
-    Returns:
-        New string with entity spans replaced by placeholder characters.
-    """
-    if not entities:
-        return text
-    chars = list(text)
-    for ent in entities:
-        for i in range(ent.start, min(ent.end, len(chars))):
-            chars[i] = placeholder
-    return "".join(chars)
-
-
-def remove_span_overlap(candidate: DetectedEntity, existing: List[DetectedEntity]) -> bool:
-    """
-    Return True if *candidate* overlaps with any entity in *existing*.
-
-    Used by EntityTrace to skip spans already covered by PatternScan.
-
-    Args:
-        candidate: The entity being tested.
-        existing:  Already-confirmed entities.
-
-    Returns:
-        True if there is an overlap (candidate should be skipped).
-    """
-    return any(candidate.overlaps(e) for e in existing)
-
-
-def plan_substitutions(
-    text: str,
-    entities: List[DetectedEntity],
-    mapping: Dict[str, str],
-) -> List[Tuple[int, int, str, str]]:
-    """
-    Plan every replacement as ``(start, end, original, surrogate)`` in the
-    coordinates of the ORIGINAL *text*. Edits never overlap.
-
-    Two sources, both planned against the original text so a surrogate can
-    never be rewritten by a later pass (E1):
-      1. The detected entity spans whose text has a surrogate. Overlapping
-         spans keep the longest one.
-      2. Every ADDITIONAL whole-word occurrence of each mapped original that
-         lies outside the claimed spans (repeated values the cascade only saw
-         once), longest original first.
-    """
-    if not mapping:
-        return []
-
-    edits: List[Tuple[int, int, str, str]] = []
-
-    def _free(s: int, e: int) -> bool:
-        return all(e <= es or s >= ee for es, ee, _, _ in edits)
-
-    for ent in sorted(
-        (e for e in entities
-         if e.text in mapping and 0 <= e.start < e.end <= len(text)
-         and text[e.start:e.end] == e.text),
-        key=lambda e: (-(e.end - e.start), e.start),
-    ):
-        if _free(ent.start, ent.end):
-            edits.append((ent.start, ent.end, ent.text, mapping[ent.text]))
-
-    for original in sorted(mapping, key=len, reverse=True):
-        if not original or original not in text:
-            continue
-        pattern = re.compile(r"(?<![\w])" + re.escape(original) + r"(?![\w])")
-        for m in pattern.finditer(text):
-            if _free(m.start(), m.end()):
-                edits.append((m.start(), m.end(), original, mapping[original]))
-
-    edits.sort(key=lambda x: x[0])
-    return edits
-
-
-def splice(text: str, edits: List[Tuple[int, int, str, str]]) -> str:
-    """Apply non-overlapping ``plan_substitutions`` edits, right to left."""
-    result = text
-    for start, end, _original, surrogate in sorted(edits, key=lambda x: x[0], reverse=True):
-        result = result[:start] + surrogate + result[end:]
-    return result
-
-
-def apply_entity_surrogates(
-    text: str,
-    entities: List[DetectedEntity],
-    mapping: Dict[str, str],
-) -> str:
-    """Replace each detected entity (and repeated occurrences of its text)
-    with its surrogate. See ``plan_substitutions`` for the rules."""
-    return splice(text, plan_substitutions(text, entities, mapping))
 
 
 def new_conversation_id() -> str:

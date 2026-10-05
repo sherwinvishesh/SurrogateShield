@@ -2,32 +2,51 @@
 detection/pipeline.py — SentinelLayer
 
 Cascade: PatternScan → EntityTrace → ContextGuard, followed by four
-post-processing passes.
+model-output-driven post-processing passes.
 
-Post-processing passes:
+Post-processing passes (all use model outputs + linguistic structure,
+no keyword lists):
+
   Pass A — Structural ORG detection
+      Regex: "[the/a/an] <name> [corporation|company|corp|inc|ltd|llc…]"
+      emits <name> as ORG.  The organisational suffix is the signal that
+      the preceding word is a company name, regardless of capitalisation.
+      This is structural detection (like PatternScan's address pattern),
+      not a list of company names.
+
   Pass B — Email-username → PERSON reclassification
+      If an ORG entity's text is a prefix of a detected email username
+
   Pass C — PERSON component deduplication
-  Pass D — Topical geo-entity filter
+      When entity A ("Mitchell") is a word-component of entity B
+      ("Sarah Mitchell"), both PERSON, A is removed.  ResolvePass
+      component matching handles standalone surname occurrences from the
+      full-name surrogate, giving consistent replacement.
+
+  Pass D — Topical geo-entity filter (revised)
+      A GPE/LOC is dropped ONLY if it appears exclusively in query
+      sub-clauses.  Appearing in any non-query sub-clause → always kept,
+      regardless of whether a PERSON is present.
+
+      Additionally: mid-sentence lowercase geo entities (common-noun
+      usages like "phoenix bird" or "springfield field team") are skipped
+      via a capitalisation check — proper place names are capitalised in
+      English.
 """
 
 from __future__ import annotations
 
 import logging
 import re
+import time
+from dataclasses import replace as _dc_replace
 from typing import Dict, List, Optional, Set, Tuple
 
-from dataclasses import replace as _dc_replace
 from ..entities import DetectedEntity, mask_spans
 from . import pattern_scan, entity_trace, context_guard
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
-
-
-class _TaggedList(list):
-    """list subclass that allows attribute assignment (used for _qi_matches)."""
-    pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -48,6 +67,11 @@ _PII_OFF_ALIASES: Dict[str, Set[str]] = {
     "bank":        {"us_bank_number"},
     "license":     {"us_driver_license"},
 }
+
+
+class _TaggedList(list):
+    """list subclass that allows attribute assignment (used for _qi_matches)."""
+    pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -78,6 +102,18 @@ def _detect_structural_orgs(
     text: str,
     existing_entities: List[DetectedEntity],
 ) -> List[DetectedEntity]:
+    """
+    Emit ORG entities for company names identified by organisational suffixes.
+
+    The structural suffix (corporation, company, etc.) signals that the
+    preceding word is used as a company name regardless of capitalisation.
+    This catches "target corporation", "the phoenix group", etc. without
+    any list of known company names.
+
+    The detected span covers ONLY the name (e.g. "target"), not the suffix,
+    so the surrogate replaces only "target" and "corporation" is preserved,
+    giving "The RetailHoldings corporation announced…" as expected.
+    """
     occupied = {(e.start, e.end) for e in existing_entities}
     new_ents: List[DetectedEntity] = []
 
@@ -600,6 +636,17 @@ def _detect_card_brand_orgs(
 def _reclassify_email_username_orgs(
     entities: List[DetectedEntity],
 ) -> List[DetectedEntity]:
+    """
+    Reclassify ORG entities whose text is a name-prefix of a detected email.
+
+    spaCy sees masked text after PatternScan — the email is hidden — so it
+    sometimes labels the standalone first name as ORG.  This pass uses the
+    email detection output (from PatternScan) to correct that labelling.
+
+    Example: "[redacted]@gmail.com" detected → username "[redacted]"
+             "abhi" detected as ORG → "abhi" is prefix of username
+             → reclassify "abhi" as PERSON
+    """
     email_usernames: Set[str] = set()
     for ent in entities:
         if ent.type == "email" and "@" in ent.text:
@@ -631,6 +678,17 @@ def _reclassify_email_username_orgs(
 def _deduplicate_person_components(
     entities: List[DetectedEntity],
 ) -> List[DetectedEntity]:
+    """
+    Remove PERSON entities that are word-components of longer PERSON entities.
+
+    When "Mitchell" and "Sarah Mitchell" are both detected:
+      • Keep "Sarah Mitchell"
+      • Remove "Mitchell" (ResolvePass component matching will handle
+        standalone "Mitchell" occurrences using the full-name surrogate,
+        giving consistent output like "Clark" from "Jessica Clark")
+
+    Decision is purely structural (word-set containment), no name lists.
+    """
     persons = [e for e in entities if e.type == "PERSON"]
     others  = [e for e in entities if e.type != "PERSON"]
 
@@ -711,27 +769,63 @@ def _contains_entity(entity_text: str, clause: str) -> bool:
 
 
 def _is_proper_capitalized(entity_text: str, text: str) -> bool:
-    if entity_text[0].isupper():
-        return True
+    """
+    Return True if this entity should be treated as a proper noun.
 
+    English proper nouns are capitalised.  A geo entity whose surface form
+    starts with a lowercase letter and appears mid-sentence is almost
+    certainly a common-noun usage ("phoenix bird", "springfield field team"),
+    not the name of a place.
+
+    This is a linguistic structure rule — it uses no geographic keyword lists.
+    """
+    if entity_text[0].isupper():
+        return True  # capitalised → proper noun ✓
+
+    # Lowercase entity — check if it's at the start of a sentence/clause
     idx = text.find(entity_text)
     if idx == -1:
         idx = text.lower().find(entity_text.lower())
     if idx == -1:
-        return True
+        return True  # not found → conservative: keep
 
     prefix = text[:idx].rstrip()
     if not prefix or prefix[-1] in ".!?;":
-        return True
+        return True  # sentence-start → might be proper noun despite lowercase
 
-    return False
+    return False  # lowercase, mid-sentence → common noun usage → skip
 
 
 def _filter_topical_geo_entities(
     entities: List[DetectedEntity],
     text: str,
     anchored: bool = False,
-) -> tuple:
+) -> tuple[List, List]:
+    """
+    Remove GPE/LOC entities that are query topics rather than personal refs.
+
+    Revised rule (no PERSON co-occurrence requirement):
+      • Geo entity appears ONLY in query sub-clauses → topical → DROPPED
+      • Geo entity appears in any non-query sub-clause → personal/narrative
+        → KEPT regardless of whether a PERSON entity is present
+
+    This means:
+      "give me tax benefits of Wyoming"         → query only → dropped
+      "from the ashes of Phoenix"               → non-query  → kept ✓
+      "The city of Springfield is beautiful"    → non-query  → kept ✓
+      "What restaurants are near London?"       → query only → dropped ✓
+      "Revanth lives in Wyoming"                → non-query  → kept ✓
+
+    Person anchor: when the message also names a person or carries one of
+    their direct identifiers (``anchored=True``), the query-only exemption is
+    off — "find Carlos Mendez from NovaBuild in Naperville" keeps Naperville.
+
+    The capitalisation check (_is_proper_capitalized) additionally filters
+    mid-sentence lowercase usages ("phoenix bird", "springfield field team").
+
+    Returns:
+        (kept_entities, skipped_entities)
+    """
     geo_ents   = [e for e in entities if e.type in _GEO_FILTERABLE]
     other_ents = [e for e in entities if e.type not in _GEO_FILTERABLE]
 
@@ -745,6 +839,7 @@ def _filter_topical_geo_entities(
     result = list(other_ents)
 
     for geo_ent in geo_ents:
+        # Capitalisation check: lowercase mid-sentence = common noun → skip
         if not _is_proper_capitalized(geo_ent.text, text):
             logger.debug(
                 f"[SentinelLayer] Pass D: lowercase geo skipped (not proper noun): "
@@ -753,6 +848,7 @@ def _filter_topical_geo_entities(
             skipped.append(geo_ent)
             continue
 
+        # Query-clause filter
         in_query    = False
         in_personal = False
 
@@ -779,7 +875,7 @@ def _filter_topical_geo_entities(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ORG→GPE reclassification
+# ORG→GPE reclassification (narrow preps only)
 # ─────────────────────────────────────────────────────────────────────────────
 
 _LOCATION_PREPS = {
@@ -814,6 +910,8 @@ def run_cascade(
     text: str,
     skip_values: Optional[Set[str]] = None,
     skip_location_entities: bool = False,
+    timings: Optional[Dict[str, float]] = None,
+    *,
     pii_off=None,
     spacy_model: str = "en_core_web_lg",
     context_guard_enabled: bool = True,
@@ -823,22 +921,47 @@ def run_cascade(
     entity_trace_fallback_threshold: float = 0.65,
     context_guard_model: str = "dslim/distilbert-NER",
     context_guard_device: int = -1,
+    use_entity_trace: bool = True,
+    use_context_guard: Optional[bool] = None,
+    use_post_passes: bool = True,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full SentinelLayer cascade then apply post-processing passes.
 
     Args:
-        text:                         Raw user message.
-        skip_values:                  Surrogate strings to skip in PatternScan.
-        skip_location_entities:       Suppress ALL geo entities (service-query mode).
-        pii_off:                      List of PII type names/aliases to exclude.
-        spacy_model:                  spaCy model name for EntityTrace.
-        context_guard_enabled:        Whether to run ContextGuard NER inference.
-        entity_trace_high_threshold:  Score threshold to auto-confirm NER entities.
-        entity_trace_low_threshold:   Score threshold for borderline NER entities.
-        context_guard_threshold:      Score threshold for ContextGuard confirmation.
-        entity_trace_fallback_threshold: Promotion threshold when ContextGuard disabled.
+        text:                   Raw user message.
+        skip_values:            Surrogate strings to skip in PatternScan.
+        skip_location_entities: Suppress ALL geo entities (service-query mode).
+        timings:                If given, filled with wall-clock milliseconds
+                                of THIS pass: pattern_scan_ms, entity_trace_ms,
+                                context_guard_ms, post_passes_ms.
+        pii_off:                PII type names/aliases to drop from the result
+                                (detected, then deliberately not replaced).
+        spacy_model:            spaCy model for EntityTrace.
+        context_guard_enabled:  Run ContextGuard; when off, borderline NER
+                                entities at or above
+                                entity_trace_fallback_threshold are promoted.
+        entity_trace_high_threshold / entity_trace_low_threshold:
+                                EntityTrace confirmed / borderline cut-offs.
+        context_guard_threshold: ContextGuard confirmation cut-off.
+        context_guard_model / context_guard_device:
+                                HuggingFace model and device for ContextGuard.
+        use_entity_trace:       False skips spaCy NER (ablation, audit A9).
+        use_context_guard:      None follows context_guard_enabled; a bool
+                                overrides it (ablation).
+        use_post_passes:        False skips structural passes A, B, C, E–H.
+                                Pass D (topical geo policy) always runs.
     """
+    _clock = time.perf_counter
+    _t = _clock()
+
+    def _lap(name: str) -> None:
+        nonlocal _t
+        now = _clock()
+        if timings is not None:
+            timings[name] = round((now - _t) * 1000, 3)
+        _t = now
+
     confirmed: List[DetectedEntity] = []
     needs_confirmation: List[DetectedEntity] = []
     all_skipped: List[DetectedEntity] = []
@@ -848,16 +971,20 @@ def run_cascade(
     pattern_results = pattern_scan.scan(text, skip_values=skip_values)
     confirmed.extend(pattern_results)
     remaining_text = mask_spans(text, pattern_results)
+    _lap("pattern_scan_ms")
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
-    ner_confirmed, ner_borderline = entity_trace.trace(
-        remaining_text,
-        existing_entities=confirmed,
-        spacy_model=spacy_model,
-        high_threshold=entity_trace_high_threshold,
-        low_threshold=entity_trace_low_threshold,
-    )
+    if use_entity_trace:
+        ner_confirmed, ner_borderline = entity_trace.trace(
+            remaining_text,
+            existing_entities=confirmed,
+            spacy_model=spacy_model,
+            high_threshold=entity_trace_high_threshold,
+            low_threshold=entity_trace_low_threshold,
+        )
+    else:
+        ner_confirmed, ner_borderline = [], []
     ner_confirmed  = _reclassify_location_orgs(ner_confirmed,  text)
     ner_borderline = _reclassify_location_orgs(ner_borderline, text)
 
@@ -871,9 +998,12 @@ def run_cascade(
 
     confirmed.extend(ner_confirmed)
     remaining_text = mask_spans(remaining_text, ner_confirmed)
+    _lap("entity_trace_ms")
 
     # ── Stage 3: ContextGuard ─────────────────────────────────────────────────
-    if context_guard_enabled:
+    if use_context_guard is None:
+        use_context_guard = context_guard_enabled
+    if use_context_guard:
         logger.info("[SentinelLayer] Stage 3: ContextGuard")
         slm_confirmed, slm_uncertain = context_guard.guard(
             remaining_text=remaining_text,
@@ -895,48 +1025,50 @@ def run_cascade(
         ]
         if promoted:
             confirmed.extend(promoted)
+    _lap("context_guard_ms")
 
-    # ── Pass A: Structural ORG detection ─────────────────────────────────────
-    structural_orgs = _detect_structural_orgs(text, confirmed)
-    if structural_orgs:
-        logger.info(
-            f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
+    if use_post_passes:
+        # ── Pass A: Structural ORG detection ─────────────────────────────────────
+        structural_orgs = _detect_structural_orgs(text, confirmed)
+        if structural_orgs:
+            logger.info(
+                f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
+            )
+            confirmed.extend(structural_orgs)
+
+        # ── Pass E: Structural PERSON detection (case-degenerate text) ───────────
+        structural_persons, superseded = _detect_structural_persons(
+            text, confirmed + needs_confirmation,
         )
-        confirmed.extend(structural_orgs)
+        if superseded:
+            confirmed          = [e for e in confirmed          if e not in superseded]
+            needs_confirmation = [e for e in needs_confirmation if e not in superseded]
+        if structural_persons:
+            logger.info(
+                f"[SentinelLayer] Pass E: +{len(structural_persons)} structural PERSON(s)"
+            )
+            confirmed.extend(structural_persons)
 
-    # ── Pass E: Structural PERSON detection (case-degenerate text) ───────────
-    structural_persons, superseded = _detect_structural_persons(
-        text, confirmed + needs_confirmation,
-    )
-    if superseded:
-        confirmed          = [e for e in confirmed          if e not in superseded]
-        needs_confirmation = [e for e in needs_confirmation if e not in superseded]
-    if structural_persons:
-        logger.info(
-            f"[SentinelLayer] Pass E: +{len(structural_persons)} structural PERSON(s)"
-        )
-        confirmed.extend(structural_persons)
+        # ── Pass F: ORG plausibility filter ──────────────────────────────────────
+        confirmed          = _filter_implausible_orgs(confirmed, text)
+        needs_confirmation = _filter_implausible_orgs(needs_confirmation, text)
 
-    # ── Pass F: ORG plausibility filter ──────────────────────────────────────
-    confirmed          = _filter_implausible_orgs(confirmed, text)
-    needs_confirmation = _filter_implausible_orgs(needs_confirmation, text)
+        # ── Pass G: Adjacent-PERSON merge ────────────────────────────────────────
+        confirmed          = _merge_adjacent_persons(confirmed, text)
+        needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
 
-    # ── Pass G: Adjacent-PERSON merge ────────────────────────────────────────
-    confirmed          = _merge_adjacent_persons(confirmed, text)
-    needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
+        # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
+        brand_orgs = _detect_card_brand_orgs(confirmed, text)
+        if brand_orgs:
+            confirmed.extend(brand_orgs)
 
-    # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
-    brand_orgs = _detect_card_brand_orgs(confirmed, text)
-    if brand_orgs:
-        confirmed.extend(brand_orgs)
+        # ── Pass B: Email-username → PERSON reclassification ─────────────────────
+        confirmed          = _reclassify_email_username_orgs(confirmed)
+        needs_confirmation = _reclassify_email_username_orgs(needs_confirmation)
 
-    # ── Pass B: Email-username → PERSON reclassification ─────────────────────
-    confirmed          = _reclassify_email_username_orgs(confirmed)
-    needs_confirmation = _reclassify_email_username_orgs(needs_confirmation)
-
-    # ── Pass C: PERSON component deduplication ────────────────────────────────
-    confirmed          = _deduplicate_person_components(confirmed)
-    needs_confirmation = _deduplicate_person_components(needs_confirmation)
+        # ── Pass C: PERSON component deduplication ────────────────────────────────
+        confirmed          = _deduplicate_person_components(confirmed)
+        needs_confirmation = _deduplicate_person_components(needs_confirmation)
 
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
@@ -946,7 +1078,7 @@ def run_cascade(
         all_skipped = skipped_confirmed + skipped_nc
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
-    confirmed = _TaggedList(confirmed)
+    confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
     qi_matches = qi_score(confirmed)
     if qi_matches:
         for match in qi_matches:
@@ -972,6 +1104,7 @@ def run_cascade(
         confirmed = _TaggedList([e for e in confirmed if e.type not in exclude_types])
         confirmed._qi_matches       = old_qi
         confirmed._skipped_entities = old_skipped
+    _lap("post_passes_ms")
 
     logger.info(
         f"[SentinelLayer] Final → "

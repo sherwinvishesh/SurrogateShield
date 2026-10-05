@@ -81,6 +81,8 @@ _CG_BLOCKLIST: frozenset = frozenset({
     # role nouns fragment-expansion can surface ("Client", "Batch", "Median")
     "client", "customer", "vendor", "supplier", "contact", "batch", "median",
     "user", "patient", "member",
+    # form-field labels ("Name - X, Email - Y" intake rows)
+    "email", "phone", "name", "dob", "ssn", "address",
 })
 
 

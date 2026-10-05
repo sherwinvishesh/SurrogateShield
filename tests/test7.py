@@ -477,11 +477,11 @@ restored_strict = rp_strict.resolve(response_absent, shadow_strict, fuzzy_thresh
 check("fuzzy_threshold=100 does not restore absent surrogate",
       "RealPerson" not in restored_strict)
 
-# Library ResolvePass does NOT have a 'failures' attribute (simplified version)
-check("Library ResolvePass has no .failures attribute",
-      not hasattr(rp, "failures"))
-check("Library ResolvePass has no get_failure_summary() method",
-      not hasattr(rp, "get_failure_summary"))
+# One ResolvePass for app and library (audit F4): failure taxonomy included
+check("Library ResolvePass records failures",
+      isinstance(rp.failures, list))
+check("Library ResolvePass get_failure_summary() has the three kinds",
+      set(rp.get_failure_summary()) == {"exact_miss", "fuzzy_miss", "fuzzy_hit"})
 
 # Component matching: multi-word surrogate where model used only first name
 rp_comp = ResolvePass()
