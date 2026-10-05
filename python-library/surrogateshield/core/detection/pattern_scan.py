@@ -339,13 +339,14 @@ _KIN = (
     r"|sister|grandma|grandmother|granny|grandpa|grandfather|grandson|granddaughter"
     r"|wife|husband|partner|spouse|boyfriend|girlfriend|fianc[ée]e?|aunt|uncle"
     r"|niece|nephew|cousin|friend|roommate|boss|patient|client|neighbou?r|stepson"
-    r"|stepdaughter)"
+    r"|stepdaughter|twins?|grandad|granddad|gran|nana|nanna|nani|nonna|nonno"
+    r"|abuel[ao]|oma|opa)"
 )
 # Words that turn "I'm 30" into a measurement or a count, not an age.
 _NOT_AGE_AFTER = re.compile(
     r"\s*(?:%|percent|['\"′″]|[.:,]\d|/|[-–]\d|x\b|k\b|am\b|pm\b|st\b|nd\b|rd\b|th\b"
     r"|(?:minutes?|mins?|hours?|hrs?|days?|weeks?|months?|seconds?|secs?|lbs?|kg|kilos?"
-    r"|pounds|cm|mm|inch(?:es)?|in\b|feet|ft|foot|miles?|mi\b|km|meters?|metres?"
+    r"|pounds|cm|mm|inch(?:es)?|in(?=\s*[.,;)\n]|\s*$|\s+(?:tall|long|wide|high|deep))|feet|ft|foot|miles?|mi\b|km|meters?|metres?"
     r"|dollars?|bucks|euros?|times|of\b|out\b|minutes|points?|pts|degrees?"
     r"|steps?|items?|pages?|people|units?|cents?)\b)",
     re.IGNORECASE,
@@ -687,6 +688,36 @@ def _shape(s: str) -> str:
 
 # ── age and year of birth ────────────────────────────────────────────────────
 
+_AGE_HEADER = frozenset({"age", "ages", "age (years)", "age (yrs)", "edad", "alter",
+                         "âge", "age_years", "idade", "età", "leeftijd", "ålder"})
+
+
+def _table_age_cells(text: str):
+    """(start, end) of each number under an "Age" column of a pasted CSV,
+    TSV or pipe table ("Name,Age,Allergy\nKai Nakamura,8,peanuts")."""
+    lines = [(m.start(), m.group()) for m in re.finditer(r"[^\n]+", text)]
+    i = 0
+    while i < len(lines):
+        _, head = lines[i]
+        i += 1
+        for d in (",", "\t", ";", "|"):
+            cells = [c.strip().lower() for c in head.split(d)]
+            if len(cells) >= 3 and any(c in _AGE_HEADER for c in cells):
+                col = next(k for k, c in enumerate(cells) if c in _AGE_HEADER)
+                while i < len(lines):
+                    off, row = lines[i]
+                    parts = row.split(d)
+                    if len(parts) != len(cells):
+                        break
+                    i += 1
+                    s = off + sum(len(x) + 1 for x in parts[:col])
+                    cell = parts[col]
+                    v = cell.strip()
+                    if re.fullmatch(r"\d{1,3}", v) and 0 < int(v) <= 120:
+                        s += len(cell) - len(cell.lstrip())
+                        yield s, s + len(v)
+                break
+
 _AGE_PATTERNS = [
     # "34 years old", "a 41 year old", "34yo", "34 y/o"
     re.compile(
@@ -697,16 +728,44 @@ _AGE_PATTERNS = [
                re.IGNORECASE),
     # "turned 7", "aged 34", "age: 34", "turning 40"
     re.compile(
-        r"\b(?P<v>(?:aged?|turn(?:ed|s|ing)?)(?:\s*(?:is|was|:|=|-))?\s+\d{1,3})\b",
+        r"\b(?P<v>(?:age[ds]?|turn(?:ed|s|ing)?)(?:\s*(?:is|was|are|:|=|-|–|—))?\s+\d{1,3})\b",
         re.IGNORECASE,
     ),
     # "I'm 29", "they're 5", "my grandma Evelyn is 89"
     re.compile(
         r"(?:\b(?:i'?m|i\s+am|she'?s|he'?s|they'?re|they\s+are|she\s+is|he\s+is"
         r"|who'?s|who\s+is|(?:are|were)\s+both)"
-        rf"|\b(?:my|our|his|her|their)\s+{_KIN}(?:\s+[A-Z][\w'\-]+)?\s+"
-        r"(?:is|was|turns|just\s+turned))"
+        rf"|\b(?:my|our|his|her|their)\s+{_KIN}s?(?:\s+[A-Z][\w'\-]+"
+        r"(?:\s+(?:and|&)\s+[A-Z][\w'\-]+)?)?\s+(?:is|was|are|were|turns|just\s+turned))"
         r"\s+(?:(?:only|just|almost|nearly|about)\s+)?(?P<v>\d{1,3})\b",
+        re.IGNORECASE,
+    ),
+    # "Esther is 13 and has dyslexia", "my youngest, Talia, is 4": a
+    # capitalised name, then the number ends the clause
+    re.compile(
+        r"(?<![\w'])(?!(?:It|This|That|There|Here|What|Which|Who|Where|When|How|Version"
+        r"|Price|Total|Score|Rate|Chapter|Page|Step|Level|Size|Count|Number|Python|Java"
+        r"|Node|Room|Floor|Gate|Platform|Section|Part|Item|Order|Answer|Result|Value"
+        r"|Mine|Ours|Yours|Today|Tomorrow|Yesterday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b)"
+        r"[A-Z][a-z]{2,}(?:\s+and\s+[A-Z][a-z]{2,})?,?\s+(?:is|are|was|turns|just\s+turned)"
+        r"\s+(?:(?:only|just|almost|nearly)\s+)?(?P<v>\d{1,2})"
+        r"(?=\s+(?:and|but|now|today|this|next|so|too|already)\b|\s*[.,;!?)]|\s*$)",
+    ),
+    # Reddit style: "I (29F)", "my bf (31 M)", "[F/24]", "34M here"
+    re.compile(
+        r"[(\[]\s*(?P<v>[1-9]\d)\s*/?\s*(?:[MF]|NB|nb|m|f)\s*[)\]]"
+        r"|[(\[]\s*(?:[MF]|NB|m|f)\s*/?\s*(?P<w>[1-9]\d)\s*[)\]]"
+    ),
+    re.compile(r"(?:^|(?<=[\s,]))(?P<v>\d{2})\s?[MF](?=\s+here\b|\s*[,:)]\s*(?:i|my)\b)"),
+    # "(gloria, 63)", "name 'Dmitri, 39'"
+    re.compile(r"[(\"'‘“]\s*(?!(?:fig|figure|table|eq|page|pp|vol|ch|chapter|item|step|line"
+               r"|row|col|box|note|part|section|sec|ref|art|para|no|nr|level|round|week|day)\b)"
+               r"[A-Za-z][a-z]{2,},\s*(?P<v>\d{1,2})\s*[)\"'’”]", re.IGNORECASE),
+    # "Nana's 80th", "my 40th birthday"
+    re.compile(
+        rf"\b(?:{_KIN}|[A-Z][a-z]{{2,}})['’]s\s+(?P<v>\d{{1,3}}(?:st|nd|rd|th))"
+        r"(?=\s+birthday|\s*[.,!?;)\n]|\s*$)"
+        r"|\b(?:my|his|her|their|your)\s+(?P<w>\d{1,3}(?:st|nd|rd|th))(?=\s+birthday)",
         re.IGNORECASE,
     ),
     # "My daughter Ava Lindqvist (14)"
@@ -768,7 +827,7 @@ _GROUP1_TYPES = frozenset({
 
 # Types whose value may be followed by more values of the same shape
 # ("Passport: A09382716 / A11746620").
-_LIST_TYPES = frozenset({"us_driver_license", "passport", "id_number"})
+_LIST_TYPES = frozenset({"us_driver_license", "passport", "id_number", "credential"})
 
 _PATTERNS: list = [
     # NOTE: street addresses are detected by the canonical structured parser
@@ -820,18 +879,22 @@ _PATTERNS: list = [
     (
         "credential",
         re.compile(
-            r"(?:pass(?:word|wd|phrase|code)|\bpwd\b|\bpin(?:\s*(?:code|number))?\b"
+            r"(?:pas+w(?:or|ro)?d|pass(?:phrase|code)|\bpwd\b|\bpw\b|\bpword\b"
+            r"|\bpass(?=\s*[:=])|\bpin(?:\s*(?:code|number))?\b"
             r"|(?:2fa|mfa|otp|backup|recovery|verification|verify|security"
             r"|one[\s-]?time|login|auth(?:entication)?|access|sms|reset|confirmation"
             r"|al(?:ar|ra)m|door|gate|garage|lock|keypad|entry|safe|unlock)\s+codes?"
-            r"|\botp\b|(?:api|secret|access|auth|refresh|session)[\s_]*(?:key|token)"
-            r"|\btoken\b|\bsecret\b|contrase[ñn]a|mot\s+de\s+passe|passwort|senha)"
+            r"|\botp\b|(?:api|secret|access|auth|refresh|session)[\s_\-]*(?:key|token)"
+            r"|\btoken\b|\bsecret\b|contrase[ñn]a|mot\s+de\s+passe|passwort|senha"
+            r"|pass\s?key|(?:wi-?fi|wlan|wpa2?|network|router)\s+(?:key|pass\b)"
+            r"|(?:private|secret|license|licence|product|activation)\s+key"
+            r"|wachtwoord|parola\s+d'ordine|has[łl]o|kennwort|codice\s+pin|c[óo]digo\s+pin)"
             # "the reset code they sent was 482913"
             r"(?:\s+(?:they|you|we|he|she|it|i)\s+(?:just\s+)?(?:sent|gave|texted"
             r"|emailed)(?:\s+(?:me|us))?)?"
             r"\s*(?:(?:is|was|are|=|:|-|of|es|est|ist|é)\s*)?"
             r"(?:(?:now|still|set\s+to|changed\s+to)\s+)?[\"'`]?"
-            r"(?P<v>\d{3}[ \-]\d{3}(?!\d)|[^\s\"'`]{4,128})",     # "OTP 559 104"
+            r"(?P<v>\d{3,4}[ \-]\d{3,4}(?!\d)|[^\s\"'`]{4,128})",     # "OTP 559 104"
             re.IGNORECASE,
         ),
         _credential_validator,
@@ -858,6 +921,51 @@ _PATTERNS: list = [
             re.IGNORECASE,
         ),
         _credential_validator,
+    ),
+
+    # "your Kloverbank code is 482 913": six digits after "code is" are a
+    # one-time code unless the code is named as something else
+    (
+        "credential",
+        re.compile(r"\bcode\s+(?:is|was|:)\s*(?P<v>\d{3}[ \-]?\d{3})(?![\d\-.,]\d)",
+                   re.IGNORECASE),
+        lambda m: not re.search(r"(?:zip|postal|post|area|country|dial|promo|discount|coupon"
+                                r"|error|status|exit|http|product|sku|item|tracking|order"
+                                r"|reference|ref|tax|class|course|program+e?)\s*$",
+                                _before(m, 30), re.IGNORECASE),
+    ),
+    # SMS one-time codes as pasted: "G-482913", "482913 is your Steam code"
+    (
+        "credential",
+        re.compile(r"\b(?P<v>G-\d{6})\b"
+                   r"|(?<![\w\-.])(?P<w>\d{4,8}|\d{3}[ \-]\d{3})\s+is\s+your\s+"
+                   r"(?:[\w\-]+\s+){0,4}(?:code|pin|password|otp|passcode)\b",
+                   re.IGNORECASE),
+        None,
+    ),
+    # A password in quotes after its keyword is a password, whatever it
+    # looks like ("my password is 'sunshine'")
+    (
+        "credential",
+        re.compile(r"(?:pas+w(?:or)?d|passcode|passphrase|\bpin\b|\bpw\b)\s*(?:is|was|:|=)?\s*"
+                   r"[\"'‘“`](?P<v>[^\s\"'’”`]{4,64})[\"'’”`]", re.IGNORECASE),
+        lambda m: not _CODE_REFERENCE.match(m.group("v")),
+    ),
+    # A seed / recovery phrase: 12–24 lower-case words
+    (
+        "credential",
+        re.compile(r"(?:seed|recovery|backup|secret|mnemonic)\s+(?:phrase|words)\s*"
+                   r"(?:is|are|was|were|:|=|-)?\s*[\"'`]?"
+                   r"(?P<v>[a-z]{3,8}(?:[ ,]+[a-z]{3,8}){11,23})", re.IGNORECASE),
+        None,
+    ),
+    # A base32 TOTP setup key written in groups of four
+    # ("MZXW 6YTB OI3K 5QPL R2DN 4HVE"); most groups carry a digit, which
+    # all-caps prose never does.
+    (
+        "credential",
+        re.compile(r"(?<![A-Za-z0-9])(?P<v>[A-Z2-7]{4}(?: [A-Z2-7]{4}){3,7})(?![A-Za-z0-9])"),
+        lambda m: sum(any(c.isdigit() for c in g) for g in m.group("v").split()) >= 3,
     ),
 
     # ── Social / chat / game handles ─────────────────────────────────────────
@@ -1217,6 +1325,15 @@ _PATTERNS: list = [
             r"(?:January|February|March|April|May|June|July|August|September|"
             r"October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
             r"[\s,]+\d{1,2}(?:st|nd|rd|th)?[\s,]+(?:\d{4}|'\d{2})"
+            r"|(?:19|20)\d{2}/(?:0?[1-9]|1[0-2])/(?:0?[1-9]|[12]\d|3[01])"
+            r"|\d{1,2}(?:\.|º|er)?\s+(?:de\s+)?"
+            r"(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre"
+            r"|octubre|noviembre|diciembre|janvier|f[ée]vrier|mars|avril|mai|juin|juillet"
+            r"|ao[ûu]t|septembre|octobre|novembre|d[ée]cembre|januar|februar|m[äa]rz|april"
+            r"|juni|juli|august|oktober|dezember|gennaio|febbraio|aprile|maggio|giugno"
+            r"|luglio|settembre|ottobre|dicembre|janeiro|fevereiro|mar[çc]o|maio|junho"
+            r"|julho|setembro|outubro|novembro|dezembro|januari|februari|maart|mei|augustus)"
+            r"\s+(?:de\s+)?\d{4}"
             r")\b",
             re.IGNORECASE,
         ),
@@ -1227,7 +1344,10 @@ _PATTERNS: list = [
     (
         "dob",
         re.compile(
-            r"\b(?:born|b\.)\s+(?:in\s+|on\s+)?(?P<v>(?:19|20)\d{2})\b(?![/\-.]\d)",
+            r"(?:\b(?:born|b\.|year\s+of\s+birth|yob|birth\s+year|n[ée]e?|nat[oa]|nacid[oa]"
+            r"|geboren|nascid[oa])\s*(?::|-|–)?\s*(?:in\s+|on\s+|en\s+|nel\s+|em\s+|im\s+)?"
+            r")(?P<v>(?:(?:January|February|March|April|May|June|July|August|September"
+            r"|October|November|December)\s+)?(?:19|20)\d{2})\b(?![/\-.]\d)",
             re.IGNORECASE,
         ),
         None,
@@ -1422,6 +1542,10 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
                         and not _NOT_AGE_AFTER.match(text, lm.end()):
                     _claim("age", *lm.span(1))
                     pos = lm.end()
+
+    for s, e in _table_age_cells(text):
+        if _span_free(s, e) and not _should_skip(text[s:e]):
+            _claim("age", s, e)
 
     results.sort(key=lambda e: e.start)
     logger.info(f"[PatternScan] Found {len(results)} entities")
