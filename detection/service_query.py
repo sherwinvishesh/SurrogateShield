@@ -173,9 +173,13 @@ def fuzz_addresses(
         forbidden.add(fuzzed)
         logger.debug(f"[ServiceQuery] {parsed.full_text!r} → {fuzzed!r}")
 
-    result = text
-    for original in sorted(mappings, key=len, reverse=True):
-        result = result.replace(original, mappings[original])
+    from util import splice
+
+    # Span-based: each parsed address is replaced at its own offsets (E1).
+    result = splice(text, [
+        (p.start, p.end, p.full_text, mappings[p.full_text])
+        for p in parsed_list if p.full_text in mappings
+    ])
 
     if mappings:
         logger.info(f"[ServiceQuery] Fuzzed {len(mappings)} address(es)")

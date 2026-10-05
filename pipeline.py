@@ -159,12 +159,6 @@ class Pipeline:
             from chatbot.rag import RAGStore  # noqa: F401
         self.rag = rag
 
-    def _apply_surrogates(self, text: str, surrogate_map: Dict[str, str]) -> str:
-        result = text
-        for original in sorted(surrogate_map, key=len, reverse=True):
-            result = result.replace(original, surrogate_map[original])
-        return result
-
     def _invert_map(self, surrogate_map: Dict[str, str]) -> Dict[str, str]:
         return {v: k for k, v in surrogate_map.items()}
 

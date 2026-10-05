@@ -235,6 +235,7 @@ def _run_pii_finder() -> None:
     from detection.logic import run_cascade, deduplicate
     from detection.service_query import is_service_query
     from generation.logic import MimicGen
+    from detection.service_query import resolve_address_mode
     from util import apply_entity_surrogates
     from config import (
         ADDRESS_MODE,
@@ -364,7 +365,7 @@ def _run_pii_finder() -> None:
         if SERVICE_QUERY_DETECTION_ENABLED and is_service_query(user_input):
             # v2: addresses flow through the unified detect→generate path.
             # In service-query mode "auto" resolves to shift (±N house number).
-            sq_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "shift"
+            sq_mode = resolve_address_mode(ADDRESS_MODE, True)
 
             sq_confirmed, _ = run_cascade(user_input, skip_location_entities=True)
             sq_confirmed = deduplicate(sq_confirmed)
@@ -456,8 +457,7 @@ def _run_pii_finder() -> None:
             _show_presidio_panel(user_input)
             continue
 
-        # Non-service context: "auto" resolves to replace (the v1 behaviour).
-        std_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "replace"
+        std_mode = resolve_address_mode(ADDRESS_MODE, False)
         surrogate_map = (
             mimic.generate_all(
                 confirmed,
@@ -505,9 +505,8 @@ def _run_pii_finder() -> None:
                 console.print("[dim green]✓  No quasi-identifier combination risk detected.[/dim green]")
             console.print()
 
-        sanitised = user_input
-        for orig in sorted(surrogate_map, key=len, reverse=True):
-            sanitised = sanitised.replace(orig, surrogate_map[orig])
+        # Same span-based substitution as the real send path (E1).
+        sanitised = apply_entity_surrogates(user_input, confirmed, surrogate_map)
 
         console.print(Panel(
             f"[dim]Would send to {_current_provider_name()}:[/dim]\n[blue]{sanitised}[/blue]",
