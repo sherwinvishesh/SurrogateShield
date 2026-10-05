@@ -18,7 +18,8 @@ Generated keys (rows with ``Spans``, from experiment/make_dataset.py):
 
 Legacy keys (``Question`` + ``Answer-Key`` only, e.g. experiment/test_key.json)
 get the checks that need no offsets: B2 value not in question, B3 unknown or
-label-like values, B4 regex-obvious PII missing from the key, B1 reuse counts.
+label-like values, ORG values with no capital letter (a common word or a
+number, not an organisation), B4 regex-obvious PII missing from the key, B1 reuse counts.
 
 Exit status 1 if any finding. Usage:
     python experiment/lint_key.py experiment/synth_dev_key.json experiment/synth_test_key.json
@@ -162,6 +163,9 @@ def lint_legacy(fname: str, rows: list) -> List[str]:
                 findings.append(f"{where}: B3 unknown label for {v!r}")
             if v.lower() in _LABEL_WORDS:
                 findings.append(f"{where}: B3 label word {v!r} used as a value")
+            if t.lower() == "org" and not any(c.isupper() for c in v):
+                # "internal", "bio for my", "+49 89 …": no organisation is named
+                findings.append(f"{where}: B3 ORG value {v!r} names no organisation")
             reuse.setdefault(t, Counter())[v.casefold()] += 1
         gold = [s for _t, v in pairs for s in em.find_occurrences(q, v)]
         for t, pat in _OBVIOUS.items():

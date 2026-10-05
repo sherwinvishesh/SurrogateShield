@@ -161,3 +161,12 @@ def test_B_lint_legacy_key_reports_known_problems(tmp_path):
     assert any("B2 phone='480-555-0199'" in f for f in findings)
     assert any("B4 ssn-shaped" in f for f in findings)
     assert any("B3 label word 'phone'" in f for f in findings)
+
+
+def test_B3_lint_flags_org_value_that_names_no_organisation():
+    legacy = [
+        {"Question": "Draft a note for an internal company channel", "Answer-Key": {"org": "internal"}},
+        {"Question": "I work at Kestrel Analytics", "Answer-Key": {"org": "Kestrel Analytics"}},
+    ]
+    findings = [f for f in lint_key.lint_legacy("k", legacy) if "names no organisation" in f]
+    assert findings == ["k:0: B3 ORG value 'internal' names no organisation"]
