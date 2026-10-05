@@ -13,6 +13,7 @@ import logging
 import threading
 from typing import Dict, List, Optional, Tuple
 
+from ..consistency import strip_clitic
 from ..entities import DetectedEntity, remove_span_overlap
 from ..errors import DetectorUnavailable
 
@@ -89,6 +90,22 @@ _LOCATION_PREPS = {
 }
 
 
+# Clause punctuation never belongs to a name; an English model run on CJK
+# text otherwise returns spans such as "…收件人：李娜，邮箱：" (audit I4).
+_EDGE_PUNCT = set(" \t,;:!?\"“”«»()[]{}，。：；！？、（）「」『』《》【】")
+
+
+def _clean_span(text: str, start: int, end: int) -> Tuple[int, int]:
+    """Trim edge punctuation and a possessive clitic ("Mia Lopez's" →
+    "Mia Lopez", "Jennings'" → "Jennings") from an NER span (audit I4)."""
+    while start < end and text[start] in _EDGE_PUNCT:
+        start += 1
+    while end > start and text[end - 1] in _EDGE_PUNCT:
+        end -= 1
+    end = start + len(strip_clitic(text[start:end]))
+    return start, end
+
+
 def trace(
     text: str,
     existing_entities: Optional[List[DetectedEntity]] = None,
@@ -153,10 +170,13 @@ def trace(
                 score = _TYPE_DEFAULTS["GPE"]
                 logger.debug(f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r}")
 
+        start, end = _clean_span(text, ent.start_char, ent.end_char)
+        if start >= end:
+            continue
         candidate = DetectedEntity(
-            text=ent.text,
-            start=ent.start_char,
-            end=ent.end_char,
+            text=text[start:end],
+            start=start,
+            end=end,
             type=effective_label,
             score=score,
             source="ner",
