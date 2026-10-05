@@ -34,6 +34,7 @@ experiment/phase8/
 bench/realdata/raw/
 bench/realdata/build/
 experiment/realdata/
+bench/realdata/human_check*.jsonl
 *.json.tmp
 
 # Device secret — NEVER commit this
