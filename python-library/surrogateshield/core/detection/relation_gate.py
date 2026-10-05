@@ -340,7 +340,11 @@ _CUE_BEFORE = re.compile(
     r"|workplace|clinic|hospital|doctor|dentist|practice|gym|church|mosque|temple"
     r"|synagogue|bank|landlord|team|club|daycare|kindergarten|job|work|agency"
     r"|startup|lab|department|plant|warehouse|store|shop|restaurant|salon|branch"
-    r"|apartment|building|complex|hoa|district|county|parish|ward)\b[^.!?\n]{0,15}?"
+    r"|apartment|building|complex|hoa|district|county|parish|ward|boss|manager"
+    r"|supervisor|coworkers?|co-workers?|colleagues?|midwife|therapist|lawyer|gp"
+    r"|landlady|kids?'?|son'?s|daughter'?s)\b[^.!?\n]{0,15}?"
+    # "I'm a Unite shop steward at the Dagenham plant", "I'm a nurse at"
+    r"|\b(?:i'?m|i\s+am|im|i\s+work\s+as)\s+(?:a|an)\s+[^.!?\n,]{1,40}?\s+(?:at|for|with)"
     # other languages (es/fr/de/pt/it)
     r"|\b(?:vivo|vive|vivimos|trabajo|trabaja|estudio|j'habite|habite|je\s+vis"
     r"|travaille|wohne|wohnt|arbeite|arbeitet|moro|mora|trabalho|abito|lavoro)"
@@ -351,7 +355,12 @@ _CUE_AFTER = re.compile(
     r"|hired\s+me|offered\s+me|employs\s+me|is\s+(?:my|our|his|her|their)\s+"
     r"(?:employer|school|company|hometown|home|clinic|doctor)"
     r"|-based|\s+based\b)"
+    r"|^\s*[?.!]\s*(?:she|he)\s+(?:is|was|keeps|kept|has|had|said|says|told|sent|texted)\b"
 )
+# a device named after its owner: "Lucas-iPhone", "Priya's MacBook Pro"
+_DEVICE = re.compile(
+    r"^[A-Z][a-z]{2,15}(?:['’]?s)?[-_ ](?:iPhone|iPad|MacBook|Mac|Galaxy|Pixel|PC"
+    r"|Laptop|Desktop|Phone|Tablet|Watch|Kindle|Echo|TV)\b")
 _FIELD_LABEL = re.compile(
     r"(?i)\b(?:city|town|location|employer|company|organi[sz]ation|org|school"
     r"|university|college|workplace|hometown|home\s*town|residence|clinic"
@@ -434,6 +443,8 @@ _ISSUED_TYPES = frozenset({"credit_card", "us_bank_number", "iban", "id_number",
 
 def is_tied(ent: DetectedEntity, text: str, persons: List[DetectedEntity],
             context: Iterable[DetectedEntity] = ()) -> bool:
+    if _DEVICE.match(_core(ent.text)):
+        return True
     for c in context:
         if (c.type in _ISSUED_TYPES and 0 <= c.start - ent.end <= 60
                 and not re.search(r"[.!?\n]", text[ent.end:c.start])):
@@ -508,7 +519,8 @@ def gate(
     for e in first:
         if e.type not in _PLACE_ORG or id(e) in tied_ids:
             kept.append(e)
-        elif (e.type == "ORG" and _LEGAL_SUFFIX.search(_core(e.text))
+        elif (e.type == "ORG" and " " in _core(e.text).strip()
+              and _LEGAL_SUFFIX.search(_core(e.text))
               and _core(e.text).lower() not in PUBLIC_ORGS):
             kept.append(e)
         elif _core(e.text).lower() in PUBLIC_ORGS:

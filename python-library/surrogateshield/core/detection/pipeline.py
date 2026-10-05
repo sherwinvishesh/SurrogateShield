@@ -108,6 +108,14 @@ _SUFFIXED_ORG_PATTERN = re.compile(
 )
 
 
+# words that are never part of a company name found by its suffix
+_ORG_NAME_STOP = frozenset("""
+the a an and or of for to in on at by with between from is are was were be my
+your our his her their this that these those what which who how why when where
+difference new small big large local same other another any some every each
+""".split())
+
+
 def _detect_structural_orgs(
     text: str,
     existing_entities: List[DetectedEntity],
@@ -126,12 +134,19 @@ def _detect_structural_orgs(
     """
     occupied = {(e.start, e.end) for e in existing_entities}
     new_ents: List[DetectedEntity] = []
+    lower_writer = _writes_lowercase(text)
 
     for pattern in (_STRUCTURAL_ORG_PATTERN, _SUFFIXED_ORG_PATTERN):
         for m in pattern.finditer(text):
             name_text  = m.group(1).strip()
             name_start = m.start(1)
             name_end   = name_start + len(name_text)
+            words = name_text.split()
+            if any(w.lower() in _ORG_NAME_STOP for w in words):
+                continue                    # "the difference between an LLC"
+            if (pattern is _STRUCTURAL_ORG_PATTERN and not lower_writer
+                    and not any(w[:1].isupper() for w in words)):
+                continue                    # "a clothing company", "the insurance firm"
 
             # Skip if overlaps with an already-detected entity
             if any(not (name_end <= os or name_start >= oe) for os, oe in occupied):
@@ -807,7 +822,21 @@ def _is_proper_capitalized(entity_text: str, text: str) -> bool:
     if not prefix or prefix[-1] in ".!?;":
         return True  # sentence-start → might be proper noun despite lowercase
 
+    if _writes_lowercase(text):
+        return True  # "my doctor in dayton": the writer capitalises nothing
+
     return False  # lowercase, mid-sentence → common noun usage → skip
+
+
+def _writes_lowercase(text: str) -> bool:
+    """True when the writer does not capitalise: no word in the message
+    starts with a capital letter, or the pronoun "i" is written lower-case."""
+    words = re.findall(r"[^\W\d_][\w'’\-]*", text)
+    if not words:
+        return False
+    if any(w in ("i", "im", "i'm", "i’m", "ive", "i've", "id", "ill") for w in words):
+        return True
+    return not any(w[:1].isupper() for w in words)
 
 
 def _filter_topical_geo_entities(
@@ -1296,6 +1325,10 @@ february march april may june july august september october november december
 thanks thank please hi hello dear regards best cheers sorry yes no ok okay
 can could would should will is are was were has have had do does did
 """.split())
+# a preposition the model took into a place ("uit Zwolle", "aus Graz")
+_LEAD_PREP = re.compile(
+    r"(?:(?:uit|aus|nach|naar|in|im|bei|à|au|aux|em|no|na|en|dans|from|at|near"
+    r"|to|the|a|an|desde|hacia|para|da|dal|dalla|nel|nella|w|we|z|ze|v|ve) )+")
 # a company word after a one-word ORG: "Brightwater Logistics"
 _ORG_TAIL = re.compile(
     r" (Ltd|Limited|Inc|LLC|GmbH|AG|SA|BV|Pty|PLC|Co|Corp|Group|Logistics|Roofing|"
@@ -1320,6 +1353,10 @@ def _snap_to_words(entities: List[DetectedEntity], text: str) -> List[DetectedEn
             s += 1
         while t > s and (text[t - 1] in _QUOTES or text[t - 1] in _JOINER or text[t - 1].isspace()):
             t -= 1
+        if e.type in ("GPE", "LOC", "FAC", "ORG"):
+            m = _LEAD_PREP.match(text, s, t)
+            if m and m.end() < t:
+                s = m.end()                 # "uit Zwolle" -> "Zwolle"
         if s == t:
             out.append(e)
             continue
