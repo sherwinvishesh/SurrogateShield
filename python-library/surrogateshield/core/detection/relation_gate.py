@@ -321,6 +321,53 @@ def is_foreign_fragment(ent: DetectedEntity, text: str) -> bool:
     return False
 
 
+# A title alone is not a name ("Mr" of "Mr. Okonkwo-Hale" when NER splits it).
+_HONORIFICS = frozenset("""
+mr mrs ms mx miss dr prof sir madam herr frau mme mlle sr sra srta dott sig
+""".split())
+# An object pronoun after a sentence-initial word makes that word a verb:
+# "Ping me on …", "Bel me even op …", "Ruf mich an". Not in French, Spanish,
+# Italian or Portuguese, where the pronoun comes before the verb ("Ana me
+# ligou", "Marie me dit").
+_OBJECT_PRONOUN = {None: re.compile(r"[ \t]+(?:me|us)\b"),
+                   "de": re.compile(r"[ \t]+(?:mich|uns)\b"),
+                   "nl": re.compile(r"[ \t]+(?:me|mij|ons)\b")}
+_SENTENCE_START = re.compile(r"(?:^|[.!?\n]\s*|^\s*[-*•]\s*)$")
+
+
+_COLUMN_NAME = re.compile(
+    r"(?i)^(?:(?:first|last|full|user|sur|given|family)?\s*_?names?|age|e-?mail|phone|mobile|tel"
+    r"|date|dob|id|address|city|town|country|role|title|status|type|notes?|amount|qty"
+    r"|department|dept|team|company|employer|school|class|grade|gender|salary|start|end)$")
+
+
+def _header_cells(text: str) -> set:
+    """Cells of the first row of a CSV / TSV / pipe table: column names
+    ("Name,Age,Allergy,Parent phone"), never values. The row has no digit,
+    three or more cells, one of them a usual column name, and the next line
+    has as many separators. A headerless table ("Maria Lopez,Sales,Berlin")
+    has no header row."""
+    cells = set()
+    lines = text.split("\n")
+    for k in range(len(lines) - 1):
+        row, nxt = lines[k], lines[k + 1]
+        prev = lines[k - 1] if k else ""
+        for sep in (",", "\t", ";", "|"):
+            n = row.count(sep)
+            if (n >= 2 and nxt.count(sep) == n and prev.count(sep) != n
+                    and not any(c.isdigit() for c in row)):
+                row_cells = {c.strip(" *`") for c in row.split(sep) if c.strip()}
+                if any(_COLUMN_NAME.match(c) for c in row_cells):
+                    cells |= row_cells
+    return cells
+
+
+def _defined_terms(text: str) -> set:
+    """Defined terms of a contract: ("Tenant"), ("the Landlord")."""
+    return {m.group(1) for m in re.finditer(
+        r"\(\s*[\"“'‘](?:the\s+)?([A-Z][a-z]+)[\"”'’]\s*\)", text)}
+
+
 def is_junk(ent: DetectedEntity, text: str = "") -> bool:
     core = _core(ent.text)
     if not core or not any(c.isalpha() for c in core):
@@ -329,6 +376,19 @@ def is_junk(ent: DetectedEntity, text: str = "") -> bool:
         return True
     if is_foreign_fragment(ent, text):
         return True
+    if core.lower() in _HONORIFICS or core.lower() in _POSSESSIVE_DET:
+        return True                         # "Mr", "Dr", "mera"
+    pair = core.split()
+    if (ent.type == "PERSON" and len(pair) == 2 and core == core.lower() and pair[0] in _POSSESSIVE_DET
+            and text != text.lower()):
+        return True                         # "mera account" in a cased message
+    if text and " " not in core and ent.source not in ("pattern", "structural"):
+        pronoun = _OBJECT_PRONOUN.get(message_language(text))
+        if (pronoun and core[:1].isupper() and _SENTENCE_START.search(text[:ent.start])
+                and pronoun.match(text, ent.end)):
+            return True                     # "Ping me", "Bel me"
+        if core in _header_cells(text) or core in _defined_terms(text):
+            return True                     # "Name,Age,Allergy", ("Tenant")
     words = core.split()
     if _QUESTION_WORD.match(core):
         return True                         # "Combien de calories", "¿Cuáles son …"
