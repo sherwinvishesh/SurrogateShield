@@ -4,7 +4,11 @@ The corpus behind gate J2 (`bench/realworld.py`). Each file is JSON Lines, one
 message per line, written the way people actually type into a chat assistant.
 Every person, address, number and account in it is invented.
 
-* `dev.jsonl` — used while developing detection. Look at it freely.
+* `dev.jsonl`, `dev2.jsonl`, `dev3.jsonl` — used while developing detection.
+  Look at them freely (`--show`). dev3 and dev4 were written blind, by authors
+  who saw only this guide.
+* `dev4.jsonl` — checks that a fix made on dev–dev3 generalises. It is scored,
+  never inspected: `--show` refuses it.
 * `test.jsonl` — written by a separate author who never saw the detection
   code. **Do not tune on it.** It is scored once per release with
   `python bench/realworld.py --split test`.

@@ -224,7 +224,7 @@ def print_realworld(r: dict) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--synth", choices=("dev", "test", "none"), default="dev")
-    ap.add_argument("--realworld", choices=("dev", "dev2", "test", "none"), default="dev")
+    ap.add_argument("--realworld", choices=("dev", "dev2", "dev3", "dev4", "test", "none"), default="dev")
     ap.add_argument("--final", action="store_true",
                     help="the held-out test splits of both sets (run once, never tune on it)")
     ap.add_argument("--limit", type=int, help="first N synthetic messages (smoke runs)")

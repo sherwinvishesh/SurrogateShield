@@ -46,8 +46,8 @@ PROTECT_TYPES = {"PERSON", "EMAIL", "PHONE", "ADDRESS", "LOCATION", "ORG", "DATE
 SENSITIVE_TYPES = {"HEALTH", "RELIGION", "ETHNICITY", "ORIENTATION", "POLITICAL"}
 POLICY_TYPES = {"ADDRESS", "LOCATION"}
 LISTS = ("protect", "sensitive", "optional", "keep")
-ID_RE = re.compile(r"^rw-(dev2?|test)-\d{4}$")
-SPLITS = ("dev", "dev2", "test")       # dev and dev2 are for tuning; test is J2
+ID_RE = re.compile(r"^rw-(dev[234]?|test)-\d{4}$")
+SPLITS = ("dev", "dev2", "dev3", "dev4", "test")  # dev–dev3 tune; dev4 checks a fix; test is J2
 
 LEAK_GATE = 0.02
 SPURIOUS_GATE = 0.03
@@ -297,8 +297,8 @@ def main() -> int:
         return 1 if errors else 0
     if not args.split:
         ap.error("--split or --lint is required")
-    if args.show and args.split == "test":
-        ap.error("--show is for dev; the test split is not inspected while tuning")
+    if args.show and args.split in ("test", "dev4"):
+        ap.error("--show is for dev; test and dev4 are not inspected while tuning")
 
     summary = run(args.split, args.show)
     print(json.dumps(summary, indent=2))
