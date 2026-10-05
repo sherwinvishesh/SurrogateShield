@@ -1,0 +1,215 @@
+{"id": "rd-oasst1-dev-0001", "ms": 40.43, "edits": [[8, 14, "PERSON", 5, 0], [16, 21, "PERSON", 5, 0], [44, 63, "credit_card", 19, 0], [121, 131, "PERSON", 11, 0], [134, 145, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-0002", "ms": 39.56, "edits": [[4, 16, "age", 12, 0], [28, 37, "GPE", 7, 0], [62, 78, "handle", 13, 0]]}
+{"id": "rd-oasst1-dev-0003", "ms": 30.22, "edits": [[110, 128, "PERSON", 14, 0], [130, 136, "age", 6, 0]]}
+{"id": "rd-oasst1-dev-0004", "ms": 49.7, "edits": [[6, 18, "PERSON", 14, 0], [25, 32, "GPE", 10, 0], [39, 61, "iban", 22, 0], [80, 91, "id_number", 11, 0], [98, 110, "age", 12, 0], [126, 133, "age", 8, 0], [167, 176, "age", 9, 0]]}
+{"id": "rd-oasst1-dev-0005", "ms": 88.78, "edits": [[216, 235, "ORG", 13, 0], [236, 258, "email", 15, 0], [265, 284, "credit_card", 19, 0], [289, 302, "ip_address", 15, 0]]}
+{"id": "rd-oasst1-dev-0006", "ms": 35.18, "edits": [[6, 21, "PERSON", 13, 0], [26, 39, "ip_address", 13, 0], [73, 86, "GPE", 8, 0], [92, 106, "GPE", 10, 0]]}
+{"id": "rd-oasst1-dev-0007", "ms": 38.61, "edits": [[10, 20, "PERSON", 7, 0], [22, 31, "PERSON", 4, 0], [44, 76, "email", 24, 0], [96, 112, "ORG", 12, 0]]}
+{"id": "rd-oasst1-dev-0008", "ms": 31.87, "edits": [[6, 24, "PERSON", 17, 0], [29, 43, "ip_address", 14, 0], [61, 72, "ORG", 13, 0]]}
+{"id": "rd-oasst1-dev-0009", "ms": 72.98, "edits": [[20, 28, "ORG", 11, 0], [137, 149, "PERSON", 13, 0], [157, 169, "phone_intl", 12, 0], [181, 213, "credential", 32, 0]]}
+{"id": "rd-oasst1-dev-0010", "ms": 36.05, "edits": [[6, 13, "GPE", 6, 0], [22, 35, "handle", 14, 0], [45, 77, "credential", 32, 0]]}
+{"id": "rd-oasst1-dev-0011", "ms": 38.36, "edits": [[4, 18, "PERSON", 12, 0], [20, 39, "email", 19, 0], [41, 82, "url", 39, 0]]}
+{"id": "rd-oasst1-dev-0012", "ms": 46.57, "edits": [[305, 317, "PERSON", 10, 0], [323, 333, "dob", 10, 0], [341, 351, "PERSON", 13, 0], [367, 380, "PERSON", 14, 0]]}
+{"id": "rd-oasst1-dev-0013", "ms": 29.65, "edits": [[6, 17, "PERSON", 12, 0], [25, 39, "phone_intl", 14, 0], [44, 54, "ip_address", 13, 0]]}
+{"id": "rd-oasst1-dev-0014", "ms": 39.53, "edits": [[24, 37, "PERSON", 11, 0], [39, 45, "GPE", 10, 0], [46, 52, "postcode_uk", 6, 0], [66, 84, "email", 12, 0], [106, 138, "credential", 32, 0], [203, 212, "GPE", 7, 0], [214, 219, "GPE", 8, 0]]}
+{"id": "rd-oasst1-dev-0015", "ms": 26.29, "edits": [[4, 19, "PERSON", 13, 0], [31, 49, "address", 17, 0], [51, 60, "GPE", 9, 0], [140, 146, "ORG", 5, 0]]}
+{"id": "rd-oasst1-dev-0016", "ms": 134.04, "edits": [[4, 19, "PERSON", 13, 0], [26, 43, "dob", 17, 0], [59, 73, "PERSON", 14, 0], [75, 82, "GPE", 8, 0], [84, 86, "GPE", 2, 0], [87, 92, "zip_us", 5, 0], [106, 135, "email", 27, 0], [163, 175, "handle", 11, 0], [202, 219, "mac_address", 17, 0], [241, 273, "credential", 32, 0], [847, 852, "PERSON", 6, 0], [986, 991, "PERSON", 5, 0], [1074, 1079, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-0017", "ms": 46.27, "edits": [[4, 14, "PERSON", 20, 0], [29, 42, "PERSON", 12, 0], [53, 60, "postcode_uk", 7, 0], [70, 83, "ip_address", 13, 0], [93, 104, "handle", 21, 0]]}
+{"id": "rd-oasst1-dev-0018", "ms": 120.49, "edits": [[6, 15, "PERSON", 10, 0], [25, 40, "address", 14, 0], [45, 50, "zip_us", 5, 0], [51, 57, "GPE", 7, 0], [65, 81, "phone_intl", 16, 0], [87, 97, "dob", 10, 0], [116, 128, "id_number", 12, 0], [135, 157, "iban", 22, 0], [169, 213, "url", 41, 0], [259, 274, "ORG", 12, 0]]}
+{"id": "rd-oasst1-dev-0019", "ms": 176.58, "edits": [[4, 20, "PERSON", 13, 0], [22, 28, "age", 6, 0], [39, 64, "address", 23, 0], [82, 92, "ORG", 15, 0], [105, 132, "iban", 27, 0], [151, 163, "id_number", 12, 0], [176, 193, "mac_address", 17, 0], [216, 263, "url", 44, 0], [520, 532, "phone_uk", 12, 0], [568, 580, "phone_uk", 12, 0], [712, 724, "phone_uk", 12, 0], [975, 979, "PERSON", 4, 0], [1071, 1075, "PERSON", 4, 0], [1096, 1108, "phone_uk", 12, 0], [1240, 1252, "phone_uk", 12, 0]]}
+{"id": "rd-oasst1-dev-0020", "ms": 192.62, "edits": [[4, 18, "PERSON", 11, 0], [25, 41, "dob", 13, 0], [53, 90, "address", 36, 0], [104, 118, "phone_us", 14, 0], [124, 135, "ssn", 11, 0], [147, 161, "ip_address", 12, 0], [189, 230, "url", 38, 0], [283, 288, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-0021", "ms": 35.79, "edits": [[180, 192, "PERSON", 15, 0], [194, 200, "age", 6, 0], [201, 218, "email", 17, 0]]}
+{"id": "rd-oasst1-dev-0022", "ms": 26.41, "edits": [[4, 23, "PERSON", 17, 0], [25, 37, "age", 12, 0]]}
+{"id": "rd-oasst1-dev-0023", "ms": 64.63, "edits": [[8, 24, "PERSON", 13, 0], [31, 41, "dob", 10, 0], [52, 66, "ip_address", 15, 0], [82, 125, "url", 40, 0], [136, 168, "credential", 32, 0], [198, 206, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-0024", "ms": 60.62, "edits": [[26, 36, "GPE", 7, 0], [42, 52, "dob", 10, 0], [66, 82, "credit_card", 16, 0], [101, 113, "id_number", 12, 0], [124, 154, "url", 33, 0], [188, 207, "PERSON", 17, 0], [226, 248, "ORG", 18, 0]]}
+{"id": "rd-oasst1-dev-0025", "ms": 58.96, "edits": [[12, 38, "email", 24, 0], [65, 82, "mac_address", 17, 0], [101, 146, "url", 43, 0], [168, 200, "credential", 32, 0]]}
+{"id": "rd-oasst1-dev-0026", "ms": 92.42, "edits": [[669, 681, "PERSON", 15, 0], [695, 708, "PERSON", 13, 0], [710, 715, "GPE", 4, 0], [739, 755, "dob", 17, 0], [781, 792, "id_number", 11, 0], [804, 843, "ip_address", 39, 0], [852, 884, "url", 35, 0], [899, 908, "handle", 12, 0]]}
+{"id": "rd-oasst1-dev-0027", "ms": 45.03, "edits": [[34, 44, "PERSON", 16, 0], [53, 75, "email", 28, 0], [82, 153, "url", 70, 0]]}
+{"id": "rd-oasst1-dev-0028", "ms": 32.84, "edits": [[127, 141, "PERSON", 15, 0], [152, 161, "passport", 9, 0], [162, 181, "PERSON", 14, 0]]}
+{"id": "rd-oasst1-dev-0029", "ms": 53.3, "edits": [[6, 22, "PERSON", 16, 0], [30, 46, "phone_intl", 16, 0], [58, 71, "ip_address", 15, 0], [83, 115, "credential", 32, 0], [147, 152, "ORG", 7, 0]]}
+{"id": "rd-oasst1-dev-0030", "ms": 56.19, "edits": [[58, 74, "PERSON", 13, 0], [96, 109, "phone_intl", 13, 0], [124, 137, "handle", 11, 0], [157, 205, "credential", 48, 0]]}
+{"id": "rd-oasst1-dev-0031", "ms": 74.69, "edits": [[10, 15, "PERSON", 9, 0], [17, 24, "PERSON", 5, 0], [37, 49, "phone_us", 12, 0], [60, 69, "ssn", 9, 0], [79, 91, "ip_address", 14, 0]]}
+{"id": "rd-oasst1-dev-0032", "ms": 37.92, "edits": [[6, 19, "PERSON", 16, 0], [27, 39, "phone_us", 12, 0]]}
+{"id": "rd-oasst1-dev-0033", "ms": 28.86, "edits": [[6, 20, "PERSON", 10, 0], [36, 46, "dob", 10, 0]]}
+{"id": "rd-oasst1-dev-0034", "ms": 47.3, "edits": [[6, 17, "PERSON", 12, 0], [33, 43, "dob", 10, 0], [48, 61, "ip_address", 14, 0], [62, 74, "ORG", 11, 0], [76, 83, "handle", 7, 0]]}
+{"id": "rd-oasst1-dev-0035", "ms": 34.79, "edits": [[23, 32, "ORG", 10, 0], [49, 67, "email", 15, 0], [208, 215, "PERSON", 7, 0]]}
+{"id": "rd-oasst1-dev-0036", "ms": 46.96, "edits": [[5, 15, "PERSON", 7, 0], [22, 36, "PERSON", 15, 0], [67, 80, "handle", 14, 0], [91, 104, "credential", 13, 0], [136, 142, "PERSON", 6, 0], [206, 212, "PERSON", 6, 0], [269, 280, "GPE", 7, 0], [348, 354, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-0037", "ms": 54.95, "edits": [[14, 38, "email", 25, 0], [50, 55, "zip_us", 5, 0], [56, 74, "PERSON", 20, 0], [81, 88, "GPE", 8, 0], [113, 123, "phone_us", 10, 0], [142, 153, "id_number", 11, 0], [164, 183, "credit_card", 19, 0]]}
+{"id": "rd-oasst1-dev-0038", "ms": 30.22, "edits": [[6, 29, "email", 23, 0], [38, 58, "ORG", 17, 0], [84, 92, "FAC", 7, 0], [97, 108, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-0039", "ms": 38.89, "edits": [[41, 50, "ORG", 7, 0], [107, 133, "credential", 26, 0]]}
+{"id": "rd-oasst1-dev-0040", "ms": 28.6, "edits": [[4, 12, "PERSON", 14, 0], [23, 34, "GPE", 10, 0]]}
+{"id": "rd-oasst1-dev-0041", "ms": 56.69, "edits": [[353, 366, "ORG", 11, 0], [369, 383, "address", 14, 0], [385, 399, "address", 15, 0], [402, 416, "phone_intl", 14, 0], [424, 434, "dob", 10, 0], [437, 481, "url", 44, 0]]}
+{"id": "rd-oasst1-dev-0042", "ms": 31.9, "edits": [[4, 16, "PERSON", 13, 0], [64, 76, "GPE", 9, 0]]}
+{"id": "rd-oasst1-dev-0043", "ms": 26.96, "edits": [[40, 46, "GPE", 8, 0], [88, 98, "PERSON", 12, 0], [100, 116, "email", 17, 0]]}
+{"id": "rd-oasst1-dev-0044", "ms": 32.19, "edits": [[140, 155, "PERSON", 13, 0], [158, 174, "phone_intl", 16, 0], [177, 193, "handle", 16, 0]]}
+{"id": "rd-oasst1-dev-0045", "ms": 35.37, "edits": [[4, 23, "PERSON", 17, 0], [29, 36, "ORG", 5, 0], [47, 64, "address", 12, 0], [75, 81, "GPE", 8, 0]]}
+{"id": "rd-oasst1-dev-0046", "ms": 49.09, "edits": [[4, 23, "PERSON", 15, 0], [29, 62, "ORG", 30, 0], [71, 101, "email", 24, 0], [110, 125, "phone_us", 15, 0], [185, 195, "PERSON", 13, 0], [198, 209, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-0047", "ms": 32.8, "edits": [[113, 122, "GPE", 5, 0], [127, 142, "PERSON", 11, 0], [143, 187, "url", 40, 0]]}
+{"id": "rd-oasst1-dev-0048", "ms": 30.61, "edits": [[4, 15, "PERSON", 12, 0], [17, 28, "handle", 14, 0], [30, 61, "url", 32, 0]]}
+{"id": "rd-oasst1-dev-0049", "ms": 35.21, "edits": [[7, 13, "PERSON", 5, 0], [15, 22, "PERSON", 5, 0], [61, 71, "handle", 8, 0]]}
+{"id": "rd-oasst1-dev-0050", "ms": 45.45, "edits": [[25, 45, "PERSON", 16, 0], [47, 60, "ORG", 13, 0], [62, 67, "zip_us", 5, 0], [91, 102, "id_number", 11, 0], [121, 134, "us_driver_license", 13, 0], [145, 177, "credential", 32, 0], [180, 184, "PERSON", 7, 0], [233, 244, "PERSON", 12, 0], [250, 257, "ORG", 5, 0]]}
+{"id": "rd-oasst1-dev-0051#t0", "ms": 54.91, "edits": [[4, 18, "PERSON", 14, 0], [25, 35, "dob", 10, 0], [61, 74, "ip_address", 14, 0]]}
+{"id": "rd-oasst1-dev-0051#t1", "ms": 23.14, "edits": []}
+{"id": "rd-oasst1-dev-0052#t0", "ms": 45.15, "edits": [[4, 18, "PERSON", 12, 0], [49, 62, "ip_address", 10, 0], [76, 108, "credential", 32, 0]]}
+{"id": "rd-oasst1-dev-0052#t1", "ms": 27.45, "edits": []}
+{"id": "rd-oasst1-dev-0053#t0", "ms": 41.28, "edits": [[52, 59, "ORG", 9, 0], [65, 85, "PERSON", 20, 0], [87, 101, "phone_us", 14, 0]]}
+{"id": "rd-oasst1-dev-0053#t1", "ms": 27.07, "edits": []}
+{"id": "rd-oasst1-dev-0054#t0", "ms": 57.7, "edits": [[6, 20, "PERSON", 9, 0], [31, 42, "GPE", 7, 0], [53, 73, "PERSON", 15, 0], [75, 101, "PERSON", 22, 0], [103, 148, "url", 40, 0]]}
+{"id": "rd-oasst1-dev-0054#t1", "ms": 23.49, "edits": []}
+{"id": "rd-oasst1-dev-0055#t0", "ms": 47.41, "edits": [[4, 21, "PERSON", 21, 0], [32, 41, "GPE", 7, 0], [63, 76, "ip_address", 13, 0], [92, 124, "credential", 32, 0], [207, 225, "ORG", 5, 0], [237, 249, "GPE", 5, 0], [288, 306, "ORG", 5, 0], [310, 322, "GPE", 5, 0], [405, 417, "GPE", 5, 0]]}
+{"id": "rd-oasst1-dev-0055#t1", "ms": 28.66, "edits": []}
+{"id": "rd-oasst1-dev-0056#t0", "ms": 39.8, "edits": [[4, 24, "PERSON", 15, 0], [35, 42, "GPE", 13, 0], [65, 79, "phone_us", 14, 0]]}
+{"id": "rd-oasst1-dev-0056#t1", "ms": 23.42, "edits": []}
+{"id": "rd-oasst1-dev-0057#t0", "ms": 30.96, "edits": [[155, 168, "PERSON", 16, 0], [176, 195, "credit_card", 19, 0]]}
+{"id": "rd-oasst1-dev-0057#t1", "ms": 26.01, "edits": []}
+{"id": "rd-oasst1-dev-0058#t0", "ms": 26.88, "edits": [[112, 129, "PERSON", 15, 0], [131, 133, "age", 2, 0], [135, 140, "GPE", 8, 0]]}
+{"id": "rd-oasst1-dev-0058#t1", "ms": 23.34, "edits": []}
+{"id": "rd-oasst1-dev-0058#t2", "ms": 23.91, "edits": []}
+{"id": "rd-oasst1-dev-0059#t0", "ms": 32.09, "edits": [[126, 138, "PERSON", 14, 0], [141, 155, "ip_address", 14, 0], [158, 190, "url", 34, 0]]}
+{"id": "rd-oasst1-dev-0059#t1", "ms": 34.23, "edits": []}
+{"id": "rd-oasst1-dev-0060#t0", "ms": 45.31, "edits": [[6, 20, "LOC", 10, 0], [27, 34, "GPE", 8, 0], [45, 50, "PERSON", 6, 0], [52, 61, "PERSON", 6, 0], [66, 72, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-0060#t1", "ms": 24.67, "edits": []}
+{"id": "rd-oasst1-dev-0060#t2", "ms": 22.64, "edits": []}
+{"id": "rd-oasst1-dev-1001", "ms": 27.46, "edits": [[56, 66, "PERSON", 14, 0], [69, 80, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-1002", "ms": 26.27, "edits": []}
+{"id": "rd-oasst1-dev-1003", "ms": 43.02, "edits": []}
+{"id": "rd-oasst1-dev-1004", "ms": 22.57, "edits": []}
+{"id": "rd-oasst1-dev-1005", "ms": 27.7, "edits": []}
+{"id": "rd-oasst1-dev-1006", "ms": 50.69, "edits": [[49, 59, "PERSON", 12, 0], [66, 74, "PERSON", 14, 0], [81, 92, "PERSON", 13, 0], [99, 107, "PERSON", 7, 0]]}
+{"id": "rd-oasst1-dev-1007", "ms": 33.5, "edits": []}
+{"id": "rd-oasst1-dev-1008", "ms": 27.85, "edits": [[5, 17, "age", 12, 0], [33, 40, "age", 8, 0], [74, 83, "age", 9, 0]]}
+{"id": "rd-oasst1-dev-1009", "ms": 25.06, "edits": []}
+{"id": "rd-oasst1-dev-1010", "ms": 31.01, "edits": []}
+{"id": "rd-oasst1-dev-1011", "ms": 24.84, "edits": []}
+{"id": "rd-oasst1-dev-1012", "ms": 25.76, "edits": []}
+{"id": "rd-oasst1-dev-1013", "ms": 27.05, "edits": []}
+{"id": "rd-oasst1-dev-1014", "ms": 25.68, "edits": []}
+{"id": "rd-oasst1-dev-1015", "ms": 24.18, "edits": []}
+{"id": "rd-oasst1-dev-1016", "ms": 28.05, "edits": [[30, 56, "ORG", 26, 0], [71, 81, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-1017", "ms": 24.71, "edits": []}
+{"id": "rd-oasst1-dev-1018", "ms": 22.24, "edits": []}
+{"id": "rd-oasst1-dev-1019", "ms": 24.79, "edits": []}
+{"id": "rd-oasst1-dev-1020", "ms": 34.2, "edits": []}
+{"id": "rd-oasst1-dev-1021", "ms": 32.5, "edits": []}
+{"id": "rd-oasst1-dev-1022", "ms": 34.37, "edits": []}
+{"id": "rd-oasst1-dev-1023", "ms": 32.2, "edits": []}
+{"id": "rd-oasst1-dev-1024", "ms": 24.51, "edits": []}
+{"id": "rd-oasst1-dev-1025", "ms": 23.82, "edits": []}
+{"id": "rd-oasst1-dev-1026", "ms": 25.64, "edits": []}
+{"id": "rd-oasst1-dev-1027", "ms": 77.55, "edits": [[572, 577, "PERSON", 5, 0], [711, 716, "PERSON", 5, 0], [799, 804, "PERSON", 5, 0]]}
+{"id": "rd-oasst1-dev-1028", "ms": 33.92, "edits": []}
+{"id": "rd-oasst1-dev-1029", "ms": 31.7, "edits": []}
+{"id": "rd-oasst1-dev-1030", "ms": 28.41, "edits": [[36, 41, "PERSON", 7, 0], [76, 86, "PERSON", 15, 0]]}
+{"id": "rd-oasst1-dev-1031", "ms": 25.8, "edits": []}
+{"id": "rd-oasst1-dev-1032", "ms": 27.01, "edits": []}
+{"id": "rd-oasst1-dev-1033", "ms": 32.76, "edits": []}
+{"id": "rd-oasst1-dev-1034", "ms": 30.16, "edits": []}
+{"id": "rd-oasst1-dev-1035", "ms": 23.67, "edits": []}
+{"id": "rd-oasst1-dev-1036", "ms": 33.01, "edits": []}
+{"id": "rd-oasst1-dev-1038", "ms": 31.16, "edits": []}
+{"id": "rd-oasst1-dev-1039", "ms": 31.77, "edits": []}
+{"id": "rd-oasst1-dev-1040", "ms": 80.34, "edits": []}
+{"id": "rd-oasst1-dev-1041", "ms": 38.94, "edits": []}
+{"id": "rd-oasst1-dev-1042", "ms": 26.18, "edits": []}
+{"id": "rd-oasst1-dev-1043", "ms": 142.98, "edits": [[255, 267, "phone_uk", 12, 0], [303, 315, "phone_uk", 12, 0], [447, 459, "phone_uk", 12, 0], [710, 714, "PERSON", 4, 0], [806, 810, "PERSON", 4, 0], [831, 843, "phone_uk", 12, 0], [975, 987, "phone_uk", 12, 0]]}
+{"id": "rd-oasst1-dev-1044", "ms": 32.2, "edits": []}
+{"id": "rd-oasst1-dev-1045", "ms": 154.72, "edits": [[51, 56, "PERSON", 5, 0]]}
+{"id": "rd-oasst1-dev-1046", "ms": 29.58, "edits": []}
+{"id": "rd-oasst1-dev-1047", "ms": 31.84, "edits": []}
+{"id": "rd-oasst1-dev-1048", "ms": 25.59, "edits": []}
+{"id": "rd-oasst1-dev-1049", "ms": 44.04, "edits": [[27, 35, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-1050", "ms": 35.79, "edits": []}
+{"id": "rd-oasst1-dev-1051", "ms": 40.02, "edits": [[21, 51, "PERSON", 31, 0], [70, 92, "ORG", 19, 0]]}
+{"id": "rd-oasst1-dev-1052", "ms": 22.49, "edits": []}
+{"id": "rd-oasst1-dev-1053", "ms": 22.82, "edits": []}
+{"id": "rd-oasst1-dev-1054", "ms": 32.62, "edits": []}
+{"id": "rd-oasst1-dev-1055", "ms": 30.47, "edits": []}
+{"id": "rd-oasst1-dev-1056", "ms": 55.48, "edits": []}
+{"id": "rd-oasst1-dev-1057", "ms": 33.65, "edits": []}
+{"id": "rd-oasst1-dev-1058", "ms": 23.54, "edits": []}
+{"id": "rd-oasst1-dev-1059", "ms": 25.05, "edits": []}
+{"id": "rd-oasst1-dev-1060", "ms": 23.17, "edits": []}
+{"id": "rd-oasst1-dev-1061", "ms": 24.2, "edits": []}
+{"id": "rd-oasst1-dev-1062", "ms": 36.72, "edits": []}
+{"id": "rd-oasst1-dev-1063", "ms": 25.04, "edits": []}
+{"id": "rd-oasst1-dev-1064", "ms": 32.57, "edits": []}
+{"id": "rd-oasst1-dev-1065", "ms": 50.37, "edits": []}
+{"id": "rd-oasst1-dev-1066", "ms": 22.78, "edits": []}
+{"id": "rd-oasst1-dev-1067", "ms": 22.56, "edits": []}
+{"id": "rd-oasst1-dev-1068", "ms": 30.98, "edits": []}
+{"id": "rd-oasst1-dev-1069", "ms": 24.49, "edits": []}
+{"id": "rd-oasst1-dev-1070", "ms": 36.34, "edits": []}
+{"id": "rd-oasst1-dev-1071", "ms": 23.87, "edits": []}
+{"id": "rd-oasst1-dev-1072", "ms": 44.34, "edits": [[47, 51, "PERSON", 5, 0]]}
+{"id": "rd-oasst1-dev-1073", "ms": 25.98, "edits": []}
+{"id": "rd-oasst1-dev-1074", "ms": 31.25, "edits": [[47, 53, "PERSON", 6, 0], [117, 123, "PERSON", 6, 0], [180, 191, "GPE", 7, 0], [259, 265, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-1075", "ms": 32.63, "edits": []}
+{"id": "rd-oasst1-dev-1076", "ms": 39.24, "edits": []}
+{"id": "rd-oasst1-dev-1077", "ms": 105.37, "edits": []}
+{"id": "rd-oasst1-dev-1078", "ms": 32.69, "edits": []}
+{"id": "rd-oasst1-dev-1079", "ms": 37.71, "edits": [[4, 15, "PERSON", 9, 0]]}
+{"id": "rd-oasst1-dev-1080", "ms": 29.46, "edits": [[24, 32, "FAC", 8, 0], [37, 48, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-1081", "ms": 28.01, "edits": []}
+{"id": "rd-oasst1-dev-1082", "ms": 26.94, "edits": []}
+{"id": "rd-oasst1-dev-1083", "ms": 26.31, "edits": []}
+{"id": "rd-oasst1-dev-1084", "ms": 48.49, "edits": []}
+{"id": "rd-oasst1-dev-1085", "ms": 23.6, "edits": []}
+{"id": "rd-oasst1-dev-1086", "ms": 38.44, "edits": []}
+{"id": "rd-oasst1-dev-1087", "ms": 23.4, "edits": []}
+{"id": "rd-oasst1-dev-1088", "ms": 22.16, "edits": []}
+{"id": "rd-oasst1-dev-1089", "ms": 38.53, "edits": []}
+{"id": "rd-oasst1-dev-1090", "ms": 24.85, "edits": []}
+{"id": "rd-oasst1-dev-1091", "ms": 28.0, "edits": []}
+{"id": "rd-oasst1-dev-1092", "ms": 34.19, "edits": [[57, 67, "PERSON", 15, 0], [70, 81, "age", 11, 0]]}
+{"id": "rd-oasst1-dev-1093", "ms": 22.35, "edits": []}
+{"id": "rd-oasst1-dev-1094", "ms": 22.85, "edits": []}
+{"id": "rd-oasst1-dev-1095", "ms": 26.14, "edits": []}
+{"id": "rd-oasst1-dev-1096", "ms": 23.77, "edits": [[43, 45, "age", 2, 0], [69, 71, "age", 2, 0]]}
+{"id": "rd-oasst1-dev-1097", "ms": 41.79, "edits": [[152, 157, "GPE", 6, 0]]}
+{"id": "rd-oasst1-dev-1098", "ms": 23.56, "edits": []}
+{"id": "rd-oasst1-dev-1099", "ms": 23.52, "edits": [[0, 4, "PERSON", 6, 0], [53, 64, "PERSON", 12, 0], [70, 77, "ORG", 9, 0]]}
+{"id": "rd-oasst1-dev-1100", "ms": 33.13, "edits": []}
+{"id": "rd-oasst1-dev-1101#t0", "ms": 40.1, "edits": []}
+{"id": "rd-oasst1-dev-1101#t1", "ms": 24.86, "edits": []}
+{"id": "rd-oasst1-dev-1102#t0", "ms": 31.52, "edits": []}
+{"id": "rd-oasst1-dev-1102#t1", "ms": 26.4, "edits": []}
+{"id": "rd-oasst1-dev-1103#t0", "ms": 36.93, "edits": []}
+{"id": "rd-oasst1-dev-1103#t1", "ms": 22.8, "edits": []}
+{"id": "rd-oasst1-dev-1104#t0", "ms": 39.34, "edits": []}
+{"id": "rd-oasst1-dev-1104#t1", "ms": 24.91, "edits": []}
+{"id": "rd-oasst1-dev-1105#t0", "ms": 22.72, "edits": []}
+{"id": "rd-oasst1-dev-1105#t1", "ms": 27.35, "edits": []}
+{"id": "rd-oasst1-dev-1106#t0", "ms": 39.13, "edits": []}
+{"id": "rd-oasst1-dev-1106#t1", "ms": 24.46, "edits": []}
+{"id": "rd-oasst1-dev-1107#t0", "ms": 35.84, "edits": [[111, 123, "GPE", 5, 0], [184, 196, "GPE", 5, 0], [279, 291, "GPE", 5, 0]]}
+{"id": "rd-oasst1-dev-1107#t1", "ms": 21.65, "edits": []}
+{"id": "rd-oasst1-dev-1108#t0", "ms": 22.77, "edits": []}
+{"id": "rd-oasst1-dev-1108#t1", "ms": 23.24, "edits": []}
+{"id": "rd-oasst1-dev-1109#t0", "ms": 31.19, "edits": []}
+{"id": "rd-oasst1-dev-1109#t1", "ms": 24.0, "edits": []}
+{"id": "rd-oasst1-dev-1110#t0", "ms": 26.46, "edits": []}
+{"id": "rd-oasst1-dev-1110#t1", "ms": 25.26, "edits": []}
+{"id": "rd-oasst1-dev-1111#t0", "ms": 36.74, "edits": [[66, 71, "PERSON", 5, 0], [178, 183, "GPE", 7, 0], [194, 199, "PERSON", 5, 0]]}
+{"id": "rd-oasst1-dev-1111#t1", "ms": 26.91, "edits": []}
+{"id": "rd-oasst1-dev-1112#t0", "ms": 24.86, "edits": []}
+{"id": "rd-oasst1-dev-1112#t1", "ms": 25.27, "edits": []}
+{"id": "rd-oasst1-dev-1112#t2", "ms": 23.57, "edits": []}
+{"id": "rd-oasst1-dev-1113#t0", "ms": 22.91, "edits": []}
+{"id": "rd-oasst1-dev-1113#t1", "ms": 25.91, "edits": []}
+{"id": "rd-oasst1-dev-1113#t2", "ms": 23.52, "edits": []}
+{"id": "rd-oasst1-dev-1114#t0", "ms": 28.73, "edits": [[20, 32, "PERSON", 13, 0]]}
+{"id": "rd-oasst1-dev-1114#t1", "ms": 26.93, "edits": [[27, 39, "PERSON", 14, 0], [44, 50, "PERSON", 6, 0]]}
+{"id": "rd-oasst1-dev-1115#t0", "ms": 27.13, "edits": []}
+{"id": "rd-oasst1-dev-1115#t1", "ms": 29.02, "edits": []}
+{"id": "rd-oasst1-dev-1116#t0", "ms": 34.81, "edits": []}
+{"id": "rd-oasst1-dev-1116#t1", "ms": 28.64, "edits": []}
+{"id": "rd-oasst1-dev-1116#t2", "ms": 31.78, "edits": []}
+{"id": "rd-oasst1-dev-1117#t0", "ms": 50.87, "edits": []}
+{"id": "rd-oasst1-dev-1117#t1", "ms": 34.33, "edits": []}
+{"id": "rd-oasst1-dev-1118#t0", "ms": 29.07, "edits": []}
+{"id": "rd-oasst1-dev-1118#t1", "ms": 27.55, "edits": []}
+{"id": "rd-oasst1-dev-1119#t0", "ms": 69.89, "edits": [[68, 71, "GPE", 9, 0]]}
+{"id": "rd-oasst1-dev-1119#t1", "ms": 40.75, "edits": []}
+{"id": "rd-oasst1-dev-1120#t0", "ms": 38.02, "edits": []}
+{"id": "rd-oasst1-dev-1120#t1", "ms": 24.26, "edits": []}
+{"id": "rd-oasst1-dev-1120#t2", "ms": 24.13, "edits": []}
