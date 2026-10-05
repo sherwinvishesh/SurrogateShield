@@ -2,7 +2,8 @@
 
 1. Sample ``--sample`` questions that carry gold PII from the synthetic test
    split with ``random.Random(--seed)``. The sample and its key rows are
-   written in the same order to ``experiment/phase8/`` (git-ignored, 0600).
+   written in the same order to ``experiment/phase8/<--run>/`` (git-ignored,
+   0600).
 2. ``json_tester.run_batch`` on the sample. It makes three responder calls
    per question: the SurrogateShield text, the Presidio text and the
    original text (synthetic data only). Then it computes rescaled BERTScore
@@ -38,7 +39,7 @@ sys.path.insert(0, str(ROOT / "python-library"))
 
 SYNTH_QUESTIONS = ROOT / "experiment" / "synth_test.json"
 SYNTH_KEY = ROOT / "experiment" / "synth_test_key.json"
-OUT_DIR = ROOT / "experiment" / "phase8"
+OUT_ROOT = ROOT / "experiment" / "phase8"
 SAMPLE_FILE = "phase8_sample.json"
 SAMPLE_KEY = "phase8_sample_key.json"
 RESPONDER_CALLS_PER_QUESTION = 3
@@ -115,13 +116,14 @@ def _write_private(path: Path, obj) -> None:
     os.replace(tmp, path)
 
 
-def write_sample(indices: list[int]) -> None:
+def write_sample(indices: list[int], out_dir: Path) -> None:
     questions = json.loads(SYNTH_QUESTIONS.read_text(encoding="utf-8"))
     key = json.loads(SYNTH_KEY.read_text(encoding="utf-8"))
-    OUT_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
-    os.chmod(OUT_DIR, 0o700)
-    _write_private(OUT_DIR / SAMPLE_FILE, [questions[i] for i in indices])
-    _write_private(OUT_DIR / SAMPLE_KEY, [key[i] for i in indices])
+    for d in (OUT_ROOT, out_dir):
+        d.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(d, 0o700)
+    _write_private(out_dir / SAMPLE_FILE, [questions[i] for i in indices])
+    _write_private(out_dir / SAMPLE_KEY, [key[i] for i in indices])
 
 
 def _bootstrap_mean_diff(pairs: list[tuple[float, float]], seed: int, n_boot: int = 2000):
@@ -157,6 +159,7 @@ def main(argv=None) -> int:
     ap.add_argument("--attacker", required=True, help="attacker model (≠ responder)")
     ap.add_argument("--max-calls", type=int, default=300)
     ap.add_argument("--json", type=Path, default=None, help="counts-only summary")
+    ap.add_argument("--run", default="main", help="output folder under experiment/phase8/")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args(argv)
 
@@ -187,7 +190,10 @@ def main(argv=None) -> int:
     import json_tester
     from chatbot.chat import ClaudeChat
 
-    write_sample(indices)
+    if not args.run.replace("-", "").replace("_", "").isalnum():
+        raise ValueError("--run must be letters, digits, - or _")
+    out_dir = OUT_ROOT / args.run
+    write_sample(indices, out_dir)
     counter = CallCounter(args.max_calls)
     chat = ClaudeChat()
     chat._client = CountedAdapter(chat._client, counter)
@@ -199,14 +205,14 @@ def main(argv=None) -> int:
             print(f"  bertscore {status}", flush=True)
 
     answers_path = Path(json_tester.run_batch(SAMPLE_FILE, FIELDS, progress_cb=progress, chat=chat,
-                                              experiment_dir=OUT_DIR))
+                                              experiment_dir=out_dir))
     answers = json.loads(answers_path.read_text(encoding="utf-8"))
-    meta = json.loads((OUT_DIR / "phase8_sample_answers.meta.json").read_text(encoding="utf-8"))
+    meta = json.loads((out_dir / "phase8_sample_answers.meta.json").read_text(encoding="utf-8"))
 
     client = CountedAnthropic(anthropic.Anthropic(max_retries=0), counter)
     attack_path = attacker.run_experiment(
         answers_path.name, SAMPLE_KEY, seed=args.seed, model=attacker_model,
-        max_calls=args.max_calls - counter.total, client=client, experiment_dir=OUT_DIR,
+        max_calls=args.max_calls - counter.total, client=client, experiment_dir=out_dir,
         progress_cb=lambda n, t, s: print(f"  attack {n + 1}/{t} {s} calls={counter.total}", flush=True))
     attack = json.loads(Path(attack_path).read_text(encoding="utf-8"))
 
