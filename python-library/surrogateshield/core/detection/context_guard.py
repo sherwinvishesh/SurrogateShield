@@ -211,6 +211,18 @@ def guard(
                 )
                 if len(text) < 3 or text.lower() in _CG_BLOCKLIST:
                     continue
+        else:
+            # The word is not in the text near its offsets (an [UNK] piece, a
+            # normalised character): the offsets are the authority, so the
+            # entity's text is what an edit at those offsets would replace.
+            if not 0 <= start < end <= len(clean):
+                continue
+            span = clean[start:end]
+            start += len(span) - len(span.lstrip())
+            end = start + len(span.strip())
+            text = clean[start:end]
+            if len(text) < 3 or text.lower() in _CG_BLOCKLIST or "\n" in text:
+                continue
 
         entity = DetectedEntity(
             text=text,
