@@ -173,6 +173,20 @@ def _key(provider: str) -> str:
     return value
 
 
+WORKSPACE_ENV = "ANTHROPIC_WORKSPACE_ID"
+
+
+def claude_client_kwargs() -> dict:
+    """Keyword arguments for ``anthropic.Anthropic``. A key that is not
+    scoped to a workspace needs the workspace ID on every request; set it
+    with ``ANTHROPIC_WORKSPACE_ID``."""
+    kwargs = {"api_key": _key("claude")}
+    workspace = os.environ.get(WORKSPACE_ENV, "").strip()
+    if workspace:
+        kwargs["default_headers"] = {"anthropic-workspace-id": workspace}
+    return kwargs
+
+
 def _missing(package: str) -> EnvironmentError:
     return EnvironmentError(f"{package} package not installed. Run: pip install {package}")
 
@@ -182,7 +196,7 @@ def build(provider: str) -> Adapter:
     "local"). Raises EnvironmentError for a missing key or package."""
     if provider == "claude":
         import anthropic
-        client = anthropic.Anthropic(api_key=_key("claude"), timeout=TIMEOUT_S, max_retries=0)
+        client = anthropic.Anthropic(**claude_client_kwargs(), timeout=TIMEOUT_S, max_retries=0)
         model = config.CLAUDE_MODEL
 
         def call(payload, system):

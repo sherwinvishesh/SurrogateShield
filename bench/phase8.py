@@ -209,7 +209,8 @@ def main(argv=None) -> int:
     answers = json.loads(answers_path.read_text(encoding="utf-8"))
     meta = json.loads((out_dir / "phase8_sample_answers.meta.json").read_text(encoding="utf-8"))
 
-    client = CountedAnthropic(anthropic.Anthropic(max_retries=0), counter)
+    from chatbot.providers import claude_client_kwargs
+    client = CountedAnthropic(anthropic.Anthropic(**claude_client_kwargs(), max_retries=0), counter)
     attack_path = attacker.run_experiment(
         answers_path.name, SAMPLE_KEY, seed=args.seed, model=attacker_model,
         max_calls=args.max_calls - counter.total, client=client, experiment_dir=out_dir,

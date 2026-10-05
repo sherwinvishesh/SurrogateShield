@@ -412,6 +412,7 @@ precedence over the file.
 
 ```env
 ANTHROPIC_API_KEY=sk-ant-...       # Required for Claude
+ANTHROPIC_WORKSPACE_ID=wrkspc_... # Only for a key not scoped to a workspace
 GEMINI_API_KEY=...                 # Required for Gemini
 OPENAI_API_KEY=sk-...              # Required for ChatGPT
 ```

@@ -400,7 +400,8 @@ def run_experiment(
         if not os.environ.get("ANTHROPIC_API_KEY"):
             raise EnvironmentError("ANTHROPIC_API_KEY is not set")
         import anthropic
-        client = anthropic.Anthropic()
+        from chatbot.providers import claude_client_kwargs
+        client = anthropic.Anthropic(**claude_client_kwargs())
 
     def _flush() -> None:
         rows.sort(key=lambda r: r["index"])
