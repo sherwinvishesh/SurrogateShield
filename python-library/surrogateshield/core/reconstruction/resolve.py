@@ -264,10 +264,23 @@ class ResolvePass:
         protected: Spans = []
         unresolved: Dict[str, str] = {}
 
+        # A one-word surrogate of an earlier turn ("James" for "Hunter") that
+        # the user typed unmasked in this turn ("LeBron James") is the user's
+        # own word here, not the surrogate.
+        typed_now = sent if current is not None else None    # needs this turn's surrogates
+        if typed_now is not None:
+            for surrogate in sorted(current, key=len, reverse=True):
+                if surrogate.strip():
+                    typed_now = re.sub(re.escape(surrogate), " ", typed_now, flags=re.IGNORECASE)
+
         # ── Pass 1: whole-value, case-carrying, longest first ──────────
         for surrogate, original in sorted(shadow_map.items(), key=lambda kv: len(kv[0]),
                                           reverse=True):
             if not surrogate.strip():
+                continue
+            if (typed_now is not None and surrogate not in current
+                    and re.fullmatch(r"[^\W\d_]+", surrogate) and occurs(typed_now, surrogate)):
+                logger.debug(f"[ResolvePass] {surrogate!r} typed by the user this turn; kept")
                 continue
             pattern = re.compile(re.escape(surrogate), re.IGNORECASE)
             result, protected, hits = _replace_where(

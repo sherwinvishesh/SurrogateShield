@@ -128,3 +128,18 @@ def test_I5_low_entropy_restored_only_in_its_own_turn(resolve):
 
 def test_I5_low_entropy_never_partially_matched(resolve):
     assert resolve("aged 72 years", {"72 years old": "70 years old"}) == "aged 72 years"
+
+
+def test_I15_one_word_surrogate_the_user_typed_this_turn(resolve):
+    # echo seed 0, turn 99: "James" was the surrogate of "Hunter" in an
+    # earlier turn; the user now types "LeBron James" (not masked)
+    shadow = {"James": "Hunter", "Mia Lopez": "Sarah Mitchell"}
+    sent = "Did LeBron James beat Mia Lopez?"
+    reply = "LeBron James did; James scored 30. Mia Lopez did not."
+    out = resolve(reply, shadow, current={"Mia Lopez"}, sent=sent)
+    assert out == "LeBron James did; James scored 30. Sarah Mitchell did not."
+    # not typed this turn: the earlier surrogate is restored
+    assert resolve("James called.", shadow, current=set(), sent="Who called?") == "Hunter called."
+    # sent in this turn as a surrogate: restored
+    assert resolve("James called.", shadow, current={"James"}, sent="Did James call?") == \
+        "Hunter called."
