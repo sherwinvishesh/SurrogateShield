@@ -42,7 +42,7 @@ import re
 from dataclasses import replace as _dc_replace
 from functools import lru_cache
 from importlib import import_module
-from typing import Iterable, List, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from ..entities import DetectedEntity
 from .geo_data import US_STATE_ABBREVS
@@ -772,15 +772,21 @@ def gate(
     text: str,
     entities: Iterable[DetectedEntity],
     context: Iterable[DetectedEntity] = (),
+    reasons: Optional[Dict[int, str]] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """Split *entities* into (kept, dropped). *context* are other entities of
-    the same message (used for anchoring and person links, never dropped)."""
+    the same message (used for anchoring and person links, never dropped).
+    *reasons*, if given, receives ``id(entity) -> rule`` for every drop
+    (``junk``, ``public_person``, ``word_name``, ``public_org``,
+    ``common_noun``, ``untied``); it changes nothing else."""
     entities = list(entities)
     context = list(context)
     dropped: List[DetectedEntity] = []
 
-    def _drop(e):
+    def _drop(e, rule):
         dropped.append(e)
+        if reasons is not None:
+            reasons[id(e)] = rule
         return False
 
     # 1–2: junk and public people first — they never anchor anything
@@ -789,9 +795,11 @@ def gate(
         if e.type not in GATED_TYPES:
             first.append(e)
         elif is_junk(e, text):
-            _drop(e)
-        elif e.type == "PERSON" and (is_public_person(e, text) or is_word_name(e, text)):
-            _drop(e)
+            _drop(e, "junk")
+        elif e.type == "PERSON" and is_public_person(e, text):
+            _drop(e, "public_person")
+        elif e.type == "PERSON" and is_word_name(e, text):
+            _drop(e, "word_name")
         else:
             first.append(e)
 
@@ -821,10 +829,12 @@ def gate(
               and _LEGAL_SUFFIX.search(_core(e.text))
               and _core(e.text).lower() not in PUBLIC_ORGS):
             kept.append(e)
-        elif is_public_org(_core(e.text)) or is_common_noun(e, text):
-            _drop(e)
+        elif is_public_org(_core(e.text)):
+            _drop(e, "public_org")
+        elif is_common_noun(e, text):
+            _drop(e, "common_noun")
         elif anchored:
             kept.append(e)
         else:
-            _drop(e)
+            _drop(e, "untied")
     return kept, dropped

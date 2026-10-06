@@ -1107,6 +1107,7 @@ def run_cascade(
     use_entity_trace: bool = True,
     use_context_guard: Optional[bool] = None,
     use_post_passes: bool = True,
+    trace: Optional[list] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full SentinelLayer cascade then apply post-processing passes.
@@ -1134,6 +1135,15 @@ def run_cascade(
                                 overrides it (ablation).
         use_post_passes:        False skips structural passes A, B, C, E–H.
                                 Pass D (topical geo policy) always runs.
+        trace:                  If given, a list that receives, after every
+                                pass, ``{"stage", "entities": [[start, end,
+                                type, source, bucket], ...]}`` (the live
+                                candidates; bucket confirmed / borderline /
+                                needs_confirmation), the URL spans the NER
+                                stages never see (``opaque``) and the
+                                relation gate's rule per drop (``dropped``).
+                                Read by bench/realdata/attribute.py; it
+                                changes nothing in the result.
     """
     _clock = time.perf_counter
     _t = _clock()
@@ -1149,6 +1159,15 @@ def run_cascade(
     needs_confirmation: List[DetectedEntity] = []
     all_skipped: List[DetectedEntity] = []
 
+    def _mark(stage: str, pending=(), borderline=(), **extra) -> None:
+        if trace is None:
+            return
+        rows = [[e.start, e.end, e.type, e.source, bucket]
+                for bucket, ents in (("confirmed", confirmed), ("confirmed", pending),
+                                     ("borderline", borderline), ("needs_confirmation", needs_confirmation))
+                for e in ents]
+        trace.append({"stage": stage, "entities": rows, **extra})
+
     # ── Stage 1: PatternScan ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 1: PatternScan")
     pattern_results = pattern_scan.scan(text, skip_values=skip_values)
@@ -1160,6 +1179,7 @@ def run_cascade(
     remaining_text = mask_spans(remaining_text, [
         DetectedEntity(text[s:e], s, e, "opaque", 0.0, "url") for s, e in opaque])
     _lap("pattern_scan_ms")
+    _mark("pattern_scan", opaque=[[s, e] for s, e in opaque])
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
@@ -1175,6 +1195,7 @@ def run_cascade(
         ner_confirmed, ner_borderline = [], []
     ner_confirmed  = _reclassify_location_orgs(ner_confirmed,  text)
     ner_borderline = _reclassify_location_orgs(ner_borderline, text)
+    _mark("entity_trace", pending=ner_confirmed, borderline=ner_borderline)
 
     if skip_location_entities:
         ner_confirmed_filtered  = [e for e in ner_confirmed  if e.type in _GEO_TYPES]
@@ -1187,6 +1208,7 @@ def run_cascade(
     confirmed.extend(ner_confirmed)
     remaining_text = mask_spans(remaining_text, ner_confirmed)
     _lap("entity_trace_ms")
+    _mark("service_query_geo", borderline=ner_borderline)
 
     # ── Stage 3: ContextGuard ─────────────────────────────────────────────────
     if use_context_guard is None:
@@ -1214,6 +1236,7 @@ def run_cascade(
         if promoted:
             confirmed.extend(promoted)
     _lap("context_guard_ms")
+    _mark("context_guard")
 
     # A model span may run across a line break and come back with the break
     # normalised to a space ("University of Leicester\nORCID"): its text no
@@ -1221,6 +1244,7 @@ def run_cascade(
     # name would go out unmasked. Re-anchor every span on the message itself.
     confirmed          = _snap_to_words(_anchor_to_lines(confirmed, text), text)
     needs_confirmation = _snap_to_words(_anchor_to_lines(needs_confirmation, text), text)
+    _mark("reanchor")
 
     if use_post_passes:
         # ── Pass A: Structural ORG detection ─────────────────────────────────────
@@ -1230,6 +1254,7 @@ def run_cascade(
                 f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
             )
             confirmed.extend(structural_orgs)
+        _mark("structural_org")
 
         # ── Pass E: Structural PERSON detection (case-degenerate text) ───────────
         structural_persons, superseded = _detect_structural_persons(
@@ -1243,33 +1268,40 @@ def run_cascade(
                 f"[SentinelLayer] Pass E: +{len(structural_persons)} structural PERSON(s)"
             )
             confirmed.extend(structural_persons)
+        _mark("structural_person")
 
         # ── Pass F: ORG plausibility filter ──────────────────────────────────────
         confirmed          = _filter_implausible_orgs(confirmed, text)
         needs_confirmation = _filter_implausible_orgs(needs_confirmation, text)
+        _mark("implausible_org")
 
         # ── Pass G: Adjacent-PERSON merge ────────────────────────────────────────
         confirmed          = _merge_adjacent_persons(confirmed, text)
         needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
+        _mark("merge_persons")
 
         # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
         brand_orgs = _detect_card_brand_orgs(confirmed, text)
         if brand_orgs:
             confirmed.extend(brand_orgs)
+        _mark("card_brand_org")
 
         # ── Pass B: Email-username → PERSON reclassification ─────────────────────
         confirmed          = _reclassify_email_username_orgs(confirmed)
         needs_confirmation = _reclassify_email_username_orgs(needs_confirmation)
+        _mark("email_username")
 
         # ── Pass C: PERSON component deduplication ────────────────────────────────
         confirmed          = _deduplicate_person_components(confirmed)
         needs_confirmation = _deduplicate_person_components(needs_confirmation)
+        _mark("person_components")
 
     # Structural passes read the raw text; nothing they find inside a URL is
     # kept (the URL is either a pattern entity already or not PII).
     if opaque:
         confirmed          = _outside_opaque(confirmed, opaque)
         needs_confirmation = _outside_opaque(needs_confirmation, opaque)
+    _mark("inside_url")
 
     # ── Pass D: Topical geo-entity filter ─────────────────────────────────────
     if not skip_location_entities:
@@ -1277,6 +1309,7 @@ def run_cascade(
         confirmed,          skipped_confirmed = _filter_topical_geo_entities(confirmed,          text, anchored)
         needs_confirmation, skipped_nc        = _filter_topical_geo_entities(needs_confirmation, text, anchored)
         all_skipped = skipped_confirmed + skipped_nc
+    _mark("topical_geo")
 
     # ── Pass R: relation gate (I12) — names not tied to a person stay ────────
     # verbatim: acronyms, code, greetings, public figures/companies and
@@ -1300,6 +1333,9 @@ def run_cascade(
             confirmed = ents
         else:
             needs_confirmation = ents
+    _mark("sentence_frame")
+    gate_reasons: Optional[Dict[int, str]] = {} if trace is not None else None
+    gate_dropped: List[list] = []
     for bucket in ("confirmed", "needs_confirmation"):
         ents = confirmed if bucket == "confirmed" else needs_confirmation
         # NER/SLM entities, plus structural PERSONs (Pass E) — those only
@@ -1308,7 +1344,9 @@ def run_cascade(
         gated_ids = {id(e) for e in gated}
         others = [e for e in list(confirmed) + list(needs_confirmation)
                   if id(e) not in gated_ids]
-        kept, dropped = relation_gate.gate(text, gated, others)
+        kept, dropped = relation_gate.gate(text, gated, others, reasons=gate_reasons)
+        if gate_reasons is not None:
+            gate_dropped += [[e.start, e.end, gate_reasons.get(id(e), "?")] for e in dropped]
         kept_ids = {id(e) for e in kept}
         ents = [e for e in ents if id(e) not in gated_ids or id(e) in kept_ids]
         for e in dropped:
@@ -1318,6 +1356,7 @@ def run_cascade(
             confirmed = ents
         else:
             needs_confirmation = ents
+    _mark("relation_gate", dropped=gate_dropped)
 
     # ── Pass S: structural / frame detection (I8, I13) — CSV columns, chat
     # speakers, name components, particles, residence cues, payees, zh/hi
@@ -1341,6 +1380,7 @@ def run_cascade(
                 a.start < e.end and e.start < a.end for a in added)]
             confirmed = list(confirmed) + added
             logger.info(f"[SentinelLayer] Pass S: +{len(added)} structural entit(ies)")
+    _mark("structural")
 
     # ── Pass G: a gender term that agrees with a named person (D1) ─────────
     # The person's surrogate keeps their gender, so "Sarah … female" →
@@ -1352,6 +1392,7 @@ def run_cascade(
         skip_reasons[(e.start, e.end)] = "gender_follows_name"
     if follows:
         all_skipped = list(all_skipped) + follows
+    _mark("gender_follows_name")
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
@@ -1377,6 +1418,7 @@ def run_cascade(
         confirmed._skipped_entities = old_skipped
         confirmed._skip_reasons     = skip_reasons
     _lap("post_passes_ms")
+    _mark("pii_off")
 
     logger.info(
         f"[SentinelLayer] Final → "
