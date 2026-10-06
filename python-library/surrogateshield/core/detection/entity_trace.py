@@ -46,15 +46,39 @@ def _load_nlp(model_name: str):
             "EntityTrace needs spaCy, which is not installed. Run: pip install spacy"
         )
     try:
-        nlp = spacy.load(model_name)
+        nlp = spacy.load(model_name, exclude=["vectors"])
     except OSError:
         # Never download from library code (audit I10): tell the user how.
         return DetectorUnavailable(
             f"EntityTrace needs the spaCy model {model_name!r}, which is not "
             f"installed. Run: python -m spacy download {model_name}"
         )
+    try:
+        _map_vectors(nlp)
+    except Exception as exc:
+        logger.info(f"[EntityTrace] Word vectors of {model_name} not mapped ({exc!r}); reading them whole")
+        nlp = spacy.load(model_name)
     logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
     return nlp
+
+
+def _map_vectors(nlp) -> None:
+    """Attach the model's word-vector table read-only from its file (a numpy
+    memory map) instead of reading it into memory. en_core_web_lg's table is
+    411 MB and NER reads only the rows of the words it sees, so most of it
+    never becomes resident. The values are the file's, so the entities are
+    the same as with spacy.load's in-memory copy."""
+    import numpy
+    from pathlib import Path
+
+    vocab = Path(nlp.path) / "vocab"
+    vectors = nlp.vocab.vectors
+    vectors.from_disk(vocab, exclude=["strings", "vectors"])    # key2row, keys, vectors.cfg
+    if vectors.mode != "default":
+        raise ValueError(f"vectors mode {vectors.mode!r}")
+    if (vocab / "vectors").exists():
+        vectors.data = numpy.load(str(vocab / "vectors"), mmap_mode="r")
+        vectors._sync_unset()
 
 
 _TARGET_LABELS = {"PERSON", "GPE", "LOC", "ORG", "FAC"}
