@@ -1,0 +1,870 @@
+{"id": "rd-wildchat-test-0001", "ms": 114.63, "edits": [[6, 17, "person", 8, 0], [27, 64, "address", 9, 0], [72, 86, "phone number", 14, 0], [92, 94, "age", 5, 0], [104, 152, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0002", "ms": 90.71, "edits": [[4, 11, "organization", 14, 0], [17, 27, "person", 8, 0], [29, 31, "age", 5, 0], [43, 50, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0003", "ms": 85.32, "edits": [[247, 260, "person", 8, 0], [262, 273, "location", 10, 0], [286, 303, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0004", "ms": 354.83, "edits": [[184, 197, "person", 8, 0], [234, 242, "organization", 14, 0], [396, 409, "person", 8, 0], [532, 540, "organization", 14, 0], [812, 819, "person", 8, 0], [932, 939, "person", 8, 0], [942, 950, "organization", 14, 0], [1158, 1166, "organization", 14, 0], [1413, 1422, "organization", 14, 0], [1552, 1561, "organization", 14, 0], [1727, 1741, "person", 8, 0], [1744, 1758, "organization", 14, 0], [1759, 1788, "email", 7, 0], [1791, 1802, "phone number", 14, 0], [1808, 1818, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0005", "ms": 99.56, "edits": [[300, 313, "person", 8, 0], [319, 329, "age", 5, 0], [339, 378, "address", 9, 0], [386, 411, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0006", "ms": 92.77, "edits": [[52, 70, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0007", "ms": 91.72, "edits": [[0, 5, "person", 8, 0], [90, 104, "location", 10, 0], [225, 232, "person", 8, 0], [286, 303, "person", 8, 0], [311, 321, "date of birth", 15, 0], [346, 364, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0008", "ms": 133.93, "edits": [[4, 15, "person", 8, 0], [21, 26, "location", 10, 0], [28, 48, "email", 7, 0], [50, 81, "url", 5, 0], [127, 139, "person", 8, 0], [284, 298, "person", 8, 0], [300, 312, "person", 8, 0], [364, 382, "person", 8, 0], [425, 436, "person", 8, 0], [438, 450, "person", 8, 0], [459, 473, "person", 8, 0], [496, 510, "person", 8, 0], [526, 535, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0009", "ms": 146.52, "edits": [[93, 109, "person", 8, 0], [115, 117, "age", 5, 0], [119, 129, "location", 10, 0], [180, 185, "person", 8, 0], [213, 218, "person", 8, 0], [221, 232, "organization", 14, 0], [359, 364, "person", 8, 0], [469, 475, "person", 8, 0], [482, 487, "person", 8, 0], [492, 498, "person", 8, 0], [567, 572, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0010", "ms": 101.16, "edits": [[6, 35, "person", 8, 0], [45, 72, "address", 9, 0], [80, 108, "email", 7, 0], [116, 128, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0011", "ms": 106.18, "edits": [[387, 412, "organization", 14, 0], [413, 444, "email", 7, 0], [445, 458, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0012", "ms": 117.93, "edits": [[4, 20, "person", 8, 0], [32, 59, "address", 9, 0], [74, 90, "phone number", 14, 0], [106, 142, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0013", "ms": 107.76, "edits": [[6, 19, "person", 8, 0], [30, 38, "organization", 14, 0], [48, 79, "address", 9, 0], [87, 110, "email", 7, 0], [119, 132, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0014", "ms": 667.78, "edits": [[2602, 2609, "location", 10, 0], [3406, 3418, "phone number", 14, 0], [3430, 3441, "ip address", 12, 0], [3451, 3489, "url", 5, 0], [3499, 3547, "api key", 9, 0], [3821, 3828, "location", 10, 0], [3852, 3866, "location", 10, 0], [3893, 3904, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0015", "ms": 74.33, "edits": [[4, 18, "person", 8, 0], [20, 43, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0016", "ms": 142.52, "edits": [[4, 22, "person", 8, 0], [24, 51, "email", 7, 0], [61, 74, "ip address", 12, 0], [136, 162, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0017", "ms": 107.95, "edits": [[49, 56, "person", 8, 0], [58, 64, "person", 8, 0], [66, 91, "email", 7, 0], [93, 124, "organization", 14, 0], [170, 176, "person", 8, 0], [181, 186, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0018", "ms": 103.94, "edits": [[6, 16, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0019", "ms": 77.07, "edits": [[7, 22, "location", 10, 0], [36, 42, "email", 7, 0], [91, 106, "ip address", 12, 0], [164, 174, "person", 8, 0], [185, 197, "person", 8, 0], [199, 211, "person", 8, 0], [213, 223, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0020", "ms": 141.09, "edits": [[4, 23, "person", 8, 0], [30, 40, "date of birth", 15, 0], [48, 74, "location", 10, 0], [85, 127, "address", 9, 0], [162, 208, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0021", "ms": 107.2, "edits": [[4, 17, "person", 8, 0], [24, 32, "location", 10, 0], [39, 49, "date of birth", 15, 0], [57, 82, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0022", "ms": 115.28, "edits": [[10, 23, "person", 8, 0], [35, 44, "location", 10, 0], [55, 78, "date of birth", 15, 0], [92, 106, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0023", "ms": 66.67, "edits": [[77, 95, "person", 8, 0], [102, 116, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0024", "ms": 80.71, "edits": [[6, 21, "person", 8, 0], [29, 47, "email", 7, 0], [57, 90, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0025", "ms": 75.34, "edits": [[31, 38, "person", 8, 0], [112, 119, "person", 8, 0], [128, 130, "age", 5, 0], [132, 140, "location", 10, 0], [152, 165, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0026", "ms": 210.85, "edits": [[0, 17, "person", 8, 0], [27, 41, "ip address", 12, 0], [101, 117, "password", 10, 0], [186, 197, "credit card number", 20, 1], [224, 237, "email", 7, 0], [251, 261, "ip address", 12, 1], [265, 282, "driver's license number", 24, 0], [324, 335, "passport number", 17, 0], [373, 385, "phone number", 14, 1], [389, 400, "url", 5, 0], [414, 417, "url", 5, 0], [421, 435, "url", 5, 0], [439, 456, "driver's license number", 24, 0], [460, 467, "driver's license number", 24, 0], [471, 482, "passport number", 17, 0], [486, 492, "social security number", 24, 0], [593, 599, "person", 8, 1], [603, 610, "address", 9, 1], [614, 626, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0027", "ms": 69.34, "edits": [[99, 111, "person", 8, 0], [112, 136, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0028", "ms": 120.82, "edits": [[4, 19, "person", 8, 0], [23, 44, "age", 5, 0], [55, 108, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0029", "ms": 129.47, "edits": [[6, 22, "person", 8, 0], [30, 44, "phone number", 14, 0], [55, 64, "passport number", 17, 0]]}
+{"id": "rd-wildchat-test-0030", "ms": 80.13, "edits": [[6, 22, "person", 8, 0], [30, 60, "email", 7, 0], [69, 85, "username", 10, 0], [113, 123, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0031", "ms": 87.98, "edits": [[9, 16, "location", 10, 0], [19, 37, "person", 8, 0], [39, 84, "url", 5, 0], [87, 101, "organization", 14, 0], [104, 110, "person", 8, 0], [112, 118, "person", 8, 0], [139, 144, "person", 8, 0], [153, 159, "person", 8, 0], [198, 204, "person", 8, 0], [220, 226, "person", 8, 0], [248, 254, "person", 8, 0], [259, 264, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0032", "ms": 163.35, "edits": [[2, 19, "person", 8, 0], [22, 39, "email", 7, 0], [62, 89, "iban", 6, 0]]}
+{"id": "rd-wildchat-test-0033", "ms": 80.49, "edits": [[0, 5, "person", 8, 0], [15, 23, "organization", 14, 0], [135, 145, "person", 8, 0], [148, 163, "email", 7, 0], [166, 179, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0034", "ms": 201.07, "edits": [[1, 2, "person", 8, 0], [21, 34, "location", 10, 0], [51, 65, "location", 10, 0], [81, 82, "person", 8, 0], [98, 99, "person", 8, 0], [219, 227, "person", 8, 0], [247, 248, "person", 8, 0], [327, 339, "location", 10, 0], [464, 477, "age", 5, 0], [550, 558, "person", 8, 0], [656, 669, "age", 5, 0], [935, 958, "person", 8, 0], [1011, 1025, "person", 8, 0], [1031, 1033, "age", 5, 0], [1044, 1056, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0035", "ms": 100.57, "edits": [[4, 15, "person", 8, 0], [22, 32, "location", 10, 0], [46, 77, "url", 5, 0], [95, 103, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0036", "ms": 113.85, "edits": [[4, 17, "person", 8, 0], [24, 40, "date of birth", 15, 0], [51, 57, "location", 10, 0], [73, 121, "api key", 9, 0], [171, 190, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0037", "ms": 715.11, "edits": [[20, 24, "person", 8, 0], [75, 86, "person", 8, 0], [99, 110, "person", 8, 0], [137, 148, "person", 8, 0], [363, 367, "person", 8, 0], [402, 406, "person", 8, 0], [499, 503, "person", 8, 0], [542, 546, "person", 8, 0], [818, 822, "person", 8, 0], [1055, 1059, "person", 8, 0], [1294, 1298, "person", 8, 0], [1536, 1540, "person", 8, 0], [2199, 2203, "username", 10, 0], [2512, 2516, "username", 10, 0], [2662, 2673, "username", 10, 0], [2714, 2725, "username", 10, 0], [2766, 2777, "username", 10, 0], [2819, 2830, "username", 10, 0], [2867, 2871, "username", 10, 0], [2915, 2919, "username", 10, 0], [2940, 2951, "username", 10, 0], [2959, 2963, "username", 10, 0], [3252, 3256, "username", 10, 0], [3265, 3269, "username", 10, 0], [3284, 3288, "username", 10, 0], [3417, 3429, "person", 8, 0], [3435, 3452, "organization", 14, 0], [3461, 3480, "email", 7, 0], [3489, 3506, "phone number", 14, 0], [3519, 3531, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0038", "ms": 515.28, "edits": [[2, 17, "person", 8, 0], [30, 39, "passport number", 17, 0], [47, 64, "ip address", 12, 0], [67, 102, "url", 5, 0], [105, 119, "username", 10, 0], [132, 147, "password", 10, 0], [2013, 2019, "person", 8, 0], [2043, 2049, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0039", "ms": 105.35, "edits": [[322, 340, "person", 8, 0], [343, 365, "email", 7, 0], [368, 385, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0040", "ms": 124.24, "edits": [[46, 62, "person", 8, 0], [68, 70, "age", 5, 0], [86, 130, "address", 9, 0], [151, 187, "url", 5, 0], [191, 204, "email", 7, 0], [249, 258, "location", 10, 0], [314, 324, "organization", 14, 0], [511, 522, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0041", "ms": 134.8, "edits": [[165, 197, "organization", 14, 0], [200, 220, "email", 7, 0], [228, 238, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0042", "ms": 99.96, "edits": [[6, 24, "person", 8, 0], [30, 40, "date of birth", 15, 0], [42, 56, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0043", "ms": 177.81, "edits": [[28, 43, "person", 8, 0], [46, 73, "email", 7, 0], [76, 118, "url", 5, 0], [121, 135, "username", 10, 0], [147, 179, "api key", 9, 0], [186, 203, "location", 10, 0], [280, 290, "location", 10, 0], [306, 322, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0044", "ms": 181.3, "edits": [[11, 34, "person", 8, 0], [970, 986, "phone number", 14, 0], [1024, 1033, "passport number", 17, 0]]}
+{"id": "rd-wildchat-test-0045", "ms": 119.89, "edits": [[4, 15, "person", 8, 0], [19, 39, "age", 5, 0], [50, 57, "location", 10, 0], [71, 86, "email", 7, 0], [120, 132, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0046", "ms": 69.74, "edits": [[6, 24, "person", 8, 0], [35, 41, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0047", "ms": 79.55, "edits": [[0, 14, "organization", 14, 0], [40, 52, "person", 8, 0], [54, 72, "email", 7, 0], [74, 84, "username", 10, 0], [159, 173, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0048", "ms": 725.55, "edits": [[4, 18, "person", 8, 0], [20, 48, "email", 7, 0], [57, 67, "phone number", 14, 0], [74, 85, "social security number", 24, 0], [98, 110, "ip address", 12, 0], [118, 152, "url", 5, 0], [165, 197, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0049", "ms": 146.29, "edits": [[4, 6, "age", 5, 0], [16, 33, "organization", 14, 0], [35, 65, "email", 7, 0], [74, 85, "phone number", 14, 0], [116, 125, "passport number", 17, 0], [137, 153, "password", 10, 0]]}
+{"id": "rd-wildchat-test-0050", "ms": 102.42, "edits": [[283, 295, "person", 8, 0], [296, 314, "email", 7, 0], [315, 338, "person", 8, 0], [340, 342, "age", 5, 0], [344, 357, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0051", "ms": 114.12, "edits": [[57, 67, "date of birth", 15, 0], [70, 82, "email", 7, 0], [90, 116, "password", 10, 0], [119, 146, "address", 9, 0], [208, 213, "person", 8, 0], [274, 279, "person", 8, 0], [357, 362, "person", 8, 0], [431, 436, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0052", "ms": 241.92, "edits": [[10, 26, "person", 8, 0], [85, 95, "username", 10, 0], [113, 139, "password", 10, 0], [283, 291, "person", 8, 0], [337, 354, "person", 8, 0], [399, 409, "person", 8, 0], [413, 421, "person", 8, 0], [496, 513, "person", 8, 0], [535, 545, "person", 8, 0], [582, 607, "location", 10, 0], [630, 638, "person", 8, 0], [668, 693, "location", 10, 0], [733, 750, "person", 8, 0], [913, 921, "person", 8, 0], [940, 957, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0053", "ms": 96.17, "edits": [[4, 22, "person", 8, 0], [29, 56, "date of birth", 15, 0], [68, 90, "address", 9, 0], [110, 142, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0054", "ms": 97.26, "edits": [[4, 18, "person", 8, 0], [20, 38, "email", 7, 0], [49, 57, "passport number", 17, 0], [83, 92, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0055", "ms": 152.88, "edits": [[88, 107, "person", 8, 0], [125, 137, "phone number", 14, 0], [140, 151, "username", 10, 0], [162, 175, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0056", "ms": 87.53, "edits": [[3, 18, "person", 8, 0], [22, 50, "address", 9, 0], [145, 161, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0057", "ms": 115.29, "edits": [[447, 456, "username", 10, 0], [457, 469, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0058", "ms": 118.2, "edits": [[6, 21, "person", 8, 0], [31, 79, "address", 9, 0], [97, 106, "driver's license number", 24, 0]]}
+{"id": "rd-wildchat-test-0059", "ms": 80.44, "edits": [[192, 208, "person", 8, 0], [210, 221, "location", 10, 0], [222, 250, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0060", "ms": 68.7, "edits": [[6, 20, "person", 8, 0], [29, 44, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0061", "ms": 82.63, "edits": [[4, 21, "person", 8, 0], [36, 49, "location", 10, 0], [68, 81, "driver's license number", 24, 0], [93, 102, "passport number", 17, 0], [271, 289, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0062", "ms": 78.34, "edits": [[9, 51, "address", 9, 0], [87, 98, "social security number", 24, 0], [163, 173, "organization", 14, 0], [177, 183, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0063", "ms": 65.52, "edits": [[6, 14, "person", 8, 0], [20, 22, "age", 5, 0], [66, 74, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0064", "ms": 95.35, "edits": [[9, 42, "address", 9, 0], [48, 58, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0065", "ms": 115.08, "edits": [[11, 29, "person", 8, 0], [44, 50, "location", 10, 0], [56, 66, "date of birth", 15, 0], [123, 138, "email", 7, 0], [145, 154, "organization", 14, 0], [406, 411, "person", 8, 0], [516, 523, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0066", "ms": 79.5, "edits": [[4, 18, "person", 8, 0], [30, 79, "address", 9, 0], [111, 130, "credit card number", 20, 0], [241, 242, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0067", "ms": 471.45, "edits": [[6, 23, "person", 8, 0], [33, 70, "address", 9, 0], [76, 86, "date of birth", 15, 0], [97, 123, "organization", 14, 0], [211, 214, "organization", 14, 0], [1736, 1748, "person", 8, 0], [1762, 1766, "person", 8, 0], [1773, 1779, "person", 8, 0], [1875, 1879, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0068", "ms": 79.31, "edits": [[4, 20, "person", 8, 0], [22, 41, "email", 7, 0], [43, 85, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0069", "ms": 102.81, "edits": [[352, 367, "person", 8, 0], [368, 377, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0070", "ms": 211.3, "edits": [[65, 73, "location", 10, 0], [476, 492, "person", 8, 0], [497, 520, "person", 8, 0], [794, 802, "location", 10, 0], [1002, 1018, "person", 8, 0], [1024, 1026, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0071", "ms": 94.7, "edits": [[0, 1, "person", 8, 0], [9, 14, "location", 10, 0], [19, 20, "person", 8, 0], [23, 34, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0072", "ms": 103.68, "edits": [[366, 375, "person", 8, 0], [381, 383, "age", 5, 0], [385, 397, "location", 10, 0], [398, 413, "email", 7, 0], [414, 428, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0073", "ms": 108.41, "edits": [[385, 402, "person", 8, 0], [417, 423, "location", 10, 0], [442, 457, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0074", "ms": 79.03, "edits": [[6, 18, "person", 8, 0], [29, 51, "organization", 14, 0], [64, 90, "password", 10, 0], [130, 142, "person", 8, 0], [157, 193, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0075", "ms": 68.56, "edits": [[6, 18, "person", 8, 0], [24, 26, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0076", "ms": 139.6, "edits": [[770, 787, "person", 8, 0], [803, 813, "date of birth", 15, 0], [824, 833, "passport number", 17, 0], [844, 849, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0077", "ms": 119.11, "edits": [[4, 18, "person", 8, 0], [20, 36, "phone number", 14, 0], [38, 63, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0078", "ms": 107.09, "edits": [[6, 21, "person", 8, 0], [29, 41, "phone number", 14, 0], [53, 66, "ip address", 12, 0], [68, 96, "organization", 14, 0], [153, 158, "person", 8, 0], [169, 173, "person", 8, 0], [178, 183, "person", 8, 0], [198, 204, "person", 8, 0], [209, 214, "person", 8, 0], [241, 247, "person", 8, 0], [249, 254, "person", 8, 0], [256, 263, "person", 8, 0], [265, 269, "person", 8, 0], [274, 279, "person", 8, 0], [336, 353, "person", 8, 0], [411, 415, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0079", "ms": 167.47, "edits": [[584, 598, "person", 8, 0], [601, 627, "email", 7, 0], [630, 646, "phone number", 14, 0], [654, 664, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0080", "ms": 75.62, "edits": [[4, 20, "person", 8, 0], [22, 42, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0081", "ms": 94.94, "edits": [[226, 250, "organization", 14, 0], [273, 293, "organization", 14, 0], [302, 312, "location", 10, 0], [350, 380, "organization", 14, 0], [390, 404, "person", 8, 0], [405, 433, "organization", 14, 0], [435, 464, "email", 7, 0], [465, 477, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0082", "ms": 381.9, "edits": [[170, 180, "organization", 14, 0], [250, 257, "person", 8, 0], [265, 275, "date of birth", 15, 0], [303, 312, "passport number", 17, 0], [324, 355, "address", 9, 0], [1495, 1508, "organization", 14, 0], [1563, 1576, "organization", 14, 0], [1773, 1786, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0083", "ms": 79.4, "edits": [[6, 20, "person", 8, 0], [28, 40, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0084", "ms": 68.98, "edits": [[11, 25, "person", 8, 0], [31, 42, "social security number", 24, 0]]}
+{"id": "rd-wildchat-test-0085", "ms": 76.04, "edits": [[4, 16, "person", 8, 0], [22, 24, "age", 5, 0], [32, 49, "phone number", 14, 0], [72, 84, "person", 8, 0], [97, 101, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0086", "ms": 383.36, "edits": [[1291, 1305, "person", 8, 0], [1320, 1339, "email", 7, 0], [1366, 1381, "ip address", 12, 0], [1384, 1399, "email", 7, 0], [1411, 1443, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0087", "ms": 131.3, "edits": [[0, 6, "person", 8, 0], [48, 51, "person", 8, 0], [147, 153, "person", 8, 0], [184, 188, "person", 8, 0], [243, 249, "person", 8, 0], [269, 272, "person", 8, 0], [276, 280, "person", 8, 0], [357, 361, "person", 8, 0], [396, 399, "person", 8, 0], [430, 434, "person", 8, 0], [472, 476, "person", 8, 0], [546, 561, "person", 8, 0], [569, 581, "date of birth", 15, 0], [584, 609, "email", 7, 0], [612, 624, "phone number", 14, 0], [648, 661, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0088", "ms": 89.4, "edits": [[11, 23, "person", 8, 0], [37, 50, "email", 7, 0], [68, 85, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0089", "ms": 75.58, "edits": [[10, 29, "person", 8, 0], [45, 63, "organization", 14, 0], [72, 77, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0090", "ms": 128.28, "edits": [[0, 1, "person", 8, 0], [4, 6, "age", 5, 0], [35, 73, "address", 9, 0], [75, 99, "email", 7, 0], [101, 113, "phone number", 14, 0], [125, 141, "password", 10, 0]]}
+{"id": "rd-wildchat-test-0091", "ms": 107.19, "edits": [[159, 170, "person", 8, 0], [175, 182, "person", 8, 0], [433, 447, "person", 8, 0], [455, 465, "date of birth", 15, 0], [468, 481, "organization", 14, 0], [484, 515, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0092", "ms": 98.47, "edits": [[6, 18, "person", 8, 0], [24, 26, "age", 5, 0], [37, 46, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0093", "ms": 121.58, "edits": [[397, 412, "person", 8, 0], [414, 429, "username", 10, 0], [436, 449, "location", 10, 0], [457, 481, "email", 7, 0], [492, 501, "passport number", 17, 0]]}
+{"id": "rd-wildchat-test-0094", "ms": 155.14, "edits": [[8, 14, "location", 10, 0], [35, 49, "person", 8, 0], [60, 97, "address", 9, 0], [109, 126, "password", 10, 0], [187, 193, "location", 10, 0], [312, 324, "person", 8, 0], [438, 442, "location", 10, 0], [514, 520, "person", 8, 0], [545, 557, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0095", "ms": 75.43, "edits": [[15, 33, "person", 8, 0], [57, 69, "phone number", 14, 0], [80, 99, "organization", 14, 0], [151, 155, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0096", "ms": 474.38, "edits": [[37, 45, "person", 8, 0], [47, 52, "person", 8, 0], [65, 69, "person", 8, 0], [74, 78, "person", 8, 0], [89, 103, "url", 5, 0], [1591, 1604, "person", 8, 0], [1659, 1672, "organization", 14, 0], [1869, 1882, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0097", "ms": 98.43, "edits": [[8, 18, "person", 8, 0], [29, 34, "location", 10, 0], [56, 80, "email", 7, 0], [84, 98, "phone number", 14, 0], [105, 145, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0098", "ms": 78.01, "edits": [[4, 17, "person", 8, 0], [23, 30, "location", 10, 0], [32, 50, "email", 7, 0], [154, 162, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0099", "ms": 115.22, "edits": [[475, 488, "person", 8, 0], [499, 512, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0100", "ms": 105.8, "edits": [[4, 16, "person", 8, 0], [18, 28, "username", 10, 0], [41, 85, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0101", "ms": 75.44, "edits": [[4, 21, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0102", "ms": 105.41, "edits": [[10, 34, "organization", 14, 0], [42, 56, "email", 7, 0], [64, 78, "phone number", 14, 0], [84, 110, "password", 10, 0], [158, 164, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0103", "ms": 132.07, "edits": [[4, 17, "person", 8, 0], [19, 30, "email", 7, 0], [137, 146, "location", 10, 0], [149, 155, "person", 8, 0], [284, 297, "organization", 14, 0], [350, 354, "location", 10, 0], [364, 372, "age", 5, 0], [464, 471, "person", 8, 0], [596, 609, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0104", "ms": 75.85, "edits": [[0, 10, "location", 10, 0], [17, 27, "person", 8, 0], [35, 47, "email", 7, 0], [80, 96, "person", 8, 0], [113, 129, "person", 8, 0], [148, 157, "organization", 14, 0], [166, 182, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0105", "ms": 97.99, "edits": [[4, 16, "person", 8, 0], [30, 67, "email", 7, 0], [82, 92, "username", 10, 0], [115, 132, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0106", "ms": 93.53, "edits": [[65, 74, "location", 10, 0], [84, 109, "location", 10, 0], [131, 163, "api key", 9, 0], [166, 171, "person", 8, 0], [176, 180, "person", 8, 0], [232, 236, "person", 8, 0], [246, 251, "person", 8, 0], [266, 270, "person", 8, 0], [277, 282, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0107", "ms": 292.62, "edits": [[2, 13, "person", 8, 0], [21, 38, "date of birth", 15, 0], [51, 66, "organization", 14, 0], [74, 91, "ip address", 12, 0], [100, 131, "url", 5, 0], [139, 165, "api key", 9, 0], [853, 860, "location", 10, 0], [1052, 1068, "person", 8, 0], [1273, 1280, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0108", "ms": 97.94, "edits": [[29, 46, "person", 8, 0], [53, 55, "age", 5, 0], [70, 81, "location", 10, 0], [100, 111, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0109", "ms": 102.75, "edits": [[4, 18, "person", 8, 0], [25, 56, "organization", 14, 0], [58, 82, "email", 7, 0], [89, 99, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0110", "ms": 97.14, "edits": [[0, 1, "person", 8, 0], [13, 20, "location", 10, 0], [27, 37, "date of birth", 15, 0], [46, 65, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0111", "ms": 103.4, "edits": [[142, 148, "organization", 14, 0], [149, 156, "organization", 14, 0], [157, 166, "organization", 14, 0], [167, 174, "organization", 14, 0], [288, 300, "person", 8, 0], [303, 325, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0112", "ms": 118.92, "edits": [[439, 452, "person", 8, 0], [454, 462, "location", 10, 0], [465, 489, "email", 7, 0], [492, 504, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0113", "ms": 372.56, "edits": [[4, 19, "person", 8, 0], [33, 49, "phone number", 14, 0], [57, 79, "iban", 6, 0], [86, 103, "ip address", 12, 0], [195, 210, "username", 10, 0], [223, 255, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0114", "ms": 116.92, "edits": [[48, 66, "person", 8, 0], [73, 83, "date of birth", 15, 0], [88, 114, "organization", 14, 0], [236, 244, "person", 8, 0], [297, 307, "person", 8, 0], [435, 446, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0115", "ms": 86.73, "edits": [[229, 248, "api key", 9, 0], [305, 324, "person", 8, 0], [326, 332, "person", 8, 0], [337, 340, "person", 8, 0], [348, 363, "phone number", 14, 0], [374, 383, "passport number", 17, 0]]}
+{"id": "rd-wildchat-test-0116", "ms": 161.13, "edits": [[4, 16, "person", 8, 0], [20, 31, "age", 5, 0], [64, 73, "driver's license number", 24, 0], [78, 100, "organization", 14, 0], [112, 157, "address", 9, 0], [180, 194, "phone number", 14, 0], [236, 248, "person", 8, 0], [371, 383, "person", 8, 0], [403, 414, "person", 8, 0], [526, 542, "person", 8, 0], [564, 574, "person", 8, 0], [576, 588, "person", 8, 0], [610, 624, "person", 8, 0], [626, 641, "person", 8, 0], [643, 658, "person", 8, 0], [660, 670, "person", 8, 0], [701, 712, "person", 8, 0], [747, 756, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0117", "ms": 177.13, "edits": [[8, 34, "location", 10, 0], [49, 64, "person", 8, 0], [66, 89, "email", 7, 0], [134, 145, "username", 10, 0], [148, 155, "person", 8, 0], [158, 164, "person", 8, 0], [204, 210, "person", 8, 0], [305, 311, "person", 8, 0], [330, 336, "person", 8, 0], [354, 360, "person", 8, 0], [384, 388, "person", 8, 0], [419, 425, "person", 8, 0], [460, 466, "person", 8, 0], [500, 506, "person", 8, 0], [577, 583, "person", 8, 0], [789, 796, "person", 8, 0], [821, 827, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0118", "ms": 131.97, "edits": [[10, 21, "person", 8, 0], [35, 62, "organization", 14, 0], [73, 84, "age", 5, 0], [127, 157, "url", 5, 0], [383, 393, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0119", "ms": 106.76, "edits": [[4, 24, "person", 8, 0], [30, 39, "location", 10, 0], [41, 70, "email", 7, 0], [72, 87, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0120", "ms": 95.73, "edits": [[367, 384, "person", 8, 0], [390, 408, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0121", "ms": 80.27, "edits": [[8, 22, "person", 8, 0], [28, 30, "age", 5, 0], [52, 65, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0122", "ms": 165.02, "edits": [[6, 19, "person", 8, 0], [27, 42, "phone number", 14, 0], [49, 59, "location", 10, 0], [537, 554, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0123", "ms": 107.28, "edits": [[6, 21, "person", 8, 0], [28, 35, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0124", "ms": 76.44, "edits": [[3, 9, "organization", 14, 0], [131, 139, "location", 10, 0], [146, 163, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0125", "ms": 69.59, "edits": [[28, 47, "organization", 14, 0], [57, 64, "location", 10, 0], [147, 160, "person", 8, 0], [163, 170, "location", 10, 0], [173, 188, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0126", "ms": 94.53, "edits": [[244, 263, "person", 8, 0], [264, 288, "address", 9, 0], [289, 305, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0127", "ms": 76.05, "edits": [[0, 1, "person", 8, 0], [4, 14, "age", 5, 0], [47, 66, "credit card number", 20, 0]]}
+{"id": "rd-wildchat-test-0128", "ms": 115.0, "edits": [[6, 22, "person", 8, 0], [28, 30, "age", 5, 0], [41, 62, "organization", 14, 0], [74, 87, "ip address", 12, 0], [98, 114, "password", 10, 0]]}
+{"id": "rd-wildchat-test-0129", "ms": 76.43, "edits": [[4, 14, "person", 8, 0], [26, 66, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0130", "ms": 98.21, "edits": [[274, 293, "organization", 14, 0], [296, 323, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0131", "ms": 104.62, "edits": [[4, 16, "person", 8, 0], [22, 24, "age", 5, 0], [31, 61, "organization", 14, 0], [72, 112, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0132", "ms": 78.24, "edits": [[4, 16, "person", 8, 0], [18, 35, "phone number", 14, 0], [71, 78, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0133", "ms": 103.63, "edits": [[10, 22, "person", 8, 0], [37, 76, "address", 9, 0], [141, 152, "location", 10, 0], [215, 226, "location", 10, 0], [334, 345, "location", 10, 0], [505, 520, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0134", "ms": 319.18, "edits": [[67, 69, "person", 8, 0], [187, 188, "person", 8, 0], [313, 314, "person", 8, 0], [347, 349, "person", 8, 0], [408, 418, "organization", 14, 0], [638, 639, "person", 8, 0], [657, 658, "person", 8, 0], [731, 740, "location", 10, 0], [775, 776, "person", 8, 0], [802, 803, "person", 8, 0], [902, 910, "person", 8, 0], [922, 924, "person", 8, 0], [966, 969, "person", 8, 0], [1028, 1029, "person", 8, 0], [1044, 1045, "person", 8, 0], [1084, 1085, "person", 8, 0], [1192, 1193, "person", 8, 0], [1288, 1289, "person", 8, 0], [1350, 1351, "person", 8, 0], [1613, 1630, "organization", 14, 0], [1633, 1647, "phone number", 14, 0], [1656, 1674, "iban", 6, 0]]}
+{"id": "rd-wildchat-test-0135", "ms": 76.18, "edits": [[43, 56, "person", 8, 0], [70, 82, "phone number", 14, 0], [99, 126, "iban", 6, 0], [142, 156, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0136", "ms": 155.19, "edits": [[4, 16, "person", 8, 0], [31, 50, "organization", 14, 0], [74, 108, "address", 9, 0], [123, 138, "phone number", 14, 0], [166, 214, "api key", 9, 0], [296, 315, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0137", "ms": 86.85, "edits": [[17, 23, "location", 10, 0], [55, 68, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0138", "ms": 77.23, "edits": [[15, 25, "person", 8, 0], [36, 42, "location", 10, 0], [59, 81, "email", 7, 0], [111, 133, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0139", "ms": 75.35, "edits": [[33, 38, "person", 8, 0], [40, 45, "person", 8, 0], [51, 56, "person", 8, 0], [60, 66, "person", 8, 0], [216, 229, "person", 8, 0], [237, 249, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0140", "ms": 78.52, "edits": [[4, 19, "person", 8, 0], [26, 36, "date of birth", 15, 0], [50, 76, "password", 10, 0], [120, 127, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0141", "ms": 733.78, "edits": [[6, 18, "person", 8, 0], [24, 34, "date of birth", 15, 0], [58, 70, "organization", 14, 0], [88, 101, "driver's license number", 24, 0], [710, 713, "organization", 14, 0], [862, 865, "person", 8, 0], [877, 880, "person", 8, 0], [891, 893, "person", 8, 0], [1074, 1077, "organization", 14, 0], [6900, 6904, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0142", "ms": 76.18, "edits": [[0, 26, "organization", 14, 0], [41, 62, "email", 7, 0], [69, 79, "date of birth", 15, 0], [81, 88, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0143", "ms": 157.07, "edits": [[95, 104, "location", 10, 0], [701, 716, "person", 8, 0], [729, 754, "email", 7, 0], [767, 780, "phone number", 14, 0], [797, 829, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0144", "ms": 376.17, "edits": [[27, 39, "person", 8, 0], [45, 47, "age", 5, 0], [58, 93, "address", 9, 0], [114, 146, "url", 5, 0], [275, 285, "organization", 14, 0], [1433, 1446, "person", 8, 0], [1501, 1514, "organization", 14, 0], [1711, 1724, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0145", "ms": 67.94, "edits": [[54, 66, "organization", 14, 0], [94, 102, "person", 8, 0], [108, 118, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0146", "ms": 80.17, "edits": [[0, 1, "person", 8, 0], [4, 14, "age", 5, 0], [31, 49, "email", 7, 0], [72, 91, "credit card number", 20, 0], [95, 109, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0147", "ms": 78.48, "edits": [[6, 21, "person", 8, 0], [28, 34, "location", 10, 0], [51, 64, "organization", 14, 0], [68, 77, "location", 10, 0], [86, 100, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0148", "ms": 68.57, "edits": [[6, 23, "person", 8, 0], [31, 60, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0149", "ms": 162.85, "edits": [[6, 15, "person", 8, 0], [21, 23, "age", 5, 0], [32, 41, "username", 10, 0], [71, 116, "address", 9, 0], [128, 160, "api key", 9, 0], [186, 197, "organization", 14, 0], [318, 329, "organization", 14, 0], [474, 485, "organization", 14, 0], [900, 911, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0150", "ms": 105.61, "edits": [[6, 18, "person", 8, 0], [24, 26, "age", 5, 0], [33, 41, "location", 10, 0], [164, 177, "location", 10, 0], [248, 261, "organization", 14, 0], [343, 356, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0151", "ms": 105.42, "edits": [[0, 1, "person", 8, 0], [9, 17, "location", 10, 0], [302, 310, "person", 8, 0], [329, 330, "person", 8, 0], [378, 379, "person", 8, 0], [447, 448, "person", 8, 0], [509, 510, "person", 8, 0], [522, 523, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0152", "ms": 716.49, "edits": [[4, 19, "person", 8, 0], [21, 41, "email", 7, 0], [43, 78, "url", 5, 0], [88, 102, "ip address", 12, 0], [113, 161, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0153", "ms": 394.18, "edits": [[25, 40, "person", 8, 0], [42, 88, "address", 9, 0], [286, 296, "organization", 14, 0], [1651, 1664, "organization", 14, 0], [1719, 1732, "organization", 14, 0], [1929, 1942, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0154", "ms": 115.76, "edits": [[4, 17, "person", 8, 0], [24, 34, "date of birth", 15, 0], [46, 84, "address", 9, 0], [92, 117, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0155", "ms": 74.09, "edits": [[8, 21, "person", 8, 0], [57, 65, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0156", "ms": 78.3, "edits": [[6, 24, "person", 8, 0], [32, 44, "phone number", 14, 0], [53, 81, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0157", "ms": 67.43, "edits": [[30, 36, "person", 8, 0], [64, 68, "person", 8, 0], [74, 78, "person", 8, 0], [98, 111, "person", 8, 0], [117, 119, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0158", "ms": 76.61, "edits": [[4, 16, "person", 8, 0], [18, 27, "username", 10, 0], [33, 43, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0159", "ms": 134.37, "edits": [[4, 22, "person", 8, 0], [34, 60, "address", 9, 0], [73, 86, "organization", 14, 0], [108, 134, "email", 7, 0], [138, 154, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0160", "ms": 160.09, "edits": [[6, 20, "person", 8, 0], [27, 32, "location", 10, 0], [41, 50, "username", 10, 0], [55, 63, "person", 8, 0], [77, 84, "organization", 14, 0], [265, 272, "organization", 14, 0], [451, 459, "person", 8, 0], [584, 592, "person", 8, 0], [649, 654, "person", 8, 0], [734, 738, "organization", 14, 0], [768, 772, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0161", "ms": 98.75, "edits": [[33, 46, "person", 8, 0], [53, 64, "date of birth", 15, 0], [72, 96, "url", 5, 0], [106, 120, "ip address", 12, 0], [123, 128, "person", 8, 0], [159, 164, "person", 8, 0], [214, 219, "person", 8, 0], [242, 247, "person", 8, 0], [276, 281, "person", 8, 0], [294, 299, "person", 8, 0], [306, 311, "person", 8, 0], [327, 332, "person", 8, 0], [337, 343, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0162", "ms": 215.98, "edits": [[21, 34, "person", 8, 0], [44, 58, "ip address", 12, 0], [65, 91, "api key", 9, 0], [102, 142, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0163", "ms": 119.91, "edits": [[16, 28, "person", 8, 0], [35, 45, "date of birth", 15, 0], [56, 105, "address", 9, 0], [117, 132, "password", 10, 0], [278, 287, "location", 10, 0], [361, 378, "organization", 14, 0], [537, 551, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0164", "ms": 101.07, "edits": [[4, 22, "person", 8, 0], [33, 53, "date of birth", 15, 0], [62, 78, "phone number", 14, 0], [86, 119, "iban", 6, 0], [127, 146, "credit card number", 20, 0]]}
+{"id": "rd-wildchat-test-0165", "ms": 169.57, "edits": [[4, 22, "person", 8, 0], [28, 41, "location", 10, 0], [50, 81, "email", 7, 0], [91, 109, "username", 10, 0], [120, 152, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0166", "ms": 76.09, "edits": [[8, 24, "person", 8, 0], [26, 50, "national id number", 20, 0], [53, 67, "organization", 14, 0], [116, 130, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0167", "ms": 120.63, "edits": [[4, 20, "person", 8, 0], [26, 28, "age", 5, 0], [37, 61, "email", 7, 0], [71, 83, "username", 10, 0], [110, 116, "person", 8, 0], [223, 230, "person", 8, 0], [257, 271, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0168", "ms": 76.86, "edits": [[9, 14, "organization", 14, 0], [28, 45, "phone number", 14, 0], [54, 65, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0169", "ms": 129.1, "edits": [[0, 1, "person", 8, 0], [4, 6, "age", 5, 0], [17, 24, "location", 10, 0], [38, 71, "organization", 14, 0], [79, 101, "email", 7, 0], [114, 131, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0170", "ms": 186.68, "edits": [[4, 17, "person", 8, 0], [23, 25, "age", 5, 0], [33, 46, "phone number", 14, 0], [59, 76, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0171", "ms": 75.84, "edits": [[11, 25, "person", 8, 0], [46, 78, "api key", 9, 0], [84, 101, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0172", "ms": 537.42, "edits": [[6, 20, "person", 8, 0], [28, 42, "phone number", 14, 0], [48, 50, "age", 5, 0], [59, 74, "username", 10, 0], [84, 99, "location", 10, 0], [254, 262, "person", 8, 0], [282, 295, "location", 10, 0], [314, 324, "person", 8, 0], [344, 359, "location", 10, 0], [434, 449, "location", 10, 0], [471, 481, "person", 8, 0], [511, 521, "person", 8, 0], [549, 562, "person", 8, 0], [591, 601, "person", 8, 0], [667, 675, "person", 8, 0], [678, 688, "person", 8, 0], [727, 737, "person", 8, 0], [781, 794, "person", 8, 0], [812, 820, "person", 8, 0], [879, 889, "person", 8, 0], [909, 922, "person", 8, 0], [1096, 1104, "person", 8, 0], [1145, 1155, "person", 8, 0], [1253, 1266, "person", 8, 0], [1346, 1356, "person", 8, 0], [1411, 1419, "person", 8, 0], [1448, 1458, "person", 8, 0], [1512, 1522, "person", 8, 0], [1641, 1654, "person", 8, 0], [1755, 1765, "person", 8, 0], [1771, 1784, "person", 8, 0], [1809, 1817, "person", 8, 0], [1837, 1847, "person", 8, 0], [1889, 1899, "person", 8, 0], [2007, 2020, "person", 8, 0], [2074, 2087, "person", 8, 0], [2118, 2128, "person", 8, 0], [2145, 2146, "person", 8, 0], [2156, 2157, "person", 8, 0], [2176, 2189, "person", 8, 0], [2194, 2195, "person", 8, 0], [2238, 2239, "person", 8, 0], [2261, 2271, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0173", "ms": 106.29, "edits": [[6, 18, "person", 8, 0], [36, 59, "organization", 14, 0], [69, 100, "address", 9, 0], [108, 121, "phone number", 14, 0], [195, 197, "age", 5, 0], [207, 211, "person", 8, 0], [214, 225, "age", 5, 0], [237, 240, "person", 8, 0], [264, 266, "age", 5, 0], [274, 280, "person", 8, 0], [316, 322, "person", 8, 0], [363, 366, "person", 8, 0], [389, 395, "person", 8, 0], [433, 437, "person", 8, 0], [488, 494, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0174", "ms": 116.03, "edits": [[6, 19, "person", 8, 0], [27, 44, "email", 7, 0], [52, 64, "phone number", 14, 0], [70, 82, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0175", "ms": 80.38, "edits": [[8, 29, "organization", 14, 0], [36, 42, "location", 10, 0], [50, 73, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0176", "ms": 116.57, "edits": [[10, 27, "person", 8, 0], [42, 76, "address", 9, 0], [87, 104, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0177", "ms": 91.48, "edits": [[6, 12, "location", 10, 0], [19, 55, "url", 5, 0], [148, 150, "age", 5, 0], [181, 196, "person", 8, 0], [215, 217, "age", 5, 0], [235, 245, "person", 8, 0], [306, 308, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0178", "ms": 131.36, "edits": [[4, 12, "person", 8, 0], [23, 62, "address", 9, 0], [75, 98, "organization", 14, 0], [118, 125, "person", 8, 0], [176, 181, "person", 8, 0], [261, 268, "person", 8, 0], [392, 397, "person", 8, 0], [478, 485, "person", 8, 0], [514, 519, "person", 8, 0], [725, 732, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0179", "ms": 85.7, "edits": [[4, 20, "person", 8, 0], [35, 49, "location", 10, 0], [73, 88, "password", 10, 0]]}
+{"id": "rd-wildchat-test-0180", "ms": 94.93, "edits": [[230, 244, "person", 8, 0], [245, 296, "address", 9, 0], [297, 318, "email", 7, 0], [319, 329, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0181", "ms": 79.46, "edits": [[6, 16, "person", 8, 0], [24, 46, "email", 7, 0], [51, 64, "ip address", 12, 0], [66, 82, "organization", 14, 0], [196, 201, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0182", "ms": 407.46, "edits": [[8, 21, "person", 8, 0], [23, 47, "email", 7, 0], [58, 67, "passport number", 17, 0], [76, 88, "ip address", 12, 0], [90, 130, "url", 5, 0], [132, 148, "username", 10, 0], [158, 206, "api key", 9, 0], [390, 399, "organization", 14, 0], [408, 412, "organization", 14, 0], [426, 430, "organization", 14, 0], [847, 869, "organization", 14, 0], [1039, 1043, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0183", "ms": 264.02, "edits": [[8, 22, "person", 8, 0], [24, 47, "username", 10, 0], [49, 63, "username", 10, 0], [70, 88, "organization", 14, 0], [100, 132, "api key", 9, 0], [1123, 1135, "person", 8, 0], [1164, 1201, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0184", "ms": 79.04, "edits": [[6, 22, "person", 8, 0], [28, 30, "age", 5, 0], [35, 50, "ip address", 12, 0], [91, 103, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0185", "ms": 88.48, "edits": [[11, 28, "person", 8, 0], [35, 45, "date of birth", 15, 0], [61, 73, "location", 10, 0], [135, 143, "username", 10, 0]]}
+{"id": "rd-wildchat-test-0186", "ms": 192.69, "edits": [[6, 16, "person", 8, 0], [24, 37, "email", 7, 0], [48, 63, "organization", 14, 0], [70, 78, "location", 10, 0], [119, 125, "person", 8, 0], [219, 224, "person", 8, 0], [302, 307, "person", 8, 0], [325, 329, "person", 8, 0], [396, 402, "person", 8, 0], [404, 409, "person", 8, 0], [414, 418, "person", 8, 0], [453, 459, "person", 8, 0], [502, 506, "person", 8, 0], [511, 517, "person", 8, 0], [519, 525, "person", 8, 0], [530, 534, "person", 8, 0], [539, 544, "person", 8, 0], [582, 588, "person", 8, 0], [633, 638, "person", 8, 0], [668, 674, "person", 8, 0], [695, 700, "person", 8, 0], [804, 810, "person", 8, 0], [821, 826, "person", 8, 0], [846, 850, "person", 8, 0], [927, 931, "person", 8, 0], [1007, 1013, "person", 8, 0], [1023, 1028, "person", 8, 0], [1140, 1146, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0187", "ms": 100.48, "edits": [[404, 420, "person", 8, 0], [422, 435, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0188", "ms": 105.71, "edits": [[6, 19, "person", 8, 0], [29, 58, "address", 9, 0], [66, 77, "phone number", 14, 0], [90, 116, "password", 10, 0]]}
+{"id": "rd-wildchat-test-0189", "ms": 67.78, "edits": [[6, 20, "person", 8, 0], [26, 28, "age", 5, 0]]}
+{"id": "rd-wildchat-test-0190", "ms": 76.64, "edits": [[10, 21, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0191", "ms": 137.82, "edits": [[15, 27, "person", 8, 0], [33, 35, "age", 5, 0], [142, 173, "organization", 14, 0], [366, 391, "organization", 14, 0], [620, 634, "person", 8, 0], [818, 824, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0192", "ms": 69.13, "edits": [[0, 7, "organization", 14, 0], [58, 75, "person", 8, 0], [81, 83, "age", 5, 0], [104, 113, "password", 10, 0]]}
+{"id": "rd-wildchat-test-0193", "ms": 99.27, "edits": [[183, 202, "location", 10, 0], [330, 351, "person", 8, 0], [352, 362, "organization", 14, 0], [363, 392, "email", 7, 0], [405, 422, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0194#t0", "ms": 76.12, "edits": [[39, 44, "tax identification number", 27, 0], [70, 80, "person", 8, 0], [83, 95, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0194#t1", "ms": 65.01, "edits": [[55, 56, "person", 8, 0], [78, 85, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0194#t2", "ms": 69.78, "edits": [[4, 5, "person", 8, 0], [103, 110, "person", 8, 0], [115, 130, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0195#t0", "ms": 66.39, "edits": [[85, 102, "age", 5, 0], [112, 122, "person", 8, 0], [123, 140, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0195#t1", "ms": 63.62, "edits": [[60, 67, "person", 8, 0], [72, 77, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0195#t2", "ms": 63.89, "edits": [[74, 75, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0196#t0", "ms": 87.33, "edits": [[8, 24, "person", 8, 0], [31, 40, "location", 10, 0], [57, 93, "url", 5, 0], [170, 175, "location", 10, 0], [207, 212, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0196#t1", "ms": 67.71, "edits": [[18, 26, "username", 10, 0], [120, 125, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0197#t0", "ms": 99.17, "edits": [[94, 98, "person", 8, 0], [319, 330, "api key", 9, 0], [383, 395, "person", 8, 0], [398, 414, "email", 7, 0], [417, 426, "username", 10, 0], [434, 444, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0197#t1", "ms": 68.19, "edits": [[98, 102, "username", 10, 0], [115, 116, "person", 8, 0], [129, 132, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0197#t2", "ms": 70.26, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0198#t0", "ms": 77.41, "edits": [[4, 16, "person", 8, 0], [27, 36, "location", 10, 0], [54, 77, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0198#t1", "ms": 69.89, "edits": [[162, 166, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0198#t2", "ms": 75.05, "edits": [[52, 57, "email", 7, 0], [98, 106, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0199#t0", "ms": 91.16, "edits": [[45, 59, "phone number", 14, 0], [78, 126, "api key", 9, 0], [150, 177, "url", 5, 0], [178, 198, "url", 5, 0], [256, 276, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0199#t1", "ms": 78.24, "edits": [[35, 47, "phone number", 14, 0], [73, 89, "api key", 9, 0], [101, 121, "url", 5, 0], [151, 178, "api key", 9, 0], [179, 199, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0199#t2", "ms": 63.03, "edits": [[41, 47, "phone number", 14, 0], [48, 49, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0200#t0", "ms": 118.28, "edits": [[417, 428, "person", 8, 0], [438, 481, "address", 9, 0], [499, 505, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0200#t1", "ms": 62.74, "edits": [[54, 55, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0201#t0", "ms": 74.95, "edits": [[119, 131, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0201#t1", "ms": 76.09, "edits": [[163, 164, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0202#t0", "ms": 77.9, "edits": [[22, 39, "person", 8, 0], [41, 67, "email", 7, 0], [212, 237, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0202#t1", "ms": 68.84, "edits": [[77, 86, "person", 8, 0], [97, 107, "person", 8, 0], [109, 116, "person", 8, 0], [123, 131, "person", 8, 0], [137, 146, "person", 8, 0], [155, 160, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0203#t0", "ms": 115.36, "edits": [[8, 20, "person", 8, 0], [30, 45, "ip address", 12, 0], [109, 118, "username", 10, 0], [134, 145, "organization", 14, 0], [288, 299, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0203#t1", "ms": 129.45, "edits": [[107, 110, "organization", 14, 0], [114, 120, "organization", 14, 0], [391, 397, "person", 8, 0], [444, 451, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0203#t2", "ms": 73.57, "edits": [[3, 4, "person", 8, 0], [75, 81, "username", 10, 0], [86, 90, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0204#t0", "ms": 76.8, "edits": [[120, 135, "person", 8, 0], [137, 153, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0204#t1", "ms": 81.84, "edits": [[121, 122, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0204#t2", "ms": 81.78, "edits": []}
+{"id": "rd-wildchat-test-0205#t0", "ms": 104.23, "edits": [[4, 16, "person", 8, 0], [32, 52, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0205#t1", "ms": 97.78, "edits": []}
+{"id": "rd-wildchat-test-0205#t2", "ms": 110.86, "edits": []}
+{"id": "rd-wildchat-test-0206#t0", "ms": 114.82, "edits": [[132, 137, "person", 8, 0], [261, 268, "person", 8, 0], [292, 314, "organization", 14, 0], [336, 346, "person", 8, 0], [353, 366, "date of birth", 15, 0], [373, 380, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0206#t1", "ms": 80.36, "edits": [[17, 23, "person", 8, 0], [38, 39, "person", 8, 0], [58, 65, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0207#t0", "ms": 78.22, "edits": [[44, 66, "organization", 14, 0], [150, 157, "organization", 14, 0], [228, 238, "person", 8, 0], [254, 291, "address", 9, 0]]}
+{"id": "rd-wildchat-test-0207#t1", "ms": 74.77, "edits": [[8, 13, "person", 8, 0], [69, 76, "address", 9, 0], [88, 95, "person", 8, 0], [101, 108, "organization", 14, 0], [166, 173, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0207#t2", "ms": 77.11, "edits": [[8, 14, "person", 8, 0], [116, 140, "location", 10, 0], [225, 232, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0208#t0", "ms": 250.43, "edits": [[0, 5, "organization", 14, 0], [47, 77, "organization", 14, 0], [87, 112, "address", 9, 0], [175, 184, "location", 10, 0], [216, 225, "location", 10, 0], [421, 426, "organization", 14, 0], [472, 481, "location", 10, 0], [508, 516, "location", 10, 0], [521, 533, "location", 10, 0], [1036, 1045, "location", 10, 0], [1221, 1226, "organization", 14, 0], [1318, 1329, "person", 8, 0], [1353, 1370, "person", 8, 0], [1399, 1410, "person", 8, 0], [1483, 1488, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0208#t1", "ms": 74.35, "edits": [[55, 62, "address", 9, 0], [196, 200, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0208#t2", "ms": 76.21, "edits": [[76, 87, "person", 8, 0], [91, 96, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0209#t0", "ms": 87.48, "edits": [[17, 30, "person", 8, 0], [36, 38, "age", 5, 0], [53, 73, "organization", 14, 0], [83, 121, "address", 9, 0], [131, 136, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0209#t1", "ms": 59.44, "edits": [[40, 41, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0209#t2", "ms": 62.49, "edits": [[0, 24, "organization", 14, 0], [52, 64, "organization", 14, 0], [65, 66, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0210#t0", "ms": 483.87, "edits": [[43, 56, "person", 8, 0], [64, 66, "age", 5, 0], [74, 89, "organization", 14, 0], [100, 114, "ip address", 12, 0]]}
+{"id": "rd-wildchat-test-0210#t1", "ms": 62.29, "edits": []}
+{"id": "rd-wildchat-test-0211#t0", "ms": 338.91, "edits": [[19, 27, "organization", 14, 0], [249, 272, "organization", 14, 0], [1369, 1381, "organization", 14, 0], [1686, 1699, "person", 8, 0], [1702, 1721, "person", 8, 0], [1724, 1738, "phone number", 14, 0], [1746, 1756, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0211#t1", "ms": 285.19, "edits": [[249, 272, "organization", 14, 0], [1393, 1405, "organization", 14, 0], [1726, 1733, "person", 8, 0], [1738, 1753, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0211#t2", "ms": 289.1, "edits": [[249, 272, "organization", 14, 0], [1443, 1455, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0212#t0", "ms": 76.22, "edits": [[134, 143, "person", 8, 0], [146, 167, "email", 7, 0], [175, 185, "date of birth", 15, 0]]}
+{"id": "rd-wildchat-test-0212#t1", "ms": 67.37, "edits": [[50, 53, "person", 8, 0], [65, 79, "organization", 14, 0], [128, 143, "phone number", 14, 0], [144, 145, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0213#t0", "ms": 75.22, "edits": [[17, 39, "organization", 14, 0], [41, 65, "email", 7, 0], [72, 78, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0213#t1", "ms": 78.92, "edits": [[3, 9, "organization", 14, 0], [235, 240, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0214#t0", "ms": 76.72, "edits": [[6, 21, "person", 8, 0], [31, 84, "address", 9, 0], [126, 129, "person", 8, 0], [153, 157, "person", 8, 0], [158, 162, "person", 8, 0], [190, 193, "person", 8, 0], [208, 211, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0214#t1", "ms": 75.45, "edits": [[56, 63, "address", 9, 0], [74, 77, "person", 8, 0], [101, 105, "person", 8, 0], [106, 110, "person", 8, 0], [138, 141, "person", 8, 0], [156, 159, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0214#t2", "ms": 63.84, "edits": [[8, 11, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0215#t0", "ms": 76.89, "edits": [[4, 24, "person", 8, 0], [26, 28, "age", 5, 0], [156, 172, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0215#t1", "ms": 66.15, "edits": [[66, 73, "person", 8, 0], [77, 80, "age", 5, 0], [84, 85, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0215#t2", "ms": 63.67, "edits": [[49, 56, "person", 8, 0], [68, 69, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0216#t0", "ms": 191.14, "edits": [[8, 18, "person", 8, 0], [33, 48, "organization", 14, 0], [60, 97, "address", 9, 0], [119, 138, "email", 7, 0], [191, 198, "person", 8, 0], [200, 203, "person", 8, 0], [283, 286, "person", 8, 0], [303, 314, "person", 8, 0], [415, 422, "person", 8, 0], [470, 477, "person", 8, 0], [587, 590, "person", 8, 0], [667, 674, "person", 8, 0], [723, 726, "person", 8, 0], [767, 770, "person", 8, 0], [784, 791, "person", 8, 0], [921, 924, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0216#t1", "ms": 166.36, "edits": [[2, 13, "organization", 14, 0], [50, 57, "person", 8, 0], [124, 127, "person", 8, 0], [207, 210, "person", 8, 0], [227, 238, "person", 8, 0], [339, 346, "person", 8, 0], [394, 401, "person", 8, 0], [511, 514, "person", 8, 0], [591, 598, "person", 8, 0], [647, 650, "person", 8, 0], [691, 694, "person", 8, 0], [708, 715, "person", 8, 0], [845, 848, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0217#t0", "ms": 115.5, "edits": [[6, 17, "person", 8, 0], [27, 37, "organization", 14, 0], [45, 59, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0217#t1", "ms": 108.62, "edits": [[28, 34, "person", 8, 0], [87, 103, "person", 8, 0], [323, 344, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0217#t2", "ms": 108.21, "edits": [[37, 44, "organization", 14, 0], [84, 100, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0218#t0", "ms": 69.22, "edits": [[8, 24, "person", 8, 0], [26, 38, "username", 10, 0], [75, 86, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0218#t1", "ms": 68.8, "edits": [[50, 51, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0218#t2", "ms": 66.16, "edits": [[135, 148, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0219#t0", "ms": 77.65, "edits": [[211, 226, "person", 8, 0], [227, 260, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0219#t1", "ms": 77.34, "edits": [[189, 195, "person", 8, 0], [210, 217, "person", 8, 0], [222, 233, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0220#t0", "ms": 353.97, "edits": [[6, 19, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0220#t1", "ms": 904.43, "edits": []}
+{"id": "rd-wildchat-test-0221#t0", "ms": 528.93, "edits": [[12, 32, "person", 8, 0], [45, 74, "email", 7, 0], [85, 102, "phone number", 14, 0], [113, 161, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-0221#t1", "ms": 92.27, "edits": []}
+{"id": "rd-wildchat-test-0221#t2", "ms": 74.28, "edits": [[57, 71, "url", 5, 0]]}
+{"id": "rd-wildchat-test-0222#t0", "ms": 74.12, "edits": [[4, 22, "person", 8, 0], [37, 42, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0222#t1", "ms": 76.01, "edits": [[0, 13, "person", 8, 0], [53, 60, "person", 8, 0], [66, 73, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0222#t2", "ms": 77.42, "edits": [[3, 26, "organization", 14, 0], [78, 85, "person", 8, 0], [104, 108, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0223#t0", "ms": 79.12, "edits": [[4, 18, "person", 8, 0], [29, 64, "address", 9, 0], [84, 90, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0223#t1", "ms": 76.44, "edits": [[31, 32, "person", 8, 0], [57, 64, "address", 9, 0], [81, 97, "organization", 14, 0], [160, 173, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0223#t2", "ms": 74.91, "edits": [[40, 47, "address", 9, 0], [118, 144, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0224#t0", "ms": 150.11, "edits": [[170, 195, "person", 8, 0], [385, 410, "person", 8, 0], [946, 959, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0224#t1", "ms": 79.24, "edits": [[29, 40, "person", 8, 0], [171, 177, "location", 10, 0], [230, 249, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0224#t2", "ms": 105.93, "edits": [[32, 38, "person", 8, 0], [86, 91, "organization", 14, 0], [164, 182, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0225#t0", "ms": 462.36, "edits": [[9, 13, "person", 8, 0], [18, 23, "person", 8, 0], [79, 84, "person", 8, 0], [129, 133, "person", 8, 0], [148, 152, "person", 8, 0], [215, 219, "person", 8, 0], [238, 242, "person", 8, 0], [256, 260, "person", 8, 0], [309, 314, "person", 8, 0], [360, 365, "person", 8, 0], [377, 381, "person", 8, 0], [396, 400, "person", 8, 0], [415, 419, "person", 8, 0], [434, 438, "person", 8, 0], [560, 565, "person", 8, 0], [604, 608, "person", 8, 0], [653, 658, "person", 8, 0], [728, 733, "person", 8, 0], [789, 793, "person", 8, 0], [826, 830, "person", 8, 0], [846, 851, "person", 8, 0], [868, 879, "location", 10, 0], [917, 921, "person", 8, 0], [923, 927, "person", 8, 0], [943, 947, "person", 8, 0], [973, 978, "person", 8, 0], [1014, 1018, "person", 8, 0], [1075, 1080, "person", 8, 0], [1085, 1089, "person", 8, 0], [1279, 1283, "person", 8, 0], [1292, 1297, "person", 8, 0], [1316, 1320, "person", 8, 0], [1326, 1330, "person", 8, 0], [1349, 1354, "person", 8, 0], [1356, 1360, "person", 8, 0], [1388, 1393, "person", 8, 0], [1418, 1422, "person", 8, 0], [1427, 1432, "person", 8, 0], [1438, 1440, "age", 5, 0], [1511, 1515, "person", 8, 0], [1526, 1531, "person", 8, 0], [1562, 1567, "person", 8, 0], [1598, 1603, "person", 8, 0], [1628, 1633, "person", 8, 0], [1644, 1648, "person", 8, 0], [1686, 1690, "person", 8, 0], [1738, 1743, "person", 8, 0], [1810, 1814, "person", 8, 0], [1899, 1903, "person", 8, 0], [1908, 1913, "person", 8, 0], [1991, 1995, "person", 8, 0], [2149, 2159, "person", 8, 0], [2161, 2207, "address", 9, 0], [2210, 2228, "email", 7, 0], [2231, 2246, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-0225#t1", "ms": 108.24, "edits": [[26, 32, "location", 10, 0], [121, 126, "person", 8, 0], [151, 155, "person", 8, 0], [174, 179, "person", 8, 0], [205, 209, "person", 8, 0], [257, 263, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0225#t2", "ms": 62.82, "edits": [[6, 17, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0226#t0", "ms": 141.12, "edits": [[5, 20, "person", 8, 0], [26, 28, "age", 5, 0], [46, 68, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0226#t1", "ms": 99.25, "edits": [[246, 251, "email", 7, 0]]}
+{"id": "rd-wildchat-test-0227#t0", "ms": 86.29, "edits": [[4, 19, "person", 8, 0], [25, 27, "age", 5, 0], [35, 49, "phone number", 14, 0], [58, 73, "email", 7, 0], [152, 166, "location", 10, 0]]}
+{"id": "rd-wildchat-test-0227#t1", "ms": 103.64, "edits": [[2, 11, "person", 8, 0], [49, 65, "organization", 14, 0], [152, 170, "location", 10, 0], [176, 183, "organization", 14, 0], [251, 258, "organization", 14, 0], [361, 368, "organization", 14, 0], [583, 584, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0227#t2", "ms": 76.4, "edits": [[68, 84, "person", 8, 0], [93, 105, "phone number", 14, 0], [110, 116, "email", 7, 0], [117, 118, "person", 8, 0], [198, 199, "person", 8, 0]]}
+{"id": "rd-wildchat-test-0228#t0", "ms": 67.64, "edits": [[91, 104, "person", 8, 0], [106, 139, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0228#t1", "ms": 75.26, "edits": [[0, 16, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0229#t0", "ms": 77.83, "edits": [[4, 24, "person", 8, 0], [31, 36, "location", 10, 0], [47, 56, "passport number", 17, 0], [61, 73, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-0229#t1", "ms": 68.01, "edits": [[3, 15, "organization", 14, 0], [39, 54, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1001", "ms": 76.08, "edits": []}
+{"id": "rd-wildchat-test-1003", "ms": 79.5, "edits": [[23, 29, "person", 8, 0], [48, 49, "person", 8, 0], [64, 69, "person", 8, 0], [112, 118, "person", 8, 0], [143, 144, "person", 8, 0], [182, 196, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1004", "ms": 378.92, "edits": [[1, 2, "person", 8, 0], [79, 89, "organization", 14, 0], [189, 190, "person", 8, 0], [227, 242, "location", 10, 0], [249, 250, "person", 8, 0], [269, 270, "person", 8, 0], [306, 309, "person", 8, 0], [379, 389, "person", 8, 0], [597, 607, "person", 8, 0], [712, 715, "person", 8, 0], [729, 734, "person", 8, 0], [894, 899, "person", 8, 0], [915, 925, "person", 8, 0], [1038, 1043, "person", 8, 0], [1235, 1240, "person", 8, 0], [1302, 1307, "person", 8, 0], [1407, 1412, "person", 8, 0], [1522, 1527, "person", 8, 0], [1559, 1564, "person", 8, 0], [1717, 1722, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1005", "ms": 107.96, "edits": [[0, 18, "person", 8, 0], [24, 37, "location", 10, 0], [116, 123, "organization", 14, 0], [231, 236, "person", 8, 0], [267, 272, "person", 8, 0], [335, 340, "person", 8, 0], [393, 398, "person", 8, 0], [483, 488, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1006", "ms": 64.26, "edits": [[75, 86, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-1007", "ms": 94.53, "edits": []}
+{"id": "rd-wildchat-test-1008", "ms": 258.26, "edits": [[173, 177, "person", 8, 0], [272, 277, "person", 8, 0], [551, 556, "person", 8, 0], [577, 581, "person", 8, 0], [613, 628, "driver's license number", 24, 0], [729, 733, "person", 8, 0], [1049, 1058, "location", 10, 0], [1104, 1108, "location", 10, 0], [1155, 1164, "location", 10, 0], [1249, 1253, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1009", "ms": 81.06, "edits": [[4, 11, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1010", "ms": 120.76, "edits": [[24, 28, "person", 8, 0], [51, 55, "person", 8, 0], [62, 69, "organization", 14, 0], [106, 112, "url", 5, 0], [153, 163, "location", 10, 0], [205, 209, "person", 8, 0], [254, 258, "person", 8, 0], [361, 365, "person", 8, 0], [410, 414, "person", 8, 0], [563, 567, "person", 8, 0], [572, 577, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1011", "ms": 99.05, "edits": []}
+{"id": "rd-wildchat-test-1012", "ms": 139.59, "edits": [[49, 52, "location", 10, 0], [65, 71, "person", 8, 0], [114, 119, "person", 8, 0], [227, 233, "person", 8, 0], [258, 263, "person", 8, 0], [325, 330, "person", 8, 0], [365, 371, "person", 8, 0], [397, 403, "person", 8, 0], [421, 426, "person", 8, 0], [558, 564, "person", 8, 0], [580, 585, "person", 8, 0], [674, 680, "person", 8, 0], [690, 695, "person", 8, 0], [810, 815, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1013", "ms": 74.78, "edits": []}
+{"id": "rd-wildchat-test-1014", "ms": 308.12, "edits": [[184, 197, "person", 8, 0], [234, 242, "organization", 14, 0], [396, 409, "person", 8, 0], [532, 540, "organization", 14, 0], [812, 819, "person", 8, 0], [932, 939, "person", 8, 0], [942, 950, "organization", 14, 0], [998, 1004, "person", 8, 0], [1158, 1166, "organization", 14, 0], [1247, 1256, "organization", 14, 0], [1374, 1383, "organization", 14, 0], [1413, 1422, "organization", 14, 0], [1552, 1561, "organization", 14, 0], [1626, 1634, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1015", "ms": 102.67, "edits": []}
+{"id": "rd-wildchat-test-1017", "ms": 82.71, "edits": [[86, 90, "person", 8, 0], [129, 146, "person", 8, 0], [182, 193, "organization", 14, 0], [277, 294, "person", 8, 0], [317, 328, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1018", "ms": 68.38, "edits": [[84, 97, "person", 8, 0], [114, 122, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1020", "ms": 117.54, "edits": [[42, 53, "person", 8, 0], [72, 75, "person", 8, 0], [76, 79, "person", 8, 0], [104, 116, "location", 10, 0], [118, 120, "person", 8, 0], [164, 167, "person", 8, 0], [215, 217, "person", 8, 0], [244, 247, "person", 8, 0], [267, 270, "person", 8, 0], [314, 317, "person", 8, 0], [373, 376, "person", 8, 0], [420, 423, "person", 8, 0], [456, 458, "person", 8, 0], [553, 556, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1021", "ms": 82.65, "edits": [[35, 43, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1022", "ms": 88.28, "edits": [[0, 3, "person", 8, 0], [11, 29, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1023", "ms": 79.08, "edits": [[0, 5, "person", 8, 0], [90, 104, "location", 10, 0], [225, 232, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1024", "ms": 115.73, "edits": [[42, 54, "person", 8, 0], [152, 197, "person", 8, 0], [199, 213, "person", 8, 0], [215, 227, "person", 8, 0], [234, 242, "person", 8, 0], [244, 261, "person", 8, 0], [263, 277, "person", 8, 0], [279, 297, "person", 8, 0], [299, 319, "person", 8, 0], [321, 338, "person", 8, 0], [340, 351, "person", 8, 0], [353, 365, "person", 8, 0], [367, 372, "person", 8, 0], [374, 388, "person", 8, 0], [411, 425, "person", 8, 0], [441, 450, "person", 8, 0], [452, 466, "person", 8, 0], [468, 490, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1025", "ms": 139.0, "edits": [[140, 145, "person", 8, 0], [173, 178, "person", 8, 0], [319, 324, "person", 8, 0], [429, 435, "person", 8, 0], [442, 447, "person", 8, 0], [452, 458, "person", 8, 0], [527, 532, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1026", "ms": 109.33, "edits": [[139, 144, "person", 8, 0], [383, 405, "organization", 14, 0], [409, 416, "organization", 14, 0], [420, 426, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1027", "ms": 96.91, "edits": [[36, 37, "person", 8, 0], [59, 61, "person", 8, 0], [106, 108, "person", 8, 0], [246, 248, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1028", "ms": 83.75, "edits": [[30, 31, "person", 8, 0], [116, 117, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1029", "ms": 102.64, "edits": []}
+{"id": "rd-wildchat-test-1030", "ms": 92.6, "edits": [[1, 8, "person", 8, 0], [63, 70, "person", 8, 0], [127, 134, "person", 8, 0], [186, 193, "person", 8, 0], [216, 223, "person", 8, 0], [268, 272, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1032", "ms": 73.85, "edits": [[116, 121, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1033", "ms": 152.8, "edits": []}
+{"id": "rd-wildchat-test-1034", "ms": 311.7, "edits": [[0, 7, "person", 8, 0], [18, 29, "age", 5, 0], [179, 185, "person", 8, 0], [462, 469, "person", 8, 0], [579, 585, "person", 8, 0], [594, 601, "person", 8, 0], [641, 648, "person", 8, 0], [701, 707, "person", 8, 0], [746, 753, "person", 8, 0], [815, 822, "person", 8, 0], [919, 926, "person", 8, 0], [1098, 1105, "person", 8, 0], [1426, 1432, "person", 8, 0], [1630, 1637, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1035", "ms": 97.41, "edits": []}
+{"id": "rd-wildchat-test-1036", "ms": 93.24, "edits": [[25, 37, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1037", "ms": 622.76, "edits": [[3693, 3707, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1038", "ms": 103.63, "edits": [[22, 25, "person", 8, 0], [67, 70, "person", 8, 0], [286, 289, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1039", "ms": 76.29, "edits": [[27, 31, "person", 8, 0], [44, 56, "location", 10, 0], [83, 89, "person", 8, 0], [180, 184, "person", 8, 0], [191, 195, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1040", "ms": 63.45, "edits": []}
+{"id": "rd-wildchat-test-1041", "ms": 103.89, "edits": []}
+{"id": "rd-wildchat-test-1042", "ms": 87.81, "edits": [[26, 28, "person", 8, 0], [104, 105, "person", 8, 0], [117, 118, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1044", "ms": 98.06, "edits": [[82, 88, "person", 8, 0], [93, 98, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1045", "ms": 107.34, "edits": [[93, 118, "organization", 14, 0], [140, 146, "person", 8, 0], [161, 174, "location", 10, 0], [281, 293, "person", 8, 0], [441, 448, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1046", "ms": 100.08, "edits": [[37, 39, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1047", "ms": 75.22, "edits": [[54, 80, "organization", 14, 0], [172, 198, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1048", "ms": 65.01, "edits": [[56, 66, "person", 8, 0], [77, 89, "person", 8, 0], [91, 103, "person", 8, 0], [105, 115, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1049", "ms": 104.9, "edits": [[47, 48, "person", 8, 0], [170, 171, "person", 8, 0], [206, 207, "person", 8, 0], [252, 255, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1050", "ms": 95.85, "edits": []}
+{"id": "rd-wildchat-test-1052", "ms": 93.65, "edits": [[44, 46, "person", 8, 0], [83, 85, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1053", "ms": 62.95, "edits": [[61, 73, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1054", "ms": 68.82, "edits": []}
+{"id": "rd-wildchat-test-1055", "ms": 64.91, "edits": [[31, 38, "person", 8, 0], [112, 119, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1056", "ms": 169.23, "edits": [[66, 77, "credit card number", 20, 1], [104, 117, "email", 7, 0], [131, 141, "ip address", 12, 1], [145, 162, "driver's license number", 24, 0], [204, 215, "passport number", 17, 0], [253, 265, "phone number", 14, 1], [294, 297, "url", 5, 0], [301, 315, "url", 5, 0], [319, 336, "driver's license number", 24, 0], [340, 347, "driver's license number", 24, 0], [351, 362, "passport number", 17, 0], [366, 372, "social security number", 24, 0], [376, 382, "driver's license number", 24, 0], [406, 417, "driver's license number", 24, 0], [421, 427, "driver's license number", 24, 0], [473, 479, "person", 8, 1], [483, 490, "address", 9, 1], [494, 506, "organization", 14, 0], [515, 529, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-1057", "ms": 146.99, "edits": [[380, 390, "organization", 14, 0], [392, 410, "location", 10, 0], [550, 560, "organization", 14, 0], [718, 728, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1058", "ms": 63.7, "edits": []}
+{"id": "rd-wildchat-test-1059", "ms": 82.54, "edits": []}
+{"id": "rd-wildchat-test-1060", "ms": 93.65, "edits": []}
+{"id": "rd-wildchat-test-1061", "ms": 115.89, "edits": []}
+{"id": "rd-wildchat-test-1062", "ms": 84.31, "edits": [[26, 36, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1063", "ms": 99.51, "edits": []}
+{"id": "rd-wildchat-test-1064", "ms": 155.04, "edits": [[657, 674, "person", 8, 0], [698, 717, "person", 8, 0], [763, 788, "person", 8, 0], [792, 804, "person", 8, 0], [812, 830, "person", 8, 0], [885, 902, "person", 8, 0], [904, 923, "person", 8, 0], [925, 950, "person", 8, 0], [952, 964, "person", 8, 0], [969, 987, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1065", "ms": 73.47, "edits": [[17, 23, "person", 8, 0], [25, 31, "person", 8, 0], [52, 57, "person", 8, 0], [66, 72, "person", 8, 0], [111, 117, "person", 8, 0], [133, 139, "person", 8, 0], [145, 150, "location", 10, 0], [161, 167, "person", 8, 0], [172, 177, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1066", "ms": 115.0, "edits": []}
+{"id": "rd-wildchat-test-1067", "ms": 153.98, "edits": []}
+{"id": "rd-wildchat-test-1068", "ms": 193.34, "edits": []}
+{"id": "rd-wildchat-test-1069", "ms": 64.94, "edits": []}
+{"id": "rd-wildchat-test-1070", "ms": 92.61, "edits": []}
+{"id": "rd-wildchat-test-1071", "ms": 114.21, "edits": [[48, 56, "person", 8, 0], [133, 140, "organization", 14, 0], [142, 149, "organization", 14, 0], [154, 163, "organization", 14, 0], [492, 513, "organization", 14, 0], [531, 543, "organization", 14, 0], [563, 567, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1072", "ms": 432.25, "edits": [[59, 63, "person", 8, 0], [71, 75, "person", 8, 0], [95, 98, "person", 8, 0], [148, 154, "organization", 14, 0], [302, 308, "organization", 14, 0], [419, 425, "organization", 14, 0], [470, 476, "organization", 14, 0], [610, 616, "organization", 14, 0], [687, 691, "person", 8, 0], [696, 699, "person", 8, 0], [728, 732, "person", 8, 0], [737, 740, "person", 8, 0], [886, 890, "person", 8, 0], [912, 915, "person", 8, 0], [946, 962, "location", 10, 0], [1048, 1051, "person", 8, 0], [1066, 1069, "person", 8, 0], [1130, 1134, "person", 8, 0], [1203, 1207, "person", 8, 0], [1212, 1215, "person", 8, 0], [1305, 1308, "person", 8, 0], [1339, 1355, "location", 10, 0], [1502, 1506, "person", 8, 0], [1563, 1567, "person", 8, 0], [1572, 1575, "person", 8, 0], [1596, 1600, "person", 8, 0], [1640, 1644, "person", 8, 0], [1727, 1730, "person", 8, 0], [1803, 1809, "person", 8, 0], [1844, 1848, "person", 8, 0], [1850, 1853, "person", 8, 0], [1872, 1875, "person", 8, 0], [1955, 1966, "person", 8, 0], [2000, 2006, "person", 8, 0], [2020, 2024, "person", 8, 0], [2029, 2032, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1073", "ms": 458.41, "edits": []}
+{"id": "rd-wildchat-test-1074", "ms": 69.67, "edits": [[0, 5, "person", 8, 0], [15, 23, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1075", "ms": 179.79, "edits": [[1, 2, "person", 8, 0], [21, 34, "location", 10, 0], [51, 65, "location", 10, 0], [81, 82, "person", 8, 0], [98, 99, "person", 8, 0], [187, 188, "person", 8, 0], [219, 227, "person", 8, 0], [247, 248, "person", 8, 0], [305, 306, "person", 8, 0], [316, 317, "person", 8, 0], [327, 339, "location", 10, 0], [387, 388, "person", 8, 0], [464, 477, "age", 5, 0], [479, 480, "person", 8, 0], [511, 512, "person", 8, 0], [550, 558, "person", 8, 0], [600, 601, "person", 8, 0], [656, 669, "age", 5, 0], [935, 958, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1076", "ms": 82.49, "edits": []}
+{"id": "rd-wildchat-test-1077", "ms": 93.93, "edits": [[47, 66, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1078", "ms": 644.61, "edits": [[20, 24, "person", 8, 0], [75, 86, "person", 8, 0], [99, 110, "person", 8, 0], [137, 148, "person", 8, 0], [363, 367, "person", 8, 0], [402, 406, "person", 8, 0], [499, 503, "person", 8, 0], [542, 546, "person", 8, 0], [818, 822, "person", 8, 0], [1055, 1059, "person", 8, 0], [1294, 1298, "person", 8, 0], [1536, 1540, "person", 8, 0], [2199, 2203, "username", 10, 0], [2512, 2516, "username", 10, 0], [2662, 2673, "username", 10, 0], [2714, 2725, "username", 10, 0], [2766, 2777, "username", 10, 0], [2819, 2830, "username", 10, 0], [2867, 2871, "username", 10, 0], [2915, 2919, "username", 10, 0], [2940, 2951, "username", 10, 0], [2959, 2963, "username", 10, 0], [3252, 3256, "username", 10, 0], [3265, 3269, "username", 10, 0], [3284, 3288, "username", 10, 0], [3481, 3485, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1079", "ms": 92.81, "edits": [[25, 37, "person", 8, 0], [45, 48, "location", 10, 0], [50, 53, "person", 8, 0], [86, 87, "person", 8, 0], [96, 99, "person", 8, 0], [116, 118, "person", 8, 0], [153, 154, "person", 8, 0], [164, 167, "person", 8, 0], [191, 194, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1080", "ms": 79.75, "edits": [[8, 24, "username", 10, 0], [26, 27, "person", 8, 0], [100, 103, "person", 8, 0], [150, 153, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1081", "ms": 469.43, "edits": [[1865, 1871, "person", 8, 0], [1895, 1901, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1082", "ms": 94.42, "edits": [[57, 60, "person", 8, 0], [108, 111, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1083", "ms": 96.59, "edits": [[84, 93, "location", 10, 0], [100, 109, "person", 8, 0], [149, 159, "organization", 14, 0], [300, 309, "person", 8, 0], [346, 357, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1084", "ms": 68.38, "edits": []}
+{"id": "rd-wildchat-test-1085", "ms": 93.6, "edits": [[25, 36, "person", 8, 0], [40, 47, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1086", "ms": 145.49, "edits": [[24, 35, "organization", 14, 0], [59, 66, "location", 10, 0], [149, 169, "organization", 14, 0], [193, 208, "organization", 14, 0], [404, 410, "organization", 14, 0], [608, 619, "organization", 14, 0], [896, 911, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1087", "ms": 66.22, "edits": [[0, 14, "location", 10, 0], [53, 59, "person", 8, 0], [62, 64, "person", 8, 0], [89, 103, "location", 10, 0], [108, 114, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1088", "ms": 101.1, "edits": [[35, 43, "location", 10, 0], [45, 52, "person", 8, 0], [74, 78, "person", 8, 0], [113, 119, "person", 8, 0], [148, 154, "person", 8, 0], [206, 208, "person", 8, 0], [222, 228, "person", 8, 0], [261, 265, "person", 8, 0], [287, 295, "location", 10, 0], [305, 311, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1089", "ms": 152.07, "edits": [[30, 47, "location", 10, 0], [82, 93, "location", 10, 0], [95, 103, "location", 10, 0], [124, 134, "location", 10, 0], [136, 145, "location", 10, 0], [150, 166, "location", 10, 0], [485, 504, "person", 8, 0], [597, 617, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1090", "ms": 166.36, "edits": [[11, 34, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1091", "ms": 101.88, "edits": [[114, 118, "person", 8, 0], [128, 132, "person", 8, 0], [204, 211, "person", 8, 0], [221, 228, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1094", "ms": 63.73, "edits": [[51, 67, "person", 8, 0], [74, 92, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1095", "ms": 68.36, "edits": [[0, 14, "organization", 14, 0], [19, 25, "person", 8, 0], [35, 41, "person", 8, 0], [99, 113, "organization", 14, 0], [117, 123, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1096", "ms": 78.94, "edits": []}
+{"id": "rd-wildchat-test-1097", "ms": 78.95, "edits": [[166, 172, "location", 10, 0], [224, 230, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1098", "ms": 683.44, "edits": []}
+{"id": "rd-wildchat-test-1100", "ms": 93.91, "edits": [[48, 57, "location", 10, 0], [103, 107, "location", 10, 0], [206, 210, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1101", "ms": 141.32, "edits": [[28, 34, "person", 8, 0], [172, 180, "location", 10, 0], [293, 297, "person", 8, 0], [302, 308, "person", 8, 0], [342, 346, "person", 8, 0], [391, 397, "person", 8, 0], [475, 481, "person", 8, 0], [508, 512, "person", 8, 0], [536, 543, "person", 8, 0], [645, 663, "location", 10, 0], [700, 706, "person", 8, 0], [730, 734, "location", 10, 0], [741, 745, "person", 8, 0], [750, 757, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1102", "ms": 120.79, "edits": [[380, 385, "location", 10, 0], [459, 464, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1103", "ms": 87.93, "edits": [[51, 56, "email", 7, 0], [92, 96, "person", 8, 0], [137, 143, "person", 8, 0], [265, 273, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1104", "ms": 87.39, "edits": [[35, 36, "person", 8, 0], [61, 62, "person", 8, 0], [89, 92, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1105", "ms": 64.28, "edits": [[0, 1, "person", 8, 0], [7, 17, "person", 8, 0], [19, 20, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1106", "ms": 86.68, "edits": []}
+{"id": "rd-wildchat-test-1107", "ms": 97.21, "edits": [[111, 116, "person", 8, 0], [177, 182, "person", 8, 0], [260, 265, "person", 8, 0], [334, 339, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1109", "ms": 184.28, "edits": [[8, 20, "location", 10, 0], [26, 34, "person", 8, 0], [48, 55, "location", 10, 0], [140, 148, "person", 8, 0], [194, 211, "person", 8, 0], [256, 266, "person", 8, 0], [270, 278, "person", 8, 0], [353, 370, "person", 8, 0], [392, 402, "person", 8, 0], [439, 464, "location", 10, 0], [487, 495, "person", 8, 0], [525, 550, "location", 10, 0], [590, 607, "person", 8, 0], [770, 778, "person", 8, 0], [797, 814, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1110", "ms": 79.51, "edits": []}
+{"id": "rd-wildchat-test-1111", "ms": 205.9, "edits": [[1, 2, "person", 8, 0], [21, 34, "location", 10, 0], [51, 65, "location", 10, 0], [81, 82, "person", 8, 0], [98, 99, "person", 8, 0], [187, 188, "person", 8, 0], [219, 227, "person", 8, 0], [247, 248, "person", 8, 0], [316, 317, "person", 8, 0], [327, 339, "location", 10, 0], [387, 388, "person", 8, 0], [464, 477, "age", 5, 0], [479, 480, "person", 8, 0], [511, 512, "person", 8, 0], [550, 558, "person", 8, 0], [600, 601, "person", 8, 0], [656, 669, "age", 5, 0], [935, 958, "person", 8, 0], [1002, 1010, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1112", "ms": 140.46, "edits": [[279, 282, "person", 8, 0], [512, 515, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1113", "ms": 85.3, "edits": [[77, 78, "person", 8, 0], [93, 94, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1114", "ms": 122.55, "edits": []}
+{"id": "rd-wildchat-test-1115", "ms": 79.12, "edits": [[17, 28, "person", 8, 0], [77, 93, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1116", "ms": 98.06, "edits": []}
+{"id": "rd-wildchat-test-1117", "ms": 102.03, "edits": [[44, 45, "person", 8, 0], [95, 96, "person", 8, 0], [192, 193, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1118", "ms": 77.06, "edits": [[45, 48, "person", 8, 0], [77, 79, "person", 8, 0], [131, 132, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1119", "ms": 63.61, "edits": []}
+{"id": "rd-wildchat-test-1120", "ms": 74.22, "edits": [[166, 184, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1121", "ms": 64.52, "edits": [[63, 73, "organization", 14, 0], [77, 83, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1122", "ms": 108.32, "edits": [[59, 63, "person", 8, 0], [90, 97, "person", 8, 0], [124, 139, "age", 5, 0], [207, 214, "person", 8, 0], [527, 531, "person", 8, 0], [547, 562, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1123", "ms": 64.4, "edits": [[51, 63, "person", 8, 0], [68, 74, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1124", "ms": 62.98, "edits": [[42, 50, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1125", "ms": 78.27, "edits": []}
+{"id": "rd-wildchat-test-1126", "ms": 81.48, "edits": [[1, 7, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1127", "ms": 96.39, "edits": [[4, 13, "organization", 14, 0], [265, 270, "person", 8, 0], [375, 382, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1129", "ms": 253.57, "edits": [[35, 37, "person", 8, 0], [94, 96, "person", 8, 0], [359, 361, "person", 8, 0], [564, 566, "person", 8, 0], [575, 578, "person", 8, 0], [666, 669, "person", 8, 0], [743, 745, "person", 8, 0], [833, 835, "person", 8, 0], [1121, 1123, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1130", "ms": 64.84, "edits": [[24, 31, "person", 8, 0], [50, 55, "person", 8, 0], [70, 74, "location", 10, 0], [96, 104, "person", 8, 0], [109, 120, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1131", "ms": 97.72, "edits": [[5, 17, "organization", 14, 0], [65, 68, "organization", 14, 0], [167, 170, "organization", 14, 0], [416, 419, "organization", 14, 0], [460, 465, "email", 7, 0]]}
+{"id": "rd-wildchat-test-1132", "ms": 77.02, "edits": [[6, 7, "person", 8, 0], [31, 34, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1133", "ms": 442.5, "edits": [[47, 50, "organization", 14, 0], [1572, 1584, "person", 8, 0], [1598, 1602, "person", 8, 0], [1609, 1615, "person", 8, 0], [1711, 1715, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1134", "ms": 126.27, "edits": []}
+{"id": "rd-wildchat-test-1135", "ms": 64.24, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1136", "ms": 81.72, "edits": [[8, 20, "person", 8, 0], [207, 217, "person", 8, 0], [223, 233, "organization", 14, 0], [278, 289, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1137", "ms": 65.58, "edits": [[32, 37, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1138", "ms": 100.09, "edits": [[2, 13, "person", 8, 0], [17, 19, "age", 5, 0], [82, 102, "person", 8, 0], [108, 119, "person", 8, 0], [128, 141, "person", 8, 0], [229, 240, "person", 8, 0], [290, 310, "person", 8, 0], [379, 392, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1139", "ms": 93.49, "edits": [[25, 26, "person", 8, 0], [124, 125, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1140", "ms": 177.91, "edits": [[1, 2, "person", 8, 0], [65, 73, "location", 10, 0], [312, 313, "person", 8, 0], [378, 379, "person", 8, 0], [476, 492, "person", 8, 0], [497, 520, "person", 8, 0], [794, 802, "location", 10, 0], [946, 965, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1141", "ms": 100.27, "edits": [[37, 41, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1142", "ms": 76.16, "edits": [[14, 19, "person", 8, 0], [52, 55, "location", 10, 0], [72, 76, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1143", "ms": 96.5, "edits": [[95, 97, "person", 8, 0], [184, 186, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1144", "ms": 79.07, "edits": []}
+{"id": "rd-wildchat-test-1145", "ms": 94.03, "edits": [[46, 47, "person", 8, 0], [62, 75, "person", 8, 0], [81, 82, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1146", "ms": 94.06, "edits": []}
+{"id": "rd-wildchat-test-1147", "ms": 68.35, "edits": [[38, 50, "person", 8, 0], [65, 79, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1148", "ms": 64.96, "edits": []}
+{"id": "rd-wildchat-test-1149", "ms": 127.8, "edits": []}
+{"id": "rd-wildchat-test-1150", "ms": 104.06, "edits": [[31, 41, "person", 8, 0], [53, 54, "person", 8, 0], [135, 136, "person", 8, 0], [280, 281, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1151", "ms": 106.38, "edits": []}
+{"id": "rd-wildchat-test-1152", "ms": 92.43, "edits": []}
+{"id": "rd-wildchat-test-1153", "ms": 76.4, "edits": [[70, 96, "organization", 14, 0], [142, 153, "organization", 14, 0], [213, 239, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1154", "ms": 212.17, "edits": []}
+{"id": "rd-wildchat-test-1155", "ms": 76.29, "edits": [[64, 84, "location", 10, 0], [93, 113, "location", 10, 0], [167, 173, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1156", "ms": 96.21, "edits": [[0, 28, "location", 10, 0], [85, 90, "person", 8, 0], [92, 99, "person", 8, 0], [101, 105, "person", 8, 0], [110, 115, "person", 8, 0], [130, 136, "person", 8, 0], [141, 146, "person", 8, 0], [173, 179, "person", 8, 0], [181, 186, "person", 8, 0], [188, 195, "person", 8, 0], [197, 201, "person", 8, 0], [206, 211, "person", 8, 0], [268, 273, "person", 8, 0], [278, 285, "person", 8, 0], [333, 338, "person", 8, 0], [343, 347, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1157", "ms": 64.2, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1158", "ms": 157.7, "edits": [[34, 40, "person", 8, 0], [122, 139, "url", 5, 0], [190, 207, "url", 5, 0], [342, 360, "url", 5, 0], [403, 409, "organization", 14, 0], [446, 462, "url", 5, 0], [498, 514, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1159", "ms": 76.28, "edits": [[59, 62, "organization", 14, 0], [128, 147, "passport number", 17, 0], [191, 199, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1160", "ms": 105.97, "edits": [[137, 139, "organization", 14, 0], [168, 177, "person", 8, 0], [241, 243, "person", 8, 0], [279, 281, "person", 8, 0], [552, 554, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1161", "ms": 68.16, "edits": [[53, 54, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1162", "ms": 76.56, "edits": [[22, 37, "organization", 14, 0], [70, 77, "person", 8, 0], [92, 109, "social security number", 24, 0], [152, 165, "organization", 14, 0], [176, 183, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1163", "ms": 143.91, "edits": []}
+{"id": "rd-wildchat-test-1164", "ms": 75.61, "edits": [[19, 28, "url", 5, 0], [33, 51, "organization", 14, 0], [65, 69, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1165", "ms": 64.51, "edits": []}
+{"id": "rd-wildchat-test-1166", "ms": 76.9, "edits": [[33, 42, "person", 8, 0], [46, 58, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1167", "ms": 63.73, "edits": [[13, 17, "person", 8, 0], [30, 37, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1168", "ms": 294.17, "edits": [[84, 96, "person", 8, 0], [137, 142, "location", 10, 0], [171, 172, "age", 5, 0], [186, 191, "person", 8, 0], [232, 244, "location", 10, 0], [414, 427, "organization", 14, 0], [437, 442, "person", 8, 0], [466, 471, "person", 8, 0], [543, 548, "person", 8, 0], [550, 555, "person", 8, 0], [578, 583, "location", 10, 0], [603, 608, "person", 8, 0], [730, 735, "person", 8, 0], [863, 870, "person", 8, 0], [927, 932, "person", 8, 0], [1010, 1015, "person", 8, 0], [1064, 1079, "age", 5, 0], [1081, 1086, "person", 8, 0], [1090, 1091, "age", 5, 0], [1131, 1136, "location", 10, 0], [1137, 1142, "person", 8, 0], [1155, 1166, "organization", 14, 0], [1181, 1186, "person", 8, 0], [1236, 1241, "person", 8, 0], [1472, 1477, "person", 8, 0], [1479, 1484, "person", 8, 0], [1603, 1608, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1169", "ms": 81.94, "edits": [[226, 250, "organization", 14, 0], [273, 293, "organization", 14, 0], [302, 312, "location", 10, 0], [350, 380, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1170", "ms": 351.45, "edits": [[40, 63, "person", 8, 0], [170, 180, "organization", 14, 0], [1388, 1401, "person", 8, 0], [1456, 1469, "organization", 14, 0], [1666, 1679, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1171", "ms": 70.48, "edits": [[6, 7, "person", 8, 0], [21, 24, "person", 8, 0], [54, 57, "person", 8, 0], [87, 88, "person", 8, 0], [100, 103, "person", 8, 0], [110, 111, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1172", "ms": 64.35, "edits": []}
+{"id": "rd-wildchat-test-1173", "ms": 64.76, "edits": [[21, 33, "person", 8, 0], [46, 50, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1174", "ms": 347.65, "edits": []}
+{"id": "rd-wildchat-test-1175", "ms": 106.25, "edits": [[0, 6, "person", 8, 0], [48, 51, "person", 8, 0], [147, 153, "person", 8, 0], [184, 188, "person", 8, 0], [243, 249, "person", 8, 0], [269, 272, "person", 8, 0], [276, 280, "person", 8, 0], [357, 361, "person", 8, 0], [396, 399, "person", 8, 0], [430, 434, "person", 8, 0], [472, 476, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1176", "ms": 78.28, "edits": [[0, 1, "person", 8, 0], [177, 180, "person", 8, 0], [186, 188, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1177", "ms": 63.32, "edits": [[0, 10, "email", 7, 0]]}
+{"id": "rd-wildchat-test-1178", "ms": 103.89, "edits": [[26, 28, "person", 8, 0], [53, 56, "person", 8, 0], [89, 92, "person", 8, 0], [94, 95, "person", 8, 0], [102, 105, "person", 8, 0], [140, 143, "person", 8, 0], [178, 181, "person", 8, 0], [290, 293, "person", 8, 0], [431, 434, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1179", "ms": 94.36, "edits": [[26, 32, "organization", 14, 0], [69, 84, "username", 10, 0], [159, 170, "person", 8, 0], [175, 182, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1180", "ms": 77.63, "edits": [[196, 221, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1181", "ms": 97.75, "edits": [[25, 32, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1182", "ms": 133.15, "edits": [[8, 14, "location", 10, 0], [18, 26, "person", 8, 0], [52, 58, "person", 8, 0], [76, 82, "location", 10, 0], [143, 163, "person", 8, 0], [201, 213, "person", 8, 0], [327, 331, "location", 10, 0], [340, 346, "person", 8, 0], [362, 374, "person", 8, 0], [402, 410, "person", 8, 0], [434, 446, "person", 8, 0], [550, 554, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1183", "ms": 102.92, "edits": [[32, 33, "person", 8, 0], [94, 95, "person", 8, 0], [136, 137, "person", 8, 0], [228, 229, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1184", "ms": 66.68, "edits": [[0, 5, "person", 8, 0], [19, 21, "age", 5, 0], [37, 42, "person", 8, 0], [84, 89, "person", 8, 0], [102, 107, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1185", "ms": 64.91, "edits": [[9, 14, "person", 8, 0], [19, 28, "person", 8, 0], [80, 84, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1186", "ms": 109.04, "edits": [[41, 51, "person", 8, 0], [72, 83, "person", 8, 0], [192, 203, "person", 8, 0], [286, 297, "person", 8, 0], [486, 496, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1187", "ms": 445.49, "edits": [[214, 237, "location", 10, 0], [242, 252, "location", 10, 0], [299, 308, "organization", 14, 0], [680, 687, "organization", 14, 0], [1233, 1246, "organization", 14, 0], [1265, 1275, "person", 8, 0], [1520, 1530, "person", 8, 0], [1579, 1590, "location", 10, 0], [1595, 1612, "location", 10, 0], [1731, 1738, "organization", 14, 0], [1817, 1830, "organization", 14, 0], [1832, 1842, "organization", 14, 0], [1848, 1867, "organization", 14, 0], [1871, 1888, "location", 10, 0], [2023, 2033, "person", 8, 0], [2067, 2086, "passport number", 17, 0], [2174, 2183, "person", 8, 0], [2231, 2245, "location", 10, 0], [2343, 2353, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1188", "ms": 75.79, "edits": []}
+{"id": "rd-wildchat-test-1189", "ms": 473.69, "edits": [[1508, 1521, "person", 8, 0], [1576, 1589, "organization", 14, 0], [1786, 1799, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1190", "ms": 179.14, "edits": [[8, 23, "location", 10, 0], [29, 41, "person", 8, 0], [49, 59, "person", 8, 0], [147, 159, "person", 8, 0], [264, 279, "location", 10, 0], [283, 295, "person", 8, 0], [313, 325, "person", 8, 0], [350, 362, "person", 8, 0], [620, 632, "person", 8, 0], [718, 724, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1191", "ms": 77.0, "edits": [[33, 37, "person", 8, 0], [42, 48, "username", 10, 0], [127, 146, "date of birth", 15, 0], [149, 153, "person", 8, 0], [208, 214, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1192", "ms": 80.23, "edits": [[5, 45, "organization", 14, 0], [73, 81, "person", 8, 0], [211, 219, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1193", "ms": 63.09, "edits": []}
+{"id": "rd-wildchat-test-1195", "ms": 105.93, "edits": [[0, 3, "person", 8, 0], [11, 34, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1196", "ms": 68.49, "edits": [[101, 109, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1197", "ms": 104.47, "edits": []}
+{"id": "rd-wildchat-test-1198", "ms": 93.89, "edits": []}
+{"id": "rd-wildchat-test-1199", "ms": 175.86, "edits": [[92, 105, "person", 8, 0], [451, 459, "person", 8, 0], [1070, 1078, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1200", "ms": 81.53, "edits": [[53, 56, "person", 8, 0], [129, 132, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1201", "ms": 77.68, "edits": []}
+{"id": "rd-wildchat-test-1202", "ms": 86.66, "edits": [[45, 51, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1203", "ms": 122.81, "edits": [[104, 113, "location", 10, 0], [116, 122, "person", 8, 0], [251, 264, "organization", 14, 0], [317, 321, "location", 10, 0], [331, 339, "age", 5, 0], [431, 438, "person", 8, 0], [563, 576, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1204", "ms": 73.86, "edits": [[31, 47, "person", 8, 0], [64, 80, "person", 8, 0], [99, 108, "organization", 14, 0], [117, 133, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1205", "ms": 79.34, "edits": [[0, 1, "person", 8, 0], [55, 56, "person", 8, 0], [105, 106, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1206", "ms": 65.04, "edits": [[100, 108, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1207", "ms": 76.21, "edits": [[32, 40, "organization", 14, 0], [42, 47, "person", 8, 0], [52, 56, "person", 8, 0], [70, 77, "location", 10, 0], [108, 112, "person", 8, 0], [122, 127, "person", 8, 0], [142, 146, "person", 8, 0], [153, 158, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1208", "ms": 92.62, "edits": []}
+{"id": "rd-wildchat-test-1209", "ms": 111.73, "edits": [[59, 63, "person", 8, 0], [72, 76, "person", 8, 0], [93, 96, "person", 8, 0], [102, 113, "age", 5, 0], [135, 150, "person", 8, 0], [169, 180, "age", 5, 0], [189, 199, "person", 8, 0], [299, 303, "person", 8, 0], [308, 311, "person", 8, 0], [332, 335, "person", 8, 0], [389, 393, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1210", "ms": 252.9, "edits": [[33, 44, "person", 8, 0], [129, 132, "person", 8, 0], [184, 189, "person", 8, 0], [313, 318, "person", 8, 0], [601, 604, "person", 8, 0], [652, 655, "person", 8, 0], [684, 691, "location", 10, 0], [987, 992, "person", 8, 0], [1039, 1042, "person", 8, 0], [1081, 1084, "person", 8, 0], [1104, 1111, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1211", "ms": 79.15, "edits": []}
+{"id": "rd-wildchat-test-1212", "ms": 74.81, "edits": [[19, 22, "person", 8, 0], [56, 60, "location", 10, 0], [108, 137, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1213", "ms": 87.67, "edits": [[37, 38, "person", 8, 0], [93, 94, "person", 8, 0], [129, 130, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1214", "ms": 63.97, "edits": [[40, 45, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1215", "ms": 84.65, "edits": [[1, 8, "person", 8, 0], [72, 82, "age", 5, 0], [117, 124, "person", 8, 0], [137, 144, "person", 8, 0], [147, 156, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1216", "ms": 78.08, "edits": []}
+{"id": "rd-wildchat-test-1217", "ms": 264.26, "edits": [[93, 99, "person", 8, 0], [236, 242, "person", 8, 0], [399, 415, "location", 10, 0], [494, 500, "person", 8, 0], [683, 689, "person", 8, 0], [1046, 1052, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1218", "ms": 83.32, "edits": [[26, 28, "person", 8, 0], [48, 49, "person", 8, 0], [92, 95, "person", 8, 0], [118, 121, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1219", "ms": 86.76, "edits": [[142, 148, "organization", 14, 0], [149, 156, "organization", 14, 0], [157, 166, "organization", 14, 0], [167, 174, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1220", "ms": 99.31, "edits": [[30, 31, "person", 8, 0], [47, 50, "person", 8, 0], [52, 53, "person", 8, 0], [167, 168, "person", 8, 0], [234, 235, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1221", "ms": 175.54, "edits": [[139, 151, "age", 5, 0], [153, 158, "person", 8, 0], [163, 169, "person", 8, 0], [176, 198, "location", 10, 0], [231, 253, "organization", 14, 0], [446, 451, "person", 8, 0], [456, 462, "person", 8, 0], [858, 863, "person", 8, 0], [865, 871, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1222", "ms": 275.92, "edits": []}
+{"id": "rd-wildchat-test-1223", "ms": 115.42, "edits": [[13, 20, "person", 8, 0], [57, 60, "person", 8, 0], [97, 115, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1225", "ms": 106.08, "edits": [[20, 31, "location", 10, 0], [37, 45, "person", 8, 0], [98, 104, "person", 8, 0], [156, 164, "person", 8, 0], [186, 192, "person", 8, 0], [217, 227, "person", 8, 0], [233, 237, "person", 8, 0], [355, 366, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1226", "ms": 76.36, "edits": [[219, 222, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1227", "ms": 77.31, "edits": [[54, 57, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1228", "ms": 128.51, "edits": [[40, 52, "person", 8, 0], [91, 96, "person", 8, 0], [98, 103, "person", 8, 0], [109, 113, "person", 8, 0], [175, 187, "person", 8, 0], [207, 218, "person", 8, 0], [273, 287, "person", 8, 0], [289, 301, "person", 8, 0], [303, 310, "person", 8, 0], [330, 346, "person", 8, 0], [348, 358, "person", 8, 0], [360, 366, "person", 8, 0], [368, 378, "person", 8, 0], [380, 392, "person", 8, 0], [414, 428, "person", 8, 0], [430, 445, "person", 8, 0], [447, 462, "person", 8, 0], [464, 474, "person", 8, 0], [476, 489, "person", 8, 0], [491, 503, "person", 8, 0], [505, 516, "person", 8, 0], [518, 532, "person", 8, 0], [534, 549, "person", 8, 0], [551, 560, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1229", "ms": 150.82, "edits": [[8, 34, "location", 10, 0], [38, 45, "person", 8, 0], [48, 54, "person", 8, 0], [94, 100, "person", 8, 0], [195, 201, "person", 8, 0], [220, 226, "person", 8, 0], [244, 250, "person", 8, 0], [274, 278, "person", 8, 0], [309, 315, "person", 8, 0], [350, 356, "person", 8, 0], [390, 396, "person", 8, 0], [467, 473, "person", 8, 0], [679, 686, "person", 8, 0], [711, 717, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1230", "ms": 99.64, "edits": [[194, 204, "organization", 14, 0], [222, 232, "organization", 14, 0], [403, 414, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1231", "ms": 95.73, "edits": [[105, 113, "person", 8, 0], [149, 163, "person", 8, 0], [215, 223, "person", 8, 0], [289, 297, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1232", "ms": 88.7, "edits": [[25, 26, "person", 8, 0], [66, 67, "person", 8, 0], [115, 116, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1233", "ms": 66.18, "edits": [[22, 27, "location", 10, 0], [33, 35, "person", 8, 0], [40, 47, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1234", "ms": 75.26, "edits": [[42, 51, "person", 8, 0], [67, 79, "person", 8, 0], [85, 104, "person", 8, 0], [113, 118, "person", 8, 0], [120, 125, "person", 8, 0], [131, 142, "person", 8, 0], [144, 153, "person", 8, 0], [174, 184, "organization", 14, 0], [219, 229, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1235", "ms": 152.74, "edits": [[476, 493, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1236", "ms": 144.06, "edits": [[185, 210, "url", 5, 0], [440, 465, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1237", "ms": 583.97, "edits": [[122, 145, "api key", 9, 0], [157, 161, "api key", 9, 0], [249, 253, "username", 10, 0], [605, 609, "username", 10, 0], [852, 856, "username", 10, 0], [2316, 2321, "email", 7, 0], [2330, 2334, "person", 8, 0], [2538, 2543, "email", 7, 0], [2552, 2556, "person", 8, 0], [2743, 2748, "email", 7, 0], [2757, 2761, "person", 8, 0], [2972, 2977, "email", 7, 0], [2986, 2990, "person", 8, 0], [3200, 3205, "email", 7, 0], [3214, 3218, "person", 8, 0], [3408, 3413, "email", 7, 0], [3422, 3426, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1238", "ms": 88.73, "edits": [[40, 46, "organization", 14, 0], [148, 152, "organization", 14, 0], [168, 169, "person", 8, 0], [222, 225, "organization", 14, 0], [354, 358, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1239", "ms": 96.13, "edits": [[26, 28, "person", 8, 0], [81, 82, "person", 8, 0], [95, 96, "person", 8, 0], [118, 119, "person", 8, 0], [204, 205, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1240", "ms": 70.14, "edits": [[1, 2, "person", 8, 0], [32, 37, "person", 8, 0], [75, 87, "bank account number", 21, 0]]}
+{"id": "rd-wildchat-test-1241", "ms": 97.0, "edits": []}
+{"id": "rd-wildchat-test-1242", "ms": 100.96, "edits": [[26, 29, "person", 8, 0], [413, 420, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1243", "ms": 75.75, "edits": [[1, 8, "person", 8, 0], [142, 147, "person", 8, 0], [152, 158, "person", 8, 0], [201, 207, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1245", "ms": 64.49, "edits": [[50, 62, "person", 8, 0], [66, 75, "person", 8, 0], [80, 85, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1247", "ms": 79.2, "edits": [[0, 14, "organization", 14, 0], [40, 61, "person", 8, 0], [63, 80, "person", 8, 0], [85, 100, "person", 8, 0], [104, 118, "person", 8, 0], [136, 150, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1248", "ms": 65.38, "edits": [[3, 9, "organization", 14, 0], [49, 73, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1249", "ms": 65.06, "edits": [[28, 47, "organization", 14, 0], [57, 64, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1250", "ms": 68.89, "edits": [[161, 167, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1251", "ms": 79.44, "edits": []}
+{"id": "rd-wildchat-test-1252", "ms": 76.11, "edits": []}
+{"id": "rd-wildchat-test-1253", "ms": 113.85, "edits": [[70, 83, "location", 10, 0], [171, 176, "organization", 14, 0], [200, 211, "organization", 14, 0], [256, 263, "person", 8, 0], [305, 313, "organization", 14, 0], [325, 335, "organization", 14, 0], [377, 385, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1254", "ms": 80.15, "edits": []}
+{"id": "rd-wildchat-test-1255", "ms": 166.11, "edits": [[14, 29, "person", 8, 0], [720, 731, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1256", "ms": 81.15, "edits": [[0, 3, "person", 8, 0], [11, 34, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1257", "ms": 190.02, "edits": []}
+{"id": "rd-wildchat-test-1259", "ms": 76.51, "edits": []}
+{"id": "rd-wildchat-test-1260", "ms": 76.83, "edits": []}
+{"id": "rd-wildchat-test-1261", "ms": 71.0, "edits": [[81, 96, "email", 7, 0], [98, 99, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1262", "ms": 101.51, "edits": [[25, 26, "person", 8, 0], [43, 55, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1263", "ms": 64.0, "edits": [[53, 67, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1264", "ms": 80.02, "edits": [[202, 212, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1265", "ms": 96.49, "edits": []}
+{"id": "rd-wildchat-test-1266", "ms": 106.72, "edits": [[384, 410, "person", 8, 0], [448, 478, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1267", "ms": 107.81, "edits": [[0, 3, "person", 8, 0], [11, 34, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1269", "ms": 75.61, "edits": [[34, 41, "location", 10, 0], [80, 111, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1270", "ms": 63.92, "edits": [[62, 65, "person", 8, 0], [70, 86, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1271", "ms": 159.22, "edits": [[1, 8, "person", 8, 0], [70, 77, "person", 8, 0], [247, 254, "person", 8, 0], [269, 275, "person", 8, 0], [344, 347, "person", 8, 0], [361, 364, "person", 8, 0], [372, 379, "person", 8, 0], [412, 418, "person", 8, 0], [483, 486, "person", 8, 0], [507, 513, "person", 8, 0], [516, 519, "person", 8, 0], [601, 608, "person", 8, 0], [636, 643, "person", 8, 0], [651, 657, "person", 8, 0], [725, 732, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1272", "ms": 87.06, "edits": [[5, 35, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1273", "ms": 91.05, "edits": [[61, 72, "location", 10, 0], [135, 146, "location", 10, 0], [185, 209, "person", 8, 0], [254, 265, "location", 10, 0], [425, 440, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1274", "ms": 77.28, "edits": [[173, 185, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1275", "ms": 298.43, "edits": [[67, 69, "person", 8, 0], [187, 188, "person", 8, 0], [313, 314, "person", 8, 0], [347, 349, "person", 8, 0], [408, 418, "organization", 14, 0], [638, 639, "person", 8, 0], [657, 658, "person", 8, 0], [731, 740, "location", 10, 0], [775, 776, "person", 8, 0], [802, 803, "person", 8, 0], [902, 910, "person", 8, 0], [922, 924, "person", 8, 0], [966, 969, "person", 8, 0], [1028, 1029, "person", 8, 0], [1044, 1045, "person", 8, 0], [1084, 1085, "person", 8, 0], [1122, 1134, "person", 8, 0], [1192, 1193, "person", 8, 0], [1288, 1289, "person", 8, 0], [1336, 1348, "person", 8, 0], [1350, 1351, "person", 8, 0], [1426, 1428, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1276", "ms": 116.26, "edits": [[29, 38, "person", 8, 0], [57, 61, "person", 8, 0], [216, 218, "person", 8, 0], [266, 270, "person", 8, 0], [281, 284, "age", 5, 0], [286, 289, "person", 8, 0], [306, 308, "person", 8, 0], [333, 336, "person", 8, 0], [367, 370, "person", 8, 0], [376, 392, "organization", 14, 0], [394, 396, "person", 8, 0], [438, 443, "location", 10, 0], [449, 453, "person", 8, 0], [466, 468, "location", 10, 0], [495, 498, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1277", "ms": 79.17, "edits": [[35, 42, "person", 8, 0], [85, 89, "person", 8, 0], [91, 98, "person", 8, 0], [109, 113, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1278", "ms": 66.73, "edits": [[32, 35, "person", 8, 0], [46, 60, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1279", "ms": 123.1, "edits": [[65, 74, "person", 8, 0], [80, 99, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1280", "ms": 64.67, "edits": [[35, 48, "location", 10, 0], [77, 89, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1281", "ms": 75.34, "edits": []}
+{"id": "rd-wildchat-test-1282", "ms": 99.73, "edits": [[39, 47, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1283", "ms": 64.72, "edits": []}
+{"id": "rd-wildchat-test-1284", "ms": 175.37, "edits": [[36, 46, "age", 5, 0], [47, 61, "person", 8, 0], [356, 363, "person", 8, 0], [969, 988, "person", 8, 0], [1048, 1055, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1285", "ms": 68.73, "edits": [[27, 49, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1286", "ms": 64.22, "edits": [[50, 51, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1287", "ms": 78.57, "edits": [[174, 206, "organization", 14, 0], [211, 237, "organization", 14, 0], [242, 264, "organization", 14, 0], [269, 292, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1288", "ms": 76.05, "edits": [[33, 38, "person", 8, 0], [40, 45, "person", 8, 0], [51, 56, "person", 8, 0], [60, 66, "person", 8, 0], [198, 204, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1289", "ms": 68.44, "edits": [[41, 48, "organization", 14, 0], [72, 87, "date of birth", 15, 0], [104, 108, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1290", "ms": 287.01, "edits": [[36, 48, "person", 8, 0], [432, 440, "person", 8, 0], [1121, 1122, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1291", "ms": 744.71, "edits": [[517, 520, "organization", 14, 0], [669, 672, "person", 8, 0], [684, 687, "person", 8, 0], [698, 700, "person", 8, 0], [881, 884, "organization", 14, 0], [6707, 6711, "organization", 14, 0], [7004, 7008, "organization", 14, 0], [7278, 7282, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1292", "ms": 65.6, "edits": [[0, 26, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1293", "ms": 68.81, "edits": [[2, 9, "organization", 14, 0], [113, 122, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1294", "ms": 122.01, "edits": [[95, 104, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1295", "ms": 80.03, "edits": []}
+{"id": "rd-wildchat-test-1296", "ms": 94.9, "edits": [[27, 33, "person", 8, 0], [36, 37, "person", 8, 0], [57, 58, "person", 8, 0], [103, 104, "person", 8, 0], [149, 153, "person", 8, 0], [160, 161, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1297", "ms": 347.25, "edits": [[40, 63, "person", 8, 0], [150, 160, "organization", 14, 0], [1308, 1321, "organization", 14, 0], [1376, 1389, "organization", 14, 0], [1586, 1599, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1298", "ms": 65.14, "edits": [[34, 45, "person", 8, 0], [54, 66, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1299", "ms": 76.44, "edits": []}
+{"id": "rd-wildchat-test-1300", "ms": 74.38, "edits": [[2, 16, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1301", "ms": 75.45, "edits": [[15, 28, "organization", 14, 0], [32, 41, "location", 10, 0], [50, 64, "location", 10, 0], [160, 171, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1302", "ms": 63.72, "edits": []}
+{"id": "rd-wildchat-test-1303", "ms": 134.75, "edits": [[24, 35, "organization", 14, 0], [144, 153, "location", 10, 0], [156, 167, "organization", 14, 0], [312, 323, "organization", 14, 0], [636, 656, "person", 8, 0], [738, 749, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1304", "ms": 93.79, "edits": [[8, 33, "location", 10, 0], [37, 45, "person", 8, 0], [71, 84, "location", 10, 0], [155, 168, "organization", 14, 0], [172, 180, "person", 8, 0], [195, 201, "person", 8, 0], [250, 263, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1305", "ms": 99.42, "edits": [[20, 29, "organization", 14, 0], [170, 179, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1306", "ms": 104.15, "edits": [[283, 291, "person", 8, 0], [310, 311, "person", 8, 0], [359, 360, "person", 8, 0], [428, 429, "person", 8, 0], [490, 491, "person", 8, 0], [503, 504, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1307", "ms": 697.33, "edits": []}
+{"id": "rd-wildchat-test-1308", "ms": 367.08, "edits": [[40, 63, "person", 8, 0], [219, 229, "organization", 14, 0], [1584, 1597, "organization", 14, 0], [1652, 1665, "organization", 14, 0], [1862, 1875, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1309", "ms": 99.13, "edits": [[56, 57, "person", 8, 0], [170, 171, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1310", "ms": 63.21, "edits": [[56, 63, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1311", "ms": 63.67, "edits": []}
+{"id": "rd-wildchat-test-1312", "ms": 108.57, "edits": [[22, 25, "person", 8, 0], [79, 80, "person", 8, 0], [116, 117, "person", 8, 0], [145, 146, "person", 8, 0], [215, 216, "person", 8, 0], [308, 311, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1313", "ms": 99.49, "edits": [[30, 43, "person", 8, 0], [92, 96, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1314", "ms": 74.64, "edits": [[78, 94, "person", 8, 0], [120, 124, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1315", "ms": 97.26, "edits": [[25, 35, "person", 8, 0], [39, 48, "organization", 14, 0], [187, 196, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1316", "ms": 64.56, "edits": [[30, 36, "person", 8, 0], [64, 68, "person", 8, 0], [74, 78, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1317", "ms": 102.45, "edits": [[68, 69, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1318", "ms": 66.26, "edits": []}
+{"id": "rd-wildchat-test-1319", "ms": 344.07, "edits": [[11, 14, "person", 8, 0], [508, 511, "person", 8, 0], [614, 622, "organization", 14, 0], [626, 634, "organization", 14, 0], [865, 868, "person", 8, 0], [955, 963, "organization", 14, 0], [1016, 1024, "organization", 14, 0], [1112, 1120, "organization", 14, 0], [1229, 1232, "person", 8, 0], [1241, 1249, "organization", 14, 0], [1277, 1281, "person", 8, 0], [1344, 1362, "person", 8, 0], [1587, 1605, "person", 8, 0], [1820, 1838, "person", 8, 0], [1895, 1898, "person", 8, 0], [2116, 2119, "person", 8, 0], [2128, 2136, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1320", "ms": 70.81, "edits": [[83, 102, "organization", 14, 0], [113, 132, "organization", 14, 0], [188, 192, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1321", "ms": 87.84, "edits": []}
+{"id": "rd-wildchat-test-1322", "ms": 97.81, "edits": [[39, 40, "person", 8, 0], [57, 60, "person", 8, 0], [103, 104, "person", 8, 0], [114, 115, "person", 8, 0], [207, 210, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1323", "ms": 95.96, "edits": []}
+{"id": "rd-wildchat-test-1324", "ms": 92.78, "edits": []}
+{"id": "rd-wildchat-test-1325", "ms": 108.06, "edits": [[97, 101, "location", 10, 0], [176, 180, "location", 10, 0], [226, 230, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1326", "ms": 140.97, "edits": [[42, 47, "person", 8, 0], [49, 63, "person", 8, 0], [170, 185, "person", 8, 0], [187, 195, "person", 8, 0], [197, 201, "person", 8, 0], [203, 216, "person", 8, 0], [218, 232, "person", 8, 0], [234, 243, "person", 8, 0], [245, 257, "person", 8, 0], [259, 273, "person", 8, 0], [275, 288, "person", 8, 0], [290, 303, "person", 8, 0], [305, 320, "person", 8, 0], [322, 333, "person", 8, 0], [349, 361, "person", 8, 0], [363, 376, "person", 8, 0], [378, 389, "person", 8, 0], [391, 407, "person", 8, 0], [409, 426, "person", 8, 0], [428, 440, "person", 8, 0], [442, 463, "person", 8, 0], [465, 479, "person", 8, 0], [481, 486, "person", 8, 0], [502, 516, "person", 8, 0], [518, 531, "person", 8, 0], [533, 542, "person", 8, 0], [544, 556, "person", 8, 0], [558, 569, "person", 8, 0], [571, 578, "person", 8, 0], [580, 594, "person", 8, 0], [689, 694, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1327", "ms": 64.35, "edits": [[0, 14, "location", 10, 0], [39, 44, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1328", "ms": 133.81, "edits": [[414, 422, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1329", "ms": 74.62, "edits": [[25, 29, "person", 8, 0], [33, 36, "person", 8, 0], [41, 44, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1330", "ms": 81.24, "edits": [[26, 32, "organization", 14, 0], [68, 83, "username", 10, 0], [149, 160, "person", 8, 0], [165, 172, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1331", "ms": 153.97, "edits": [[3, 11, "person", 8, 0], [25, 32, "organization", 14, 0], [213, 220, "organization", 14, 0], [399, 407, "person", 8, 0], [532, 540, "person", 8, 0], [597, 602, "person", 8, 0], [682, 686, "organization", 14, 0], [716, 720, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1332", "ms": 80.66, "edits": [[30, 35, "person", 8, 0], [66, 71, "person", 8, 0], [121, 126, "person", 8, 0], [149, 154, "person", 8, 0], [183, 188, "person", 8, 0], [193, 199, "person", 8, 0], [201, 206, "person", 8, 0], [213, 218, "person", 8, 0], [234, 239, "person", 8, 0], [244, 250, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1333", "ms": 69.6, "edits": [[126, 137, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1334", "ms": 79.01, "edits": [[31, 53, "location", 10, 0], [61, 64, "person", 8, 0], [175, 179, "person", 8, 0], [185, 194, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1335", "ms": 79.17, "edits": [[31, 39, "organization", 14, 0], [80, 84, "person", 8, 0], [227, 231, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1336", "ms": 141.26, "edits": [[2, 13, "organization", 14, 0], [50, 55, "person", 8, 0], [57, 60, "person", 8, 0], [122, 125, "person", 8, 0], [143, 151, "person", 8, 0], [205, 210, "person", 8, 0], [258, 263, "person", 8, 0], [322, 330, "person", 8, 0], [372, 375, "person", 8, 0], [460, 468, "person", 8, 0], [470, 475, "person", 8, 0], [493, 496, "person", 8, 0], [655, 663, "person", 8, 0], [695, 698, "person", 8, 0], [712, 717, "person", 8, 0], [744, 747, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1337", "ms": 75.13, "edits": [[5, 10, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1338", "ms": 88.74, "edits": [[76, 77, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1340", "ms": 214.98, "edits": [[8, 23, "location", 10, 0], [29, 41, "person", 8, 0], [49, 59, "person", 8, 0], [147, 159, "person", 8, 0], [264, 279, "location", 10, 0], [283, 295, "person", 8, 0], [313, 325, "person", 8, 0], [620, 632, "person", 8, 0], [718, 724, "person", 8, 0], [822, 834, "person", 8, 0], [875, 881, "location", 10, 0], [934, 946, "person", 8, 0], [954, 960, "person", 8, 0], [964, 970, "location", 10, 0], [984, 990, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1341", "ms": 121.65, "edits": [[115, 118, "location", 10, 0], [241, 247, "person", 8, 0], [269, 274, "person", 8, 0], [348, 353, "person", 8, 0], [385, 391, "person", 8, 0], [479, 484, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1342", "ms": 180.81, "edits": []}
+{"id": "rd-wildchat-test-1343", "ms": 275.87, "edits": [[8, 16, "location", 10, 0], [51, 57, "person", 8, 0], [83, 87, "person", 8, 0], [106, 112, "person", 8, 0], [114, 120, "person", 8, 0], [153, 160, "person", 8, 0], [242, 251, "person", 8, 0], [288, 290, "person", 8, 0], [307, 314, "person", 8, 0], [346, 352, "person", 8, 0], [368, 376, "location", 10, 0], [405, 411, "person", 8, 0], [462, 470, "location", 10, 0], [472, 475, "person", 8, 0], [535, 542, "person", 8, 0], [576, 582, "person", 8, 0], [607, 613, "person", 8, 0], [656, 663, "person", 8, 0], [712, 719, "person", 8, 0], [765, 771, "person", 8, 0], [795, 801, "person", 8, 0], [817, 824, "person", 8, 0], [916, 923, "person", 8, 0], [962, 971, "person", 8, 0], [975, 981, "person", 8, 0], [1021, 1028, "person", 8, 0], [1110, 1119, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1344", "ms": 79.56, "edits": []}
+{"id": "rd-wildchat-test-1345", "ms": 83.67, "edits": [[73, 82, "location", 10, 0], [156, 173, "person", 8, 0], [332, 346, "location", 10, 0], [363, 378, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1346", "ms": 77.07, "edits": [[21, 32, "person", 8, 0], [42, 55, "person", 8, 0], [75, 78, "person", 8, 0], [127, 130, "person", 8, 0], [164, 167, "person", 8, 0], [181, 184, "person", 8, 0], [236, 239, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1347", "ms": 75.55, "edits": [[142, 151, "person", 8, 0], [204, 213, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1348", "ms": 140.89, "edits": [[19, 30, "location", 10, 0], [39, 43, "location", 10, 0], [160, 174, "person", 8, 0], [178, 186, "person", 8, 0], [312, 327, "person", 8, 0], [358, 366, "person", 8, 0], [382, 397, "person", 8, 0], [422, 430, "person", 8, 0], [450, 465, "person", 8, 0], [529, 537, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1349", "ms": 65.08, "edits": [[38, 50, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1350", "ms": 64.23, "edits": [[33, 47, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1351", "ms": 79.72, "edits": [[7, 14, "username", 10, 0], [82, 100, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1352", "ms": 102.68, "edits": []}
+{"id": "rd-wildchat-test-1353", "ms": 102.07, "edits": [[24, 30, "person", 8, 0], [137, 144, "person", 8, 0], [171, 185, "location", 10, 0], [304, 308, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1354", "ms": 68.92, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1355", "ms": 108.47, "edits": [[0, 3, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1356", "ms": 69.9, "edits": [[0, 1, "person", 8, 0], [39, 40, "person", 8, 0], [144, 145, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1357", "ms": 87.29, "edits": [[39, 41, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1358", "ms": 156.98, "edits": [[73, 108, "person", 8, 0], [205, 214, "person", 8, 0], [648, 661, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1359", "ms": 64.62, "edits": []}
+{"id": "rd-wildchat-test-1360", "ms": 77.23, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1361", "ms": 443.9, "edits": [[8, 33, "location", 10, 0], [37, 45, "person", 8, 0], [178, 186, "person", 8, 0], [206, 219, "location", 10, 0], [238, 248, "person", 8, 0], [268, 283, "location", 10, 0], [292, 298, "person", 8, 0], [358, 373, "location", 10, 0], [395, 405, "person", 8, 0], [435, 445, "person", 8, 0], [473, 486, "person", 8, 0], [515, 525, "person", 8, 0], [591, 599, "person", 8, 0], [602, 612, "person", 8, 0], [651, 661, "person", 8, 0], [705, 718, "person", 8, 0], [736, 744, "person", 8, 0], [803, 813, "person", 8, 0], [833, 846, "person", 8, 0], [1020, 1028, "person", 8, 0], [1069, 1079, "person", 8, 0], [1177, 1190, "person", 8, 0], [1270, 1280, "person", 8, 0], [1335, 1343, "person", 8, 0], [1372, 1382, "person", 8, 0], [1436, 1446, "person", 8, 0], [1565, 1578, "person", 8, 0], [1679, 1689, "person", 8, 0], [1695, 1708, "person", 8, 0], [1733, 1741, "person", 8, 0], [1761, 1771, "person", 8, 0], [1813, 1823, "person", 8, 0], [1931, 1944, "person", 8, 0], [1998, 2011, "person", 8, 0], [2042, 2052, "person", 8, 0], [2100, 2113, "person", 8, 0], [2185, 2195, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1362", "ms": 96.54, "edits": [[59, 63, "person", 8, 0], [72, 83, "age", 5, 0], [84, 88, "person", 8, 0], [91, 102, "age", 5, 0], [114, 117, "person", 8, 0], [141, 143, "age", 5, 0], [151, 157, "person", 8, 0], [193, 199, "person", 8, 0], [240, 243, "person", 8, 0], [266, 272, "person", 8, 0], [310, 314, "person", 8, 0], [365, 371, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1363", "ms": 80.47, "edits": []}
+{"id": "rd-wildchat-test-1364", "ms": 103.4, "edits": []}
+{"id": "rd-wildchat-test-1365", "ms": 69.93, "edits": [[60, 75, "location", 10, 0], [120, 140, "location", 10, 0], [144, 163, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1366", "ms": 94.59, "edits": [[30, 31, "person", 8, 0], [49, 50, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1367", "ms": 171.15, "edits": [[2, 13, "organization", 14, 0], [52, 57, "person", 8, 0], [69, 72, "person", 8, 0], [148, 153, "person", 8, 0], [173, 178, "person", 8, 0], [180, 183, "person", 8, 0], [269, 274, "person", 8, 0], [322, 327, "person", 8, 0], [405, 410, "person", 8, 0], [441, 444, "person", 8, 0], [496, 500, "location", 10, 0], [502, 507, "person", 8, 0], [547, 550, "person", 8, 0], [593, 596, "person", 8, 0], [619, 624, "person", 8, 0], [657, 662, "person", 8, 0], [673, 676, "person", 8, 0], [678, 683, "person", 8, 0], [721, 726, "person", 8, 0], [783, 788, "person", 8, 0], [812, 815, "person", 8, 0], [885, 888, "person", 8, 0], [935, 940, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1368", "ms": 121.69, "edits": [[16, 21, "email", 7, 0], [40, 45, "email", 7, 0], [50, 54, "person", 8, 0], [134, 138, "organization", 14, 0], [426, 433, "person", 8, 0], [493, 500, "person", 8, 0], [515, 520, "email", 7, 0]]}
+{"id": "rd-wildchat-test-1369", "ms": 83.79, "edits": []}
+{"id": "rd-wildchat-test-1370", "ms": 79.74, "edits": [[81, 85, "person", 8, 0], [91, 93, "age", 5, 0], [124, 139, "person", 8, 0], [158, 160, "age", 5, 0], [178, 188, "person", 8, 0], [249, 251, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1371", "ms": 78.28, "edits": []}
+{"id": "rd-wildchat-test-1372", "ms": 120.98, "edits": [[17, 24, "person", 8, 0], [75, 80, "person", 8, 0], [160, 167, "person", 8, 0], [291, 296, "person", 8, 0], [348, 354, "organization", 14, 0], [377, 384, "person", 8, 0], [413, 418, "person", 8, 0], [624, 631, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1373", "ms": 69.23, "edits": [[117, 138, "organization", 14, 0], [146, 155, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1374", "ms": 78.75, "edits": []}
+{"id": "rd-wildchat-test-1375", "ms": 80.54, "edits": [[5, 7, "person", 8, 0], [22, 25, "person", 8, 0], [60, 62, "person", 8, 0], [79, 82, "person", 8, 0], [95, 98, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1376", "ms": 68.36, "edits": [[0, 16, "organization", 14, 0], [79, 87, "person", 8, 0], [130, 135, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1377", "ms": 65.22, "edits": []}
+{"id": "rd-wildchat-test-1378", "ms": 101.57, "edits": []}
+{"id": "rd-wildchat-test-1379", "ms": 352.19, "edits": [[180, 189, "organization", 14, 0], [198, 202, "organization", 14, 0], [216, 220, "organization", 14, 0], [294, 317, "person", 8, 0], [637, 659, "organization", 14, 0], [829, 833, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1380", "ms": 169.66, "edits": [[13, 16, "person", 8, 0], [21, 50, "person", 8, 0], [184, 187, "person", 8, 0], [383, 385, "person", 8, 0], [440, 441, "person", 8, 0], [747, 748, "person", 8, 0], [766, 769, "person", 8, 0], [1109, 1112, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1382", "ms": 69.12, "edits": [[39, 51, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1383", "ms": 79.15, "edits": [[60, 68, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1384", "ms": 176.29, "edits": [[39, 45, "person", 8, 0], [94, 98, "organization", 14, 0], [139, 144, "person", 8, 0], [222, 227, "person", 8, 0], [245, 249, "person", 8, 0], [262, 266, "organization", 14, 0], [316, 322, "person", 8, 0], [324, 329, "person", 8, 0], [334, 338, "person", 8, 0], [373, 379, "person", 8, 0], [422, 426, "person", 8, 0], [431, 437, "person", 8, 0], [439, 445, "person", 8, 0], [450, 454, "person", 8, 0], [459, 464, "person", 8, 0], [502, 508, "person", 8, 0], [553, 558, "person", 8, 0], [588, 594, "person", 8, 0], [615, 620, "person", 8, 0], [724, 730, "person", 8, 0], [741, 746, "person", 8, 0], [766, 770, "person", 8, 0], [847, 851, "person", 8, 0], [927, 933, "person", 8, 0], [943, 948, "person", 8, 0], [1060, 1066, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1385", "ms": 98.12, "edits": [[25, 26, "person", 8, 0], [33, 34, "person", 8, 0], [45, 48, "person", 8, 0], [192, 193, "person", 8, 0], [209, 212, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1386", "ms": 92.53, "edits": [[57, 73, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1387", "ms": 64.82, "edits": [[11, 27, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1388", "ms": 64.98, "edits": [[0, 1, "person", 8, 0], [53, 56, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1389", "ms": 79.65, "edits": [[34, 44, "username", 10, 0], [51, 54, "person", 8, 0], [70, 72, "person", 8, 0], [91, 93, "person", 8, 0], [171, 174, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1390", "ms": 68.36, "edits": []}
+{"id": "rd-wildchat-test-1391", "ms": 63.93, "edits": [[22, 29, "url", 5, 0], [36, 37, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1392", "ms": 98.91, "edits": [[0, 3, "person", 8, 0], [53, 57, "person", 8, 0], [164, 167, "person", 8, 0], [198, 201, "person", 8, 0], [204, 208, "person", 8, 0], [225, 229, "person", 8, 0], [265, 269, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1393", "ms": 127.01, "edits": [[1, 9, "person", 8, 0], [80, 111, "organization", 14, 0], [304, 329, "organization", 14, 0], [558, 572, "person", 8, 0], [756, 762, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1394", "ms": 102.01, "edits": [[31, 48, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1395", "ms": 65.35, "edits": [[0, 7, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1396", "ms": 95.25, "edits": [[25, 28, "person", 8, 0], [177, 180, "person", 8, 0], [401, 404, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1397", "ms": 90.11, "edits": [[12, 14, "organization", 14, 0], [26, 35, "person", 8, 0], [91, 92, "person", 8, 0], [102, 105, "person", 8, 0], [138, 140, "organization", 14, 0], [163, 181, "location", 10, 0], [183, 202, "location", 10, 0], [284, 287, "person", 8, 0], [316, 319, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1398", "ms": 102.41, "edits": [[0, 26, "person", 8, 0], [94, 104, "person", 8, 0], [194, 198, "person", 8, 0], [219, 232, "location", 10, 0], [237, 241, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1399", "ms": 255.86, "edits": [[22, 34, "person", 8, 0], [58, 70, "location", 10, 0], [1039, 1052, "organization", 14, 0], [1146, 1160, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1400", "ms": 80.84, "edits": []}
+{"id": "rd-wildchat-test-1401#t0", "ms": 357.95, "edits": [[62, 63, "person", 8, 0], [578, 583, "organization", 14, 0], [624, 629, "organization", 14, 0], [760, 767, "location", 10, 0], [1073, 1074, "person", 8, 0], [1093, 1094, "person", 8, 0], [1132, 1133, "person", 8, 0], [1148, 1149, "person", 8, 0], [1214, 1215, "person", 8, 0], [1228, 1229, "person", 8, 0], [1266, 1267, "person", 8, 0], [1359, 1360, "person", 8, 0], [1403, 1405, "person", 8, 0], [1581, 1582, "person", 8, 0], [1721, 1730, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1401#t1", "ms": 59.5, "edits": []}
+{"id": "rd-wildchat-test-1402#t0", "ms": 68.32, "edits": [[39, 44, "tax identification number", 27, 0], [97, 98, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1402#t1", "ms": 59.37, "edits": []}
+{"id": "rd-wildchat-test-1402#t2", "ms": 64.12, "edits": []}
+{"id": "rd-wildchat-test-1403#t0", "ms": 63.7, "edits": [[85, 102, "age", 5, 0]]}
+{"id": "rd-wildchat-test-1403#t1", "ms": 58.0, "edits": []}
+{"id": "rd-wildchat-test-1403#t2", "ms": 61.53, "edits": []}
+{"id": "rd-wildchat-test-1404#t0", "ms": 76.94, "edits": [[74, 79, "location", 10, 0], [111, 116, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1404#t1", "ms": 64.22, "edits": [[18, 26, "person", 8, 0], [57, 62, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1405#t0", "ms": 64.52, "edits": [[0, 3, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1405#t1", "ms": 95.38, "edits": [[72, 74, "person", 8, 0], [107, 108, "person", 8, 0], [140, 141, "person", 8, 0], [187, 194, "person", 8, 0], [262, 263, "person", 8, 0], [287, 289, "person", 8, 0], [342, 349, "person", 8, 0], [366, 377, "organization", 14, 0], [423, 425, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1405#t2", "ms": 89.07, "edits": [[105, 116, "url", 5, 0], [174, 183, "organization", 14, 0], [187, 198, "organization", 14, 0], [384, 398, "person", 8, 0], [404, 422, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1406#t0", "ms": 69.36, "edits": [[42, 45, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1406#t1", "ms": 62.18, "edits": []}
+{"id": "rd-wildchat-test-1406#t2", "ms": 59.5, "edits": []}
+{"id": "rd-wildchat-test-1407#t0", "ms": 87.5, "edits": [[94, 98, "person", 8, 0], [319, 330, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-1407#t1", "ms": 63.14, "edits": []}
+{"id": "rd-wildchat-test-1407#t2", "ms": 65.98, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1408#t0", "ms": 100.17, "edits": [[50, 53, "location", 10, 0], [79, 80, "person", 8, 0], [268, 271, "location", 10, 0], [343, 344, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1408#t1", "ms": 67.7, "edits": [[41, 51, "person", 8, 0], [82, 110, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1409#t0", "ms": 64.51, "edits": []}
+{"id": "rd-wildchat-test-1409#t1", "ms": 64.06, "edits": []}
+{"id": "rd-wildchat-test-1409#t2", "ms": 65.23, "edits": [[27, 35, "organization", 14, 0], [61, 69, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1410#t0", "ms": 63.75, "edits": [[57, 71, "organization", 14, 0], [113, 133, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1410#t1", "ms": 97.31, "edits": [[34, 53, "location", 10, 0], [107, 117, "location", 10, 0], [332, 338, "person", 8, 0], [348, 358, "location", 10, 0], [364, 370, "location", 10, 0], [372, 378, "person", 8, 0], [388, 398, "location", 10, 0], [417, 423, "person", 8, 0], [433, 443, "location", 10, 0], [462, 468, "person", 8, 0], [478, 488, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1410#t2", "ms": 74.86, "edits": [[137, 152, "organization", 14, 0], [168, 174, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1411#t0", "ms": 74.52, "edits": [[33, 49, "api key", 9, 0], [61, 81, "url", 5, 0], [93, 109, "password", 10, 0], [139, 159, "url", 5, 0], [171, 187, "password", 10, 0]]}
+{"id": "rd-wildchat-test-1411#t1", "ms": 77.34, "edits": [[16, 32, "api key", 9, 0], [44, 64, "url", 5, 0], [76, 92, "password", 10, 0], [94, 110, "api key", 9, 0], [122, 142, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1411#t2", "ms": 58.06, "edits": []}
+{"id": "rd-wildchat-test-1412#t0", "ms": 79.93, "edits": [[113, 117, "person", 8, 0], [216, 220, "person", 8, 0], [317, 321, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1412#t1", "ms": 78.14, "edits": [[113, 118, "person", 8, 0], [228, 233, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1413#t0", "ms": 91.69, "edits": [[57, 66, "person", 8, 0], [362, 371, "person", 8, 0], [395, 409, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1413#t1", "ms": 59.04, "edits": []}
+{"id": "rd-wildchat-test-1414#t0", "ms": 66.23, "edits": [[65, 66, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1414#t1", "ms": 65.03, "edits": [[92, 93, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1415#t1", "ms": 65.39, "edits": [[0, 5, "person", 8, 0], [43, 46, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1415#t2", "ms": 59.32, "edits": [[20, 26, "person", 8, 0], [39, 43, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1416#t0", "ms": 64.22, "edits": []}
+{"id": "rd-wildchat-test-1416#t1", "ms": 63.94, "edits": [[26, 33, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1416#t2", "ms": 65.33, "edits": []}
+{"id": "rd-wildchat-test-1417#t0", "ms": 65.49, "edits": [[123, 135, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1417#t1", "ms": 65.49, "edits": [[132, 144, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1418#t0", "ms": 152.68, "edits": [[711, 719, "organization", 14, 0], [789, 801, "person", 8, 0], [830, 838, "organization", 14, 0], [967, 975, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1418#t1", "ms": 64.32, "edits": [[33, 61, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1418#t2", "ms": 63.21, "edits": [[15, 34, "organization", 14, 0], [84, 90, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1419#t0", "ms": 68.79, "edits": []}
+{"id": "rd-wildchat-test-1419#t1", "ms": 75.2, "edits": []}
+{"id": "rd-wildchat-test-1420#t0", "ms": 79.47, "edits": [[18, 34, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1420#t1", "ms": 62.53, "edits": []}
+{"id": "rd-wildchat-test-1420#t2", "ms": 59.44, "edits": []}
+{"id": "rd-wildchat-test-1421#t0", "ms": 74.66, "edits": [[84, 93, "person", 8, 0], [95, 107, "person", 8, 0], [113, 132, "person", 8, 0], [152, 177, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1421#t1", "ms": 67.01, "edits": [[39, 48, "person", 8, 0], [59, 69, "person", 8, 0], [71, 78, "person", 8, 0], [85, 93, "person", 8, 0], [99, 108, "person", 8, 0], [117, 122, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1422#t0", "ms": 87.18, "edits": [[23, 30, "person", 8, 0], [32, 42, "person", 8, 0], [48, 59, "person", 8, 0], [237, 244, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1422#t1", "ms": 79.6, "edits": [[24, 31, "person", 8, 0], [36, 39, "person", 8, 0], [47, 51, "person", 8, 0], [60, 63, "person", 8, 0], [95, 102, "person", 8, 0], [127, 131, "person", 8, 0], [152, 155, "person", 8, 0], [157, 160, "person", 8, 0], [194, 197, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1422#t2", "ms": 79.51, "edits": [[0, 3, "person", 8, 0], [40, 44, "person", 8, 0], [123, 126, "person", 8, 0], [139, 143, "person", 8, 0], [152, 156, "person", 8, 0], [241, 248, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1423#t0", "ms": 94.07, "edits": [[0, 1, "person", 8, 0], [13, 24, "organization", 14, 0], [156, 157, "person", 8, 0], [167, 178, "organization", 14, 0], [183, 184, "person", 8, 0], [277, 278, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1423#t1", "ms": 122.32, "edits": [[59, 62, "organization", 14, 0], [66, 72, "organization", 14, 0], [343, 349, "person", 8, 0], [396, 403, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1423#t2", "ms": 66.56, "edits": [[99, 100, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1424#t0", "ms": 76.43, "edits": []}
+{"id": "rd-wildchat-test-1424#t1", "ms": 79.41, "edits": []}
+{"id": "rd-wildchat-test-1424#t2", "ms": 79.15, "edits": []}
+{"id": "rd-wildchat-test-1425#t0", "ms": 97.02, "edits": []}
+{"id": "rd-wildchat-test-1425#t1", "ms": 97.72, "edits": []}
+{"id": "rd-wildchat-test-1425#t2", "ms": 99.18, "edits": []}
+{"id": "rd-wildchat-test-1426#t0", "ms": 75.76, "edits": [[0, 1, "person", 8, 0], [58, 61, "person", 8, 0], [89, 90, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1426#t1", "ms": 73.64, "edits": [[38, 44, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1426#t2", "ms": 59.3, "edits": []}
+{"id": "rd-wildchat-test-1427#t0", "ms": 104.46, "edits": [[132, 137, "person", 8, 0], [261, 268, "person", 8, 0], [292, 314, "organization", 14, 0], [338, 345, "organization", 14, 0], [474, 499, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1427#t1", "ms": 77.05, "edits": [[12, 19, "organization", 14, 0], [247, 252, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1428#t0", "ms": 75.83, "edits": [[44, 66, "organization", 14, 0], [72, 92, "person", 8, 0], [150, 157, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1428#t1", "ms": 67.47, "edits": [[8, 13, "person", 8, 0], [29, 36, "person", 8, 0], [42, 49, "organization", 14, 0], [107, 114, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1428#t2", "ms": 81.94, "edits": [[8, 14, "person", 8, 0], [70, 94, "location", 10, 0], [179, 186, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1429#t0", "ms": 65.44, "edits": []}
+{"id": "rd-wildchat-test-1429#t1", "ms": 62.42, "edits": []}
+{"id": "rd-wildchat-test-1430#t0", "ms": 66.46, "edits": [[61, 69, "username", 10, 0]]}
+{"id": "rd-wildchat-test-1430#t1", "ms": 623.92, "edits": []}
+{"id": "rd-wildchat-test-1430#t2", "ms": 58.68, "edits": []}
+{"id": "rd-wildchat-test-1431#t0", "ms": 254.28, "edits": [[0, 5, "organization", 14, 0], [101, 110, "location", 10, 0], [142, 151, "location", 10, 0], [347, 352, "organization", 14, 0], [398, 407, "location", 10, 0], [434, 442, "location", 10, 0], [447, 459, "location", 10, 0], [962, 971, "location", 10, 0], [1147, 1152, "organization", 14, 0], [1192, 1204, "organization", 14, 0], [1244, 1255, "person", 8, 0], [1279, 1296, "person", 8, 0], [1325, 1336, "person", 8, 0], [1409, 1414, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1431#t1", "ms": 69.73, "edits": [[153, 157, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1431#t2", "ms": 69.96, "edits": [[41, 52, "person", 8, 0], [56, 61, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1432#t0", "ms": 68.96, "edits": [[170, 176, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1432#t1", "ms": 68.78, "edits": [[170, 176, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1433#t0", "ms": 63.64, "edits": [[73, 90, "organization", 14, 0], [94, 108, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1433#t1", "ms": 62.95, "edits": [[0, 5, "organization", 14, 0], [58, 65, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1433#t2", "ms": 66.97, "edits": []}
+{"id": "rd-wildchat-test-1434#t0", "ms": 66.63, "edits": []}
+{"id": "rd-wildchat-test-1434#t1", "ms": 74.35, "edits": []}
+{"id": "rd-wildchat-test-1435#t0", "ms": 66.21, "edits": [[24, 30, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1435#t1", "ms": 65.91, "edits": []}
+{"id": "rd-wildchat-test-1435#t2", "ms": 65.99, "edits": [[18, 24, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1436#t0", "ms": 67.08, "edits": [[45, 61, "organization", 14, 0], [71, 96, "organization", 14, 0], [104, 111, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1436#t1", "ms": 64.23, "edits": [[44, 61, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1437#t0", "ms": 75.53, "edits": [[18, 23, "email", 7, 0], [104, 114, "person", 8, 0], [169, 178, "person", 8, 0], [203, 217, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1437#t1", "ms": 58.2, "edits": []}
+{"id": "rd-wildchat-test-1437#t2", "ms": 58.84, "edits": [[0, 24, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1438#t0", "ms": 482.74, "edits": []}
+{"id": "rd-wildchat-test-1438#t1", "ms": 59.02, "edits": []}
+{"id": "rd-wildchat-test-1439#t0", "ms": 121.8, "edits": []}
+{"id": "rd-wildchat-test-1439#t1", "ms": 321.04, "edits": []}
+{"id": "rd-wildchat-test-1439#t2", "ms": 330.57, "edits": []}
+{"id": "rd-wildchat-test-1440#t0", "ms": 277.23, "edits": [[19, 27, "organization", 14, 0], [249, 272, "organization", 14, 0], [1369, 1381, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1440#t1", "ms": 280.32, "edits": [[249, 272, "organization", 14, 0], [1393, 1405, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1440#t2", "ms": 287.98, "edits": [[249, 272, "organization", 14, 0], [1443, 1455, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1441#t0", "ms": 64.92, "edits": []}
+{"id": "rd-wildchat-test-1441#t1", "ms": 63.94, "edits": []}
+{"id": "rd-wildchat-test-1442#t0", "ms": 158.79, "edits": [[42, 48, "organization", 14, 0], [390, 405, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1442#t1", "ms": 155.56, "edits": [[42, 48, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1443#t0", "ms": 66.49, "edits": [[5, 10, "person", 8, 0], [53, 59, "person", 8, 0], [79, 93, "phone number", 14, 0]]}
+{"id": "rd-wildchat-test-1443#t1", "ms": 59.67, "edits": [[19, 24, "email", 7, 0], [50, 58, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1443#t2", "ms": 59.37, "edits": [[0, 1, "person", 8, 0], [19, 31, "person", 8, 0], [35, 40, "email", 7, 0]]}
+{"id": "rd-wildchat-test-1444#t0", "ms": 64.0, "edits": [[3, 9, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1444#t1", "ms": 74.19, "edits": [[3, 9, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1445#t0", "ms": 62.48, "edits": [[32, 33, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1445#t1", "ms": 58.27, "edits": []}
+{"id": "rd-wildchat-test-1446#t0", "ms": 68.79, "edits": [[40, 43, "person", 8, 0], [67, 71, "person", 8, 0], [72, 76, "person", 8, 0], [104, 107, "person", 8, 0], [122, 125, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1446#t1", "ms": 68.59, "edits": [[40, 43, "person", 8, 0], [67, 71, "person", 8, 0], [72, 76, "person", 8, 0], [104, 107, "person", 8, 0], [122, 125, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1446#t2", "ms": 58.64, "edits": [[8, 11, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1447#t0", "ms": 154.2, "edits": [[102, 110, "person", 8, 0], [137, 148, "organization", 14, 0], [201, 212, "organization", 14, 0], [328, 339, "organization", 14, 0], [591, 602, "organization", 14, 0], [644, 652, "person", 8, 0], [741, 752, "organization", 14, 0], [785, 794, "person", 8, 0], [889, 900, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1447#t1", "ms": 58.59, "edits": []}
+{"id": "rd-wildchat-test-1448#t0", "ms": 77.98, "edits": []}
+{"id": "rd-wildchat-test-1448#t1", "ms": 77.79, "edits": []}
+{"id": "rd-wildchat-test-1449#t0", "ms": 68.11, "edits": [[0, 1, "person", 8, 0], [21, 27, "person", 8, 0], [106, 112, "person", 8, 0], [116, 132, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1449#t1", "ms": 62.89, "edits": []}
+{"id": "rd-wildchat-test-1449#t2", "ms": 59.33, "edits": []}
+{"id": "rd-wildchat-test-1450#t0", "ms": 160.96, "edits": [[2, 13, "organization", 14, 0], [50, 57, "person", 8, 0], [59, 62, "person", 8, 0], [142, 145, "person", 8, 0], [162, 173, "person", 8, 0], [274, 281, "person", 8, 0], [329, 336, "person", 8, 0], [446, 449, "person", 8, 0], [526, 533, "person", 8, 0], [582, 585, "person", 8, 0], [626, 629, "person", 8, 0], [643, 650, "person", 8, 0], [780, 783, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1450#t1", "ms": 161.84, "edits": [[2, 13, "organization", 14, 0], [50, 57, "person", 8, 0], [59, 62, "person", 8, 0], [142, 145, "person", 8, 0], [162, 173, "person", 8, 0], [274, 281, "person", 8, 0], [329, 336, "person", 8, 0], [446, 449, "person", 8, 0], [526, 533, "person", 8, 0], [582, 585, "person", 8, 0], [626, 629, "person", 8, 0], [643, 650, "person", 8, 0], [780, 783, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1451#t0", "ms": 105.54, "edits": [[26, 42, "person", 8, 0], [262, 283, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1451#t1", "ms": 105.43, "edits": [[40, 56, "person", 8, 0], [276, 297, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1451#t2", "ms": 105.94, "edits": [[54, 70, "person", 8, 0], [290, 311, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1452#t0", "ms": 75.6, "edits": [[5, 26, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1452#t1", "ms": 64.37, "edits": [[40, 47, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1453#t0", "ms": 63.85, "edits": [[34, 45, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1453#t1", "ms": 65.1, "edits": [[38, 55, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1453#t2", "ms": 65.86, "edits": [[135, 148, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1454#t0", "ms": 76.09, "edits": [[202, 208, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1454#t1", "ms": 69.18, "edits": [[189, 195, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1455#t0", "ms": 93.2, "edits": []}
+{"id": "rd-wildchat-test-1455#t1", "ms": 80.29, "edits": [[141, 145, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1456#t0", "ms": 331.13, "edits": []}
+{"id": "rd-wildchat-test-1456#t1", "ms": 896.1, "edits": []}
+{"id": "rd-wildchat-test-1457#t0", "ms": 475.17, "edits": [[1081, 1084, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1457#t1", "ms": 81.97, "edits": [[0, 14, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1457#t2", "ms": 64.15, "edits": []}
+{"id": "rd-wildchat-test-1458#t0", "ms": 66.05, "edits": []}
+{"id": "rd-wildchat-test-1458#t1", "ms": 69.31, "edits": [[0, 13, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1458#t2", "ms": 69.0, "edits": [[3, 26, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1459#t0", "ms": 68.38, "edits": [[18, 24, "organization", 14, 0], [128, 148, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1459#t1", "ms": 68.32, "edits": [[9, 25, "organization", 14, 0], [88, 101, "location", 10, 0], [127, 164, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1459#t2", "ms": 67.11, "edits": [[44, 58, "date of birth", 15, 0], [62, 88, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1460#t0", "ms": 87.58, "edits": []}
+{"id": "rd-wildchat-test-1460#t1", "ms": 64.87, "edits": []}
+{"id": "rd-wildchat-test-1460#t2", "ms": 58.85, "edits": []}
+{"id": "rd-wildchat-test-1461#t0", "ms": 302.31, "edits": []}
+{"id": "rd-wildchat-test-1461#t1", "ms": 63.71, "edits": [[0, 1, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1461#t2", "ms": 64.05, "edits": [[58, 75, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1462#t0", "ms": 144.84, "edits": [[170, 195, "person", 8, 0], [385, 410, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1462#t1", "ms": 73.51, "edits": [[106, 112, "location", 10, 0], [165, 184, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1462#t2", "ms": 101.63, "edits": [[14, 19, "organization", 14, 0], [92, 110, "person", 8, 0], [295, 346, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1463#t0", "ms": 441.83, "edits": [[9, 13, "person", 8, 0], [18, 23, "person", 8, 0], [79, 84, "person", 8, 0], [129, 133, "person", 8, 0], [148, 152, "person", 8, 0], [215, 219, "person", 8, 0], [238, 242, "person", 8, 0], [256, 260, "person", 8, 0], [309, 314, "person", 8, 0], [360, 365, "person", 8, 0], [377, 381, "person", 8, 0], [396, 400, "person", 8, 0], [415, 419, "person", 8, 0], [434, 438, "person", 8, 0], [560, 565, "person", 8, 0], [604, 608, "person", 8, 0], [653, 658, "person", 8, 0], [728, 733, "person", 8, 0], [789, 793, "person", 8, 0], [826, 830, "person", 8, 0], [846, 851, "person", 8, 0], [868, 879, "location", 10, 0], [917, 921, "person", 8, 0], [923, 927, "person", 8, 0], [943, 947, "person", 8, 0], [973, 978, "person", 8, 0], [1014, 1018, "person", 8, 0], [1075, 1080, "person", 8, 0], [1085, 1089, "person", 8, 0], [1279, 1283, "person", 8, 0], [1292, 1297, "person", 8, 0], [1316, 1320, "person", 8, 0], [1326, 1330, "person", 8, 0], [1349, 1354, "person", 8, 0], [1356, 1360, "person", 8, 0], [1388, 1393, "person", 8, 0], [1418, 1422, "person", 8, 0], [1427, 1432, "person", 8, 0], [1438, 1440, "age", 5, 0], [1511, 1515, "person", 8, 0], [1526, 1531, "person", 8, 0], [1562, 1567, "person", 8, 0], [1598, 1603, "person", 8, 0], [1628, 1633, "person", 8, 0], [1644, 1648, "person", 8, 0], [1686, 1690, "person", 8, 0], [1738, 1743, "person", 8, 0], [1810, 1814, "person", 8, 0], [1899, 1903, "person", 8, 0], [1908, 1913, "person", 8, 0], [1991, 1995, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1463#t1", "ms": 103.99, "edits": [[26, 32, "location", 10, 0], [121, 126, "person", 8, 0], [151, 155, "person", 8, 0], [174, 179, "person", 8, 0], [205, 209, "person", 8, 0], [257, 263, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1463#t2", "ms": 56.86, "edits": []}
+{"id": "rd-wildchat-test-1464#t0", "ms": 127.76, "edits": []}
+{"id": "rd-wildchat-test-1464#t1", "ms": 94.14, "edits": []}
+{"id": "rd-wildchat-test-1465#t0", "ms": 78.85, "edits": [[9, 26, "organization", 14, 0], [77, 91, "location", 10, 0], [278, 279, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1465#t1", "ms": 98.52, "edits": [[2, 18, "organization", 14, 0], [105, 123, "location", 10, 0], [129, 136, "organization", 14, 0], [204, 211, "organization", 14, 0], [314, 321, "organization", 14, 0], [536, 537, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1465#t2", "ms": 65.26, "edits": [[131, 132, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1466#t0", "ms": 63.71, "edits": [[124, 130, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1466#t1", "ms": 64.09, "edits": []}
+{"id": "rd-wildchat-test-1466#t2", "ms": 64.29, "edits": [[124, 166, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1467#t0", "ms": 86.26, "edits": [[11, 49, "person", 8, 0], [172, 182, "organization", 14, 0], [213, 238, "url", 5, 0], [295, 300, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1467#t1", "ms": 56.64, "edits": []}
+{"id": "rd-wildchat-test-1468#t0", "ms": 106.73, "edits": [[1, 5, "api key", 9, 0], [75, 79, "api key", 9, 0], [138, 142, "api key", 9, 0], [374, 378, "api key", 9, 0]]}
+{"id": "rd-wildchat-test-1468#t1", "ms": 58.79, "edits": []}
+{"id": "rd-wildchat-test-1469#t0", "ms": 155.92, "edits": [[42, 48, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1469#t1", "ms": 152.38, "edits": [[42, 48, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1470#t0", "ms": 64.37, "edits": [[0, 16, "organization", 14, 0], [67, 87, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1470#t1", "ms": 67.97, "edits": [[0, 16, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1471#t0", "ms": 611.52, "edits": []}
+{"id": "rd-wildchat-test-1471#t1", "ms": 58.48, "edits": []}
+{"id": "rd-wildchat-test-1472#t0", "ms": 75.27, "edits": [[24, 39, "organization", 14, 0], [73, 77, "organization", 14, 0], [99, 109, "person", 8, 0], [113, 129, "person", 8, 0], [180, 183, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1472#t1", "ms": 75.6, "edits": [[16, 46, "organization", 14, 0], [146, 176, "person", 8, 0], [210, 213, "location", 10, 0], [244, 247, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1473#t0", "ms": 66.93, "edits": [[51, 63, "location", 10, 0], [117, 137, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1473#t1", "ms": 59.27, "edits": [[48, 70, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1473#t2", "ms": 62.83, "edits": [[48, 70, "location", 10, 0]]}
+{"id": "rd-wildchat-test-1474#t0", "ms": 159.1, "edits": [[159, 162, "location", 10, 0], [175, 181, "person", 8, 0], [270, 276, "person", 8, 0], [301, 306, "person", 8, 0], [399, 404, "person", 8, 0], [439, 445, "person", 8, 0], [485, 491, "person", 8, 0], [514, 519, "person", 8, 0], [574, 580, "person", 8, 0], [596, 601, "person", 8, 0], [772, 778, "person", 8, 0], [788, 793, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1474#t1", "ms": 113.52, "edits": [[51, 54, "location", 10, 0], [67, 73, "person", 8, 0], [140, 145, "person", 8, 0], [191, 196, "person", 8, 0], [228, 234, "person", 8, 0], [277, 283, "person", 8, 0], [290, 295, "person", 8, 0], [330, 336, "person", 8, 0], [345, 350, "person", 8, 0], [495, 501, "person", 8, 0], [512, 517, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1475#t0", "ms": 78.59, "edits": [[1, 2, "person", 8, 0], [19, 43, "location", 10, 0], [59, 80, "person", 8, 0], [147, 150, "person", 8, 0], [179, 181, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1475#t1", "ms": 58.91, "edits": [[13, 22, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1475#t2", "ms": 75.74, "edits": []}
+{"id": "rd-wildchat-test-1476#t0", "ms": 64.53, "edits": [[29, 35, "organization", 14, 0], [88, 100, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1476#t1", "ms": 64.94, "edits": [[29, 35, "organization", 14, 0], [83, 97, "person", 8, 0], [102, 118, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1477#t0", "ms": 67.91, "edits": [[3, 15, "organization", 14, 0]]}
+{"id": "rd-wildchat-test-1477#t1", "ms": 67.92, "edits": [[3, 15, "organization", 14, 0], [39, 54, "url", 5, 0]]}
+{"id": "rd-wildchat-test-1478#t0", "ms": 73.8, "edits": [[204, 212, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1478#t1", "ms": 58.66, "edits": []}
+{"id": "rd-wildchat-test-1478#t2", "ms": 62.43, "edits": []}
+{"id": "rd-wildchat-test-1479#t0", "ms": 105.56, "edits": [[0, 1, "person", 8, 0], [7, 10, "person", 8, 0], [77, 78, "person", 8, 0], [93, 96, "person", 8, 0], [117, 120, "person", 8, 0], [233, 234, "person", 8, 0], [240, 243, "person", 8, 0], [424, 425, "person", 8, 0], [431, 434, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1479#t1", "ms": 315.84, "edits": [[66, 71, "location", 10, 0], [237, 245, "person", 8, 0], [398, 406, "person", 8, 0], [553, 558, "person", 8, 0], [675, 704, "person", 8, 0], [881, 886, "location", 10, 0], [986, 991, "location", 10, 0], [1089, 1102, "person", 8, 0], [1217, 1228, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1480#t0", "ms": 114.21, "edits": [[72, 78, "person", 8, 0], [107, 113, "person", 8, 0], [117, 123, "person", 8, 0], [230, 236, "person", 8, 0], [242, 248, "person", 8, 0], [260, 264, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1480#t1", "ms": 64.93, "edits": [[35, 41, "organization", 14, 0], [53, 57, "person", 8, 0]]}
+{"id": "rd-wildchat-test-1480#t2", "ms": 66.88, "edits": [[54, 60, "organization", 14, 0], [72, 76, "person", 8, 0]]}

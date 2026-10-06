@@ -1,0 +1,74 @@
+{
+ "arm": "presidio_transformers",
+ "command": ".venv-baselines/bin/python -m bench.arms.presidio_transformers --in bench/realdata/build/score/test/wildchat.jsonl --out bench/realdata/build/spans/presidio_transformers/test-wildchat.jsonl",
+ "config": {
+  "model_revision": "78f2152eb93ddd817290ce8dbe46f1a6685e09fc",
+  "nlp_configuration": {
+   "models": [
+    {
+     "lang_code": "en",
+     "model_name": {
+      "spacy": "en_core_web_sm",
+      "transformers": "obi/deid_roberta_i2b2"
+     }
+    }
+   ],
+   "ner_model_configuration": {
+    "aggregation_strategy": "max",
+    "alignment_mode": "expand",
+    "labels_to_ignore": [
+     "O"
+    ],
+    "low_confidence_score_multiplier": 0.4,
+    "low_score_entity_names": [
+     "ID"
+    ],
+    "model_to_presidio_entity_mapping": {
+     "AGE": "AGE",
+     "DATE": "DATE_TIME",
+     "EMAIL": "EMAIL",
+     "FACILITY": "LOCATION",
+     "GPE": "LOCATION",
+     "HCW": "PERSON",
+     "HOSP": "ORGANIZATION",
+     "HOSPITAL": "LOCATION",
+     "ID": "ID",
+     "LOC": "LOCATION",
+     "LOCATION": "LOCATION",
+     "NORP": "NRP",
+     "ORG": "ORGANIZATION",
+     "ORGANIZATION": "ORGANIZATION",
+     "PATIENT": "PERSON",
+     "PATORG": "ORGANIZATION",
+     "PER": "PERSON",
+     "PERSON": "PERSON",
+     "PHONE": "PHONE_NUMBER",
+     "STAFF": "PERSON",
+     "TIME": "DATE_TIME",
+     "VENDOR": "ORGANIZATION"
+    },
+    "stride": 16
+   },
+   "nlp_engine_name": "transformers"
+  },
+  "overlap_resolution": "longest span, then highest score",
+  "replacement": "[ENTITY_TYPE] placeholder",
+  "score_threshold": 0.4,
+  "versions": {
+   "presidio-analyzer": "2.2.358",
+   "python": "3.12.9",
+   "spacy": "3.8.16",
+   "spacy-huggingface-pipelines": "0.0.4",
+   "torch": "2.14.1",
+   "transformers": "4.51.3"
+  }
+ },
+ "edits": 2959,
+ "input": "bench/realdata/build/score/test/wildchat.jsonl",
+ "input_sha256": "67b2df52060b8741acf2e553237f52eff6e902137fb24dff0cf5cd115ca8804e",
+ "load_seconds": 0.5,
+ "messages": 870,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}
