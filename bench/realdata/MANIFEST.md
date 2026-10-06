@@ -307,6 +307,44 @@ Interpreter `.venv-baselines/bin/python`, seed 20261005.
 
 ```
 {
+ "device": "cpu (pinned; LLM Guard would pick mps or cuda)",
+ "entity_types": [
+  "CREDIT_CARD",
+  "CRYPTO",
+  "EMAIL_ADDRESS",
+  "IBAN_CODE",
+  "IP_ADDRESS",
+  "PERSON",
+  "PHONE_NUMBER",
+  "US_SSN",
+  "US_BANK_NUMBER",
+  "CREDIT_CARD_RE",
+  "UUID",
+  "EMAIL_ADDRESS_RE",
+  "US_SSN_RE"
+ ],
+ "faker": "module Faker re-seeded per message (seed_instance)",
+ "faker_arity_shim": "one-argument lambdas in _entity_faker_map called with a dummy argument (0.3.16 bug)",
+ "model": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2",
+ "model_revision": "9ea992753ab2686be4a8f64605ccc7be197ad794",
+ "recognizer_conf": "DEBERTA_AI4PRIVACY_v2_CONF",
+ "scanner": "llm_guard.input_scanners.Anonymize(Vault(), use_faker=True)",
+ "threshold": 0.5,
+ "versions": {
+  "faker": "37.12.0",
+  "llm-guard": "0.3.16",
+  "presidio-analyzer": "2.2.358",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ }
+}
+```
+
+Historical span files (`natural-oasst1`, `natural-sharegpt`, `natural-wildchat`): made on mps before fc4ab21 pinned LLM Guard to the CPU; test-1's silver-label candidates were drawn from them.
+
+```
+{
  "entity_types": [
   "CREDIT_CARD",
   "CRYPTO",

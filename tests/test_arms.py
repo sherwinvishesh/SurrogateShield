@@ -240,3 +240,21 @@ def test_natural_inputs_per_collection():
     t2 = run.natural("test2")
     assert sorted(t2) == ["test2-natural-oasst1", "test2-natural-sharegpt", "test2-natural-wildchat"]
     assert t2["test2-natural-oasst1"].parts[-4:] == ("build", "test2", "oasst1", "messages.jsonl")
+
+
+def test_record_arms_lists_historical_span_files_apart(tmp_path):
+    from bench.arms import run
+    from bench.realdata import manifest
+    pub, mpath = tmp_path / "spans", tmp_path / "manifest.json"
+    (pub / "lg").mkdir(parents=True)
+    for name, dev in (("natural-a", None), ("natural-b", None), ("dev-a", "cpu"), ("test2-natural-a", "cpu")):
+        (pub / "lg" / f"{name}.jsonl.meta.json").write_text(json.dumps(
+            {"arm": "lg", "config": {"device": dev}, "seed": 1}))
+    hist = {("lg", "natural-a"): "older run", ("lg", "natural-b"): "older run"}
+    arms = run.record_arms(pub, mpath, hist)
+    assert arms["lg"]["config"] == {"device": "cpu"}
+    assert arms["lg"]["historical"] == {"config": {"device": None}, "interpreter": None, "seed": 1,
+                                        "why": "older run", "files": ["natural-a", "natural-b"]}
+    assert "Historical span files (`natural-a`, `natural-b`): older run." in manifest.render(manifest.load(mpath))
+    with pytest.raises(SystemExit):                     # without the exception it still refuses
+        run.record_arms(pub, mpath, {})

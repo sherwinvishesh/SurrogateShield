@@ -101,18 +101,38 @@ def run_arm(arm: str, src: Path, name: str) -> dict:
             "median_ms": sorted(r["ms"] for r in rows)[len(rows) // 2] if rows else None}
 
 
-def record_arms(public: Path = PUBLIC, manifest_path: Optional[Path] = None) -> Dict[str, dict]:
+# Span files kept from an arm's earlier configuration because a frozen
+# artefact was built from them: test-1's silver labels took their candidates
+# from these LLM Guard runs, made on Apple's GPU before fc4ab21 pinned the arm
+# to the CPU. They are never rerun; the manifest lists them apart.
+HISTORICAL = {("llm_guard", f"natural-{ds}"): "made on mps before fc4ab21 pinned LLM Guard to the CPU; "
+              "test-1's silver-label candidates were drawn from them" for ds in ("oasst1", "sharegpt", "wildchat")}
+
+
+def record_arms(public: Path = PUBLIC, manifest_path: Optional[Path] = None,
+                historical: Optional[Dict[tuple, str]] = None) -> Dict[str, dict]:
     """Every arm's configuration, from the committed meta sidecars, into the
-    real-data manifest; a sidecar that disagrees with another of its arm raises."""
+    real-data manifest; a sidecar that disagrees with another of its arm raises,
+    except the ``HISTORICAL`` ones, recorded under the arm's ``historical`` key."""
     from bench.realdata import manifest
+    historical = HISTORICAL if historical is None else historical
     arms: Dict[str, dict] = {}
+    old: Dict[str, dict] = {}
     for meta_path in sorted(public.glob("*/*.jsonl.meta.json")):
         meta = json.loads(meta_path.read_text())
         rec = {"config": meta["config"], "interpreter": ARMS.get(meta["arm"]), "seed": meta["seed"]}
-        if meta["arm"] in arms and arms[meta["arm"]] != rec:
+        name = meta_path.name[:-len(".jsonl.meta.json")]
+        why = historical.get((meta["arm"], name))
+        target = old if why else arms
+        if why:
+            rec["why"] = why
+        if meta["arm"] in target and {k: v for k, v in target[meta["arm"]].items() if k != "files"} != rec:
             raise SystemExit(f"{rel(meta_path)}: configuration differs from another run of {meta['arm']}; "
                              "rerun every input with one version")
-        arms[meta["arm"]] = rec
+        files = target.get(meta["arm"], {}).get("files", []) + [name] if why else None
+        target[meta["arm"]] = {**rec, "files": files} if why else rec
+    for arm, rec in old.items():
+        arms.setdefault(arm, {"config": None, "interpreter": rec["interpreter"], "seed": rec["seed"]})["historical"] = rec
     path = manifest_path or manifest.PATH
     m = manifest.load(path)
     m["arms"] = arms

@@ -169,6 +169,10 @@ def render(m: dict) -> str:
         for arm, rec in sorted(m["arms"].items()):
             out += [f"### {arm}", "", f"Interpreter `{rec['interpreter']}/bin/python`, seed {rec['seed']}.", "",
                     "```", json.dumps(rec["config"], indent=1, sort_keys=True), "```", ""]
+            if rec.get("historical"):
+                h = rec["historical"]
+                out += [f"Historical span files ({', '.join(f'`{f}`' for f in h['files'])}): {h['why']}.", "",
+                        "```", json.dumps(h["config"], indent=1, sort_keys=True), "```", ""]
     if m.get("labels"):
         out += ["## Silver labels", "", "```", json.dumps(m["labels"], indent=1, sort_keys=True), "```", ""]
     out += ["## Frozen files (SHA-256)", "", "| file | SHA-256 |", "|---|---|"]
