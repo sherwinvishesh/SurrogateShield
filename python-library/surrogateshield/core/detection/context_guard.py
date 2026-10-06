@@ -19,10 +19,11 @@ import os
 import logging
 import re
 import threading
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Mapping, Optional, Tuple
 
 from ..entities import DetectedEntity
 from ..errors import DetectorUnavailable
+from .config import GENERATOR_TYPE
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +104,21 @@ _LABEL_MAP = {
 }
 
 _KEEP_LABELS = {"PER", "PERSON", "ORG", "LOC", "GPE"}
+# A name shorter than this is a fragment; a mapped AGE ("34") or PIN is not.
+_NAME_TYPES = frozenset({"PERSON", "ORG", "LOC", "GPE"})
+_MIN_NAME_LEN = 3
+
+
+def label_types(labels: Optional[Mapping[str, str]] = None) -> Dict[str, str]:
+    """Model label -> the type its entities get. None: the CoNLL / OntoNotes
+    names (``PER``, ``ORG``, ``LOC``, ``GPE``) as before. A stage's
+    ``labels`` option maps another model's labels onto public types
+    (``"FIRSTNAME": "PERSON"``, ``"CITY": "LOCATION"``) or internal ones; a
+    label it does not name is dropped."""
+    if labels is None:
+        return {k: _LABEL_MAP.get(k, k) for k in _KEEP_LABELS}
+    return {k: GENERATOR_TYPE.get(v, v) for k, v in labels.items()}
+
 
 _CG_BLOCKLIST: frozenset = frozenset({
     "dr", "mr", "mrs", "ms", "prof", "professor", "rev", "sr", "jr",
@@ -139,6 +155,7 @@ def guard(
     confidence_threshold: float = 0.70,
     device: int = -1,
     revision: Optional[str] = None,
+    labels: Optional[Mapping[str, str]] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Run NER on remaining_text and verify borderline_entities.
@@ -151,6 +168,8 @@ def guard(
         confidence_threshold: Minimum score to promote a borderline entity.
         revision:            Model revision (commit) to load; None is the
                              default branch.
+        labels:              Model label -> type (``label_types``); None
+                             keeps the CoNLL / OntoNotes names.
 
     Returns:
         Tuple of (confirmed_entities, uncertain_entities).
@@ -179,6 +198,7 @@ def guard(
     if not clean.strip():
         return confirmed, uncertain
 
+    keep = label_types(labels)
     ner = _get_ner(model_name, device, revision)
     try:
         results = ner(clean)
@@ -187,16 +207,17 @@ def guard(
 
     for r in results:
         label = r.get("entity_group", r.get("entity", ""))
-        if label not in _KEEP_LABELS:
+        if label not in keep:
             continue
 
-        entity_type = _LABEL_MAP.get(label, label)
+        entity_type = keep[label]
+        min_len = _MIN_NAME_LEN if entity_type in _NAME_TYPES else 1
         score = float(r.get("score", 0.0))
 
         raw_word = r.get("word", "")
         text = _clean_token(raw_word)
 
-        if len(text) < 3:
+        if len(text) < min_len:
             logger.debug(
                 f"[ContextGuard] Skipping too-short token: {raw_word!r} → {text!r}"
             )
@@ -233,7 +254,7 @@ def guard(
                 logger.debug(
                     f"[ContextGuard] Expanded fragment {raw_word!r} → {text!r}"
                 )
-                if len(text) < 3 or text.lower() in _CG_BLOCKLIST:
+                if len(text) < min_len or text.lower() in _CG_BLOCKLIST:
                     continue
         else:
             # The word is not in the text near its offsets (an [UNK] piece, a
@@ -252,7 +273,7 @@ def guard(
             start += len(span) - len(span.lstrip())
             end = start + len(span.strip())
             text = clean[start:end]
-            if len(text) < 3 or text.lower() in _CG_BLOCKLIST:
+            if len(text) < min_len or text.lower() in _CG_BLOCKLIST:
                 continue
 
         entity = DetectedEntity(

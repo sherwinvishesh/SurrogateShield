@@ -401,6 +401,14 @@ class DetectionConfig:
                 raise ValueError(f"stage {s.name!r}: max_latency_ms must be > 0")
             if not isinstance(s.device, int) or s.device < -1:
                 raise ValueError(f"stage {s.name!r}: device must be -1 (CPU) or a GPU index")
+            labels = s.options.get("labels") if s.name == "context_guard" else None
+            if labels is not None:
+                if not isinstance(labels, Mapping) or not labels or not all(
+                        isinstance(k, str) and k and isinstance(v, str) for k, v in labels.items()):
+                    raise ValueError("context_guard: option 'labels' must map model labels to types")
+                bad = sorted({v for v in labels.values() if v not in ALL_TYPES and v not in _PUBLIC_OF})
+                if bad:
+                    raise ValueError(f"context_guard: labels map onto unknown type(s) {bad}")
         known = set(names) | set(BUILTIN_STAGES) | {"*"}
         for t, sources in self.type_sources.items():
             if t not in ALL_TYPES and t != "*":

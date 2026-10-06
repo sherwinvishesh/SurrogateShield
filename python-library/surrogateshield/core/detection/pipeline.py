@@ -1481,6 +1481,7 @@ def run_cascade(
             confidence_threshold=cg_th.get("accept", 0.70),
             device=cg_stage.device,
             revision=cg_stage.revision,
+            labels=cg_stage.options.get("labels"),
         )
         _over_budget(config, "context_guard", (_clock() - _t_cg) * 1000, timings)
         slm_confirmed = _routed(config, slm_confirmed)

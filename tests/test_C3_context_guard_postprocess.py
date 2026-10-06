@@ -97,3 +97,18 @@ def test_C3_model_error_fails_closed(monkeypatch):
     monkeypatch.setattr(cg, "_get_ner", lambda *_a, **_k: ner)
     with pytest.raises(DetectorUnavailable):
         cg.guard("Dana Whitfield", [])
+
+
+def test_C3_a_label_map_replaces_the_conll_labels(monkeypatch):
+    # another model's labels (V3 §3.7): only the mapped ones are kept, public
+    # types become the internal type a plugin candidate of that type gets
+    t = "ask Priya at p@x.org in Leeds, she is 34"
+    res = [r("Priya", 4, 9, "FIRSTNAME"), r("p@x.org", 13, 20, "EMAIL"), r("Leeds", 24, 29, "CITY"),
+           r("34", 38, 40, "AGE"), r("Priya", 4, 9, "PER")]
+    labels = {"FIRSTNAME": "PERSON", "EMAIL": "EMAIL", "CITY": "LOCATION", "AGE": "AGE"}
+    assert run(monkeypatch, t, res, labels=labels)[0] == [("PERSON", "Priya"), ("email", "p@x.org"),
+                                                         ("GPE", "Leeds"), ("age", "34")]
+    assert run(monkeypatch, t, res)[0] == [("PERSON", "Priya")]          # default: CoNLL names only
+    # the three-character minimum is a name rule
+    assert run(monkeypatch, "ask Al", [r("Al", 4, 6, "FIRSTNAME")], labels=labels) == ([], [])
+    assert cg.label_types() == {"PER": "PERSON", "PERSON": "PERSON", "ORG": "ORG", "LOC": "LOC", "GPE": "GPE"}

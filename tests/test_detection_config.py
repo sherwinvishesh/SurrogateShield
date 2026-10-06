@@ -100,6 +100,9 @@ def test_hash_ignores_key_order_but_not_values():
     (lambda c: c.replace(address_shift_range=0), "address_shift_range"),
     (lambda c: c.with_sources(EMAIL=["nowhere"]), "type_sources"),
     (lambda c: c.replace(detectors=c.detectors + c.detectors[:1]), "duplicate|twice|unique"),
+    (lambda c: c.with_stage("context_guard", options={"labels": ["FIRSTNAME"]}), "labels"),
+    (lambda c: c.with_stage("context_guard", options={"labels": {}}), "labels"),
+    (lambda c: c.with_stage("context_guard", options={"labels": {"FIRSTNAME": "NAME"}}), "unknown type"),
 ])
 def test_invalid_configs_are_refused(change, match):
     with pytest.raises((ValueError, TypeError), match=match):
