@@ -22,6 +22,10 @@ split (``bench/arms/run.PRIVATE``), on the same messages. ``--extra`` is a
 partial config merged on the tagger's (other types it may emit, per-type
 thresholds, gate options), named by ``--variant``; SS runs over the whole
 split once per variant, and either half is scored from the same spans.
+The variants chosen on dev-large's calib half are kept in
+``bench/tagger/configs/``: ``sel3ga9-spacyloc`` (the tagger for every
+free-text and most structured types, spaCy for places only, no ContextGuard)
+and ``sel3ga9-loc4`` (no spaCy; places from the tagger at 0.4).
 """
 
 from __future__ import annotations
