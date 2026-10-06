@@ -17,7 +17,9 @@ arm runs as its own subprocess in its own interpreter
 * peak RSS of the 200-message process (``os.wait4``).
 
 Spans of these runs stay private (``build/perf/spans/``); the output holds
-timings and counts only.
+timings and counts only. With ``$SURROGATESHIELD_DETECTION_CONFIG`` set (a
+partial config the ``ss`` arm merges on the benchmark config), the file and
+its SHA-256 are recorded and the command carries the variable.
 """
 
 from __future__ import annotations
@@ -41,6 +43,7 @@ from bench.realdata.common import BUILD, DATASETS, ROOT, commit_note, derive_see
 N = 200
 COLD_RUNS = 3
 PERF = BUILD / "perf"
+CONFIG_ENV = "SURROGATESHIELD_DETECTION_CONFIG"   # read by the ss arm (bench/arms/ss.py)
 
 
 def sample(units_by_ds: Dict[str, Sequence[dict]], n: int = N, seed: int = None) -> List[dict]:
@@ -115,13 +118,19 @@ def run_all(arms: Sequence[str], out: Path, units_by_ds: Optional[Dict[str, Sequ
     msgs = sample(units_by_ds)
     src = perf / "messages.jsonl"
     write_jsonl(src, msgs, private=True)
+    cfg = os.environ.get(CONFIG_ENV)
+    config = {"path": _rel(Path(cfg)), "sha256": file_sha256(Path(cfg))} if cfg else None
     rows = []
     for arm in arms:
         r = measure(arm, src, perf / "spans", cmd, cold_runs)
         log(f"{arm:22} p50 {r['p50_ms']:>7.1f} ms  p95 {r['p95_ms']:>7.1f}  load {r['model_load_s']:>5.1f} s  "
             f"cold {r['cold_start_s']:>5.1f} s  RSS {r['peak_rss_mb']:>7.1f} MB")
         rows.append(r)
-    doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.perf_arms --out {_rel(out)}",
+    env = f"{CONFIG_ENV}={config['path']} " if cfg else ""
+    some = "" if list(arms) == list(ARMS) else f"--arms {' '.join(arms)} "
+    doc = {"command": f"{env}HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.perf_arms "
+                      f"{some}--out {_rel(out)}",
+           "detection_config": config,
            "git": git_state(),
            "messages": len(msgs), "per_dataset": {ds: sum(m["id"].startswith(f"rd-{ds}-") for m in msgs) for ds in sorted(units_by_ds)},
            "input_sha256": file_sha256(src), "machine": machine(), "cold_runs": cold_runs,

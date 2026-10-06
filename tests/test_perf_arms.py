@@ -2,6 +2,7 @@
 message draw, the warm statistics, the RSS unit, and a whole run with a stub
 arm process standing in for the real ones. Texts are invented."""
 
+import hashlib
 import json
 import os
 import sys
@@ -75,3 +76,17 @@ def test_a_failing_arm_stops_the_run(tmp_path):
     src.write_text(json.dumps({"id": "a", "text": "hello"}) + "\n")
     with pytest.raises(SystemExit, match="exit 3"):
         P.measure("fail", src, tmp_path / "spans", _cmd(tmp_path))
+
+
+def test_the_config_merged_by_the_ss_arm_is_recorded(tmp_path, monkeypatch):
+    cfg = tmp_path / "variant.config.json"
+    cfg.write_text('{"detectors": []}\n')
+    monkeypatch.setenv(P.CONFIG_ENV, str(cfg))
+    out = tmp_path / "perf_ss.json"
+    doc = P.run_all(["ss"], out, _units(), perf=tmp_path / "perf", cmd=_cmd(tmp_path), cold_runs=1, log=lambda *_: None)
+    assert doc["detection_config"]["sha256"] == hashlib.sha256(cfg.read_bytes()).hexdigest()
+    assert doc["command"].startswith(f"{P.CONFIG_ENV}={doc['detection_config']['path']} ")
+    assert "--arms ss --out" in doc["command"] and doc["command"].split()[-1].endswith("perf_ss.json")
+    monkeypatch.delenv(P.CONFIG_ENV)
+    assert P.run_all(["ss"], out, _units(), perf=tmp_path / "perf", cmd=_cmd(tmp_path), cold_runs=1,
+                     log=lambda *_: None)["detection_config"] is None
