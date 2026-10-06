@@ -247,6 +247,28 @@ Drawn: multi_test2 = 120, single_test2 = 600
 
 Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 2817525755150603185, single = 4631120071886413785
 
+**test2 labels**
+
+```
+{
+ "annotator": "claude-sonnet-4-6",
+ "literal_rule_arms": [
+  "ss",
+  "presidio_default",
+  "gliner_pii"
+ ],
+ "pooled_arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "prompt_version": "bebc6e281801fa74"
+}
+```
+
 ## Systems under test
 
 Recorded by `python -m bench.arms.run` from each arm's meta sidecar
@@ -553,8 +575,14 @@ Interpreter `.venv/bin/python`, seed 20261005.
 | `bench/realdata/sharegpt/pii_free.json` | `2207dd6db4f83e3e2d705bb7d5c83aee61ea2ecbe3c2122e09fff851ea37691b` |
 | `bench/realdata/sharegpt/pool.jsonl` | `f9d7636ffeb99beba8487fdbf3bf39d94f877823f86c42aa945723798dc2564d` |
 | `bench/realdata/sharegpt/test.jsonl` | `7686a2a4e2117aafd99071786d8ffa7022e1408b8f56ce087f37af5f8fdac37f` |
+| `bench/realdata/test2/oasst1/labels.jsonl` | `88fd8cc643fbc6c64982e90d5e876e941ba41e0486f5888e9b4ca4162f1884bf` |
+| `bench/realdata/test2/oasst1/pii_free.json` | `5b61fddc18bda7e0a0cc069ec0d79e7aa64d61bd9d5b0efc1ef8910cfcfddf51` |
 | `bench/realdata/test2/oasst1/pool.jsonl` | `6d832cbb932734f3d48823adbbe818ebb47618de151fc89d007f2d5ddf229e33` |
+| `bench/realdata/test2/sharegpt/labels.jsonl` | `08eeaa2905030a649c99063c697ca8e6355368778f9c4f60334b87e66f49166c` |
+| `bench/realdata/test2/sharegpt/pii_free.json` | `a16ca7a880da4def1f906a80ba09b2baa33beed6d24bfd1c78de093239cf8cb2` |
 | `bench/realdata/test2/sharegpt/pool.jsonl` | `9c5ee4a77d2cee6aaf9e4071ce5073131fd845802e1e2174ef997685c1adc8f8` |
+| `bench/realdata/test2/wildchat/labels.jsonl` | `3e5adb6498c67a9c46d82970d57db3424c84ef46f13611b2aa225724e526036f` |
+| `bench/realdata/test2/wildchat/pii_free.json` | `130cef94435b569f819ba772f8bbd14772e701f6c4f473d1a50fe7f34c344a15` |
 | `bench/realdata/test2/wildchat/pool.jsonl` | `620fa2417c307affab9c3a52ef15eb095ea1db78be5ef4b9a3c9216fcd863359` |
 | `bench/realdata/wildchat/dev.jsonl` | `de853c7174b008199bd8fd6b7bd05a5654908b99b71a6f94f9b0c638c43a91cf` |
 | `bench/realdata/wildchat/labels.jsonl` | `8e2669d041deb6e91de36e49a1b44cb112cf9853c0b5b5682320bfa4974b628f` |
