@@ -24,6 +24,9 @@ def tree(tmp_path, monkeypatch):
     (cfgs / "curve" / "op1.json").write_text('{"preset": "balanced"}\n')
     monkeypatch.setattr(F, "models", lambda cfg: [{"stage": "pii_tagger", "model": "m", "revision": "sha256:0"}])
     monkeypatch.setattr(F, "CONFIGS", cfgs)
+    (tmp_path / "external").mkdir()
+    (tmp_path / "external" / "ext.json").write_text('{"records": []}\n')
+    monkeypatch.setattr(F, "EXTERNAL", tmp_path / "external")
     return hyp, cfgs
 
 
@@ -41,6 +44,7 @@ def test_the_freeze_records_the_detector_and_is_written_once(tmp_path, tree):
     assert doc["config_files"] == {str(tree[1] / "balanced.json"): file_sha256(tree[1] / "balanced.json"),
                                    str(tree[1] / "curve" / "op1.json"): file_sha256(tree[1] / "curve" / "op1.json")}
     assert doc["gliner_pii_tuned"] == {"label_set": "published", "threshold": 0.3} and doc["models"][0]["model"] == "m"
+    assert list(doc["external_samples"]) == [str(tmp_path / "external" / "ext.json")]
     assert json.loads((tmp_path / "FREEZE.json").read_text()) == doc
     with pytest.raises(SystemExit, match="frozen once"):
         _freeze(tmp_path, tree)
@@ -63,6 +67,10 @@ def test_test2_is_refused_once_the_tree_moves_from_the_freeze(tmp_path, tree):
     with pytest.raises(SystemExit, match="differs from .* in config_files"):
         score.check_freeze(freeze, hyp)
     (cfgs / "curve" / "op1.json").write_text('{"preset": "balanced"}\n')
+    (tmp_path / "external" / "ext.json").write_text('{"records": [1]}\n')
+    with pytest.raises(SystemExit, match="in external_samples"):
+        score.check_freeze(freeze, hyp)
+    (tmp_path / "external" / "ext.json").write_text('{"records": []}\n')
     doc = json.loads(freeze.read_text())
     freeze.write_text(json.dumps({**doc, "code": "0" * 64, "detection_config_hash": "0" * 64}))
     with pytest.raises(SystemExit, match="in code, detection_config_hash"):

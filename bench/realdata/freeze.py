@@ -8,11 +8,13 @@ nothing untracked under ``python-library/`` or ``bench/``), the library code
 stamp, the default detector (``benchmark()``: its config hash and the config
 itself), every model it loads with its revision and licence (the tagger's
 installed weights checked against their pin), the hypotheses file's hash, the
-committed config files the test-2 runs read (E9 and E10) and the frozen
-baseline choice (``gliner_pii_tuned``). It refuses to overwrite an existing
+committed config files the test-2 runs read (E9 and E10), the external
+benchmark's sample descriptions and the frozen baseline choice
+(``gliner_pii_tuned``). It refuses to overwrite an existing
 freeze. ``score.check_freeze`` refuses test-2 unless the hypotheses,
-and, when FREEZE.json records them, the code, the default config and the
-config files are still the frozen ones; ``--check`` prints the same.
+and, when FREEZE.json records them, the code, the default config, the
+config files and the external samples are still the frozen ones;
+``--check`` prints the same.
 """
 
 from __future__ import annotations
@@ -28,6 +30,7 @@ from bench.realdata.common import file_sha256, git_state
 from bench.realdata.score import FREEZE, HYPOTHESES, RD, rel
 
 CONFIGS = RD / "configs"
+EXTERNAL = RD / "external"
 
 
 def untracked() -> List[str]:
@@ -40,6 +43,10 @@ def untracked() -> List[str]:
 
 def config_files(configs: Optional[Path] = None) -> Dict[str, str]:
     return {rel(p): file_sha256(p) for p in sorted((configs or CONFIGS).rglob("*.json"))}
+
+
+def external_samples(external: Optional[Path] = None) -> Dict[str, str]:
+    return {rel(p): file_sha256(p) for p in sorted((external or EXTERNAL).glob("*.json"))}
 
 
 def models(cfg) -> List[dict]:
@@ -69,14 +76,15 @@ def current(configs: Optional[Path] = None, hypotheses: Path = HYPOTHESES) -> di
     cfg = C.benchmark()
     return {"code": code_stamp(), "detection_config_hash": cfg.config_hash(), "detection_config": cfg.to_dict(),
             "hypotheses_sha256": file_sha256(hypotheses), "config_files": config_files(configs),
+            "external_samples": external_samples(),
             "gliner_pii_tuned": {"label_set": tuned.LABEL_SET, "threshold": tuned.THRESHOLD}}
 
 
 def differences(doc: dict, now: Optional[dict] = None, hypotheses: Path = HYPOTHESES) -> List[str]:
     """The frozen fields that the tree no longer matches."""
     now = now or current(hypotheses=hypotheses)
-    return [k for k in ("code", "detection_config_hash", "hypotheses_sha256", "config_files", "gliner_pii_tuned")
-            if k in doc and doc[k] != now[k]]
+    return [k for k in ("code", "detection_config_hash", "hypotheses_sha256", "config_files", "external_samples",
+                        "gliner_pii_tuned") if k in doc and doc[k] != now[k]]
 
 
 def freeze(out: Path = FREEZE, configs: Optional[Path] = None, hypotheses: Path = HYPOTHESES,
