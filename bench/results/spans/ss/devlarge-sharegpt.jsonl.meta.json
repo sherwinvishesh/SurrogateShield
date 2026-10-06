@@ -1,0 +1,208 @@
+{
+ "arm": "ss",
+ "command": ".venv/bin/python -m bench.arms.ss --in bench/realdata/build/score/test/sharegpt.jsonl --out bench/realdata/build/spans/ss/devlarge-sharegpt.jsonl",
+ "config": {
+  "ADDRESS_MODE": "replace",
+  "ADDRESS_MODE_product": "auto",
+  "SERVICE_QUERY_DETECTION_ENABLED": true,
+  "detection_config": {
+   "address_shift_range": 1,
+   "detectors": [
+    {
+     "device": -1,
+     "enabled": true,
+     "max_latency_ms": null,
+     "model": null,
+     "name": "pattern_scan",
+     "options": {},
+     "revision": null,
+     "stride": null,
+     "thresholds": {},
+     "window": null
+    },
+    {
+     "device": -1,
+     "enabled": true,
+     "max_latency_ms": null,
+     "model": null,
+     "name": "canonicaliser",
+     "options": {
+      "views": [
+       "worded",
+       "spelled",
+       "dates",
+       "folded",
+       "joined"
+      ]
+     },
+     "revision": null,
+     "stride": null,
+     "thresholds": {},
+     "window": null
+    },
+    {
+     "device": -1,
+     "enabled": true,
+     "max_latency_ms": null,
+     "model": "en_core_web_lg",
+     "name": "entity_trace",
+     "options": {},
+     "revision": "3.8.0",
+     "stride": null,
+     "thresholds": {
+      "fallback": 0.65,
+      "high": 0.85,
+      "low": 0.6
+     },
+     "window": null
+    },
+    {
+     "device": -1,
+     "enabled": true,
+     "max_latency_ms": null,
+     "model": "dslim/distilbert-NER",
+     "name": "context_guard",
+     "options": {},
+     "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+     "stride": null,
+     "thresholds": {
+      "accept": 0.7
+     },
+     "window": null
+    },
+    {
+     "device": -1,
+     "enabled": false,
+     "max_latency_ms": null,
+     "model": null,
+     "name": "pii_tagger",
+     "options": {},
+     "revision": null,
+     "stride": null,
+     "thresholds": {},
+     "window": null
+    },
+    {
+     "device": -1,
+     "enabled": true,
+     "max_latency_ms": null,
+     "model": null,
+     "name": "structural",
+     "options": {},
+     "revision": null,
+     "stride": null,
+     "thresholds": {},
+     "window": null
+    }
+   ],
+   "gate": true,
+   "gate_bypass": [],
+   "preset": "balanced",
+   "service_queries": true,
+   "source_priority": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "type_actions": {
+    "ADDRESS": "replace"
+   },
+   "type_conflicts": {
+    "LOCATION|ORG": "score",
+    "LOCATION|PERSON": "score",
+    "ORG|PERSON": "score"
+   },
+   "type_sources": {
+    "ADDRESS": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "AGE": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "CREDENTIAL": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "DATE_OF_BIRTH": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "EMAIL": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "GENDER": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "HANDLE": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "ID": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "LOCATION": [
+     "*"
+    ],
+    "NETWORK": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "ORG": [
+     "*"
+    ],
+    "OTHER": [
+     "*"
+    ],
+    "PERSON": [
+     "*"
+    ],
+    "PHONE": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ],
+    "URL": [
+     "pattern_scan",
+     "canonicaliser",
+     "structural"
+    ]
+   }
+  },
+  "detection_config_hash": "8e463c3c6b7562fd6ae3070109edd178a248cd7e5ab350168aeb122bd4c81c15",
+  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+  "versions": {
+   "faker": "40.15.0",
+   "python": "3.13.2",
+   "spacy": "3.8.14",
+   "surrogateshield": "2.1.0",
+   "torch": "2.12.0",
+   "transformers": "5.8.1"
+  }
+ },
+ "edits": 1883,
+ "input": "bench/realdata/build/score/test/sharegpt.jsonl",
+ "input_sha256": "1e30b86fe9ef51b393211aad2c41ecea1deb90ed570e5e7a8b0837d8072f4621",
+ "load_seconds": 0.0,
+ "messages": 890,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

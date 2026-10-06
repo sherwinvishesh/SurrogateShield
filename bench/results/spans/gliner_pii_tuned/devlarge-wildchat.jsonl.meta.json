@@ -1,0 +1,56 @@
+{
+ "arm": "gliner_pii_tuned",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/test/wildchat.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/devlarge-wildchat.jsonl",
+ "config": {
+  "backbone_revision": {
+   "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+  },
+  "chosen_by": "bench/results/gliner_sweep_dev.json (lowest pooled dev injected leak)",
+  "flat_ner": true,
+  "label_set": "published",
+  "labels": [
+   "person",
+   "organization",
+   "email",
+   "phone number",
+   "address",
+   "location",
+   "date of birth",
+   "age",
+   "passport number",
+   "social security number",
+   "credit card number",
+   "bank account number",
+   "iban",
+   "driver's license number",
+   "national id number",
+   "tax identification number",
+   "health insurance id number",
+   "ip address",
+   "url",
+   "username",
+   "password",
+   "api key"
+  ],
+  "model": "urchade/gliner_multi_pii-v1",
+  "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+  "overlap_words": 30,
+  "replacement": "[LABEL] placeholder",
+  "threshold": 0.3,
+  "versions": {
+   "gliner": "0.2.29",
+   "python": "3.12.9",
+   "torch": "2.14.1",
+   "transformers": "4.51.3"
+  },
+  "window_words": 200
+ },
+ "edits": 4117,
+ "input": "bench/realdata/build/score/test/wildchat.jsonl",
+ "input_sha256": "67b2df52060b8741acf2e553237f52eff6e902137fb24dff0cf5cd115ca8804e",
+ "load_seconds": 11.2,
+ "messages": 870,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

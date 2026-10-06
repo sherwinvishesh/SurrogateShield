@@ -176,7 +176,8 @@ def test_committed_span_files_hold_offsets_only():
             assert set(r) - {"refused"} == {"id", "edits", "ms"} and r.get("refused", 1) == 1
             for e in r["edits"]:
                 assert len(e) == 5 and all(isinstance(x, int) for x in (e[0], e[1], e[3], e[4]))
-                assert re.fullmatch(r"[A-Za-z_' ]{1,40}", e[2]), (f.name, e[2])
+                # a type, or a canonical view's label ("age:worded"); never text
+                assert re.fullmatch(r"[A-Za-z_' ]{1,40}(?::[a-z_]{1,20})?", e[2]), (f.name, e[2])
 
 
 def test_gliner_windows_cover_every_word_with_overlap():
