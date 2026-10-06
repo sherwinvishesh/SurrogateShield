@@ -462,3 +462,209 @@ def test_estimate_counts_what_is_missing_and_tokens_from_cached_replies(run):
     after = L.estimate(r, data, list(data))
     assert after["plan"]["natural responder"] == 0 and after["ledger_total"] == 10
     assert after["tokens_per_call"]["responder"] == {"in": 10, "out": 5, "n": 10}
+
+
+# ── test-2 (V3 Phase 4): GLiNER-PII as a live comparator, H7'' and H8'' ──────
+
+T2 = L.PLANS["test2"]
+
+
+def build2(**kw):
+    """build() plus GLiNER-PII's spans: ``[LABEL]`` placeholders, the same
+    placeholder every turn, and one spurious edit on a natural prompt."""
+    data = build(**kw)
+    for ds, d in data.items():
+        g = d["spans"]["gliner_pii"] = {}
+        for mid, u in d["units"].items():
+            text = u["gold"]["text"]
+            edits = [_edit(text, NAME, "[PERSON]", "PERSON")] if NAME in text else []
+            if EMAIL in text:
+                edits.append(_edit(text, EMAIL, "[EMAIL_ADDRESS]", "EMAIL"))
+            if mid == f"{ds}-n0":
+                edits.append(_edit(text, "Python", "[ORG]", "ORG"))
+            g[mid] = {"id": mid, "edits": sorted(edits)}
+    return data
+
+
+def blind(params):
+    """respond(), with an attacker that never guesses."""
+    content = _text_of(params)
+    if params["model"] == pv.OPUS and "Answer A:" not in content and "Final answer:" not in content:
+        return text_msg(json.dumps({"estimates": []}))
+    return respond(params)
+
+
+def _doc(**kw):
+    return {"command": "c", "git": {"commit": "abc", "modified": []}, "split": "test2", **kw}
+
+
+def test_plans_keep_test1_and_add_gliner_pii_with_its_own_draws_to_test2():
+    assert L.TEST is L.PLANS["test"] and L.TEST.spans == L.SPAN_ARMS and L.TEST.tag("6-judge") == "6-judge"
+    assert L.TEST.utility == L.UTILITY_ARMS and L.TEST.attack == L.ATTACK_ARMS
+    assert L.TEST.multiturn == L.MULTITURN_ARMS and L.TEST.judged == ("presidio_default",)
+    for arms in (T2.utility, T2.natural, T2.multiturn, T2.attack, T2.placeholder, T2.spans):
+        assert "gliner_pii" in arms
+    assert T2.judged == L.H7_AGAINST == ("presidio_faker", "gliner_pii")
+    assert set(T2.spans) == {*L.SPAN_ARMS, "gliner_pii"} and T2.tag("6-judge") == "6-judge-test2"
+    # test-1's judge slot and seed are what they were; test-2's name the arm and the split
+    assert L.judge_slot(L.TEST, "oasst1", "m", "presidio_default") == L.slot("oasst1", "m", "judge")
+    assert L.judge_seed(L.TEST, "m", "presidio_default") == L.derive_seed("live-judge", "m")
+    assert L.judge_slot(T2, "oasst1", "m", "gliner_pii") == L.slot("oasst1", "m", "judge-gliner_pii")
+    assert len({L.judge_seed(T2, "m", o) for o in T2.judged} | {L.judge_seed(L.TEST, "m", "presidio_faker")}) == 3
+
+
+def test_test2_utility_judges_ss_against_presidio_faker_and_gliner_pii_and_checks_h7(run):
+    data = build2()
+    r = run(plan=T2)
+    out = L.utility(r, data, list(data), scorer=stub_scorer)
+    res = out["results"]["all"]
+    assert "judge" not in res and "H3" not in res and set(res["judges"]) == {"presidio_faker", "gliner_pii"}
+    assert res["bertscore"]["gliner_pii"]["mean"] == 0.5 and res["bertscore_differences"]["ss-gliner_pii"]["diff"] == 0.5
+    gl, pf = res["judges"]["gliner_pii"], res["judges"]["presidio_faker"]
+    assert gl["ss_wins"] == 6 and gl["gliner_pii_wins"] == 0 and gl["pair"] == "ss vs gliner_pii"
+    assert pf["ties"] == 6 and pf["score"]["diff"] == 0.0     # neither answer carries a placeholder
+    h = res[L.H7]
+    assert h["holds"] is True and all(h[k] for k in ("bertscore_not_below_presidio_faker", "judge_not_below_gliner_pii"))
+    assert h["strict"]["judge_above_presidio_faker"] is False and h["strict"]["judge_above_gliner_pii"] is True
+    phases = {(b[1], b[2]): len(b[3]) for b in r.stub.batches}
+    assert phases == {("6-utility-test2", "responder"): 6 * 5, ("6-judge-test2", "judge"): 6 * 2}
+    judged = [p for b in r.stub.batches if b[2] == "judge" for p in b[3]]
+    assert all(p["model"] == pv.OPUS for p in judged)
+    assert not any(w in _text_of(p).lower() for p in judged for w in ("gliner", "presidio", "surrogateshield"))
+    assert sum("[PERSON]" in _block(_text_of(p), "Answer A:") + _block(_text_of(p), "Answer B:")
+               for p in judged) == 6                      # the GLiNER-PII answers, judged blind
+    md = L.markdown("utility", _doc(e5b=out["results"], natural=L.natural(r, data, list(data),
+                                                                           scorer=stub_scorer)["results"]))
+    assert md.startswith("# utility (real data, test2)") and "| all | ss vs gliner_pii | 6 | 6/0/0 |" in md
+    assert "- all: **holds**" in md and "ss − gliner_pii" in md
+
+
+def test_test2_natural_sends_gliner_pii_edits_and_compares_ss_with_it(run):
+    data = build2()
+    r = run(plan=T2)
+    res = L.natural(r, data, list(data), scorer=stub_scorer)["results"]["all"]
+    assert res["edited"]["gliner_pii"]["k"] == 2 and r.sent == 4 * 2 + 2 + 2
+    assert set(res["differences"]) == {"ss-rerun", "presidio_default-rerun", "gliner_pii-rerun",
+                                       "ss-presidio_default", "ss-gliner_pii"}
+    assert {b[1] for b in r.stub.batches} == {"6-natural-test2"}
+
+
+def test_test2_multiturn_compares_ss_with_both_arms_and_reports_distinct_consistency(run, tmp_path, monkeypatch):
+    monkeypatch.setattr(L, "TMP", tmp_path / "live-tmp")
+    data = build2()
+    r = run(plan=T2)
+    out = L.multiturn(r, data, list(data), cascade=fake_cascade, log=lambda *_: None)
+    res = out["results"]["all"]
+    ss, pf, gl = res["ss"], res["presidio_faker"], res["gliner_pii"]
+    assert ss["complete"] == pf["complete"] == gl["complete"] == 2
+    assert ss["consistent_distinct"]["rate"] == 1.0 and pf["consistent_distinct"]["rate"] == 0.0
+    assert gl["consistent"]["rate"] == 1.0                   # the same placeholder every turn
+    assert gl["grades"] == {"incorrect": 2} and ss["grades"] == {"correct": 2}
+    h = res[L.H7]
+    assert h["judge_above_gliner_pii"] is True and h["consistency_above_presidio_faker"] is True
+    assert h["consistency_above_gliner_pii"] is False and h["holds"] is False      # ties are not "above"
+    hist = [b for b in r.stub.batches if b[1] == "6-multiturn-test2"]
+    assert len(hist) == 2 and len(hist[1][3]) == 2 * 3
+    md = L.markdown("multiturn", _doc(results=out["results"]))
+    assert "| all | gliner_pii |" in md and "consistent, distinct" in md and "- all: **does not hold**" in md
+
+
+def test_consistent_distinct_fails_one_placeholder_for_two_people():
+    ds, conv = "oasst1", "oasst1-c9"
+    texts = ["Sarah Mitchell met Tom Reed.", "Tom Reed thanked Sarah Mitchell."]
+    units, spans = {}, {}
+    for t, text in enumerate(texts):
+        mid = f"{conv}#t{t}"
+        units[mid] = _unit(ds, mid, text, [{"type": "PERSON", "value": NAME}, {"type": "PERSON", "value": "Tom Reed"}],
+                           ("injected", "multi"), conv=conv, turn=t)
+        spans[mid] = {"id": mid, "edits": sorted(_edit(text, v, "[PERSON]", "PERSON") for v in (NAME, "Tom Reed"))}
+    data = {ds: {"units": units, "spans": {"gliner_pii": spans}}}
+    turn = {"raw": "ok", "shown": "ok", "payload": [{"role": "user", "content": "x"}]}
+    out = L.score_conversation(data, ds, conv, "gliner_pii", {"failed": None, "turns": [turn, turn]})
+    assert out["recurring"] == 2 and out["consistent"] == 2 and out["consistent_distinct"] == 0
+
+
+def test_test2_attack_reads_gliner_pii_placeholders_and_h8_fails_on_an_exact_recovery(run, tmp_path, monkeypatch):
+    monkeypatch.setattr(L, "TMP", tmp_path / "live-tmp")
+    data = build2()
+    r = run(plan=T2)
+    L.multiturn(r, data, list(data), cascade=fake_cascade, log=lambda *_: None)
+    out = L.attack(r, data, list(data))
+    batches = [b for b in r.stub.batches if b[1] == "6-attacker-test2"]
+    single = [p for b in batches if b[0].startswith("attack-") and not b[0].startswith("attack-conv") for p in b[3]]
+    assert len(single) == 6 * 5 - 2
+    assert sum("[PERSON], [LOCATION]" in _text_of(p) for p in single) == 12      # presidio_default and gliner_pii
+    res = out["results"]["all"]
+    assert "H5" not in res and "H5-conv" not in res and res["gliner_pii"]["attacked"] == 12
+    assert res["ss"]["recovered"]["k"] == 12 and res["gliner_pii"]["recovered"]["k"] == 12
+    h = res[L.H8]
+    assert h["no_exact_single"] is False and h["no_exact_conversation"] is False and h["holds"] is False
+    assert h["recovery_not_above_gliner_pii"] is True and h["recovery"]["ss-gliner_pii"]["diff"] == 0.0
+    assert set(out["unparsed"]) == set(T2.attack)
+    md = L.markdown("attacker", _doc(results=out["results"]))
+    assert "| all | gliner_pii |" in md and "| all | ss-conversation |" in md and "- all: **does not hold**" in md
+
+
+def test_test2_h8_holds_when_nothing_of_ss_is_recovered(run, tmp_path, monkeypatch):
+    monkeypatch.setattr(L, "TMP", tmp_path / "live-tmp")
+    data = build2()
+    r = run(blind, plan=T2)
+    L.multiturn(r, data, list(data), cascade=fake_cascade, log=lambda *_: None)
+    h = L.attack(r, data, list(data))["results"]["all"][L.H8]
+    assert h["no_exact_single"] and h["no_exact_conversation"] and h["recovery_not_above_gliner_pii"]
+    assert h["holds"] is True and h["recovery"]["ss"]["k"] == 0
+
+
+def test_test2_h8_needs_a_conversation_condition(run):
+    data = build2()
+    r = run(blind, plan=T2)
+    h = L.attack(r, data, list(data), conversations=False)["results"]["all"][L.H8]
+    assert h["no_exact_single"] is True and h["no_exact_conversation"] is False and h["holds"] is False
+
+
+def test_test2_estimate_counts_gliner_pii_and_two_judges(run):
+    data = build2()
+    e = L.estimate(run(plan=T2), data, list(data))
+    p = e["plan"]
+    assert e["split"] == "test2"
+    assert p["utility responder"] == 6 * 5 and p["utility judge"] == 6 * 2
+    assert p["natural responder"] == 4 * 2 + 2 + 2 and p["attacker single"] == 6 * 5 - 2
+    assert p["multiturn judge"] == 2 * 3 and p["multiturn responder (at most)"] == 2 * 3 * 2
+
+
+def test_load_test_reads_test2_only_after_the_freeze(tmp_path, monkeypatch):
+    from bench.arms import run as arms_run
+    from bench.realdata import score
+    seen = []
+
+    def load_split(split, datasets, rd, build, prefix=""):
+        seen.append(("load", split, prefix))
+        return {}, {ds: {"units": [{"mid": f"{ds}-1"}], "input_sha": "h"} for ds in datasets}
+
+    monkeypatch.setattr(score, "load_split", load_split)
+    monkeypatch.setattr(score, "read_spans", lambda path, units, sha: seen.append(path.relative_to(tmp_path).as_posix())
+                        or {})
+    monkeypatch.setattr(arms_run, "PRIVATE", tmp_path)
+
+    def sealed(*_a, **_k):
+        raise SystemExit("not frozen")
+
+    monkeypatch.setattr(score, "check_freeze", sealed)
+    with pytest.raises(SystemExit):
+        L.load_test(["oasst1"], T2.spans, "test2")
+    assert seen == []                                     # nothing of test-2 read before the freeze
+    monkeypatch.setattr(score, "check_freeze", lambda *_a, **_k: "ok")
+    L.load_test(["oasst1"], T2.spans, "test2")
+    assert seen[0] == ("load", "test2", "test2") and "gliner_pii/test2-oasst1.jsonl" in seen
+    seen.clear()
+    monkeypatch.setattr(score, "check_freeze", sealed)    # test-1 needs no freeze
+    L.load_test(["oasst1"])
+    assert seen[0] == ("load", "test", "") and "ss/test-oasst1.jsonl" in seen
+    assert not any("gliner" in s for s in seen[1:])
+
+
+def test_main_names_the_run_and_command_by_split():
+    assert L._command("utility", L.Path("bench/results/u.json")) == (
+        "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.live utility "
+        "--out bench/results/u.json")
+    assert " utility --split test2 --out " in L._command("utility", L.Path("bench/results/u.json"), "test2")

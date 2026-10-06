@@ -1,10 +1,15 @@
-"""Phase 6: the live runs of the real-data benchmark, on the test split.
+"""Phase 6: the live runs of the real-data benchmark, on the test split; with
+``--split test2``, V3 Phase 4 on the sealed second test (see "Test-2" below).
 
     .venv/bin/python -m bench.realdata.live estimate
     .venv/bin/python -m bench.realdata.live utility   --pilot 10
     .venv/bin/python -m bench.realdata.live utility   --out bench/results/utility_realdata.json
     .venv/bin/python -m bench.realdata.live multiturn --out bench/results/multiturn_realdata.json
     .venv/bin/python -m bench.realdata.live attacker  --out bench/results/attacker_realdata.json
+    .venv/bin/python -m bench.realdata.live estimate  --split test2
+    .venv/bin/python -m bench.realdata.live utility   --split test2 --out bench/results/utility_realdata_test2.json
+    .venv/bin/python -m bench.realdata.live multiturn --split test2 --out bench/results/multiturn_realdata_test2.json
+    .venv/bin/python -m bench.realdata.live attacker  --split test2 --out bench/results/attacker_realdata_test2.json
 
 ``utility`` is E5b (injected slice) and the natural-slice utility cost;
 ``multiturn`` is E7b; ``attacker`` is E8, whose conversation condition reads
@@ -23,8 +28,8 @@ Cache. Every reply is stored under ``experiment/realdata/<run>/`` (git-ignored,
 0700 directory, 0600 files), keyed by the hash of its slot and request
 parameters, so a rerun sends only what is missing. A failed request is stored
 as an error row and is not resent unless ``--retry-errors`` is given (each
-retry is counted). Arm texts come from the frozen test spans the scorer wrote
-(``bench/realdata/build/spans/<arm>/test-<dataset>.jsonl``); the multi-turn
+retry is counted). Arm texts come from the frozen spans the scorer wrote
+(``bench/realdata/build/spans/<arm>/<split>-<dataset>.jsonl``); the multi-turn
 replay runs the app's own ``Pipeline``.
 
 Samples (ids are stored in each result):
@@ -101,6 +106,46 @@ Presidio+Faker on BERTScore); E7b runs 30 conversations per dataset, not 50;
 E8 runs 60 prompts per dataset, not 100. The reasons and the estimate are in
 the run's progress log.
 
+Test-2 (``--split test2``; PROMPT_FOR_OPUS_V3 Phase 4, ``HYPOTHESES_TEST2.md``).
+The rows are test-2's, read only after FREEZE.json is committed (the scorer's
+check), with the default SurrogateShield the freeze pinned. Everything above
+holds, with these changes (``PLANS["test2"]``):
+
+* arms: ``gliner_pii`` is added to E5b, the natural slice, E7b and E8, the
+  baseline to beat; E5b's judge compares ss with ``presidio_faker`` and with
+  ``gliner_pii`` (one call each per prompt, positions drawn per prompt and
+  arm), not with ``presidio_default``; the attacker reads ``gliner_pii``'s
+  ``[LABEL]`` placeholders with the placeholder prompt, as Presidio's.
+* sizes: test-1's (100 / 50 / 30 / 60 per dataset), the plan the call cap of
+  6,500 was raised for (§6 Q1), about 4,550 calls by the dry-run estimate.
+* draws, ledger phases and the cache are the split's own: seed names and
+  phases end in ``-test2`` and the run directory is ``test2``, so nothing of
+  the test-1 pilot is reused.
+* supplementary, deciding nothing: E7b's ``consistent_distinct`` (consistent,
+  and the replacement stands for no other value of the conversation:
+  ``[PERSON]`` for two people is consistent but not distinct); E5b's strict
+  bounds (above 0); E8's ``recovered`` rate for every arm.
+
+Criteria for test-2, fixed here before any test-2 live call. Each is computed
+per dataset and pooled; the verdict is the pooled group's ("all"), the
+per-dataset groups are reported beside.
+
+* H7'' (E5b) holds when, for Presidio+Faker and for GLiNER-PII, the mean
+  BERTScore difference ss − arm and the mean judge score of ss against the arm
+  each have a 95 % paired bootstrap lower bound above −0.02 (the margin
+  applies to both arms, as test-1's H3(c) read "not below Presidio+Faker").
+* H7'' (E7b) holds when, for Presidio+Faker and for GLiNER-PII, the judge
+  grade (iv) and the consistency rate (iii) of ss are each higher than the
+  arm's, with a 95 % bootstrap interval over conversations above 0.
+  H7'' holds when both parts hold; it is not part of the GO rule.
+* H8'' holds when (a) SurrogateShield has no exact recovery of a value it
+  replaced in the single-message condition, (b) nor in the conversation
+  condition, and (c) its recovery rate (exact + partial, over the values it
+  replaced) in the single-message condition is not above GLiNER-PII's, by
+  point estimates as H10'' reads "not above"; the paired cluster bootstrap of
+  the difference over messages is reported beside. H8'' is part of the GO
+  rule.
+
 Real text: natural-slice prompts go to the responder only; the judge and the
 attacker see injected-slice text only. Committed results hold counts, ids and
 prompt templates, never message text.
@@ -119,6 +164,7 @@ import sys
 import tempfile
 from collections import Counter
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -146,6 +192,39 @@ ATTACK_ARMS = ("ss", "presidio_default", "presidio_faker", "llm_guard")
 SPAN_ARMS = ("ss", "presidio_default", "presidio_faker", "llm_guard")
 MULTITURN_ARMS = ("ss", "presidio_faker")
 GRADES = {"correct": 1.0, "partly": 0.5, "incorrect": 0.0}
+H7_AGAINST = ("presidio_faker", "gliner_pii")      # test-2's utility comparators (HYPOTHESES_TEST2 H7'')
+H7_MARGIN = 0.02
+H7, H8 = "H7''", "H8''"                              # result keys
+
+
+@dataclass(frozen=True)
+class Plan:
+    """What one live run compares, and on which split. ``test`` is the
+    real-data benchmark's Phase 6, unchanged; ``test2`` is V3 Phase 4."""
+    split: str                      # a score.RUNS key; arm texts come from its span files <split>-<dataset>
+    utility: Tuple[str, ...]        # E5b responder arms, the original first
+    judged: Tuple[str, ...]         # the pairwise judge compares ss with each, one call per prompt and arm
+    natural: Tuple[str, ...]        # natural slice: arms sent when they changed the prompt
+    multiturn: Tuple[str, ...]
+    attack: Tuple[str, ...]
+    placeholder: Tuple[str, ...]    # arms that write [TYPE]: the attacker reads them with the placeholder prompt
+
+    @property
+    def spans(self) -> Tuple[str, ...]:
+        return tuple(dict.fromkeys(a for a in (*self.utility, *self.natural, *self.multiturn, *self.attack)
+                                   if a != "original"))
+
+    def tag(self, name: str) -> str:
+        """A seed name or ledger phase: test-1's own, other splits' suffixed,
+        so no draw and no call count is shared."""
+        return name if self.split == "test" else f"{name}-{self.split}"
+
+
+PLANS = {"test": Plan("test", UTILITY_ARMS, ("presidio_default",), ("ss", "presidio_default"), MULTITURN_ARMS,
+                      ATTACK_ARMS, ("presidio_default",)),
+         "test2": Plan("test2", (*UTILITY_ARMS, "gliner_pii"), H7_AGAINST, ("ss", "presidio_default", "gliner_pii"),
+                       ("ss", *H7_AGAINST), (*ATTACK_ARMS, "gliner_pii"), ("presidio_default", "gliner_pii"))}
+TEST = PLANS["test"]
 
 # ── prompts (versioned; their hashes go into every result) ───────────────────
 
@@ -318,10 +397,10 @@ class Run:
 
     def __init__(self, name: str = "main", *, root: Path = RUNS, ledger: Optional[pv.Ledger] = None,
                  client=None, batch_runner: Callable = pv.run_batch, max_calls: Optional[int] = None,
-                 retry_errors: bool = False, log: Callable[[str], None] = print):
+                 retry_errors: bool = False, log: Callable[[str], None] = print, plan: Plan = TEST):
         if not re.fullmatch(r"[A-Za-z0-9_-]{1,40}", name):
             raise ValueError(f"run name {name!r}: letters, digits, _ and - only")
-        self.name, self.dir = name, Path(root) / name
+        self.name, self.dir, self.plan = name, Path(root) / name, plan
         self.ledger = ledger if ledger is not None else pv.Ledger(run=f"live-{name}")
         self._client, self.batch_runner = client, batch_runner
         self.max_calls, self.retry_errors, self.log = max_calls, retry_errors, log
@@ -394,16 +473,24 @@ class Run:
 
 # ── data: the frozen test split and each arm's text ──────────────────────────
 
-def load_test(datasets: Sequence[str] = DATASETS, arms: Sequence[str] = SPAN_ARMS) -> Dict[str, dict]:
-    """Per dataset: ``units`` by message id and each arm's checked span rows."""
+def load_test(datasets: Sequence[str] = DATASETS, arms: Sequence[str] = SPAN_ARMS,
+              split: str = "test") -> Dict[str, dict]:
+    """Per dataset: ``units`` by message id and each arm's checked span rows
+    from the scored run *split*. A sealed collection's rows are read only
+    after the freeze, as its scorer reads them."""
     from bench.arms.run import PRIVATE
     from bench.realdata import score
-    _hashes, loaded = score.load_split("test", datasets)
+    from bench.realdata.common import COLLECTIONS
+    data_split, coll_name, _role = score.RUNS[split]
+    coll = COLLECTIONS[coll_name]
+    if coll.prefix:
+        score.check_freeze()
+    _hashes, loaded = score.load_split(data_split, datasets, coll.rd, coll.build, prefix=coll.prefix)
     out = {}
     for ds in datasets:
         units = loaded[ds]["units"]
         out[ds] = {"units": {u["mid"]: u for u in units},
-                   "spans": {a: score.read_spans(PRIVATE / a / f"test-{ds}.jsonl", units, loaded[ds]["input_sha"])
+                   "spans": {a: score.read_spans(PRIVATE / a / f"{split}-{ds}.jsonl", units, loaded[ds]["input_sha"])
                              for a in arms}}
     return out
 
@@ -442,26 +529,26 @@ def turn_mids(data: dict, ds: str, conv: str) -> List[str]:
 
 # ── samples ──────────────────────────────────────────────────────────────────
 
-def utility_sample(data: dict, ds: str, n: int = UTILITY_PER_DS) -> List[str]:
+def utility_sample(data: dict, ds: str, n: int = UTILITY_PER_DS, plan: Plan = TEST) -> List[str]:
     mids = sorted(m for m, u in data[ds]["units"].items()
                   if "injected" in u["slices"] and "multi" not in u["slices"])
-    return random.Random(derive_seed("live-utility", ds)).sample(mids, min(n, len(mids)))
+    return random.Random(derive_seed(plan.tag("live-utility"), ds)).sample(mids, min(n, len(mids)))
 
 
-def natural_sample(data: dict, ds: str, n: int = NATURAL_PER_DS) -> List[str]:
+def natural_sample(data: dict, ds: str, n: int = NATURAL_PER_DS, plan: Plan = TEST) -> List[str]:
     mids = sorted(m for m, u in data[ds]["units"].items()
                   if "natural" in u["slices"] and u["turn"] == 0
                   and not any(u["gold"][k] for k in ("protect", "sensitive", "optional")))
-    return random.Random(derive_seed("live-natural", ds)).sample(mids, min(n, len(mids)))
+    return random.Random(derive_seed(plan.tag("live-natural"), ds)).sample(mids, min(n, len(mids)))
 
 
-def multiturn_sample(data: dict, ds: str, n: int = MULTITURN_PER_DS) -> List[str]:
+def multiturn_sample(data: dict, ds: str, n: int = MULTITURN_PER_DS, plan: Plan = TEST) -> List[str]:
     convs = sorted({u["conv"] for u in data[ds]["units"].values() if "multi" in u["slices"]})
-    return random.Random(derive_seed("live-multiturn", ds)).sample(convs, min(n, len(convs)))
+    return random.Random(derive_seed(plan.tag("live-multiturn"), ds)).sample(convs, min(n, len(convs)))
 
 
-def attack_sample(data: dict, ds: str, n: int = ATTACK_PER_DS) -> List[str]:
-    return utility_sample(data, ds)[:n]
+def attack_sample(data: dict, ds: str, n: int = ATTACK_PER_DS, plan: Plan = TEST) -> List[str]:
+    return utility_sample(data, ds, plan=plan)[:n]
 
 
 def pilot_of(sample: Dict[str, List[str]], pilot: Optional[int]) -> Dict[str, List[str]]:
@@ -540,12 +627,29 @@ def _user(text: str) -> dict:
     return responder_params([{"role": "user", "content": text}])
 
 
-def utility_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List[str]]) -> List[tuple]:
+def utility_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List[str]],
+                     plan: Plan = TEST) -> List[tuple]:
     return [((ds, mid, arm), (slot(ds, mid, arm), _user(text))) for ds in datasets for mid in sample[ds]
-            for arm in UTILITY_ARMS for text in [arm_text(data, ds, arm, mid)] if text is not None]
+            for arm in plan.utility for text in [arm_text(data, ds, arm, mid)] if text is not None]
 
 
-def natural_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List[str]]) -> Tuple[List[tuple], dict]:
+def judge_slot(plan: Plan, ds: str, mid: str, other: str) -> str:
+    return slot(ds, mid, "judge" if plan.split == "test" else f"judge-{other}")
+
+
+def per_arm(plan: Plan, other: str) -> tuple:
+    """Seed parts naming the compared arm: test-1 compared one arm per measure
+    and named none, so its draws are unchanged."""
+    return () if plan.split == "test" else (other,)
+
+
+def judge_seed(plan: Plan, mid: str, other: str) -> int:
+    """Which side ss is shown on."""
+    return derive_seed(plan.tag("live-judge"), mid, *per_arm(plan, other))
+
+
+def natural_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List[str]],
+                     plan: Plan = TEST) -> Tuple[List[tuple], dict]:
     """The untouched prompt twice (``orig``, ``rerun``), and each arm's text
     when the arm changed it; and which arms changed which prompt."""
     out, edited = [], {}
@@ -553,7 +657,7 @@ def natural_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List
         for mid in sample[ds]:
             text = original(data, ds, mid)
             out += [((ds, mid, w), (slot(ds, mid, w), _user(text))) for w in ("orig", "rerun")]
-            for arm in ("ss", "presidio_default"):
+            for arm in plan.natural:
                 sent = arm_text(data, ds, arm, mid)
                 edited[(ds, mid, arm)] = sent is not None and sent != text
                 if edited[(ds, mid, arm)]:
@@ -561,11 +665,12 @@ def natural_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List
     return out, edited
 
 
-def attack_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List[str]]) -> List[tuple]:
+def attack_requests(data: dict, datasets: Sequence[str], sample: Dict[str, List[str]],
+                    plan: Plan = TEST) -> List[tuple]:
     prompts = attack_prompts()
     return [((ds, mid, arm), (slot(ds, mid, f"attack-{arm}"),
-                              attack_params(prompts["placeholder" if arm == "presidio_default" else "substitute"], text)))
-            for ds in datasets for mid in sample[ds] for arm in ATTACK_ARMS
+                              attack_params(prompts["placeholder" if arm in plan.placeholder else "substitute"], text)))
+            for ds in datasets for mid in sample[ds] for arm in plan.attack
             for text in [arm_text(data, ds, arm, mid)] if text is not None]
 
 
@@ -575,10 +680,45 @@ def _fetch(run: Run, stage: str, phase: str, kind: str, reqs: List[tuple]) -> Di
 
 # ── E5b and the natural slice ────────────────────────────────────────────────
 
+def _judge_summary(plan: Plan, verdicts: dict, f1: dict, mids: List[tuple], other: str, g: str) -> dict:
+    judged = [(ds, m) for ds, m in mids if verdicts.get((ds, m, other), {}).get("score") is not None]
+    scores = [verdicts[(ds, m, other)]["score"] for ds, m in judged]
+    decided = [k for k in judged if verdicts[(*k, other)]["score"] != 0]
+    both_f1 = [k for k in decided if (*k, "ss") in f1 and (*k, other) in f1]
+    agree = sum(1 for k in both_f1 if (verdicts[(*k, other)]["score"] > 0) == (f1[(*k, "ss")] > f1[(*k, other)]))
+    return {"pair": f"ss vs {other}", "n": len(judged),
+            "unavailable": sum(1 for k in mids if (*k, other) in verdicts and verdicts[(*k, other)]["score"] is None),
+            "ss_wins": scores.count(1), f"{other}_wins": scores.count(-1), "ties": scores.count(0),
+            "ss_win_rate": wilson(scores.count(1), len(scores)),
+            "score": mean_diff([f"{ds}/{m}" for ds, m in judged], scores, [0] * len(scores),
+                               derive_seed(plan.tag("live-boot"), "judge", *per_arm(plan, other), g)),
+            "first_position_chosen": wilson(sum(1 for k in decided if verdicts[(*k, other)]["first"]), len(decided)),
+            "agreement_with_bertscore": wilson(agree, len(both_f1))}
+
+
+def _lower(x: dict) -> Optional[float]:
+    return x["ci95"][0] if x.get("ci95") else None
+
+
+def h7_utility(res: dict) -> dict:
+    """H7'' on E5b: for Presidio+Faker and GLiNER-PII, the BERTScore difference
+    and the judge score of ss each have a lower bound above −0.02; ``strict``
+    (above 0) is reported beside and decides nothing."""
+    out, strict = {}, {}
+    for o in H7_AGAINST:
+        for name, x in (("bertscore", res["bertscore_differences"][f"ss-{o}"]), ("judge", res["judges"][o]["score"])):
+            lo = _lower(x)
+            out[f"{name}_not_below_{o}"] = lo is not None and lo > -H7_MARGIN
+            strict[f"{name}_above_{o}"] = lo is not None and lo > 0
+    return {**out, "holds": all(out.values()), "strict": strict}
+
+
 def utility(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Optional[int] = None,
             scorer: Optional[Callable] = None) -> dict:
-    sample = pilot_of({ds: utility_sample(data, ds) for ds in datasets}, pilot)
-    replies = _fetch(run, "utility", "6-utility", "responder", utility_requests(data, datasets, sample))
+    plan = run.plan
+    sample = pilot_of({ds: utility_sample(data, ds, plan=plan) for ds in datasets}, pilot)
+    replies = _fetch(run, "utility", plan.tag("6-utility"), "responder",
+                     utility_requests(data, datasets, sample, plan))
 
     shown: Dict[tuple, str] = {}
     for (ds, mid, arm), row in replies.items():
@@ -594,23 +734,26 @@ def utility(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opt
     jindex, jitems = [], []
     for ds in datasets:
         for mid in sample[ds]:
-            a, b = shown.get((ds, mid, "ss")), shown.get((ds, mid, "presidio_default"))
-            if a is None or b is None:
-                continue
-            ss_first = random.Random(derive_seed("live-judge", mid)).random() < 0.5
-            jindex.append((ds, mid, ss_first))
-            jitems.append((slot(ds, mid, "judge"), judge_pair_params(original(data, ds, mid), *((a, b) if ss_first else (b, a)))))
+            for other in plan.judged:
+                a, b = shown.get((ds, mid, "ss")), shown.get((ds, mid, other))
+                if a is None or b is None:
+                    continue
+                ss_first = random.Random(judge_seed(plan, mid, other)).random() < 0.5
+                jindex.append((ds, mid, other, ss_first))
+                jitems.append((judge_slot(plan, ds, mid, other),
+                               judge_pair_params(original(data, ds, mid), *((a, b) if ss_first else (b, a)))))
     verdicts = {}
-    for (ds, mid, ss_first), row in zip(jindex, run.fetch("judge", "6-judge", "judge", jitems)):
+    for (ds, mid, other, ss_first), row in zip(jindex, run.fetch("judge", plan.tag("6-judge"), "judge", jitems)):
         better = judge_answer(row, "better", VERDICTS)
         if better is None:
-            verdicts[(ds, mid)] = {"score": None, "first": None}
+            verdicts[(ds, mid, other)] = {"score": None, "first": None}
             continue
         ss_won = better == ("A" if ss_first else "B")
-        verdicts[(ds, mid)] = {"score": 0 if better == "tie" else (1 if ss_won else -1),
-                               "first": None if better == "tie" else better == "A"}
+        verdicts[(ds, mid, other)] = {"score": 0 if better == "tie" else (1 if ss_won else -1),
+                                      "first": None if better == "tie" else better == "A"}
 
-    arms_scored = ("ss", "ss_raw", "presidio_default", "presidio_faker")
+    others = tuple(a for a in plan.utility if a not in ("original", "ss"))
+    arms_scored = ("ss", "ss_raw", *others)
     pairs = [(ds, mid, arm) for ds in datasets for mid in sample[ds] for arm in arms_scored
              if (ds, mid, arm) in shown and (ds, mid, "original") in shown]
     f1 = {k: v for k, v in zip(pairs, bertscore([(shown[p], shown[(p[0], p[1], "original")]) for p in pairs],
@@ -621,54 +764,48 @@ def utility(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opt
         mids = [(ds, mid) for ds in datasets if _in(g, ds) for mid in sample[ds]]
         res = {"n": len(mids),
                "errored": {a: sum(1 for ds, m in mids if (ds, m, a) in replies
-                                  and replies[(ds, m, a)]["status"] == "errored") for a in UTILITY_ARMS},
-               "refused": {a: sum(1 for ds, m in mids if (ds, m, a) not in replies) for a in UTILITY_ARMS},
+                                  and replies[(ds, m, a)]["status"] == "errored") for a in plan.utility},
+               "refused": {a: sum(1 for ds, m in mids if (ds, m, a) not in replies) for a in plan.utility},
                "truncated": {a: sum(1 for ds, m in mids if replies.get((ds, m, a), {}).get("status") == "truncated")
-                             for a in UTILITY_ARMS},
+                             for a in plan.utility},
                "bertscore": {a: {"n": len(v), "mean": mean(v)} for a in arms_scored
                              for v in [[f1[(ds, m, a)] for ds, m in mids if (ds, m, a) in f1]]}}
         res["bertscore_differences"] = {}
-        for other in ("presidio_default", "presidio_faker"):
+        for other in others:
             both = [(ds, m) for ds, m in mids if (ds, m, "ss") in f1 and (ds, m, other) in f1]
             res["bertscore_differences"][f"ss-{other}"] = mean_diff(
                 [f"{ds}/{m}" for ds, m in both], [f1[(ds, m, "ss")] for ds, m in both],
-                [f1[(ds, m, other)] for ds, m in both], derive_seed("live-boot", "e5b", other, g))
-        judged = [(ds, m) for ds, m in mids if verdicts.get((ds, m), {}).get("score") is not None]
-        scores = [verdicts[k]["score"] for k in judged]
-        decided = [k for k in judged if verdicts[k]["score"] != 0]
-        both_f1 = [k for k in decided if (k[0], k[1], "ss") in f1 and (k[0], k[1], "presidio_default") in f1]
-        agree = sum(1 for k in both_f1 if (verdicts[k]["score"] > 0) ==
-                    (f1[(k[0], k[1], "ss")] > f1[(k[0], k[1], "presidio_default")]))
-        res["judge"] = {"pair": "ss vs presidio_default", "n": len(judged),
-                        "unavailable": sum(1 for k in mids if k in verdicts and verdicts[k]["score"] is None),
-                        "ss_wins": scores.count(1), "presidio_default_wins": scores.count(-1), "ties": scores.count(0),
-                        "ss_win_rate": wilson(scores.count(1), len(scores)),
-                        "score": mean_diff([f"{ds}/{m}" for ds, m in judged], scores, [0] * len(scores),
-                                           derive_seed("live-boot", "judge", g)),
-                        "first_position_chosen": wilson(sum(1 for k in decided if verdicts[k]["first"]), len(decided)),
-                        "agreement_with_bertscore": wilson(agree, len(both_f1))}
-        d_pd, d_pf, j = (res["bertscore_differences"]["ss-presidio_default"],
-                         res["bertscore_differences"]["ss-presidio_faker"], res["judge"]["score"])
-        res["H3"] = {"bertscore_above_presidio_default": bool(d_pd["ci95"] and d_pd["ci95"][0] > 0),
-                     "judge_above_presidio_default": bool(j["ci95"] and j["ci95"][0] > 0),
-                     "not_below_presidio_faker": bool(d_pf["ci95"] and d_pf["ci95"][0] > -0.02)}
-        res["H3"]["supported"] = all(res["H3"].values())
+                [f1[(ds, m, other)] for ds, m in both], derive_seed(plan.tag("live-boot"), "e5b", other, g))
+        judges = {o: _judge_summary(plan, verdicts, f1, mids, o, g) for o in plan.judged}
+        if plan.split == "test":
+            res["judge"] = judges["presidio_default"]
+            d_pd, d_pf, j = (res["bertscore_differences"]["ss-presidio_default"],
+                             res["bertscore_differences"]["ss-presidio_faker"], res["judge"]["score"])
+            res["H3"] = {"bertscore_above_presidio_default": bool(d_pd["ci95"] and d_pd["ci95"][0] > 0),
+                         "judge_above_presidio_default": bool(j["ci95"] and j["ci95"][0] > 0),
+                         "not_below_presidio_faker": bool(d_pf["ci95"] and d_pf["ci95"][0] > -0.02)}
+            res["H3"]["supported"] = all(res["H3"].values())
+        else:
+            res["judges"] = judges
+            res[H7] = h7_utility(res)
         e5b[g] = res
     rows = [{"dataset": ds, "id": mid, "arm": arm, "status": replies[(ds, mid, arm)]["status"],
-             "bertscore": f1.get((ds, mid, arm)), "judge": verdicts.get((ds, mid), {}).get("score")}
-            for ds in datasets for mid in sample[ds] for arm in UTILITY_ARMS if (ds, mid, arm) in replies]
+             "bertscore": f1.get((ds, mid, arm)),
+             "judge": {o: verdicts.get((ds, mid, o), {}).get("score") for o in plan.judged}}
+            for ds in datasets for mid in sample[ds] for arm in plan.utility if (ds, mid, arm) in replies]
     return {"sample": sample, "results": e5b, "rows": rows}
 
 
 def natural(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Optional[int] = None,
             scorer: Optional[Callable] = None) -> dict:
     """The cost of spurious edits on prompts with nothing to protect."""
-    sample = pilot_of({ds: natural_sample(data, ds) for ds in datasets}, pilot)
-    reqs, edited = natural_requests(data, datasets, sample)
-    replies = _fetch(run, "natural", "6-natural", "responder", reqs)
+    plan = run.plan
+    sample = pilot_of({ds: natural_sample(data, ds, plan=plan) for ds in datasets}, pilot)
+    reqs, edited = natural_requests(data, datasets, sample, plan)
+    replies = _fetch(run, "natural", plan.tag("6-natural"), "responder", reqs)
 
     def shown(ds, mid, arm):
-        if arm in ("ss", "presidio_default") and not edited[(ds, mid, arm)]:
+        if arm in plan.natural and not edited[(ds, mid, arm)]:
             arm = "rerun"                  # nothing changed: the same prompt, answered again
         row = replies.get((ds, mid, arm))
         if row is None or row["status"] == "errored":
@@ -682,36 +819,37 @@ def natural(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opt
     for ds in datasets:
         for mid in sample[ds]:
             ref = shown(ds, mid, "orig")
-            for arm in ("rerun", "ss", "presidio_default"):
+            for arm in ("rerun", *plan.natural):
                 cand = shown(ds, mid, arm)
                 if ref is not None and cand is not None:
                     pairs.append(((ds, mid, arm), (cand, ref)))
     f1 = {k: v for k, v in zip([k for k, _ in pairs], bertscore([p for _k, p in pairs], run.dir / "bertscore.jsonl",
                                                                   scorer)) if v is not None}
+    compared = [(a, "rerun") for a in plan.natural] + [("ss", a) for a in plan.natural if a != "ss"]
     out = {}
     for g in _groups(datasets):
         mids = [(ds, m) for ds in datasets if _in(g, ds) for m in sample[ds]]
         res = {"n": len(mids),
-               "edited": {a: wilson(sum(1 for ds, m in mids if edited[(ds, m, a)]), len(mids))
-                          for a in ("ss", "presidio_default")},
+               "edited": {a: wilson(sum(1 for ds, m in mids if edited[(ds, m, a)]), len(mids)) for a in plan.natural},
                "errored": sum(1 for r in (replies[k] for k in replies if _in(g, k[0])) if r["status"] == "errored"),
-               "bertscore": {a: {"n": len(v), "mean": mean(v)} for a in ("rerun", "ss", "presidio_default")
+               "bertscore": {a: {"n": len(v), "mean": mean(v)} for a in ("rerun", *plan.natural)
                              for v in [[f1[(ds, m, a)] for ds, m in mids if (ds, m, a) in f1]]},
                "differences": {}}
-        for a, b in (("ss", "rerun"), ("presidio_default", "rerun"), ("ss", "presidio_default")):
+        for a, b in compared:
             both = [(ds, m) for ds, m in mids if (ds, m, a) in f1 and (ds, m, b) in f1]
             res["differences"][f"{a}-{b}"] = mean_diff([f"{ds}/{m}" for ds, m in both], [f1[(ds, m, a)] for ds, m in both],
                                                        [f1[(ds, m, b)] for ds, m in both],
-                                                       derive_seed("live-boot", "natural", a, b, g))
+                                                       derive_seed(plan.tag("live-boot"), "natural", a, b, g))
         res["edited_only"] = {}                  # the cost per edited prompt, against the noise floor
-        for a in ("ss", "presidio_default"):
+        for a in plan.natural:
             both = [(ds, m) for ds, m in mids if edited[(ds, m, a)] and (ds, m, a) in f1 and (ds, m, "rerun") in f1]
             res["edited_only"][a] = {"n": len(both), "mean": mean([f1[(ds, m, a)] for ds, m in both]),
                                      "rerun_mean": mean([f1[(ds, m, "rerun")] for ds, m in both]),
                                      "minus_rerun": mean_diff([f"{ds}/{m}" for ds, m in both],
                                                               [f1[(ds, m, a)] for ds, m in both],
                                                               [f1[(ds, m, "rerun")] for ds, m in both],
-                                                              derive_seed("live-boot", "natural-edited", a, g))}
+                                                              derive_seed(plan.tag("live-boot"), "natural-edited",
+                                                                          a, g))}
         out[g] = res
     return {"sample": sample, "results": out}
 
@@ -813,7 +951,7 @@ def converse(run: Run, data: dict, convs: List[Tuple[str, str]], cascade: Option
             pending = []
             for ds, conv in convs:
                 mids = turn_mids(data, ds, conv)
-                for arm in MULTITURN_ARMS:
+                for arm in run.plan.multiturn:
                     if (ds, conv, arm) in done:
                         continue
                     state: dict = {}
@@ -830,7 +968,7 @@ def converse(run: Run, data: dict, convs: List[Tuple[str, str]], cascade: Option
                         return row["text"]
                     if arm == "ss":
                         turns = replay_ss(env, conv, [original(data, ds, m) for m in mids], answer,
-                                          derive_seed("live-mimic", conv))
+                                          derive_seed(run.plan.tag("live-mimic"), conv))
                     else:
                         texts = [arm_text(data, ds, arm, m) for m in mids]
                         if any(t is None for t in texts):
@@ -848,7 +986,7 @@ def converse(run: Run, data: dict, convs: List[Tuple[str, str]], cascade: Option
             log(f"multiturn round {rnd}: {len(pending)} turn(s) to send")
             if not pending:
                 return done
-            run.fetch("multiturn", "6-multiturn", "responder", pending)
+            run.fetch("multiturn", run.plan.tag("6-multiturn"), "responder", pending)
     raise RuntimeError("multi-turn replay did not finish")
 
 
@@ -878,7 +1016,7 @@ def score_conversation(data: dict, ds: str, conv: str, arm: str, convo: dict) ->
     reps = replacements(data, ds, arm, mids, turns)
     out = {"turns": len(turns), "complete": convo["failed"] is None and len(turns) == len(mids),
            "restore_needed": 0, "restored": 0, "history_original": 0, "history_original_user": 0,
-           "payload_gold": 0, "recurring": 0, "consistent": 0, "replaced_every_turn": 0}
+           "payload_gold": 0, "recurring": 0, "consistent": 0, "consistent_distinct": 0, "replaced_every_turn": 0}
     mapping: Dict[str, str] = {}                       # replacement → original, so far
     for k, t in enumerate(turns):
         if arm == "ss":
@@ -904,13 +1042,19 @@ def score_conversation(data: dict, ds: str, conv: str, arm: str, convo: dict) ->
         out["recurring"] += 1
         got = [reps[k].get(v_cf) for k in where]
         out["replaced_every_turn"] += all(g is not None for g in got)
-        out["consistent"] += all(g is not None for g in got) and len(set(got)) == 1
+        consistent = all(g is not None for g in got) and len(set(got)) == 1
+        out["consistent"] += consistent
+        # supplementary: the one replacement stands for this value alone ([PERSON] for two people does not)
+        others = {r for rep in reps for o, r in rep.items() if o != v_cf}
+        out["consistent_distinct"] += consistent and got[0] not in others
     return out
 
 
 def multiturn(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Optional[int] = None,
               cascade: Optional[Callable] = None, log: Callable[[str], None] = print) -> dict:
-    sample = pilot_of({ds: multiturn_sample(data, ds) for ds in datasets}, pilot)
+    from bench.realdata.score import bootstrap
+    plan = run.plan
+    sample = pilot_of({ds: multiturn_sample(data, ds, plan=plan) for ds in datasets}, pilot)
     convs = [(ds, c) for ds in datasets for c in sample[ds]]
     done = converse(run, data, convs, cascade, log)
     scored = {k: score_conversation(data, k[0], k[1], k[2], v) for k, v in done.items()}
@@ -922,13 +1066,13 @@ def multiturn(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: O
             jitems.append((slot(ds, conv, f"judge-{arm}"), judge_details_params(
                 [original(data, ds, m) for m in turn_mids(data, ds, conv)], v["turns"][-1]["shown"])))
     grades = {}
-    for k, row in zip(jindex, run.fetch("judge-mt", "6-judge", "judge", jitems)):
+    for k, row in zip(jindex, run.fetch("judge-mt", plan.tag("6-judge"), "judge", jitems)):
         grades[k] = judge_answer(row, "grade", GRADE_VALUES)
 
     out = {}
     for g in _groups(datasets):
         res = {}
-        for arm in MULTITURN_ARMS:
+        for arm in plan.multiturn:
             ks = [(ds, c, arm) for ds, c in convs if _in(g, ds)]
             s = [scored[k] for k in ks if k in scored]
             tot = Counter()
@@ -940,25 +1084,35 @@ def multiturn(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: O
                         "history_original_user": wilson(tot["history_original_user"], tot["turns"]),
                         "payload_gold": wilson(tot["payload_gold"], tot["turns"]),
                         "consistent": wilson(tot["consistent"], tot["recurring"]),
+                        "consistent_distinct": wilson(tot["consistent_distinct"], tot["recurring"]),
                         "replaced_every_turn": wilson(tot["replaced_every_turn"], tot["recurring"]),
                         "grades": dict(Counter(grades.get(k) or "unavailable" for k in ks if k in grades))}
-        pairs = [(ds, c) for ds, c in convs if _in(g, ds)
-                 and grades.get((ds, c, "ss")) in GRADES and grades.get((ds, c, "presidio_faker")) in GRADES]
-        judge = mean_diff([f"{ds}/{c}" for ds, c in pairs], [GRADES[grades[(ds, c, "ss")]] for ds, c in pairs],
-                          [GRADES[grades[(ds, c, "presidio_faker")]] for ds, c in pairs],
-                          derive_seed("live-boot", "multiturn-judge", g))
-        rec = [(ds, c) for ds, c in convs if _in(g, ds) and (ds, c, "ss") in scored
-               and (ds, c, "presidio_faker") in scored and scored[(ds, c, "ss")]["recurring"]]
-        from bench.realdata.score import bootstrap
-        cons = bootstrap([f"{ds}/{c}" for ds, c in rec],
-                         [(scored[(ds, c, "ss")]["consistent"], scored[(ds, c, "ss")]["recurring"]) for ds, c in rec],
-                         [(scored[(ds, c, "presidio_faker")]["consistent"],
-                           scored[(ds, c, "presidio_faker")]["recurring"]) for ds, c in rec],
-                         derive_seed("live-boot", "multiturn-consistency", g)) if rec else {"diff": None, "ci95": None}
-        res["differences"] = {"judge_ss-presidio_faker": judge, "consistency_ss-presidio_faker": cons}
-        res["H4"] = {"judge_above_presidio_faker": bool(judge["ci95"] and judge["ci95"][0] > 0),
-                     "consistency_above_presidio_faker": bool(cons.get("ci95") and cons["ci95"][0] > 0)}
-        res["H4"]["supported"] = all(res["H4"].values())
+        res["differences"] = {}
+        for other in (a for a in plan.multiturn if a != "ss"):
+            pairs = [(ds, c) for ds, c in convs if _in(g, ds)
+                     and grades.get((ds, c, "ss")) in GRADES and grades.get((ds, c, other)) in GRADES]
+            judge = mean_diff([f"{ds}/{c}" for ds, c in pairs], [GRADES[grades[(ds, c, "ss")]] for ds, c in pairs],
+                              [GRADES[grades[(ds, c, other)]] for ds, c in pairs],
+                              derive_seed(plan.tag("live-boot"), "multiturn-judge", *per_arm(plan, other), g))
+            rec = [(ds, c) for ds, c in convs if _in(g, ds) and (ds, c, "ss") in scored
+                   and (ds, c, other) in scored and scored[(ds, c, "ss")]["recurring"]]
+            cons = bootstrap([f"{ds}/{c}" for ds, c in rec],
+                             [(scored[(ds, c, "ss")]["consistent"], scored[(ds, c, "ss")]["recurring"])
+                              for ds, c in rec],
+                             [(scored[(ds, c, other)]["consistent"], scored[(ds, c, other)]["recurring"])
+                              for ds, c in rec],
+                             derive_seed(plan.tag("live-boot"), "multiturn-consistency", *per_arm(plan, other), g)
+                             ) if rec else {"diff": None, "ci95": None}
+            res["differences"][f"judge_ss-{other}"] = judge
+            res["differences"][f"consistency_ss-{other}"] = cons
+        if plan.split == "test":
+            judge, cons = (res["differences"]["judge_ss-presidio_faker"],
+                           res["differences"]["consistency_ss-presidio_faker"])
+            res["H4"] = {"judge_above_presidio_faker": bool(judge["ci95"] and judge["ci95"][0] > 0),
+                         "consistency_above_presidio_faker": bool(cons.get("ci95") and cons["ci95"][0] > 0)}
+            res["H4"]["supported"] = all(res["H4"].values())
+        else:
+            res[H7] = h7_multiturn(res)
         out[g] = res
     histories = {f"{ds}/{conv}": done[(ds, conv, "ss")]["turns"] for ds, conv in convs
                  if (ds, conv, "ss") in done and scored[(ds, conv, "ss")]["complete"]}
@@ -969,6 +1123,18 @@ def multiturn(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: O
     return {"sample": sample, "results": out,
             "rows": [{"dataset": k[0], "conv": k[1], "arm": k[2], **scored[k], "grade": grades.get(k)}
                      for k in sorted(scored)]}
+
+
+def h7_multiturn(res: dict) -> dict:
+    """H7'' on E7b: for Presidio+Faker and GLiNER-PII, the judge's grade (iv)
+    and the consistency rate (iii) of ss are each higher, with a 95 % bootstrap
+    interval over conversations above 0."""
+    out = {}
+    for o in H7_AGAINST:
+        for name in ("judge", "consistency"):
+            lo = _lower(res["differences"][f"{name}_ss-{o}"])
+            out[f"{name}_above_{o}"] = lo is not None and lo > 0
+    return {**out, "holds": all(out.values())}
 
 
 # ── E8: the attacker ─────────────────────────────────────────────────────────
@@ -1195,22 +1361,49 @@ def summarise_attack(rows: Sequence[dict]) -> dict:
     visible = Counter(r["class"] for r in rows if r["outcome"] == "partial" and r["visible"])
     return {"values": len(rows), "leaked": c["leaked"], "policy": c["policy"], "unavailable": c["unavailable"],
             "refused": c["refused"], "attacked": n, "exact": wilson(c["exact"], n), "partial": wilson(c["partial"], n),
+            "recovered": wilson(c["exact"] + c["partial"], n),
             "exposed": wilson(c["exact"] + c["partial"] + c["leaked"] + c["policy"],
                               len(rows) - c["unavailable"] - c["refused"]),
             "partial_classes": {k: {"n": v, "visible_in_text": visible[k]} for k, v in sorted(classes.items())},
             "exact_types": dict(sorted(Counter(r["type"] for r in rows if r["outcome"] == "exact").items()))}
 
 
+def h8(res: dict, rows: Sequence[dict], g: str, plan: Plan) -> dict:
+    """H8'': SurrogateShield has no exact recovery, in the single-message and
+    in the conversation condition, and its recovery (exact + partial, of the
+    values it replaced) is not above GLiNER-PII's (point estimates, as H10'';
+    the paired bootstrap over messages is reported beside)."""
+    from bench.realdata.score import bootstrap
+    ss, gl, conv = res["ss"], res.get("gliner_pii"), res.get("ss-conversation")
+    per: Dict[str, Dict[str, list]] = {}
+    for r in rows:
+        if r["arm"] in ("ss", "gliner_pii") and _in(g, r["dataset"]) and r["outcome"] in ("exact", "partial",
+                                                                                          "not_recovered"):
+            x = per.setdefault(f"{r['dataset']}/{r['id']}", {"ss": [0, 0], "gliner_pii": [0, 0]})[r["arm"]]
+            x[0] += r["outcome"] != "not_recovered"
+            x[1] += 1
+    both = sorted(k for k, v in per.items() if v["ss"][1] and v["gliner_pii"][1])
+    diff = bootstrap(both, [tuple(per[k]["ss"]) for k in both], [tuple(per[k]["gliner_pii"]) for k in both],
+                     derive_seed(plan.tag("live-boot"), "attack-recovery", g)) if both else {"diff": None, "ci95": None}
+    rate = lambda a: a["recovered"]["rate"] if a and a["attacked"] else None
+    out = {"no_exact_single": ss["attacked"] > 0 and ss["exact"]["k"] == 0,
+           "no_exact_conversation": bool(conv) and conv["attacked"] > 0 and conv["exact"]["k"] == 0,
+           "recovery_not_above_gliner_pii": rate(ss) is not None and rate(gl) is not None and rate(ss) <= rate(gl)}
+    return {**out, "holds": all(out.values()), "recovery": {"ss": ss["recovered"], "gliner_pii": gl and gl["recovered"],
+                                                             "ss-gliner_pii": {**diff, "messages": len(both)}}}
+
+
 def attack(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Optional[int] = None,
            conversations: bool = True) -> dict:
+    plan = run.plan
     prompts = attack_prompts()
-    sample = pilot_of({ds: attack_sample(data, ds) for ds in datasets}, pilot)
-    replies = _fetch(run, "attack", "6-attacker", "attacker", attack_requests(data, datasets, sample))
+    sample = pilot_of({ds: attack_sample(data, ds, plan=plan) for ds in datasets}, pilot)
+    replies = _fetch(run, "attack", plan.tag("6-attacker"), "attacker", attack_requests(data, datasets, sample, plan))
     rows: List[dict] = []
     for ds in datasets:
         for mid in sample[ds]:
             unit = data[ds]["units"][mid]
-            for arm in ATTACK_ARMS:
+            for arm in plan.attack:
                 if (ds, mid, arm) not in replies:
                     rows += [{"dataset": ds, "id": mid, "arm": arm, "type": t, "outcome": "refused", "class": None,
                               "visible": None} for t, _v in message_gold(unit)]
@@ -1227,7 +1420,7 @@ def attack(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opti
         if pilot is not None:
             hist = hist[:pilot]
         texts = [conversation_text(h["messages"]) for h in hist]
-        creplies = run.fetch("attack-conv", "6-attacker", "attacker",
+        creplies = run.fetch("attack-conv", plan.tag("6-attacker"), "attacker",
                              [(slot(h["dataset"], h["conv"], "attack-conv"), attack_params(prompts["conversation"], t))
                               for h, t in zip(hist, texts)])
         for h, text, row in zip(hist, texts, creplies):
@@ -1247,17 +1440,20 @@ def attack(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opti
     out = {}
     for g in _groups(datasets):
         res = {arm: summarise_attack([r for r in rows if r["arm"] == arm and _in(g, r["dataset"])])
-               for arm in ATTACK_ARMS}
+               for arm in plan.attack}
         if conv_rows:
             res["ss-conversation"] = summarise_attack([r for r in conv_rows if _in(g, r["dataset"])])
-        res["H5"] = {"supported": res["ss"]["attacked"] > 0 and res["ss"]["exact"]["k"] == 0,
-                     "exact": res["ss"]["exact"]}
-        if conv_rows:
-            res["H5-conv"] = {"supported": res["ss-conversation"]["exact"]["k"] == 0,
-                              "exact": res["ss-conversation"]["exact"]}
+        if plan.split == "test":
+            res["H5"] = {"supported": res["ss"]["attacked"] > 0 and res["ss"]["exact"]["k"] == 0,
+                         "exact": res["ss"]["exact"]}
+            if conv_rows:
+                res["H5-conv"] = {"supported": res["ss-conversation"]["exact"]["k"] == 0,
+                                  "exact": res["ss-conversation"]["exact"]}
+        else:
+            res[H8] = h8(res, rows, g, plan)
         out[g] = res
     return {"sample": sample, "results": out, "rows": rows + conv_rows,
-            "unparsed": {a: sum(1 for k, r in replies.items() if k[2] == a and _parse(r) is None) for a in ATTACK_ARMS}}
+            "unparsed": {a: sum(1 for k, r in replies.items() if k[2] == a and _parse(r) is None) for a in plan.attack}}
 
 
 # ── estimate ─────────────────────────────────────────────────────────────────
@@ -1272,17 +1468,19 @@ def estimate(run: Run, data: dict, datasets: Sequence[str] = DATASETS) -> dict:
 
     def lacking(slots):
         return sum(max(0, n - have[s]) for s, n in slots)
-    util = {ds: utility_sample(data, ds) for ds in datasets}
-    nat, _edited = natural_requests(data, datasets, {ds: natural_sample(data, ds) for ds in datasets})
-    convs = [(ds, c) for ds in datasets for c in multiturn_sample(data, ds)]
-    plan = {"utility responder": missing(utility_requests(data, datasets, util)),
-            "utility judge": lacking((slot(ds, m, "judge"), 1) for ds in datasets for m in util[ds]),
+    p = run.plan
+    util = {ds: utility_sample(data, ds, plan=p) for ds in datasets}
+    nat, _edited = natural_requests(data, datasets, {ds: natural_sample(data, ds, plan=p) for ds in datasets}, p)
+    convs = [(ds, c) for ds in datasets for c in multiturn_sample(data, ds, plan=p)]
+    plan = {"utility responder": missing(utility_requests(data, datasets, util, p)),
+            "utility judge": lacking((judge_slot(p, ds, m, o), 1) for ds in datasets for m in util[ds]
+                                     for o in p.judged),
             "natural responder": missing(nat),
             "multiturn responder (at most)": lacking((slot(ds, c, a), len(turn_mids(data, ds, c)))
-                                                     for ds, c in convs for a in MULTITURN_ARMS),
-            "multiturn judge": lacking((slot(ds, c, f"judge-{a}"), 1) for ds, c in convs for a in MULTITURN_ARMS),
-            "attacker single": missing(attack_requests(data, datasets, {ds: attack_sample(data, ds)
-                                                                          for ds in datasets})),
+                                                     for ds, c in convs for a in p.multiturn),
+            "multiturn judge": lacking((slot(ds, c, f"judge-{a}"), 1) for ds, c in convs for a in p.multiturn),
+            "attacker single": missing(attack_requests(data, datasets, {ds: attack_sample(data, ds, plan=p)
+                                                                          for ds in datasets}, p)),
             "attacker conversation": lacking((slot(ds, c, "attack-conv"), 1) for ds, c in convs)}
     used = run.ledger.total()
     tokens: Dict[str, dict] = {}
@@ -1294,7 +1492,8 @@ def estimate(run: Run, data: dict, datasets: Sequence[str] = DATASETS) -> dict:
             t["output_tokens"] += r["usage"].get("output_tokens") or 0
     per = {k: {"in": round(v["input_tokens"] / v["n"]), "out": round(v["output_tokens"] / v["n"]), "n": v["n"]}
            for k, v in tokens.items() if v["n"]}
-    return {"ledger_total": used, "cap": run.ledger.cap, "remaining": run.ledger.cap - used, "plan": plan,
+    return {"split": p.split, "ledger_total": used, "cap": run.ledger.cap, "remaining": run.ledger.cap - used,
+            "plan": plan,
             "planned_total": sum(plan.values()), "after": used + sum(plan.values()), "tokens_per_call": per}
 
 
@@ -1330,9 +1529,81 @@ def _r(x: Optional[dict]) -> str:
     return f"{x['k']}/{x['n']} ({x['rate']:.1%}, {lo:.1%}–{hi:.1%})"
 
 
+def _flags(h: dict) -> str:
+    return ", ".join(f"{k} {'yes' if v else 'no'}" for k, v in h.items() if isinstance(v, bool) and k != "holds")
+
+
+def markdown_plan(kind: str, doc: dict, plan: Plan) -> List[str]:
+    """The tables of a run other than test-1's: every arm of its plan, and H7'' / H8''."""
+    lines = []
+    if kind == "utility":
+        others = [a for a in plan.utility if a not in ("original", "ss")]
+        lines += ["| group | n | BERTScore ss | ss raw | " + " | ".join(others) + " | "
+                  + " | ".join(f"ss − {o}" for o in others) + " |", "|" + "---|" * (4 + 2 * len(others))]
+        for g, r in doc["e5b"].items():
+            b, d = r["bertscore"], r["bertscore_differences"]
+            lines.append(f"| {g} | {r['n']} | {b['ss']['mean']} | {b['ss_raw']['mean']} | "
+                         + " | ".join(str(b[o]["mean"]) for o in others) + " | "
+                         + " | ".join(_bs(d[f"ss-{o}"]) for o in others) + " |")
+        lines += ["", "Pairwise judge (+1 when ss is preferred, −1 when the other arm is, 0 for a tie).", "",
+                  "| group | pair | n | ss / other / tie | score | first position chosen | agrees with BERTScore |",
+                  "|" + "---|" * 7]
+        for g, r in doc["e5b"].items():
+            for o, j in r["judges"].items():
+                lines.append(f"| {g} | {j['pair']} | {j['n']} | {j['ss_wins']}/{j[f'{o}_wins']}/{j['ties']} "
+                             f"| {_bs(j['score'])} | {_r(j['first_position_chosen'])} "
+                             f"| {_r(j['agreement_with_bertscore'])} |")
+        lines += ["", f"{H7} on E5b (lower bounds above −{H7_MARGIN}; the verdict is the pooled group's):", ""]
+        lines += [f"- {g}: **{'holds' if r[H7]['holds'] else 'does not hold'}** ({_flags(r[H7])}; "
+                  f"strict, deciding nothing: {_flags(r[H7]['strict'])})" for g, r in doc["e5b"].items()]
+        arms = list(plan.natural)
+        diffs = list(next(iter(doc["natural"].values()))["differences"])
+        lines += ["", "Natural slice (nothing to protect): BERTScore against the answer to the untouched prompt.", "",
+                  "| group | n | " + " | ".join(f"edited {a}" for a in arms) + " | rerun | " + " | ".join(arms)
+                  + " | " + " | ".join(k.replace("-", " − ") for k in diffs) + " |",
+                  "|" + "---|" * (3 + 2 * len(arms) + len(diffs))]
+        for g, r in doc["natural"].items():
+            b = r["bertscore"]
+            lines.append(f"| {g} | {r['n']} | " + " | ".join(_r(r["edited"][a]) for a in arms)
+                         + f" | {b['rerun']['mean']} | " + " | ".join(str(b[a]["mean"]) for a in arms) + " | "
+                         + " | ".join(_bs(r["differences"][k]) for k in diffs) + " |")
+    elif kind == "multiturn":
+        lines += ["| group | arm | complete | restored | history original | gold in request | consistent "
+                  "| consistent, distinct | grades |", "|" + "---|" * 9]
+        for g, r in doc["results"].items():
+            for arm in plan.multiturn:
+                a = r[arm]
+                lines.append(f"| {g} | {arm} | {a['complete']}/{a['conversations']} | {_r(a['restored'])} "
+                             f"| {_r(a['history_original'])} | {_r(a['payload_gold'])} | {_r(a['consistent'])} "
+                             f"| {_r(a['consistent_distinct'])} | {a['grades']} |")
+            for o in (a for a in plan.multiturn if a != "ss"):
+                lines.append(f"| {g} | ss − {o} | | | | | {_bs(r['differences'][f'consistency_ss-{o}'])} | "
+                             f"| judge {_bs(r['differences'][f'judge_ss-{o}'])} |")
+        lines += ["", f"{H7} on E7b (intervals over conversations above 0; the verdict is the pooled group's):", ""]
+        lines += [f"- {g}: **{'holds' if r[H7]['holds'] else 'does not hold'}** ({_flags(r[H7])})"
+                  for g, r in doc["results"].items()]
+    else:
+        lines += ["| group | arm | values | left in (leak / policy) | unavailable | exact | partial | recovered "
+                  "| exposed |", "|" + "---|" * 9]
+        for g, r in doc["results"].items():
+            for arm in (*plan.attack, "ss-conversation"):
+                if arm in r:
+                    a = r[arm]
+                    lines.append(f"| {g} | {arm} | {a['values']} | {a['leaked']} / {a['policy']} | {a['unavailable']} "
+                                 f"| {_r(a['exact'])} | {_r(a['partial'])} | {_r(a['recovered'])} "
+                                 f"| {_r(a['exposed'])} |")
+        lines += ["", f"{H8} (the verdict is the pooled group's):", ""]
+        lines += [f"- {g}: **{'holds' if r[H8]['holds'] else 'does not hold'}** ({_flags(r[H8])}; recovery "
+                  f"ss − gliner_pii {_bs(r[H8]['recovery']['ss-gliner_pii'])})" for g, r in doc["results"].items()]
+    return lines
+
+
 def markdown(kind: str, doc: dict) -> str:
-    lines = [f"# {kind} (real data, test)", "", f"Command: `{doc['command']}` at commit `{doc['git']['commit'][:12]}`"
+    split = doc.get("split", "test")
+    lines = [f"# {kind} (real data, {split})", "", f"Command: `{doc['command']}` at commit `{doc['git']['commit'][:12]}`"
              + (f" with {len(doc['git']['modified'])} modified tracked file(s)" if doc["git"]["modified"] else ""), ""]
+    if split != "test":
+        return "\n".join(lines + markdown_plan(kind, doc, PLANS[split])) + "\n"
     if kind == "utility":
         lines += ["| group | n | BERTScore ss | ss raw | presidio_default | presidio_faker | ss − pd | ss − pf | "
                   "judge ss/pd/tie | judge score | H3 |", "|" + "---|" * 11]
@@ -1379,8 +1650,9 @@ def _publish(kind: str, doc: dict, out: Path) -> None:
     out.with_suffix(".md").write_text(markdown(kind, doc))
 
 
-def _command(sub: str, out: Path) -> str:
-    return f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.live {sub} --out {_rel(out)}"
+def _command(sub: str, out: Path, split: str = "test") -> str:
+    return (f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.live {sub}"
+            + ("" if split == "test" else f" --split {split}") + f" --out {_rel(out)}")
 
 
 def main(argv=None) -> int:
@@ -1396,7 +1668,9 @@ def main(argv=None) -> int:
 
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("what", choices=("estimate", "utility", "multiturn", "attacker"))
-    ap.add_argument("--run", default="main")
+    ap.add_argument("--split", choices=sorted(PLANS), default="test",
+                    help="test-1's test split, or the sealed test-2 (only after the freeze)")
+    ap.add_argument("--run", help="cache directory under experiment/realdata (default: main for test, else the split)")
     ap.add_argument("--pilot", type=int, help="first N rows only; writes no result")
     ap.add_argument("--out", type=Path)
     ap.add_argument("--max-calls", type=int, help="stop before this invocation sends more than this")
@@ -1404,8 +1678,10 @@ def main(argv=None) -> int:
     ap.add_argument("--datasets", nargs="+", default=list(DATASETS), choices=DATASETS)
     args = ap.parse_args(args_in)
     check_roles()
-    run = Run(args.run, max_calls=args.max_calls, retry_errors=args.retry_errors)
-    data = load_test(args.datasets)
+    plan = PLANS[args.split]
+    run = Run(args.run or ("main" if args.split == "test" else args.split), max_calls=args.max_calls,
+              retry_errors=args.retry_errors, plan=plan)
+    data = load_test(args.datasets, plan.spans, args.split)
 
     if args.what == "estimate":
         print(json.dumps(estimate(run, data, args.datasets), indent=1))
@@ -1413,28 +1689,32 @@ def main(argv=None) -> int:
     if args.pilot is None and args.out is None:
         ap.error("--out is required without --pilot")
     common = {"git": git_state(), "models": {"responder": pv.SONNET, "judge": pv.OPUS, "attacker": pv.OPUS},
-              "prompts": prompt_record(), "run": args.run, "datasets": args.datasets}
+              "prompts": prompt_record(), "run": run.name, "split": args.split, "datasets": args.datasets,
+              "arms": {"utility": plan.utility, "judged_against": plan.judged, "natural": plan.natural,
+                       "multiturn": plan.multiturn, "attacker": plan.attack, "placeholder_prompt": plan.placeholder}}
     if args.what == "utility":
         e5b = utility(run, data, args.datasets, args.pilot)
         nat = natural(run, data, args.datasets, args.pilot)
         run.write_private(f"utility-rows{'-pilot' if args.pilot else ''}.jsonl", e5b["rows"])
-        doc = {"command": _command("utility", args.out or Path("pilot.json")), **common,
+        doc = {"command": _command("utility", args.out or Path("pilot.json"), args.split), **common,
                "samples": {"e5b": e5b["sample"], "natural": nat["sample"]}, "e5b": e5b["results"],
                "natural": nat["results"], "bertscore": {"model": "roberta-large", "rescaled": True,
                                                         "reference": "the answer to the original prompt"},
-               "calls": _calls(run, ("6-utility", "6-natural", "6-judge"))}
+               "calls": _calls(run, [plan.tag(x) for x in ("6-utility", "6-natural", "6-judge")])}
         kind = "utility"
     elif args.what == "multiturn":
         mt = multiturn(run, data, args.datasets, args.pilot)
         run.write_private(f"multiturn-rows{'-pilot' if args.pilot else ''}.jsonl", mt["rows"])
-        doc = {"command": _command("multiturn", args.out or Path("pilot.json")), **common, "samples": mt["sample"],
-               "results": mt["results"], "rows": mt["rows"], "calls": _calls(run, ("6-multiturn", "6-judge"))}
+        doc = {"command": _command("multiturn", args.out or Path("pilot.json"), args.split), **common,
+               "samples": mt["sample"], "results": mt["results"], "rows": mt["rows"],
+               "calls": _calls(run, [plan.tag(x) for x in ("6-multiturn", "6-judge")])}
         kind = "multiturn"
     else:
         at = attack(run, data, args.datasets, args.pilot)
         run.write_private(f"attacker-rows{'-pilot' if args.pilot else ''}.jsonl", at["rows"])
-        doc = {"command": _command("attacker", args.out or Path("pilot.json")), **common, "samples": at["sample"],
-               "results": at["results"], "unparsed": at["unparsed"], "calls": _calls(run, ("6-attacker",))}
+        doc = {"command": _command("attacker", args.out or Path("pilot.json"), args.split), **common,
+               "samples": at["sample"], "results": at["results"], "unparsed": at["unparsed"],
+               "calls": _calls(run, [plan.tag("6-attacker")])}
         kind = "attacker"
     doc["ledger_total"] = run.ledger.total()
     if args.pilot is not None:
