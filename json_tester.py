@@ -129,6 +129,8 @@ class Prepared:
                 "source": ent.source if ent is not None else "repeat",
                 "replaced": surrogate != original,
             })
+            if getattr(ent, "view", None):
+                out[-1]["view"] = ent.view          # found on a canonical view
         claimed = [(s["start"], s["end"]) for s in out]
         for ent in list(self.confirmed) + list(self.skipped):
             if any(not (ent.end <= s or ent.start >= e) for s, e in claimed):

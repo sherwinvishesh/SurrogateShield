@@ -40,10 +40,10 @@ import logging
 import re
 import time
 from dataclasses import replace as _dc_replace
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity, mask_spans
-from . import pattern_scan, entity_trace, context_guard, relation_gate, structural
+from . import canonical, pattern_scan, entity_trace, context_guard, relation_gate, structural
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -1107,6 +1107,7 @@ def run_cascade(
     use_entity_trace: bool = True,
     use_context_guard: Optional[bool] = None,
     use_post_passes: bool = True,
+    canonical_views: Optional[Sequence[str]] = None,
     trace: Optional[list] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
@@ -1135,6 +1136,11 @@ def run_cascade(
                                 overrides it (ablation).
         use_post_passes:        False skips structural passes A, B, C, E–H.
                                 Pass D (topical geo policy) always runs.
+        canonical_views:        Views of the message PatternScan also reads
+                                (detection/canonical.py: number words,
+                                spelled-out e-mails, ordinal dates, look-alike
+                                characters, grouped digits); None is
+                                ``canonical.DEFAULT_VIEWS``, () none.
         trace:                  If given, a list that receives, after every
                                 pass, ``{"stage", "entities": [[start, end,
                                 type, source, bucket], ...]}`` (the live
@@ -1172,14 +1178,24 @@ def run_cascade(
     logger.info("[SentinelLayer] Stage 1: PatternScan")
     pattern_results = pattern_scan.scan(text, skip_values=skip_values)
     confirmed.extend(pattern_results)
-    remaining_text = mask_spans(text, pattern_results)
     # URLs are opaque to the NER stages (audit I1): a model never sees
     # "github.com/Microsoft" or a query string, so it cannot tag a fragment.
     opaque = pattern_scan.opaque_spans(text)
+    _mark("pattern_scan", opaque=[[s, e] for s, e in opaque])
+    # The canonicaliser: PatternScan again on rewritten views of the message
+    # ("six one seven …", "jane dot doe at …"); hits keep their view. It only
+    # adds: the NER stages read the same text as without it (a long masked
+    # run of words shifts their scores), and a model span inside a view hit
+    # is dropped after ContextGuard.
+    views = canonical.DEFAULT_VIEWS if canonical_views is None else tuple(canonical_views)
+    view_hits = canonical.scan_views(
+        text, pattern_results, views, lambda t: pattern_scan.scan(t, skip_values=skip_values)) if views else []
+    confirmed.extend(view_hits)
+    _mark("canonicaliser")
+    remaining_text = mask_spans(text, pattern_results)
     remaining_text = mask_spans(remaining_text, [
         DetectedEntity(text[s:e], s, e, "opaque", 0.0, "url") for s, e in opaque])
     _lap("pattern_scan_ms")
-    _mark("pattern_scan", opaque=[[s, e] for s, e in opaque])
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
@@ -1235,6 +1251,11 @@ def run_cascade(
         ]
         if promoted:
             confirmed.extend(promoted)
+    if view_hits:
+        def _inside_view(x: DetectedEntity) -> bool:
+            return x.view is None and any(v.start <= x.start and x.end <= v.end for v in view_hits)
+        confirmed[:] = [x for x in confirmed if not _inside_view(x)]
+        needs_confirmation[:] = [x for x in needs_confirmation if not _inside_view(x)]
     _lap("context_guard_ms")
     _mark("context_guard")
 

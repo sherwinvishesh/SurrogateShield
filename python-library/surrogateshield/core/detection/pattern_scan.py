@@ -773,6 +773,11 @@ _AGE_PATTERNS = [
     ),
     re.compile(r"(?<!\d)(?P<v>\d{1,3}\s*(?:años|ans|jahre\s+alt|anos|岁|歳|साल))",
                re.IGNORECASE),
+    # a JSON or YAML key: '"age": "34"', "'edad': 34"
+    re.compile(
+        r"(?i)[\"'](?:age|age_years|edad|alter|âge|idade|età|leeftijd|ålder)[\"']\s*[:=]\s*[\"']?"
+        r"(?P<v>\d{1,3})[\"']?(?=\s*(?:[,}\]\n]|$))"
+    ),
     # "turned 7", "aged 34", "age: 34", "turning 40"
     re.compile(
         r"\b(?P<v>(?:age[ds]?|turn(?:ed|s|ing)?)(?:\s*(?:is|was|are|:|=|-|–|—))?\s+\d{1,3})\b",
@@ -1174,9 +1179,10 @@ _PATTERNS: list = [
     # ── IPv4 address ───────────────────────────────────────────────────────────
     (
         "ip_address",
+        # not four groups of a dotted phone ("+33.7.25.61.98.87")
         re.compile(
-            r"\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}"
-            r"(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b"
+            r"(?<![+.\d])\b(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}"
+            r"(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b(?!\.\d)"
         ),
         _ipv4_validator,
     ),
@@ -1296,6 +1302,17 @@ _PATTERNS: list = [
             r"(?<![0-9A-Za-z_.\-/:#])(?<!\d[ \-])0\d{1,4}(?:[ \-]\d{2,8}){1,4}(?![0-9A-Za-z_]|[.\-/]\d)"
         ),
         lambda m: (10 <= len(re.sub(r"\D", "", m.group())) <= 12
+                   and _phone_validator(m)),
+    ),
+    # ... and with dots: "06.45.68.14.80" (FR), "0176.20476296" (DE),
+    # "06.45681480" (NL); four groups of up to three digits are an IPv4 shape.
+    (
+        "phone_intl",
+        re.compile(
+            r"(?<![0-9A-Za-z_.\-/:#])0\d{1,4}(?:\.\d{2,8}){1,4}(?![0-9A-Za-z_]|[.\-/]\d)"
+        ),
+        lambda m: (10 <= len(re.sub(r"\D", "", m.group())) <= 12
+                   and not re.fullmatch(r"\d{1,3}(?:\.\d{1,3}){3}", m.group())
                    and _phone_validator(m)),
     ),
 

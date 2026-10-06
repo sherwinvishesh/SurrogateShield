@@ -17,6 +17,7 @@ No surrogate equals or contains an original of the conversation (J4).
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import random
 import re
@@ -26,7 +27,7 @@ from typing import Dict, FrozenSet, List, Optional, Set
 import datetime
 from faker import Faker
 
-from ..detection import address_parser
+from ..detection import address_parser, canonical
 from ..detection.geo_data import MAJOR_COUNTRIES, US_STATE_ABBREVS
 from ..consistency import find_all, is_low_entropy, match_case, occurs
 from ..entities import DetectedEntity
@@ -1132,6 +1133,12 @@ class MimicGen:
         address_shift_range: int = 1,
         forbidden: FrozenSet[str] = frozenset(),
     ) -> str:
+        if getattr(entity, "canonical", None) is not None:
+            # found on a rewritten view ("twenty-nine", "jdoe at x dot com"):
+            # draw for the written form, then spell it the message's way
+            written = dataclasses.replace(entity, text=entity.canonical.text, view=None, canonical=None)
+            return canonical.render_like(entity.view, entity.text.strip(), entity.canonical,
+                                         self.generate(written, address_mode, address_shift_range, forbidden))
         if entity.type == "gender_indicator":
             surrogate = self._gen_gender(entity.text)
         elif entity.type == "address":
@@ -1230,6 +1237,7 @@ class MimicGen:
         self._context = text or ""
         self._avoid = set(equal_blocked)
         self.people.observe([e.text for e in entities]
+                            + [e.canonical.text for e in entities if getattr(e, "canonical", None) is not None]
                             + [f for f in blocked if not is_low_entropy(f)], self._context)
 
         def order(item):

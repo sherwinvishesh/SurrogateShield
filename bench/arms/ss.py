@@ -32,7 +32,9 @@ def load(cascade_options: dict | None = None):
             if str(exc).startswith(NO_SURROGATE):
                 raise Refused(str(exc)) from exc
             raise
-        types = {(s["start"], s["end"]): s["type"] for s in p.spans()}
+        # a hit found on a canonical view reports it ("email:spelled"), so the
+        # scorer's by_edit_type shows what each view adds
+        types = {(s["start"], s["end"]): s["type"] + (f":{s['view']}" if s.get("view") else "") for s in p.spans()}
         return [[s, e, types.get((s, e), "unknown"), sur] for s, e, _orig, sur in p.edits]
     return fn
 

@@ -247,7 +247,9 @@ def spurious_sources(text: str, gold: dict, prepared) -> Counter:
         if any(overlaps(a, b, s, e) for s, e in gold_spans):
             continue
         x = by_span.get((a, b))
-        out[(x.source, x.type) if x else ("repeat", "")] += 1
+        # a canonical-view hit counts under its view ("pattern:worded")
+        src = x and (x.source + (f":{x.view}" if getattr(x, "view", None) else ""))
+        out[(src, x.type) if x else ("repeat", "")] += 1
     return out
 
 

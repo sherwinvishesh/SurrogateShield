@@ -131,6 +131,14 @@ def test_spurious_sources_count_only_edits_outside_gold():
     assert A.spurious_sources(t, gold, p) == {("slm", "ORG"): 1, ("ner", "LOCATION"): 1}
 
 
+def test_spurious_sources_name_the_view_of_a_canonical_hit():
+    t = "I counted twenty-nine sheep."
+    x = _ent(t, "twenty-nine", "age", "pattern")
+    x.view = "worded"
+    p = _prep(t, [x], [_edit(t, "twenty-nine")])
+    assert A.spurious_sources(t, {"protect": [], "sensitive": [], "optional": []}, p) == {("pattern:worded", "age"): 1}
+
+
 def test_summary_has_counts_and_no_text():
     rows = {("oasst1", "PERSON", "intro", "plain", "injected_single", "missed", ""): 2,
             ("oasst1", "PERSON", "intro", "plain", "injected_single", "protected", ""): 6,

@@ -20,6 +20,12 @@ class DetectedEntity:
     # ParsedAddress from the canonical address parser). Optional and unused
     # by all non-address code paths.
     parsed: Optional[object] = field(default=None, compare=False)
+    # A PatternScan hit found on a rewritten view of the message
+    # (detection/canonical.py): the view's name, and the hit as the view
+    # wrote it (``canonical.Canon``) so a surrogate can be generated for the
+    # written form and rendered back in the message's own spelling.
+    view: Optional[str] = field(default=None, compare=False)
+    canonical: Optional[object] = field(default=None, compare=False)
 
     def overlaps(self, other: "DetectedEntity") -> bool:
         return not (self.end <= other.start or self.start >= other.end)
