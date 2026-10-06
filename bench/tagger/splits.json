@@ -1,0 +1,53 @@
+{
+ "data_split": "test",
+ "datasets": {
+  "oasst1": {
+   "calib": {
+    "injected_units": 119,
+    "members_sha256": "b70e3cf4dcb36cd9ce211b55541fe37dc4adf3eab011f895df7b422857101dc6",
+    "natural_units": 250,
+    "records": 325
+   },
+   "val": {
+    "injected_units": 162,
+    "members_sha256": "c8487439f9b3801ec3f92729597ac1a345ad85fe2ea9d92b72ffa99df8942606",
+    "natural_units": 317,
+    "records": 393
+   }
+  },
+  "sharegpt": {
+   "calib": {
+    "injected_units": 141,
+    "members_sha256": "910240c2ae2cf7c1c375fb5a0abff61491eadb759f1667b8d0a031687b8de295",
+    "natural_units": 291,
+    "records": 356
+   },
+   "val": {
+    "injected_units": 160,
+    "members_sha256": "2780c79b5a5473aaf627cfdedf65522ad2441dec57d0b601e96c5d0705eb63f5",
+    "natural_units": 298,
+    "records": 359
+   }
+  },
+  "wildchat": {
+   "calib": {
+    "injected_units": 134,
+    "members_sha256": "3a533c50347c321d3fc5ece3bd4d5835dcb994706a6c2364d7e60b9990f1bf62",
+    "natural_units": 270,
+    "records": 342
+   },
+   "val": {
+    "injected_units": 153,
+    "members_sha256": "8c1463604f87fb5eea1bb171218dec69b9293170a90a2363d163f5f3af856d66",
+    "natural_units": 313,
+    "records": 367
+   }
+  }
+ },
+ "key": "surrogateshield-tagger-split-v1",
+ "rule": "sha256(key:dataset:source_id)[0] >> 7 -> calib | val",
+ "use": {
+  "calib": "thresholds only",
+  "val": "acceptance"
+ }
+}

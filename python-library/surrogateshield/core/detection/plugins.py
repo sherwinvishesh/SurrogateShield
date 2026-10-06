@@ -18,7 +18,9 @@ Register a factory under a stage name, then list the stage::
 The factory receives the :class:`~.config.Stage` (its ``model``,
 ``thresholds``, ``options``). A package can instead declare an entry point
 in the ``surrogateshield.detectors`` group (``name = "pkg.module:factory"``);
-it is loaded the first time a config lists that stage.
+it is loaded the first time a config lists that stage. ``pii_tagger`` is
+built in (:mod:`.pii_tagger`); a factory registered under that name
+replaces it.
 
 A plugin's candidates go through everything a model's do: the type routing
 (``type_sources``), the stage's per-type thresholds, the URL rule (nothing
@@ -102,13 +104,24 @@ def _entry_point(name: str) -> Optional[Factory]:
     return None
 
 
+def _builtin(name: str) -> Optional[Factory]:
+    """The project's own detectors, imported on first use (they load torch)."""
+    if name == "pii_tagger":
+        from .pii_tagger import factory
+        return factory
+    return None
+
+
 def get_detector(stage: Stage) -> Detector:
-    """The detector instance for *stage* (one per stage settings)."""
+    """The detector instance for *stage* (one per stage settings). A
+    registered factory wins over the built-in one, then an entry point."""
     key = (stage.name, repr(stage.to_dict()))
     with _lock:
         if key in _instances:
             return _instances[key]
         factory = _factories.get(stage.name)
+    if factory is None:
+        factory = _builtin(stage.name)
     if factory is None:
         factory = _entry_point(stage.name)
         if factory is None:
