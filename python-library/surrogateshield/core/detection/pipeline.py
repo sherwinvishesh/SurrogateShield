@@ -705,13 +705,35 @@ def _filter_implausible_orgs(
 # Pass G — Adjacent-PERSON merge
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Particles that belong to the surname after them ("Ó Tomáis", "Mac Giolla
+# Bhuí", "van der Berg", "da Silva", "bin Talal")
+_NAME_PARTICLES = frozenset("""
+ó ní nic uí mac mc mhic van von der den ter ten de da di del della dos das du le la
+bin binti bint ibn al el ben zu af
+""".split())
+_PARTICLE_ALT = "|".join(sorted(_NAME_PARTICLES, key=len, reverse=True))
+_WORD = r"[^\W\d_][^\W\d_'’\-]*"
+# Between two PERSON pieces: a capitalised initial ("Cauã I. Pacheco") or
+# particles ("Maria de Souza", "Ursula von der Leyen")
+_PERSON_GAP = re.compile(
+    rf" (?:[^\W\d_]\. |(?:(?:{_PARTICLE_ALT}) ){{1,3}})", re.IGNORECASE)
+
+
+def _person_gap(gap: str) -> bool:
+    if gap == " ":
+        return True
+    return bool(_PERSON_GAP.fullmatch(gap)) and (gap[1].isupper() or not gap.endswith(". "))
+
+
 def _merge_adjacent_persons(
     entities: List[DetectedEntity],
     text: str,
 ) -> List[DetectedEntity]:
     """
     NER sometimes splits one name into two entities ("Priya" + "Nambiar").
-    Two PERSON entities separated by exactly one space are one name.
+    Two PERSON entities separated by exactly one space, by a capitalised
+    initial with its period ("Cauã I. Pacheco") or by name particles
+    ("Maria de Souza"), are one name.
     """
     persons = sorted(
         (e for e in entities if e.type == "PERSON"), key=lambda e: e.start
@@ -720,7 +742,7 @@ def _merge_adjacent_persons(
 
     merged: List[DetectedEntity] = []
     for ent in persons:
-        if merged and (text[merged[-1].end:ent.start] == " "
+        if merged and (_person_gap(text[merged[-1].end:ent.start])
                        or merged[-1].start < ent.start < merged[-1].end < ent.end):
             prev = merged[-1]               # adjacent, or overlapping
             merged[-1] = DetectedEntity(
@@ -737,6 +759,129 @@ def _merge_adjacent_persons(
         else:
             merged.append(ent)
     return others + merged
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pass G2 — a name's particles and a "Surname, Given" field value
+# ─────────────────────────────────────────────────────────────────────────────
+
+# A given name, then particles, right before a PERSON span ("Judy Mac" +
+# "Giolla Bhuí", "Maria de" + "Souza", "Liam" + "Ó Tomáis")
+_GIVEN_PARTICLES_BEFORE = re.compile(
+    rf"(?<![\w'’\-])(?:({_WORD})[ \t]+)?((?:(?:{_PARTICLE_ALT})[ \t]+){{0,3}})$",
+    re.IGNORECASE)
+# Particles, then a surname, right after a PERSON span ("Maria" + " de Souza")
+_PARTICLES_AFTER = re.compile(
+    rf"^((?:[ \t]+(?:{_PARTICLE_ALT})(?![\w'’\-])){{0,3}}[ \t]+)({_WORD})", re.IGNORECASE)
+# Words that may stand before ", <Name>" in a field without being a surname
+_NOT_SURNAME = frozenset("""
+oh congrats congratulations welcome bye goodbye morning afternoon evening night great nice
+cool wow yeah yep nope hmm love hugs xoxo warmly sincerely respectfully cordially peace later
+ciao hola salut gracias merci danke obrigado obrigada grazie mr mrs ms dr sir madam monday
+tuesday wednesday thursday friday saturday sunday january february march april may june july
+august september october november december
+""".split())
+_SURNAME_FIRST = re.compile(rf"(?<![\w'’\-])((?:{_WORD}[ \t]){{0,2}}{_WORD}),[ \t]$")
+_VALUE_START = re.compile(r"(?:^|[\"'\n\t>(\[|;:])[ \t]*$")
+_VALUE_END = re.compile(r"^[ \t]*(?:[\"'\n\t)\]|;]|$)")
+# The given name after a surname that starts a field value ("Vuković" +
+# ", Božo"); the value ends right after it
+_GIVEN_AFTER = re.compile(rf",[ \t]((?:{_WORD}[ \t])?{_WORD})(?=[ \t]*(?:[\"'\n\t)\]|;]|$))")
+# A capital initial ending a span ("Suzana H." + " Peharda")
+_CAP_INITIAL = re.compile(r"[^\W\d_]\.")
+
+
+def _name_like(tok: str) -> bool:
+    """A capitalised name token, or a mutated Irish one ("hÉinniú")."""
+    if tok[:1].isupper():
+        return _token_ok(tok) and not _verbish(tok)
+    return relation_gate.mutated_name(tok)
+
+
+def _complete_person_spans(
+    entities: List[DetectedEntity],
+    text: str,
+    others: Sequence[DetectedEntity] = (),
+) -> List[DetectedEntity]:
+    """
+    Grow a PERSON span over the parts of its name that no other entity
+    covers: particles and the given name before it ("Judy Mac" + "Giolla
+    Bhuí", "Maria de" + "Souza", "Liam" + "Ó Tomáis"); particles and the
+    surname after it ("Maria" + " de Souza", "Suzanne Ó" + " hÉinniú"), or
+    after a middle initial ("Suzana H." + " Peharda"); and the other half of
+    a field whose whole value is "Surname, Given" ("Blažek, Samuel" as a
+    JSON string or alone on a line, from either name). A lowercase particle
+    alone is a word ("le livre de Marie"), so it needs a name on its other
+    side.
+    """
+    taken = [(e.start, e.end) for e in list(entities) + list(others)]
+
+    def free(a: int, b: int) -> bool:
+        return a < b and not any(s < b and a < e for s, e in taken)
+
+    out: List[DetectedEntity] = []
+    for ent in entities:
+        if ent.type != "PERSON":
+            out.append(ent)
+            continue
+        start, end = ent.start, ent.end
+        for _ in range(3):
+            grown = False
+            toks = text[start:end].split()
+            m = _GIVEN_PARTICLES_BEFORE.search(text[max(0, start - 60):start])
+            if m and (m.group(1) or m.group(2)):
+                given, parts = m.group(1), m.group(2)
+                if given and given.lower() in _NAME_PARTICLES:
+                    given, parts = None, m.group(0)[m.start(1) - m.start():]
+                lead = (parts.split() + toks)[0].lower()
+                a = start
+                if (given and given.lower() not in _NAME_PARTICLES and _name_like(given)
+                        and given[:1].isupper() and lead in _NAME_PARTICLES):
+                    a = start - len(m.group(0))
+                elif parts[:1].isupper() and text[start:start + 1].isupper():
+                    a = start - len(parts)      # "Van Halen", "Ó Tomáis"
+                if free(a, start):
+                    start, grown = a, True
+            m = _PARTICLES_AFTER.match(text[end:end + 60])
+            initial = (len(toks) >= 2 and _CAP_INITIAL.fullmatch(toks[-1])
+                       and toks[-1][0].isupper())
+            if (m and _name_like(m.group(2))
+                    and (m.group(1).strip() or toks[-1].lower() in _NAME_PARTICLES or initial)):
+                b = end + len(m.group(0))
+                if free(end, b):
+                    end, grown = b, True
+            if not grown:
+                break
+        if len(text[start:end].split()) <= 2 and _VALUE_END.match(text[end:end + 3]):
+            m = _SURNAME_FIRST.search(text[max(0, start - 60):start])
+            if m:
+                a = start - len(m.group(0))
+                toks = m.group(1).split()
+                if (free(a, start) and _VALUE_START.search(text[max(0, a - 20):a])
+                        and toks[-1][:1].isupper()
+                        and all(_token_ok(t) or t.lower() in _NAME_PARTICLES for t in toks)
+                        and not any(t.lower() in _NOT_SURNAME or _verbish(t) for t in toks)):
+                    start = a
+        if (len(text[start:end].split()) == 1
+                and _VALUE_START.search(text[max(0, start - 20):start])):
+            m = _GIVEN_AFTER.match(text, end)
+            if m:
+                b = end + len(m.group(0))
+                toks = m.group(1).split()
+                if (free(end, b) and all(_name_like(t) and not t.isupper() for t in toks)
+                        and not any(t.lower() in _NOT_SURNAME for t in toks)
+                        and not org_assembly.has_form(text[start:b])):
+                    end = b
+        if (start, end) == (ent.start, ent.end):
+            out.append(ent)
+            continue
+        taken.append((start, end))
+        out.append(DetectedEntity(
+            text=text[start:end], start=start, end=end, type="PERSON",
+            score=ent.score, source=ent.source,
+        ))
+        logger.debug(f"[SentinelLayer] Pass G2 completed PERSON → {text[start:end]!r}")
+    return out
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1417,6 +1562,9 @@ def run_cascade(
         # ── Pass G: Adjacent-PERSON merge ────────────────────────────────────────
         confirmed          = _merge_adjacent_persons(confirmed, text)
         needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
+        # ── Pass G2: a name's particles, "Surname, Given" field values ───────────
+        confirmed          = _complete_person_spans(confirmed, text, needs_confirmation)
+        needs_confirmation = _complete_person_spans(needs_confirmation, text, confirmed)
         _mark("merge_persons")
 
         # ── Pass O: an organisation's name read whole (V3 §3.5) ──────────────────

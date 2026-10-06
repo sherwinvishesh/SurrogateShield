@@ -426,7 +426,9 @@ def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
     """The words of a detected e-mail, @handle or profile-URL slug name the
     person elsewhere in the message: "hui.min.tan68@…" makes "TAN HUI MIN"
     a name, "@farshad.m" makes "not again farshad" one. A single word must
-    be at least three letters and no function or mailbox word."""
+    be at least three letters and no function or mailbox word. A middle
+    initial may stand inside the name ("Cauã I. Pacheco"), and a name a model
+    found only part of ("Acuña" of "Zoé Acuña") is taken whole."""
     common = _common_words()
     parts: Set[str] = set()
     lone: Set[str] = set()                 # may stand alone as a name
@@ -450,14 +452,28 @@ def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
     if not parts:
         return [], []
     added: List[DetectedEntity] = []
+    removed: List[DetectedEntity] = []
     toks = list(re.finditer(r"[^\W\d_]+(?:[\-'’][^\W\d_]+)*", text))
+
+    def spelled(k: int) -> bool:
+        return all(_fold(p) in parts for p in re.split(r"[\-'’]", toks[k].group()))
+
+    def initial(k: int) -> bool:            # "Cauã I. Pacheco"
+        t = toks[k]
+        return (len(t.group()) == 1 and t.group().isupper() and text[t.end():t.end() + 1] == "."
+                and k + 1 < len(toks) and spelled(k + 1))
+
     k = 0
     while k < len(toks):
         run = []
-        while (k < len(toks) and all(_fold(p) in parts for p in re.split(r"[\-'’]", toks[k].group()))
-               and (not run or re.fullmatch(r"[ \t]+", text[toks[k - 1].end():toks[k].start()]))):
+        while k < len(toks) and (spelled(k) or run and initial(k)):
+            gap = text[run[-1].end():toks[k].start()] if run else " "
+            if not (re.fullmatch(r"[ \t]+", gap) or initial(k - 1) and re.fullmatch(r"\.[ \t]+", gap)):
+                break
             run.append(toks[k])
             k += 1
+        while run and len(run[-1].group()) == 1 and not spelled(toks.index(run[-1])):
+            run.pop()                           # no trailing initial
         if not run:
             k += 1
             continue
@@ -465,9 +481,15 @@ def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
         single = len(run) == 1
         if single and (_fold(run[0].group()) not in lone or run[0].group().lower() in _NOT_NICKNAMES):
             continue
-        if not _overlaps(s, e, list(ents) + added):
+        over = [x for x in list(ents) + added if x.start < e and s < x.end]
+        if not over:
             added.append(_ent(text, s, e, "PERSON", 0.9))
-    return added, []
+        elif not single and all(x.type == "PERSON" and x.source != "pattern" and s <= x.start
+                                and x.end <= e and any(x is y for y in ents) for x in over):
+            # a model found part of the name ("Acuña" of "Zoé Acuña")
+            removed.extend(over)
+            added.append(_ent(text, s, e, "PERSON", 0.9))
+    return added, removed
 
 
 def _speakers(text: str, ents: Sequence[DetectedEntity]):

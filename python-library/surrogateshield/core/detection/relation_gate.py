@@ -129,8 +129,19 @@ ibn al el y e wa ap af av st
 _COORD = frozenset("and und en et y e & + / , og och i".split())
 
 
+# A Gaelic surname mutated after "Ó", "Ní", "Mac" or "Uí" ("Ó hÉinniú", "Uí
+# nGallchóir"): a lower-case prefix, then the capitalised name
+_IRISH_MUTATION = re.compile(r"(?:h|n|t|bh|bp|dt|gc|mb|ng)(?=[^\W\d_])")
+
+
+def mutated_name(w: str) -> bool:
+    """A mutated Irish name word ("hÉinniú", "nGallchóir")."""
+    m = _IRISH_MUTATION.match(w)
+    return bool(m) and w[m.end():m.end() + 1].isupper()
+
+
 def _is_name_word(w: str) -> bool:
-    return w[:1].isupper() or w.lower() in _NAME_PARTICLES
+    return w[:1].isupper() or w.lower() in _NAME_PARTICLES or mutated_name(w)
 
 
 def trim_person(ent: DetectedEntity, text: str):
@@ -178,7 +189,7 @@ def trim_person(ent: DetectedEntity, text: str):
         runs, run = [], []
         for k in range(i, j):
             w = toks[k].group()
-            if w[:1].isupper() or (run and w.lower() in _NAME_PARTICLES):
+            if w[:1].isupper() or mutated_name(w) or (run and w.lower() in _NAME_PARTICLES):
                 run.append(k)
             else:
                 runs.append(run)
@@ -188,7 +199,8 @@ def trim_person(ent: DetectedEntity, text: str):
         if all(w.lower() in _COORD for w in loose):
             return ent                      # "Ngozi Adeyemi + Chidi Adeyemi"
         for r in runs:
-            while r and not toks[r[-1]].group()[:1].isupper():
+            while r and not (toks[r[-1]].group()[:1].isupper()
+                             or mutated_name(toks[r[-1]].group())):
                 r.pop()                     # no trailing particle
         long_runs = [r for r in runs if len(r) >= 2]
         if len(long_runs) == 1:
