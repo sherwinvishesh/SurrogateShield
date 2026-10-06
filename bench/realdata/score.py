@@ -36,6 +36,16 @@ is development data for the v3 detector; ``test2`` scores the second
 collection (``bench/realdata/test2/``, frozen keys ``test2/...``) and is
 refused unless ``bench/realdata/FREEZE.json`` exists and records the
 pre-registered hypotheses' current hash.
+
+``--external NAME`` (V3 §5.4, H10'') scores the external benchmark built by
+``bench.realdata.external`` through the same arms, span checks, per-message
+scoring, aggregation and bootstrap (clusters: the source's record groups),
+per stratum and pooled, beside a value-level span F1 (precision = edits
+touching a gold value / edits, recall = 1 − leak rate). Also refused before
+the freeze. H10'' (fixed before any arm ran on the data): pooled, SS's leak
+rate ≤ the GLiNER arm's or SS's span F1 ≥ the GLiNER arm's (point
+estimates; the intervals are reported beside), for ``gliner_pii`` (the
+hypothesis) and ``gliner_pii_tuned``.
 """
 
 from __future__ import annotations
@@ -502,6 +512,75 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
     return doc
 
 
+def span_f1(agg: dict) -> Optional[float]:
+    """Value-level F1: recall 1 − leak rate, precision 1 − spurious rate."""
+    if agg["leak"]["rate"] is None or agg["spurious"]["rate"] is None:
+        return None
+    p, r = 1 - agg["spurious"]["rate"], 1 - agg["leak"]["rate"]
+    return round(2 * p * r / (p + r), 4) if p + r else 0.0
+
+
+def h10(res: dict) -> dict:
+    out = {}
+    for g in ("gliner_pii", "gliner_pii_tuned"):
+        if g not in res or "ss" not in res:
+            continue
+        ss, gl = res["ss"], res[g]
+        leak = ss["leak"]["rate"] is not None and gl["leak"]["rate"] is not None and ss["leak"]["rate"] <= gl["leak"]["rate"]
+        f1 = ss["span_f1"] is not None and gl["span_f1"] is not None and ss["span_f1"] >= gl["span_f1"]
+        out[g] = {"leak_not_above": leak, "span_f1_not_below": f1, "holds": leak or f1}
+    return out
+
+
+def score_external(name: str, arms: Sequence[str] = ARMS, reuse: bool = False, out: Optional[Path] = None,
+                   loaded: Optional[dict] = None, runner: Optional[Callable] = None, spans: Optional[Path] = None,
+                   log=print, freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> dict:
+    """Score the external benchmark *name* (``bench.realdata.external``) once, after the freeze."""
+    sealed = check_freeze(freeze, prereg)
+    if loaded is None:
+        from bench.realdata import external
+        if name != external.NAME:
+            raise SystemExit(f"no external benchmark {name!r} (built: {external.NAME})")
+        loaded = external.load()
+    units, src, input_sha = loaded["units"], loaded["src"], loaded["input_sha"]
+    from bench.arms.run import PRIVATE
+    scores, config_hashes = {}, {}
+    for arm in arms:
+        rows = produce(arm, src, f"external-{name}", reuse, input_sha, units, runner, spans)
+        h = config_hash((spans or PRIVATE) / arm / f"external-{name}.jsonl")
+        if h:
+            config_hashes[arm] = h
+        scores[arm] = [score_unit(u, rows[u["mid"]]) for u in units]
+        log(f"external {name} {arm:22} scored {len(units)} messages")
+    groups = sorted({u["dataset"] for u in units}) + ["all"]
+    results, diffs = {}, {}
+    for g in groups:
+        keep = [i for i, u in enumerate(units) if g == "all" or u["dataset"] == g]
+        us = [units[i] for i in keep]
+        sc = {a: [scores[a][i] for i in keep] for a in arms}
+        results[g] = {a: aggregate(us, sc[a]) for a in arms}
+        for a in arms:
+            results[g][a]["span_f1"] = span_f1(results[g][a])
+        diffs[g] = differences(us, sc, derive_seed("score-external", name, g), arms) if "ss" in arms else {}
+    out = out or ROOT / "bench" / "results" / f"external_{name}.json"
+    doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score "
+                      f"--external {name} --out {rel(out)}",
+           "git": git_state(), "external": name, "role": "secondary check (H10''), not used for tuning",
+           "freeze_sha256": sealed, "source": loaded.get("description", {}).get("source"),
+           "label_map": loaded.get("description", {}).get("label_map"), "arms": list(arms),
+           "corpus": loaded["corpus"], **({"config_hashes": config_hashes} if config_hashes else {}),
+           "claimed_types": {a: list(CLAIMED[a]) for a in arms},
+           "bootstrap": {"resamples": RESAMPLES, "unit": "the source's record group (uid)",
+                         "seed": "derive_seed('score-external', name, group)", "ci": "percentile 2.5 / 97.5",
+                         "difference": "ss − arm"},
+           "span_f1": "value-level: precision 1 − spurious rate, recall 1 − leak rate",
+           "results": results, "differences": diffs, "hypotheses": {"H10''": h10(results["all"])}}
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
+    out.with_suffix(".md").write_text(markdown_external(doc))
+    return doc
+
+
 def rel(path: Path) -> str:
     path = Path(path).resolve()
     return str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
@@ -572,9 +651,62 @@ def markdown(doc: dict) -> str:
     return "\n".join(lines)
 
 
+def _f1(v: Optional[float]) -> str:
+    return "–" if v is None else f"{v:.3f}"
+
+
+def markdown_external(doc: dict) -> str:
+    arms, res, dif = doc["arms"], doc["results"], doc["differences"]
+    lines = [f"# External benchmark `{doc['external']}` ({doc['role']})", "",
+             f"Command: `{doc['command']}`" + commit_note(doc.get("git")), "",
+             f"Source: {(doc.get('source') or {}).get('repo')} @ `{str((doc.get('source') or {}).get('revision'))[:12]}` "
+             f"({(doc.get('source') or {}).get('licence')}); {doc['corpus']['records']} records, "
+             f"strata {doc['corpus']['strata']}. Same scorer as the real-data benchmark: leak = a protect value with a "
+             "letter or digit reaching the provider; spurious = an edit touching no gold value; span F1 = "
+             "value-level (precision 1 − spurious rate, recall 1 − leak rate). Δ = SS − arm, paired cluster "
+             f"bootstrap ({doc['bootstrap']['resamples']} resamples); * = interval excludes 0.", ""]
+    for g in res:
+        r = res[g]
+        lines += [f"## {g} ({r[arms[0]]['messages']} records, {r[arms[0]]['protect_values']} protect values)", "",
+                  "| arm | leaked / values | leak rate | Δ leak | edits | spurious rate | Δ spurious | span F1 |",
+                  "|---|---|---|---|---|---|---|---|"]
+        for a in arms:
+            x, d = r[a], dif[g].get(a, {})
+            lines.append(f"| {a} | {x['leak']['k']} / {x['leak']['n']} | {_pct(x['leak'])} | {_diff(d.get('leak_rate'))} "
+                         f"| {x['edits']} | {_pct(x['spurious'])} | {_diff(d.get('spurious_rate'))} "
+                         f"| {_f1(x['span_f1'])} |")
+        lines.append("")
+    r = res["all"]
+    types = sorted({t for a in arms for t in r[a]["by_type"]})
+    lines += ["## all — leak by type (leaked / values)", "", "| type | " + " | ".join(arms) + " |",
+              "|---|" + "---|" * len(arms)]
+    for t in types:
+        cells = []
+        for a in arms:
+            v = r[a]["by_type"].get(t)
+            cells.append(f"{v['leaked']} / {v['values'] - v['policy']}" if v else "–")
+        lines.append(f"| {t} | " + " | ".join(cells) + " |")
+    lines += ["", "## H10'' (pooled; point estimates)", "", "| GLiNER arm | SS leak ≤ | SS span F1 ≥ | holds |",
+              "|---|---|---|---|"]
+    for g, h in doc["hypotheses"]["H10''"].items():
+        lines.append(f"| {g} | {'yes' if h['leak_not_above'] else 'no'} | {'yes' if h['span_f1_not_below'] else 'no'} "
+                     f"| {'yes' if h['holds'] else 'no'} |")
+    if doc.get("label_map"):
+        lines += ["", "## Label map (Nemotron-PII label → J2 list, type)", "", "| label | list | type |", "|---|---|---|"]
+        for label, (lst, typ) in sorted(doc["label_map"].items(), key=lambda kv: (kv[1][0], kv[1][1] or "", kv[0])):
+            lines.append(f"| {label} | {lst} | {typ or '–'} |")
+    c = doc["corpus"]
+    lines += ["", f"Values dropped (not a whole-word substring of their text): {sum(c['dropped_not_whole_word'].values())} "
+              f"{c['dropped_not_whole_word']}; values given labels of different lists or types (first kept): "
+              f"{sum(c['merged_duplicate_values'].values())}.", ""]
+    return "\n".join(lines)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--split", choices=list(RUNS), required=True)
+    which = ap.add_mutually_exclusive_group(required=True)
+    which.add_argument("--split", choices=list(RUNS))
+    which.add_argument("--external", help="an external benchmark built by bench.realdata.external (V3 §5.4)")
     ap.add_argument("--datasets", nargs="*", choices=list(DATASETS), default=list(DATASETS))
     ap.add_argument("--arms", nargs="*", choices=list(ARMS), default=list(ARMS))
     ap.add_argument("--reuse", action="store_true", help="rescore saved spans; run no arm")
@@ -582,6 +714,11 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     os.environ.setdefault("HF_HUB_OFFLINE", "1")
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+    if args.external:
+        doc = score_external(args.external, args.arms, args.reuse, args.out)
+        for g, h in doc["hypotheses"]["H10''"].items():
+            print(f"H10'' vs {g}: {'holds' if h['holds'] else 'does not hold'} {h}")
+        return 0
     doc = score_split(args.split, args.datasets, args.arms, args.reuse, args.out)
     for ds, h in doc["hypotheses"].items():
         r = doc["results"][ds]["injected"]
