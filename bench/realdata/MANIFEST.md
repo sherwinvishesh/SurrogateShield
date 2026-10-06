@@ -157,6 +157,96 @@ Raw file SHA-256:
 - `data/train-00004-of-00014.parquet` `08c7e0c31edc120606d67cfa82486471d82945a7a414761501ea44b1ab0cd804`
 - `data/train-00008-of-00014.parquet` `a69578183dde5de1aa94134da2d7c2d13f00d88a577ef91140a492fbbbf10792`
 
+## Collection `test2`
+
+The sealed second test (PROMPT_FOR_OPUS_V3 §5.2): drawn by `python -m bench.realdata.pull
+--collection test2` from sources the first draw never touched (its ids skipped, its first turns
+seeding the near-duplicate check), one split, files under
+`bench/realdata/test2/<dataset>/`.
+
+### test2 / oasst1
+
+| step | count |
+|---|---|
+| `source_roots` | 10,364 |
+| `drop_deleted` | 1 |
+| `drop_not_english` | 6,693 |
+| `drop_first_turn_too_short` | 1,775 |
+| `drop_first_turn_too_long` | 6 |
+| `drop_first_turn_only_code` | 2 |
+| `drop_first_turn_jailbreak` | 3 |
+| `first_turn_kept` | 1,884 |
+| `single_exact_duplicates` | 1 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 1,399 |
+| `drop_multi_later_turn_too_long` | 1 |
+| `multi_kept` | 1,398 |
+| `multi_exact_duplicates` | 0 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+
+Drawn: multi_test2 = 120, single_test2 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 6100473939742772187, single = 5516664046704425191
+
+### test2 / sharegpt
+
+| step | count |
+|---|---|
+| `source_conversations` | 45,332 |
+| `drop_not_starting_with_user` | 1,673 |
+| `drop_first_turn_empty` | 5 |
+| `drop_first_turn_not_english` | 14,651 |
+| `drop_first_turn_too_short` | 9,369 |
+| `drop_first_turn_too_long` | 1,929 |
+| `drop_first_turn_only_code` | 106 |
+| `drop_first_turn_jailbreak` | 286 |
+| `first_turn_kept` | 17,313 |
+| `single_exact_duplicates` | 2,158 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 12,464 |
+| `drop_multi_later_turn_empty` | 1 |
+| `drop_multi_later_turn_too_long` | 421 |
+| `drop_multi_later_turn_not_english` | 859 |
+| `drop_multi_later_turn_jailbreak` | 4 |
+| `multi_kept` | 11,179 |
+| `multi_exact_duplicates` | 1,445 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+
+Drawn: multi_test2 = 120, single_test2 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 1486538153402145689, single = 3896618106654812218
+
+### test2 / wildchat
+
+| step | count |
+|---|---|
+| `source_conversations` | 119,713 |
+| `drop_duplicate_hash` | 1,428 |
+| `drop_not_english` | 51,104 |
+| `drop_first_turn_empty` | 204 |
+| `drop_first_turn_too_short` | 16,212 |
+| `drop_first_turn_too_long` | 13,276 |
+| `drop_first_turn_only_code` | 601 |
+| `drop_first_turn_jailbreak` | 148 |
+| `first_turn_kept` | 36,740 |
+| `single_exact_duplicates` | 6,271 |
+| `single_near_duplicates_skipped` | 27 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 10,678 |
+| `drop_multi_later_turn_empty` | 301 |
+| `drop_multi_later_turn_too_long` | 299 |
+| `drop_multi_later_turn_jailbreak` | 3 |
+| `multi_kept` | 10,075 |
+| `multi_exact_duplicates` | 706 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+
+Drawn: multi_test2 = 120, single_test2 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 2817525755150603185, single = 4631120071886413785
+
 ## Systems under test
 
 Recorded by `python -m bench.arms.run` from each arm's meta sidecar
@@ -425,6 +515,9 @@ Interpreter `.venv/bin/python`, seed 20261005.
 | `bench/realdata/sharegpt/pii_free.json` | `2207dd6db4f83e3e2d705bb7d5c83aee61ea2ecbe3c2122e09fff851ea37691b` |
 | `bench/realdata/sharegpt/pool.jsonl` | `f9d7636ffeb99beba8487fdbf3bf39d94f877823f86c42aa945723798dc2564d` |
 | `bench/realdata/sharegpt/test.jsonl` | `7686a2a4e2117aafd99071786d8ffa7022e1408b8f56ce087f37af5f8fdac37f` |
+| `bench/realdata/test2/oasst1/pool.jsonl` | `6d832cbb932734f3d48823adbbe818ebb47618de151fc89d007f2d5ddf229e33` |
+| `bench/realdata/test2/sharegpt/pool.jsonl` | `9c5ee4a77d2cee6aaf9e4071ce5073131fd845802e1e2174ef997685c1adc8f8` |
+| `bench/realdata/test2/wildchat/pool.jsonl` | `620fa2417c307affab9c3a52ef15eb095ea1db78be5ef4b9a3c9216fcd863359` |
 | `bench/realdata/wildchat/dev.jsonl` | `de853c7174b008199bd8fd6b7bd05a5654908b99b71a6f94f9b0c638c43a91cf` |
 | `bench/realdata/wildchat/labels.jsonl` | `8e2669d041deb6e91de36e49a1b44cb112cf9853c0b5b5682320bfa4974b628f` |
 | `bench/realdata/wildchat/pii_free.json` | `fd096fe8325d5dd1a54dab3c14dc512069e7772790f2914d56efb1ea190b124d` |
