@@ -13,6 +13,11 @@ from bench.arms.base import ROOT, Refused, cli, versions
 
 ARM = "ss"
 NO_SURROGATE = "could not generate a surrogate"
+# The benchmark's address mode (V3 §3.5). The product's "auto" shifts the house
+# number inside a service query and keeps street, town and postcode verbatim
+# within one whole-address edit, which the scorer counts as covered; "replace"
+# re-draws every part, so a covered address leaks none of them.
+ADDRESS_MODE = "replace"
 
 
 def load(cascade_options: dict | None = None):
@@ -25,7 +30,7 @@ def load(cascade_options: dict | None = None):
 
     def fn(text: str, seed: int):
         try:
-            p = prepare_send(text, MimicGen(seed=seed), cascade_options)
+            p = prepare_send(text, MimicGen(seed=seed), cascade_options, address_mode=ADDRESS_MODE)
         except RuntimeError as exc:
             # MimicGen.generate_all found no surrogate that differs from every
             # original; the app does not send such a message (main.py lets it raise).
@@ -44,7 +49,8 @@ def config() -> dict:
         sys.path.insert(0, str(ROOT))
     import config as cfg
     return {"send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
-            "ADDRESS_MODE": cfg.ADDRESS_MODE,
+            "ADDRESS_MODE": ADDRESS_MODE,
+            "ADDRESS_MODE_product": cfg.ADDRESS_MODE,
             "SERVICE_QUERY_DETECTION_ENABLED": cfg.SERVICE_QUERY_DETECTION_ENABLED,
             "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
             "versions": versions("surrogateshield", "spacy", "transformers", "torch", "faker")}

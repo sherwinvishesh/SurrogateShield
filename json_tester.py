@@ -153,12 +153,14 @@ class Prepared:
         return out
 
 
-def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None) -> Prepared:
+def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None,
+                 address_mode: Optional[str] = None) -> Prepared:
     """Detect, generate surrogates and build the exact text to send.
 
     This is the single code path used by the runner and by
     ``offline_eval.py --protection`` / ``--ablation``. *cascade_options* are
-    passed to ``run_cascade`` (stage switches for the ablation).
+    passed to ``run_cascade`` (stage switches for the ablation);
+    *address_mode* overrides ``config.ADDRESS_MODE`` (the benchmark pins it).
     """
     from config import (
         ADDRESS_MODE,
@@ -170,7 +172,8 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None) -
     from util import plan_substitutions, splice
 
     # Same address-mode resolution as pipeline.process_turn.
-    is_svc, address_mode = resolve_service(question, ADDRESS_MODE, SERVICE_QUERY_DETECTION_ENABLED)
+    is_svc, address_mode = resolve_service(question, address_mode or ADDRESS_MODE,
+                                           SERVICE_QUERY_DETECTION_ENABLED)
 
     timings: Dict[str, float] = {}
     confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings,

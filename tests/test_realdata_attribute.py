@@ -150,3 +150,30 @@ def test_summary_has_counts_and_no_text():
     assert doc["injected"]["by_format"]["PERSON:plain"]["values"] == 8
     md = A.markdown({**doc, "git": None})
     assert "| PERSON | 8 | 0.25 |" in md
+
+
+@pytest.mark.parametrize("value, rep, kept", [
+    # a shift edit covers every character of the value, yet repeats the rest
+    ("Langestraße 91/15, 40718 Mainz", "Langestraße 90/15, 40718 Mainz", "street+locality+postcode"),
+    ("77 East Ave, Tempe, AZ 85281", "16 East Ave, Tempe, AZ 85281", "street+locality+postcode"),
+    ("77 East Ave, Tempe, AZ 85281", "16 Hale Ave, Gilbert, AZ 85296", ""),
+    ("Kerkstraat 14, 8861 AJ Harlingen", "Molenstraat 41, 2318 KN Zwolle", ""),
+    ("Kerkstraat 14, 8861 AJ Harlingen", "Molenstraat 41, 2318 KN Harlingen", "locality"),
+])
+def test_kept_parts_names_what_a_covering_surrogate_repeats(value, rep, kept):
+    text = f"Ship it to {value} please."
+    assert A.kept_parts(text, value, [_edit(text, value, rep)]) == kept
+    assert A.first_failure(text, value, [_edit(text, value, rep)])[0] is None   # the scorer: covered
+
+
+def test_the_benchmark_pins_the_fully_covering_address_mode():
+    from bench.arms import ss
+    assert ss.ADDRESS_MODE == "replace" and ss.config()["ADDRESS_MODE"] == "replace"
+
+
+def test_summary_reports_kept_parts():
+    rows = {("oasst1", "ADDRESS", "form", "plain", "injected_single", "protected", ""): 3}
+    doc = A.summarise("dev", "dev", "test1", ["oasst1"], rows, {}, {}, {"messages": 0},
+                      __import__("collections").Counter({"none": 2, "street+locality+postcode": 1}))
+    assert doc["injected"]["address_kept_parts"] == {"none": 2, "street+locality+postcode": 1}
+    assert "`street+locality+postcode` 1" in A.markdown({**doc, "git": None})

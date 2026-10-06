@@ -31,6 +31,11 @@ the J2 scorer's own leak rule (``bench/realworld.py``; checked against
 On the natural slice every spurious edit (no gold overlap; the scorer's
 rule) is attributed to the source and type of the entity that produced it.
 
+``kept_parts`` (diagnostic, not a cause): an ADDRESS the scorer counts as
+protected whose surrogate still carries its street name, locality or
+postcode verbatim. One whole-address edit that only moves the house number
+(``shift``) covers every character, yet sends the rest unchanged.
+
 The output holds counts only (type × layout × format × slice × cause ×
 detail): no text, no value. ``reproduced`` compares the traced run's edits
 with the ``ss`` arm's private span file of the same input (when one exists),
@@ -75,11 +80,12 @@ def traced_prepare():
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     from generation.logic import MimicGen
     from json_tester import prepare_send
+    from bench.arms.ss import ADDRESS_MODE
 
     def fn(text: str, seed: int):
         trace: List[dict] = []
         try:
-            return prepare_send(text, MimicGen(seed=seed), {"trace": trace}), trace
+            return prepare_send(text, MimicGen(seed=seed), {"trace": trace}, address_mode=ADDRESS_MODE), trace
         except RuntimeError as exc:
             if str(exc).startswith("could not generate a surrogate"):
                 return None, trace
@@ -131,6 +137,26 @@ _AT = re.compile(r"\s*(?:@|[\(\[\{<]\s*at\s*[\)\]\}>]|\s+at\s+)\s*", re.I)
 def _uncovered(text: str, s: int, e: int, edits) -> List[bool]:
     """Per character of text[s:e]: True when it is a letter/digit no edit covers."""
     return [text[i].isalnum() and not any(a <= i < b for a, b, _o, _r in edits) for i in range(s, e)]
+
+
+def kept_parts(text: str, value: str, edits) -> str:
+    """The street / locality / postcode of a covered ADDRESS that its
+    surrogate repeats verbatim ("street+locality+postcode"), "" when none."""
+    from surrogateshield.core.detection import address_assembly, address_parser
+    p = address_assembly.parse(value) or address_parser.parse(value)
+    if p is None:
+        return ""
+    if p.parts:
+        role = {"name": "street", "city": "locality", "postcode": "postcode"}
+        pieces = [(role[r], p.full_text[a:b]) for r, a, b in p.parts if r in role]
+    else:
+        pieces = [("street", p.street_name), ("locality", p.city), ("postcode", p.zip_code)]
+    out = set()
+    for s, e in rw.occurrences(text, value):
+        sent = " ".join(r for a, b, _o, r in edits if overlaps(a, b, s, e))
+        out |= {k for k, piece in pieces
+                if piece and re.search(rf"(?<!\w){re.escape(piece)}(?!\w)", sent)}
+    return "+".join(k for k in ("street", "locality", "postcode") if k in out)
 
 
 def parts_left(typ: str, fmt: str, value: str, left: List[bool]) -> str:
@@ -264,6 +290,7 @@ def run(split: str, datasets: Sequence[str] = DATASETS, prepare=None) -> dict:
     spurious: Counter = Counter()
     reproduced = Counter()
     natural = Counter()
+    kept = Counter()
     for ds in datasets:
         units = loaded[ds]["units"]
         lay = layouts(coll.rd, ds, data_split)
@@ -292,10 +319,12 @@ def run(split: str, datasets: Sequence[str] = DATASETS, prepare=None) -> dict:
                 cause, detail = attribute_value(text, item, gold["service_query"], prepared, trace)
                 rows[(ds, item["type"], lay.get(u["conv"], ""), item.get("fmt") or "", sl, cause, detail)] += 1
                 mine[cause] += 1
+                if cause == "protected" and item["type"] == "ADDRESS":
+                    kept[kept_parts(text, item["value"], edits) or "none"] += 1
             if prepared is not None and (sum(mine[c] for c in LEAK_CAUSES) != len(check["leaked"])
                                          or mine["policy"] != len(check["policy"])):
                 raise RuntimeError(f"{u['mid']}: attribution disagrees with score_message")
-    return summarise(split, data_split, coll_name, datasets, rows, spurious, reproduced, natural)
+    return summarise(split, data_split, coll_name, datasets, rows, spurious, reproduced, natural, kept)
 
 
 def _same_input(span_file: Path, input_sha: str) -> bool:
@@ -304,7 +333,7 @@ def _same_input(span_file: Path, input_sha: str) -> bool:
 
 
 def summarise(split, data_split, coll_name, datasets, rows: Counter, spurious: Counter,
-              reproduced: Counter, natural: Counter) -> dict:
+              reproduced: Counter, natural: Counter, kept: Counter = None) -> dict:
     by_type: Dict[str, Counter] = defaultdict(Counter)
     by_cause: Counter = Counter()
     details: Dict[str, Dict[str, Counter]] = defaultdict(lambda: defaultdict(Counter))
@@ -342,6 +371,7 @@ def summarise(split, data_split, coll_name, datasets, rows: Counter, spurious: C
                      "by_format": {f: {**leak(c), "by_cause": dict(c)} for f, c in sorted(by_format.items())},
                      "details": {t: {c: dict(d.most_common()) for c, d in sorted(v.items())}
                                  for t, v in sorted(details.items())},
+                     "address_kept_parts": dict((kept or Counter()).most_common()),
                      "rows": [dict(zip(("dataset", "type", "layout", "fmt", "slice", "cause", "detail"), k), n=n)
                               for k, n in sorted(rows.items())]},
         "natural": {**dict(natural), "spurious_edits": sum(spurious.values()),
@@ -372,6 +402,9 @@ def markdown(doc: dict) -> str:
     for t, cs in inj["details"].items():
         for c, d in cs.items():
             lines.append(f"- **{t}** {c}: " + ", ".join(f"`{k}` {n}" for k, n in d.items()))
+    kept = inj.get("address_kept_parts", {})
+    lines += ["", "## Protected ADDRESS values whose surrogate repeats a part verbatim", "",
+              ", ".join(f"`{k}` {n}" for k, n in kept.items()) or "no protected ADDRESS value."]
     nat = doc["natural"]
     lines += ["", "## Natural slice: spurious edits by source", "",
               f"{nat.get('messages', 0)} messages, {nat.get('untouched', 0)} untouched, "
@@ -401,6 +434,7 @@ def main(argv=None) -> int:
     out.with_suffix(".md").write_text(markdown(doc))
     a = doc["injected"]["all"]
     print(f"{args.split}: {a['values']} values, leak {a['leak_rate']}, causes {a['by_cause']}; "
+          f"address kept parts {doc['injected']['address_kept_parts']}; "
           f"reproduced {doc['reproduced_vs_ss_arm']} -> {S.rel(out)}")
     return 0
 

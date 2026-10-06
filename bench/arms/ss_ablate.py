@@ -252,11 +252,11 @@ def load():
         sys.path.insert(0, str(ROOT))
     from generation.logic import MimicGen
     from json_tester import prepare_send
-    from bench.arms.ss import NO_SURROGATE
+    from bench.arms.ss import ADDRESS_MODE, NO_SURROGATE
 
     def fn(text: str, seed: int):
         try:
-            p = prepare_send(text, MimicGen(seed=seed))
+            p = prepare_send(text, MimicGen(seed=seed), address_mode=ADDRESS_MODE)
         except RuntimeError as exc:
             if str(exc).startswith(NO_SURROGATE):
                 raise Refused(str(exc)) from exc
@@ -311,8 +311,10 @@ def run(src: Path, out_dir: Path, names: List[str] | None = None, fn=None, seed:
         Path(str(out) + ".meta.json").write_text(json.dumps(meta, indent=1, sort_keys=True) + "\n")
         summary[cond["name"]] = {"edits": n_edits, "refused": n_refused}
         print(f"{ARM} {cond['name']:24} {len(msgs)} messages, {n_edits} edits, {meta['seconds']} s", flush=True)
+    from bench.arms.ss import ADDRESS_MODE
     return {"families": {k: len(v) for k, v in fams.items()}, "conditions": conds, "load_seconds": round(load_s, 1),
-            "summary": summary, "versions": versions("surrogateshield", "spacy", "transformers", "torch")}
+            "summary": summary, "ADDRESS_MODE": ADDRESS_MODE,
+            "versions": versions("surrogateshield", "spacy", "transformers", "torch")}
 
 
 def main(argv=None) -> int:
