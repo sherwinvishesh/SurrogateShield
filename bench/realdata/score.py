@@ -3,6 +3,8 @@
     HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score --split dev --out bench/results/realdata_dev.json
     ... --split test --out bench/results/realdata_test.json     # once, at the end of Phase 5
     ... --reuse        # rescore saved spans whose input hash still matches; runs no arm
+    ... --split devlarge   # test-1's test split, development data for the v3 detector
+    ... --split test2      # the sealed second test, once, only after FREEZE.json is committed
 
 The prompt names this ``bench/realdata.py``; a module of that name would
 shadow the package ``bench.realdata`` (D15), so it lives here.
@@ -26,6 +28,14 @@ shadow the package ``bench.realdata`` (D15), so it lives here.
    intervals, per type, per task, per type universe; SS − arm differences
    with a paired bootstrap (2,000 resamples of conversations, the same draws
    for every arm). Counts only: no text and no value leaves this script.
+
+Named runs (``RUNS``) beyond ``dev`` / ``test`` (PROMPT_FOR_OPUS_V3 §5):
+``devlarge`` scores test-1's ``test`` files (same records, ids and bootstrap
+draws as ``test``) under its own span-file and result names, because test-1
+is development data for the v3 detector; ``test2`` scores the second
+collection (``bench/realdata/test2/``, frozen keys ``test2/...``) and is
+refused unless ``bench/realdata/FREEZE.json`` exists and records the
+pre-registered hypotheses' current hash.
 """
 
 from __future__ import annotations
@@ -40,14 +50,21 @@ from types import SimpleNamespace
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from bench import realworld as rw
-from bench.realdata.common import (BUILD, DATASETS, RD, ROOT, commit_note, derive_seed, file_sha256, git_state,
-                                   read_jsonl, sha256, write_jsonl)
+from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RD, ROOT, commit_note, derive_seed, file_sha256,
+                                   git_state, read_jsonl, sha256, write_jsonl)
 
 ARMS = ("ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii")
 BASELINES = ARMS[1:]
 SLICES = ("injected", "injected_single", "shift", "multi", "natural")
 RESAMPLES = 2000
 NATURAL_FROM = 1001
+# run name -> (data split, collection, role)
+RUNS = {"dev": ("dev", "test1", "diagnosis only"),
+        "test": ("test", "test1", "the paper's detection numbers"),
+        "devlarge": ("test", "test1", "development only (test-1's test split)"),
+        "test2": ("test2", "test2", "the paper's detection numbers (sealed second test)")}
+FREEZE = RD / "FREEZE.json"
+HYPOTHESES = RD / "HYPOTHESES_TEST2.md"
 
 # GUIDE protect types each arm is configured to detect (its recogniser list or
 # label set as recorded in bench/realdata/manifest.json -> arms), not what it
@@ -79,17 +96,33 @@ def frozen_files(datasets: Sequence[str], split: str) -> List[str]:
     return [f"{ds}/{name}" for ds in datasets for name in (f"{split}.jsonl", "labels.jsonl", "pool.jsonl")]
 
 
-def check_frozen(datasets: Sequence[str], split: str, frozen: Dict[str, str], rd: Path = RD) -> Dict[str, str]:
-    """The hash of every frozen input, or SystemExit naming the first that changed."""
+def check_frozen(datasets: Sequence[str], split: str, frozen: Dict[str, str], rd: Path = RD,
+                 prefix: str = "") -> Dict[str, str]:
+    """The hash of every frozen input, or SystemExit naming the first that
+    changed. Files are read under *rd*; their manifest keys carry *prefix*
+    (``test2/oasst1/pool.jsonl``)."""
     out = {}
     for name in frozen_files(datasets, split):
-        if name not in frozen:
-            raise SystemExit(f"{name}: not frozen in the manifest; refusing to score")
+        key = f"{prefix}/{name}" if prefix else name
+        if key not in frozen:
+            raise SystemExit(f"{key}: not frozen in the manifest; refusing to score")
         got = file_sha256(rd / name)
-        if got != frozen[name]:
-            raise SystemExit(f"{name}: hash {got[:12]} differs from the frozen {frozen[name][:12]}; refusing to score")
-        out[name] = got
+        if got != frozen[key]:
+            raise SystemExit(f"{key}: hash {got[:12]} differs from the frozen {frozen[key][:12]}; refusing to score")
+        out[key] = got
     return out
+
+
+def check_freeze(freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> str:
+    """The SHA-256 of FREEZE.json, or SystemExit: test2 is scored only after
+    the detector is frozen and with the hypotheses it pre-registered."""
+    if not freeze.exists():
+        raise SystemExit(f"{rel(freeze)} does not exist: test2 is scored only after the freeze (Phase 3)")
+    doc = json.loads(freeze.read_text())
+    want = doc.get("hypotheses_sha256")
+    if want is None or file_sha256(prereg) != want:
+        raise SystemExit(f"{rel(prereg)} does not match the hash recorded in {rel(freeze)}; refusing to score")
+    return file_sha256(freeze)
 
 
 # ── 2. records ───────────────────────────────────────────────────────────────
@@ -355,14 +388,15 @@ def hypotheses(results: dict, diffs: dict, datasets: Sequence[str], arms: Sequen
 # ── 6. run ───────────────────────────────────────────────────────────────────
 
 def load_split(split: str, datasets: Sequence[str] = DATASETS, rd: Path = RD, build: Path = BUILD,
-               frozen: Optional[dict] = None) -> Tuple[Dict[str, str], Dict[str, dict]]:
+               frozen: Optional[dict] = None, prefix: str = "") -> Tuple[Dict[str, str], Dict[str, dict]]:
     """Check the frozen hashes, rebuild and lint the records, write one arm
     input per dataset. Returns the hashes and, per dataset, ``units``,
-    ``src`` (the arm input), ``input_sha`` and ``corpus`` (counts)."""
+    ``src`` (the arm input), ``input_sha`` and ``corpus`` (counts). *split*
+    is a data split; *rd* / *build* / *prefix* are its collection's."""
     if frozen is None:
         from bench.realdata import manifest
         frozen = manifest.load()["frozen"]
-    hashes = check_frozen(datasets, split, frozen, rd)
+    hashes = check_frozen(datasets, split, frozen, rd, prefix)
     out = {}
     for ds in datasets:
         injected = read_jsonl(rd / ds / f"{split}.jsonl")
@@ -384,9 +418,17 @@ def load_split(split: str, datasets: Sequence[str] = DATASETS, rd: Path = RD, bu
 
 
 def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[str] = ARMS, reuse: bool = False,
-                out: Optional[Path] = None, rd: Path = RD, build: Path = BUILD, frozen: Optional[dict] = None,
-                runner: Optional[Callable] = None, spans: Optional[Path] = None, log=print) -> dict:
-    hashes, loaded = load_split(split, datasets, rd, build, frozen)
+                out: Optional[Path] = None, rd: Optional[Path] = None, build: Optional[Path] = None,
+                frozen: Optional[dict] = None, runner: Optional[Callable] = None, spans: Optional[Path] = None,
+                log=print, freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> dict:
+    """Score the run *split* (a key of ``RUNS``). Span files are named
+    ``<run>-<dataset>``; records, private files and bootstrap draws follow the
+    data split, so ``devlarge`` reproduces ``test`` for an unchanged arm."""
+    data, coll_name, role = RUNS[split]
+    coll = COLLECTIONS[coll_name]
+    rd, build = rd or coll.rd, build or coll.build
+    sealed = check_freeze(freeze, prereg) if coll.prefix else None
+    hashes, loaded = load_split(data, datasets, rd, build, frozen, coll.prefix)
     all_units: Dict[str, List[dict]] = {}
     all_scores: Dict[str, Dict[str, List[dict]]] = {}
     corpus = {}
@@ -412,12 +454,14 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
             us = [units[i] for i in keep]
             sc = {a: [scores[a][i] for i in keep] for a in arms}
             results[g][sl] = {a: aggregate(us, sc[a]) for a in arms}
-            diffs[g][sl] = differences(us, sc, derive_seed("score-bootstrap", split, g, sl), arms) if "ss" in arms else {}
+            diffs[g][sl] = differences(us, sc, derive_seed("score-bootstrap", data, g, sl), arms) if "ss" in arms else {}
     out = out or ROOT / "bench" / "results" / f"realdata_{split}.json"
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score "
                       f"--split {split} --out {rel(out)}",
            "git": git_state(),
-           "split": split, "role": "the paper's detection numbers" if split == "test" else "diagnosis only",
+           "split": split, "role": role,
+           **({"data_split": data, "collection": coll.name} if split not in ("dev", "test") else {}),
+           **({"freeze_sha256": sealed} if sealed else {}),
            "frozen": hashes, "arms": list(arms), "slices": list(SLICES), "corpus": corpus,
            "claimed_types": {a: list(CLAIMED[a]) for a in arms}, "universes": {k: list(v) for k, v in UNIVERSES.items()},
            "bootstrap": {"resamples": RESAMPLES, "unit": "conversation (a single-turn prompt is its own)",
@@ -503,7 +547,7 @@ def markdown(doc: dict) -> str:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--split", choices=("dev", "test"), required=True)
+    ap.add_argument("--split", choices=list(RUNS), required=True)
     ap.add_argument("--datasets", nargs="*", choices=list(DATASETS), default=list(DATASETS))
     ap.add_argument("--arms", nargs="*", choices=list(ARMS), default=list(ARMS))
     ap.add_argument("--reuse", action="store_true", help="rescore saved spans; run no arm")

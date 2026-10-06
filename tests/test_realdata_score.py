@@ -185,18 +185,19 @@ def _label_row(mid, text, status="ok", protect=(), keep=()):
             "protect": [{"type": t, "occ": occ(v)} for v, t in protect], "keep": [{"occ": occ(v)} for v in keep]}
 
 
-def make_bench(tmp_path):
-    """A synthetic benchmark: rd (injected dev split, public pool, labels),
-    build (private pool), a spans directory and the frozen hashes."""
+def make_bench(tmp_path, split_="dev", prefix=""):
+    """A synthetic benchmark: rd (injected *split_*, public pool, labels),
+    build (private pool), a spans directory and the frozen hashes (keys
+    under *prefix*, as a later collection's are)."""
     rd, build, spans = tmp_path / "rd", tmp_path / "build", tmp_path / "spans"
     (rd / DS).mkdir(parents=True)
     (build / DS).mkdir(parents=True)
-    with open(rd / DS / "dev.jsonl", "w") as f:
+    with open(rd / DS / f"{split_}.jsonl", "w") as f:
         for r in _injected():
-            f.write(json.dumps(r) + "\n")
+            f.write(json.dumps({**r, "id": r["id"].replace("-dev-", f"-{split_}-")}) + "\n")
     pool, priv, labels = [], [], []
     for sid, turns in NAT.items():
-        split = "test" if sid == "s3" else "dev"
+        split = "test" if sid == "s3" else split_
         kind = "multi" if len(turns) > 1 else "single"
         pool.append({"dataset": DS, "kind": kind, "meta": {}, "refs": [], "sha256": [sha256(t) for t in turns],
                      "source_id": sid, "split": split, "words": [len(t.split()) for t in turns]})
@@ -207,7 +208,8 @@ def make_bench(tmp_path):
     labels.append(_label_row(f"{DS}/s3#t0", NAT["s3"][0]))
     for path, rows in ((rd / DS / "pool.jsonl", pool), (build / DS / "pool.jsonl", priv), (rd / DS / "labels.jsonl", labels)):
         path.write_text("".join(json.dumps(r) + "\n" for r in rows))
-    frozen = {f"{DS}/{n}": file_sha256(rd / DS / n) for n in ("dev.jsonl", "pool.jsonl", "labels.jsonl")}
+    key = lambda n: f"{prefix}/{DS}/{n}" if prefix else f"{DS}/{n}"
+    frozen = {key(n): file_sha256(rd / DS / n) for n in (f"{split_}.jsonl", "pool.jsonl", "labels.jsonl")}
     return rd, build, spans, frozen
 
 
@@ -338,6 +340,39 @@ def test_reuse_refuses_spans_of_another_input(bench, tmp_path):
     meta.write_text(json.dumps({"input_sha256": "0" * 64}))
     with pytest.raises(SystemExit, match="another input"):
         _score(bench, tmp_path, reuse=True)
+
+
+def test_devlarge_reproduces_test_under_its_own_names(tmp_path):
+    rd, build, spans, frozen = make_bench(tmp_path, "test")
+    kw = dict(rd=rd, build=build, frozen=frozen, runner=_runner(spans), spans=spans, log=lambda *_: None)
+    t = S.score_split("test", [DS], ("ss", "presidio_default"), out=tmp_path / "t.json", **kw)
+    d = S.score_split("devlarge", [DS], ("ss", "presidio_default"), out=tmp_path / "d.json", **kw)
+    assert d["results"] == t["results"] and d["differences"] == t["differences"] and d["frozen"] == t["frozen"]
+    assert (d["split"], d["data_split"], d["collection"]) == ("devlarge", "test", "test1") and "data_split" not in t
+    assert (spans / "ss" / "devlarge-oasst1.jsonl").exists() and (spans / "ss" / "test-oasst1.jsonl").exists()
+    assert t["role"] == "the paper's detection numbers" and d["role"].startswith("development only")
+
+
+def test_test2_needs_the_freeze_and_reads_its_own_collection(tmp_path):
+    rd, build, spans, frozen = make_bench(tmp_path, "test2", prefix="test2")
+    hyp, freeze = tmp_path / "HYPOTHESES_TEST2.md", tmp_path / "FREEZE.json"
+    hyp.write_text("H1'' ...\n")
+    kw = dict(rd=rd, build=build, frozen=frozen, runner=_runner(spans), spans=spans, log=lambda *_: None,
+              out=tmp_path / "res" / "realdata_test2.json", freeze=freeze, prereg=hyp)
+    with pytest.raises(SystemExit, match="only after the freeze"):
+        S.score_split("test2", [DS], ("ss", "presidio_default"), **kw)
+    freeze.write_text(json.dumps({"hypotheses_sha256": "0" * 64}))
+    with pytest.raises(SystemExit, match="does not match"):
+        S.score_split("test2", [DS], ("ss", "presidio_default"), **kw)
+    freeze.write_text(json.dumps({"hypotheses_sha256": file_sha256(hyp)}))
+    doc = S.score_split("test2", [DS], ("ss", "presidio_default"), **kw)
+    assert doc["freeze_sha256"] == file_sha256(freeze) and doc["collection"] == "test2"
+    assert sorted(doc["frozen"]) == [f"test2/{DS}/labels.jsonl", f"test2/{DS}/pool.jsonl", f"test2/{DS}/test2.jsonl"]
+    assert doc["results"][DS]["injected"]["ss"]["leak"] == S.rate(0, 3) and doc["corpus"][DS]["natural_records"] == 2
+    assert (spans / "ss" / "test2-oasst1.jsonl").exists()
+    assert not rw.lint(S.read_jsonl(rd / DS / "test2.jsonl"))
+    with pytest.raises(SystemExit, match="not frozen"):
+        S.check_frozen([DS], "test2", {k[len("test2/"):]: v for k, v in frozen.items()}, rd, "test2")
 
 
 def test_commit_note_flags_a_dirty_tree():
