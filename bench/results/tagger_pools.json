@@ -1,0 +1,52 @@
+{
+ "command": "python -m bench.tagger.pools --data bench/tagger/build/data/train-40k.jsonl bench/tagger/build/data/train-80k.jsonl --out bench/results/tagger_pools.json",
+ "data": {
+  "bench/tagger/build/data/train-40k.jsonl": "45385de32536c41bd4ab2c4c2523997c66febcf2af5179c429e83b6ad614d046",
+  "bench/tagger/build/data/train-80k.jsonl": "70686d6d374c14c00257e01cbfc65d400859160b9ce4c49ccd795db79cc73a51"
+ },
+ "git": {
+  "commit": "7bde61452d7705e6676d44d2c1c7d4b91c6f43fc",
+  "modified": []
+ },
+ "key": "surrogateshield-identity-pool-v1",
+ "ok": true,
+ "rule": "sha256(key:word)[0] >> 7 -> eval | train",
+ "test2": {
+  "all": {
+   "other_half": 0,
+   "sha256": "8695de8d1b882e6f10bfe32f9fb53bb337e6231a78732c01a0611ee1da417262",
+   "words": 1990
+  },
+  "datasets": {
+   "oasst1": {
+    "other_half": 0,
+    "sha256": "f7c09211f6710f2d0654d865d731f467f285cb2d7f1c9608790e7279b920b132",
+    "words": 849
+   },
+   "sharegpt": {
+    "other_half": 0,
+    "sha256": "696312b429a9de76c774c511ebb3402894065bb900a992c248e9702148c5ec2d",
+    "words": 861
+   },
+   "wildchat": {
+    "other_half": 0,
+    "sha256": "1187f75158895e984d5b3103aae07aa3196922c89ab76e69ee67c189019f4602",
+    "words": 881
+   }
+  }
+ },
+ "training": {
+  "bench/tagger/build/data/train-40k.jsonl": {
+   "other_half": 0,
+   "overlap_with_test2": 0,
+   "sha256": "361c19d335a44eca79e098babc735bfceae0e45473ce2ee338ed0aafe10e4ecc",
+   "words": 10628
+  },
+  "bench/tagger/build/data/train-80k.jsonl": {
+   "other_half": 0,
+   "overlap_with_test2": 0,
+   "sha256": "0d6837aa70ca750ea5119626c32a8932c2dedf98613c94fec81e2a6ce10f80c8",
+   "words": 12379
+  }
+ }
+}
