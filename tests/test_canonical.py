@@ -216,6 +216,18 @@ def test_render_falls_back_to_the_drawn_surrogate():
     assert C.render_like("casefold", "JANE@X.COM", C.Canon("jane@x.com", ()), "kim@y.com") == "kim@y.com"
 
 
+@pytest.mark.parametrize("age, shape", [
+    ("twenty-nine", r"(twenty|thirty)-(one|two|three|four|five|six|seven|eight|nine)|thirty"),
+    ("Seven years old", r"(Four|Five|Six|Eight|Nine|Ten) years old"),
+    ("41", r"3[89]|4[0234]"),
+    ("mid-thirties", r"[a-z]{3}-[a-z]{8}"),          # no number in it: a shape
+])
+def test_an_age_found_by_a_model_in_words_gets_a_surrogate(age, shape):
+    # a model's AGE has no canonical view: it used to crash on a missing digit
+    sur = MimicGen(seed=5).generate(DetectedEntity(age, 0, len(age), "age", 0.9, "slm"))
+    assert sur != age and re.fullmatch(shape, sur), sur
+
+
 def test_prepared_spans_carry_the_view():
     from json_tester import Prepared
     text = "I'm twenty-nine"

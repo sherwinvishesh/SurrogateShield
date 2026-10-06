@@ -1081,6 +1081,17 @@ class MimicGen:
 
     def _gen_age_like(self, original: str) -> str:
         m = re.search(r"\d+", original)
+        if m is None:
+            # an AGE a model found in words ("twenty-nine years"): its number
+            # re-drawn and spelled back; with no number in it, a shape
+            n = canonical.number_value(original)
+            view = (canonical.rewrite("worded", original, [(0, len(original), str(n))]) if n is not None
+                    else canonical.worded(original))
+            if view is None or not re.search(r"\d", view.text):
+                return self._shape_like(original)
+            canon = canonical.Canon(view.text, tuple((a, b, view.starts[a], view.ends[b - 1])
+                                                     for a, b in view.changed))
+            return canonical.render_like("worded", original, canon, self._gen_age_like(view.text))
         n = int(m.group())
         step = self._rng.randint(1, 3) * self._rng.choice((-1, 1))
         new = n + step if n + step >= 1 else n + abs(step)
