@@ -294,3 +294,21 @@ def test_reuse_refuses_another_draw_seed(tmp_path):
     meta.write_text(json.dumps({**m, "seed": 1}))
     with pytest.raises(SystemExit, match="seed"):
         _ablate(tmp_path, reuse=True)
+
+
+def test_test2_is_sealed_until_the_freeze_and_reads_its_own_collection(tmp_path):
+    rd, build, spans, frozen = make_bench(tmp_path, "test2", prefix="test2")
+    hyp, freeze = tmp_path / "HYPOTHESES_TEST2.md", tmp_path / "FREEZE.json"
+    hyp.write_text("H6'' ...\n")
+    kw = dict(out=tmp_path / "res" / "realdata_regex_ablation_test2.json", rd=rd, build=build, frozen=frozen,
+              runner=_runner(spans, [("Python", "x")]), spans=spans, log=lambda *_: None, freeze=freeze, prereg=hyp)
+    with pytest.raises(SystemExit, match="only after the freeze"):
+        E.ablate_split("test2", [DS], **kw)
+    assert not (spans / "ss_ablate").exists()                       # refused before any arm ran
+    freeze.write_text(json.dumps({"hypotheses_sha256": file_sha256(hyp)}))
+    doc = E.ablate_split("test2", [DS], **kw)
+    assert doc["freeze_sha256"] == file_sha256(freeze) and doc["role"] == "the paper's robustness numbers"
+    assert sorted(doc["frozen"]) == [f"test2/{DS}/labels.jsonl", f"test2/{DS}/pool.jsonl", f"test2/{DS}/test2.jsonl"]
+    assert doc["results"][DS]["injected"]["none"]["leak"] == S.rate(0, 3) and doc["H6"][DS]["H6"]
+    assert (spans / "ss_ablate" / f"test2-{DS}").is_dir()
+    assert doc["command"].endswith("--split test2 --out " + S.rel(kw["out"]))
