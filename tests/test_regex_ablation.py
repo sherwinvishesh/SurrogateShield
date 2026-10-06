@@ -134,6 +134,32 @@ def test_wrong_changes_matches_and_restores_module_globals():
     assert "ssn" in _found(text) and ap._STREET_ADDRESS_RE is street
 
 
+INTL = "Ship to Kambsstraße 2-8, 90146 Augsburg or Calle Mayor 17, 3º B, Ponferrada (24401)."
+
+
+def _addresses(text):
+    return [e.text for e in PS.scan(text) if e.type == "address"]
+
+
+def test_the_address_family_includes_the_international_layouts():
+    aa = PS.address_assembly
+    assert len(_addresses(INTL)) == 2
+    with A.applied({"name": "x", "drop": ["address"], "wrong": [], "how": None}, PS):
+        assert _addresses(INTL) == []
+        assert aa.find(INTL)                              # the module itself is untouched
+    assert PS.address_assembly is aa and len(_addresses(INTL)) == 2
+
+
+def test_wrong_address_perturbs_the_layouts_only_during_the_call():
+    aa = PS.address_assembly
+    before = {n: getattr(aa, n) for n in A.ASSEMBLY_REGEXES}
+    right = _addresses(INTL)
+    with A.applied({"name": "x", "drop": [], "wrong": ["address"], "how": "both"}, PS):
+        assert _addresses(INTL) != right
+        assert all(getattr(aa, n) is rx for n, rx in before.items())
+    assert PS.address_assembly is aa and _addresses(INTL) == right
+
+
 def test_an_exception_inside_still_restores():
     before = PS._PATTERNS
     with pytest.raises(ValueError):

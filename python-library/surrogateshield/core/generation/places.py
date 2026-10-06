@@ -46,6 +46,8 @@ TOWNS: Dict[str, Tuple[str, ...]] = {
            "Moncton", "Fredericton", "Guelph", "Kamloops", "Thunder Bay", "Sherbrooke"),
     "AU": ("Hobart", "Canberra", "Geelong", "Cairns", "Townsville", "Wollongong", "Ballarat",
            "Bendigo", "Toowoomba", "Launceston", "Mackay"),
+    "IE": ("Sligo", "Athlone", "Wexford", "Drogheda", "Dundalk", "Ennis", "Tralee", "Killarney",
+           "Letterkenny", "Carlow", "Navan", "Mullingar", "Clonmel", "Castlebar"),
     "IN": ("Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Bhopal", "Patna",
            "Vadodara", "Coimbatore", "Kochi", "Mysore", "Surat", "Chandigarh", "Visakhapatnam"),
     "DE": ("Freiburg", "Heidelberg", "Leipzig", "Dresden", "Bremen", "Hanover", "Nuremberg",
@@ -66,6 +68,7 @@ TOWNS: Dict[str, Tuple[str, ...]] = {
 # words in a message that tell the country of an unknown town
 _COUNTRY_CUES: Sequence[Tuple[str, str]] = (
     (r"\b(?:UK|U\.K\.|England|Scotland|Wales|Britain|Northern Ireland)\b", "GB"),
+    (r"(?<!Northern )\b(?:Ireland|Éire|Eire)\b", "IE"),
     (r"\bCanada\b|\b(?:Ontario|Quebec|Alberta|Manitoba|Nova Scotia|BC)\b", "CA"),
     (r"\bAustralia\b|\b(?:NSW|Queensland|Victoria|Tasmania)\b", "AU"),
     (r"\bIndia\b", "IN"), (r"\bGermany\b|\bDeutschland\b", "DE"), (r"\bFrance\b", "FR"),
@@ -88,6 +91,7 @@ _LOCAL_NAMES = {
     "nürnberg": "DE", "hannover": "DE", "köln": "DE", "düsseldorf": "DE",
     "napoli": "IT", "torino": "IT", "genova": "IT", "padova": "IT", "firenze": "IT",
     "den haag": "NL", "lisboa": "BR", "são paulo": "BR",
+    "dublin": "IE", "cork": "IE", "galway": "IE", "limerick": "IE", "waterford": "IE", "kilkenny": "IE",
 }
 
 FEATURES: Dict[str, Tuple[str, ...]] = {
@@ -144,11 +148,15 @@ def _case_like(model: str, value: str) -> str:
     return value
 
 
-def country_of(original: str, context: str = "") -> str:
+def country_of(original: str, context: str = "", hint: Optional[str] = None) -> str:
+    """The country of *original*: its own (a listed town), else *hint* (the
+    country an address layout names), else a cue in *context*, else US."""
     known = (_TOWN_COUNTRY.get(original.strip().casefold())
              or _LOCAL_NAMES.get(original.strip().casefold()))
     if known:
         return known
+    if hint in TOWNS:
+        return hint
     rest = context.replace(original, " ") if original else context
     for pat, code in _COUNTRY_CUES:
         if re.search(pat, rest):
@@ -168,11 +176,12 @@ def _zh_place(text: str, choose: Callable[[Sequence[str]], str],
 
 
 def real_place(original: str, context: str, choose: Callable[[Sequence[str]], str],
-               avoid: Callable[[str], bool]) -> Optional[str]:
+               avoid: Callable[[str], bool], country: Optional[str] = None) -> Optional[str]:
     """A real place standing in for *original*, or None when every
     candidate is excluded. *choose* picks from a sequence (the caller's
     seeded RNG); *avoid* rejects a candidate (an original, a surrogate in
-    use, a word of the message)."""
+    use, a word of the message); *country* is the country of an address
+    whose town this is ("90146 Augsburg" -> DE), used for an unlisted town."""
     text = original.strip()
     cf = text.casefold().rstrip(".")
     if re.search(r"[\u4e00-\u9fff]", text):
@@ -188,7 +197,7 @@ def real_place(original: str, context: str, choose: Callable[[Sequence[str]], st
         elif len(text.split()) >= 3 and kind is None and not text.istitle():
             pool = FEATURES["region"]
         else:
-            pool = TOWNS[country_of(text, context)]
+            pool = TOWNS[country_of(text, context, country)]
     cands = [p for p in pool if p.casefold() != cf and not avoid(p)]
     if not cands:
         cands = [t for towns in TOWNS.values() for t in towns if t.casefold() != cf and not avoid(t)]

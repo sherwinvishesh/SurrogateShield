@@ -181,11 +181,15 @@ def test_I8_field_nouns_are_not_places(text):
 def test_I13_wired_into_cascade_model_free():
     from surrogateshield.core.detection import pipeline
     text = ("first,last,zip\nleah,okonkwo,85251\n"
-            "j'habite au 14 rue des Lilas. Ping Kev about it.")
+            "j'habite au 14 rue des Lilas. Ping Kev about it.\n"
+            "the basement flat at Storgata 41B, Lillehammer")
     conf, _ = pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False)
     got = {(e.type, e.text, e.source) for e in conf}
     assert ("PERSON", "okonkwo", "structural") in got
-    assert ("address", "14 rue des Lilas", "structural") in got
+    # a French layout is PatternScan's now (address_assembly); a weak
+    # Nordic ending ("-gata") is still left to the structural pass
+    assert ("address", "14 rue des Lilas", "pattern") in got
+    assert ("address", "Storgata 41B", "structural") in got
     assert ("PERSON", "Kev", "structural") in got
     # service-query mode keeps place cues off
     conf, _ = pipeline.run_cascade("vivo en Sevilla", skip_location_entities=True,

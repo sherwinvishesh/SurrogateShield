@@ -6,8 +6,9 @@ wrong, one span file per condition. Runs in ``.venv``; the cascade loads once.
 A *family* is every regex of one PatternScan entity type (``phone_us``,
 ``phone_uk`` and ``phone_intl`` are one family, as are ``zip_us`` and
 ``postcode_uk``), plus the two parsers that ``scan()`` runs before the regex
-list: ``url`` (``find_urls``) and ``address`` (``address_parser.find_addresses``,
-patched for PatternScan only, not for the service-query check). Conditions:
+list: ``url`` (``find_urls``) and ``address`` (``address_parser.find_addresses``
+and ``address_assembly.find``, patched for PatternScan only, not for the
+service-query check). Conditions:
 
 * ``none`` — unablated; its spans equal arm ``ss``'s on the same input.
 * ``drop-<family>`` — that family never matches (*incomplete*).
@@ -173,6 +174,10 @@ def perturb(rx: "re.Pattern", how: str = "both", targets=None) -> "re.Pattern":
 
 # ── applying a condition ─────────────────────────────────────────────────────
 
+# the international layouts' regexes, perturbed with the parser's for wrong-address
+ASSEMBLY_REGEXES = ("_EN_RE", "_R1_RE", "_R2_RE", "_R3_RE", "_CMP_RE")
+
+
 class _Proxy:
     def __init__(self, mod, **over):
         self._mod, self._over = mod, over
@@ -185,10 +190,10 @@ class _Proxy:
 def applied(cond: dict, ps=None):
     """Patch PatternScan for *cond*; restore everything on exit."""
     ps = ps or _ps()
-    ap = ps.address_parser
+    ap, aa = ps.address_parser, ps.address_assembly
     fams = families(ps)
     saved = {"_PATTERNS": ps._PATTERNS, "find_urls": ps.find_urls, "_URL_RE": ps._URL_RE,
-             "address_parser": ap, "_table_age_cells": ps._table_age_cells}
+             "address_parser": ap, "address_assembly": aa, "_table_age_cells": ps._table_age_cells}
     table = list(ps._PATTERNS)
     try:
         for f in cond["wrong"]:
@@ -208,6 +213,18 @@ def applied(cond: dict, ps=None):
                     finally:
                         ap._STREET_ADDRESS_RE, ap._PO_BOX_RE = old
                 ps.address_parser = _Proxy(ap, find_addresses=find)
+                layouts = {n: perturb(getattr(aa, n), cond["how"]) for n in ASSEMBLY_REGEXES}
+
+                def find_layouts(text, _r=layouts):
+                    old = {n: getattr(aa, n) for n in _r}
+                    for n, rx in _r.items():
+                        setattr(aa, n, rx)
+                    try:
+                        return aa.find(text)
+                    finally:
+                        for n, rx in old.items():
+                            setattr(aa, n, rx)
+                ps.address_assembly = _Proxy(aa, find=find_layouts)
         for f in cond["drop"]:
             for i in fams[f]:
                 t, _rx, v = table[i]
@@ -216,6 +233,7 @@ def applied(cond: dict, ps=None):
                 ps.find_urls = lambda text: []
             if f == "address":
                 ps.address_parser = _Proxy(ap, find_addresses=lambda text: [])
+                ps.address_assembly = _Proxy(aa, find=lambda text: [])
             if f == "age":
                 ps._table_age_cells = lambda text: []
         ps._PATTERNS = table

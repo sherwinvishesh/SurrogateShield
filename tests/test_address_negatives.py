@@ -79,6 +79,9 @@ NEGATIVES = [
     "6 point font is unreadable",
     "the 2 dollar bill",
     "9 to 5 job",
+    # a copyright line: a year, an ordinal and a weak suffix, then a company's legal form
+    "// Copyright (c) 2019 3rd Wall, Inc.",
+    "(c) 2021 5th Light, LLC. All rights reserved.",
 ]
 
 

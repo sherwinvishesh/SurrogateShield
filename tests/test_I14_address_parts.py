@@ -31,7 +31,8 @@ def covered(text):
     ("Shipping name was Ludmila Horvatová, 17 Hlavná, 040 01 Košice.",
      ["17 Hlavná", "040 01 Košice"]),
     ("flat 4, 70 Cowley Road\nim home after 6", ["flat 4", "70 Cowley Road"]),
-    ("wohne in der Lindenstraße 14, 79098 Freiburg. Mein", ["Lindenstraße 14", "79098 Freiburg"]),
+    # one address now: a German layout (address_assembly), not two parts
+    ("wohne in der Lindenstraße 14, 79098 Freiburg. Mein", ["Lindenstraße 14, 79098 Freiburg"]),
     ("Current address: 9 Kowhai Grove, Hamilton 3204\nEmployer:", ["9 Kowhai Grove", "Hamilton 3204"]),
     ("ik ben Sanne Wijnberg uit Zwolle (8011 PK). Kun je", ["8011 PK"]),
 ])

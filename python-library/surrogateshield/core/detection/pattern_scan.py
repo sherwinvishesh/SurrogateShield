@@ -62,7 +62,7 @@ import re
 from typing import List, Optional, Set
 
 from ..entities import DetectedEntity
-from . import address_parser
+from . import address_assembly, address_parser
 
 logger = logging.getLogger(__name__)
 
@@ -1618,8 +1618,16 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
         occupied_spans.append((us, ue))
 
     # ── Street addresses next: the canonical parser claims the FULL span
-    # (street + unit + city + state + ZIP) as one entity.
-    for parsed in address_parser.find_addresses(text):
+    # (street + unit + city + state + ZIP) as one entity; the assembler adds
+    # the international layouts.  Where the two read the same words the
+    # longer span wins, the parser on a tie.
+    found = [(p, 0) for p in address_parser.find_addresses(text)]
+    found += [(p, 1) for p in address_assembly.find(text)]
+    picked: List[address_parser.ParsedAddress] = []
+    for parsed, _rank in sorted(found, key=lambda f: (-(f[0].end - f[0].start), f[1], f[0].start)):
+        if all(parsed.end <= q.start or parsed.start >= q.end for q in picked):
+            picked.append(parsed)
+    for parsed in sorted(picked, key=lambda p: p.start):
         if not _span_free(parsed.start, parsed.end):
             continue
         if _should_skip(parsed.full_text):

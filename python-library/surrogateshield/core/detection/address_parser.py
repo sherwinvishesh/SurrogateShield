@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 
 from .geo_data import MAJOR_CITIES, US_STATES, US_STATE_ABBREVS
@@ -52,6 +52,11 @@ class ParsedAddress:
     zip_code: Optional[str] = None                    # "85281" or "85281-1234"
     po_box: Optional[str] = None                      # "PO Box 1234"
     is_po_box: bool = False
+    # address_assembly's international layouts: every piece as (role,
+    # start, end) relative to full_text — house, name, type, unit, pre,
+    # city, region, postcode — and the country the layout implies
+    parts: Tuple[Tuple[str, int, int], ...] = field(default=(), compare=False)
+    country: Optional[str] = field(default=None, compare=False)
 
     @property
     def house_number_relative_span(self) -> Optional[Tuple[int, int]]:
@@ -78,6 +83,8 @@ _UNAMBIGUOUS_SUFFIXES = frozenset({
     "heights", "hts", "square", "sq", "alley", "aly",
     "row", "mews", "byway", "pike", "esplanade", "boardwalk",
     "parade", "promenade", "quay", "wharf",
+    "stravenue", "trafficway", "throughway", "motorway", "skyway", "underpass",
+    "overpass", "viaduct", "bypass",
 })
 
 # Tier 2: common English nouns that are also street suffixes — these require
@@ -94,11 +101,31 @@ _AMBIGUOUS_SUFFIXES = frozenset({
     "station", "stream", "wells",
 })
 
-_ALL_SUFFIXES = _UNAMBIGUOUS_SUFFIXES | _AMBIGUOUS_SUFFIXES
+# Tier 3: the rest of USPS Publication 28 Appendix C1's primary suffix
+# names — mostly landscape and everyday nouns ("3 Grand Canyon", "2 Pine
+# Valley Rd"), so a capitalized name is not enough: they need a city, state
+# or ZIP tail ("6721 Meza Forks, Spokane, WA 65396").
+_WEAK_SUFFIXES = frozenset("""
+    anex arcade bayou beach bluff bluffs bottom branch bridge brook brooks burg burgs camp canyon cape
+    center centers circles cliffs club common commons corner corners course courts coves crest crossroad
+    crossroads curve dam divide drives estate estates extension extensions fall falls ferry field fields
+    flat flats ford fords forest forge forges forks fort garden gateway glens greens groves harbors hills
+    inlet island islands junction junctions keys knolls lakes land light lights loaf lock locks lodge mall
+    manors mills mission mountain mountains neck parks parkways passage pine plain points ports prairie
+    radial ramp rapid rapids rest ridges river roads route rue shoal shoals spur spurs squares streets
+    track trailer tunnel union unions valley valleys views villages ville walks wall ways well
+""".split())
+
+_ALL_SUFFIXES = _UNAMBIGUOUS_SUFFIXES | _AMBIGUOUS_SUFFIXES | _WEAK_SUFFIXES
 
 # Function/quantity words that never appear inside a real street name.
 # Checked lowercase-as-written, so "3-5 business days on Oak St" is rejected
 # while a legitimately capitalized street ("123 Days Inn Dr") still passes.
+# a company's legal form is never a town: "(c) 2019 3rd Wall, Inc." is a
+# copyright line, not 2019 3rd Wall in the city of Inc
+# (not "Co.": Irish counties, "Co. Cork")
+_CORP_TAILS = frozenset("inc incorporated llc llp ltd limited corp corporation plc gmbh ag bv nv pty srl".split())
+
 _STREET_STOPWORDS = frozenset({
     "on", "in", "at", "by", "to", "of", "the", "a", "an", "and", "or",
     "near", "from", "for", "with", "was", "is", "are", "be", "off",
@@ -259,6 +286,10 @@ def _is_sep_delimited(sep: Optional[str]) -> bool:
     return sep is not None and ("," in sep or "\n" in sep)
 
 
+def _is_corp_tail(city: str) -> bool:
+    return city.split()[0].lower().rstrip(".,") in _CORP_TAILS
+
+
 def _street_is_capitalized(street: Optional[str]) -> bool:
     """True when every word of the street name is capitalized or an ordinal."""
     if not street:
@@ -324,6 +355,8 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
         # tail evidence counts: a lowercase city group ("this morning" after
         # "5 mile run") is NOT evidence unless a ZIP backs it up.
         city_g = g.get("city")
+        if city_g and _is_corp_tail(city_g):
+            city_g = None
         has_tail = bool(
             g.get("state") or g.get("zip")
             or (city_g and city_g[0].isupper())
@@ -332,6 +365,12 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
             # Ambiguous suffixes need extra evidence: a capitalized street
             # name, or an explicit city/state/ZIP tail.
             if not (_street_is_capitalized(street) or has_tail):
+                return None
+        elif norm in _WEAK_SUFFIXES:
+            # Weak suffixes need a state or ZIP, or a capitalized city behind
+            # a capitalized street name.
+            if not (g.get("state") or g.get("zip")
+                    or (city_g and city_g[0].isupper() and _street_is_capitalized(street))):
                 return None
         core_end = match.end("postdir") if postdir else match.end("suffix")
 
@@ -347,6 +386,8 @@ def _assemble(match: "re.Match", text: str, is_po_box: bool) -> Optional[ParsedA
     state_txt = g.get("state")
     zip_txt = g.get("zip")
     city_group_end = match.end("city") if city_txt else None
+    if city_txt and _is_corp_tail(city_txt):
+        city_txt = state_txt = zip_txt = None
 
     # Case discipline: the city group matches any case so lowercase chat
     # text ("madison wi 53711") parses, but a properly-capitalized city

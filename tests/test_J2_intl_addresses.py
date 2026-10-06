@@ -26,10 +26,11 @@ def addresses(text):
 
 @pytest.mark.parametrize("text, want", [
     ("address is 12 Rua do Sol, Lagos", {"12 Rua do Sol"}),
-    ("Kerkstraat 14, 8861 AJ Harlingen", {"Kerkstraat 14", "8861 AJ Harlingen"}),
+    # whole addresses where a layout reads them (address_assembly), parts elsewhere
+    ("Kerkstraat 14, 8861 AJ Harlingen", {"Kerkstraat 14, 8861 AJ Harlingen"}),
     ("the basement flat at Storgata 41B, Lillehammer", {"Storgata 41B"}),
     ("asunnossa Mannerheimintie 12, Helsinki", {"Mannerheimintie 12"}),
-    ("vivo en Calle Mayor 17, 3º B, Ponferrada (24401).", {"Calle Mayor 17", "3º B", "24401"}),
+    ("vivo en Calle Mayor 17, 3º B, Ponferrada (24401).", {"Calle Mayor 17, 3º B, Ponferrada (24401)"}),
     ("Moro na Travessa do Carmo 8, 2.º Esq., em Tomar", {"Travessa do Carmo 8", "2.º Esq."}),
     ("in der Wohnung Lindenallee 3a, 2. OG links, ist", {"Lindenallee 3a", "2. OG links"}),
     ('{"address": "Bv. San Juan 1120, Piso 4 Dpto B"}', {"Bv. San Juan 1120", "Piso 4", "Dpto B"}),
@@ -42,7 +43,7 @@ def test_J2_european_street_unit_and_postcode(text, want):
 
 def test_J2_indian_house_number_and_pin_after_locality():
     got = addresses("Address – H.No. 3-118, Gandhi Nagar, Almora 263601.")
-    assert {"H.No. 3-118", "Gandhi Nagar, Almora 263601"} <= got
+    assert {"H.No. 3-118, Gandhi Nagar, Almora 263601"} <= got
 
 
 @pytest.mark.parametrize("text, value", [

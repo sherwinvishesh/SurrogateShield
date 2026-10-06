@@ -27,7 +27,7 @@ from typing import Dict, FrozenSet, List, Optional, Set
 import datetime
 from faker import Faker
 
-from ..detection import address_parser, canonical
+from ..detection import address_assembly, address_parser, canonical
 from ..detection.geo_data import MAJOR_COUNTRIES, US_STATE_ABBREVS
 from ..consistency import find_all, is_low_entropy, match_case, occurs
 from ..entities import DetectedEntity
@@ -189,6 +189,41 @@ _EURO_JOINERS = frozenset("de des du la le da do dos das del della di von der bi
 _EURO_STREET_NAMES = ("Flores", "Liberdade", "Garibaldi", "Mozart", "Pasteur", "Castelo",
                       "Oliveira", "Roma", "Goethe", "Mayor", "Vitória", "Tilleuls",
                       "Sol", "Lumière", "Lindenhof")
+
+
+# a part-by-part address fake (address_assembly layouts): words kept as written
+_STREET_TYPES = frozenset(address_parser._ALL_SUFFIXES) | {"nagar", "marg"}
+_DIRECTIONS = frozenset("n s e w ne nw se sw north south east west".split())
+_EN_JOINERS = frozenset("of the and".split())
+_STREET_WORD = re.compile(r"[^\W\d_]+(?:['’\-][^\W\d_]+)*")
+_CMP_ENDING = re.compile(r"(?i)(.+?)(-?)(" + "|".join(sorted(
+    {re.escape(e.rstrip(".")) for e in address_assembly._CMP_STRONG + address_assembly._CMP_WEAK},
+    key=len, reverse=True)) + r")")
+_EN_COUNTRIES = frozenset({None, "US", "CA", "GB", "AU", "IE", "IN"})
+# the Republic of Ireland's 26 counties ("Co. Kerry" -> "Co. Laois")
+_IE_COUNTIES = ("Carlow", "Cavan", "Clare", "Cork", "Donegal", "Dublin", "Galway", "Kerry", "Kildare",
+                "Kilkenny", "Laois", "Leitrim", "Limerick", "Longford", "Louth", "Mayo", "Meath",
+                "Monaghan", "Offaly", "Roscommon", "Sligo", "Tipperary", "Waterford", "Westmeath",
+                "Wexford", "Wicklow")
+_IE_COUNTY = re.compile(r"((?:Co\.?|County)[ \t]+)(\S+)")
+_EIRCODE = re.compile(address_assembly._EIRCODE)
+_EIR_LETTERS = "ACDEFHKNPRTVWXY"
+# street names of the address's language; the rest use _EURO_STREET_NAMES
+_STREET_NAMES = {
+    "ES": ("Mayor", "Real", "Alcalá", "Cervantes", "Goya", "Serrano", "Toledo", "Princesa"),
+    "MX": ("Reforma", "Juárez", "Hidalgo", "Morelos", "Insurgentes", "Madero", "Zaragoza"),
+    "BR": ("Flores", "Palmeiras", "Laranjeiras", "Acácias", "Bandeirantes", "Andradas"),
+    "FR": ("Pasteur", "Voltaire", "Tilleuls", "Lilas", "Moulin", "Lumière", "Rivoli"),
+    "IT": ("Garibaldi", "Mazzini", "Cavour", "Roma", "Dante", "Verdi", "Manzoni"),
+}
+_ELIDED_NAMES = ("Abbaye", "Église", "Étang", "Orangerie", "Arsenal", "Industrie", "Europe",
+                 "Hôpital", "Union")             # after "l'" / "d'": a vowel
+_US_TERRITORIES = frozenset("AS GU MP PR VI UM AA AE AP FM MH PW".split())
+_REGION_CODES = (("BR", address_assembly._BR_UF), ("AU", address_assembly._AU_STATE),
+                 ("CA", address_assembly._CA_PROV),
+                 ("US", tuple(sorted(US_STATE_ABBREVS - _US_TERRITORIES))))
+_PC_LETTERED = re.compile(rf"{address_assembly._PC_UK}|{address_assembly._PC_CA}|\d{{4}}[ ]?[A-Z]{{2}}")
+_PC_LETTERS = "ABEGHJLNPRSTWXZ"      # valid in a UK, Canadian and Dutch postcode alike
 
 
 _WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -583,7 +618,9 @@ class MimicGen:
         """
         parsed = getattr(entity, "parsed", None) if entity is not None else None
         if parsed is None and entity is not None:
-            parsed = address_parser.parse(entity.text)
+            # a layout that spans the whole value first: the US parser's
+            # first hit may be a piece of it ("Flat 3, 35 Hennigan Street, …")
+            parsed = address_assembly.parse(entity.text) or address_parser.parse(entity.text)
 
         blocked = frozenset(forbidden | self.used_surrogates)
 
@@ -617,8 +654,9 @@ class MimicGen:
             )
 
         if parsed is not None:
+            replace = self._replace_parts if parsed.parts else self._replace_address
             for _ in range(20):
-                candidate = self._replace_address(parsed)
+                candidate = replace(parsed)
                 if candidate not in blocked and not self._taken(candidate):
                     self.used_surrogates.add(candidate)
                     return candidate
@@ -696,6 +734,14 @@ class MimicGen:
                 (span[0], span[0] + len(numeric), new_numeric)
             )
 
+        # No street name: the directional is the name ("North Street", "West Light").
+        if parsed.pre_directional and not parsed.street_name:
+            span = locate(parsed.pre_directional)
+            if span:
+                name = next((n for n in (self._fake.last_name() for _ in range(10))
+                             if n.casefold() != parsed.pre_directional.casefold()), "Hale")
+                replacements.append((span[0], span[1], name))
+
         # Street name (skip for highway forms, whose digits are handled below).
         if parsed.street_name:
             span = locate(parsed.street_name)
@@ -756,6 +802,128 @@ class MimicGen:
         for start, end, value in sorted(replacements, reverse=True):
             result = result[:start] + value + result[end:]
         return result
+
+    def _replace_parts(self, parsed: "address_parser.ParsedAddress") -> str:
+        """A fake of an address read part by part (:mod:`address_assembly`):
+        every number, name word, town, region and postcode replaced in its
+        slot by one of the same kind and shape; the street type ("Calle",
+        "rue", "-straße", "Street"), joiners ("de", "das") and separators
+        kept, so "Calle Mayor 17, 3º B, Ponferrada (24401)" stays a Spanish
+        address of the same layout."""
+        text = parsed.full_text
+        out = text
+        for role, s, e in sorted(parsed.parts, key=lambda p: p[1], reverse=True):
+            value = text[s:e]
+            if role in ("house", "pre", "unit"):
+                new = self._unit_like(value)
+            elif role == "name":
+                new = self._street_name_like(value, parsed.country)
+            elif role == "city":
+                new = places.real_place(value, self._context, self._rng.choice,
+                                        self._place_taken, country=parsed.country) \
+                    or self._fake.city()
+            elif role == "region":
+                new = self._region_like(value, parsed.country)
+            elif role == "postcode":
+                new = self._postcode_like(value)
+            else:                                            # "type"
+                continue
+            out = out[:s] + new + out[e:]
+        return out
+
+    def _unit_like(self, value: str) -> str:
+        """"Apt. 500" -> "Apt. 318", "3º B" -> "7º K", "2-8" -> "5-3": the
+        words kept, the numbers and a lone door letter replaced."""
+        out = re.sub(r"\d+", lambda m: self._house_number_like(m.group()), value)
+        out = re.sub(r"(\d+)(st|nd|rd|th|ST|ND|RD|TH)\b", _ordinal, out)
+        return re.sub(r"(?<![\w.])[A-Z](?![\w.])", lambda m: self._rng.choice(
+            [c for c in _PC_LETTERS if c != m.group()]), out)
+
+    def _house_number_like(self, numeric: str) -> str:
+        """_fake_number_like, never 0 ("Hauptstr. 0")."""
+        new = self._fake_number_like(numeric)
+        return new if int(new) or int(numeric) == 0 else str(self._rng.randint(1, 9)).zfill(len(numeric))
+
+    def _street_name_like(self, value: str, country: Optional[str]) -> str:
+        """A street name of the same words: a compound keeps its ending
+        ("Kambsstraße" -> "Lindenstraße"), a joiner stays, and so do an
+        English name's trailing street type and leading direction ("Harbor
+        View Terrace" -> "Mejia Norton Terrace": "Harbor" and "View" are
+        USPS types too, but here they are the name); every other word
+        becomes a surname (English layouts) or a common street name."""
+        out = re.sub(r"\d+", lambda m: self._house_number_like(m.group()), value)
+        out = re.sub(r"(\d+)(st|nd|rd|th|ST|ND|RD|TH)\b", _ordinal, out)
+
+        originals = {w.casefold() for w in _STREET_WORD.findall(value)}
+
+        def pick(w: str, pool=None) -> str:
+            for _ in range(20):
+                name = (self._rng.choice(pool) if pool
+                        else self._fake.last_name() if country in _EN_COUNTRIES
+                        else self._rng.choice(_STREET_NAMES.get(country, _EURO_STREET_NAMES)))
+                if not {n.casefold() for n in _STREET_WORD.findall(name)} & originals:
+                    break                                    # not "Rich Roadside" -> "… Rich"
+            return name.upper() if w.isupper() and len(w) > 1 else (
+                name.lower() if w.islower() else name)
+
+        words = list(_STREET_WORD.finditer(out))
+        keep = set()
+        if country in _EN_COUNTRIES and len(words) > 1:
+            if words[-1].group().lower().rstrip(".") in _STREET_TYPES:
+                keep.add(words[-1].start())
+            # a direction before a name ("West Elm Street"), not the name
+            # itself ("West Light"): something of the street is always re-drawn
+            if words[0].group().lower().rstrip(".") in _DIRECTIONS and len(words) - len(keep) > 1:
+                keep.add(words[0].start())
+
+        def word(m: "re.Match") -> str:
+            w = m.group()
+            if re.match(r"(?i)[ld]['’].", w):                # "l'Église", "d'Alsace"
+                return w[:2] + pick(w[2:], _ELIDED_NAMES)
+            low = w.lower()
+            if m.start() in keep or low in _EURO_JOINERS or low in _EN_JOINERS or len(w) == 1:
+                return w
+            cmp = _CMP_ENDING.fullmatch(w)
+            if cmp and len(re.sub(r"[\W\d_]", "", cmp.group(1))) >= 2:
+                stems = next(st for rx, st in _EURO_STEMS if rx.fullmatch(cmp.group(3)))
+                stem = self._rng.choice([n for n in stems if n.lower() != cmp.group(1).lower()])
+                return stem + cmp.group(2) + cmp.group(3)
+            return pick(w)
+        return _STREET_WORD.sub(word, out)
+
+    def _region_like(self, value: str, country: Optional[str]) -> str:
+        """Another region code of the same country ("AB" -> "SK", "PE" ->
+        "BA" in Brazil), or another US state of the same form."""
+        county = _IE_COUNTY.fullmatch(value)
+        if county:
+            return county.group(1) + self._rng.choice(
+                [c for c in _IE_COUNTIES if c.casefold() != county.group(2).casefold()])
+        token = value.rstrip(".").upper()
+        codes = next((c for k, c in _REGION_CODES if k == country and token in c), None) \
+            or next((c for _k, c in _REGION_CODES if token in c), None)
+        if codes is None:
+            return places.real_place(value, self._context, self._rng.choice,
+                                     lambda c: False) or self._fake.state()
+        new = self._rng.choice([c for c in codes if c != token])
+        return new if value.isupper() else new.title()
+
+    def _postcode_like(self, value: str) -> str:
+        """Same shape: digits for digits, and the letters of a UK, Canadian
+        or Dutch postcode for letters; a "C.P." or "D-" prefix kept."""
+        if _EIRCODE.fullmatch(value):
+            # an Eircode: a routing key (letter, two digits) and four
+            # characters, all from the Eircode alphabet
+            key = self._rng.choice(_EIR_LETTERS) + f"{self._rng.randint(1, 99):02d}"
+            ident = "".join(self._rng.choice([c for c in _EIR_LETTERS if c != ch]) if ch.isalpha()
+                            else self._rng.choice([d for d in "0123456789" if d != ch])
+                            for ch in value[-4:])
+            return key + value[3:-4] + ident
+        lettered = _PC_LETTERED.fullmatch(value)
+        out = re.sub(r"\d+", lambda m: self._fake_number_like(m.group()), value)
+        if lettered:
+            out = "".join(self._rng.choice([c for c in _PC_LETTERS if c != ch])
+                          if ch.isalpha() else ch for ch in out)
+        return out
 
     def _fake_number_like(self, numeric: str) -> str:
         """Random number with the same digit count, different value,
