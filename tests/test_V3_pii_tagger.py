@@ -213,6 +213,25 @@ def test_a_missing_model_is_unavailable(tmp_path):
         T.get_model(str(tmp_path / "nowhere"), None, "cpu")
 
 
+def test_a_local_model_is_found_by_name_and_pinned_by_its_weights(tmp_path, monkeypatch):
+    import hashlib
+    folder = tmp_path / "pii-tagger-x"
+    folder.mkdir()
+    (folder / "model.safetensors").write_bytes(b"weights")
+    pin = "sha256:" + hashlib.sha256(b"weights").hexdigest()
+    monkeypatch.setenv(T.MODELS_ENV, str(tmp_path))
+    assert T.local_dir("pii-tagger-x") == str(folder) and T.local_dir(str(folder)) == str(folder)
+    assert T.local_dir("org/hub-model") is None and T.local_dir("not-there") is None
+    T.check_pin(str(folder), pin)
+    T.check_pin(str(folder), None)
+    with pytest.raises(DetectorUnavailable, match="not the pinned"):
+        T.check_pin(str(folder), "sha256:" + "0" * 64)
+    with pytest.raises(DetectorUnavailable, match="sha256:<64 hex>"):
+        T.check_pin(str(folder), "4b419818330868dff6a60ad3e6b1c730f8b8c0c6")
+    with pytest.raises(DetectorUnavailable, match="no weights file"):
+        T.check_pin(str(tmp_path), pin)
+
+
 def test_edits_at_thresholds():
     cands = [[0, 3, "PERSON", .55], [4, 8, "AGE", .95], [9, 12, "ORG", .45]]
     assert [e[2] for e in E.edits_at(cands, .5)] == ["PERSON", "AGE"]

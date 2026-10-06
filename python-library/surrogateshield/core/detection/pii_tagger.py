@@ -11,6 +11,12 @@ only, and it is configured like any stage::
           window=256, stride=64, thresholds={"PERSON": 0.6},
           options={"device": "cpu", "batch": 8})
 
+*model* is a hub id (pinned by commit, as the other models), a local folder,
+or the name of a folder under ``$SURROGATESHIELD_MODELS`` (default
+``~/.cache/surrogateshield/models``). A local model's *revision* is
+``sha256:<hex>`` of its weights file, checked at load, so a config names the
+exact weights without naming a machine's paths.
+
 The model's labels are BIO tags over the protect types, with ADDRESS split
 into STREET / CITY / REGION / POSTCODE. Adjacent address parts are joined
 back into one ADDRESS; a lone city is a LOCATION; a lone region is dropped.
@@ -25,7 +31,9 @@ downstream (RelationGate, the resolver): the tagger only finds values.
 
 from __future__ import annotations
 
+import hashlib
 import logging
+import os
 import re
 import threading
 from typing import Dict, List, Optional, Sequence, Tuple
@@ -55,6 +63,56 @@ _ABBREV = re.compile(r"(?i)(?:(?<![^\W\d_])[^\W\d_]\.\s?){2,}$|\b(?:inc|ltd|co|c
 _models: Dict[tuple, object] = {}
 _lock = threading.Lock()
 
+# Weights that are not on a hub sit under one directory, one folder per model,
+# and a stage names its folder; the revision pins the weights file by hash.
+MODELS_ENV = "SURROGATESHIELD_MODELS"
+DEFAULT_MODELS_DIR = os.path.join("~", ".cache", "surrogateshield", "models")
+WEIGHTS_FILES = ("model.safetensors", "pytorch_model.bin")
+_PIN = re.compile(r"sha256:([0-9a-f]{64})")
+
+
+def models_dir() -> str:
+    return os.path.expanduser(os.environ.get(MODELS_ENV) or DEFAULT_MODELS_DIR)
+
+
+def local_dir(model: str) -> Optional[str]:
+    """*model* as a local folder: a path to one, or a folder of that name
+    under ``$SURROGATESHIELD_MODELS``; None for a hub id."""
+    if os.path.isdir(model):
+        return model
+    if model and os.sep not in model and "/" not in model:
+        path = os.path.join(models_dir(), model)
+        if os.path.isdir(path):
+            return path
+    return None
+
+
+def weights_sha256(path: str) -> str:
+    for name in WEIGHTS_FILES:
+        f = os.path.join(path, name)
+        if os.path.isfile(f):
+            h = hashlib.sha256()
+            with open(f, "rb") as fh:
+                for block in iter(lambda: fh.read(1 << 20), b""):
+                    h.update(block)
+            return h.hexdigest()
+    raise DetectorUnavailable(f"PIITagger: {path!r} has no weights file ({', '.join(WEIGHTS_FILES)})")
+
+
+def check_pin(path: str, revision: Optional[str]) -> None:
+    """A local model's revision, when given, is ``sha256:<hex>`` of its
+    weights file, and the file must match it."""
+    if not revision:
+        return
+    m = _PIN.fullmatch(revision)
+    if not m:
+        raise DetectorUnavailable(f"PIITagger: a local model's revision is 'sha256:<64 hex>' of its weights "
+                                  f"file, not {revision!r}")
+    found = weights_sha256(path)
+    if found != m.group(1):
+        raise DetectorUnavailable(f"PIITagger: the weights in {path!r} are not the pinned ones "
+                                  f"(sha256 {found[:12]}…, pinned {m.group(1)[:12]}…)")
+
 
 class TaggerModel:
     """A tokenizer and encoder, loaded once per (model, revision, device)."""
@@ -68,10 +126,16 @@ class TaggerModel:
                 "PIITagger needs transformers and torch, which are not installed. "
                 "Run: pip install transformers torch — or switch the pii_tagger stage off.") from exc
         try:
-            path = _local_model(model, revision)
-            self.tokenizer = AutoTokenizer.from_pretrained(path, revision=revision if path == model else None)
+            local = local_dir(model)
+            if local:
+                check_pin(local, revision)
+                path, hub_revision = local, None
+            else:
+                path = _local_model(model, revision)
+                hub_revision = revision if path == model else None
+            self.tokenizer = AutoTokenizer.from_pretrained(path, revision=hub_revision)
             self.model = AutoModelForTokenClassification.from_pretrained(
-                path, revision=revision if path == model else None, dtype=torch.float32)
+                path, revision=hub_revision, dtype=torch.float32)
         except (OSError, ValueError) as exc:
             raise DetectorUnavailable(
                 f"PIITagger could not load {model!r} ({exc}). Download it once with network access "
