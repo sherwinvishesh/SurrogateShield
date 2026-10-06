@@ -118,13 +118,20 @@ def check_frozen(datasets: Sequence[str], split: str, frozen: Dict[str, str], rd
 
 def check_freeze(freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> str:
     """The SHA-256 of FREEZE.json, or SystemExit: test2 is scored only after
-    the detector is frozen and with the hypotheses it pre-registered."""
+    the detector is frozen, with the hypotheses it pre-registered and, when
+    the freeze records them, its code, default config and config files."""
     if not freeze.exists():
         raise SystemExit(f"{rel(freeze)} does not exist: test2 is scored only after the freeze (Phase 3)")
     doc = json.loads(freeze.read_text())
     want = doc.get("hypotheses_sha256")
     if want is None or file_sha256(prereg) != want:
         raise SystemExit(f"{rel(prereg)} does not match the hash recorded in {rel(freeze)}; refusing to score")
+    if "code" in doc:                       # a bench.realdata.freeze record: the detector must still be the frozen one
+        from bench.realdata.freeze import differences
+        diff = differences(doc, hypotheses=prereg)
+        if diff:
+            raise SystemExit(f"the tree differs from {rel(freeze)} in {', '.join(diff)}; test2 is scored only "
+                             "with the frozen detector")
     return file_sha256(freeze)
 
 
