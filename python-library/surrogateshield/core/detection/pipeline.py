@@ -220,7 +220,10 @@ _PERSON_STOPWORDS = frozenset({
     "files", "logs", "sessions", "preferences", "activity", "management",
 })
 
-_NAME_TOKEN = r"[A-Za-z][A-Za-z'’.\-]*"
+# A name token in any script ("Kovač", "Ó", "Nguyễn"): letters joined by an
+# apostrophe, period or hyphen ("O'Neil", "Jean-Luc"), or one initial with
+# its period ("M."). A sentence's closing period is not part of the name.
+_NAME_TOKEN = r"(?:[^\W\d_]\.|[^\W\d_](?:[^\W\d_]|['’.\-](?=[^\W\d_]))*)"
 
 # E1: introduction frames — weak ("this is", "i'm") need a 2-token full name;
 #     strong ("my name is") accept a single token.
@@ -347,7 +350,7 @@ def _token_ok(t: str) -> bool:
     )
 
 
-_INITIAL_RE = re.compile(r"[A-Za-z]\.?,?$")
+_INITIAL_RE = re.compile(r"[^\W\d_]\.?,?$")
 
 # Form-field labels that end a name value ("Name - Fatou Diarra, Email - …")
 _FIELD_LABEL_BREAKERS = frozenset({
@@ -356,8 +359,16 @@ _FIELD_LABEL_BREAKERS = frozenset({
 })
 
 
+def _initial_ok(t: str) -> bool:
+    """A capitalised one-letter initial or particle inside a name ("M.",
+    "Ó"); a bare "A" or "I" is an English word."""
+    return bool(_INITIAL_RE.fullmatch(t)) and t[0].isupper() and (
+        "." in t or t[0] not in "AI")
+
+
 def _person_tokens_ok(tokens: List[str]) -> bool:
-    return bool(tokens) and all(_token_ok(t) for t in tokens)
+    return (bool(tokens) and all(_token_ok(t) or _initial_ok(t) for t in tokens)
+            and any(len(_token_core(t)) >= 2 for t in tokens))
 
 
 def _verbish(t: str) -> bool:
