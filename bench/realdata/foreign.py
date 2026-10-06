@@ -14,7 +14,9 @@ arm's config, traced as in ``attribute.py``) runs on each message.
 
 Per language: messages, the gate's guess of the language
 (``relation_gate.message_language``), messages edited, edits, entities by
-type and source, the gate's drops of model spans by rule, and the drops that
+type and source, the script of each confirmed span by source (Latin,
+Cyrillic, mixed, other, none: a masked shape), the gate's drops of model
+spans by rule, and the drops that
 ``is_foreign_fragment`` names: the filter that keeps an English NER model
 from redacting clauses of another language. There is no gold here, so leak
 is not measured and the edits are an upper bound on over-redaction; the
@@ -29,6 +31,7 @@ import hashlib
 import json
 import random
 import sys
+import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -42,6 +45,16 @@ GATE = {"German": "de", "French": "fr", "Spanish": "es", "Italian": "it", "Portu
 PER_LANG = 100
 MIN_WORDS, MAX_WORDS = 15, 400
 MODEL_SOURCES_EXCLUDED = ("pattern", "structural")     # is_foreign_fragment reads model spans only
+
+
+def script(span: str) -> str:
+    """The writing system of a span's letters: latin, cyrillic, mixed, other or none."""
+    seen = {unicodedata.name(c, "?").split()[0] for c in span if c.isalpha()}
+    if not seen:
+        return "none"
+    if len(seen) > 1:
+        return "mixed"
+    return {"LATIN": "latin", "CYRILLIC": "cyrillic"}.get(seen.pop(), "other")
 
 
 def taken() -> set:
@@ -105,12 +118,13 @@ def measure(text: str, prepared, trace: Sequence[dict]) -> dict:
     drops = gate_drops(text, trace)
     model = [d for d in drops if d[1] not in MODEL_SOURCES_EXCLUDED]
     out = {"guess": message_language(text) or "none", "refused": prepared is None,
-           "edits": 0, "types": Counter(), "sources": Counter(),
+           "edits": 0, "types": Counter(), "sources": Counter(), "scripts": Counter(),
            "drops": Counter(rule for rule, _s, _f in model), "foreign": sum(f for _r, _s, f in model)}
     if prepared is not None:
         out["edits"] = len(prepared.edits)
         out["types"] = Counter(e.type for e in prepared.confirmed)
         out["sources"] = Counter(e.source for e in prepared.confirmed)
+        out["scripts"] = Counter(f"{e.source}/{script(e.text)}" for e in prepared.confirmed)
     return out
 
 
@@ -125,6 +139,7 @@ def aggregate(lang: str, rows: Sequence[dict]) -> dict:
             "edits": sum(r["edits"] for r in rows),
             "edits_per_message": round(sum(r["edits"] for r in rows) / n, 3) if n else None,
             "entities_by_type": dict(total("types")), "entities_by_source": dict(total("sources")),
+            "entities_by_source_script": dict(total("scripts")),
             "model_drops_by_rule": dict(total("drops")),
             "foreign_fragment_drops": sum(r["foreign"] for r in rows),
             "messages_with_foreign_fragment_drop": S.rate(sum(r["foreign"] > 0 for r in rows), n)}

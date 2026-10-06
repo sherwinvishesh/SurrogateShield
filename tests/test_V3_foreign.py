@@ -49,5 +49,11 @@ def test_foreign_fragment_drops_and_edits_are_counted_without_text(tmp_path):
     assert de["foreign_fragment_drops"] == 2 and de["model_drops_by_rule"] == {"junk": 2}
     assert de["edits"] == 0 and de["messages_with_foreign_fragment_drop"]["k"] == 2
     assert en["edits"] == 1 and en["entities_by_type"] == {"PERSON": 1} and en["gate_guess_right"]["k"] == 1
+    assert en["entities_by_source_script"] == {"pii_tagger/latin": 1}
     text = out.read_text() + out.with_suffix(".md").read_text()
     assert "Kannst" not in text and "landlord" not in text and "| German | de | 2 |" in text
+
+
+def test_script_names_the_writing_system_of_the_letters():
+    assert [F.script(x) for x in ("Anna", "Анна", "Anna Анна", "42", "東京", "Zoë-Ølsen")] == \
+        ["latin", "cyrillic", "mixed", "none", "other", "latin"]
