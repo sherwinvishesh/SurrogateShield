@@ -1641,9 +1641,10 @@ def run_cascade(
     for bucket in ("confirmed", "needs_confirmation"):
         ents = confirmed if bucket == "confirmed" else needs_confirmation
         # NER/SLM entities, plus structural PERSONs (Pass E) — those only
-        # face the junk and public-figure checks ("Emperor Meiji").
+        # face the junk and public-figure checks ("Emperor Meiji"). A stage's
+        # ``gate_above`` option lets its sure candidates through.
         gated = [e for e in ents if (e.source != "pattern" or e.type == "PERSON")
-                 and not config.bypasses_gate(e.type)]
+                 and not config.bypasses_gate(e.type) and not config.vouches(stage_of(e), e.score)]
         gated_ids = {id(e) for e in gated}
         others = [e for e in list(confirmed) + list(needs_confirmation)
                   if id(e) not in gated_ids]

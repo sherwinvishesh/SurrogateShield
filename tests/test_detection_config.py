@@ -103,6 +103,8 @@ def test_hash_ignores_key_order_but_not_values():
     (lambda c: c.with_stage("context_guard", options={"labels": ["FIRSTNAME"]}), "labels"),
     (lambda c: c.with_stage("context_guard", options={"labels": {}}), "labels"),
     (lambda c: c.with_stage("context_guard", options={"labels": {"FIRSTNAME": "NAME"}}), "unknown type"),
+    (lambda c: c.with_stage("pii_tagger", options={"gate_above": 1.5}), "gate_above"),
+    (lambda c: c.with_stage("pii_tagger", options={"gate_above": True}), "gate_above"),
 ])
 def test_invalid_configs_are_refused(change, match):
     with pytest.raises((ValueError, TypeError), match=match):
@@ -180,6 +182,34 @@ def test_gate_bypass_reaches_the_relation_gate(monkeypatch):
     n = len(seen)
     pipeline.run_cascade(text, config=C.preset("no_models").replace(gate_bypass=("PERSON",)))
     assert "PERSON" in seen[0] and not any("PERSON" in s for s in seen[n:])
+
+
+def test_gate_above_lets_a_stages_sure_candidates_skip_the_gate(monkeypatch):
+    from surrogateshield.core.detection import plugins
+
+    class Places:
+        def detect(self, text, view):
+            return [plugins.Candidate(text.index("Lyon"), text.index("Lyon") + 4, "LOCATION", 0.95),
+                    plugins.Candidate(text.index("Porto"), text.index("Porto") + 5, "LOCATION", 0.6)]
+    seen = []
+    real = pipeline.relation_gate.gate
+
+    def spy(text, gated, others, **kw):
+        seen.extend(e.text for e in gated)
+        return real(text, gated, others, **kw)
+    monkeypatch.setattr(pipeline.relation_gate, "gate", spy)
+    plugins.register_detector("places", lambda stage: Places())
+    try:
+        text = "Lyon and Porto are lovely in spring"
+        base = C.preset("no_models").with_stage("places", enabled=True)
+        conf, _ = pipeline.run_cascade(text, config=base)
+        assert {"Lyon", "Porto"} <= set(seen) and not {"Lyon", "Porto"} & {e.text for e in conf}
+        seen.clear()
+        conf, _ = pipeline.run_cascade(text, config=base.with_stage("places", options={"gate_above": 0.9}))
+        assert "Lyon" not in seen and "Porto" in seen
+        assert "Lyon" in {e.text for e in conf} and "Porto" not in {e.text for e in conf}
+    finally:
+        plugins.unregister_detector("places")
 
 
 def test_stage_of():

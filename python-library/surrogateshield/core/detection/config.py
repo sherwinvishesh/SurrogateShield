@@ -20,7 +20,9 @@ A :class:`DetectionConfig` names:
   otherwise). A key is a public type ("PHONE") or an internal one
   ("phone_uk"); the internal key wins.
 * ``gate`` / ``gate_bypass``: the relation gate (names not tied to a person
-  stay as typed) and the types it never drops.
+  stay as typed) and the types it never drops. A stage's ``gate_above``
+  option: its candidates scored at least that skip the gate (a detector
+  trained to tell a private name from a public one, like ``pii_tagger``).
 * ``source_priority`` / ``type_conflicts``: which candidate stands for a
   value two stages read differently (the resolver, V3 §3.5).
 
@@ -274,6 +276,12 @@ class DetectionConfig:
     def bypasses_gate(self, typ: str) -> bool:
         return not self.gate or "*" in self.gate_bypass or public_type(typ) in self.gate_bypass
 
+    def vouches(self, stage: str, score: float) -> bool:
+        """Does *stage*'s ``gate_above`` option let a candidate of *score*
+        skip the relation gate?"""
+        above = self.stage(stage).options.get("gate_above")
+        return above is not None and score >= above
+
     def rank(self, stage: str) -> int:
         """Position in ``source_priority`` (lower wins); stages not listed
         share the last rank (an empty list: every stage ties)."""
@@ -401,6 +409,10 @@ class DetectionConfig:
                 raise ValueError(f"stage {s.name!r}: max_latency_ms must be > 0")
             if not isinstance(s.device, int) or s.device < -1:
                 raise ValueError(f"stage {s.name!r}: device must be -1 (CPU) or a GPU index")
+            above = s.options.get("gate_above")
+            if above is not None and (isinstance(above, bool) or not isinstance(above, (int, float))
+                                      or not 0 <= above <= 1):
+                raise ValueError(f"stage {s.name!r}: option 'gate_above' must be a score in [0, 1]")
             labels = s.options.get("labels") if s.name == "context_guard" else None
             if labels is not None:
                 if not isinstance(labels, Mapping) or not labels or not all(
