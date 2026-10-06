@@ -233,7 +233,7 @@ def latency(model: Path, units_by_ds, n: int = 300) -> dict:
 def brief(r: dict) -> dict:
     inj, nat = r["all"]["injected"], r["all"]["natural"]
     return {"leak": inj["leak"], "macro": inj["macro_leak_rate"], "leaked_by_type": inj["leaked_by_type"],
-            "values_by_type": {t: v["values"] - v["policy"] for t, v in inj["by_type"].items()},
+            "values_by_type": inj["values_by_type"],
             "natural_spurious": nat["spurious"]["k"], "natural_edits": nat["edits"],
             "negatives_untouched": nat["negatives_untouched"]}
 

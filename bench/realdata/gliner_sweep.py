@@ -92,6 +92,7 @@ def summary(units: Sequence[dict], scores: Sequence[dict]) -> dict:
         out[sl] = {k: a[k] for k in ("messages", "protect_values", "leak", "macro_leak_rate", "message_leak",
                                      "edits", "spurious", "messages_with_spurious", "negatives_untouched")}
         out[sl]["leaked_by_type"] = {t: v["leaked"] for t, v in a["by_type"].items()}
+        out[sl]["values_by_type"] = {t: v["values"] - v["policy"] for t, v in a["by_type"].items()}
     return out
 
 
