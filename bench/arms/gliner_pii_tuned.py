@@ -57,9 +57,11 @@ PUBLISHED: Dict[str, str] = {
 LABEL_TYPES: Dict[str, Dict[str, str]] = {"published": PUBLISHED, "ours": OURS}
 LABEL_SETS: Dict[str, List[str]] = {name: list(m) for name, m in LABEL_TYPES.items()}
 
-# The sweep's choice, frozen before test-2 (None until the sweep has run).
-LABEL_SET: Optional[str] = None
-THRESHOLD: Optional[float] = None
+# The sweep's choice, frozen before test-2: bench/results/gliner_sweep_dev.json
+# at 4d32bf0, pooled dev injected leak 49/627 = 0.0781 (the model card's
+# setting, published @ 0.5: 59/627 = 0.0941; ours is worse at every threshold).
+LABEL_SET: Optional[str] = "published"
+THRESHOLD: Optional[float] = 0.3
 
 
 def load():

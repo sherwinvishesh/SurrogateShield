@@ -53,7 +53,8 @@ from bench import realworld as rw
 from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RD, ROOT, commit_note, derive_seed, file_sha256,
                                    git_state, read_jsonl, sha256, write_jsonl)
 
-ARMS = ("ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii")
+ARMS = ("ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii",
+        "gliner_pii_tuned")
 BASELINES = ARMS[1:]
 SLICES = ("injected", "injected_single", "shift", "multi", "natural")
 RESAMPLES = 2000
@@ -72,7 +73,8 @@ HYPOTHESES = RD / "HYPOTHESES_TEST2.md"
 # for NETWORK, and the national-id / card / IBAN / bank recognisers for ID;
 # it has no street-address, organisation (shipped spaCy config), age, handle
 # or secret recogniser. LLM Guard's default entity list has no location, link
-# or date. GLiNER-PII's 22 labels cover every type.
+# or date. GLiNER-PII's 22 labels cover every type, as do both label sets of
+# gliner_pii_tuned (V3 §3.8: the dev sweep's threshold and label set).
 _ALL = tuple(sorted(rw.PROTECT_TYPES))
 _PRESIDIO = ("DATE_OF_BIRTH", "EMAIL", "ID", "LOCATION", "NETWORK", "PERSON", "PHONE", "URL")
 CLAIMED: Dict[str, Tuple[str, ...]] = {
@@ -82,6 +84,7 @@ CLAIMED: Dict[str, Tuple[str, ...]] = {
     "presidio_transformers": tuple(sorted(_PRESIDIO + ("AGE", "ORG"))),
     "llm_guard": ("EMAIL", "ID", "NETWORK", "PERSON", "PHONE"),
     "gliner_pii": _ALL,
+    "gliner_pii_tuned": _ALL,
 }
 UNIVERSES = {
     "shared_all_arms": tuple(sorted(set.intersection(*(set(v) for v in CLAIMED.values())))),

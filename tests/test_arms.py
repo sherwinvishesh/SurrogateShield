@@ -160,7 +160,8 @@ def test_copied_follows_the_scorer_rule(orig, rep, flag):
 
 
 def test_every_arm_has_a_module_and_an_interpreter():
-    assert set(run.ARMS) == {"ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii"}
+    assert set(run.ARMS) == {"ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii",
+                             "gliner_pii_tuned"}
     for arm, venv in run.ARMS.items():
         assert (ROOT / "bench" / "arms" / f"{arm}.py").exists()
         cmd = run.command(arm, Path("/in.jsonl"), Path("/out.jsonl"))

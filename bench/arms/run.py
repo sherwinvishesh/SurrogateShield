@@ -42,6 +42,7 @@ ARMS: Dict[str, str] = {
     "presidio_transformers": ".venv-baselines",
     "llm_guard": ".venv-baselines",
     "gliner_pii": ".venv-baselines",
+    "gliner_pii_tuned": ".venv-baselines",
 }
 PRIVATE = ROOT / "bench" / "realdata" / "build" / "spans"
 PUBLIC = ROOT / "bench" / "results" / "spans"
