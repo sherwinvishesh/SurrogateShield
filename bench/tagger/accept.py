@@ -1,8 +1,8 @@
 """V3 §3.3 acceptance on the pooled development set: dev + dev-large's val half.
 
     PYTHONPATH=.:python-library .venv/bin/python -m bench.tagger.accept \\
-        bench/tagger/build/eval/dv3xs-40k-dev-<variant>.json \\
-        bench/tagger/build/eval/dv3xs-40k-devlarge-val-<variant>.json \\
+        bench/tagger/build/eval/dv3s-40k-dev-<variant>.json \\
+        bench/tagger/build/eval/dv3s-40k-devlarge-val-<variant>.json \\
         --out bench/results/tagger_acceptance_dev.json
 
 Each input is a ``bench.tagger.evaluate --ss`` result for one split. The

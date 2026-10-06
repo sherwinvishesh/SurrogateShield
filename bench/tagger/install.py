@@ -1,6 +1,6 @@
 """Put a trained tagger where the library finds it (V3 §3.3; weights stay local).
 
-    PYTHONPATH=.:python-library .venv/bin/python -m bench.tagger.install bench/tagger/build/models/dv3xs-40k
+    PYTHONPATH=.:python-library .venv/bin/python -m bench.tagger.install bench/tagger/build/models/dv3s-40k
 
 The folder is copied to ``$SURROGATESHIELD_MODELS/<name>`` (default
 ``~/.cache/surrogateshield/models``). Without ``--name`` the name is the

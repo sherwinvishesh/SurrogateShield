@@ -21,9 +21,10 @@ ROOT = Path(__file__).resolve().parent.parent
 # The hashes of the shipped configs. A change to a default changes one of
 # these on purpose: update it, and say so in the commit (the benchmark's is
 # recorded in every ss .meta.json and in realdata_test2.json). 2026-10-06:
-# the tagger joined balanced, ContextGuard left it, spaCy reads places only.
-BALANCED_HASH = "2e234aafc5810433"
-BENCHMARK_HASH = "7d524abba90c7696"
+# the tagger joined balanced, ContextGuard left it, spaCy reads places only;
+# then the tagger became deberta-v3-small (bench/results/tagger_selection.json).
+BALANCED_HASH = "2af4dcc2650e3b81"
+BENCHMARK_HASH = "82c6c21dcc740c1a"
 # the benchmark before the tagger (v2), which bench/tagger/configs/ss-v2.json restores
 V2_BENCHMARK_HASH = "8e463c3c6b7562fd"
 

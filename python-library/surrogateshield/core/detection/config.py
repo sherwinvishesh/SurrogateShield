@@ -167,12 +167,14 @@ SPACY_REVISION = "3.8.0"
 CONTEXT_GUARD_MODEL = "dslim/distilbert-NER"
 CONTEXT_GUARD_REVISION = "dfa2838a127384aabb82ed7719e16dab84c42a2a"
 # The project's tagger (bench/tagger/, V3 §3.3), fine-tuned from
-# microsoft/deberta-v3-xsmall (MIT) on generated text only. Its weights are
+# microsoft/deberta-v3-small (MIT) on generated text only, chosen over
+# deberta-v3-xsmall and ModernBERT-base by the rule in bench/tagger/select.py
+# (bench/results/tagger_selection.json). Its weights are
 # not on a hub: the stage names a folder under $SURROGATESHIELD_MODELS
 # (default ~/.cache/surrogateshield/models; ``python -m bench.tagger.install``
 # puts it there) and pins the weights file by its SHA-256.
-PII_TAGGER_MODEL = "pii-tagger-dv3xs-40k"
-PII_TAGGER_REVISION = "sha256:05cca9b0062299e3335e63e92624789b8ef4b1b93db43d8488a7551fce5ff31b"
+PII_TAGGER_MODEL = "pii-tagger-dv3s-40k"
+PII_TAGGER_REVISION = "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173"
 # Their licences, as recorded (doctor prints them; a spaCy package's own
 # meta.json wins when it is installed). Permissive only (V3 §0).
 MODEL_LICENCES = {SPACY_MODEL: "MIT", CONTEXT_GUARD_MODEL: "Apache-2.0", PII_TAGGER_MODEL: "MIT"}
