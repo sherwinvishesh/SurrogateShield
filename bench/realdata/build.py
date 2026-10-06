@@ -2,6 +2,7 @@
 
     .venv/bin/python -m bench.realdata.build            # all datasets
     .venv/bin/python -m bench.realdata.build --check    # verify only, write nothing
+    .venv/bin/python -m bench.realdata.build --collection test2
 
 Reads ``bench/realdata/<dataset>/pool.jsonl`` (ids, refs, SHA-256 per turn),
 looks every turn up in ``bench/realdata/raw/`` (download those files at the
@@ -19,7 +20,7 @@ from typing import List
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from bench.realdata.common import BUILD, DATASETS, RAW, RD, read_jsonl, sha256, write_jsonl
+from bench.realdata.common import COLLECTIONS, DATASETS, RAW, read_jsonl, sha256, write_jsonl
 from bench.realdata.sources import LOOKUPS, resolve
 
 
@@ -43,13 +44,17 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("datasets", nargs="*", choices=list(DATASETS), help="default: all")
     ap.add_argument("--check", action="store_true", help="verify hashes without writing")
+    ap.add_argument("--collection", choices=list(COLLECTIONS), default="test1")
     args = ap.parse_args(argv)
     args.datasets = args.datasets or list(DATASETS)
+    coll = COLLECTIONS[args.collection]
     for ds in args.datasets:
-        rows = rebuild(read_jsonl(RD / ds / "pool.jsonl"), ds, LOOKUPS[ds](RAW))
+        rows = rebuild(read_jsonl(coll.rd / ds / "pool.jsonl"), ds, LOOKUPS[ds](RAW))
+        out = coll.build / ds / "pool.jsonl"
         if not args.check:
-            write_jsonl(BUILD / ds / "pool.jsonl", rows, private=True)
-        print(f"{ds}: {len(rows)} prompts, every hash matches" + ("" if args.check else f" -> build/{ds}/pool.jsonl"))
+            write_jsonl(out, rows, private=True)
+        print(f"{ds}: {len(rows)} prompts, every hash matches"
+              + ("" if args.check else f" -> {out.relative_to(coll.build.parent if coll.prefix else coll.build)}"))
     return 0
 
 

@@ -14,6 +14,7 @@ value's occurrences in the result.
     python -m bench.realdata.inject --estimate        # requests and characters, no network
     python -m bench.realdata.inject --pilot           # 2 calls, 10 items, verified, token counts
     python -m bench.realdata.inject --run [--write]   # Message Batches, two rounds, resumable
+    python -m bench.realdata.inject --collection test2 --plan | --estimate | --pilot | --run [--write]
 
 Verification (``check`` and ``detector_problems``) covers every rule of the
 prompt's Phase 3 step 2:
@@ -42,6 +43,13 @@ A failing item is re-asked once with its problems listed, then dropped. The
 acceptance rate and the kinds of drop reason go to
 ``bench/results/realdata_injection.json``; the records go to
 ``bench/realdata/<dataset>/{dev,test}.jsonl`` (REALDATA_PROGRESS D13, D14).
+
+``--collection test2`` builds the sealed second test's injected slice the same
+way at 1.5× the test share (300 single-turn, 48 of them format-shift, and 60
+conversations per dataset; ≥ 60 prompts per type), with its own seeds, the
+**evaluation** half of the identity pools (``identities.py``, PROMPT_FOR_OPUS_V3
+§5.3), batch names ``test2-inject-…``, and records ``rd-<dataset>-test2-NNNN``
+in ``bench/realdata/test2/<dataset>/test2.jsonl``.
 """
 
 from __future__ import annotations
@@ -60,8 +68,9 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 from bench.realdata import identities as I
-from bench.realdata.common import BUILD, DATASETS, RD, ROOT, derive_seed, read_jsonl, sha256, write_jsonl
-from bench.realdata.label import LABELS, LITERAL_ARMS, load_messages
+from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, ROOT, TEST1, Collection, derive_seed,
+                                   read_jsonl, sha256, write_jsonl)
+from bench.realdata.label import LITERAL_ARMS, labels_dir, load_messages
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -81,6 +90,25 @@ KEEP_MIN = 0.65                          # share of the user's words kept in pla
 FRAME_PER_VALUE, FRAME_SLACK, LATER_FRAME = 8, 4, 15
 INJECT = BUILD / "inject"
 SUMMARY = ROOT / "bench" / "results" / "realdata_injection.json"
+# test2 (1.5x test1's test share): single, shift and multi by split, and single-turn prompts per type
+N_SINGLE_TEST2, N_SHIFT_TEST2, N_MULTI_TEST2, TARGET_TEST2 = {"test2": 300}, {"test2": 48}, {"test2": 60}, 60
+
+
+def sizes(coll: Collection) -> tuple:
+    if coll.prefix:
+        return N_SINGLE_TEST2, N_SHIFT_TEST2, N_MULTI_TEST2, TARGET_TEST2
+    return N_SINGLE, N_SHIFT, N_MULTI, I.TARGET
+
+
+def pool_of(coll: Collection) -> Optional[str]:
+    """Identity pool half: test2 draws only evaluation tokens; test1 predates the split."""
+    return "eval" if coll.prefix else None
+
+
+def summary_file(coll: Collection = TEST1) -> Path:
+    return SUMMARY.with_name(f"realdata_injection_{coll.name}.json") if coll.prefix else SUMMARY
+
+
 WORD = re.compile(r"\w+")
 WORD_CHAR = re.compile(r"[^\W_]")
 SHAPE = re.compile(r"[\w.+-]+@[\w-]+\.\w|https?://|www\.|\d{5,}")
@@ -111,11 +139,11 @@ def means(v: dict) -> str:
 
 # ── plan: bases, types, identities (local, seeded) ───────────────────────────
 
-def base_units(ds: str) -> Dict[str, dict]:
+def base_units(ds: str, coll: Collection = TEST1) -> Dict[str, dict]:
     """source_id → the base's split, kind, words per turn, turn texts and
     per-turn labels (private; texts checked against the frozen hashes)."""
-    msgs, committed = load_messages(ds)
-    labs = {r["id"]: r.get("label") for r in read_jsonl(LABELS / f"{ds}.jsonl")}
+    msgs, committed = load_messages(ds, coll.rd, coll.build)
+    labs = {r["id"]: r.get("label") for r in read_jsonl(labels_dir(coll) / f"{ds}.jsonl")}
     out: Dict[str, dict] = {}
     for m in msgs:
         sid = m["conv"]
@@ -144,32 +172,34 @@ def avoid_values(labels: Sequence[dict]) -> List[str]:
     return sorted(v for v in vals if len(WORD_CHAR.findall(v)) >= 2)
 
 
-def plan(ds: str, units: Optional[Dict[str, dict]] = None, free: Optional[dict] = None) -> List[dict]:
+def plan(ds: str, units: Optional[Dict[str, dict]] = None, free: Optional[dict] = None,
+         coll: Collection = TEST1) -> List[dict]:
     """One row per base: dataset, source_id, split, kind, task, shift, layout,
     types and identity. Deterministic from the seed and the frozen files."""
-    units = base_units(ds) if units is None else units
-    free = json.loads((RD / ds / "pii_free.json").read_text()) if free is None else free
-    rng = random.Random(derive_seed("inject", ds))
+    n_single, n_shift, n_multi, target = sizes(coll)
+    units = base_units(ds, coll) if units is None else units
+    free = json.loads((coll.rd / ds / "pii_free.json").read_text()) if free is None else free
+    rng = random.Random(coll.seed("inject", ds))
     splits = {s: u["split"] for s, u in units.items()}
-    singles = draw(free["single"]["adjudicated"], splits, N_SINGLE, rng)
+    singles = draw(free["single"]["adjudicated"], splits, n_single, rng)
     shift = set()
-    for split in sorted(N_SHIFT):
-        shift |= set(rng.sample([s for s in singles if splits[s] == split], N_SHIFT[split]))
-    multis = draw(free["multi"]["adjudicated"], splits, N_MULTI, rng)
+    for split in sorted(n_shift):
+        shift |= set(rng.sample([s for s in singles if splits[s] == split], n_shift[split]))
+    multis = draw(free["multi"]["adjudicated"], splits, n_multi, rng)
     rows = [{"key": f"{ds}/{sid}", "dataset": ds, "source_id": sid, "split": units[sid]["split"], "kind": kind,
              "task": units[sid]["labels"][0]["task"], "shift": sid in shift, "words": units[sid]["words"][0]}
             for kind, ids in (("single", singles), ("multi", multis)) for sid in ids]
-    for kind, target in (("single", I.TARGET), ("multi", 0)):
+    for kind, tgt in (("single", target), ("multi", 0)):
         idx = [i for i, r in enumerate(rows) if r["kind"] == kind]
-        for i, types in zip(idx, I.assign_types([rows[i] for i in idx], derive_seed("inject-types", ds, kind), target)):
+        for i, types in zip(idx, I.assign_types([rows[i] for i in idx], coll.seed("inject-types", ds, kind), tgt)):
             rows[i]["types"] = types
     named = sorted(r["source_id"] for r in rows if r["shift"] and "PERSON" in r["types"])
-    json_ids = set(rng.sample(named, min(len(named), round(sum(N_SHIFT.values()) * JSON_SHARE))))
+    json_ids = set(rng.sample(named, min(len(named), round(sum(n_shift.values()) * JSON_SHARE))))
     for r in rows:
         u = units[r["source_id"]]
-        r_rng = random.Random(derive_seed("inject-identity", ds, r["source_id"]))
+        r_rng = random.Random(coll.seed("inject-identity", ds, r["source_id"]))
         r["identity"] = I.identity(r_rng, r["types"], r["task"], r["shift"], text="\n".join(u["turns"]),
-                                   avoid=avoid_values(u["labels"]))
+                                   avoid=avoid_values(u["labels"]), pool=pool_of(coll))
         r["layout"] = "json" if r["source_id"] in json_ids else r_rng.choice(LAYOUTS)
     return rows
 
@@ -612,11 +642,12 @@ def verify(rows: Sequence[dict], texts: Dict[str, List[str]], labels: Dict[str, 
 
 # ── rounds ───────────────────────────────────────────────────────────────────
 
-def load_all(datasets=DATASETS) -> Tuple[List[dict], Dict[str, List[str]], Dict[str, List[dict]]]:
+def load_all(datasets=DATASETS, coll: Collection = TEST1
+             ) -> Tuple[List[dict], Dict[str, List[str]], Dict[str, List[dict]]]:
     rows, texts, labels = [], {}, {}
     for ds in datasets:
-        units = base_units(ds)
-        for r in plan(ds, units):
+        units = base_units(ds, coll)
+        for r in plan(ds, units, coll=coll):
             rows.append(r)
             texts[r["key"]] = units[r["source_id"]]["turns"]
             labels[r["key"]] = units[r["source_id"]]["labels"]
@@ -663,16 +694,17 @@ def problems_of(key: str, bad: Dict[str, List[str]], ver: Dict[str, dict]) -> Li
 
 
 def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, log=print,
-        detector=detect) -> Dict[str, dict]:
+        detector=detect, coll: Collection = TEST1) -> Dict[str, dict]:
     """Both rounds (Message Batches, resumable) and verification; key →
     ``{"status": "accepted" | "dropped", "round", "turns", "info", "problems", "first_problems"}``."""
     from bench.realdata.provider import SONNET, requests_of, run_batch
     model = model or SONNET
     pv = prompt_version()
-    rows, texts, labels = load_all(datasets)
+    rows, texts, labels = load_all(datasets, coll)
     reqs, locals_ = _requests(rows, texts, model, "r1")
-    ans, bad = collect(run_batch(cl, ledger, f"inject-{pv}-r1", PHASE, "place", requests_of(reqs), log=log), locals_)
-    ver = verify(rows, texts, labels, ans, f"{pv}-r1", detector)
+    ans, bad = collect(run_batch(cl, ledger, coll.tag(f"inject-{pv}-r1"), PHASE, "place", requests_of(reqs), log=log),
+                       locals_)
+    ver = verify(rows, texts, labels, ans, coll.tag(f"{pv}-r1"), detector)
     final, redo = {}, {}
     for r in rows:
         k = r["key"]
@@ -685,9 +717,9 @@ def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, lo
     if redo:
         again = [r for r in rows if r["key"] in redo]
         reqs, locals_ = _requests(again, texts, model, "r2", feedback=redo)
-        ans, bad = collect(run_batch(cl, ledger, f"inject-{pv}-r2", PHASE, "place-reask", requests_of(reqs),
+        ans, bad = collect(run_batch(cl, ledger, coll.tag(f"inject-{pv}-r2"), PHASE, "place-reask", requests_of(reqs),
                                      log=log), locals_)
-        ver = verify(again, texts, labels, ans, f"{pv}-r2", detector)
+        ver = verify(again, texts, labels, ans, coll.tag(f"{pv}-r2"), detector)
         for k in redo:
             probs = problems_of(k, bad, ver)
             if probs:
@@ -695,10 +727,10 @@ def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, lo
                             "problems": probs, "first_problems": redo[k]}
             else:
                 final[k] = {**ver[k], "status": "accepted", "round": 2, "first_problems": redo[k]}
-    write_jsonl(INJECT / f"results-{pv}.jsonl", [{"key": k, **{f: v for f, v in final[k].items() if f != "info"},
-                                                  "kept": final[k].get("info", {}).get("kept"),
-                                                  "added": final[k].get("info", {}).get("added")}
-                                                 for k in sorted(final)], private=True)
+    write_jsonl(INJECT / f"{coll.tag(f'results-{pv}')}.jsonl",
+                [{"key": k, **{f: v for f, v in final[k].items() if f != "info"},
+                  "kept": final[k].get("info", {}).get("kept"), "added": final[k].get("info", {}).get("added")}
+                 for k in sorted(final)], private=True)
     n_ok = sum(1 for v in final.values() if v["status"] == "accepted")
     log(f"final: {n_ok} accepted, {len(final) - n_ok} dropped")
     return final
@@ -759,31 +791,34 @@ def summary(rows: Sequence[dict], final: Dict[str, dict]) -> dict:
     return out
 
 
-def write(final: Dict[str, dict], datasets=DATASETS, model: Optional[str] = None, out: Path = SUMMARY,
-          log=print) -> dict:
+def write(final: Dict[str, dict], datasets=DATASETS, model: Optional[str] = None, out: Optional[Path] = None,
+          log=print, coll: Collection = TEST1) -> dict:
     from bench.realdata import manifest
     from bench.realdata.provider import SONNET
-    rows, _texts, labels = load_all(datasets)
+    out = out or summary_file(coll)
+    rows, _texts, labels = load_all(datasets, coll)
     recs = records(rows, labels, final)
     m = manifest.load()
     for ds in datasets:
-        for split in ("dev", "test"):
-            path = RD / ds / f"{split}.jsonl"
+        for split in coll.splits:
+            path = coll.rd / ds / f"{split}.jsonl"
             got = recs.get((ds, split), [])
             errors = rw.lint(got) + [(r["id"], f"turn {k + 1}: {p}") for r in got for k, t in enumerate(r["turns"] or [])
                                      for _i, p in rw.lint([{"id": r["id"], "category": r["category"], "lang": "en", **t}])]
             if errors:
                 raise SystemExit(f"{ds}/{split}: {len(errors)} lint errors, first {errors[:5]}")
             write_jsonl(path, got)
-            m["frozen"][f"{ds}/{split}.jsonl"] = manifest.file_hash(path)
-    doc = {"command": f"python -m bench.realdata.inject --run --write --out {out.relative_to(ROOT)}",
+            m["frozen"][coll.key(f"{ds}/{split}.jsonl")] = manifest.file_hash(path)
+    flag = f"--collection {coll.name} " if coll.prefix else ""
+    doc = {"command": f"python -m bench.realdata.inject {flag}--run --write --out {out.relative_to(ROOT)}",
            "placer": model or SONNET, "prompt_version": prompt_version(),
            "rules": {"keep_min": KEEP_MIN, "frame_per_value": FRAME_PER_VALUE, "frame_slack": FRAME_SLACK,
                      "later_frame": LATER_FRAME, "detector_arms": list(LITERAL_ARMS), "detector_quorum": QUORUM},
            "datasets": summary(rows, final)}
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
-    m.setdefault("injection", {}).update({"placer": model or SONNET, "prompt_version": prompt_version(),
-                                          "faker": version("faker")})
+    (m.setdefault("injection", {}) if not coll.prefix else m.setdefault(coll.name, {}).setdefault("injection", {})
+     ).update({"placer": model or SONNET, "prompt_version": prompt_version(), "faker": version("faker"),
+               **({"identity_pool": pool_of(coll), "pool_key": I.POOL_KEY} if coll.prefix else {})})
     manifest.save(m)
     for ds in datasets:
         d = doc["datasets"][ds]
@@ -815,11 +850,14 @@ def main(argv=None) -> int:
     g.add_argument("--pilot", action="store_true")
     g.add_argument("--run", action="store_true")
     ap.add_argument("--write", action="store_true", help="with --run: write records and counts")
-    ap.add_argument("--out", type=Path, default=SUMMARY, help="with --write: the counts file")
+    ap.add_argument("--out", type=Path, help="with --write: the counts file "
+                    "(default bench/results/realdata_injection[_<collection>].json)")
     ap.add_argument("--datasets", nargs="*", choices=list(DATASETS), default=list(DATASETS))
+    ap.add_argument("--collection", choices=list(COLLECTIONS), default="test1")
     args = ap.parse_args(argv)
+    coll = COLLECTIONS[args.collection]
     if args.plan or args.estimate:
-        rows, texts, _ = load_all(args.datasets)
+        rows, texts, _ = load_all(args.datasets, coll)
         for ds in args.datasets:
             mine = [r for r in rows if r["dataset"] == ds]
             single = [r for r in mine if r["kind"] == "single"]
@@ -838,10 +876,10 @@ def main(argv=None) -> int:
         return 0
     if args.pilot:
         from bench.realdata.provider import SONNET, Ledger, call, client
-        rows, texts, labels = load_all(DATASETS)
-        saved = INJECT / f"pilot-{prompt_version()}.jsonl"        # a rerun re-verifies without new calls
+        rows, texts, labels = load_all(DATASETS, coll)
+        saved = INJECT / f"{coll.tag(f'pilot-{prompt_version()}')}.jsonl"   # a rerun re-verifies without new calls
         msgs = read_jsonl(saved) if saved.exists() else []
-        cl, ledger = (None, None) if msgs else (client(), Ledger(run="inject-pilot"))
+        cl, ledger = (None, None) if msgs else (client(), Ledger(run=coll.tag("inject-pilot")))
         answers, bad = {}, {}
         for i, grp in enumerate(pilot_rows(rows)):
             p, local = params(grp, texts, SONNET)
@@ -857,7 +895,7 @@ def main(argv=None) -> int:
                   f"{u['output_tokens']} tokens; characters {sum(len(t) for r in grp for t in texts[r['key']])}")
         write_jsonl(saved, msgs, private=True)
         flat = [r for grp in pilot_rows(rows) for r in grp]
-        ver = verify(flat, texts, labels, answers, f"pilot-{prompt_version()}")
+        ver = verify(flat, texts, labels, answers, coll.tag(f"pilot-{prompt_version()}"))
         for r in flat:
             v = ver.get(r["key"])
             probs = problems_of(r["key"], bad, ver)
@@ -866,9 +904,9 @@ def main(argv=None) -> int:
                   + (f"  kept {v['info']['kept']} added {v['info']['added']}" if v and v["info"] else ""))
         return 0
     from bench.realdata.provider import Ledger, client
-    final = run(args.datasets, cl=client(), ledger=Ledger(run="inject"))
+    final = run(args.datasets, cl=client(), ledger=Ledger(run=coll.tag("inject")), coll=coll)
     if args.write:
-        write(final, args.datasets, out=args.out.resolve())
+        write(final, args.datasets, out=args.out.resolve() if args.out else None, coll=coll)
     return 0
 
 

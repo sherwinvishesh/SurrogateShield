@@ -14,6 +14,7 @@ annotator adjudicates and extends (TREC-style pooling; REALDATA_PROGRESS D4).
     python -m bench.realdata.label --run --write [--out F] # labels, prevalence, PII-free sets
     python -m bench.realdata.label --human-check         # 100 rows for a person to correct
     python -m bench.realdata.label --agreement FILE      # Sonnet vs the corrected rows
+    python -m bench.realdata.label --collection test2 --estimate | --pilot | --run [--write]
 
 Every value is validated with the J2 scorer's own lint (``bench/realworld.py``):
 an exact, whole-word, case-sensitive substring, a valid type, no protect value
@@ -22,6 +23,11 @@ problems listed; a message still failing is ``label_status: "failed"`` and
 excluded. Values stay private (``bench/realdata/build/labels/``, 0600); the
 committed ``bench/realdata/<dataset>/labels.jsonl`` holds character offsets
 and types only.
+
+``--collection test2`` labels the sealed second test the same way (same prompt,
+same pooled arms, run on ``test2-natural-<dataset>``) with batch names
+``test2-labels-…`` and outputs under ``bench/realdata/test2/`` and
+``build/test2/labels/``.
 """
 
 from __future__ import annotations
@@ -36,7 +42,8 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from bench.arms.inputs import message_id, parse_id
-from bench.realdata.common import BUILD, DATASETS, RD, ROOT, SEED, TASKS, read_jsonl, sha256, write_jsonl
+from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RD, ROOT, SEED, TASKS, TEST1, Collection,
+                                   read_jsonl, sha256, write_jsonl)
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -55,6 +62,14 @@ MAX_CANDIDATE = 200
 MAX_TOKENS = 8192
 HUMAN_CHECK = RD / "human_check.jsonl"
 PREVALENCE = ROOT / "bench" / "results" / "realdata_prevalence.json"
+
+
+def labels_dir(coll: Collection = TEST1) -> Path:
+    return LABELS if not coll.prefix else coll.build / "labels"
+
+
+def prevalence_file(coll: Collection = TEST1) -> Path:
+    return PREVALENCE.with_name(f"realdata_prevalence_{coll.name}.json") if coll.prefix else PREVALENCE
 
 
 # ── prompt ───────────────────────────────────────────────────────────────────
@@ -484,12 +499,13 @@ def agreement(rows: List[dict]) -> dict:
 
 # ── driver ───────────────────────────────────────────────────────────────────
 
-def plan(datasets=DATASETS) -> Tuple[List[Tuple[str, List[dict]]], Dict[str, str], Dict[str, List[str]], Dict[str, dict]]:
+def plan(datasets=DATASETS, coll: Collection = TEST1
+         ) -> Tuple[List[Tuple[str, List[dict]]], Dict[str, str], Dict[str, List[str]], Dict[str, dict]]:
     """Round-1 requests as (dataset, group), plus texts, candidates and messages by id."""
     out, texts, cands, by_id = [], {}, {}, {}
     for ds in datasets:
-        msgs, _ = load_messages(ds)
-        cands.update(candidates(msgs, f"natural-{ds}"))
+        msgs, _ = load_messages(ds, coll.rd, coll.build)
+        cands.update(candidates(msgs, coll.tag(f"natural-{ds}")))
         for m in msgs:
             texts[m["id"]], by_id[m["id"]] = m["text"], m
         out += [(ds, g) for g in groups(units(msgs))]
@@ -518,18 +534,19 @@ def _collect(res: Dict[str, dict], locals_: Dict[str, Dict[str, str]], texts: Di
     return ok, bad
 
 
-def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, log=print) -> dict:
+def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, log=print,
+        coll: Collection = TEST1) -> dict:
     """Both rounds (Message Batches, resumable); returns id → (label | None,
     round, problems)."""
     from bench.realdata.provider import SONNET, run_batch, requests_of
     model = model or SONNET
-    planned, texts, cands, by_id = plan(datasets)
+    planned, texts, cands, by_id = plan(datasets, coll)
     reqs, locals_ = [], {}
     for i, (_ds, g) in enumerate(planned):
         p, local = params(g, cands, model)
         reqs.append((f"r1-{i:04d}", p))
         locals_[f"r1-{i:04d}"] = local
-    res = run_batch(cl, ledger, f"labels-{prompt_version()}-r1", PHASE, "label", requests_of(reqs), log=log)
+    res = run_batch(cl, ledger, coll.tag(f"labels-{prompt_version()}-r1"), PHASE, "label", requests_of(reqs), log=log)
     ok1, bad1 = _collect(res, locals_, texts, cands)
     out = {mid: (lab, 1, []) for mid, lab in ok1.items()}
     # round 2: every unit with a failing message, asked again with the problems
@@ -540,7 +557,8 @@ def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, lo
         reqs.append((f"r2-{i:04d}", p))
         locals_[f"r2-{i:04d}"] = local
     if reqs:
-        res = run_batch(cl, ledger, f"labels-{prompt_version()}-r2", PHASE, "label-reask", requests_of(reqs), log=log)
+        res = run_batch(cl, ledger, coll.tag(f"labels-{prompt_version()}-r2"), PHASE, "label-reask",
+                        requests_of(reqs), log=log)
         ok2, bad2 = _collect(res, locals_, texts, cands)
         for mid in bad1:
             out[mid] = (ok2[mid], 2, []) if mid in ok2 else (None, 2, bad2.get(mid, ["not re-asked"]))
@@ -550,14 +568,16 @@ def run(datasets=DATASETS, model: Optional[str] = None, cl=None, ledger=None, lo
     return out
 
 
-def write(result: dict, datasets=DATASETS, model: Optional[str] = None, log=print, out: Path = PREVALENCE) -> dict:
+def write(result: dict, datasets=DATASETS, model: Optional[str] = None, log=print, out: Optional[Path] = None,
+          coll: Collection = TEST1) -> dict:
     from bench.realdata import manifest
     from bench.realdata.provider import SONNET
     model = model or SONNET
+    out = out or prevalence_file(coll)
     labels, kinds, summary = {}, {}, {}
     m = manifest.load()
     for ds in datasets:
-        msgs, _ = load_messages(ds)
+        msgs, _ = load_messages(ds, coll.rd, coll.build)
         priv, pub, labs = [], [], {}
         for msg in msgs:
             lab, rnd, problems = result[msg["id"]]
@@ -567,22 +587,24 @@ def write(result: dict, datasets=DATASETS, model: Optional[str] = None, log=prin
             pub.append(public_row(msg["id"], msg["text"], lab, status, rnd, problems))
             labs[msg["id"]] = lab
             kinds[msg["id"]] = msg["kind"]
-        write_jsonl(LABELS / f"{ds}.jsonl", priv, private=True)
-        write_jsonl(RD / ds / "labels.jsonl", pub)
-        free = pii_free(msgs, labs, SPANS, f"natural-{ds}")
-        (RD / ds / "pii_free.json").write_text(json.dumps(free, indent=1, sort_keys=True) + "\n")
+        write_jsonl(labels_dir(coll) / f"{ds}.jsonl", priv, private=True)
+        write_jsonl(coll.rd / ds / "labels.jsonl", pub)
+        free = pii_free(msgs, labs, SPANS, coll.tag(f"natural-{ds}"))
+        (coll.rd / ds / "pii_free.json").write_text(json.dumps(free, indent=1, sort_keys=True) + "\n")
         labels[ds] = labs
         for f in ("labels.jsonl", "pii_free.json"):
-            m["frozen"][f"{ds}/{f}"] = manifest.file_hash(RD / ds / f)
+            m["frozen"][coll.key(f"{ds}/{f}")] = manifest.file_hash(coll.rd / ds / f)
         summary[ds] = {k: {r: len(v) for r, v in d.items()} for k, d in free.items()}
     prev = prevalence(labels, kinds)
     for ds in datasets:
         prev[ds]["pii_free_sources"] = summary[ds]
-    doc = {"command": f"python -m bench.realdata.label --run --write --out {out.relative_to(ROOT)}", "annotator": model,
-           "prompt_version": prompt_version(), "per_call": PER_CALL, "datasets": prev}
+    flag = f"--collection {coll.name} " if coll.prefix else ""
+    doc = {"command": f"python -m bench.realdata.label {flag}--run --write --out {out.relative_to(ROOT)}",
+           "annotator": model, "prompt_version": prompt_version(), "per_call": PER_CALL, "datasets": prev}
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
-    m.setdefault("labels", {}).update({"annotator": model, "prompt_version": prompt_version(),
-                                       "pooled_arms": list(ARMS), "literal_rule_arms": list(LITERAL_ARMS)})
+    (m.setdefault("labels", {}) if not coll.prefix else m.setdefault(coll.name, {}).setdefault("labels", {})).update(
+        {"annotator": model, "prompt_version": prompt_version(),
+         "pooled_arms": list(ARMS), "literal_rule_arms": list(LITERAL_ARMS)})
     manifest.save(m)
     for ds in datasets:
         d = prev[ds]
@@ -620,11 +642,14 @@ def main(argv=None) -> int:
     g.add_argument("--human-check", action="store_true")
     g.add_argument("--agreement", type=Path)
     ap.add_argument("--write", action="store_true", help="with --run: write labels, prevalence, PII-free sets")
-    ap.add_argument("--out", type=Path, default=PREVALENCE, help="with --write: the prevalence counts file")
+    ap.add_argument("--out", type=Path, help="with --write: the prevalence counts file "
+                    "(default bench/results/realdata_prevalence[_<collection>].json)")
     ap.add_argument("--datasets", nargs="*", choices=list(DATASETS), default=list(DATASETS))
+    ap.add_argument("--collection", choices=list(COLLECTIONS), default="test1")
     args = ap.parse_args(argv)
+    coll = COLLECTIONS[args.collection]
     if args.estimate:
-        planned, texts, cands, _ = plan(args.datasets)
+        planned, texts, cands, _ = plan(args.datasets, coll)
         chars = [sum(len(m["text"]) for m in g) for _ds, g in planned]
         print(f"prompt {prompt_version()}: {len(texts)} messages in {len(planned)} round-1 requests "
               f"(≤ {PER_CALL} messages, ≤ {CHAR_BUDGET} characters); message characters per request: "
@@ -633,11 +658,12 @@ def main(argv=None) -> int:
         return 0
     if args.pilot:
         from bench.realdata.provider import SONNET, Ledger, call, client
-        planned, texts, cands, by_id = plan(DATASETS)
+        planned, texts, cands, by_id = plan(DATASETS, coll)
         group = [by_id[m] for m in pilot_ids(texts)]
         p, local = params(group, cands, SONNET)
-        msg = call(client(), Ledger(run="label-pilot"), PHASE, "label-pilot", p)
-        write_jsonl(LABELS / f"pilot-{prompt_version()}.jsonl", [{"message": msg, "local": local}], private=True)
+        msg = call(client(), Ledger(run=coll.tag("label-pilot")), PHASE, "label-pilot", p)
+        write_jsonl(labels_dir(coll) / f"pilot-{prompt_version()}.jsonl", [{"message": msg, "local": local}],
+                    private=True)
         ok, bad = parse(msg, local, texts, cands)
         u = msg["usage"]
         print(f"pilot: model {msg['model']}, stop {msg['stop_reason']}, {len(ok)}/10 valid; "
@@ -649,9 +675,9 @@ def main(argv=None) -> int:
         return 0
     if args.run:
         from bench.realdata.provider import Ledger, client
-        result = run(args.datasets, cl=client(), ledger=Ledger(run="label"))
+        result = run(args.datasets, cl=client(), ledger=Ledger(run=coll.tag("label")), coll=coll)
         if args.write:
-            write(result, args.datasets, out=args.out.resolve())
+            write(result, args.datasets, out=args.out.resolve() if args.out else None, coll=coll)
         return 0
     if args.human_check:
         ids = write_human_check()

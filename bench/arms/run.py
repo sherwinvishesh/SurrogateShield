@@ -2,6 +2,7 @@
 text-free copies of their spans.
 
     .venv/bin/python -m bench.arms.run --natural                       # every arm, the three natural pools
+    .venv/bin/python -m bench.arms.run --natural --collection test2    # ... of the sealed second test
     .venv/bin/python -m bench.arms.run --in F.jsonl --name NAME [--arms ss llm_guard]
     .venv/bin/python -m bench.arms.run --record                        # arm configs -> manifest only
 
@@ -46,6 +47,14 @@ PRIVATE = ROOT / "bench" / "realdata" / "build" / "spans"
 PUBLIC = ROOT / "bench" / "results" / "spans"
 NATURAL = {f"natural-{ds}": ROOT / "bench" / "realdata" / "build" / ds / "messages.jsonl"
            for ds in ("oasst1", "sharegpt", "wildchat")}
+
+
+def natural(collection: str = "test1") -> Dict[str, Path]:
+    """Span-file name → arm input for the natural pools of *collection*
+    (``natural-<ds>`` for test1, ``test2-natural-<ds>`` for test2)."""
+    from bench.realdata.common import COLLECTIONS
+    coll = COLLECTIONS[collection]
+    return {coll.tag(f"natural-{ds}"): coll.build / ds / "messages.jsonl" for ds in ("oasst1", "sharegpt", "wildchat")}
 
 
 def copied(original: str, replacement: str) -> int:
@@ -118,12 +127,13 @@ def main(argv=None) -> int:
     ap.add_argument("--natural", action="store_true", help="the three rebuilt natural pools")
     ap.add_argument("--arms", nargs="*", choices=list(ARMS), default=list(ARMS))
     ap.add_argument("--record", action="store_true", help="only record arm configurations in the manifest")
+    ap.add_argument("--collection", choices=("test1", "test2"), default="test1", help="with --natural")
     args = ap.parse_args(argv)
     if args.record:
         print("recorded:", ", ".join(record_arms()))
         return 0
     if args.natural:
-        jobs = list(NATURAL.items())
+        jobs = list(natural(args.collection).items())
     elif args.src and args.name:
         jobs = [(args.name, args.src.resolve())]
     else:

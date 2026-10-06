@@ -27,6 +27,14 @@ def save(m: dict, path: Path = PATH, md: Path | None = MD) -> None:
         md.write_text(render(m))
 
 
+def section(m: dict, coll) -> dict:
+    """Per-dataset records of a collection: ``m["datasets"]`` for test1,
+    ``m["<name>"]["datasets"]`` for a later one."""
+    if not coll.prefix:
+        return m["datasets"]
+    return m.setdefault(coll.name, {}).setdefault("datasets", {})
+
+
 def file_hash(path: Path) -> str:
     return file_sha256(path)
 
@@ -131,6 +139,29 @@ def render(m: dict) -> str:
         for k in sorted(d):
             if k not in ("pull_counts", "drawn", "seeds", "raw_files"):
                 out += [f"**{k}**", "", "```", json.dumps(d[k], indent=1, sort_keys=True), "```", ""]
+    for name in ("test2",):
+        if not m.get(name):
+            continue
+        out += [f"## Collection `{name}`", "",
+                "The sealed second test (PROMPT_FOR_OPUS_V3 §5.2): drawn by `python -m bench.realdata.pull",
+                f"--collection {name}` from sources the first draw never touched (its ids skipped, its first turns",
+                "seeding the near-duplicate check), one split, files under",
+                f"`bench/realdata/{name}/<dataset>/`.", ""]
+        for ds, d in m[name].get("datasets", {}).items():
+            out += [f"### {name} / {ds}", ""]
+            if "pull_counts" in d:
+                out += ["| step | count |", "|---|---|", _counts_table(d["pull_counts"]), ""]
+            if "drawn" in d:
+                out += ["Drawn: " + ", ".join(f"{k} = {v}" for k, v in d["drawn"].items()), ""]
+            if "seeds" in d:
+                out += ["Seeds (`common.derive_seed(dataset, kind, \"test2\")`): "
+                        + ", ".join(f"{k} = {v}" for k, v in d["seeds"].items()), ""]
+            for k in sorted(d):
+                if k not in ("pull_counts", "drawn", "seeds", "raw_files"):
+                    out += [f"**{k}**", "", "```", json.dumps(d[k], indent=1, sort_keys=True), "```", ""]
+        for k in sorted(m[name]):
+            if k != "datasets":
+                out += [f"**{name} {k}**", "", "```", json.dumps(m[name][k], indent=1, sort_keys=True), "```", ""]
     if m.get("arms"):
         out += ["## Systems under test", "",
                 "Recorded by `python -m bench.arms.run` from each arm's meta sidecar",

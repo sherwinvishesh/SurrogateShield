@@ -194,3 +194,11 @@ def test_agreement_per_type_and_kappa():
     ml = r["message_level"]
     assert (ml["both"], ml["neither"], ml["human_only"], ml["sonnet_only"]) == (1, 1, 1, 0)
     assert ml["kappa"] == pytest.approx((2 / 3 - 4 / 9) / (1 - 4 / 9))
+
+
+def test_test2_labels_and_prevalence_go_to_their_own_files():
+    from bench.realdata.common import COLLECTIONS, TEST1
+    t2 = COLLECTIONS["test2"]
+    assert L.labels_dir(TEST1) == L.LABELS and L.prevalence_file(TEST1) == L.PREVALENCE
+    assert L.labels_dir(t2) == t2.build / "labels" != L.LABELS
+    assert L.prevalence_file(t2).name == "realdata_prevalence_test2.json"

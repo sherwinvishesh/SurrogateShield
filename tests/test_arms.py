@@ -233,3 +233,10 @@ def test_record_arms_writes_configs_and_refuses_disagreeing_runs(tmp_path):
         {"arm": "ss", "config": {"versions": {"surrogateshield": "2.1"}}, "seed": 1}))
     with pytest.raises(SystemExit):
         run.record_arms(pub, mpath)
+
+
+def test_natural_inputs_per_collection():
+    assert run.natural() == run.NATURAL
+    t2 = run.natural("test2")
+    assert sorted(t2) == ["test2-natural-oasst1", "test2-natural-sharegpt", "test2-natural-wildchat"]
+    assert t2["test2-natural-oasst1"].parts[-4:] == ("build", "test2", "oasst1", "messages.jsonl")

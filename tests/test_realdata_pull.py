@@ -221,6 +221,49 @@ def test_index_has_no_text_and_rebuild_verifies(raw, small, tmp_path, ds):
         build.rebuild(idx, ds, sources.LOOKUPS[ds](raw))
 
 
+# ── test2: a second draw from sources test1 never took ────────────────────────
+
+T2 = common.COLLECTIONS["test2"]
+
+
+def test_collections_name_their_files_batches_and_seeds_apart():
+    t1 = common.TEST1
+    assert (t1.tag("labels-x"), t1.key("oasst1/pool.jsonl")) == ("labels-x", "oasst1/pool.jsonl")
+    assert (T2.tag("labels-x"), T2.key("oasst1/pool.jsonl")) == ("test2-labels-x", "test2/oasst1/pool.jsonl")
+    assert t1.seed("oasst1", "single") == common.derive_seed("oasst1", "single") != T2.seed("oasst1", "single")
+    assert T2.rd == common.RD / "test2" and T2.build == common.BUILD / "test2" and T2.splits == ("test2",)
+
+
+@pytest.mark.parametrize("ds", common.DATASETS)
+def test_test2_draws_only_sources_test1_never_took(raw, small, monkeypatch, tmp_path, ds):
+    monkeypatch.setattr(pull, "N_SINGLE_TEST2", 8)
+    monkeypatch.setattr(pull, "N_MULTI_TEST2", 4)
+    rows1, _ = pull.sample(ds, raw)
+    pull.write(ds, rows1, rd=tmp_path / "rd", build=tmp_path / "build")
+    rows2, counts = pull.sample(ds, raw, T2, prior=tmp_path / "rd")
+    assert rows2 == pull.sample(ds, raw, T2, prior=tmp_path / "rd")[0]
+    assert counts["taken_by_test1"] == 15
+    assert not {r["source_id"] for r in rows1} & {r["source_id"] for r in rows2}
+    assert Counter((r["kind"], r["split"]) for r in rows2) == {("single", "test2"): 8, ("multi", "test2"): 4}
+
+
+def test_test2_refuses_when_a_test1_source_is_gone(raw, small, tmp_path):
+    common.write_jsonl(tmp_path / "rd" / "oasst1" / "pool.jsonl", [{"source_id": "no-such-root"}])
+    with pytest.raises(SystemExit, match="not among the candidates"):
+        pull.sample("oasst1", raw, T2, prior=tmp_path / "rd")
+
+
+def test_draw_skips_near_duplicates_of_earlier_draws():
+    base = sentence("near")
+    cands = [{"source_id": "a", "turns": [base + " ok"], "refs": [], "meta": {}},
+             {"source_id": "b", "turns": [sentence("other")], "refs": [], "meta": {}},
+             {"source_id": "c", "turns": [sentence("third")], "refs": [], "meta": {}}]
+    counts = Counter()
+    with pytest.raises(SystemExit, match="only 2 single"):
+        pull.draw(cands, 3, random.Random(1), {"zz"}, [common.normalise(base)], counts, "single")
+    assert counts["single_near_duplicates_skipped"] == 1
+
+
 def test_manifest_render_lists_frozen_hashes(tmp_path):
     m = {"seed": common.SEED, "frozen": {"oasst1/pool.jsonl": "ab" * 32},
          "datasets": {"oasst1": {"pull_counts": {"source_roots": 3, "drawn_single": 1},

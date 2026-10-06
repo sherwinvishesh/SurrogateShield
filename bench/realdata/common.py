@@ -12,8 +12,9 @@ import json
 import os
 import re
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Tuple
 
 ROOT = Path(__file__).resolve().parents[2]
 RD = ROOT / "bench" / "realdata"
@@ -50,6 +51,39 @@ SOURCES = {
 }
 
 TASKS = ("writing", "coding", "qa", "advice", "translation", "roleplay", "business", "other")
+
+
+@dataclass(frozen=True)
+class Collection:
+    """One draw of natural prompts and everything built on it.
+
+    ``test1`` is the original draw (splits ``dev`` / ``test``; files directly
+    under ``bench/realdata/<dataset>/``). ``test2`` is the sealed second test
+    (PROMPT_FOR_OPUS_V3 §5.2): one split, ``test2``, drawn only from sources
+    test1 never touched, with files under ``bench/realdata/test2/<dataset>/``,
+    private text under ``build/test2/``, and its own seeds, frozen-hash keys,
+    provider batch names and span-file names, so nothing of test1 is touched."""
+    name: str
+    splits: Tuple[str, ...]
+    rd: Path              # committed files: <rd>/<dataset>/...
+    build: Path           # private text: <build>/<dataset>/..., <build>/labels, <build>/inject
+    prefix: str           # "" for test1
+
+    def tag(self, name: str) -> str:
+        """A batch, span-file or result name, unique to the collection."""
+        return f"{self.prefix}-{name}" if self.prefix else name
+
+    def key(self, rel: str) -> str:
+        """A path relative to ``bench/realdata/`` (the manifest's frozen keys)."""
+        return f"{self.prefix}/{rel}" if self.prefix else rel
+
+    def seed(self, *parts) -> int:
+        return derive_seed(*parts, self.prefix) if self.prefix else derive_seed(*parts)
+
+
+COLLECTIONS = {"test1": Collection("test1", ("dev", "test"), RD, BUILD, ""),
+               "test2": Collection("test2", ("test2",), RD / "test2", BUILD / "test2", "test2")}
+TEST1 = COLLECTIONS["test1"]
 
 
 def sha256(text: str) -> str:

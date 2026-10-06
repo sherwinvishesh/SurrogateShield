@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from bench import realworld as rw
+from bench.realdata import common
 from bench.realdata import identities as I
 from bench.realdata import inject as J
 
@@ -272,6 +273,46 @@ def test_plan_refuses_when_a_split_has_too_few_bases(synthetic):
         J.plan("oasst1", units, {**free, "single": {"adjudicated": free["single"]["adjudicated"][60:]}})
 
 
+@pytest.fixture(scope="module")
+def synthetic2():
+    units, single, multi_ = {}, [], []
+    for i in range(480):
+        kind = "single" if i < 400 else "multi"
+        n = 3 if kind == "multi" else 1
+        turns = [" ".join((WORDS * 6)[(i + k) % 5:][: 20 + (i * 7 + k) % 50]) + "?" for k in range(n)]
+        sid = f"t{i:03d}"
+        units[sid] = {"source_id": sid, "split": "test2", "kind": kind, "words": [len(t.split()) for t in turns],
+                      "turns": turns, "labels": [dict(LAB, task=("qa", "coding", "advice")[i % 3]) for _ in turns]}
+        (single if kind == "single" else multi_).append(sid)
+    return units, {"single": {"adjudicated": single}, "multi": {"adjudicated": multi_}}
+
+
+def test_test2_plan_has_its_own_sizes_seeds_and_only_evaluation_pool_identities(synthetic2):
+    t2 = common.COLLECTIONS["test2"]
+    units, free = synthetic2
+    a = J.plan("oasst1", units, free, coll=t2)
+    assert json.dumps(a, sort_keys=True) == json.dumps(J.plan("oasst1", units, free, coll=t2), sort_keys=True)
+    single = [r for r in a if r["kind"] == "single"]
+    assert len(single) == 300 and len(a) == 360 and {r["split"] for r in a} == {"test2"}
+    assert sum(r["shift"] for r in single) == 48
+    named = [r for r in single if r["shift"] and "PERSON" in r["types"]]
+    assert [r for r in a if r["layout"] == "json"] == [r for r in named if r["layout"] == "json"]
+    assert sum(r["layout"] == "json" for r in a) == min(len(named), round(48 * J.JSON_SHARE)) > 0
+    for t in I.TYPES:
+        assert sum(t in r["types"] for r in single) >= J.TARGET_TEST2, t
+    assert all(r["identity"]["pool"] == "eval" for r in a)
+    assert all(I.token_half(w) == "eval" for r in a for w in r["identity"]["pool_tokens"])
+    assert t2.seed("inject", "oasst1") != common.derive_seed("inject", "oasst1")
+
+
+def test_collections_pick_their_sizes_pool_and_summary():
+    t1, t2 = common.TEST1, common.COLLECTIONS["test2"]
+    assert J.sizes(t1) == (J.N_SINGLE, J.N_SHIFT, J.N_MULTI, I.TARGET)
+    assert J.sizes(t2) == ({"test2": 300}, {"test2": 48}, {"test2": 60}, 60)
+    assert J.pool_of(t1) is None and J.pool_of(t2) == "eval"
+    assert J.summary_file(t1) == J.SUMMARY and J.summary_file(t2).name == "realdata_injection_test2.json"
+
+
 def test_avoid_values_skip_ones_without_two_letters_or_digits():
     lab = dict(LAB, keep=["/", "C", "Python", "C#"], optional=[{"value": "UTC", "type": "LOCATION"}])
     assert J.avoid_values([lab]) == ["Python", "UTC"]
@@ -319,7 +360,7 @@ def three(monkeypatch, tmp_path):
     rows = [row(key="oasst1/a"), row(key="oasst1/b", split="test"), row(key="oasst1/c"),
             row(key="oasst1/m", kind="multi")]
     labels = {k: [LAB] * len(t) for k, t in texts.items()}
-    monkeypatch.setattr(J, "load_all", lambda datasets: (rows, texts, labels))
+    monkeypatch.setattr(J, "load_all", lambda datasets, coll=None: (rows, texts, labels))
     monkeypatch.setattr(J, "INJECT", tmp_path)
 
     def answer(name, turns, values):

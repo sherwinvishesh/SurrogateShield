@@ -2,6 +2,7 @@
 
     .venv/bin/python -m bench.realdata.pull            # all three datasets
     .venv/bin/python -m bench.realdata.pull oasst1     # one
+    .venv/bin/python -m bench.realdata.pull --collection test2   # the sealed second test
 
 Reads only the pinned files under ``bench/realdata/raw/`` (no network).
 Writes, per dataset:
@@ -23,6 +24,14 @@ and records filter counts, seeds and file hashes in ``manifest.json``
    remaining conversations; a draw is rejected as a near duplicate when its
    normalised first turn has rapidfuzz ratio ≥ 95 with one already drawn;
 4. split 20 % dev / 80 % test by a seeded draw over the drawn source prompts.
+
+``--collection test2`` (PROMPT_FOR_OPUS_V3 §5.2) repeats steps 1–3 with fresh
+seeds (``derive_seed(..., "test2")``) and 1.5× the test share (600 single-turn,
+120 multi-turn), after first marking every source of the committed test1 pool
+as taken: its ids are skipped and its first turns seed the near-duplicate
+check, so no test2 prompt is a test1 prompt or a near copy of one. Everything
+lands in one split, ``test2``, under ``bench/realdata/test2/<dataset>/`` and
+``build/test2/<dataset>/``.
 """
 
 from __future__ import annotations
@@ -38,8 +47,9 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from bench.realdata import manifest
-from bench.realdata.common import (BUILD, DATASETS, RAW, RD, derive_seed, first_turn_ok,
-                                   later_turn_ok, normalise, sha256, words, write_jsonl)
+from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RAW, RD, TEST1, Collection, derive_seed,
+                                   first_turn_ok, later_turn_ok, normalise, read_jsonl, sha256, words,
+                                   write_jsonl)
 from bench.realdata.sources import ITERATORS
 
 N_SINGLE = 500
@@ -47,6 +57,8 @@ N_MULTI = 100
 MAX_TURNS = 3
 DEV_FRACTION = 0.2
 NEAR_DUP = 95
+N_SINGLE_TEST2 = 600          # 1.5x test1's test share (400 + 80), PROMPT_FOR_OPUS_V3 §6 Q1
+N_MULTI_TEST2 = 120
 
 
 def filter_candidates(cands, english_check: bool, counts: Counter) -> Tuple[List[dict], List[dict]]:
@@ -106,14 +118,31 @@ def draw(cands: List[dict], n: int, rng: random.Random, taken_ids: set,
     return out
 
 
-def split(rows: List[dict], dataset: str, kind: str) -> None:
+def split(rows: List[dict], dataset: str, kind: str, coll: Collection = TEST1) -> None:
+    if coll.splits == ("test2",):
+        for r in rows:
+            r["split"] = "test2"
+        return
     ids = sorted(r["source_id"] for r in rows)
     dev = set(random.Random(derive_seed(dataset, kind, "split")).sample(ids, round(len(ids) * DEV_FRACTION)))
     for r in rows:
         r["split"] = "dev" if r["source_id"] in dev else "test"
 
 
-def sample(dataset: str, raw: Path = RAW) -> Tuple[List[dict], Counter]:
+def taken_before(dataset: str, cands: List[dict], rd: Path = RD) -> Tuple[set, List[str]]:
+    """The committed test1 pool's source ids and normalised first turns (from
+    the filtered candidates, so no private file is needed)."""
+    ids = {r["source_id"] for r in read_jsonl(rd / dataset / "pool.jsonl")}
+    first = {c["source_id"]: c["turns"][0] for c in cands if c["source_id"] in ids}
+    if set(first) != ids:
+        raise SystemExit(f"{dataset}: {len(ids - set(first))} test1 sources are not among the candidates; "
+                         "the raw files or filters changed")
+    return set(ids), [normalise(first[i]) for i in sorted(ids)]
+
+
+def sample(dataset: str, raw: Path = RAW, coll: Collection = TEST1, prior: Path = RD) -> Tuple[List[dict], Counter]:
+    """The draw of *coll*; a later collection first takes out every source of
+    the test1 pool committed under *prior*."""
     counts: Counter = Counter()
     cands = list(ITERATORS[dataset](raw, counts))
     single, multi = filter_candidates(cands, english_check=(dataset == "sharegpt"), counts=counts)
@@ -121,9 +150,13 @@ def sample(dataset: str, raw: Path = RAW) -> Tuple[List[dict], Counter]:
     single = dedup_exact(single, counts, "single")
     taken_ids: set = set()
     taken_norm: List[str] = []
-    picked_multi = draw(multi, N_MULTI, random.Random(derive_seed(dataset, "multi")),
+    if coll.prefix:
+        taken_ids, taken_norm = taken_before(dataset, cands, prior)
+        counts["taken_by_test1"] = len(taken_ids)
+    n_single, n_multi = (N_SINGLE_TEST2, N_MULTI_TEST2) if coll.prefix else (N_SINGLE, N_MULTI)
+    picked_multi = draw(multi, n_multi, random.Random(coll.seed(dataset, "multi")),
                         taken_ids, taken_norm, counts, "multi")
-    picked_single = draw(single, N_SINGLE, random.Random(derive_seed(dataset, "single")),
+    picked_single = draw(single, n_single, random.Random(coll.seed(dataset, "single")),
                          taken_ids, taken_norm, counts, "single")
     rows = []
     for kind, picked in (("multi", picked_multi), ("single", picked_single)):
@@ -133,7 +166,7 @@ def sample(dataset: str, raw: Path = RAW) -> Tuple[List[dict], Counter]:
             turns, refs = c["turns"][:n], c["refs"][:n]
             kind_rows.append({"source_id": c["source_id"], "dataset": dataset, "kind": kind,
                               "refs": refs, "turns": turns, "meta": c["meta"]})
-        split(kind_rows, dataset, kind)
+        split(kind_rows, dataset, kind, coll)
         rows.extend(kind_rows)
     counts["drawn_single"] = len(picked_single)
     counts["drawn_multi"] = len(picked_multi)
@@ -158,6 +191,8 @@ def order_key(r: dict):
 
 
 def write(dataset: str, rows: List[dict], rd: Path = RD, build: Path = BUILD) -> Tuple[Path, Path]:
+    """The committed index under *rd* and the private text under *build*
+    (a collection's ``rd`` / ``build``)."""
     rows = sorted(rows, key=order_key)
     index = rd / dataset / "pool.jsonl"
     text = build / dataset / "pool.jsonl"
@@ -191,8 +226,10 @@ def main(argv=None) -> int:
     ap.add_argument("datasets", nargs="*", choices=list(DATASETS), help="default: all")
     ap.add_argument("--english-check", action="store_true",
                     help="only measure the ShareGPT English heuristic against WildChat's labels")
+    ap.add_argument("--collection", choices=list(COLLECTIONS), default="test1")
     args = ap.parse_args(argv)
     args.datasets = args.datasets or list(DATASETS)
+    coll = COLLECTIONS[args.collection]
     m = manifest.load()
     if args.english_check:
         m["datasets"].setdefault("sharegpt", {})["english_heuristic_vs_wildchat_label"] = r = english_check()
@@ -200,16 +237,16 @@ def main(argv=None) -> int:
         print(r)
         return 0
     for ds in args.datasets:
-        rows, counts = sample(ds)
-        index, _ = write(ds, rows)
+        rows, counts = sample(ds, coll=coll)
+        index, _ = write(ds, rows, coll.rd, coll.build)
         by = Counter((r["kind"], r["split"]) for r in rows)
-        m["datasets"].setdefault(ds, {})
-        m["datasets"][ds]["raw_files"] = manifest.raw_hashes(ds)
-        m["datasets"][ds]["pull_counts"] = dict(sorted(counts.items()))
-        m["datasets"][ds]["drawn"] = {f"{k}_{s}": v for (k, s), v in sorted(by.items())}
-        m["datasets"][ds]["seeds"] = {k: derive_seed(ds, *k.split("/")) for k in
-                                      ("multi", "single", "multi/split", "single/split")}
-        m["frozen"][f"{ds}/pool.jsonl"] = manifest.file_hash(index)
+        d = manifest.section(m, coll).setdefault(ds, {})
+        d["raw_files"] = manifest.raw_hashes(ds)
+        d["pull_counts"] = dict(sorted(counts.items()))
+        d["drawn"] = {f"{k}_{s}": v for (k, s), v in sorted(by.items())}
+        d["seeds"] = ({k: derive_seed(ds, *k.split("/")) for k in ("multi", "single", "multi/split", "single/split")}
+                      if not coll.prefix else {k: coll.seed(ds, k) for k in ("multi", "single")})
+        m["frozen"][coll.key(f"{ds}/pool.jsonl")] = manifest.file_hash(index)
         print(f"{ds}: drawn {dict(by)}  -> {index.relative_to(manifest.ROOT)}")
     manifest.save(m)
     return 0
