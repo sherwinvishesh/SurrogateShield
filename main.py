@@ -244,17 +244,11 @@ def _run_pii_finder() -> None:
     _detailed  = _settings["detailed_view"]
     _show_pres = _settings["presidio_comparison"]
     _set_detailed_logging(_detailed)
-    from detection.logic import run_cascade, deduplicate
+    from detection.logic import run_cascade, deduplicate, generation_settings
     from detection.service_query import resolve as resolve_service
     from generation.logic import MimicGen
     from detection.service_query import resolve_address_mode
     from util import apply_entity_surrogates
-    from config import (
-        ADDRESS_MODE,
-        ADDRESS_SHIFT_RANGE,
-        SERVICE_QUERY_DETECTION_ENABLED,
-    )
-
     mimic = MimicGen()
 
     # ── Initialize Presidio once upfront ─────────────────────────────
@@ -374,8 +368,8 @@ def _run_pii_finder() -> None:
             continue
 
         # ── Service query path ────────────────────────────────────────────────
-        is_svc, sq_mode = resolve_service(user_input, ADDRESS_MODE,
-                                          SERVICE_QUERY_DETECTION_ENABLED)
+        gen = generation_settings()
+        is_svc, sq_mode = resolve_service(user_input, gen["address_mode"], gen["service"])
         if is_svc:
             # v2: addresses flow through the unified detect→generate path.
             # "auto" resolves to shift (±N house number), or to coarse ("my
@@ -391,8 +385,9 @@ def _run_pii_finder() -> None:
                 mimic.generate_all(
                     sq_confirmed,
                     address_mode=sq_mode,
-                    address_shift_range=ADDRESS_SHIFT_RANGE,
+                    address_shift_range=gen["address_shift_range"],
                     text=user_input,
+                    redact=gen["redact"],
                 )
                 if sq_confirmed
                 else {}
@@ -412,7 +407,7 @@ def _run_pii_finder() -> None:
                     for orig, surr in addr_map.items()
                 )
                 mode_note = (
-                    f"House number ±{ADDRESS_SHIFT_RANGE}, city/state unchanged"
+                    f"House number ±{gen['address_shift_range']}, city/state unchanged"
                     if sq_mode == "shift"
                     else "Street line coarsened to 'my area', city/state unchanged"
                     if sq_mode == "coarse"
@@ -480,13 +475,14 @@ def _run_pii_finder() -> None:
             _show_presidio_panel(user_input)
             continue
 
-        std_mode = resolve_address_mode(ADDRESS_MODE, False)
+        std_mode = resolve_address_mode(gen["address_mode"], False)
         surrogate_map = (
             mimic.generate_all(
                 confirmed,
                 address_mode=std_mode,
-                address_shift_range=ADDRESS_SHIFT_RANGE,
+                address_shift_range=gen["address_shift_range"],
                 text=user_input,
+                redact=gen["redact"],
             )
             if confirmed
             else {}

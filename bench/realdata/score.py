@@ -226,6 +226,13 @@ def read_spans(full: Path, units: Sequence[dict], input_sha: str) -> Dict[str, d
     return rows
 
 
+def config_hash(full: Path) -> Optional[str]:
+    """The DetectionConfig hash an arm wrote into *full*'s ``.meta.json``
+    (V3 §3.6; None for an arm without one)."""
+    meta = json.loads(Path(str(full) + ".meta.json").read_text())
+    return (meta.get("config") or {}).get("detection_config_hash")
+
+
 def produce(arm: str, src: Path, name: str, reuse: bool, input_sha: str, units: Sequence[dict],
             runner: Optional[Callable] = None, spans: Optional[Path] = None) -> Dict[str, dict]:
     """Run *arm* on *src* (unless *reuse*) and read back its checked spans."""
@@ -432,15 +439,24 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
     all_units: Dict[str, List[dict]] = {}
     all_scores: Dict[str, Dict[str, List[dict]]] = {}
     corpus = {}
+    hashes_seen: Dict[str, set] = defaultdict(set)
+    from bench.arms.run import PRIVATE
     for ds in datasets:
         units, src, input_sha = loaded[ds]["units"], loaded[ds]["src"], loaded[ds]["input_sha"]
         all_units[ds] = units
         all_scores[ds] = {}
         for arm in arms:
             rows = produce(arm, src, f"{split}-{ds}", reuse, input_sha, units, runner, spans)
+            hashes_seen[arm].add(config_hash((spans or PRIVATE) / arm / f"{split}-{ds}.jsonl"))
             all_scores[ds][arm] = [score_unit(u, rows[u["mid"]]) for u in units]
             log(f"{split} {ds:9} {arm:22} scored {len(units)} messages")
         corpus[ds] = loaded[ds]["corpus"]
+    config_hashes = {}
+    for arm, seen in hashes_seen.items():
+        if len(seen) > 1:
+            raise SystemExit(f"{arm}: span files made with different detection configs {sorted(map(str, seen))}")
+        if None not in seen:
+            config_hashes[arm] = next(iter(seen))
     pooled = "all" if len(datasets) > 1 else None
     groups = list(datasets) + ([pooled] if pooled else [])
     results, diffs = {}, {}
@@ -463,6 +479,7 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
            **({"data_split": data, "collection": coll.name} if split not in ("dev", "test") else {}),
            **({"freeze_sha256": sealed} if sealed else {}),
            "frozen": hashes, "arms": list(arms), "slices": list(SLICES), "corpus": corpus,
+           **({"config_hashes": config_hashes} if config_hashes else {}),
            "claimed_types": {a: list(CLAIMED[a]) for a in arms}, "universes": {k: list(v) for k, v in UNIVERSES.items()},
            "bootstrap": {"resamples": RESAMPLES, "unit": "conversation (a single-turn prompt is its own)",
                          "seed": "derive_seed('score-bootstrap', split, dataset, slice)", "ci": "percentile 2.5 / 97.5",

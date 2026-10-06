@@ -30,6 +30,8 @@ import warnings
 from typing import Dict, List, Union
 
 from ._state import Config, cfg
+from .core.detection.config import DetectionConfig, from_partial, preset
+from .core.detection.plugins import Candidate, register_detector
 from .core.errors import DetectorUnavailable
 from .core.storage.shadow_map import StorageError
 from .session import (
@@ -46,6 +48,7 @@ __all__ = [
     "config", "scan", "pii_finder", "mask", "mask_result", "unmask", "forget", "flush",
     "Session", "Config", "Detection", "MaskResult", "current_session", "use_session",
     "DetectorUnavailable", "StorageError", "__version__",
+    "DetectionConfig", "preset", "register_detector", "Candidate",
 ]
 
 
@@ -67,6 +70,18 @@ _VALID_PII_OFF = {
     "phone", "postal_code", "zip", "postcode", "name", "names",
     "location", "facility", "bank", "license", "username", "password",
 }
+
+
+def _detection(value):
+    """A ``detection`` setting as a DetectionConfig (or None)."""
+    if value is None or isinstance(value, DetectionConfig):
+        return value
+    if isinstance(value, str):
+        return preset(value)
+    if isinstance(value, dict):
+        return from_partial(value)
+    raise ValueError(f"detection must be a preset name, a DetectionConfig, a dict or None, "
+                     f"got {type(value).__name__}")
 
 
 def _validate_config(**kwargs) -> None:
@@ -151,6 +166,7 @@ def config(
     verify_addresses=_UNSET,
     context_guard_model=_UNSET,
     context_guard_device=_UNSET,
+    detection=_UNSET,
 ) -> Config:
     """
     Change the settings that sessions use. Only the arguments you pass
@@ -199,6 +215,13 @@ def config(
                                         the output (audit F3).
         context_guard_model:            HuggingFace model for ContextGuard.
         context_guard_device:           Device for ContextGuard (-1 = CPU, >= 0 = GPU id).
+        detection:                      The detection config: a preset name ("fast",
+                                        "balanced", "strict"), a DetectionConfig, a
+                                        dict of one (DetectionConfig.to_dict()), or
+                                        None for the environment's / "balanced".
+                                        The flat settings above that differ from
+                                        their defaults apply on top of it. See
+                                        CONFIGURATION.md.
 
     Raises:
         ValueError:   On any invalid setting (unknown address_mode, threshold out
@@ -212,6 +235,8 @@ def config(
                       DeprecationWarning, stacklevel=2)
     if "pii_off" in changes:
         changes["pii_off"] = list(changes["pii_off"] or [])
+    if "detection" in changes:
+        changes["detection"] = _detection(changes["detection"])
     merged = {f: getattr(cfg, f) for f in Config.__dataclass_fields__}
     merged.update(changes)
     _validate_config(**merged)

@@ -19,39 +19,42 @@ import os
 import logging
 import re
 import threading
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..entities import DetectedEntity
 from ..errors import DetectorUnavailable
 
 logger = logging.getLogger(__name__)
 
-# Cache pipelines (or the reason loading failed) keyed by (model, device)
+# Cache pipelines (or the reason loading failed) keyed by (model, device, revision)
 _ner_pipelines: Dict[object, object] = {}
 _ner_lock = threading.Lock()
 
 
-def _get_ner(model_name: str = "dslim/distilbert-NER", device: int = -1):
-    """Lazy-load and cache the HuggingFace NER pipeline by (model, device).
+def _get_ner(model_name: str = "dslim/distilbert-NER", device: int = -1,
+             revision: Optional[str] = None):
+    """Lazy-load and cache the HuggingFace NER pipeline by (model, device,
+    revision).
 
     Raises DetectorUnavailable if it cannot be loaded (audit I17): an
     enabled stage is never skipped silently.
     """
-    cache_key = (model_name, device)
+    cache_key = (model_name, device, revision)
     cached = _ner_pipelines.get(cache_key)
     if cached is None:
         with _ner_lock:
             cached = _ner_pipelines.get(cache_key)
             if cached is None:
-                cached = _ner_pipelines[cache_key] = _load_ner(model_name, device)
+                cached = _ner_pipelines[cache_key] = _load_ner(model_name, device, revision)
     if isinstance(cached, DetectorUnavailable):
         raise cached
     return cached
 
 
-def _local_model(model_name: str) -> str:
-    """The cached copy of *model_name*, so a load makes no network request
-    (audit N7). Only a model that is not cached yet is fetched, once."""
+def _local_model(model_name: str, revision: Optional[str] = None) -> str:
+    """The cached copy of *model_name* (at *revision*, a commit or branch;
+    None is the default branch), so a load makes no network request (audit
+    N7). Only a model that is not cached yet is fetched, once."""
     if os.path.isdir(model_name):
         return model_name
     try:
@@ -59,14 +62,14 @@ def _local_model(model_name: str) -> str:
     except ImportError:
         return model_name
     try:
-        return snapshot_download(model_name, local_files_only=True)
+        return snapshot_download(model_name, revision=revision, local_files_only=True)
     except OSError:         # not cached: LocalEntryNotFoundError
         if os.environ.get("HF_HUB_OFFLINE", "").lower() in ("1", "true", "yes", "on"):
             return model_name   # the pipeline raises; _load_ner reports it
-        return snapshot_download(model_name)
+        return snapshot_download(model_name, revision=revision)
 
 
-def _load_ner(model_name: str, device: int):
+def _load_ner(model_name: str, device: int, revision: Optional[str] = None):
     try:
         from transformers import pipeline as hf_pipeline
     except ImportError:
@@ -77,7 +80,7 @@ def _load_ner(model_name: str, device: int):
     try:
         pipeline = hf_pipeline(
             "ner",
-            model=_local_model(model_name),
+            model=_local_model(model_name, revision),
             aggregation_strategy="simple",
             device=device,
         )
@@ -135,6 +138,7 @@ def guard(
     enabled: bool = True,
     confidence_threshold: float = 0.70,
     device: int = -1,
+    revision: Optional[str] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Run NER on remaining_text and verify borderline_entities.
@@ -145,6 +149,8 @@ def guard(
         model_name:          HuggingFace model to use for NER inference.
         enabled:             If False, skip NER inference entirely.
         confidence_threshold: Minimum score to promote a borderline entity.
+        revision:            Model revision (commit) to load; None is the
+                             default branch.
 
     Returns:
         Tuple of (confirmed_entities, uncertain_entities).
@@ -173,7 +179,7 @@ def guard(
     if not clean.strip():
         return confirmed, uncertain
 
-    ner = _get_ner(model_name, device)
+    ner = _get_ner(model_name, device, revision)
     try:
         results = ner(clean)
     except Exception as exc:

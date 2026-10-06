@@ -5,7 +5,13 @@ surrogateshield/cli.py — the ``surrogateshield`` command.
     surrogateshield mask   [TEXT | -]            print the text to send
     surrogateshield unmask [TEXT | -] -s ID      restore an answer
     surrogateshield bench                        mask latency, p50 / p95
-    surrogateshield doctor                       check models, storage, keys
+    surrogateshield doctor                       check models, storage, keys;
+                                                 print the detection config
+
+``--preset NAME`` (fast / balanced / strict) or ``--detection-config FILE``
+(a DetectionConfig as JSON, partial or whole) choose the detection config;
+``SURROGATESHIELD_PRESET`` / ``SURROGATESHIELD_DETECTION_CONFIG`` do the same
+from the environment. See CONFIGURATION.md.
 
 TEXT defaults to stdin. ``mask`` keeps the surrogate map encrypted under
 ``~/.surrogateshield/sessions`` (``SURROGATESHIELD_HOME`` moves it) so a later
@@ -62,6 +68,20 @@ def _config(args):
         c.context_guard_enabled = False
     if getattr(args, "pii_off", None):
         c.pii_off = list(args.pii_off)
+    if getattr(args, "preset", None) or getattr(args, "detection_config", None):
+        from .core.detection import config as dconfig
+        from ._state import effective_detection
+        det = dconfig.preset(args.preset) if args.preset else effective_detection(c)
+        if args.detection_config:
+            try:
+                overrides = json.loads(Path(args.detection_config).read_text(encoding="utf-8"))
+            except OSError as exc:
+                raise ValueError(f"cannot read --detection-config: {exc}") from exc
+            if args.preset and isinstance(overrides, dict) and overrides.get("preset", args.preset) != args.preset:
+                raise ValueError(f"--preset {args.preset} and the file's preset "
+                                 f"{overrides['preset']!r} disagree")
+            det = dconfig.from_partial(overrides, det)
+        c.detection = det
     return c
 
 
@@ -124,13 +144,16 @@ def cmd_unmask(args, out) -> int:
 
 
 def latency(texts: Sequence[str], *, context_guard: bool, rounds: int = 3,
-            seed: int = 0) -> dict:
+            seed: int = 0, detection=None) -> dict:
     """Wall time of ``Session.mask`` per message, in ms, after one warm-up
     pass that loads the models. Used by ``surrogateshield bench`` and
-    ``bench/perf.py``."""
+    ``bench/perf.py``. *detection* is a DetectionConfig (default: the
+    configured one)."""
     from ._state import cfg
     from .session import Session
     c = dataclasses.replace(cfg, context_guard_enabled=context_guard)
+    if detection is not None:
+        c.detection = detection
     with Session(config=c, seed=seed) as s:
         for t in texts:
             s.mask(t)                               # warm-up: model loads
@@ -144,40 +167,115 @@ def latency(texts: Sequence[str], *, context_guard: bool, rounds: int = 3,
     return {"context_guard": context_guard, "messages": len(ms),
             "p50_ms": round(statistics.median(ms), 1),
             "p95_ms": round(ms[min(len(ms) - 1, int(0.95 * len(ms)))], 1),
-            "max_ms": round(ms[-1], 1)}
+            "max_ms": round(ms[-1], 1),
+            **({"preset": detection.preset} if detection is not None else {})}
 
 
 def cmd_bench(args, out) -> int:
-    modes = [False] if args.no_context_guard else [False, True]
-    rows = [latency(BENCH_TEXTS, context_guard=m, rounds=args.rounds) for m in modes]
+    det = _config(args).detection
+    if det is not None:                 # --preset / --detection-config: that config only
+        cg = det.enabled("context_guard") and not args.no_context_guard
+        rows = [latency(BENCH_TEXTS, context_guard=cg, rounds=args.rounds, detection=det)]
+    else:
+        modes = [False] if args.no_context_guard else [False, True]
+        rows = [latency(BENCH_TEXTS, context_guard=m, rounds=args.rounds) for m in modes]
     if args.json:
         out.write(json.dumps(rows) + "\n")
     else:
         for r in rows:
             name = "with ContextGuard" if r["context_guard"] else "without ContextGuard"
+            if "preset" in r:
+                name = f"{r['preset']}, {name[:-12].strip()} CG"
             out.write(f"{name:<22} p50 {r['p50_ms']:>7.1f} ms   p95 {r['p95_ms']:>7.1f} ms"
                       f"   ({r['messages']} masks)\n")
     return EXIT_OK
 
 
-def _check_models(c) -> List[tuple]:
+def _spacy_meta(name: str) -> dict:
+    import spacy
+    path = spacy.util.get_package_path(name)
+    meta = path / "meta.json"
+    if not meta.exists():
+        meta = next(path.glob("*/meta.json"))
+    return json.loads(meta.read_text(encoding="utf-8"))
+
+
+def _check_models(det) -> List[tuple]:
+    """One row per model an enabled stage of *det* loads: installed or
+    cached at its revision, with the version and licence."""
+    from .core.detection.config import MODEL_LICENCES
     rows = []
+    et, cg = det.stage("entity_trace"), det.stage("context_guard")
     try:
         import spacy
-        ok = spacy.util.is_package(c.spacy_model)
-        rows.append(("spaCy model " + c.spacy_model, ok, True,
-                     "" if ok else f"python -m spacy download {c.spacy_model}"))
+        ok = spacy.util.is_package(et.model)
+        note = f"python -m spacy download {et.model}"
+        if ok:
+            meta = _spacy_meta(et.model)
+            version = meta.get("version")
+            note = (f"version {version}, licence {meta.get('license') or MODEL_LICENCES.get(et.model, '?')}"
+                    + (f"; the config pins {et.revision}" if et.revision and version != et.revision else ""))
+        rows.append(("spaCy model " + et.model, ok, et.enabled, note))
     except ImportError as exc:
-        rows.append(("spaCy", False, True, str(exc)))
+        rows.append(("spaCy", False, et.enabled, str(exc)))
     try:
         from huggingface_hub import try_to_load_from_cache
-        hit = try_to_load_from_cache(c.context_guard_model, "config.json")
+        hit = try_to_load_from_cache(cg.model, "config.json", revision=cg.revision)
         ok = isinstance(hit, str)
-        rows.append(("ContextGuard model " + c.context_guard_model, ok, c.context_guard_enabled,
-                     "" if ok else "not in the local Hugging Face cache; the first scan downloads it"))
+        rev = f"@{cg.revision[:12]}" if cg.revision else ""
+        rows.append((f"ContextGuard model {cg.model}{rev}", ok, cg.enabled,
+                     f"licence {MODEL_LICENCES.get(cg.model, 'not recorded')}" if ok
+                     else "not in the local Hugging Face cache at this revision; the first scan downloads it"))
     except ImportError as exc:
-        rows.append(("transformers / huggingface_hub", False, c.context_guard_enabled, str(exc)))
+        rows.append(("transformers / huggingface_hub", False, cg.enabled, str(exc)))
+    from .core.detection import plugins
+    for st in det.plugin_stages():
+        try:
+            plugins.get_detector(st)
+            rows.append((f"detector {st.name}", True, True, f"model {st.model}" if st.model else ""))
+        except Exception as exc:     # noqa: BLE001 - reported, the row fails
+            rows.append((f"detector {st.name}", False, True, str(exc)))
     return rows
+
+
+def _cold_start(det) -> List[tuple]:
+    """Load each enabled model stage once and time it (a fresh process
+    pays this on its first message)."""
+    from .core.detection import context_guard, entity_trace
+    rows = []
+    for name, load in (
+        ("entity_trace", lambda st: entity_trace._get_nlp(st.model)),
+        ("context_guard", lambda st: context_guard._get_ner(st.model, st.device, st.revision)),
+    ):
+        st = det.stage(name)
+        if not st.enabled:
+            continue
+        t = time.perf_counter()
+        try:
+            load(st)
+            rows.append((f"cold start {name} ({st.model})", True, True,
+                         f"{(time.perf_counter() - t) * 1000:.0f} ms"))
+        except Exception as exc:     # noqa: BLE001 - reported, the row fails
+            rows.append((f"cold start {name} ({st.model})", False, True, str(exc)))
+    return rows
+
+
+def _describe(det, source: str) -> List[str]:
+    lines = [f"detection config: preset {det.preset}, hash {det.config_hash()[:16]} ({source})"]
+    for st in det.detectors:
+        bits = ["on" if st.enabled else "off"]
+        if st.model:
+            bits.append(st.model + (f"@{st.revision[:12]}" if st.revision else ""))
+        if st.thresholds:
+            bits.append(" ".join(f"{k}={v:g}" for k, v in sorted(st.thresholds.items())))
+        if st.max_latency_ms is not None:
+            bits.append(f"budget {st.max_latency_ms:g} ms")
+        lines.append(f"  stage {st.name:14} " + ", ".join(bits))
+    actions = ", ".join(f"{k} {v}" for k, v in sorted(det.type_actions.items()))
+    lines.append(f"  actions        {actions or 'replace'} (others replace)")
+    gate = "off" if not det.gate else ("bypassed by " + ", ".join(det.gate_bypass) if det.gate_bypass else "on")
+    lines.append(f"  relation gate  {gate}")
+    return lines
 
 
 def _check_storage() -> List[tuple]:
@@ -201,16 +299,33 @@ def _check_storage() -> List[tuple]:
 
 
 def cmd_doctor(args, out) -> int:
-    c = _config(args)
+    from ._state import effective_detection
+    from .core.detection import config as dconfig
+    try:
+        c = _config(args)
+        det = effective_detection(c)
+    except (ValueError, TypeError) as exc:
+        out.write(f"[FAIL] detection config — {exc}\n")
+        return EXIT_FAIL
+    source = ("--preset / --detection-config" if getattr(args, "preset", None) or getattr(args, "detection_config", None)
+              else "the environment" if c.detection is None and dconfig.env_selected() else
+              "settings" if c.detection is not None else "default")
+    for line in _describe(det, source):
+        out.write(line + "\n")
+    if args.show_config:
+        out.write(det.to_json() + "\n")
+    cg_on = det.enabled("context_guard")
     rows = [("python " + ".".join(map(str, sys.version_info[:3])), sys.version_info >= (3, 9), True, "")]
     for mod in ("faker", "cryptography", "rapidfuzz", "spacy", "transformers", "torch"):
         try:
             __import__(mod)
             rows.append((f"import {mod}", True, True, ""))
         except ImportError as exc:
-            rows.append((f"import {mod}", False, mod not in ("transformers", "torch")
-                         or c.context_guard_enabled, str(exc)))
-    rows += _check_models(c)
+            rows.append((f"import {mod}", False, (mod not in ("transformers", "torch") or cg_on)
+                         and (mod != "spacy" or det.enabled("entity_trace")), str(exc)))
+    rows += _check_models(det)
+    if args.cold_start and all(ok or not req for _, ok, req, _ in rows):
+        rows += _cold_start(det)
     rows += _check_storage()
     if args.smoke and all(ok or not req for _, ok, req, _ in rows):
         from .core.errors import DetectorUnavailable
@@ -245,6 +360,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="skip the distilbert-NER stage (faster, lower recall)")
         sp.add_argument("--pii-off", nargs="*", metavar="TYPE",
                         help="types to send as is (e.g. phone email)")
+        sp.add_argument("--preset", choices=("fast", "balanced", "strict"),
+                        help="detection preset (default: balanced, or $SURROGATESHIELD_PRESET)")
+        sp.add_argument("--detection-config", metavar="FILE",
+                        help="a DetectionConfig as JSON (partial or whole), see CONFIGURATION.md")
 
     sp = sub.add_parser("scan", help="list the PII found in TEXT")
     common(sp)
@@ -277,6 +396,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("doctor", help="check models, dependencies and key storage")
     common(sp, text=False)
     sp.add_argument("--smoke", action="store_true", help="also mask one sample message")
+    sp.add_argument("--cold-start", action="store_true", help="also load each model and time it")
+    sp.add_argument("--show-config", action="store_true", help="print the whole detection config as JSON")
     sp.set_defaults(func=cmd_doctor)
     return p
 

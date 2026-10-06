@@ -53,7 +53,7 @@ def test_I17_context_guard_missing_model_raises(no_ner_cache, monkeypatch):
 def test_I17_context_guard_inference_error_raises(no_ner_cache):
     def broken(_text):
         raise RuntimeError("cuda gone")
-    cg._ner_pipelines[("fake", -1)] = broken
+    cg._ner_pipelines[("fake", -1, None)] = broken
     with pytest.raises(DetectorUnavailable, match="cuda gone"):
         cg.guard(TEXT, [], model_name="fake", enabled=True)
 

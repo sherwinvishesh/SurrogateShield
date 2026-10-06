@@ -80,12 +80,13 @@ def traced_prepare():
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     from generation.logic import MimicGen
     from json_tester import prepare_send
-    from bench.arms.ss import ADDRESS_MODE
+    from bench.arms.ss import detection_config
+    cfg = detection_config()
 
     def fn(text: str, seed: int):
         trace: List[dict] = []
         try:
-            return prepare_send(text, MimicGen(seed=seed), {"trace": trace}, address_mode=ADDRESS_MODE), trace
+            return prepare_send(text, MimicGen(seed=seed), {"trace": trace}, config=cfg), trace
         except RuntimeError as exc:
             if str(exc).startswith("could not generate a surrogate"):
                 return None, trace

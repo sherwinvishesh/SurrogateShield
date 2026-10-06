@@ -12,7 +12,7 @@ from surrogateshield.core.detection import context_guard as cg
 def test_N7_cached_model_is_resolved_locally(monkeypatch):
     calls = []
 
-    def fake(repo, local_files_only=False):
+    def fake(repo, revision=None, local_files_only=False):
         calls.append(local_files_only)
         return "/cache/" + repo
     monkeypatch.setattr("huggingface_hub.snapshot_download", fake)
@@ -23,7 +23,7 @@ def test_N7_cached_model_is_resolved_locally(monkeypatch):
 def test_N7_missing_model_is_fetched_once_unless_offline(monkeypatch):
     calls = []
 
-    def fake(repo, local_files_only=False):
+    def fake(repo, revision=None, local_files_only=False):
         calls.append(local_files_only)
         if local_files_only:
             raise FileNotFoundError(repo)

@@ -322,6 +322,35 @@ VIEWS: Dict[str, Callable[[str], Optional[View]]] = {
 DEFAULT_VIEWS: Tuple[str, ...] = ("worded", "spelled", "dates", "folded", "joined")
 
 
+def chain(text: str, names: Sequence[str] = ("folded", "worded")) -> Optional[View]:
+    """The views *names* applied one after the other, as one view of *text*
+    (offsets map back to *text*); None when none of them changes it. The
+    view a detector plugin reads."""
+    out: Optional[View] = None
+    for name in names:
+        v = VIEWS[name](out.text if out is not None else text)
+        if v is None:
+            continue
+        if out is not None:
+            starts = tuple(out.starts[a] for a in v.starts)
+            ends = tuple(out.ends[b - 1] for b in v.ends)
+            v = View(v.name, v.text, starts, ends, ())
+        out = v
+    if out is None:
+        return None
+    changed, run = [], None
+    for i, ch in enumerate(out.text):
+        same = text[out.starts[i]:out.ends[i]] == ch
+        if not same and run is None:
+            run = i
+        elif same and run is not None:
+            changed.append((run, i))
+            run = None
+    if run is not None:
+        changed.append((run, len(out.text)))
+    return View("+".join(names), out.text, out.starts, out.ends, tuple(changed))
+
+
 def scan_views(
     text: str,
     taken: Sequence[DetectedEntity],

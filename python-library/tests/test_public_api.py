@@ -32,6 +32,7 @@ def test_public_all():
         "config", "scan", "pii_finder", "mask", "mask_result", "unmask", "forget", "flush",
         "Session", "Config", "Detection", "MaskResult", "current_session", "use_session",
         "DetectorUnavailable", "StorageError", "__version__",
+        "DetectionConfig", "preset", "register_detector", "Candidate",
     }
     assert ss.pii_finder is ss.scan
     for name in ss.__all__:

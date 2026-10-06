@@ -68,12 +68,6 @@ from storage.logic import RAG_STORE_ID, ShadowMap, surrogates_in_use
 from reconstruction.logic import ResolvePass
 from surrogateshield.core.consistency import assign_surrogates, quoted_back
 from chatbot.chat import ClaudeChat
-from config import (
-    ADDRESS_MODE,
-    ADDRESS_SHIFT_RANGE,
-    SERVICE_QUERY_DETECTION_ENABLED,
-)
-
 if TYPE_CHECKING:
     from chatbot.rag import RAGStore
 
@@ -125,13 +119,15 @@ def anonymise_text(text: str, mimic: Optional[MimicGen] = None, *,
     known = shadow.all_mappings() if shadow is not None else {}
     confirmed, _ = sentinel_layer.run_cascade(text, skip_values=quoted_back(known) or None)
     confirmed = sentinel_layer.deduplicate(confirmed)
+    gen = sentinel_layer.generation_settings()
     # Documents have no service-query context: "auto" resolves to replace.
-    doc_address_mode = ADDRESS_MODE if ADDRESS_MODE != "auto" else "replace"
+    doc_address_mode = gen["address_mode"] if gen["address_mode"] != "auto" else "replace"
     surrogate_map = assign_surrogates(
         confirmed, text, mimic, [shadow],
         forbidden=set(shadow.originals()) if shadow is not None else None,
         address_mode=doc_address_mode,
-        address_shift_range=ADDRESS_SHIFT_RANGE,
+        address_shift_range=gen["address_shift_range"],
+        redact=gen["redact"],
     )
     sanitised = apply_entity_surrogates(text, confirmed, surrogate_map)
     return sanitised, surrogate_map
@@ -205,8 +201,8 @@ class Pipeline:
         # Addresses flow through the normal detect→generate path in every mode;
         # ADDRESS_MODE decides shift vs replace ("auto" = shift only for
         # non-sensitive service queries — the v1 behaviour).
-        is_svc, address_mode = resolve_service(user_message, ADDRESS_MODE,
-                                               SERVICE_QUERY_DETECTION_ENABLED)
+        gen = sentinel_layer.generation_settings()
+        is_svc, address_mode = resolve_service(user_message, gen["address_mode"], gen["service"])
 
         # ── Step 1: Detection ─────────────────────────────────────────────────
         logger.info("[Pipeline] Running SentinelLayer cascade")
@@ -243,7 +239,8 @@ class Pipeline:
                 confirmed, user_message, self.mimic, [self.shadow, rag_shadow],
                 forbidden=set(self.shadow.originals()) | set(rag_map.values()),
                 address_mode=address_mode,
-                address_shift_range=ADDRESS_SHIFT_RANGE,
+                address_shift_range=gen["address_shift_range"],
+                redact=gen["redact"],
             )
 
             if detailed:

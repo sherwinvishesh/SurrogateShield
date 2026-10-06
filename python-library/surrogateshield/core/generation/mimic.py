@@ -22,7 +22,7 @@ import logging
 import random
 import re
 import string
-from typing import Dict, FrozenSet, List, Optional, Set
+from typing import Callable, Dict, FrozenSet, List, Optional, Set
 
 import datetime
 from faker import Faker
@@ -1340,6 +1340,16 @@ class MimicGen:
         logger.debug(f"[MimicGen] {entity.type}: generated a surrogate")
         return surrogate
 
+    def _placeholder(self, typ: str, chosen: Set[str], text: Optional[str]) -> str:
+        """``[TYPE_n]`` with the smallest n not issued yet and not in *text*."""
+        from ..detection.config import public_type
+        label, n = public_type(typ), 1
+        while True:
+            p = f"[{label}_{n}]"
+            if p not in self.used_surrogates and p not in chosen and not (text and p.lower() in text.lower()):
+                return p
+            n += 1
+
     def generate_all(
         self,
         entities: List[DetectedEntity],
@@ -1347,6 +1357,7 @@ class MimicGen:
         address_shift_range: int = 1,
         forbidden: Optional[Set[str]] = None,
         text: Optional[str] = None,
+        redact: Optional[Callable[[str], bool]] = None,
     ) -> Dict[str, str]:
         """
         Generate surrogates for all entities.
@@ -1365,6 +1376,10 @@ class MimicGen:
                                  (audit I5). Equality with an original, or
                                  (except for addresses) containing one as a
                                  whole value, is never accepted.
+            redact:              A test on an entity type: an entity it holds
+                                 for gets a numbered placeholder of its public
+                                 type ("[PERSON_1]") instead of a surrogate
+                                 (the DetectionConfig action "redact").
 
         People come first, longest names first, then e-mails, so "Sarah",
         "Ms. Mitchell" and ``sarah.m@…`` link to the surrogate of "Sarah
@@ -1435,6 +1450,13 @@ class MimicGen:
             for _, ent in sorted(enumerate(entities), key=order):
                 key = ent.text.strip()
                 if key in mapping:
+                    continue
+                if redact is not None and redact(ent.type):
+                    surrogate = self._placeholder(ent.type, chosen, text)
+                    mapping[key] = surrogate
+                    chosen.add(surrogate)
+                    self.used_surrogates.add(surrogate)
+                    blocked.add(surrogate)
                     continue
                 identity = ent.type in self._IDENTITY_TYPES
                 fallback = None

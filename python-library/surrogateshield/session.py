@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from typing import Dict, Iterator, List, Optional, Tuple
 
 from . import _display, _response_parser
-from ._state import Config, cfg as _default_config
+from ._state import Config, cfg as _default_config, effective_detection
 from .core.detection import pipeline as _pipeline
 from .core.consistency import assign_surrogates, quoted_back
 from .core.detection import service_query as _service_query
@@ -108,24 +108,20 @@ class Session:
         if not isinstance(text, str):
             raise TypeError(f"text must be a str, got {type(text).__name__}")
         c = self.config
-        is_svc, address_mode = _service_query.resolve(text, c.address_mode, c.service)
+        det = self.detection_config
+        is_svc, address_mode = _service_query.resolve(text, det.address_mode, det.service_queries)
         with self._lock:
             # Surrogates quoted back from earlier answers are not re-masked
             # (low-entropy ones such as "72" are values of their own, I5).
             known = quoted_back(self._shadow.get_all())
+        # "keep" types are detected and reported, like pii_off, not dropped
+        kept = {k: "replace" for k, a in det.type_actions.items() if a == "keep"}
         confirmed, _ = _pipeline.run_cascade(
             text=text,
             skip_values=known or None,
             skip_location_entities=is_svc,
             pii_off=None,                 # split below so scan() can report them
-            spacy_model=c.spacy_model,
-            context_guard_enabled=c.context_guard_enabled,
-            entity_trace_high_threshold=c.entity_trace_high_threshold,
-            entity_trace_low_threshold=c.entity_trace_low_threshold,
-            context_guard_threshold=c.context_guard_threshold,
-            entity_trace_fallback_threshold=c.entity_trace_fallback_threshold,
-            context_guard_model=c.context_guard_model,
-            context_guard_device=c.context_guard_device,
+            config=det.with_actions(**kept) if kept else det,
         )
         off = _pipeline.resolve_pii_off(c.pii_off)
         seen, detections, masked = set(), [], []
@@ -134,11 +130,18 @@ class Session:
                 continue
             seen.add((ent.start, ent.end))
             d = Detection(ent.text, ent.type, ent.start, ent.end, float(ent.score),
-                          ent.source, masked=ent.type not in off)
+                          ent.source, masked=ent.type not in off and not (kept and det.keeps(ent.type)))
             detections.append(d)
             if d.masked:
                 masked.append(ent)
-        return (is_svc, address_mode), detections, masked
+        return (is_svc, address_mode, det), detections, masked
+
+    @property
+    def detection_config(self):
+        """The :class:`DetectionConfig` this session detects with (its
+        ``detection`` setting, or the environment's, or ``balanced``, with
+        the flat settings that differ from their defaults on top)."""
+        return effective_detection(self.config)
 
     def scan(self, text: str) -> List[Detection]:
         """Detect PII without masking it, with the same settings as
@@ -163,28 +166,28 @@ class Session:
                 text is not masked (fail closed, audit I17).
             TypeError: *text* is not a str.
         """
-        (is_svc, address_mode), detections, masked = self._detect(text)   # models: outside the lock
+        (is_svc, address_mode, det), detections, masked = self._detect(text)   # models: outside the lock
         c = self.config
         with self._lock:
             self._check_open()
             if not masked:
                 result = MaskResult(text, tuple(detections), {}, is_svc)
             else:
-                result = self._substitute(text, is_svc, address_mode, detections, masked)
+                result = self._substitute(text, is_svc, address_mode, detections, masked, det)
             self._last_surrogates = frozenset(result.replacements.values())
             self._last_sent = result.text
         if c.detailed_view:
             _display.show_mask_results(result)
         return result
 
-    def _substitute(self, text, is_svc, address_mode, detections, masked) -> MaskResult:
-        c = self.config
+    def _substitute(self, text, is_svc, address_mode, detections, masked, det) -> MaskResult:
         unique = _pipeline.deduplicate(masked)
         replacements = assign_surrogates(
             unique, text, self._mimic, [self._shadow],
             forbidden=set(self._shadow.originals()),
             address_mode=address_mode,
-            address_shift_range=c.address_shift_range,
+            address_shift_range=det.address_shift_range,
+            redact=det.redacts if det.redacted_types() else None,
         )
         self._shadow.update({v: k for k, v in replacements.items()})
         edits = plan_substitutions(text, masked, replacements)

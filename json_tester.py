@@ -154,13 +154,17 @@ class Prepared:
 
 
 def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None,
-                 address_mode: Optional[str] = None) -> Prepared:
+                 address_mode: Optional[str] = None, config=None) -> Prepared:
     """Detect, generate surrogates and build the exact text to send.
 
     This is the single code path used by the runner and by
-    ``offline_eval.py --protection`` / ``--ablation``. *cascade_options* are
-    passed to ``run_cascade`` (stage switches for the ablation);
-    *address_mode* overrides ``config.ADDRESS_MODE`` (the benchmark pins it).
+    ``offline_eval.py --protection`` / ``--ablation``. *config* (a
+    ``DetectionConfig``) chooses the stages, thresholds, type routing and
+    per-type actions; None is the preset or config file the environment
+    names, else config.py's settings. *cascade_options* are passed to
+    ``run_cascade`` on top of it (stage switches for the ablation);
+    *address_mode* overrides the config's address action (the benchmark's
+    config pins it).
     """
     from config import (
         ADDRESS_MODE,
@@ -169,15 +173,24 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None,
     )
     from detection.logic import deduplicate, run_cascade
     from detection.service_query import resolve as resolve_service
+    from surrogateshield.core.detection import config as detection_config
     from util import plan_substitutions, splice
 
+    if config is None and detection_config.env_selected():
+        config = detection_config.from_env()
+    if config is not None:
+        mode, shift_range, service = config.address_mode, config.address_shift_range, config.service_queries
+    else:
+        mode, shift_range, service = ADDRESS_MODE, ADDRESS_SHIFT_RANGE, SERVICE_QUERY_DETECTION_ENABLED
+
     # Same address-mode resolution as pipeline.process_turn.
-    is_svc, address_mode = resolve_service(question, address_mode or ADDRESS_MODE,
-                                           SERVICE_QUERY_DETECTION_ENABLED)
+    is_svc, address_mode = resolve_service(question, address_mode or mode, service)
 
     timings: Dict[str, float] = {}
-    confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings,
-                               **(cascade_options or {}))
+    options = dict(cascade_options or {})
+    if config is not None:
+        options["config"] = config
+    confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings, **options)
     confirmed = deduplicate(confirmed)
     skipped = list(getattr(confirmed, "_skipped_entities", []))
 
@@ -186,8 +199,9 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None,
         mimic.generate_all(
             confirmed,
             address_mode=address_mode,
-            address_shift_range=ADDRESS_SHIFT_RANGE,
+            address_shift_range=shift_range,
             text=question,
+            redact=config.redacts if config is not None and config.redacted_types() else None,
         )
         if confirmed
         else {}

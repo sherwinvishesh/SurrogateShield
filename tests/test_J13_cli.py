@@ -109,3 +109,58 @@ def test_J13_packaging_has_entry_point_and_py_typed():
     assert (root / "py.typed").exists() and (root / "__main__.py").exists()
     toml = (root.parent / "pyproject.toml").read_text()
     assert 'surrogateshield = "surrogateshield.cli:main"' in toml and '"py.typed"' in toml
+
+
+def test_J13_doctor_prints_the_detection_config(monkeypatch, tmp_path):
+    from surrogateshield.core.detection import config as dconfig
+    monkeypatch.delenv(dconfig.ENV_PRESET, raising=False)
+    monkeypatch.delenv(dconfig.ENV_FILE, raising=False)
+    monkeypatch.setattr(cli, "_check_models", lambda det: [])
+    rc, out = run("doctor")
+    balanced = dconfig.preset("balanced").config_hash()[:16]
+    assert rc == 0 and f"preset balanced, hash {balanced} (default)" in out
+    assert "stage context_guard  on, dslim/distilbert-NER@dfa2838a1273" in out
+    rc, out = run("doctor", "--preset", "strict", "--show-config")
+    strict = dconfig.preset("strict")
+    assert rc == 0 and f"hash {strict.config_hash()[:16]} (--preset / --detection-config)" in out
+    shown = out[out.index("{"):out.rindex("}") + 1]
+    assert dconfig.DetectionConfig.from_json(shown) == strict
+    partial = tmp_path / "det.json"
+    partial.write_text(json.dumps({"gate_bypass": ["EMAIL"], "type_actions": {"PHONE": "redact"}}))
+    rc, out = run("doctor", "--detection-config", str(partial))
+    assert rc == 0 and "relation gate  bypassed by EMAIL" in out and "PHONE redact" in out
+    partial.write_text(json.dumps({"type_actions": {"PHONE": "erase"}}))
+    rc, out = run("doctor", "--detection-config", str(partial))
+    assert rc == cli.EXIT_FAIL and out.startswith("[FAIL] detection config")
+    rc, out = run("doctor", "--detection-config", str(tmp_path / "missing.json"))
+    assert rc == cli.EXIT_FAIL and "cannot read --detection-config" in out
+
+
+def test_J13_detection_config_flag_reaches_scan_and_mask(tmp_path):
+    keep = tmp_path / "keep.json"
+    keep.write_text(json.dumps({"type_actions": {"EMAIL": "keep"}}))
+    rc, out = run("scan", "--json", "--detection-config", str(keep), TEXT)
+    masked = {d["text"]: d["masked"] for d in json.loads(out)}
+    assert rc == 0 and masked == {"dana.w@example.com": False, "219-09-9999": True}
+    rc, out = run("mask", "--no-store", "--detection-config", str(keep), TEXT)
+    assert rc == 0 and "dana.w@example.com" in out and "219-09-9999" not in out
+    rc, out = run("mask", "--no-store", "--seed", "1", "--preset", "fast", TEXT)
+    assert rc == 0 and "dana.w@example.com" not in out
+    keep.write_text("[1, 2]")
+    assert run("scan", "--detection-config", str(keep), TEXT)[0] == cli.EXIT_FAIL
+
+
+def test_J13_bench_preset_runs_that_config_only(monkeypatch):
+    seen = []
+    def fake(texts, *, context_guard, rounds=3, seed=0, detection=None):
+        seen.append((context_guard, detection and detection.preset))
+        return {"context_guard": context_guard, "messages": 1, "p50_ms": 1.0, "p95_ms": 1.0,
+                "max_ms": 1.0, **({"preset": detection.preset} if detection else {})}
+    monkeypatch.setattr(cli, "latency", fake)
+    rc, out = run("bench", "--preset", "fast")
+    from surrogateshield.core.detection import config as dconfig
+    fast_cg = dconfig.preset("fast").enabled("context_guard")
+    assert rc == 0 and seen == [(fast_cg, "fast")] and out.startswith("fast, with")
+    seen.clear()
+    run("bench")
+    assert seen == [(False, None), (True, None)]

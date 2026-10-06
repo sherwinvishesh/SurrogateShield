@@ -44,7 +44,8 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity, mask_spans
 from . import canonical, pattern_scan, entity_trace, context_guard, relation_gate, structural
-from . import org_assembly
+from . import config as dconfig
+from . import org_assembly, plugins
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -1099,46 +1100,114 @@ def term_gender(text: str) -> Optional[str]:
     return next((g for g, terms in _TERM_GENDER.items() if term in terms), None)
 
 
+_UNSET = object()
+
+
+def stage_of(ent: DetectedEntity) -> str:
+    """The config stage an entity came from (``DetectionConfig.detectors``):
+    a PatternScan hit, one on a canonical view, a structural pass's PERSON
+    or ORG (Passes A, E, H mark theirs "pattern"), a model, or a plugin
+    (its source is the stage name)."""
+    src = ent.source
+    if src == "pattern":
+        if ent.view is not None:
+            return "canonicaliser"
+        return "structural" if ent.type in ("PERSON", "ORG") else "pattern_scan"
+    return _STAGE_OF_SOURCE.get(src, src)
+
+
+_STAGE_OF_SOURCE = {"ner": "entity_trace", "slm": "context_guard", "structural": "structural"}
+
+
+def detection_config(config: Optional["dconfig.DetectionConfig"] = None,
+                     **settings) -> "dconfig.DetectionConfig":
+    """The config a cascade runs with: *config*, else the environment's
+    (``SURROGATESHIELD_PRESET`` / ``SURROGATESHIELD_DETECTION_CONFIG``), else
+    ``balanced``; flat *settings* (the ``run_cascade`` keywords) on top."""
+    if config is None:
+        config = dconfig.from_env() if dconfig.env_selected() else _balanced()
+    settings = {k: v for k, v in settings.items() if v is not _UNSET}
+    return dconfig.from_settings(config, **settings) if settings else config
+
+
+_BALANCED: list = []
+
+
+def _balanced() -> "dconfig.DetectionConfig":
+    if not _BALANCED:
+        _BALANCED.append(dconfig.preset("balanced"))
+    return _BALANCED[0]
+
+
+def _routed(config, ents, stage: Optional[str] = None):
+    """*ents* that their stage may report (``type_sources``) at or above the
+    stage's per-type threshold."""
+    out = []
+    for e in ents:
+        st = stage or stage_of(e)
+        if config.allows(st, e.type) and e.score >= config.min_score(st, e.type):
+            out.append(e)
+    return out
+
+
+def _over_budget(config, stage: str, ms: float, timings) -> None:
+    budget = config.stage(stage).max_latency_ms
+    if budget is not None and ms > budget:
+        logger.warning(f"[SentinelLayer] {stage} took {ms:.1f} ms, over its budget of {budget:g} ms")
+        if timings is not None:
+            timings[f"{stage}_over_budget_ms"] = round(ms, 3)
+
+
 def run_cascade(
     text: str,
     skip_values: Optional[Set[str]] = None,
     skip_location_entities: bool = False,
     timings: Optional[Dict[str, float]] = None,
     *,
+    config: Optional["dconfig.DetectionConfig"] = None,
     pii_off=None,
-    spacy_model: str = "en_core_web_lg",
-    context_guard_enabled: bool = True,
-    entity_trace_high_threshold: float = 0.85,
-    entity_trace_low_threshold: float = 0.60,
-    context_guard_threshold: float = 0.70,
-    entity_trace_fallback_threshold: float = 0.65,
-    context_guard_model: str = "dslim/distilbert-NER",
-    context_guard_device: int = -1,
-    use_entity_trace: bool = True,
-    use_context_guard: Optional[bool] = None,
-    use_post_passes: bool = True,
-    canonical_views: Optional[Sequence[str]] = None,
+    spacy_model=_UNSET,
+    context_guard_enabled=_UNSET,
+    entity_trace_high_threshold=_UNSET,
+    entity_trace_low_threshold=_UNSET,
+    context_guard_threshold=_UNSET,
+    entity_trace_fallback_threshold=_UNSET,
+    context_guard_model=_UNSET,
+    context_guard_device=_UNSET,
+    use_entity_trace=_UNSET,
+    use_context_guard=_UNSET,
+    use_post_passes=_UNSET,
+    canonical_views=_UNSET,
     trace: Optional[list] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Execute the full SentinelLayer cascade then apply post-processing passes.
 
+    The stages, their models and thresholds, the type routing, the gate and
+    the types kept as typed come from *config* (a ``DetectionConfig``; None
+    is the environment's or ``balanced``, see :func:`detection_config`). The
+    flat keywords below are settings applied on top of it; left out, the
+    config's value stands (the defaults listed are ``balanced``'s).
+
     Args:
         text:                   Raw user message.
+        config:                 The DetectionConfig (detection/config.py).
         skip_values:            Surrogate strings to skip in PatternScan.
         skip_location_entities: Suppress ALL geo entities (service-query mode).
         timings:                If given, filled with wall-clock milliseconds
                                 of THIS pass: pattern_scan_ms, entity_trace_ms,
                                 context_guard_ms, post_passes_ms.
         pii_off:                PII type names/aliases to drop from the result
-                                (detected, then deliberately not replaced).
-        spacy_model:            spaCy model for EntityTrace.
+                                (detected, then deliberately not replaced),
+                                as are the config's types with action "keep".
+        spacy_model:            spaCy model for EntityTrace (en_core_web_lg).
         context_guard_enabled:  Run ContextGuard; when off, borderline NER
                                 entities at or above
                                 entity_trace_fallback_threshold are promoted.
         entity_trace_high_threshold / entity_trace_low_threshold:
-                                EntityTrace confirmed / borderline cut-offs.
-        context_guard_threshold: ContextGuard confirmation cut-off.
+                                EntityTrace confirmed / borderline cut-offs
+                                (0.85 / 0.60; fallback 0.65).
+        context_guard_threshold: ContextGuard confirmation cut-off (0.70).
         context_guard_model / context_guard_device:
                                 HuggingFace model and device for ContextGuard.
         use_entity_trace:       False skips spaCy NER (ablation, audit A9).
@@ -1161,6 +1230,24 @@ def run_cascade(
                                 Read by bench/realdata/attribute.py; it
                                 changes nothing in the result.
     """
+    config = detection_config(
+        config, spacy_model=spacy_model, context_guard_enabled=context_guard_enabled,
+        entity_trace_high_threshold=entity_trace_high_threshold,
+        entity_trace_low_threshold=entity_trace_low_threshold,
+        context_guard_threshold=context_guard_threshold,
+        entity_trace_fallback_threshold=entity_trace_fallback_threshold,
+        context_guard_model=context_guard_model, context_guard_device=context_guard_device,
+        use_entity_trace=use_entity_trace, use_context_guard=use_context_guard,
+        use_post_passes=use_post_passes, canonical_views=canonical_views)
+    et_stage, cg_stage = config.stage("entity_trace"), config.stage("context_guard")
+    et_th, cg_th = et_stage.thresholds, cg_stage.thresholds
+    spacy_model = et_stage.model or dconfig.SPACY_MODEL
+    use_entity_trace = et_stage.enabled
+    use_context_guard = cg_stage.enabled
+    use_post_passes = config.enabled("structural")
+    canonical_views = (tuple(config.stage("canonicaliser").options.get("views", canonical.DEFAULT_VIEWS))
+                       if config.enabled("canonicaliser") else ())
+
     _clock = time.perf_counter
     _t = _clock()
 
@@ -1186,7 +1273,7 @@ def run_cascade(
 
     # ── Stage 1: PatternScan ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 1: PatternScan")
-    pattern_results = pattern_scan.scan(text, skip_values=skip_values)
+    pattern_results = _routed(config, pattern_scan.scan(text, skip_values=skip_values), "pattern_scan")
     confirmed.extend(pattern_results)
     # URLs are opaque to the NER stages (audit I1): a model never sees
     # "github.com/Microsoft" or a query string, so it cannot tag a fragment.
@@ -1197,9 +1284,10 @@ def run_cascade(
     # adds: the NER stages read the same text as without it (a long masked
     # run of words shifts their scores), and a model span inside a view hit
     # is dropped after ContextGuard.
-    views = canonical.DEFAULT_VIEWS if canonical_views is None else tuple(canonical_views)
-    view_hits = canonical.scan_views(
-        text, pattern_results, views, lambda t: pattern_scan.scan(t, skip_values=skip_values)) if views else []
+    views = canonical_views
+    view_hits = _routed(config, canonical.scan_views(
+        text, pattern_results, views, lambda t: pattern_scan.scan(t, skip_values=skip_values)),
+        "canonicaliser") if views else []
     confirmed.extend(view_hits)
     _mark("canonicaliser")
     remaining_text = mask_spans(text, pattern_results)
@@ -1210,13 +1298,17 @@ def run_cascade(
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
     if use_entity_trace:
+        _t_et = _clock()
         ner_confirmed, ner_borderline = entity_trace.trace(
             remaining_text,
             existing_entities=confirmed,
             spacy_model=spacy_model,
-            high_threshold=entity_trace_high_threshold,
-            low_threshold=entity_trace_low_threshold,
+            high_threshold=et_th.get("high", 0.85),
+            low_threshold=et_th.get("low", 0.60),
         )
+        _over_budget(config, "entity_trace", (_clock() - _t_et) * 1000, timings)
+        ner_confirmed = _routed(config, ner_confirmed, "entity_trace")
+        ner_borderline = _routed(config, ner_borderline, "entity_trace")
     else:
         ner_confirmed, ner_borderline = [], []
     ner_confirmed  = _reclassify_location_orgs(ner_confirmed,  text)
@@ -1237,18 +1329,21 @@ def run_cascade(
     _mark("service_query_geo", borderline=ner_borderline)
 
     # ── Stage 3: ContextGuard ─────────────────────────────────────────────────
-    if use_context_guard is None:
-        use_context_guard = context_guard_enabled
     if use_context_guard:
         logger.info("[SentinelLayer] Stage 3: ContextGuard")
+        _t_cg = _clock()
         slm_confirmed, slm_uncertain = context_guard.guard(
             remaining_text=remaining_text,
             borderline_entities=ner_borderline,
-            model_name=context_guard_model,
+            model_name=cg_stage.model or dconfig.CONTEXT_GUARD_MODEL,
             enabled=True,
-            confidence_threshold=context_guard_threshold,
-            device=context_guard_device,
+            confidence_threshold=cg_th.get("accept", 0.70),
+            device=cg_stage.device,
+            revision=cg_stage.revision,
         )
+        _over_budget(config, "context_guard", (_clock() - _t_cg) * 1000, timings)
+        slm_confirmed = _routed(config, slm_confirmed)
+        slm_uncertain = _routed(config, slm_uncertain)
         if skip_location_entities:
             slm_confirmed = [e for e in slm_confirmed if e.type not in _GEO_TYPES]
             slm_uncertain = [e for e in slm_uncertain if e.type not in _GEO_TYPES]
@@ -1257,10 +1352,26 @@ def run_cascade(
     else:
         promoted = [
             e for e in ner_borderline
-            if e.score >= entity_trace_fallback_threshold
+            if e.score >= et_th.get("fallback", 0.65)
         ]
         if promoted:
             confirmed.extend(promoted)
+    # ── Detector plugins (and the PIITagger): the message as typed and its
+    # canonical view; routed and thresholded like a model's spans
+    plugin_stages = config.plugin_stages()
+    if plugin_stages:
+        pview = canonical.chain(text)
+        for st in plugin_stages:
+            _t_pl = _clock()
+            found = plugins.get_detector(st).detect(text, pview)
+            ents = _routed(config, plugins.candidates_to_entities(st.name, text, found), st.name)
+            if skip_location_entities:
+                ents = [e for e in ents if e.type not in _GEO_TYPES]
+            confirmed.extend(ents)
+            ms = (_clock() - _t_pl) * 1000
+            if timings is not None:
+                timings[f"{st.name}_ms"] = round(ms, 3)
+            _over_budget(config, st.name, ms, timings)
     if view_hits:
         def _inside_view(x: DetectedEntity) -> bool:
             return x.view is None and any(v.start <= x.start and x.end <= v.end for v in view_hits)
@@ -1279,7 +1390,7 @@ def run_cascade(
 
     if use_post_passes:
         # ── Pass A: Structural ORG detection ─────────────────────────────────────
-        structural_orgs = _detect_structural_orgs(text, confirmed)
+        structural_orgs = _routed(config, _detect_structural_orgs(text, confirmed), "structural")
         if structural_orgs:
             logger.info(
                 f"[SentinelLayer] Pass A: +{len(structural_orgs)} structural ORG(s)"
@@ -1294,6 +1405,7 @@ def run_cascade(
         if superseded:
             confirmed          = [e for e in confirmed          if e not in superseded]
             needs_confirmation = [e for e in needs_confirmation if e not in superseded]
+        structural_persons = _routed(config, structural_persons, "structural")
         if structural_persons:
             logger.info(
                 f"[SentinelLayer] Pass E: +{len(structural_persons)} structural PERSON(s)"
@@ -1317,6 +1429,8 @@ def run_cascade(
         # field, a work relation, a sign-off or the legal form says it is an
         # organisation, the whole name replaces every candidate inside it.
         org_names, org_parts = org_assembly.assemble(text, confirmed + needs_confirmation, opaque)
+        if not config.allows("structural", "ORG"):
+            org_names, org_parts = [], []
         if org_names:
             gone = {id(e) for e in org_parts}
             confirmed          = [e for e in confirmed          if id(e) not in gone] + org_names
@@ -1324,7 +1438,7 @@ def run_cascade(
         _mark("org_assembly")
 
         # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
-        brand_orgs = _detect_card_brand_orgs(confirmed, text)
+        brand_orgs = _routed(config, _detect_card_brand_orgs(confirmed, text), "structural")
         if brand_orgs:
             confirmed.extend(brand_orgs)
         _mark("card_brand_org")
@@ -1383,7 +1497,8 @@ def run_cascade(
         ents = confirmed if bucket == "confirmed" else needs_confirmation
         # NER/SLM entities, plus structural PERSONs (Pass E) — those only
         # face the junk and public-figure checks ("Emperor Meiji").
-        gated = [e for e in ents if e.source != "pattern" or e.type == "PERSON"]
+        gated = [e for e in ents if (e.source != "pattern" or e.type == "PERSON")
+                 and not config.bypasses_gate(e.type)]
         gated_ids = {id(e) for e in gated}
         others = [e for e in list(confirmed) + list(needs_confirmation)
                   if id(e) not in gated_ids]
@@ -1417,6 +1532,7 @@ def run_cascade(
             gone = {id(e) for e in removed}
             confirmed          = [e for e in confirmed          if id(e) not in gone]
             needs_confirmation = [e for e in needs_confirmation if id(e) not in gone]
+        added = _routed(config, added, "structural")
         if added:
             added = _outside_opaque(added, opaque) if opaque else added
             needs_confirmation = [e for e in needs_confirmation if not any(
@@ -1450,13 +1566,15 @@ def run_cascade(
     confirmed._skipped_entities = all_skipped
     confirmed._skip_reasons = skip_reasons
 
-    # ── pii_off filtering ─────────────────────────────────────────────────────
-    if pii_off:
+    # ── pii_off filtering, and the config's "keep" types ─────────────────────
+    keep = any(a == "keep" for a in config.type_actions.values())
+    if pii_off or keep:
         exclude_types = resolve_pii_off(pii_off)
 
         old_qi      = confirmed._qi_matches
         old_skipped = confirmed._skipped_entities
-        confirmed = _TaggedList([e for e in confirmed if e.type not in exclude_types])
+        confirmed = _TaggedList([e for e in confirmed if e.type not in exclude_types
+                                 and not (keep and config.keeps(e.type))])
         confirmed._qi_matches       = old_qi
         confirmed._skipped_entities = old_skipped
         confirmed._skip_reasons     = skip_reasons
