@@ -233,8 +233,27 @@ def latency(model: Path, units_by_ds, n: int = 300) -> dict:
 def brief(r: dict) -> dict:
     inj, nat = r["all"]["injected"], r["all"]["natural"]
     return {"leak": inj["leak"], "macro": inj["macro_leak_rate"], "leaked_by_type": inj["leaked_by_type"],
+            "values_by_type": {t: v["values"] - v["policy"] for t, v in inj["by_type"].items()},
             "natural_spurious": nat["spurious"]["k"], "natural_edits": nat["edits"],
             "negatives_untouched": nat["negatives_untouched"]}
+
+
+def acceptance(arms: dict, arm: str = "ss_tagger", gliners=("gliner_pii", "gliner_pii_tuned"),
+               per_type: float = 0.02, pooled: float = 0.06) -> dict:
+    """V3 §3.3 on one split: every type's leak at most the better GLiNER's on
+    the same rows or at most *per_type*; pooled leak at most *pooled*; natural
+    spurious edits at most the current SS's. Latency and RSS are measured apart."""
+    r = arms[arm]
+    rate = lambda a, t: (arms[a]["leaked_by_type"].get(t, 0) / arms[a]["values_by_type"][t]
+                         if arms[a]["values_by_type"].get(t) else 0.0)
+    types = {}
+    for t in sorted(r["values_by_type"]):
+        bound = max(per_type, min(rate(g, t) for g in gliners))
+        types[t] = {"rate": round(rate(arm, t), 4), "bound": round(bound, 4), "ok": rate(arm, t) <= bound}
+    checks = {"types": all(v["ok"] for v in types.values()),
+              "pooled": r["leak"]["rate"] <= pooled,
+              "spurious": r["natural_spurious"] <= arms["ss"]["natural_spurious"]}
+    return {"ok": all(checks.values()), "checks": checks, "by_type": types}
 
 
 def main(argv=None) -> int:
@@ -280,6 +299,9 @@ def main(argv=None) -> int:
             if arm != "config":
                 print(f"{arm:18s} leak {r['leak']['k']}/{r['leak']['n']} = {r['leak']['rate']}  natural spurious "
                       f"{r['natural_spurious']} of {r['natural_edits']}  {r['leaked_by_type']}")
+        doc["acceptance"] = acceptance(doc["with_ss"])
+        print(f"acceptance {doc['acceptance']['ok']} {doc['acceptance']['checks']} failing types "
+              f"{ {t: v for t, v in doc['acceptance']['by_type'].items() if not v['ok']} }")
     if not a.no_latency:
         doc["latency_cpu"] = latency(model, units_by_ds)
         print(f"latency (cpu, one message): {doc['latency_cpu']}")

@@ -262,3 +262,16 @@ def test_an_extra_config_merges_onto_the_tagger_stage():
     assert tagger["options"] == {"device": "cpu", "window": 128} and tagger["enabled"] is True
     assert other == {"name": "context_guard", "enabled": False}
     assert cfg["type_sources"] == {"PHONE": ["pattern_scan", "pii_tagger"]}
+
+
+def test_acceptance_per_type_pooled_and_spurious():
+    def arm(leaked, spurious, n=100):
+        return {"leaked_by_type": leaked, "values_by_type": {"ORG": n, "URL": n},
+                "leak": {"rate": sum(leaked.values()) / (2 * n)}, "natural_spurious": spurious}
+    arms = {"ss": arm({"ORG": 1}, 50), "gliner_pii": arm({"ORG": 5, "URL": 1}, 500),
+            "gliner_pii_tuned": arm({"ORG": 4, "URL": 0}, 600)}
+    ok = E.acceptance({**arms, "ss_tagger": arm({"ORG": 4, "URL": 2}, 40)})
+    assert ok["ok"] and ok["by_type"]["ORG"]["bound"] == 0.04 and ok["by_type"]["URL"]["bound"] == 0.02
+    bad = E.acceptance({**arms, "ss_tagger": arm({"ORG": 5, "URL": 3}, 60)})
+    assert not bad["ok"] and bad["checks"] == {"types": False, "pooled": True, "spurious": False}
+    assert [t for t, v in bad["by_type"].items() if not v["ok"]] == ["ORG", "URL"]
