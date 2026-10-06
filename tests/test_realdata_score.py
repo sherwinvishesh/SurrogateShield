@@ -380,3 +380,29 @@ def test_commit_note_flags_a_dirty_tree():
     assert commit_note(None) == ""
     assert commit_note({"commit": "a" * 40, "modified": []}) == " at commit `aaaaaaaaaaaa`"
     assert commit_note({"commit": "a" * 40, "modified": ["x.py", "y.py"]}).endswith("with 2 modified tracked file(s)")
+
+
+def test_held_out_formats_are_reported_apart():
+    from bench.tagger.data import HELD_OUT
+    assert tuple(S.HELD_OUT_FORMATS) == tuple(HELD_OUT)            # the scorer reports what training held out
+    text = "Call me on oh one six one, born March the 4th 1990, or 0161 496 0000."
+    g = _gold("m1", text, protect=[{"value": "oh one six one", "type": "PHONE", "fmt": "words"},
+                                   {"value": "March the 4th 1990", "type": "DATE_OF_BIRTH", "fmt": "month-ordinal"},
+                                   {"value": "0161 496 0000", "type": "PHONE", "fmt": "plain"}])
+    a = text.index("0161")
+    covers_plain = S.score_unit(_unit(g), {"edits": [[a, a + 13, "PHONE", "QQQ"]]})
+    h = S.held_out([covers_plain])
+    assert h["by_format"] == {"PHONE/words": S.rate(1, 1), "DATE_OF_BIRTH/month-ordinal": S.rate(1, 1)}
+    assert h["held_out"] == S.rate(2, 2) and h["same_types_other_formats"] == S.rate(0, 1)
+    assert S.held_out([S.score_unit(_unit(g), {"refused": True, "edits": []})])["held_out"] == S.rate(0, 2)
+    no_fmt = S.score_unit(_unit(_gold("m2", "Ada Byrne", protect=[{"value": "Ada Byrne", "type": "PERSON"}])),
+                          {"edits": []})
+    assert S.held_out([no_fmt])["held_out"] == S.rate(0, 0)          # records without formats count nothing
+
+
+def test_the_split_report_carries_the_held_out_block(bench, tmp_path):
+    doc = _score(bench, tmp_path)
+    h = doc["held_out_formats"]
+    assert h["formats"] == ["PHONE/words", "DATE_OF_BIRTH/month-ordinal"] and h["slice"] == "injected"
+    assert set(h["results"]) == {DS} and set(h["results"][DS]) == {"ss", "presidio_default"}
+    assert "formats the tagger never saw" in (tmp_path / "res" / "realdata_dev.md").read_text()

@@ -67,6 +67,8 @@ ARMS = ("ss", "presidio_default", "presidio_faker", "presidio_transformers", "ll
         "gliner_pii_tuned")
 BASELINES = ARMS[1:]
 SLICES = ("injected", "injected_single", "shift", "multi", "natural")
+# value formats the tagger never saw in training (bench.tagger.data.HELD_OUT; V3 §5.3.2), reported apart
+HELD_OUT_FORMATS = (("PHONE", "words"), ("DATE_OF_BIRTH", "month-ordinal"))
 RESAMPLES = 2000
 NATURAL_FROM = 1001
 # run name -> (data split, collection, role)
@@ -268,10 +270,12 @@ def score_unit(unit: dict, row: dict) -> dict:
     gold = unit["gold"]
     text = gold["text"]
     values = Counter(x["type"] for x in gold["protect"])
+    formats = Counter((x["type"], x["fmt"]) for x in gold["protect"] if x.get("fmt"))
     if "refused" in row:                     # nothing was sent, so nothing leaked and nothing was edited
         return {"values": values, "leaked": Counter(), "policy": Counter(), "edits": 0, "spurious": 0,
                 "keep_hits": 0, "spurious_types": Counter(), "sensitive": len(gold["sensitive"]),
-                "sensitive_leaked": 0, "refused": 1}
+                "sensitive_leaked": 0, "refused": 1, "formats": formats, "formats_leaked": Counter(),
+                "formats_policy": Counter()}
     r = rw.score_message(gold, SimpleNamespace(edits=[(s, e, text[s:e], rep) for s, e, _t, rep in row["edits"]]))
     gold_spans = [sp for name in ("protect", "sensitive", "optional") for x in gold[name]
                   for sp in rw.occurrences(text, x["value"])]
@@ -281,7 +285,9 @@ def score_unit(unit: dict, row: dict) -> dict:
     return {"values": values, "leaked": Counter(x["type"] for x in r["leaked"]),
             "policy": Counter(x["type"] for x in r["policy"]), "edits": len(row["edits"]),
             "spurious": len(r["spurious"]), "keep_hits": len(r["keep_hits"]), "spurious_types": spurious_types,
-            "sensitive": len(gold["sensitive"]), "sensitive_leaked": len(r["sensitive_leaked"]), "refused": 0}
+            "sensitive": len(gold["sensitive"]), "sensitive_leaked": len(r["sensitive_leaked"]), "refused": 0,
+            "formats": formats, "formats_leaked": Counter((x["type"], x["fmt"]) for x in r["leaked"] if x.get("fmt")),
+            "formats_policy": Counter((x["type"], x["fmt"]) for x in r["policy"] if x.get("fmt"))}
 
 
 # ── 5. aggregation ───────────────────────────────────────────────────────────
@@ -346,6 +352,20 @@ def aggregate(units: Sequence[dict], scores: Sequence[dict]) -> dict:
         "universes": {name: _universe(scores, types) for name, types in UNIVERSES.items()},
         "spurious_by_edit_type": dict(sorted(Counter(t for s in scores for t in s["spurious_types"].elements()).items())),
     }
+
+
+def held_out(scores: Sequence[dict], formats: Sequence[Tuple[str, str]] = HELD_OUT_FORMATS) -> dict:
+    """Leak on the values written in a held-out format, per format and together, beside the other
+    formats of the same types (V3 §5.3.2)."""
+    def count(keep):
+        n = sum(v for s in scores for f, v in s.get("formats", {}).items() if keep(f))
+        p = sum(v for s in scores for f, v in s.get("formats_policy", {}).items() if keep(f))
+        k = sum(v for s in scores for f, v in s.get("formats_leaked", {}).items() if keep(f))
+        return rate(k, n - p)
+    held, types = set(formats), {t for t, _f in formats}
+    return {"by_format": {f"{t}/{f}": count(lambda x, tf=(t, f): x == tf) for t, f in formats},
+            "held_out": count(lambda x: x in held),
+            "same_types_other_formats": count(lambda x: x[0] in types and x not in held)}
 
 
 METRICS = {   # name -> per-message (numerator, denominator)
@@ -505,6 +525,11 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
                          "seed": "derive_seed('score-bootstrap', split, dataset, slice)", "ci": "percentile 2.5 / 97.5",
                          "difference": "ss − arm"},
            "results": results, "differences": diffs,
+           "held_out_formats": {"formats": [f"{t}/{f}" for t, f in HELD_OUT_FORMATS], "slice": "injected",
+                                "results": {g: {a: held_out([s for ds in (datasets if g == "all" else [g])
+                                                             for u, s in zip(all_units[ds], all_scores[ds][a])
+                                                             if "injected" in u["slices"]]) for a in arms}
+                                            for g in groups}},
            "hypotheses": hypotheses(results, diffs, datasets, arms) if "ss" in arms else {}}
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
@@ -640,6 +665,17 @@ def markdown(doc: dict) -> str:
                   "|---|---|" + "---|" * len(arms)]
         for u, types_u in doc["universes"].items():
             lines.append(f"| {u} | {', '.join(types_u)} | " + " | ".join(_pct(r[a]["universes"][u]) for a in arms) + " |")
+        lines.append("")
+    if doc.get("held_out_formats"):
+        h = doc["held_out_formats"]
+        g = "all" if "all" in h["results"] else next(iter(h["results"]))
+        r = h["results"][g]
+        cols = list(r[arms[0]]["by_format"]) + ["held_out", "same_types_other_formats"]
+        lines += [f"## {g} — injected, formats the tagger never saw in training (leaked / values)", "",
+                  "| arm | " + " | ".join(cols) + " |", "|---|" + "---|" * len(cols)]
+        for a in arms:
+            cells = [r[a]["by_format"][c] if c in r[a]["by_format"] else r[a][c] for c in cols]
+            lines.append(f"| {a} | " + " | ".join(f"{x['k']} / {x['n']}" for x in cells) + " |")
         lines.append("")
     if doc["hypotheses"]:
         lines += ["## Pre-registered checks (injected slice)", "", "| dataset | H1 | H2 | SS leak worse than Presidio-default |",
