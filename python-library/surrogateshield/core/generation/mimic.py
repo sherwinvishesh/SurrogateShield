@@ -982,6 +982,8 @@ class MimicGen:
         original grouping/spacing preserved.
         """
         compact = re.sub(r"\s+", "", original)
+        if not re.fullmatch(r"[A-Za-z]{2}\d{2}[A-Za-z0-9]+", compact):
+            return self._shape_like(original)       # a plugin's "iban" that is not one
         country = compact[:2]
         body = "".join(
             str(self._rng.randint(0, 9)) if c.isdigit()
@@ -1009,7 +1011,7 @@ class MimicGen:
         return self.people.local(like) if like else self.people.local("user")
 
     def _gen_handle_like(self, original: str) -> str:
-        m = re.fullmatch(r"(@?)(.+?)(#\d{4})?", original)
+        m = re.fullmatch(r"(@?)(.+?)(#\d{4})?", original, re.S)
         prefix, body, tag = m.group(1), m.group(2), m.group(3)
         if tag:
             tag = "#" + "".join(str(self._rng.randint(0, 9)) for _ in range(4))
@@ -1024,7 +1026,10 @@ class MimicGen:
         """Same scheme and host style; the identifying part (profile path
         segment, personal sub-domain or domain label) becomes a fake slug."""
         from ..detection import pattern_scan as ps
-        m = re.match(r"(?i)((?:https?://)?(?:www\.)?)([^/?#\s]+)(.*)", original)
+        m = re.match(r"(?i)((?:https?://)?(?:www\.)?)([^/?#\s]+)(.*)", original, re.S)
+        if m is None:
+            # a model's URL with no host ("/u/jdoe", "#section"): its shape
+            return self._shape_like(original)
         lead, host, path = m.groups()
         hl = host.lower()
         marker = ps._PERSON_PATH_MARKERS.search(path)

@@ -563,3 +563,25 @@ def test_J4_url_carrying_a_name_takes_that_names_surrogate(name, url):
         sur = m[url]
         assert not re.search(rf"(?i)(?<![^\W_]){name}(?![^\W_])", sur), (seed, sur)
         assert m[name].replace(" ", "").lower() in sur.lower(), (seed, m)
+
+
+# ── a model's (or a plugin's) value of any shape gets a surrogate ────────────
+# A detector stage may report "/u/jdoe" as a URL, a handle broken over a line
+# or a plugin's own "iban" that is not one: the message must still go out.
+
+_ODD_VALUES = ["/path/to", "#anchor", "?q=1", "x", "12", "--", "a b c", "@", "ünïcödé", "😀 hi", "(555)",
+               "::1", "user@", "http://", "a/b", "twenty", "a\nb", "[x]", "000-00-0000", "fe80::", "SW1A"]
+
+
+def _all_generator_types():
+    from surrogateshield.core.detection.config import GENERATOR_TYPE, INTERNAL_TYPES
+    return sorted({t for v in INTERNAL_TYPES.values() for t in v} | set(GENERATOR_TYPE.values()))
+
+
+@pytest.mark.parametrize("etype", _all_generator_types())
+def test_every_type_has_a_surrogate_for_an_odd_value(etype):
+    for value in _ODD_VALUES:
+        for mode in ("replace", "shift"):
+            out = MimicGen(seed=7).generate(
+                DetectedEntity(value, 0, len(value), etype, 0.9, "pii_tagger"), address_mode=mode)
+            assert isinstance(out, str), (etype, value)
