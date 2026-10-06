@@ -83,6 +83,6 @@ The scorer checks every frozen file against `manifest.json`, and every rebuilt n
 
 ## 5. Provider calls
 
-`provider.py` takes every request from a persistent ledger (`experiment/realdata/ledger/`, cap 4,000 calls) *before* it is sent; a request that would pass the cap is not sent. A batch's id is saved as soon as it is created (`build/batches/`), so a rerun after a crash fetches the same batch instead of paying again. `live.py` caches each reply by the hash of its slot and request, so a rerun sends only what is missing, and its pilots (`--pilot N`) are a subset of the main run. The key comes from the environment or `.env` and is never printed or stored.
+`provider.py` takes every request from a persistent ledger (`experiment/realdata/ledger/`, cap 6,500 calls; 4,000 until test-2) *before* it is sent; a request that would pass the cap is not sent. A batch's id is saved as soon as it is created (`build/batches/`), so a rerun after a crash fetches the same batch instead of paying again. `live.py` caches each reply by the hash of its slot and request, so a rerun sends only what is missing, and its pilots (`--pilot N`) are a subset of the main run. The key comes from the environment or `.env` and is never printed or stored.
 
 Splits are 20 % dev / 80 % test, drawn over source prompts before any system ran; injected rows inherit their base prompt's split. Dev is for diagnosis; test is scored once, at a recorded commit.

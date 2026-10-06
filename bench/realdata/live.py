@@ -16,7 +16,7 @@ Roles. Responder: Claude Sonnet 4.6 (``config.CLAUDE_MODEL``) with the app's
 system prompt (``chatbot.chat.SYSTEM_PROMPT``) and ``max_tokens`` for every
 arm, the original included, as in Phase 8. Attacker and judge: Claude Opus
 5.5, never the responder. Every request goes through the Message Batches API
-and is taken from the run's call ledger (``provider.Ledger``, cap 4,000)
+and is taken from the run's call ledger (``provider.Ledger``, cap 6,500)
 before it is sent.
 
 Cache. Every reply is stored under ``experiment/realdata/<run>/`` (git-ignored,

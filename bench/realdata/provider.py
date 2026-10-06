@@ -28,7 +28,7 @@ from typing import Callable, Dict, Iterable, List, Optional
 
 from bench.realdata.common import BUILD, ROOT
 
-CAP = 4000                                  # PROMPT_FOR_OPUS_NEW §6 default (blanks left unfilled)
+CAP = 6500                                  # raised from 4,000 for test-2 and the live phase (PROMPT_FOR_OPUS_V3 §6 Q1)
 LEDGER = ROOT / "experiment" / "realdata" / "ledger"
 BATCHES = BUILD / "batches"
 SONNET = "claude-sonnet-4-6"                # annotator / placer / responder
