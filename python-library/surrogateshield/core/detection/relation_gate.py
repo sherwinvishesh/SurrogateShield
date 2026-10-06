@@ -794,14 +794,19 @@ def gate(
     entities: Iterable[DetectedEntity],
     context: Iterable[DetectedEntity] = (),
     reasons: Optional[Dict[int, str]] = None,
+    vouched: Iterable[DetectedEntity] = (),
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """Split *entities* into (kept, dropped). *context* are other entities of
     the same message (used for anchoring and person links, never dropped).
     *reasons*, if given, receives ``id(entity) -> rule`` for every drop
     (``junk``, ``public_person``, ``word_name``, ``public_org``,
-    ``common_noun``, ``untied``); it changes nothing else."""
+    ``common_noun``, ``untied``); it changes nothing else. *vouched*: those
+    of *entities* a detector is sure are the writer's (a stage's
+    ``gate_above``): a place or an organisation among them counts as tied,
+    and still faces every other rule."""
     entities = list(entities)
     context = list(context)
+    sure = {id(e) for e in vouched}
     dropped: List[DetectedEntity] = []
 
     def _drop(e, rule):
@@ -854,7 +859,7 @@ def gate(
             _drop(e, "public_org")
         elif is_common_noun(e, text):
             _drop(e, "common_noun")
-        elif anchored:
+        elif anchored or id(e) in sure:
             kept.append(e)
         else:
             _drop(e, "untied")

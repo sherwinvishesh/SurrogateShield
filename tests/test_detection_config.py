@@ -184,7 +184,7 @@ def test_gate_bypass_reaches_the_relation_gate(monkeypatch):
     assert "PERSON" in seen[0] and not any("PERSON" in s for s in seen[n:])
 
 
-def test_gate_above_lets_a_stages_sure_candidates_skip_the_gate(monkeypatch):
+def test_gate_above_vouches_for_a_stages_sure_places(monkeypatch):
     from surrogateshield.core.detection import plugins
 
     class Places:
@@ -206,7 +206,7 @@ def test_gate_above_lets_a_stages_sure_candidates_skip_the_gate(monkeypatch):
         assert {"Lyon", "Porto"} <= set(seen) and not {"Lyon", "Porto"} & {e.text for e in conf}
         seen.clear()
         conf, _ = pipeline.run_cascade(text, config=base.with_stage("places", options={"gate_above": 0.9}))
-        assert "Lyon" not in seen and "Porto" in seen
+        assert {"Lyon", "Porto"} <= set(seen)                   # the gate still sees both
         assert "Lyon" in {e.text for e in conf} and "Porto" not in {e.text for e in conf}
     finally:
         plugins.unregister_detector("places")

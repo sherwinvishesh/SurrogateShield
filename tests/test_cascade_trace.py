@@ -74,3 +74,13 @@ def test_trace_off_by_default_keeps_the_signature():
     trace = None
     conf, _ = pipeline.run_cascade(TEXTS[0], use_entity_trace=False, use_context_guard=False, trace=trace)
     assert any(e.type.lower() == "email" for e in conf)
+
+
+def test_a_vouched_place_is_tied_but_a_public_org_is_still_dropped():
+    text = "Lyon is lovely and Google is big"
+    lyon, goog = _one(text, "Lyon", "GPE"), _one(text, "Google", "ORG")
+    reasons = {}
+    kept, _ = rg.gate(text, [lyon, goog], reasons=reasons)
+    assert kept == [] and [reasons[id(lyon)], reasons[id(goog)]] == ["untied", "public_org"]
+    kept, dropped = rg.gate(text, [lyon, goog], vouched=[lyon, goog])
+    assert kept == [lyon] and dropped == [goog]

@@ -21,8 +21,10 @@ A :class:`DetectionConfig` names:
   ("phone_uk"); the internal key wins.
 * ``gate`` / ``gate_bypass``: the relation gate (names not tied to a person
   stay as typed) and the types it never drops. A stage's ``gate_above``
-  option: its candidates scored at least that skip the gate (a detector
-  trained to tell a private name from a public one, like ``pii_tagger``).
+  option: its places and organisations scored at least that count as tied
+  to the writer at the gate, which still drops public names, junk and common
+  nouns (for a detector trained to tell the writer's names from topics,
+  like ``pii_tagger``; V3 §3.4a).
 * ``source_priority`` / ``type_conflicts``: which candidate stands for a
   value two stages read differently (the resolver, V3 §3.5).
 
@@ -277,8 +279,8 @@ class DetectionConfig:
         return not self.gate or "*" in self.gate_bypass or public_type(typ) in self.gate_bypass
 
     def vouches(self, stage: str, score: float) -> bool:
-        """Does *stage*'s ``gate_above`` option let a candidate of *score*
-        skip the relation gate?"""
+        """Does *stage*'s ``gate_above`` option vouch, at the relation gate,
+        for a candidate of *score*?"""
         above = self.stage(stage).options.get("gate_above")
         return above is not None and score >= above
 
