@@ -3,6 +3,7 @@ seeded and reproducible, Latin-script, never a real provider's token shape,
 valid checksums, no value inside the base text or another value, type quotas,
 capacity and exclusivity respected, shifted formats only when asked."""
 
+import hashlib
 import json
 import random
 import re
@@ -149,3 +150,66 @@ def test_type_counts_count_rows_and_values():
 
 def test_number_words():
     assert [I.number_words(n) for n in (7, 13, 40, 58)] == ["seven", "thirteen", "forty", "fifty-eight"]
+
+
+# ── the evaluation / training pool split (PROMPT_FOR_OPUS_V3 §5.3) ───────────
+
+POOLED_TYPES = ("PERSON", "LOCATION", "ORG", "ADDRESS", "EMAIL", "URL", "HANDLE", "CREDENTIAL")
+
+
+@pytest.fixture(scope="module")
+def halves():
+    return {p: [I.identity(random.Random(k * 10 ** 6 + i), I.TYPES, TASKS[i % len(TASKS)], shift=(i % 3 == 0), pool=p)
+                for i in range(150)] for k, p in enumerate(I.POOLS)}
+
+
+def test_pool_none_matches_the_generator_before_the_split():
+    # sha256 of these 60 identities drawn with identities.py at 2649801, before the pool split
+    ids = [I.identity(random.Random(i), I.TYPES, TASKS[i % len(TASKS)], shift=(i % 3 == 0)) for i in range(60)]
+    blob = json.dumps(ids, sort_keys=True, ensure_ascii=False).encode()
+    assert hashlib.sha256(blob).hexdigest() == "e3ec5381abeced3f28737264cecb3aa1064fee1dc6b3d9a26ad39276284b79af"
+
+
+def test_pooled_identity_is_seeded_and_lists_its_words():
+    a = I.identity(random.Random(3), I.TYPES, "advice", shift=True, pool="eval")
+    assert a == I.identity(random.Random(3), I.TYPES, "advice", shift=True, pool="eval")
+    assert a["pool"] == "eval" and a["pool_tokens"] == sorted(set(a["pool_tokens"])) and a["pool_tokens"]
+    assert "pool" not in I.identity(random.Random(3), I.TYPES, "advice")
+    with pytest.raises(ValueError):
+        I.identity(random.Random(3), I.TYPES, "advice", pool="test")
+
+
+def test_pool_words_are_disjoint_and_hash_to_their_half(halves):
+    words = {p: set().union(*(d["pool_tokens"] for d in ds)) for p, ds in halves.items()}
+    assert not words["eval"] & words["train"]
+    for p, ws in words.items():
+        assert len(ws) > 500 and all(I.token_half(w) == p for w in ws)
+
+
+def test_every_pool_word_of_a_value_is_recorded(halves):
+    for d in halves["eval"] + halves["train"]:
+        rec = set(d["pool_tokens"])
+        for v in d["values"]:
+            if v["type"] in ("PERSON", "LOCATION", "ORG", "ADDRESS") or v["fmt"] == "password":
+                assert set(I.tokens(v["value"])) <= rec, v
+            if v["fmt"] == "password":
+                assert {w for w in re.findall(r"[a-z]+", v["value"].lower()) if w in I.WORDS} <= rec, v
+
+
+def test_no_value_is_drawn_in_both_halves(halves):
+    for t in POOLED_TYPES:
+        ev, tr = ({v["value"] for d in halves[p] for v in d["values"] if v["type"] == t} for p in I.POOLS)
+        assert ev and tr and not ev & tr, t
+
+
+def test_pool_vocabularies_split_and_keep_structure_words_shared():
+    assert I.token_half("smith") in I.POOLS and I.token_half("smith") == I.token_half("smith")
+    assert I.tokens("Rue de la Paix 12") == ["paix"] and I.tokens("Calle Mayor") == ["mayor"]
+    assert "street" in I.generic() and "outlook" in I.generic()
+    assert I.mail_key("outlook.com") == ["outlook"] and I.mail_key("yahoo.co.in") == ["yahoo"]
+    assert I.name_keys("Li") == ["li"]
+    for p in I.POOLS:
+        assert I.free_mail(p) and I.words(p) and all(I.cities(c, p) for c in I.COUNTRIES)
+    assert not set(I.free_mail("eval")) & set(I.free_mail("train"))
+    assert not set(I.words("eval")) & set(I.words("train"))
+    assert I.cities("US") == I.COUNTRIES["US"][2] and I.free_mail() == I.FREE_MAIL and I.words() == I.WORDS

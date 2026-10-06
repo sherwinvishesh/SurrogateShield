@@ -32,10 +32,26 @@ Choices that keep the benchmark fair and safe (REALDATA_PROGRESS D5, rule 5):
   seen: lower-case / ALL-CAPS / surname-first names, SSN without dashes,
   phones with dots or in words, cards and IBANs spaced in fours, dates and
   ages written out, an e-mail written "name at domain dot com".
+
+**Pool split** (PROMPT_FOR_OPUS_V3 §5.3). ``identity(..., pool="eval")`` (the
+sealed test-2) and ``identity(..., pool="train")`` (the tagger's training data)
+draw from disjoint halves of every word list a value is built from: first
+names, surnames, street names, cities, company names, school towns, mail
+providers and password words. Each word (``tokens``: a folded, lower-cased
+run of 3+ letters; a name with none is keyed whole) belongs to one half by a
+keyed hash (``token_half``), and a candidate value is redrawn until all its
+words are in the identity's half. Structural words stay shared (``generic``:
+street types, company legal forms, school kinds, flat / suite markers, months,
+number words, region codes, link hosts, tlds) so both halves look alike.
+E-mail local parts, handles and links are built from the identity's own name,
+so they follow it. Digits (phones, IDs, postcodes, house numbers), hex and
+random credentials are random draws and are not split. ``pool=None`` (test-1,
+dev) is the original generator, draw for draw.
 """
 
 from __future__ import annotations
 
+import hashlib
 import random
 import re
 import string
@@ -119,6 +135,32 @@ COUNTRIES = {
            [("Curitiba", "PR"), ("Recife", "PE"), ("Fortaleza", "CE"), ("Salvador", "BA"), ("Campinas", "SP"),
             ("Goiânia", "GO"), ("Belém", "PA"), ("Florianópolis", "SC"), ("Manaus", "AM"), ("Natal", "RN")]),
 }
+# more real cities, used only with a pool, so that each half has a few per country (test-1 / dev never draw them)
+EXTRA_CITIES = {
+    "US": [("Fresno", "CA"), ("Wichita", "KS"), ("Lexington", "KY"), ("Anchorage", "AK"), ("Reno", "NV")],
+    "UK": [("Stoke", ""), ("Sunderland", ""), ("Wolverhampton", ""), ("Inverness", ""), ("Lancaster", "")],
+    "IE": [("Sligo", ""), ("Drogheda", ""), ("Dundalk", ""), ("Athlone", ""), ("Ennis", ""), ("Tralee", ""),
+           ("Wexford", ""), ("Letterkenny", ""), ("Navan", ""), ("Carlow", "")],
+    "CA": [("Regina", "SK"), ("Kingston", "ON"), ("Windsor", "ON"), ("Moncton", "NB"), ("Fredericton", "NB"),
+           ("Guelph", "ON"), ("Kamloops", "BC"), ("Lethbridge", "AB"), ("Nanaimo", "BC")],
+    "AU": [("Townsville", "QLD"), ("Toowoomba", "QLD"), ("Launceston", "TAS"), ("Bendigo", "VIC"),
+           ("Mackay", "QLD"), ("Bunbury", "WA"), ("Albury", "NSW"), ("Rockhampton", "QLD")],
+    "DE": [("Kiel", ""), ("Rostock", ""), ("Erfurt", ""), ("Potsdam", ""), ("Heidelberg", ""), ("Regensburg", ""),
+           ("Würzburg", ""), ("Göttingen", ""), ("Ulm", ""), ("Lübeck", "")],
+    "FR": [("Reims", ""), ("Limoges", ""), ("Brest", ""), ("Amiens", ""), ("Perpignan", ""), ("Metz", ""),
+           ("Besançon", ""), ("Caen", ""), ("Orléans", ""), ("Rouen", "")],
+    "ES": [("Córdoba", ""), ("Vigo", ""), ("Gijón", ""), ("Pamplona", ""), ("Santander", ""), ("Oviedo", ""),
+           ("Burgos", ""), ("Cádiz", "")],
+    "NL": [("Maastricht", ""), ("Zwolle", ""), ("Amersfoort", ""), ("Apeldoorn", ""), ("Enschede", ""),
+           ("Leeuwarden", ""), ("Dordrecht", ""), ("Almere", "")],
+    "IN": [("Patna", ""), ("Ludhiana", ""), ("Agra", ""), ("Nashik", ""), ("Visakhapatnam", ""), ("Madurai", ""),
+           ("Varanasi", ""), ("Ranchi", ""), ("Guwahati", ""), ("Mangaluru", "")],
+    "MX": [("Tijuana", ""), ("Chihuahua", ""), ("Toluca", ""), ("Aguascalientes", ""), ("Hermosillo", ""),
+           ("Saltillo", ""), ("Culiacán", ""), ("Cancún", ""), ("Veracruz", ""), ("Acapulco", ""), ("Durango", ""),
+           ("Mazatlán", ""), ("Zacatecas", ""), ("Tampico", "")],
+    "BR": [("Vitória", "ES"), ("Maceió", "AL"), ("Teresina", "PI"), ("Londrina", "PR"), ("Joinville", "SC"),
+           ("Uberlândia", "MG"), ("Sorocaba", "SP"), ("Aracaju", "SE"), ("Cuiabá", "MT")],
+}
 DIASPORA = ("US", "UK", "CA", "AU", "DE", "IE", "NL", "FR")
 FREE_MAIL = ("gmail.com", "outlook.com", "yahoo.com", "hotmail.com", "icloud.com", "proton.me", "aol.com",
              "hotmail.co.uk", "gmx.de", "web.de", "orange.fr", "libero.it", "yahoo.co.in", "live.com", "zoho.com")
@@ -138,6 +180,9 @@ ORDINALS = ("first second third fourth fifth sixth seventh eighth ninth tenth el
             "twenty-third twenty-fourth twenty-fifth twenty-sixth twenty-seventh twenty-eighth twenty-ninth "
             "thirtieth thirty-first").split()
 MONTHS = ("January February March April May June July August September October November December").split()
+POOLS = ("eval", "train")
+POOL_KEY = "surrogateshield-identity-pool-v1"
+SCHOOLS = ('High School', 'Community College', 'Academy', 'Middle School', 'Institute of Technology')
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -192,24 +237,125 @@ def spaced(s: str, k: int = 4) -> str:
     return " ".join(s[i:i + k] for i in range(0, len(s), k))
 
 
+# ── the evaluation / training pool split (§5.3) ──────────────────────────────
+
+_RUN = re.compile(r"[^\W\d_]+")
+_FAKER_WORDS = ("street_suffixes", "street_suffixes_long", "street_suffixes_short", "street_prefixes",
+                "secondary_address_formats", "street_name_formats", "street_address_formats", "company_suffixes",
+                "company_prefixes", "company_preffixes", "company_types", "company_adjectives", "formats")
+
+
+def _runs(s: str) -> List[str]:
+    return [w for w in (ascii_fold(r).lower() for r in _RUN.findall(s)) if w]
+
+
+@lru_cache(maxsize=None)
+def generic() -> frozenset:
+    """Structural words shared by both pools: the literal words of Faker's
+    street / company vocabularies and templates for every locale used here
+    (placeholders removed), school kinds, months, number words, ordinals,
+    region codes, particles, link hosts and top-level domains."""
+    words = set()
+    for loc in sorted({v[0] for v in COUNTRIES.values()}):
+        for prov in faker(loc).providers:
+            if ".address." not in type(prov).__module__ and ".company." not in type(prov).__module__:
+                continue
+            for attr in _FAKER_WORDS:
+                v = getattr(prov, attr, None)
+                for x in (v.keys() if isinstance(v, dict) else v) if isinstance(v, (tuple, list, dict)) else ():
+                    if isinstance(x, str):
+                        words.update(_runs(re.sub(r"\{\{.*?\}\}", " ", x)))
+    words.update(_runs(" ".join(SCHOOLS + tuple(MONTHS) + tuple(ONES) + tuple(TEENS) + tuple(TENS[2:])
+                                + tuple(ORDINALS))))
+    words.update(r.lower() for v in list(COUNTRIES.values()) for _c, r in v[2] if r)
+    words.update(r.lower() for v in EXTRA_CITIES.values() for _c, r in v if r)
+    words.update("""the and of at dot de del della der des di da das do dos du la las le los san santa saint st
+                 van von ter ten fort port new north south east west upper lower mount
+                 com net org edu gov info biz dev app www http https mail
+                 linkedin github calendly instagram drive google netlify file view min""".split())
+    return frozenset(words)
+
+
+def tokens(s: str) -> List[str]:
+    """The pool-bearing words of *s*: folded, lower-cased runs of 3+ letters
+    that are not ``generic``."""
+    g = generic()
+    return [w for w in _runs(s) if len(w) >= 3 and w not in g]
+
+
+def name_keys(s: str) -> List[str]:
+    """A name's pool words; a name with no 3-letter word (``Li``, ``Ng``) is keyed whole."""
+    return tokens(s) or ["".join(_runs(s))]
+
+
+def token_half(tok: str) -> str:
+    """``eval`` or ``train``, by a keyed hash of the word (half the first byte's range each)."""
+    return POOLS[hashlib.sha256(f"{POOL_KEY}:{tok}".encode()).digest()[0] >> 7]
+
+
+def in_pool(keys: Iterable[str], pool: Optional[str]) -> bool:
+    return pool is None or all(token_half(k) == pool for k in keys)
+
+
+def cities(country: str, pool: Optional[str] = None) -> List[Tuple[str, str]]:
+    if pool is None:
+        return COUNTRIES[country][2]
+    return [cr for cr in COUNTRIES[country][2] + EXTRA_CITIES.get(country, []) if in_pool(name_keys(cr[0]), pool)]
+
+
+def mail_key(domain: str) -> List[str]:
+    """A mail provider is keyed by its name (``outlook`` of ``outlook.com``), generic or not."""
+    return ["".join(_runs(domain.split(".")[0]))]
+
+
+def free_mail(pool: Optional[str] = None) -> Sequence[str]:
+    return FREE_MAIL if pool is None else [d for d in FREE_MAIL if in_pool(mail_key(d), pool)]
+
+
+def words(pool: Optional[str] = None) -> Sequence[str]:
+    """Password words, keyed whole: several (``harbor``, ``summit``) are also street suffixes."""
+    return WORDS if pool is None else [w for w in WORDS if in_pool([w], pool)]
+
+
 # ── one value per type ───────────────────────────────────────────────────────
 
 class Ctx:
-    """What the values of one identity share."""
+    """What the values of one identity share. With a *pool*, every word a
+    value is built from comes from that half (``take``), and the words used
+    are kept in ``pool_tokens``."""
 
-    def __init__(self, rng: random.Random, shift: bool):
-        self.rng, self.shift = rng, shift
+    def __init__(self, rng: random.Random, shift: bool, pool: Optional[str] = None):
+        self.rng, self.shift, self.pool = rng, shift, pool
+        self.pool_tokens: set = set()
         self.name_locale = rng.choices(list(NAME_LOCALES), weights=list(NAME_LOCALES.values()))[0]
         self.country = HOME.get(self.name_locale) or rng.choice(DIASPORA)
-        while True:
+        for i in range(100000):
+            if pool is not None and i and i % 3000 == 0:      # e.g. vi_VN: its two space-free first names are both eval
+                self.name_locale = rng.choices(list(NAME_LOCALES), weights=list(NAME_LOCALES.values()))[0]
+                self.country = HOME.get(self.name_locale) or rng.choice(DIASPORA)
             f = fk(self.name_locale, rng)
             first, last = f.first_name(), f.last_name()
-            if latin(first + last) and " " not in first and len(ascii_fold(first)) >= 2 and len(ascii_fold(last)) >= 2:
+            if latin(first + last) and " " not in first and len(ascii_fold(first)) >= 2 and len(ascii_fold(last)) >= 2 \
+                    and self.take(first, last, names=True):
                 break
+        else:
+            raise RuntimeError(f"no {self.name_locale} name in the {pool} pool")
         self.first, self.last = first, last
         self.slug_first, self.slug_last = ascii_fold(first).lower(), ascii_fold(last).lower()
         self.org: Optional[str] = None
         self.city: Optional[Tuple[str, str]] = None
+
+    def take(self, *texts: str, names: bool = False, keys: Sequence[str] = ()) -> bool:
+        """True (and the words recorded) when every pool word of *texts* (and
+        every key in *keys*) is in this identity's pool; always True without
+        one, consuming no randomness."""
+        if self.pool is None:
+            return True
+        keys = list(keys) + [k for t in texts for k in (name_keys(t) if names else tokens(t))]
+        if not in_pool(keys, self.pool):
+            return False
+        self.pool_tokens.update(keys)
+        return True
 
 
 def person(c: Ctx) -> Tuple[str, str]:
@@ -232,7 +378,9 @@ def email(c: Ctx) -> Tuple[str, str]:
     if c.org and rng.random() < .4:
         dom = (ascii_fold(c.org.split()[0]).lower() or "mail") + rng.choice((".com", ".co", ".io", ".org"))
     else:
-        dom = rng.choice(FREE_MAIL)
+        dom = rng.choice(free_mail(c.pool))
+        if c.pool is not None:
+            c.take(keys=mail_key(dom))
     if c.shift and rng.random() < .5:
         return f"{local.replace('.', ' dot ')} at {dom.replace('.', ' dot ')}", "spelled"
     return f"{local}@{dom}", "plain"
@@ -278,7 +426,8 @@ PHONES = {"UK": ("07### ######", "+44 7### ######", "020 3### ####", "+44 161 ##
 
 def city(c: Ctx) -> Tuple[str, str]:
     if c.city is None:
-        c.city = c.rng.choice(COUNTRIES[c.country if c.country in COUNTRIES else "US"][2])
+        c.city = c.rng.choice(cities(c.country if c.country in COUNTRIES else "US", c.pool))
+        c.take(c.city[0], names=True)
     return c.city
 
 
@@ -287,11 +436,15 @@ def address(c: Ctx) -> Tuple[str, str]:
     country = c.country if c.country in COUNTRIES else "US"
     loc, layout, _ = COUNTRIES[country]
     town, region = city(c)
-    for _ in range(50):
+    for _ in range(50 if c.pool is None else 2000):
         f = fk(loc, rng)
         street = f.street_address().replace("\n", ", ")
-        if latin(street) and not re.search(r"\b(PSC|USNS|USNV|USS|APO|FPO|DPO|Unit|Box)\b", street):
+        if latin(street) and not re.search(r"\b(PSC|USNS|USNV|USS|APO|FPO|DPO|Unit|Box)\b", street) \
+                and c.take(street):
             break
+    else:
+        if c.pool is not None:
+            raise RuntimeError(f"no {loc} street in the {c.pool} pool")
     postcode = f.postcode() if country != "IE" else ""
     value = layout.format(street=street, city=town, region=region, postcode=postcode).strip().rstrip(",")
     return value, "plain"
@@ -306,14 +459,22 @@ def org(c: Ctx) -> Tuple[str, str]:
     if c.org is None:
         if rng.random() < .7:
             loc = COUNTRIES.get(c.country, COUNTRIES["US"])[0]
-            for _ in range(50):
+            for _ in range(50 if c.pool is None else 2000):
                 name = fk(loc, rng).company()
-                if latin(name) and len(name) <= 40:
+                if latin(name) and len(name) <= 40 and c.take(name):
                     break
+            else:
+                if c.pool is not None:
+                    raise RuntimeError(f"no {loc} company in the {c.pool} pool")
             c.org = name
         else:
-            town = city(c)[0] if rng.random() < .5 else fk("en_US", rng).last_name()
-            c.org = f"{town} {rng.choice(('High School', 'Community College', 'Academy', 'Middle School', 'Institute of Technology'))}"
+            if rng.random() < .5:
+                town = city(c)[0]
+            else:
+                town = fk("en_US", rng).last_name()
+                while not c.take(town, names=True):          # only with a pool
+                    town = fk("en_US", rng).last_name()
+            c.org = f"{town} {rng.choice(SCHOOLS)}"
     return c.org, "plain"
 
 
@@ -477,7 +638,10 @@ def credential(c: Ctx) -> Tuple[str, str]:
         elif k == "zqk":
             v = "zqk_" + "".join(rng.choice(string.ascii_letters + string.digits) for _ in range(28))
         elif k == "password":
-            v = rng.choice(WORDS).capitalize() + rng.choice("!#$%&*?") + rng.choice(WORDS) + _digits(rng, rng.randint(2, 4))
+            ws = words(c.pool)
+            a, mark, b = rng.choice(ws), rng.choice("!#$%&*?"), rng.choice(ws)
+            v = a.capitalize() + mark + b + _digits(rng, rng.randint(2, 4))
+            c.take(keys=(a, b))
         else:
             v = "-".join("".join(rng.choice(string.ascii_lowercase + string.digits) for _ in range(8)) for _ in range(3))
         if not FORBIDDEN.search(v):
@@ -505,14 +669,18 @@ def clashes(value: str, others: Iterable[str], text: str) -> bool:
 
 
 def identity(rng: random.Random, types: Sequence[str], task: str, shift: bool = False, text: str = "",
-             avoid: Sequence[str] = ()) -> dict:
+             avoid: Sequence[str] = (), pool: Optional[str] = None) -> dict:
     """One identity with a value for each of *types* (two for ID at most),
     none occurring in *text* or in another of its values, and none inside or
     around a string of *avoid* (the base text's ``keep`` / ``optional``
     values, so a placed value never overlaps one). Redraws the whole identity
-    (new person) when a value cannot be placed after a few tries."""
+    (new person) when a value cannot be placed after a few tries. With a
+    *pool* (``eval`` / ``train``), every word comes from that half; the
+    identity then also lists them (``pool_tokens``)."""
+    if pool is not None and pool not in POOLS:
+        raise ValueError(pool)
     for _attempt in range(20):
-        c = Ctx(rng, shift)
+        c = Ctx(rng, shift, pool)
         values: List[dict] = []
         ok = True
         for t in ORDER:
@@ -533,7 +701,10 @@ def identity(rng: random.Random, types: Sequence[str], task: str, shift: bool = 
                 ok = False
                 break
         if ok:
-            return {"locale": c.name_locale, "country": c.country, "shift": shift, "values": values}
+            out = {"locale": c.name_locale, "country": c.country, "shift": shift, "values": values}
+            if pool is not None:
+                out.update(pool=pool, pool_tokens=sorted(c.pool_tokens))
+            return out
     raise RuntimeError("could not build an identity that fits this text")
 
 
