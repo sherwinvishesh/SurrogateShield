@@ -259,3 +259,26 @@ def test_record_arms_lists_historical_span_files_apart(tmp_path):
     assert "Historical span files (`natural-a`, `natural-b`): older run." in manifest.render(manifest.load(mpath))
     with pytest.raises(SystemExit):                     # without the exception it still refuses
         run.record_arms(pub, mpath, {})
+
+
+def test_ss_merges_a_config_file_on_the_benchmark_config(tmp_path, monkeypatch):
+    # V3 §3.7: a configuration is measured through the product's config file
+    # alone; without the file the arm's config is exactly the benchmark's
+    from bench.arms import ss
+    from surrogateshield.core.detection.config import ENV_FILE, ENV_PRESET, benchmark
+    monkeypatch.delenv(ENV_FILE, raising=False)
+    monkeypatch.delenv(ENV_PRESET, raising=False)
+    assert ss.detection_config() == benchmark()
+    assert "detection_config_file" not in ss.config()
+    f = tmp_path / "cg.json"
+    f.write_text(json.dumps({"detectors": [{"name": "context_guard", "model": "m/x",
+                                            "options": {"labels": {"FIRSTNAME": "PERSON"}}}]}))
+    monkeypatch.setenv(ENV_FILE, str(f))
+    cfg = ss.detection_config()
+    assert cfg.stage("context_guard").model == "m/x" and cfg.address_mode == benchmark().address_mode
+    rec = ss.config()
+    assert rec["detection_config_file"]["sha256"] == hashlib.sha256(f.read_bytes()).hexdigest()
+    assert rec["detection_config_hash"] != benchmark().config_hash()
+    monkeypatch.setenv(ENV_PRESET, "strict")
+    with pytest.raises(SystemExit, match="replace the benchmark"):
+        ss.detection_config()

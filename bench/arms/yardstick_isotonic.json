@@ -1,0 +1,110 @@
+{
+ "detectors": [
+  {
+   "name": "context_guard",
+   "model": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2",
+   "revision": "9814d1113e03f72e8d383423188a51b43d5534c9",
+   "options": {
+    "labels": {
+     "FIRSTNAME": "PERSON",
+     "MIDDLENAME": "PERSON",
+     "LASTNAME": "PERSON",
+     "COMPANYNAME": "ORG",
+     "CITY": "LOCATION",
+     "STATE": "LOCATION",
+     "COUNTY": "LOCATION",
+     "STREET": "ADDRESS",
+     "BUILDINGNUMBER": "ADDRESS",
+     "SECONDARYADDRESS": "ADDRESS",
+     "ZIPCODE": "ADDRESS",
+     "EMAIL": "EMAIL",
+     "PHONENUMBER": "PHONE",
+     "URL": "URL",
+     "USERNAME": "HANDLE",
+     "IP": "NETWORK",
+     "IPV4": "NETWORK",
+     "IPV6": "NETWORK",
+     "MAC": "NETWORK",
+     "AGE": "AGE",
+     "DOB": "DATE_OF_BIRTH",
+     "PASSWORD": "CREDENTIAL",
+     "PIN": "CREDENTIAL",
+     "SSN": "ID",
+     "ACCOUNTNUMBER": "ID",
+     "IBAN": "ID",
+     "BIC": "ID",
+     "CREDITCARDNUMBER": "ID",
+     "VEHICLEVIN": "ID",
+     "VEHICLEVRM": "ID",
+     "PHONEIMEI": "ID",
+     "MASKEDNUMBER": "ID",
+     "BITCOINADDRESS": "ID",
+     "ETHEREUMADDRESS": "ID",
+     "LITECOINADDRESS": "ID"
+    }
+   }
+  }
+ ],
+ "type_sources": {
+  "ADDRESS": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "AGE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "CREDENTIAL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "DATE_OF_BIRTH": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "EMAIL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "HANDLE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "ID": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "NETWORK": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "PHONE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ],
+  "URL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "context_guard"
+  ]
+ }
+}

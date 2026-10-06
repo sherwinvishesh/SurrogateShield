@@ -2,14 +2,22 @@
 with ``MimicGen`` seeded per message. Runs in ``.venv``.
 
     HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.arms.ss --in M.jsonl --out S.jsonl
+
+With ``$SURROGATESHIELD_DETECTION_CONFIG`` set, that JSON file (partial or
+whole, the product's format) is merged on the benchmark config, so a
+configuration is measured through config alone (V3 §3.7); the file and its
+SHA-256 go into ``.meta.json``. ``$SURROGATESHIELD_PRESET`` is refused: it
+would replace the benchmark config, not adjust it.
 """
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import sys
 
-from bench.arms.base import ROOT, Refused, cli, versions
+from bench.arms.base import ROOT, Refused, cli, rel, versions
 
 ARM = "ss"
 NO_SURROGATE = "could not generate a surrogate"
@@ -20,11 +28,29 @@ def detection_config():
     (V3 §3.5). The product's "auto" shifts the house number inside a service
     query and keeps street, town and postcode verbatim within one
     whole-address edit, which the scorer counts as covered; "replace"
-    re-draws every part, so a covered address leaks none of them."""
+    re-draws every part, so a covered address leaks none of them. A config
+    file in ``$SURROGATESHIELD_DETECTION_CONFIG`` is merged on top."""
     if str(ROOT / "python-library") not in sys.path:
         sys.path.insert(0, str(ROOT / "python-library"))
-    from surrogateshield.core.detection.config import benchmark
-    return benchmark()
+    from surrogateshield.core.detection.config import ENV_FILE, ENV_PRESET, benchmark, from_partial
+    if os.environ.get(ENV_PRESET):
+        raise SystemExit(f"{ARM}: ${ENV_PRESET} would replace the benchmark config; "
+                         f"give a partial config in ${ENV_FILE} instead")
+    path = os.environ.get(ENV_FILE)
+    if not path:
+        return benchmark()
+    with open(path, encoding="utf-8") as f:
+        return from_partial(json.load(f), benchmark())
+
+
+def config_file() -> dict | None:
+    """The config file merged on the benchmark config, if any."""
+    from surrogateshield.core.detection.config import ENV_FILE
+    path = os.environ.get(ENV_FILE)
+    if not path:
+        return None
+    with open(path, "rb") as f:
+        return {"path": rel(path), "sha256": hashlib.sha256(f.read()).hexdigest()}
 
 
 ADDRESS_MODE = "replace"
@@ -68,7 +94,10 @@ def config() -> dict:
         sys.path.insert(0, str(ROOT))
     import config as cfg
     det = effective_config()
-    return {"send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+    extra = {"detection_config_file": config_file()} if config_file() else {}
+    send = "benchmark()" if not extra else "from_partial(<detection_config_file>, benchmark())"
+    return {"send_path": f"json_tester.prepare_send(text, MimicGen(seed=msg_seed), config={send})",
+            **extra,
             "detection_config": det.to_dict(),
             "detection_config_hash": det.config_hash(),
             "ADDRESS_MODE": det.address_mode,
