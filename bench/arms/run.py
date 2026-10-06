@@ -16,7 +16,8 @@ verbatim (original ≥ 4 characters; the scorer's leak rule); a message the
 system refused to send carries ``refused: 1``. Both run offline. Each arm's
 configuration (versions, model revisions, thresholds) is then recorded under
 ``arms`` in ``bench/realdata/manifest.json``; two runs of one arm with
-different configurations stop the record.
+different configurations stop the record, unless the older ones are listed in
+``HISTORICAL`` with the reason they are kept.
 """
 
 from __future__ import annotations
@@ -103,37 +104,53 @@ def run_arm(arm: str, src: Path, name: str) -> dict:
 
 
 # Span files kept from an arm's earlier configuration because a frozen
-# artefact was built from them: test-1's silver labels took their candidates
-# from these LLM Guard runs, made on Apple's GPU before fc4ab21 pinned the arm
-# to the CPU. They are never rerun; the manifest lists them apart.
-HISTORICAL = {("llm_guard", f"natural-{ds}"): "made on mps before fc4ab21 pinned LLM Guard to the CPU; "
-              "test-1's silver-label candidates were drawn from them" for ds in ("oasst1", "sharegpt", "wildchat")}
+# artefact or a committed result was built from them. They are never rerun;
+# the manifest lists them apart, one entry per reason. LLM Guard's natural
+# runs were made on Apple's GPU before fc4ab21 pinned the arm to the CPU, and
+# test-1's silver labels took their candidates from them. SS is the system
+# under development: its pre-V3 runs gave test-1's scores and the silver-label
+# candidates of both natural pools, and its Checkpoint A runs (V3 before the
+# tagger) gave realdata_devlarge.json.
+_DS = ("oasst1", "sharegpt", "wildchat")
+HISTORICAL = {
+    **{("llm_guard", f"natural-{ds}"): "made on mps before fc4ab21 pinned LLM Guard to the CPU; "
+       "test-1's silver-label candidates were drawn from them" for ds in _DS},
+    **{("ss", f"{name}-{ds}"): "the pre-V3 SS (before the detection config); test-1's scores "
+       "(realdata_dev/test) and the silver-label candidates of test-1's and test-2's natural pools "
+       "were made from them" for name in ("dev", "test", "natural", "test2-natural") for ds in _DS},
+    **{("ss", f"devlarge-{ds}"): "V3 Checkpoint A, the SS before the tagger; realdata_devlarge.json "
+       "was scored from them" for ds in _DS},
+}
 
 
 def record_arms(public: Path = PUBLIC, manifest_path: Optional[Path] = None,
                 historical: Optional[Dict[tuple, str]] = None) -> Dict[str, dict]:
     """Every arm's configuration, from the committed meta sidecars, into the
     real-data manifest; a sidecar that disagrees with another of its arm raises,
-    except the ``HISTORICAL`` ones, recorded under the arm's ``historical`` key."""
+    except the ``HISTORICAL`` ones, recorded under the arm's ``historical`` list
+    (one entry per reason; files with one reason must share a configuration)."""
     from bench.realdata import manifest
     historical = HISTORICAL if historical is None else historical
     arms: Dict[str, dict] = {}
-    old: Dict[str, dict] = {}
+    old: Dict[str, Dict[str, dict]] = {}
     for meta_path in sorted(public.glob("*/*.jsonl.meta.json")):
         meta = json.loads(meta_path.read_text())
         rec = {"config": meta["config"], "interpreter": ARMS.get(meta["arm"]), "seed": meta["seed"]}
         name = meta_path.name[:-len(".jsonl.meta.json")]
         why = historical.get((meta["arm"], name))
-        target = old if why else arms
+        target = old.setdefault(meta["arm"], {}) if why else arms
+        key = why or meta["arm"]
         if why:
             rec["why"] = why
-        if meta["arm"] in target and {k: v for k, v in target[meta["arm"]].items() if k != "files"} != rec:
-            raise SystemExit(f"{rel(meta_path)}: configuration differs from another run of {meta['arm']}; "
-                             "rerun every input with one version")
-        files = target.get(meta["arm"], {}).get("files", []) + [name] if why else None
-        target[meta["arm"]] = {**rec, "files": files} if why else rec
-    for arm, rec in old.items():
-        arms.setdefault(arm, {"config": None, "interpreter": rec["interpreter"], "seed": rec["seed"]})["historical"] = rec
+        if key in target and {k: v for k, v in target[key].items() if k != "files"} != rec:
+            raise SystemExit(f"{rel(meta_path)}: configuration differs from another run of {meta['arm']}"
+                             + (" with the same historical reason" if why else "; rerun every input with one version"))
+        files = target.get(key, {}).get("files", []) + [name] if why else None
+        target[key] = {**rec, "files": files} if why else rec
+    for arm, recs in old.items():
+        first = next(iter(recs.values()))
+        arms.setdefault(arm, {"config": None, "interpreter": first["interpreter"], "seed": first["seed"]})[
+            "historical"] = list(recs.values())
     path = manifest_path or manifest.PATH
     m = manifest.load(path)
     m["arms"] = arms

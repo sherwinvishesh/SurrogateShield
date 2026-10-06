@@ -255,11 +255,31 @@ def test_record_arms_lists_historical_span_files_apart(tmp_path):
     hist = {("lg", "natural-a"): "older run", ("lg", "natural-b"): "older run"}
     arms = run.record_arms(pub, mpath, hist)
     assert arms["lg"]["config"] == {"device": "cpu"}
-    assert arms["lg"]["historical"] == {"config": {"device": None}, "interpreter": None, "seed": 1,
-                                        "why": "older run", "files": ["natural-a", "natural-b"]}
+    assert arms["lg"]["historical"] == [{"config": {"device": None}, "interpreter": None, "seed": 1,
+                                         "why": "older run", "files": ["natural-a", "natural-b"]}]
     assert "Historical span files (`natural-a`, `natural-b`): older run." in manifest.render(manifest.load(mpath))
     with pytest.raises(SystemExit):                     # without the exception it still refuses
         run.record_arms(pub, mpath, {})
+
+
+def test_an_arm_may_keep_several_historical_configurations_one_per_reason(tmp_path):
+    from bench.arms import run
+    from bench.realdata import manifest
+    pub, mpath = tmp_path / "spans", tmp_path / "manifest.json"
+    (pub / "ss").mkdir(parents=True)
+    for name, v in (("dev-a", 1), ("natural-a", 1), ("devlarge-a", 2)):
+        (pub / "ss" / f"{name}.jsonl.meta.json").write_text(json.dumps({"arm": "ss", "config": {"v": v}, "seed": 1}))
+    hist = {("ss", "dev-a"): "v1 era", ("ss", "natural-a"): "v1 era", ("ss", "devlarge-a"): "v2 era"}
+    arms = run.record_arms(pub, mpath, hist)
+    assert arms["ss"]["config"] is None
+    assert [(h["why"], h["config"], h["files"]) for h in arms["ss"]["historical"]] == [
+        ("v1 era", {"v": 1}, ["dev-a", "natural-a"]), ("v2 era", {"v": 2}, ["devlarge-a"])]
+    md = manifest.render(manifest.load(mpath))
+    assert "No current span file" in md and "`devlarge-a`): v2 era." in md
+    (pub / "ss" / "test2-a.jsonl.meta.json").write_text(json.dumps({"arm": "ss", "config": {"v": 3}, "seed": 1}))
+    assert run.record_arms(pub, mpath, hist)["ss"]["config"] == {"v": 3}
+    with pytest.raises(SystemExit, match="same historical reason"):
+        run.record_arms(pub, mpath, {**hist, ("ss", "devlarge-a"): "v1 era"})
 
 
 def test_ss_merges_a_config_file_on_the_benchmark_config(tmp_path, monkeypatch):

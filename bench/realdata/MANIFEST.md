@@ -323,6 +323,57 @@ Interpreter `.venv-baselines/bin/python`, seed 20261005.
 }
 ```
 
+### gliner_pii_tuned
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "backbone_revision": {
+  "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+ },
+ "chosen_by": "bench/results/gliner_sweep_dev.json (lowest pooled dev injected leak)",
+ "flat_ner": true,
+ "label_set": "published",
+ "labels": [
+  "person",
+  "organization",
+  "email",
+  "phone number",
+  "address",
+  "location",
+  "date of birth",
+  "age",
+  "passport number",
+  "social security number",
+  "credit card number",
+  "bank account number",
+  "iban",
+  "driver's license number",
+  "national id number",
+  "tax identification number",
+  "health insurance id number",
+  "ip address",
+  "url",
+  "username",
+  "password",
+  "api key"
+ ],
+ "model": "urchade/gliner_multi_pii-v1",
+ "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+ "overlap_words": 30,
+ "replacement": "[LABEL] placeholder",
+ "threshold": 0.3,
+ "versions": {
+  "gliner": "0.2.29",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ },
+ "window_words": 200
+}
+```
+
 ### llm_guard
 
 Interpreter `.venv-baselines/bin/python`, seed 20261005.
@@ -522,12 +573,217 @@ Interpreter `.venv-baselines/bin/python`, seed 20261005.
 
 Interpreter `.venv/bin/python`, seed 20261005.
 
+No current span file: every committed one is historical.
+
+Historical span files (`dev-oasst1`, `dev-sharegpt`, `dev-wildchat`, `natural-oasst1`, `natural-sharegpt`, `natural-wildchat`, `test-oasst1`, `test-sharegpt`, `test-wildchat`, `test2-natural-oasst1`, `test2-natural-sharegpt`, `test2-natural-wildchat`): the pre-V3 SS (before the detection config); test-1's scores (realdata_dev/test) and the silver-label candidates of test-1's and test-2's natural pools were made from them.
+
 ```
 {
  "ADDRESS_MODE": "auto",
  "SERVICE_QUERY_DETECTION_ENABLED": true,
  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildchat`): V3 Checkpoint A, the SS before the tagger; realdata_devlarge.json was scored from them.
+
+```
+{
+ "ADDRESS_MODE": "replace",
+ "ADDRESS_MODE_product": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.65,
+     "high": 0.85,
+     "low": 0.6
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pii_tagger",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "LOCATION": [
+    "*"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "*"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "*"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "8e463c3c6b7562fd6ae3070109edd178a248cd7e5ab350168aeb122bd4c81c15",
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
  "versions": {
   "faker": "40.15.0",
   "python": "3.13.2",
