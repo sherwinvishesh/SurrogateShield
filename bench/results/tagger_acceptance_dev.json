@@ -34,7 +34,7 @@
    "ID": {
     "bound": 0.2815,
     "ok": true,
-    "rate": 0.0074
+    "rate": 0.0
    },
    "LOCATION": {
     "bound": 0.02,
@@ -49,12 +49,12 @@
    "ORG": {
     "bound": 0.0909,
     "ok": true,
-    "rate": 0.049
+    "rate": 0.042
    },
    "PERSON": {
     "bound": 0.02,
     "ok": true,
-    "rate": 0.0147
+    "rate": 0.0126
    },
    "PHONE": {
     "bound": 0.02,
@@ -74,13 +74,13 @@
   },
   "ok": true
  },
- "command": "... -m bench.tagger.accept bench/tagger/build/eval/dv3xs-40k-dev-balanced.json bench/tagger/build/eval/dv3xs-40k-devlarge-val-balanced.json --out bench/results/tagger_acceptance_dev.json",
+ "command": "... -m bench.tagger.accept bench/tagger/build/eval/dv3s-40k-dev-default.json bench/tagger/build/eval/dv3s-40k-devlarge-val-default.json --out bench/results/tagger_acceptance_dev.json",
  "config": {
   "as_configured": true,
-  "code": "b9e2709024c64894aa2f63e109c8b1c379093d245b6336ec0b2342a9b1e84a7b",
+  "code": "f425573baadf73d7565f6b73b975afbc25e3629113030ecf2db853bf2bfb02f3",
   "extra": {},
-  "file": "bench/tagger/build/eval/dv3xs-40k/ss-dev-balanced.config.json",
-  "hash": "7d524abba90c7696",
+  "file": "bench/tagger/build/eval/dv3s-40k/ss-dev-balanced.config.json",
+  "hash": "a1abaa92142b0db9",
   "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
   "thresholds": {},
   "variant": "balanced"
@@ -137,12 +137,12 @@
      "ORG": {
       "bound": 0.1364,
       "ok": true,
-      "rate": 0.0909
+      "rate": 0.0682
      },
      "PERSON": {
       "bound": 0.02,
-      "ok": false,
-      "rate": 0.0263
+      "ok": true,
+      "rate": 0.0197
      },
      "PHONE": {
       "bound": 0.02,
@@ -162,10 +162,10 @@
     },
     "ok": false
    },
-   "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-40k --split dev --ss --variant balanced --as-configured --out bench/tagger/build/eval/dv3xs-40k-dev-balanced.json",
-   "file": "bench/tagger/build/eval/dv3xs-40k-dev-balanced.json",
+   "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3s-40k --split dev --ss --variant balanced --as-configured --out bench/tagger/build/eval/dv3s-40k-dev-default.json",
+   "file": "bench/tagger/build/eval/dv3s-40k-dev-default.json",
    "git": {
-    "commit": "6eafe38571a0d67bfcc00497f157f40eea147e8b",
+    "commit": "4e9df88d1bba302bfae237fa661b5557a84209a9",
     "modified": []
    },
    "split": "dev"
@@ -206,7 +206,7 @@
      "ID": {
       "bound": 0.3049,
       "ok": true,
-      "rate": 0.0122
+      "rate": 0.0
      },
      "LOCATION": {
       "bound": 0.02,
@@ -246,10 +246,10 @@
     },
     "ok": true
    },
-   "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-40k --split devlarge --half val --ss --variant balanced --as-configured --out bench/tagger/build/eval/dv3xs-40k-devlarge-val-balanced.json",
-   "file": "bench/tagger/build/eval/dv3xs-40k-devlarge-val-balanced.json",
+   "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3s-40k --split devlarge --half val --ss --variant balanced --as-configured --out bench/tagger/build/eval/dv3s-40k-devlarge-val-default.json",
+   "file": "bench/tagger/build/eval/dv3s-40k-devlarge-val-default.json",
    "git": {
-    "commit": "6eafe38571a0d67bfcc00497f157f40eea147e8b",
+    "commit": "4e9df88d1bba302bfae237fa661b5557a84209a9",
     "modified": []
    },
    "split": "devlarge-val"
@@ -257,11 +257,11 @@
  ],
  "model": {
   "data_sha256": "45385de32536c41bd4ab2c4c2523997c66febcf2af5179c429e83b6ad614d046",
-  "encoder": "deberta-v3-xsmall",
+  "encoder": "deberta-v3-small",
   "licence": "MIT",
-  "path": "bench/tagger/build/models/dv3xs-40k",
-  "revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
-  "weights_sha256": "05cca9b0062299e3335e63e92624789b8ef4b1b93db43d8488a7551fce5ff31b"
+  "path": "bench/tagger/build/models/dv3s-40k",
+  "revision": "a36c739020e01763fe789b4b85e2df55d6180012",
+  "weights_sha256": "f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173"
  },
  "pooled": {
   "gliner_pii": {
@@ -395,12 +395,12 @@
   },
   "ss_tagger": {
    "leak": {
-    "k": 19,
+    "k": 16,
     "n": 1876,
-    "rate": 0.0101,
+    "rate": 0.0085,
     "wilson95": [
-     0.0065,
-     0.0158
+     0.0053,
+     0.0138
     ]
    },
    "leaked_by_type": {
@@ -410,16 +410,16 @@
     "DATE_OF_BIRTH": 0,
     "EMAIL": 0,
     "HANDLE": 0,
-    "ID": 1,
+    "ID": 0,
     "LOCATION": 1,
     "NETWORK": 0,
-    "ORG": 7,
-    "PERSON": 7,
+    "ORG": 6,
+    "PERSON": 6,
     "PHONE": 1,
     "URL": 1
    },
-   "natural_edits": 1065,
-   "natural_spurious": 861,
+   "natural_edits": 744,
+   "natural_spurious": 550,
    "values_by_type": {
     "ADDRESS": 97,
     "AGE": 99,

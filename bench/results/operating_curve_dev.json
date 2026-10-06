@@ -6,7 +6,7 @@
   "seed": "derive_seed('operating-curve', data split, group)",
   "unit": "conversation (a single-turn prompt is its own)"
  },
- "code": "b9e2709024c64894aa2f63e109c8b1c379093d245b6336ec0b2342a9b1e84a7b",
+ "code": "f425573baadf73d7565f6b73b975afbc25e3629113030ecf2db853bf2bfb02f3",
  "command": "PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.operating_curve --split dev --out bench/results/operating_curve_dev.json",
  "default": "ss@balanced",
  "differences": {
@@ -14,28 +14,28 @@
    "gliner_pii@0.3": {
     "leak_rate": {
      "ci95": [
-      -0.0854,
-      -0.037
+      -0.0888,
+      -0.0399
      ],
-     "diff": -0.0606,
+     "diff": -0.0638,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -3.064,
-      -2.2292
+      -3.2558,
+      -2.4668
      ],
-     "diff": -2.6448,
+     "diff": -2.8439,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2622,
-      -0.0348
+      -0.3921,
+      -0.0906
      ],
-     "diff": -0.1331,
+     "diff": -0.2194,
      "excludes_0": true,
      "resamples": 2000
     }
@@ -43,28 +43,28 @@
    "gliner_pii@0.4": {
     "leak_rate": {
      "ci95": [
-      -0.0953,
-      -0.0438
+      -0.0989,
+      -0.0469
      ],
-     "diff": -0.0686,
+     "diff": -0.0718,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -2.6661,
-      -1.902
+      -2.87,
+      -2.1339
      ],
-     "diff": -2.2851,
+     "diff": -2.4842,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2501,
-      -0.026
+      -0.3797,
+      -0.082
      ],
-     "diff": -0.1231,
+     "diff": -0.2094,
      "excludes_0": true,
      "resamples": 2000
     }
@@ -72,28 +72,28 @@
    "gliner_pii@0.5": {
     "leak_rate": {
      "ci95": [
-      -0.1062,
-      -0.0515
+      -0.1095,
+      -0.0535
      ],
-     "diff": -0.0766,
+     "diff": -0.0797,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -2.2633,
-      -1.5667
+      -2.4563,
+      -1.811
      ],
-     "diff": -1.9186,
+     "diff": -2.1176,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2346,
-      -0.0144
+      -0.3619,
+      -0.0708
      ],
-     "diff": -0.1095,
+     "diff": -0.1958,
      "excludes_0": true,
      "resamples": 2000
     }
@@ -101,115 +101,115 @@
    "gliner_pii@0.6": {
     "leak_rate": {
      "ci95": [
-      -0.1218,
-      -0.0634
+      -0.1258,
+      -0.0654
      ],
-     "diff": -0.0909,
+     "diff": -0.0941,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.8866,
-      -1.2494
+      -2.0675,
+      -1.4921
      ],
-     "diff": -1.5701,
+     "diff": -1.7692,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2132,
-      0.0002
+      -0.3437,
+      -0.0577
      ],
-     "diff": -0.0935,
-     "excludes_0": false,
+     "diff": -0.1798,
+     "excludes_0": true,
      "resamples": 2000
     }
    },
    "gliner_pii@0.7": {
     "leak_rate": {
      "ci95": [
-      -0.1389,
-      -0.077
+      -0.1429,
+      -0.079
      ],
-     "diff": -0.1069,
+     "diff": -0.11,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.5397,
-      -0.9387
+      -1.7143,
+      -1.1904
      ],
-     "diff": -1.2489,
+     "diff": -1.448,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1951,
-      0.0137
+      -0.3234,
+      -0.0442
      ],
-     "diff": -0.0778,
-     "excludes_0": false,
+     "diff": -0.1641,
+     "excludes_0": true,
      "resamples": 2000
     }
    },
    "gliner_pii@0.8": {
     "leak_rate": {
      "ci95": [
-      -0.1698,
-      -0.1016
+      -0.1738,
+      -0.104
      ],
-     "diff": -0.1356,
+     "diff": -0.1388,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.1852,
-      -0.6116
+      -1.3528,
+      -0.8712
      ],
-     "diff": -0.9072,
+     "diff": -1.1063,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1682,
-      0.0361
+      -0.2928,
+      -0.0233
      ],
-     "diff": -0.0539,
-     "excludes_0": false,
+     "diff": -0.1402,
+     "excludes_0": true,
      "resamples": 2000
     }
    },
    "gliner_pii@0.9": {
     "leak_rate": {
      "ci95": [
-      -0.2289,
-      -0.1498
+      -0.2334,
+      -0.1524
      ],
-     "diff": -0.1898,
+     "diff": -0.193,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -0.7755,
-      -0.2189
+      -0.934,
+      -0.4944
      ],
-     "diff": -0.5113,
+     "diff": -0.7104,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1184,
-      0.0826
+      -0.2418,
+      0.0219
      ],
-     "diff": -0.0102,
+     "diff": -0.0965,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -219,28 +219,28 @@
    "gliner_pii@0.3": {
     "leak_rate": {
      "ci95": [
-      -0.1261,
-      -0.0558
+      -0.1308,
+      -0.0605
      ],
-     "diff": -0.0905,
+     "diff": -0.0952,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -2.9231,
-      -1.6369
+      -3.0074,
+      -2.0558
      ],
-     "diff": -2.3147,
+     "diff": -2.5175,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.3098,
-      0.0191
+      -0.4413,
+      0.0188
      ],
-     "diff": -0.046,
+     "diff": -0.1531,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -248,28 +248,28 @@
    "gliner_pii@0.4": {
     "leak_rate": {
      "ci95": [
-      -0.1483,
-      -0.0694
+      -0.1539,
+      -0.0755
      ],
-     "diff": -0.1095,
+     "diff": -0.1143,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -2.6112,
-      -1.3493
+      -2.6828,
+      -1.7913
      ],
-     "diff": -2.014,
+     "diff": -2.2168,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.3043,
-      0.0215
+      -0.4355,
+      0.0208
      ],
-     "diff": -0.0429,
+     "diff": -0.15,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -277,28 +277,28 @@
    "gliner_pii@0.5": {
     "leak_rate": {
      "ci95": [
-      -0.1581,
-      -0.0789
+      -0.1631,
+      -0.0829
      ],
-     "diff": -0.119,
+     "diff": -0.1238,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -2.1912,
-      -0.9997
+      -2.2697,
+      -1.4685
      ],
-     "diff": -1.6364,
+     "diff": -1.8392,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2973,
-      0.0253
+      -0.4283,
+      0.0247
      ],
-     "diff": -0.0376,
+     "diff": -0.1448,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -306,37 +306,8 @@
    "gliner_pii@0.6": {
     "leak_rate": {
      "ci95": [
-      -0.1713,
-      -0.0837
-     ],
-     "diff": -0.1286,
-     "excludes_0": true,
-     "resamples": 2000
-    },
-    "spurious_per_message": {
-     "ci95": [
-      -1.8511,
-      -0.7279
-     ],
-     "diff": -1.3427,
-     "excludes_0": true,
-     "resamples": 2000
-    },
-    "spurious_rate": {
-     "ci95": [
-      -0.2887,
-      0.0294
-     ],
-     "diff": -0.0321,
-     "excludes_0": false,
-     "resamples": 2000
-    }
-   },
-   "gliner_pii@0.7": {
-    "leak_rate": {
-     "ci95": [
-      -0.1762,
-      -0.0878
+      -0.1777,
+      -0.0879
      ],
      "diff": -0.1333,
      "excludes_0": true,
@@ -344,19 +315,48 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -1.5411,
-      -0.4748
+      -1.9296,
+      -1.2028
      ],
-     "diff": -1.0629,
+     "diff": -1.5455,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.279,
-      0.0359
+      -0.4192,
+      0.029
      ],
-     "diff": -0.0247,
+     "diff": -0.1392,
+     "excludes_0": false,
+     "resamples": 2000
+    }
+   },
+   "gliner_pii@0.7": {
+    "leak_rate": {
+     "ci95": [
+      -0.1823,
+      -0.0927
+     ],
+     "diff": -0.1381,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "spurious_per_message": {
+     "ci95": [
+      -1.6148,
+      -0.9503
+     ],
+     "diff": -1.2657,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "spurious_rate": {
+     "ci95": [
+      -0.4087,
+      0.0345
+     ],
+     "diff": -0.1318,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -364,28 +364,28 @@
    "gliner_pii@0.8": {
     "leak_rate": {
      "ci95": [
-      -0.1903,
-      -0.0918
+      -0.196,
+      -0.098
      ],
-     "diff": -0.1429,
+     "diff": -0.1476,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.235,
-      -0.2183
+      -1.3036,
+      -0.7021
      ],
-     "diff": -0.7832,
+     "diff": -0.986,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2603,
-      0.0452
+      -0.3932,
+      0.0432
      ],
-     "diff": -0.014,
+     "diff": -0.1211,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -393,28 +393,28 @@
    "gliner_pii@0.9": {
     "leak_rate": {
      "ci95": [
-      -0.2439,
-      -0.1286
+      -0.2489,
+      -0.1337
      ],
-     "diff": -0.1857,
+     "diff": -0.1905,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -0.8243,
-      0.1461
+      -0.8774,
+      -0.3889
      ],
-     "diff": -0.4196,
-     "excludes_0": false,
+     "diff": -0.6224,
+     "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2351,
-      0.0603
+      -0.3655,
+      0.052
      ],
-     "diff": 0.003,
+     "diff": -0.1042,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -433,19 +433,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -3.9001,
-      -2.2617
+      -4.0346,
+      -2.4083
      ],
-     "diff": -3.0197,
+     "diff": -3.1579,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2074,
-      0.0254
+      -0.3679,
+      0.005
      ],
-     "diff": -0.0657,
+     "diff": -0.1248,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -462,19 +462,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -3.3885,
-      -1.8621
+      -3.5104,
+      -1.9998
      ],
-     "diff": -2.5658,
+     "diff": -2.7039,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1997,
-      0.0345
+      -0.3639,
+      0.0149
      ],
-     "diff": -0.0581,
+     "diff": -0.1173,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -491,19 +491,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -2.9343,
-      -1.592
+      -3.0594,
+      -1.7382
      ],
-     "diff": -2.2237,
+     "diff": -2.3618,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1917,
-      0.0432
+      -0.3577,
+      0.024
      ],
-     "diff": -0.0492,
+     "diff": -0.1083,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -520,19 +520,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -2.5329,
-      -1.3478
+      -2.6565,
+      -1.4964
      ],
-     "diff": -1.9079,
+     "diff": -2.0461,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.183,
-      0.0552
+      -0.3446,
+      0.0339
      ],
-     "diff": -0.0388,
+     "diff": -0.098,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -549,19 +549,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -2.1842,
-      -1.0526
+      -2.3056,
+      -1.2183
      ],
-     "diff": -1.5855,
+     "diff": -1.7237,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1806,
-      0.0563
+      -0.3377,
+      0.0337
      ],
-     "diff": -0.0387,
+     "diff": -0.0978,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -578,19 +578,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -1.7687,
-      -0.6933
+      -1.8912,
+      -0.8571
      ],
-     "diff": -1.1974,
+     "diff": -1.3355,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1748,
-      0.0699
+      -0.3227,
+      0.0387
      ],
-     "diff": -0.0316,
+     "diff": -0.0907,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -607,19 +607,19 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -1.3179,
-      -0.2565
+      -1.4317,
+      -0.438
      ],
-     "diff": -0.7566,
+     "diff": -0.8947,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1513,
-      0.1153
+      -0.2998,
+      0.0747
      ],
-     "diff": -0.0067,
+     "diff": -0.0659,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -629,37 +629,8 @@
    "gliner_pii@0.3": {
     "leak_rate": {
      "ci95": [
-      -0.1131,
-      -0.0156
-     ],
-     "diff": -0.0622,
-     "excludes_0": true,
-     "resamples": 2000
-    },
-    "spurious_per_message": {
-     "ci95": [
-      -3.3462,
-      -1.8759
-     ],
-     "diff": -2.5782,
-     "excludes_0": true,
-     "resamples": 2000
-    },
-    "spurious_rate": {
-     "ci95": [
-      -0.3332,
-      -0.018
-     ],
-     "diff": -0.157,
-     "excludes_0": true,
-     "resamples": 2000
-    }
-   },
-   "gliner_pii@0.4": {
-    "leak_rate": {
-     "ci95": [
-      -0.1191,
-      -0.0197
+      -0.1198,
+      -0.0202
      ],
      "diff": -0.067,
      "excludes_0": true,
@@ -667,19 +638,48 @@
     },
     "spurious_per_message": {
      "ci95": [
-      -2.9488,
-      -1.6013
+      -3.6176,
+      -2.109
      ],
-     "diff": -2.2585,
+     "diff": -2.8367,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.3167,
-      -0.0072
+      -0.471,
+      -0.0504
      ],
-     "diff": -0.1429,
+     "diff": -0.23,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "gliner_pii@0.4": {
+    "leak_rate": {
+     "ci95": [
+      -0.1256,
+      -0.0242
+     ],
+     "diff": -0.0718,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "spurious_per_message": {
+     "ci95": [
+      -3.218,
+      -1.8489
+     ],
+     "diff": -2.517,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "spurious_rate": {
+     "ci95": [
+      -0.453,
+      -0.0401
+     ],
+     "diff": -0.216,
      "excludes_0": true,
      "resamples": 2000
     }
@@ -687,86 +687,86 @@
    "gliner_pii@0.5": {
     "leak_rate": {
      "ci95": [
-      -0.1333,
-      -0.026
+      -0.1407,
+      -0.0294
      ],
-     "diff": -0.0766,
+     "diff": -0.0813,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -2.5,
-      -1.302
+      -2.7741,
+      -1.5479
      ],
-     "diff": -1.8776,
+     "diff": -2.1361,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2896,
-      0.012
+      -0.4311,
+      -0.0238
      ],
-     "diff": -0.1226,
-     "excludes_0": false,
+     "diff": -0.1957,
+     "excludes_0": true,
      "resamples": 2000
     }
    },
    "gliner_pii@0.6": {
     "leak_rate": {
      "ci95": [
-      -0.1549,
-      -0.0398
+      -0.1596,
+      -0.0439
      ],
-     "diff": -0.0957,
+     "diff": -0.1005,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.9818,
-      -0.9266
+      -2.2806,
+      -1.1699
      ],
-     "diff": -1.4422,
+     "diff": -1.7007,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2533,
-      0.0344
+      -0.3955,
+      -0.002
      ],
-     "diff": -0.0945,
-     "excludes_0": false,
+     "diff": -0.1676,
+     "excludes_0": true,
      "resamples": 2000
     }
    },
    "gliner_pii@0.7": {
     "leak_rate": {
      "ci95": [
-      -0.169,
-      -0.0553
+      -0.1754,
+      -0.0582
      ],
-     "diff": -0.11,
+     "diff": -0.1148,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.58,
-      -0.5948
+      -1.8672,
+      -0.8675
      ],
-     "diff": -1.0816,
+     "diff": -1.3401,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.2152,
-      0.0607
+      -0.3542,
+      0.0256
      ],
-     "diff": -0.0619,
+     "diff": -0.135,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -774,28 +774,28 @@
    "gliner_pii@0.8": {
     "leak_rate": {
      "ci95": [
-      -0.2,
-      -0.0737
+      -0.206,
+      -0.0777
      ],
-     "diff": -0.134,
+     "diff": -0.1388,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -1.1783,
-      -0.274
+      -1.4288,
+      -0.5548
      ],
-     "diff": -0.7279,
+     "diff": -0.9864,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1741,
-      0.0998
+      -0.3021,
+      0.0624
      ],
-     "diff": -0.0213,
+     "diff": -0.0944,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -803,28 +803,28 @@
    "gliner_pii@0.9": {
     "leak_rate": {
      "ci95": [
-      -0.2738,
-      -0.1171
+      -0.2817,
+      -0.121
      ],
-     "diff": -0.1914,
+     "diff": -0.1962,
      "excludes_0": true,
      "resamples": 2000
     },
     "spurious_per_message": {
      "ci95": [
-      -0.7724,
-      0.0786
+      -0.9929,
+      -0.2384
      ],
-     "diff": -0.3469,
-     "excludes_0": false,
+     "diff": -0.6054,
+     "excludes_0": true,
      "resamples": 2000
     },
     "spurious_rate": {
      "ci95": [
-      -0.1118,
-      0.1771
+      -0.2334,
+      0.1198
      ],
-     "diff": 0.0366,
+     "diff": -0.0364,
      "excludes_0": false,
      "resamples": 2000
     }
@@ -838,48 +838,50 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
+      "ss@op1",
+      "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ]
     },
@@ -891,50 +893,50 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ]
     },
@@ -948,49 +950,54 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
+      "ss@op1",
+      "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
-      "ss@op4",
+      "ss@op1",
+      "ss@op2",
+      "ss@op3",
+      "ss@balanced",
       "ss@op5"
      ]
     },
-    "default_dominates": false,
+    "default_dominates": true,
     "ss_dominates": true
    },
    "spurious_per_message": {
@@ -998,50 +1005,50 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ]
     },
@@ -1055,48 +1062,51 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
+      "ss@op1",
+      "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4"
+      "ss@op5"
      ]
     },
     "default_dominates": true,
@@ -1107,50 +1117,50 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ]
     },
@@ -1164,47 +1174,51 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
+      "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
+      "ss@op1",
+      "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
+      "ss@balanced",
       "ss@op5"
      ]
     },
-    "default_dominates": false,
+    "default_dominates": true,
     "ss_dominates": true
    },
    "spurious_per_message": {
@@ -1212,50 +1226,50 @@
      "gliner_pii@0.3": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.4": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.5": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.6": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.7": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.8": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ],
      "gliner_pii@0.9": [
       "ss@op1",
       "ss@op2",
+      "ss@op3",
       "ss@balanced",
-      "ss@op4",
       "ss@op5"
      ]
     },
@@ -1276,8 +1290,12 @@
   "wildchat/pool.jsonl": "912b55e509227bdf0a2c6442352ac668d44153febd369d3930489c0154843c9f"
  },
  "git": {
-  "commit": "1478dae9344ec5eeece962e809ac822d7546c1bd",
-  "modified": []
+  "commit": "4e9df88d1bba302bfae237fa661b5557a84209a9",
+  "modified": [
+   "bench/results/presets_dev.json",
+   "bench/results/presets_dev.md",
+   "bench/results/tagger_acceptance_dev.json"
+  ]
  },
  "gliner_arms": {
   "gliner_pii": "gliner_pii@0.5",
@@ -1735,154 +1753,154 @@
    },
    "ss@balanced": {
     "leak": {
-     "k": 11,
+     "k": 9,
      "n": 627,
-     "rate": 0.0175,
+     "rate": 0.0144,
      "wilson95": [
-      0.0098,
-      0.0311
+      0.0076,
+      0.0271
      ]
     },
     "negatives_untouched": {
-     "k": 361,
+     "k": 377,
      "n": 431,
-     "rate": 0.8376,
+     "rate": 0.8747,
      "wilson95": [
-      0.7998,
-      0.8694
+      0.8401,
+      0.9027
      ]
     },
     "spurious": {
-     "k": 221,
-     "n": 285,
-     "rate": 0.7754,
+     "k": 133,
+     "n": 193,
+     "rate": 0.6891,
      "wilson95": [
-      0.7235,
-      0.82
+      0.6207,
+      0.7502
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.3067,
-      0.7403
+      0.1722,
+      0.4418
      ],
-     "k": 221,
+     "k": 133,
      "n": 442,
-     "value": 0.5
+     "value": 0.3009
     }
    },
    "ss@op1": {
     "leak": {
-     "k": 10,
+     "k": 8,
      "n": 627,
-     "rate": 0.0159,
+     "rate": 0.0128,
      "wilson95": [
-      0.0087,
-      0.0291
+      0.0065,
+      0.025
      ]
     },
     "negatives_untouched": {
-     "k": 354,
+     "k": 369,
      "n": 431,
-     "rate": 0.8213,
+     "rate": 0.8561,
      "wilson95": [
-      0.7824,
-      0.8546
+      0.8199,
+      0.8861
      ]
     },
     "spurious": {
-     "k": 305,
-     "n": 369,
-     "rate": 0.8266,
+     "k": 169,
+     "n": 229,
+     "rate": 0.738,
      "wilson95": [
-      0.7846,
-      0.8618
+      0.6774,
+      0.7907
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.4263,
-      1.0455
+      0.2326,
+      0.5482
      ],
-     "k": 305,
+     "k": 169,
      "n": 442,
-     "value": 0.69
+     "value": 0.3824
     }
    },
    "ss@op2": {
     "leak": {
-     "k": 11,
+     "k": 9,
      "n": 627,
-     "rate": 0.0175,
+     "rate": 0.0144,
      "wilson95": [
-      0.0098,
-      0.0311
+      0.0076,
+      0.0271
      ]
     },
     "negatives_untouched": {
-     "k": 357,
+     "k": 372,
      "n": 431,
-     "rate": 0.8283,
+     "rate": 0.8631,
      "wilson95": [
-      0.7898,
-      0.861
+      0.8274,
+      0.8924
      ]
     },
     "spurious": {
-     "k": 261,
-     "n": 325,
-     "rate": 0.8031,
+     "k": 165,
+     "n": 225,
+     "rate": 0.7333,
      "wilson95": [
-      0.7564,
-      0.8427
+      0.672,
+      0.7868
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.357,
-      0.8945
+      0.2251,
+      0.5386
      ],
-     "k": 261,
+     "k": 165,
      "n": 442,
-     "value": 0.5905
+     "value": 0.3733
     }
    },
-   "ss@op4": {
+   "ss@op3": {
     "leak": {
-     "k": 12,
+     "k": 9,
      "n": 627,
-     "rate": 0.0191,
+     "rate": 0.0144,
      "wilson95": [
-      0.011,
-      0.0332
+      0.0076,
+      0.0271
      ]
     },
     "negatives_untouched": {
-     "k": 367,
+     "k": 374,
      "n": 431,
-     "rate": 0.8515,
+     "rate": 0.8677,
      "wilson95": [
-      0.8148,
-      0.882
+      0.8325,
+      0.8965
      ]
     },
     "spurious": {
-     "k": 179,
-     "n": 236,
-     "rate": 0.7585,
+     "k": 150,
+     "n": 210,
+     "rate": 0.7143,
      "wilson95": [
-      0.7,
-      0.8087
+      0.6498,
+      0.7711
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.2522,
-      0.5791
+      0.1981,
+      0.5001
      ],
-     "k": 179,
+     "k": 150,
      "n": 442,
-     "value": 0.405
+     "value": 0.3394
     }
    },
    "ss@op5": {
@@ -1896,31 +1914,31 @@
      ]
     },
     "negatives_untouched": {
-     "k": 374,
+     "k": 383,
      "n": 431,
-     "rate": 0.8677,
+     "rate": 0.8886,
      "wilson95": [
-      0.8325,
-      0.8965
+      0.8554,
+      0.915
      ]
     },
     "spurious": {
-     "k": 139,
-     "n": 193,
-     "rate": 0.7202,
+     "k": 124,
+     "n": 177,
+     "rate": 0.7006,
      "wilson95": [
-      0.6531,
-      0.7788
+      0.6294,
+      0.7632
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.1883,
-      0.455
+      0.1562,
+      0.4184
      ],
-     "k": 139,
+     "k": 124,
      "n": 442,
-     "value": 0.3145
+     "value": 0.2805
     }
    }
   },
@@ -2345,88 +2363,50 @@
    },
    "ss@balanced": {
     "leak": {
-     "k": 2,
+     "k": 1,
      "n": 210,
-     "rate": 0.0095,
+     "rate": 0.0048,
      "wilson95": [
-      0.0026,
-      0.0341
+      0.0008,
+      0.0265
      ]
     },
     "negatives_untouched": {
-     "k": 129,
+     "k": 130,
      "n": 142,
-     "rate": 0.9085,
+     "rate": 0.9155,
      "wilson95": [
-      0.8497,
-      0.9457
+      0.8581,
+      0.951
      ]
     },
     "spurious": {
-     "k": 52,
-     "n": 56,
-     "rate": 0.9286,
+     "k": 23,
+     "n": 28,
+     "rate": 0.8214,
      "wilson95": [
-      0.8302,
-      0.9719
+      0.6441,
+      0.9212
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.0803,
-      0.8687
+      0.0638,
+      0.2925
      ],
-     "k": 52,
+     "k": 23,
      "n": 143,
-     "value": 0.3636
+     "value": 0.1608
     }
    },
    "ss@op1": {
     "leak": {
-     "k": 2,
+     "k": 1,
      "n": 210,
-     "rate": 0.0095,
+     "rate": 0.0048,
      "wilson95": [
-      0.0026,
-      0.0341
-     ]
-    },
-    "negatives_untouched": {
-     "k": 127,
-     "n": 142,
-     "rate": 0.8944,
-     "wilson95": [
-      0.833,
-      0.9349
-     ]
-    },
-    "spurious": {
-     "k": 76,
-     "n": 80,
-     "rate": 0.95,
-     "wilson95": [
-      0.8784,
-      0.9804
-     ]
-    },
-    "spurious_per_message": {
-     "ci95": [
-      0.1027,
-      1.3359
-     ],
-     "k": 76,
-     "n": 143,
-     "value": 0.5315
-    }
-   },
-   "ss@op2": {
-    "leak": {
-     "k": 2,
-     "n": 210,
-     "rate": 0.0095,
-     "wilson95": [
-      0.0026,
-      0.0341
+      0.0008,
+      0.0265
      ]
     },
     "negatives_untouched": {
@@ -2439,98 +2419,136 @@
      ]
     },
     "spurious": {
-     "k": 70,
-     "n": 74,
-     "rate": 0.9459,
-     "wilson95": [
-      0.8691,
-      0.9788
-     ]
-    },
-    "spurious_per_message": {
-     "ci95": [
-      0.0949,
-      1.219
-     ],
-     "k": 70,
-     "n": 143,
-     "value": 0.4895
-    }
-   },
-   "ss@op4": {
-    "leak": {
-     "k": 3,
-     "n": 210,
-     "rate": 0.0143,
-     "wilson95": [
-      0.0049,
-      0.0412
-     ]
-    },
-    "negatives_untouched": {
-     "k": 129,
-     "n": 142,
-     "rate": 0.9085,
-     "wilson95": [
-      0.8497,
-      0.9457
-     ]
-    },
-    "spurious": {
-     "k": 38,
-     "n": 42,
-     "rate": 0.9048,
-     "wilson95": [
-      0.7793,
-      0.9623
-     ]
-    },
-    "spurious_per_message": {
-     "ci95": [
-      0.0764,
-      0.5794
-     ],
-     "k": 38,
-     "n": 143,
-     "value": 0.2657
-    }
-   },
-   "ss@op5": {
-    "leak": {
-     "k": 3,
-     "n": 210,
-     "rate": 0.0143,
-     "wilson95": [
-      0.0049,
-      0.0412
-     ]
-    },
-    "negatives_untouched": {
-     "k": 129,
-     "n": 142,
-     "rate": 0.9085,
-     "wilson95": [
-      0.8497,
-      0.9457
-     ]
-    },
-    "spurious": {
      "k": 26,
-     "n": 30,
-     "rate": 0.8667,
+     "n": 31,
+     "rate": 0.8387,
      "wilson95": [
-      0.7032,
-      0.9469
+      0.6737,
+      0.9291
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.0738,
-      0.3287
+      0.0805,
+      0.3169
      ],
      "k": 26,
      "n": 143,
      "value": 0.1818
+    }
+   },
+   "ss@op2": {
+    "leak": {
+     "k": 1,
+     "n": 210,
+     "rate": 0.0048,
+     "wilson95": [
+      0.0008,
+      0.0265
+     ]
+    },
+    "negatives_untouched": {
+     "k": 129,
+     "n": 142,
+     "rate": 0.9085,
+     "wilson95": [
+      0.8497,
+      0.9457
+     ]
+    },
+    "spurious": {
+     "k": 25,
+     "n": 30,
+     "rate": 0.8333,
+     "wilson95": [
+      0.6644,
+      0.9266
+     ]
+    },
+    "spurious_per_message": {
+     "ci95": [
+      0.0758,
+      0.3106
+     ],
+     "k": 25,
+     "n": 143,
+     "value": 0.1748
+    }
+   },
+   "ss@op3": {
+    "leak": {
+     "k": 1,
+     "n": 210,
+     "rate": 0.0048,
+     "wilson95": [
+      0.0008,
+      0.0265
+     ]
+    },
+    "negatives_untouched": {
+     "k": 130,
+     "n": 142,
+     "rate": 0.9155,
+     "wilson95": [
+      0.8581,
+      0.951
+     ]
+    },
+    "spurious": {
+     "k": 24,
+     "n": 29,
+     "rate": 0.8276,
+     "wilson95": [
+      0.6545,
+      0.924
+     ]
+    },
+    "spurious_per_message": {
+     "ci95": [
+      0.068,
+      0.3025
+     ],
+     "k": 24,
+     "n": 143,
+     "value": 0.1678
+    }
+   },
+   "ss@op5": {
+    "leak": {
+     "k": 2,
+     "n": 210,
+     "rate": 0.0095,
+     "wilson95": [
+      0.0026,
+      0.0341
+     ]
+    },
+    "negatives_untouched": {
+     "k": 130,
+     "n": 142,
+     "rate": 0.9155,
+     "wilson95": [
+      0.8581,
+      0.951
+     ]
+    },
+    "spurious": {
+     "k": 23,
+     "n": 28,
+     "rate": 0.8214,
+     "wilson95": [
+      0.6441,
+      0.9212
+     ]
+    },
+    "spurious_per_message": {
+     "ci95": [
+      0.0638,
+      0.2925
+     ],
+     "k": 23,
+     "n": 143,
+     "value": 0.1608
     }
    }
   },
@@ -2964,31 +2982,31 @@
      ]
     },
     "negatives_untouched": {
-     "k": 122,
+     "k": 129,
      "n": 149,
-     "rate": 0.8188,
+     "rate": 0.8658,
      "wilson95": [
-      0.7492,
-      0.8724
+      0.8018,
+      0.9114
      ]
     },
     "spurious": {
-     "k": 59,
-     "n": 68,
-     "rate": 0.8676,
+     "k": 38,
+     "n": 47,
+     "rate": 0.8085,
      "wilson95": [
-      0.7672,
-      0.9288
+      0.6746,
+      0.8958
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.1986,
-      0.6304
+      0.0946,
+      0.4422
      ],
-     "k": 59,
+     "k": 38,
      "n": 152,
-     "value": 0.3882
+     "value": 0.25
     }
    },
    "ss@op1": {
@@ -3002,31 +3020,31 @@
      ]
     },
     "negatives_untouched": {
-     "k": 120,
+     "k": 126,
      "n": 149,
-     "rate": 0.8054,
+     "rate": 0.8456,
      "wilson95": [
-      0.7345,
-      0.8609
+      0.779,
+      0.8949
      ]
     },
     "spurious": {
-     "k": 76,
-     "n": 85,
-     "rate": 0.8941,
+     "k": 46,
+     "n": 54,
+     "rate": 0.8519,
      "wilson95": [
-      0.8109,
-      0.9433
+      0.734,
+      0.923
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.2555,
-      0.8028
+      0.1375,
+      0.5101
      ],
-     "k": 76,
+     "k": 46,
      "n": 152,
-     "value": 0.5
+     "value": 0.3026
     }
    },
    "ss@op2": {
@@ -3040,34 +3058,34 @@
      ]
     },
     "negatives_untouched": {
-     "k": 120,
+     "k": 128,
      "n": 149,
-     "rate": 0.8054,
+     "rate": 0.8591,
      "wilson95": [
-      0.7345,
-      0.8609
+      0.7941,
+      0.9059
      ]
     },
     "spurious": {
-     "k": 65,
-     "n": 74,
-     "rate": 0.8784,
+     "k": 43,
+     "n": 51,
+     "rate": 0.8431,
      "wilson95": [
-      0.7847,
-      0.9347
+      0.7199,
+      0.9183
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.2324,
-      0.6708
+      0.1235,
+      0.4843
      ],
-     "k": 65,
+     "k": 43,
      "n": 152,
-     "value": 0.4276
+     "value": 0.2829
     }
    },
-   "ss@op4": {
+   "ss@op3": {
     "leak": {
      "k": 6,
      "n": 208,
@@ -3075,44 +3093,6 @@
      "wilson95": [
       0.0133,
       0.0615
-     ]
-    },
-    "negatives_untouched": {
-     "k": 124,
-     "n": 149,
-     "rate": 0.8322,
-     "wilson95": [
-      0.764,
-      0.8837
-     ]
-    },
-    "spurious": {
-     "k": 54,
-     "n": 62,
-     "rate": 0.871,
-     "wilson95": [
-      0.7655,
-      0.9331
-     ]
-    },
-    "spurious_per_message": {
-     "ci95": [
-      0.1786,
-      0.5796
-     ],
-     "k": 54,
-     "n": 152,
-     "value": 0.3553
-    }
-   },
-   "ss@op5": {
-    "leak": {
-     "k": 7,
-     "n": 208,
-     "rate": 0.0337,
-     "wilson95": [
-      0.0164,
-      0.0678
      ]
     },
     "negatives_untouched": {
@@ -3125,22 +3105,60 @@
      ]
     },
     "spurious": {
-     "k": 44,
-     "n": 50,
-     "rate": 0.88,
+     "k": 39,
+     "n": 47,
+     "rate": 0.8298,
      "wilson95": [
-      0.762,
-      0.9438
+      0.6986,
+      0.9111
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.1258,
-      0.5
+      0.0987,
+      0.4527
      ],
-     "k": 44,
+     "k": 39,
      "n": 152,
-     "value": 0.2895
+     "value": 0.2566
+    }
+   },
+   "ss@op5": {
+    "leak": {
+     "k": 8,
+     "n": 208,
+     "rate": 0.0385,
+     "wilson95": [
+      0.0196,
+      0.074
+     ]
+    },
+    "negatives_untouched": {
+     "k": 132,
+     "n": 149,
+     "rate": 0.8859,
+     "wilson95": [
+      0.8249,
+      0.9275
+     ]
+    },
+    "spurious": {
+     "k": 36,
+     "n": 43,
+     "rate": 0.8372,
+     "wilson95": [
+      0.7003,
+      0.9188
+     ]
+    },
+    "spurious_per_message": {
+     "ci95": [
+      0.0822,
+      0.4304
+     ],
+     "k": 36,
+     "n": 152,
+     "value": 0.2368
     }
    }
   },
@@ -3565,43 +3583,81 @@
    },
    "ss@balanced": {
     "leak": {
-     "k": 3,
+     "k": 2,
      "n": 209,
-     "rate": 0.0144,
+     "rate": 0.0096,
      "wilson95": [
-      0.0049,
-      0.0413
+      0.0026,
+      0.0342
      ]
     },
     "negatives_untouched": {
-     "k": 110,
+     "k": 118,
      "n": 140,
-     "rate": 0.7857,
+     "rate": 0.8429,
      "wilson95": [
-      0.7106,
-      0.8456
+      0.7735,
+      0.8939
      ]
     },
     "spurious": {
-     "k": 110,
-     "n": 161,
-     "rate": 0.6832,
+     "k": 72,
+     "n": 118,
+     "rate": 0.6102,
      "wilson95": [
-      0.6078,
-      0.7501
+      0.52,
+      0.6934
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.3636,
-      1.2154
+      0.1739,
+      0.8905
      ],
-     "k": 110,
+     "k": 72,
      "n": 147,
-     "value": 0.7483
+     "value": 0.4898
     }
    },
    "ss@op1": {
+    "leak": {
+     "k": 1,
+     "n": 209,
+     "rate": 0.0048,
+     "wilson95": [
+      0.0008,
+      0.0266
+     ]
+    },
+    "negatives_untouched": {
+     "k": 115,
+     "n": 140,
+     "rate": 0.8214,
+     "wilson95": [
+      0.7497,
+      0.876
+     ]
+    },
+    "spurious": {
+     "k": 97,
+     "n": 144,
+     "rate": 0.6736,
+     "wilson95": [
+      0.5934,
+      0.7448
+     ]
+    },
+    "spurious_per_message": {
+     "ci95": [
+      0.2754,
+      1.1438
+     ],
+     "k": 97,
+     "n": 147,
+     "value": 0.6599
+    }
+   },
+   "ss@op2": {
     "leak": {
      "k": 2,
      "n": 209,
@@ -3612,103 +3668,65 @@
      ]
     },
     "negatives_untouched": {
-     "k": 107,
+     "k": 115,
      "n": 140,
-     "rate": 0.7643,
+     "rate": 0.8214,
      "wilson95": [
-      0.6875,
-      0.8269
+      0.7497,
+      0.876
      ]
     },
     "spurious": {
-     "k": 153,
-     "n": 204,
-     "rate": 0.75,
+     "k": 97,
+     "n": 144,
+     "rate": 0.6736,
      "wilson95": [
-      0.6863,
-      0.8044
+      0.5934,
+      0.7448
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.5515,
-      1.6
+      0.2754,
+      1.1438
      ],
-     "k": 153,
+     "k": 97,
      "n": 147,
-     "value": 1.0408
+     "value": 0.6599
     }
    },
-   "ss@op2": {
+   "ss@op3": {
     "leak": {
-     "k": 3,
+     "k": 2,
      "n": 209,
-     "rate": 0.0144,
+     "rate": 0.0096,
      "wilson95": [
-      0.0049,
-      0.0413
+      0.0026,
+      0.0342
      ]
     },
     "negatives_untouched": {
-     "k": 109,
+     "k": 115,
      "n": 140,
-     "rate": 0.7786,
+     "rate": 0.8214,
      "wilson95": [
-      0.7029,
-      0.8394
-     ]
-    },
-    "spurious": {
-     "k": 126,
-     "n": 177,
-     "rate": 0.7119,
-     "wilson95": [
-      0.6412,
-      0.7735
-     ]
-    },
-    "spurious_per_message": {
-     "ci95": [
-      0.4217,
-      1.3826
-     ],
-     "k": 126,
-     "n": 147,
-     "value": 0.8571
-    }
-   },
-   "ss@op4": {
-    "leak": {
-     "k": 3,
-     "n": 209,
-     "rate": 0.0144,
-     "wilson95": [
-      0.0049,
-      0.0413
-     ]
-    },
-    "negatives_untouched": {
-     "k": 114,
-     "n": 140,
-     "rate": 0.8143,
-     "wilson95": [
-      0.7418,
-      0.87
+      0.7497,
+      0.876
      ]
     },
     "spurious": {
      "k": 87,
-     "n": 132,
-     "rate": 0.6591,
+     "n": 134,
+     "rate": 0.6493,
      "wilson95": [
-      0.5748,
-      0.7344
+      0.5653,
+      0.7249
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.2517,
-      1.0134
+      0.2357,
+      1.0411
      ],
      "k": 87,
      "n": 147,
@@ -3726,31 +3744,31 @@
      ]
     },
     "negatives_untouched": {
-     "k": 116,
+     "k": 121,
      "n": 140,
-     "rate": 0.8286,
+     "rate": 0.8643,
      "wilson95": [
-      0.7576,
-      0.882
+      0.7977,
+      0.9114
      ]
     },
     "spurious": {
-     "k": 69,
-     "n": 113,
-     "rate": 0.6106,
+     "k": 65,
+     "n": 106,
+     "rate": 0.6132,
      "wilson95": [
-      0.5185,
-      0.6955
+      0.5181,
+      0.7004
      ]
     },
     "spurious_per_message": {
      "ci95": [
-      0.1818,
-      0.8467
+      0.1351,
+      0.8278
      ],
-     "k": 69,
+     "k": 65,
      "n": 147,
-     "value": 0.4694
+     "value": 0.4422
     }
    }
   }
@@ -3766,31 +3784,31 @@
  "split": "dev",
  "ss_points": {
   "ss@balanced": {
-   "detection_config_hash": "7d524abba90c769642d42e4e21acf62a78108fc14ef789de577299d23de79f18",
+   "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
    "file": "bench/realdata/configs/balanced.json",
    "preset": "balanced",
    "sha256": "844015945409431deda3c0f27fc4aee4dd653428b81249f3686ca2c382d3a8de"
   },
   "ss@op1": {
-   "detection_config_hash": "cc6281eb16c89badac7870707ca97c15d386d541bbb00bc2925cefca9fefeaa5",
+   "detection_config_hash": "81eac6d5ccb217c2dd55eb44712ceba4d29207e2639c3a2615c8369d15ca44ef",
    "file": "bench/realdata/configs/curve/op1.json",
    "preset": "balanced",
    "sha256": "423a13fbaa7376595227244323527ed76e1e40fd2e8871e308945cbd790cc0f5"
   },
   "ss@op2": {
-   "detection_config_hash": "d2a2370d7e8bcef47a6cab97ebe55c770fccb9e9da57821ebb56f064a416dc06",
+   "detection_config_hash": "90e1dfbbff1f36492e8117203ea8b90beb9efd453fe52df83b452aadaf07028c",
    "file": "bench/realdata/configs/curve/op2.json",
    "preset": "balanced",
    "sha256": "095de35ebf471196c7ffa696777659fe8823be307aed1d9324b5f072ef9b8169"
   },
-  "ss@op4": {
-   "detection_config_hash": "b502609b70d3aa004d7dc333f8b928d352f8cd64bfa8cacfec5e74ffac916649",
-   "file": "bench/realdata/configs/curve/op4.json",
+  "ss@op3": {
+   "detection_config_hash": "82c6c21dcc740c1ac66e73a7701455d1304a165ec73137a6d35d33d2eedcd950",
+   "file": "bench/realdata/configs/curve/op3.json",
    "preset": "balanced",
-   "sha256": "b7ad639bb76776771ff50655fbec6f43a724e9943050f58b5c2d35b1f598167e"
+   "sha256": "9c437b26c82296063f03ce9be447897c893dbc74bbfc8fb33e62815df5b5f1b6"
   },
   "ss@op5": {
-   "detection_config_hash": "cbeacc9d45d6e8431793ce27cc5b2326499e8081b1891ec4589ef9615bfeab82",
+   "detection_config_hash": "fcc85d307a695e4ccdc4bb103d601408ef1612e17c6685d400393fc1faa49ff4",
    "file": "bench/realdata/configs/curve/op5.json",
    "preset": "balanced",
    "sha256": "4b52c7b47643bd66e108631151a3be159ed1bce9ec007f546b1ead4c7a0fda7b"

@@ -7,69 +7,69 @@
   "seed": "derive_seed('components-bootstrap', data split, group, slice)",
   "unit": "conversation (a single-turn prompt is its own)"
  },
- "code": "b9e2709024c64894aa2f63e109c8b1c379093d245b6336ec0b2342a9b1e84a7b",
+ "code": "f425573baadf73d7565f6b73b975afbc25e3629113030ecf2db853bf2bfb02f3",
  "command": "PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.components --split dev --out bench/results/presets_dev.json",
  "configs": {
   "balanced": {
-   "detection_config_hash": "7d524abba90c769642d42e4e21acf62a78108fc14ef789de577299d23de79f18",
+   "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
    "file": "bench/realdata/configs/balanced.json",
-   "in_run_p50_ms": 59.5,
+   "in_run_p50_ms": 45.5,
    "preset": "balanced",
    "sha256": "844015945409431deda3c0f27fc4aee4dd653428b81249f3686ca2c382d3a8de"
   },
   "classic": {
-   "detection_config_hash": "d4fe668425ed3220a736849eac7ab0429d50d1dd438821af51a9d65e8d0a9b17",
+   "detection_config_hash": "4b37e3914e9733e5a5fe3ed49ff12f373c57051b96a493407d308365b92098ee",
    "file": "bench/realdata/configs/classic.json",
-   "in_run_p50_ms": 46.8,
+   "in_run_p50_ms": 29.3,
    "preset": "classic",
    "sha256": "ba2dc23e606d5c86e74bc2028e6711da4a302c51070a60b40441676b59d0d37b"
   },
   "fast": {
-   "detection_config_hash": "59b3d120cc45ae0b383e068b6744922513a5010bc59d07bf1cba62c7cb805235",
+   "detection_config_hash": "19a19bd9a129c4557a4ac6928d36e9391b5f53ba0b664518cbe55d5715b81629",
    "file": "bench/realdata/configs/fast.json",
-   "in_run_p50_ms": 48.3,
+   "in_run_p50_ms": 36.0,
    "preset": "fast",
    "sha256": "c25dfd127d260cd8d7a9fe950d0138148c5f9f7462ddbb4269b181a153326b48"
   },
   "no_canonicaliser": {
-   "detection_config_hash": "c8c53feed73102144600f646327980d163b92200bb656ced3334e6483ce470f6",
+   "detection_config_hash": "ca3733979bbdb18b97fa9bfa000bbc322c082187b9352e7e169657aa903f5fae",
    "file": "bench/realdata/configs/no_canonicaliser.json",
-   "in_run_p50_ms": 69.8,
+   "in_run_p50_ms": 46.4,
    "preset": "no_canonicaliser",
    "sha256": "07d3b0e69889a7864bf94fc1a231cbd0a380bb5a4d84395ef130c35eaca50152"
   },
   "no_gate": {
-   "detection_config_hash": "df27127ddb4be48d662842c6c7cc07795f45eda0f46af0cd5b5e9028b041967a",
+   "detection_config_hash": "d1e5b8274e68263d2a5edee59ffdf6c6d2066799d68c99abde1335a13d6b71d4",
    "file": "bench/realdata/configs/no_gate.json",
-   "in_run_p50_ms": 59.9,
+   "in_run_p50_ms": 46.3,
    "preset": "no_gate",
    "sha256": "5e864dfbb1c140c9e0347cc27b68ad3ba1188df40de84f147f87f9d89c1ac25d"
   },
   "no_models": {
-   "detection_config_hash": "445c2867429fa815ace8d3197a48172742e2015061f841c825e3af01b92b1e72",
+   "detection_config_hash": "2e294416e7c78dba6ae968cae1d36540094e2895806c66e1419edf4f250026fa",
    "file": "bench/realdata/configs/no_models.json",
-   "in_run_p50_ms": 2.9,
+   "in_run_p50_ms": 2.5,
    "preset": "no_models",
    "sha256": "d9b71bfe7ff2b1a8fbade47413b3fc0afbbcace6d606105e32081c9d747bcdae"
   },
   "no_structural": {
-   "detection_config_hash": "c0e4151e7940a2b42bcc8b024ee162923a8785c4346a855e75698148a63fa4c0",
+   "detection_config_hash": "4a1e5c9003214492e5295e29667ac45d7ad96478cd5aa729d8a0beb251967edf",
    "file": "bench/realdata/configs/no_structural.json",
-   "in_run_p50_ms": 61.0,
+   "in_run_p50_ms": 44.6,
    "preset": "no_structural",
    "sha256": "c3c1d1526e741187dac4f9ba826b55586e931e2fb3f0943a8c129fb66237f68a"
   },
   "no_tagger": {
-   "detection_config_hash": "80af4e0f04d430231f0af9a8fd946ad026d5654af8665c347f0eeed5ac4da405",
+   "detection_config_hash": "cb25eb674717839e801a041a2114e09d9d355adb0f92d541c5e791c7ccd9126b",
    "file": "bench/realdata/configs/no_tagger.json",
-   "in_run_p50_ms": 15.2,
+   "in_run_p50_ms": 11.9,
    "preset": "no_tagger",
    "sha256": "57379aee58cb9cd6427e8bfbdb5b9af67bf58d90b5001de8d269d835fe8bdd48"
   },
   "strict": {
-   "detection_config_hash": "ec51c12ddf6982804464189768a6ac6956898ec40c51006a2d34b04bc43598fa",
+   "detection_config_hash": "57f6f212a49159828a31b9b171e72bda6db90e4979c863b87f3b45e895ad276e",
    "file": "bench/realdata/configs/strict.json",
-   "in_run_p50_ms": 104.6,
+   "in_run_p50_ms": 64.1,
    "preset": "strict",
    "sha256": "2cb44fada869b690152ec65569297c7e237c7edff1525722169e4385da698093"
   }
@@ -121,19 +121,19 @@
     "classic": {
      "leak_rate": {
       "ci95": [
-       -0.0033,
-       0.0205
+       0.0,
+       0.0239
       ],
-      "diff": 0.008,
+      "diff": 0.0112,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0034,
-       0.0909
+       0.0873,
+       0.1549
       ],
-      "diff": 0.0476,
+      "diff": 0.1212,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -150,10 +150,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0474,
-       -0.0149
+       -0.0613,
+       -0.0169
       ],
-      "diff": -0.0295,
+      "diff": -0.0378,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -161,19 +161,19 @@
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       0.0505,
-       0.1017
+       0.0535,
+       0.1055
       ],
-      "diff": 0.0766,
+      "diff": 0.0797,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0759,
-       0.2282
+       0.1553,
+       0.2931
       ],
-      "diff": 0.1493,
+      "diff": 0.2229,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -181,19 +181,19 @@
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       0.0374,
-       0.0836
+       0.0405,
+       0.0867
       ],
-      "diff": 0.0606,
+      "diff": 0.0638,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.1331,
-       0.2875
+       0.2086,
+       0.353
       ],
-      "diff": 0.2088,
+      "diff": 0.2825,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -210,10 +210,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0005,
-       0.0033
+       0.0004,
+       0.0024
       ],
-      "diff": 0.0018,
+      "diff": 0.0012,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -230,10 +230,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0103,
-       0.0354
+       0.0111,
+       0.0422
       ],
-      "diff": 0.0221,
+      "diff": 0.0255,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -241,19 +241,19 @@
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.1169,
-       0.1693
+       0.1197,
+       0.1725
       ],
-      "diff": 0.1419,
+      "diff": 0.1451,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.161,
-       -0.0802
+       -0.0767,
+       -0.0238
       ],
-      "diff": -0.1223,
+      "diff": -0.0487,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -270,10 +270,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0387,
-       -0.0047
+       -0.0495,
+       -0.0066
       ],
-      "diff": -0.0195,
+      "diff": -0.026,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -281,27 +281,27 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.069,
-       0.1146
+       0.0754,
+       0.1209
       ],
-      "diff": 0.0909,
+      "diff": 0.0973,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1026,
-       -0.0307
+       -0.0079,
+       0.011
       ],
-      "diff": -0.0651,
-      "excludes_0": true,
+      "diff": 0.0028,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "strict": {
      "leak_rate": {
       "ci95": [
-       -0.0172,
+       -0.017,
        -0.0016
       ],
       "diff": -0.008,
@@ -310,10 +310,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.1509,
-       0.2376
+       0.1717,
+       0.2635
       ],
-      "diff": 0.1973,
+      "diff": 0.2171,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -323,20 +323,20 @@
     "classic": {
      "leak_rate": {
       "ci95": [
-       -0.0069,
-       0.0124
+       -0.0022,
+       0.0162
       ],
-      "diff": 0.0022,
+      "diff": 0.0066,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.0279,
-       0.0769
+       0.0653,
+       0.133
       ],
-      "diff": 0.0239,
-      "excludes_0": false,
+      "diff": 0.097,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -352,10 +352,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0369,
-       -0.0104
+       -0.0435,
+       -0.0047
       ],
-      "diff": -0.0221,
+      "diff": -0.0241,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -363,39 +363,39 @@
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       0.0494,
-       0.1041
+       0.0544,
+       0.1091
       ],
-      "diff": 0.0773,
+      "diff": 0.0817,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.041,
-       0.119
+       0.0525,
+       0.1757
       ],
-      "diff": 0.0377,
-      "excludes_0": false,
+      "diff": 0.1108,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       0.0371,
-       0.0821
+       0.0416,
+       0.0868
       ],
-      "diff": 0.0596,
+      "diff": 0.064,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0055,
-       0.1611
+       0.0963,
+       0.22
       ],
-      "diff": 0.0829,
+      "diff": 0.156,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -432,10 +432,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0023,
-       0.0301
+       0.0035,
+       0.0353
       ],
-      "diff": 0.0145,
+      "diff": 0.0173,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -443,19 +443,19 @@
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.0907,
-       0.1481
+       0.0941,
+       0.1532
       ],
-      "diff": 0.1192,
+      "diff": 0.1236,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1608,
-       -0.0617
+       -0.0689,
+       -0.0138
       ],
-      "diff": -0.1118,
+      "diff": -0.0388,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -472,10 +472,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0478,
-       -0.0033
+       -0.061,
+       -0.0051
       ],
-      "diff": -0.0233,
+      "diff": -0.0315,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -483,27 +483,27 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0485,
-       0.0955
+       0.0554,
+       0.105
       ],
-      "diff": 0.0706,
+      "diff": 0.0795,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1165,
-       -0.0217
+       -0.015,
+       0.0098
       ],
-      "diff": -0.0677,
-      "excludes_0": true,
+      "diff": -0.0008,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "strict": {
      "leak_rate": {
       "ci95": [
-       -0.0069,
+       -0.007,
        0.0
       ],
       "diff": -0.0022,
@@ -512,10 +512,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.1034,
-       0.2032
+       0.1371,
+       0.2464
       ],
-      "diff": 0.1573,
+      "diff": 0.1895,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -534,11 +534,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0313,
-       0.2379
+       0.0772,
+       0.3182
       ],
-      "diff": 0.114,
-      "excludes_0": false,
+      "diff": 0.208,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -554,11 +554,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1443,
-       0.004
+       -0.2077,
+       -0.0096
       ],
-      "diff": -0.0599,
-      "excludes_0": false,
+      "diff": -0.1073,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -574,10 +574,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.3071,
-       0.5342
+       0.3985,
+       0.6157
       ],
-      "diff": 0.4142,
+      "diff": 0.5082,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -594,10 +594,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.3532,
-       0.5889
+       0.4466,
+       0.6656
       ],
-      "diff": 0.4619,
+      "diff": 0.5559,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -634,10 +634,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0123,
-       0.0726
+       0.0042,
+       0.107
       ],
-      "diff": 0.0416,
+      "diff": 0.0467,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -654,11 +654,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.2779,
-       -0.0797
+       -0.197,
+       0.0107
       ],
-      "diff": -0.1844,
-      "excludes_0": true,
+      "diff": -0.0904,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -675,9 +675,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.019
+       0.0226
       ],
-      "diff": 0.0058,
+      "diff": 0.0073,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -694,10 +694,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1364,
-       -0.01
+       0.0063,
+       0.0292
       ],
-      "diff": -0.0683,
+      "diff": 0.0178,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -714,10 +714,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2181,
-       0.3708
+       0.2197,
+       0.4111
       ],
-      "diff": 0.2952,
+      "diff": 0.3225,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -727,19 +727,19 @@
     "classic": {
      "leak_rate": {
       "ci95": [
-       -0.6154,
-       0.2943
+       -0.625,
+       0.2222
       ],
-      "diff": -0.125,
+      "diff": -0.1875,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.0716,
-       0.1052
+       -0.0092,
+       0.2243
       ],
-      "diff": 0.0124,
+      "diff": 0.0988,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -747,39 +747,39 @@
     "fast": {
      "leak_rate": {
       "ci95": [
-       0.0,
+       -0.1667,
        0.0
       ],
-      "diff": 0.0,
+      "diff": -0.0625,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.0704,
-       -0.0087
+       -0.0378,
+       0.0118
       ],
-      "diff": -0.0313,
-      "excludes_0": true,
+      "diff": -0.0117,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       -0.75,
-       -0.0833
+       -0.7647,
+       -0.1429
       ],
-      "diff": -0.375,
+      "diff": -0.4375,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0157,
-       0.2281
+       0.0622,
+       0.3493
       ],
-      "diff": 0.1095,
+      "diff": 0.1958,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -787,19 +787,19 @@
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       -0.75,
-       -0.0833
+       -0.7647,
+       -0.1429
       ],
-      "diff": -0.375,
+      "diff": -0.4375,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0348,
-       0.258
+       0.0814,
+       0.3761
       ],
-      "diff": 0.1331,
+      "diff": 0.2194,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -836,30 +836,30 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.013,
-       0.105
+       0.02,
+       0.1571
       ],
-      "diff": 0.0384,
-      "excludes_0": false,
+      "diff": 0.0796,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.1818,
-       0.8667
+       0.1667,
+       0.8
       ],
-      "diff": 0.5625,
+      "diff": 0.5,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1431,
-       0.1157
+       -0.0293,
+       0.201
       ],
-      "diff": -0.0107,
+      "diff": 0.0756,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -876,30 +876,30 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.067,
-       0.0031
+       -0.1572,
+       -0.0275
       ],
-      "diff": -0.0254,
-      "excludes_0": false,
+      "diff": -0.0891,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.1818,
-       0.8667
+       0.1667,
+       0.8
       ],
-      "diff": 0.5625,
+      "diff": 0.5,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1261,
-       0.0949
+       -0.0167,
+       0.1764
       ],
-      "diff": -0.0125,
+      "diff": 0.0703,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -907,20 +907,20 @@
     "strict": {
      "leak_rate": {
       "ci95": [
-       -0.6365,
-       -0.0714
+       -0.6667,
+       -0.125
       ],
-      "diff": -0.3125,
+      "diff": -0.375,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.0017,
-       0.1867
+       0.0328,
+       0.2934
       ],
-      "diff": 0.0851,
-      "excludes_0": false,
+      "diff": 0.1534,
+      "excludes_0": true,
       "resamples": 2000
      }
     }
@@ -938,10 +938,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0007,
-       0.1328
+       0.0371,
+       0.1977
       ],
-      "diff": 0.0833,
+      "diff": 0.1344,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -958,10 +958,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0749,
-       -0.0065
+       -0.0806,
+       -0.0079
       ],
-      "diff": -0.0333,
+      "diff": -0.0378,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -978,10 +978,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.2272,
-       0.0615
+       -0.157,
+       0.0915
       ],
-      "diff": -0.0824,
+      "diff": -0.0313,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -998,10 +998,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1731,
-       0.1605
+       -0.1,
+       0.187
       ],
-      "diff": -0.0152,
+      "diff": 0.0358,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1018,10 +1018,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0043,
-       0.0267
+       0.0032,
+       0.0228
       ],
-      "diff": 0.0151,
+      "diff": 0.012,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1039,9 +1039,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0637
+       0.0778
       ],
-      "diff": 0.0381,
+      "diff": 0.043,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1058,10 +1058,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1686,
-       -0.0305
+       -0.0991,
+       -0.0075
       ],
-      "diff": -0.1067,
+      "diff": -0.0556,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1078,10 +1078,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0653,
-       0.0091
+       -0.0758,
+       0.0102
       ],
-      "diff": -0.0333,
+      "diff": -0.0378,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1098,10 +1098,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0843,
-       0.009
+       -0.0073,
+       0.0246
       ],
-      "diff": -0.0434,
+      "diff": 0.0077,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1118,10 +1118,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0861,
-       0.3287
+       0.0752,
+       0.2998
       ],
-      "diff": 0.2503,
+      "diff": 0.2126,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1133,20 +1133,20 @@
     "classic": {
      "leak_rate": {
       "ci95": [
-       -0.0145,
-       0.0143
+       0.0,
+       0.0152
       ],
-      "diff": 0.0,
+      "diff": 0.0048,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.097,
-       0.0747
+       0.0306,
+       0.0997
       ],
-      "diff": -0.0095,
-      "excludes_0": false,
+      "diff": 0.0636,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -1162,10 +1162,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0885,
-       -0.008
+       -0.0927,
+       -0.0076
       ],
-      "diff": -0.0394,
+      "diff": -0.043,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1173,39 +1173,39 @@
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       0.0777,
-       0.1602
+       0.0813,
+       0.1652
       ],
-      "diff": 0.119,
+      "diff": 0.1238,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.0124,
-       0.2772
+       0.1057,
+       0.3211
       ],
-      "diff": 0.14,
-      "excludes_0": false,
+      "diff": 0.2131,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       0.0561,
-       0.1269
+       0.0606,
+       0.1322
       ],
-      "diff": 0.0905,
+      "diff": 0.0952,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0406,
-       0.3273
+       0.1592,
+       0.368
       ],
-      "diff": 0.1921,
+      "diff": 0.2652,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1223,9 +1223,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0054
+       0.0039
       ],
-      "diff": 0.0022,
+      "diff": 0.0015,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1243,9 +1243,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0403
+       0.0406
       ],
-      "diff": 0.0156,
+      "diff": 0.0148,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1253,19 +1253,19 @@
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.0884,
-       0.1832
+       0.093,
+       0.1884
       ],
-      "diff": 0.1333,
+      "diff": 0.1381,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1895,
-       -0.0324
+       -0.0892,
+       -0.0022
       ],
-      "diff": -0.1117,
+      "diff": -0.0386,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1282,10 +1282,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0223,
+       -0.0248,
        0.0
       ],
-      "diff": -0.0096,
+      "diff": -0.0114,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1293,19 +1293,19 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0472,
-       0.1196
+       0.0522,
+       0.1244
       ],
-      "diff": 0.081,
+      "diff": 0.0857,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1472,
-       0.004
+       -0.0044,
+       0.0115
       ],
-      "diff": -0.0653,
+      "diff": 0.0038,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1313,19 +1313,19 @@
     "strict": {
      "leak_rate": {
       "ci95": [
-       -0.0155,
+       0.0,
        0.0
       ],
-      "diff": -0.0048,
+      "diff": 0.0,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0784,
-       0.2206
+       0.0923,
+       0.1787
       ],
-      "diff": 0.1623,
+      "diff": 0.1347,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1335,20 +1335,20 @@
     "classic": {
      "leak_rate": {
       "ci95": [
-       -0.0192,
-       0.0197
+       0.0,
+       0.0216
       ],
-      "diff": 0.0,
+      "diff": 0.0065,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1165,
-       0.082
+       0.0377,
+       0.1165
       ],
-      "diff": -0.0241,
-      "excludes_0": false,
+      "diff": 0.0734,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -1364,51 +1364,51 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0595,
-       -0.0028
+       -0.0609,
+       0.0001
       ],
-      "diff": -0.0247,
-      "excludes_0": true,
+      "diff": -0.0263,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       0.0795,
-       0.1772
+       0.0863,
+       0.1824
       ],
-      "diff": 0.1299,
+      "diff": 0.1364,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.114,
-       0.2395
+       0.0345,
+       0.3051
       ],
-      "diff": 0.074,
-      "excludes_0": false,
+      "diff": 0.1714,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       0.0567,
-       0.1382
+       0.0634,
+       0.1457
       ],
-      "diff": 0.0974,
+      "diff": 0.1039,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.08,
-       0.2666
+       0.0768,
+       0.3295
       ],
-      "diff": 0.1089,
-      "excludes_0": false,
+      "diff": 0.2064,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -1445,9 +1445,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0524
+       0.0551
       ],
-      "diff": 0.0201,
+      "diff": 0.0203,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1455,20 +1455,20 @@
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.0632,
-       0.1655
+       0.0696,
+       0.1704
       ],
-      "diff": 0.1104,
+      "diff": 0.1169,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.2104,
-       -0.0272
+       -0.059,
+       0.0027
       ],
-      "diff": -0.1215,
-      "excludes_0": true,
+      "diff": -0.0241,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -1484,10 +1484,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0152,
+       -0.0174,
        0.0
       ],
-      "diff": -0.0042,
+      "diff": -0.0052,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1495,39 +1495,39 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0312,
-       0.1181
+       0.0368,
+       0.1258
       ],
-      "diff": 0.0714,
+      "diff": 0.0779,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1835,
-       -0.0003
+       -0.0078,
+       0.0099
       ],
-      "diff": -0.0903,
-      "excludes_0": true,
+      "diff": 0.0016,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "strict": {
      "leak_rate": {
       "ci95": [
-       -0.0208,
+       0.0,
        0.0
       ],
-      "diff": -0.0065,
+      "diff": 0.0,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0762,
-       0.236
+       0.096,
+       0.2063
       ],
-      "diff": 0.1789,
+      "diff": 0.1489,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1546,10 +1546,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0331,
+       -0.0189,
        0.0
       ],
-      "diff": -0.0119,
+      "diff": -0.0077,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1566,10 +1566,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.3261,
+       -0.3191,
        0.0
       ],
-      "diff": -0.1471,
+      "diff": -0.1429,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1586,10 +1586,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.1571,
+       0.1637,
        0.6364
       ],
-      "diff": 0.4068,
+      "diff": 0.411,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1606,10 +1606,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2227,
+       0.2291,
        0.6667
       ],
-      "diff": 0.4529,
+      "diff": 0.4571,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1666,10 +1666,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.3261,
+       -0.3191,
        0.0
       ],
-      "diff": -0.1471,
+      "diff": -0.1429,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1706,10 +1706,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0104,
-       0.0223
+       0.0,
+       0.0254
       ],
-      "diff": 0.0045,
+      "diff": 0.0087,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1727,9 +1727,9 @@
      "spurious_rate": {
       "ci95": [
        0.014,
-       0.1715
+       0.1667
       ],
-      "diff": 0.0692,
+      "diff": 0.0677,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1748,10 +1748,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1084,
-       0.1153
+       -0.0377,
+       0.2258
       ],
-      "diff": -0.0377,
+      "diff": 0.0695,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1768,10 +1768,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1072,
+       -0.1448,
        0.0
       ],
-      "diff": -0.007,
+      "diff": -0.0298,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1788,10 +1788,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0251,
-       0.2798
+       -0.0246,
+       0.4125
       ],
-      "diff": 0.0376,
+      "diff": 0.1448,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1809,9 +1809,9 @@
      "spurious_rate": {
       "ci95": [
        -0.0184,
-       0.2915
+       0.425
       ],
-      "diff": 0.046,
+      "diff": 0.1531,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1848,10 +1848,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0323,
-       0.1572
+       -0.0526,
+       0.2133
       ],
-      "diff": 0.0112,
+      "diff": 0.0561,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1868,10 +1868,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0856,
-       0.25
+       -0.0393,
+       0.3833
       ],
-      "diff": 0.0188,
+      "diff": 0.1259,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1888,10 +1888,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0214,
-       0.0392
+       -0.0513,
+       0.0
       ],
-      "diff": 0.0013,
+      "diff": -0.0137,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1908,10 +1908,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0577,
-       0.2667
+       -0.0048,
+       0.4
       ],
-      "diff": 0.0298,
+      "diff": 0.1351,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1928,10 +1928,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.033,
-       0.2075
+       -0.0443,
+       0.3338
       ],
-      "diff": 0.0214,
+      "diff": 0.1058,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2154,11 +2154,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0408,
-       0.0972
+       0.0506,
+       0.1527
       ],
-      "diff": 0.0338,
-      "excludes_0": false,
+      "diff": 0.1054,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -2174,11 +2174,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.036,
-       -0.0043
+       -0.0658,
+       0.0111
       ],
-      "diff": -0.0191,
-      "excludes_0": true,
+      "diff": -0.0259,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2194,10 +2194,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0343,
-       0.2535
+       0.1033,
+       0.3276
       ],
-      "diff": 0.1481,
+      "diff": 0.2197,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2214,10 +2214,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0778,
-       0.2989
+       0.1451,
+       0.3716
       ],
-      "diff": 0.193,
+      "diff": 0.2646,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2235,9 +2235,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0042
+       0.0031
       ],
-      "diff": 0.0016,
+      "diff": 0.0012,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2254,11 +2254,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0009,
-       0.0355
+       0.0022,
+       0.0558
       ],
-      "diff": 0.0153,
-      "excludes_0": false,
+      "diff": 0.0228,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -2274,11 +2274,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1734,
-       -0.0424
+       -0.0887,
+       0.0051
       ],
-      "diff": -0.1097,
-      "excludes_0": true,
+      "diff": -0.0381,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2294,10 +2294,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0904,
-       -0.0006
+       -0.1147,
+       -0.0008
       ],
-      "diff": -0.0399,
+      "diff": -0.0554,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2305,20 +2305,20 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0474,
-       0.1274
+       0.0524,
+       0.133
       ],
-      "diff": 0.0865,
+      "diff": 0.0913,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1274,
-       -0.0157
+       -0.0274,
+       0.0144
       ],
-      "diff": -0.0723,
-      "excludes_0": true,
+      "diff": -0.0031,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2334,10 +2334,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.1074,
-       0.2216
+       0.1581,
+       0.3258
       ],
-      "diff": 0.1724,
+      "diff": 0.2369,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2356,11 +2356,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0727,
-       0.074
+       0.0098,
+       0.1065
       ],
-      "diff": 0.0147,
-      "excludes_0": false,
+      "diff": 0.0644,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -2376,11 +2376,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0502,
-       -0.0081
+       -0.0489,
+       0.0304
       ],
-      "diff": -0.0276,
-      "excludes_0": true,
+      "diff": -0.0126,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2396,10 +2396,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1009,
-       0.1346
+       -0.0298,
+       0.1631
       ],
-      "diff": 0.0103,
+      "diff": 0.06,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2416,11 +2416,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0599,
-       0.1858
+       0.0089,
+       0.2129
       ],
-      "diff": 0.0559,
-      "excludes_0": false,
+      "diff": 0.1056,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -2456,10 +2456,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0142,
+       0.0,
        0.0
       ],
-      "diff": -0.0042,
+      "diff": 0.0,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2476,11 +2476,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1782,
-       -0.004
+       -0.0934,
+       0.0083
       ],
-      "diff": -0.0873,
-      "excludes_0": true,
+      "diff": -0.0376,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2496,10 +2496,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.127,
-       -0.0011
+       -0.1552,
+       -0.0005
       ],
-      "diff": -0.0613,
+      "diff": -0.0811,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2507,19 +2507,19 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0213,
-       0.1076
+       0.0267,
+       0.1154
       ],
-      "diff": 0.0625,
+      "diff": 0.0694,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1346,
-       0.0085
+       -0.0447,
+       0.0115
       ],
-      "diff": -0.058,
+      "diff": -0.0119,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2536,10 +2536,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0151,
-       0.1618
+       0.0981,
+       0.3254
       ],
-      "diff": 0.1009,
+      "diff": 0.2089,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2558,11 +2558,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.13,
-       0.2555
+       0.0539,
+       0.3371
       ],
-      "diff": 0.077,
-      "excludes_0": false,
+      "diff": 0.2082,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -2578,10 +2578,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0478,
-       0.0367
+       -0.2506,
+       0.0145
       ],
-      "diff": 0.0015,
+      "diff": -0.0921,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2598,10 +2598,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2586,
-       0.5178
+       0.3669,
+       0.6459
       ],
-      "diff": 0.357,
+      "diff": 0.4882,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2618,10 +2618,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2851,
-       0.5493
+       0.3973,
+       0.6781
       ],
-      "diff": 0.3859,
+      "diff": 0.5171,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2658,10 +2658,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0049,
-       0.1092
+       -0.0123,
+       0.2042
       ],
-      "diff": 0.0483,
+      "diff": 0.0727,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2678,11 +2678,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.3096,
-       -0.0857
+       -0.2463,
+       0.0632
       ],
-      "diff": -0.1972,
-      "excludes_0": true,
+      "diff": -0.066,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2718,11 +2718,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.2056,
-       -0.0083
+       0.0,
+       0.0278
       ],
-      "diff": -0.1146,
-      "excludes_0": true,
+      "diff": 0.0166,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2738,10 +2738,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2141,
-       0.4088
+       0.2335,
+       0.4517
       ],
-      "diff": 0.2904,
+      "diff": 0.3297,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2760,10 +2760,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0735,
-       0.1036
+       -0.0214,
+       0.2113
       ],
-      "diff": 0.0074,
+      "diff": 0.0665,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2780,10 +2780,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0111,
-       0.0089
+       -0.0085,
+       0.0667
       ],
-      "diff": -0.002,
+      "diff": 0.0176,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2800,10 +2800,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.042,
-       0.1948
+       -0.0201,
+       0.3154
       ],
-      "diff": 0.0492,
+      "diff": 0.1083,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2820,10 +2820,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0223,
-       0.2104
+       -0.0043,
+       0.3319
       ],
-      "diff": 0.0657,
+      "diff": 0.1248,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2860,10 +2860,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1532,
-       0.0727
+       -0.0871,
+       0.1423
       ],
-      "diff": -0.0465,
+      "diff": 0.001,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2880,10 +2880,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0691,
-       0.1191
+       0.0,
+       0.2069
       ],
-      "diff": 0.0289,
+      "diff": 0.088,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2900,11 +2900,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1232,
-       -0.004
+       -0.2264,
+       0.0057
       ],
-      "diff": -0.0407,
-      "excludes_0": true,
+      "diff": -0.0898,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2920,10 +2920,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1671,
-       0.0526
+       -0.0606,
+       0.1145
       ],
-      "diff": -0.0343,
+      "diff": 0.0248,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2940,10 +2940,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0867,
-       0.1264
+       -0.0459,
+       0.2598
       ],
-      "diff": 0.0054,
+      "diff": 0.0732,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2962,11 +2962,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1251,
-       0.1533
+       0.0009,
+       0.2302
       ],
-      "diff": 0.0303,
-      "excludes_0": false,
+      "diff": 0.1182,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -3002,10 +3002,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1509,
-       0.006
+       -0.0025,
+       0.0811
       ],
-      "diff": -0.0545,
+      "diff": 0.0333,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3022,10 +3022,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1509,
-       0.006
+       -0.0025,
+       0.0811
       ],
-      "diff": -0.0545,
+      "diff": 0.0333,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3043,9 +3043,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0225
+       0.0131
       ],
-      "diff": 0.0078,
+      "diff": 0.0024,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3063,9 +3063,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.1033
+       0.129
       ],
-      "diff": 0.0502,
+      "diff": 0.0604,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3082,10 +3082,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1707,
-       0.0167
+       0.0,
+       0.0259
       ],
-      "diff": -0.0795,
+      "diff": 0.0083,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3102,8 +3102,8 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0833,
-       0.0619
+       -0.0938,
+       0.0769
       ],
       "diff": 0.0,
       "excludes_0": false,
@@ -3122,10 +3122,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1707,
-       0.0101
+       0.0,
+       0.0212
       ],
-      "diff": -0.0812,
+      "diff": 0.0067,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3142,10 +3142,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0629,
-       0.236
+       0.061,
+       0.2564
       ],
-      "diff": 0.1811,
+      "diff": 0.1772,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3158,18 +3158,18 @@
      "leak_rate": {
       "ci95": [
        0.0,
-       0.0529
+       0.0599
       ],
-      "diff": 0.0239,
+      "diff": 0.0287,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0342,
-       0.1687
+       0.1057,
+       0.2421
       ],
-      "diff": 0.0978,
+      "diff": 0.1736,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3186,10 +3186,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0602,
-       -0.008
+       -0.0789,
+       -0.0165
       ],
-      "diff": -0.0306,
+      "diff": -0.044,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3197,19 +3197,19 @@
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       0.0259,
-       0.1351
+       0.0303,
+       0.141
       ],
-      "diff": 0.0766,
+      "diff": 0.0813,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0253,
-       0.2829
+       0.1027,
+       0.3452
       ],
-      "diff": 0.156,
+      "diff": 0.2318,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3217,19 +3217,19 @@
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       0.0172,
-       0.1135
+       0.02,
+       0.1182
       ],
-      "diff": 0.0622,
+      "diff": 0.067,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.092,
-       0.3646
+       0.1683,
+       0.4291
       ],
-      "diff": 0.2337,
+      "diff": 0.3095,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3247,9 +3247,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.004
+       0.0029
       ],
-      "diff": 0.0014,
+      "diff": 0.001,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3267,9 +3267,9 @@
      "spurious_rate": {
       "ci95": [
        0.0106,
-       0.0581
+       0.0671
       ],
-      "diff": 0.0333,
+      "diff": 0.037,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3277,19 +3277,19 @@
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.109,
-       0.2041
+       0.113,
+       0.2092
       ],
-      "diff": 0.1531,
+      "diff": 0.1579,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.2101,
-       -0.074
+       -0.1135,
+       -0.028
       ],
-      "diff": -0.1432,
+      "diff": -0.0674,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3306,10 +3306,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0305,
-       0.0096
+       -0.0369,
+       0.011
       ],
-      "diff": -0.0095,
+      "diff": -0.0122,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3317,39 +3317,39 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0651,
-       0.1512
+       0.0744,
+       0.1613
       ],
-      "diff": 0.1053,
+      "diff": 0.1148,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1117,
-       -0.0143
+       -0.0056,
+       0.0233
       ],
-      "diff": -0.0578,
-      "excludes_0": true,
+      "diff": 0.0079,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "strict": {
      "leak_rate": {
       "ci95": [
-       -0.0152,
+       -0.0248,
        0.0
       ],
-      "diff": -0.0048,
+      "diff": -0.0096,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.1563,
-       0.3107
+       0.1722,
+       0.3263
       ],
-      "diff": 0.2395,
+      "diff": 0.2521,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3359,19 +3359,19 @@
     "classic": {
      "leak_rate": {
       "ci95": [
-       -0.0136,
-       0.027
+       -0.0123,
+       0.0387
       ],
-      "diff": 0.0065,
+      "diff": 0.0129,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0027,
-       0.1431
+       0.0787,
+       0.2122
       ],
-      "diff": 0.067,
+      "diff": 0.1392,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3388,50 +3388,50 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.035,
-       0.003
+       -0.0639,
+       -0.0045
       ],
-      "diff": -0.0151,
-      "excludes_0": false,
+      "diff": -0.032,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "gliner_pii": {
      "leak_rate": {
       "ci95": [
-       0.0139,
-       0.1227
+       0.021,
+       0.1293
       ],
-      "diff": 0.0645,
+      "diff": 0.071,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.0575,
-       0.1204
+       0.0467,
+       0.1798
       ],
-      "diff": 0.0312,
-      "excludes_0": false,
+      "diff": 0.1034,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
     "gliner_pii_tuned": {
      "leak_rate": {
       "ci95": [
-       0.0069,
-       0.0843
+       0.0132,
+       0.092
       ],
-      "diff": 0.0452,
+      "diff": 0.0516,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0099,
-       0.1645
+       0.0952,
+       0.2315
       ],
-      "diff": 0.0849,
+      "diff": 0.1571,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3468,10 +3468,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0034,
-       0.0592
+       0.004,
+       0.0721
       ],
-      "diff": 0.0252,
+      "diff": 0.0299,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3479,19 +3479,19 @@
     "no_models": {
      "leak_rate": {
       "ci95": [
-       0.0896,
-       0.1842
+       0.0943,
+       0.1944
       ],
-      "diff": 0.1355,
+      "diff": 0.1419,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.2102,
-       -0.0466
+       -0.1082,
+       -0.0106
       ],
-      "diff": -0.1257,
+      "diff": -0.0534,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3508,10 +3508,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0355,
-       0.01
+       -0.0412,
+       0.0108
       ],
-      "diff": -0.0098,
+      "diff": -0.0125,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3519,39 +3519,39 @@
     "no_tagger": {
      "leak_rate": {
       "ci95": [
-       0.0382,
-       0.1226
+       0.0491,
+       0.1364
       ],
-      "diff": 0.0774,
+      "diff": 0.0903,
       "excludes_0": true,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       -0.1294,
-       -0.007
+       -0.0096,
+       0.0244
       ],
-      "diff": -0.0568,
-      "excludes_0": true,
+      "diff": 0.0064,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
     "strict": {
      "leak_rate": {
       "ci95": [
-       0.0,
+       -0.0207,
        0.0
       ],
-      "diff": 0.0,
+      "diff": -0.0065,
       "excludes_0": false,
       "resamples": 2000
      },
      "spurious_rate": {
       "ci95": [
-       0.0999,
-       0.2686
+       0.1263,
+       0.2851
       ],
-      "diff": 0.1806,
+      "diff": 0.2009,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3570,11 +3570,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0805,
-       0.4584
+       0.0551,
+       0.5496
       ],
-      "diff": 0.2392,
-      "excludes_0": false,
+      "diff": 0.3532,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -3590,10 +3590,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.2341,
+       -0.2647,
        0.0
       ],
-      "diff": -0.0885,
+      "diff": -0.0873,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3610,10 +3610,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2674,
-       0.6765
+       0.4192,
+       0.7304
       ],
-      "diff": 0.4685,
+      "diff": 0.5825,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3630,10 +3630,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.342,
-       0.7521
+       0.5004,
+       0.8029
       ],
-      "diff": 0.5325,
+      "diff": 0.6465,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3670,11 +3670,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0196,
-       0.0735
+       0.0,
+       0.0738
       ],
-      "diff": 0.0547,
-      "excludes_0": true,
+      "diff": 0.0496,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -3690,10 +3690,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.4325,
-       0.0128
+       -0.2647,
+       0.0343
       ],
-      "diff": -0.1869,
+      "diff": -0.0729,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3711,9 +3711,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0549
+       0.0625
       ],
-      "diff": 0.0192,
+      "diff": 0.0256,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3730,10 +3730,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.2069,
-       0.0135
+       0.0,
+       0.0657
       ],
-      "diff": -0.056,
+      "diff": 0.0289,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3750,10 +3750,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.261,
-       0.5214
+       0.279,
+       0.5973
       ],
-      "diff": 0.3708,
+      "diff": 0.4437,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3764,18 +3764,18 @@
      "leak_rate": {
       "ci95": [
        -0.735,
-       0.6
+       0.5
       ],
-      "diff": 0.0,
+      "diff": -0.0909,
       "excludes_0": false,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       -0.0698,
-       0.187
+       -0.0353,
+       0.3297
       ],
-      "diff": 0.0543,
+      "diff": 0.1273,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3783,20 +3783,20 @@
     "fast": {
      "leak_rate": {
       "ci95": [
-       0.0,
+       -0.2308,
        0.0
       ],
-      "diff": 0.0,
+      "diff": -0.0909,
       "excludes_0": false,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       -0.1466,
-       -0.0128
+       -0.0583,
+       0.029
       ],
-      "diff": -0.0656,
-      "excludes_0": true,
+      "diff": -0.0153,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -3806,17 +3806,17 @@
        -0.75,
        0.0
       ],
-      "diff": -0.2727,
+      "diff": -0.3636,
       "excludes_0": false,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       -0.0146,
-       0.2995
+       0.0159,
+       0.4295
       ],
-      "diff": 0.1226,
-      "excludes_0": false,
+      "diff": 0.1957,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -3826,16 +3826,16 @@
        -0.75,
        0.0
       ],
-      "diff": -0.2727,
+      "diff": -0.3636,
       "excludes_0": false,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       0.0117,
-       0.3445
+       0.0457,
+       0.4732
       ],
-      "diff": 0.157,
+      "diff": 0.23,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3872,11 +3872,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0,
-       0.1845
+       0.0388,
+       0.2249
       ],
-      "diff": 0.0773,
-      "excludes_0": false,
+      "diff": 0.1041,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -3886,16 +3886,16 @@
        0.25,
        1.0
       ],
-      "diff": 0.7273,
+      "diff": 0.6364,
       "excludes_0": true,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       -0.2522,
-       0.1763
+       -0.1279,
+       0.2556
       ],
-      "diff": -0.0213,
+      "diff": 0.0518,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3912,11 +3912,11 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1179,
-       0.0148
+       -0.2442,
+       -0.0184
       ],
-      "diff": -0.042,
-      "excludes_0": false,
+      "diff": -0.1224,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -3926,16 +3926,16 @@
        0.25,
        1.0
       ],
-      "diff": 0.7273,
+      "diff": 0.6364,
       "excludes_0": true,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       -0.1912,
-       0.1649
+       -0.0735,
+       0.2338
       ],
-      "diff": -0.0042,
+      "diff": 0.0648,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3946,16 +3946,16 @@
        -0.75,
        0.0
       ],
-      "diff": -0.2727,
+      "diff": -0.3636,
       "excludes_0": false,
       "resamples": 1997
      },
      "spurious_rate": {
       "ci95": [
-       0.0055,
-       0.3143
+       0.0193,
+       0.4073
       ],
-      "diff": 0.1449,
+      "diff": 0.189,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3975,9 +3975,9 @@
      "spurious_rate": {
       "ci95": [
        -0.028,
-       0.1423
+       0.2178
       ],
-      "diff": 0.096,
+      "diff": 0.1546,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3995,9 +3995,9 @@
      "spurious_rate": {
       "ci95": [
        -0.1935,
-       -0.0068
+       -0.0098
       ],
-      "diff": -0.0586,
+      "diff": -0.0696,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -4014,10 +4014,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.4201,
+       -0.3298,
        0.0972
       ],
-      "diff": -0.1958,
+      "diff": -0.1371,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4034,10 +4034,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.2894,
+       -0.206,
        0.1131
       ],
-      "diff": -0.1306,
+      "diff": -0.072,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4055,9 +4055,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0448
+       0.0422
       ],
-      "diff": 0.0175,
+      "diff": 0.0156,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4075,9 +4075,9 @@
      "spurious_rate": {
       "ci95": [
        0.0,
-       0.0694
+       0.0926
       ],
-      "diff": 0.0501,
+      "diff": 0.0586,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4094,10 +4094,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.25,
-       -0.0587
+       -0.2,
+       -0.0526
       ],
-      "diff": -0.1958,
+      "diff": -0.1371,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -4114,10 +4114,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0585,
+       -0.0828,
        0.0
       ],
-      "diff": -0.038,
+      "diff": -0.045,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4134,10 +4134,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.1073,
-       0.0379
+       -0.0259,
+       0.0462
       ],
-      "diff": -0.0577,
+      "diff": 0.0009,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4155,9 +4155,9 @@
      "spurious_rate": {
       "ci95": [
        -0.018,
-       0.3393
+       0.3261
       ],
-      "diff": 0.3058,
+      "diff": 0.2601,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -4177,8 +4177,10 @@
   "wildchat/pool.jsonl": "912b55e509227bdf0a2c6442352ac668d44153febd369d3930489c0154843c9f"
  },
  "git": {
-  "commit": "7c9518e34df5fc3eb9b62b26ababd53132d8c14e",
-  "modified": []
+  "commit": "4e9df88d1bba302bfae237fa661b5557a84209a9",
+  "modified": [
+   "bench/results/tagger_acceptance_dev.json"
+  ]
  },
  "reference": [
   "gliner_pii",
@@ -4188,14 +4190,14 @@
   "all": {
    "injected": {
     "balanced": {
-     "edits": 824,
+     "edits": 753,
      "leak": {
-      "k": 11,
+      "k": 9,
       "n": 627,
-      "rate": 0.0175,
+      "rate": 0.0144,
       "wilson95": [
-       0.0098,
-       0.0311
+       0.0076,
+       0.0271
       ]
      },
      "leaked_by_type": {
@@ -4208,41 +4210,41 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 4,
+      "ORG": 3,
+      "PERSON": 3,
       "PHONE": 1,
       "URL": 1
      },
-     "macro_leak_rate": 0.0149,
+     "macro_leak_rate": 0.0127,
      "message_leak": {
-      "k": 10,
+      "k": 8,
       "n": 176,
-      "rate": 0.0568,
+      "rate": 0.0455,
       "wilson95": [
-       0.0312,
-       0.1014
+       0.0232,
+       0.0871
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 54,
+     "messages_with_spurious": 39,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 627,
      "refused": 0,
      "spurious": {
-      "k": 169,
-      "n": 824,
-      "rate": 0.2051,
+      "k": 99,
+      "n": 753,
+      "rate": 0.1315,
       "wilson95": [
-       0.1789,
-       0.234
+       0.1092,
+       0.1575
       ]
      },
      "values_by_type": {
@@ -4336,14 +4338,14 @@
      }
     },
     "fast": {
-     "edits": 786,
+     "edits": 715,
      "leak": {
-      "k": 12,
+      "k": 10,
       "n": 627,
-      "rate": 0.0191,
+      "rate": 0.0159,
       "wilson95": [
-       0.011,
-       0.0332
+       0.0087,
+       0.0291
       ]
      },
      "leaked_by_type": {
@@ -4356,41 +4358,41 @@
       "ID": 0,
       "LOCATION": 1,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 4,
+      "ORG": 3,
+      "PERSON": 3,
       "PHONE": 1,
       "URL": 1
      },
-     "macro_leak_rate": 0.0173,
+     "macro_leak_rate": 0.0151,
      "message_leak": {
-      "k": 11,
+      "k": 9,
       "n": 176,
-      "rate": 0.0625,
+      "rate": 0.0511,
       "wilson95": [
-       0.0353,
-       0.1084
+       0.0271,
+       0.0943
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 37,
+     "messages_with_spurious": 23,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 627,
      "refused": 0,
      "spurious": {
-      "k": 138,
-      "n": 786,
-      "rate": 0.1756,
+      "k": 67,
+      "n": 715,
+      "rate": 0.0937,
       "wilson95": [
-       0.1506,
-       0.2037
+       0.0745,
+       0.1173
       ]
      },
      "values_by_type": {
@@ -4558,14 +4560,14 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 817,
+     "edits": 746,
      "leak": {
-      "k": 18,
+      "k": 16,
       "n": 627,
-      "rate": 0.0287,
+      "rate": 0.0255,
       "wilson95": [
-       0.0182,
-       0.0449
+       0.0158,
+       0.041
       ]
      },
      "leaked_by_type": {
@@ -4578,41 +4580,41 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 4,
+      "ORG": 3,
+      "PERSON": 3,
       "PHONE": 1,
       "URL": 1
      },
-     "macro_leak_rate": 0.0306,
+     "macro_leak_rate": 0.0283,
      "message_leak": {
-      "k": 17,
+      "k": 15,
       "n": 176,
-      "rate": 0.0966,
+      "rate": 0.0852,
       "wilson95": [
-       0.0612,
-       0.1492
+       0.0523,
+       0.1358
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 54,
+     "messages_with_spurious": 39,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 627,
      "refused": 0,
      "spurious": {
-      "k": 169,
-      "n": 817,
-      "rate": 0.2069,
+      "k": 99,
+      "n": 746,
+      "rate": 0.1327,
       "wilson95": [
-       0.1805,
-       0.236
+       0.1102,
+       0.1589
       ]
      },
      "values_by_type": {
@@ -4632,14 +4634,14 @@
      }
     },
     "no_gate": {
-     "edits": 854,
+     "edits": 777,
      "leak": {
-      "k": 9,
+      "k": 7,
       "n": 627,
-      "rate": 0.0144,
+      "rate": 0.0112,
       "wilson95": [
-       0.0076,
-       0.0271
+       0.0054,
+       0.0229
       ]
      },
      "leaked_by_type": {
@@ -4652,41 +4654,41 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 3,
+      "ORG": 3,
+      "PERSON": 2,
       "PHONE": 1,
       "URL": 1
      },
-     "macro_leak_rate": 0.0121,
+     "macro_leak_rate": 0.0098,
      "message_leak": {
-      "k": 9,
+      "k": 7,
       "n": 176,
-      "rate": 0.0511,
+      "rate": 0.0398,
       "wilson95": [
-       0.0271,
-       0.0943
+       0.0194,
+       0.0798
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 61,
+     "messages_with_spurious": 48,
      "negatives_untouched": {
-      "k": 37,
+      "k": 39,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.8864,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7602,
+       0.9505
       ]
      },
      "protect_values": 627,
      "refused": 0,
      "spurious": {
-      "k": 194,
-      "n": 854,
-      "rate": 0.2272,
+      "k": 122,
+      "n": 777,
+      "rate": 0.157,
       "wilson95": [
-       0.2003,
-       0.2565
+       0.1331,
+       0.1843
       ]
      },
      "values_by_type": {
@@ -4780,14 +4782,14 @@
      }
     },
     "no_structural": {
-     "edits": 803,
+     "edits": 730,
      "leak": {
-      "k": 9,
+      "k": 7,
       "n": 627,
-      "rate": 0.0144,
+      "rate": 0.0112,
       "wilson95": [
-       0.0076,
-       0.0271
+       0.0054,
+       0.0229
       ]
      },
      "leaked_by_type": {
@@ -4800,41 +4802,41 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
-      "PERSON": 4,
+      "ORG": 1,
+      "PERSON": 3,
       "PHONE": 1,
       "URL": 1
      },
-     "macro_leak_rate": 0.0114,
+     "macro_leak_rate": 0.0092,
      "message_leak": {
-      "k": 8,
+      "k": 6,
       "n": 176,
-      "rate": 0.0455,
+      "rate": 0.0341,
       "wilson95": [
-       0.0232,
-       0.0871
+       0.0157,
+       0.0724
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 52,
+     "messages_with_spurious": 38,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 627,
      "refused": 0,
      "spurious": {
-      "k": 149,
-      "n": 803,
-      "rate": 0.1856,
+      "k": 77,
+      "n": 730,
+      "rate": 0.1055,
       "wilson95": [
-       0.1602,
-       0.2139
+       0.0852,
+       0.1299
       ]
      },
      "values_by_type": {
@@ -4854,14 +4856,14 @@
      }
     },
     "no_tagger": {
-     "edits": 693,
+     "edits": 685,
      "leak": {
-      "k": 68,
+      "k": 70,
       "n": 627,
-      "rate": 0.1085,
+      "rate": 0.1116,
       "wilson95": [
-       0.0865,
-       0.1352
+       0.0893,
+       0.1387
       ]
      },
      "leaked_by_type": {
@@ -4875,22 +4877,22 @@
       "LOCATION": 5,
       "NETWORK": 0,
       "ORG": 14,
-      "PERSON": 42,
+      "PERSON": 44,
       "PHONE": 1,
       "URL": 1
      },
-     "macro_leak_rate": 0.0694,
+     "macro_leak_rate": 0.0705,
      "message_leak": {
-      "k": 57,
+      "k": 59,
       "n": 176,
-      "rate": 0.3239,
+      "rate": 0.3352,
       "wilson95": [
-       0.2591,
-       0.3961
+       0.2697,
+       0.4078
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 41,
+     "messages_with_spurious": 38,
      "negatives_untouched": {
       "k": 40,
       "n": 44,
@@ -4903,12 +4905,12 @@
      "protect_values": 627,
      "refused": 0,
      "spurious": {
-      "k": 97,
-      "n": 693,
-      "rate": 0.14,
+      "k": 92,
+      "n": 685,
+      "rate": 0.1343,
       "wilson95": [
-       0.1161,
-       0.1678
+       0.1108,
+       0.1619
       ]
      },
      "values_by_type": {
@@ -4928,14 +4930,14 @@
      }
     },
     "strict": {
-     "edits": 1148,
+     "edits": 1070,
      "leak": {
-      "k": 6,
+      "k": 4,
       "n": 627,
-      "rate": 0.0096,
+      "rate": 0.0064,
       "wilson95": [
-       0.0044,
-       0.0207
+       0.0025,
+       0.0163
       ]
      },
      "leaked_by_type": {
@@ -4948,41 +4950,41 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
+      "ORG": 2,
       "PERSON": 1,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.0094,
+     "macro_leak_rate": 0.0059,
      "message_leak": {
-      "k": 6,
+      "k": 4,
       "n": 176,
-      "rate": 0.0341,
+      "rate": 0.0227,
       "wilson95": [
-       0.0157,
-       0.0724
+       0.0089,
+       0.057
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 111,
+     "messages_with_spurious": 110,
      "negatives_untouched": {
-      "k": 26,
+      "k": 30,
       "n": 44,
-      "rate": 0.5909,
+      "rate": 0.6818,
       "wilson95": [
-       0.4441,
-       0.7231
+       0.5344,
+       0.8
       ]
      },
      "protect_values": 627,
-     "refused": 2,
+     "refused": 1,
      "spurious": {
-      "k": 462,
-      "n": 1148,
-      "rate": 0.4024,
+      "k": 373,
+      "n": 1070,
+      "rate": 0.3486,
       "wilson95": [
-       0.3744,
-       0.4311
+       0.3206,
+       0.3776
       ]
      },
      "values_by_type": {
@@ -5004,14 +5006,14 @@
    },
    "injected_single": {
     "balanced": {
-     "edits": 600,
+     "edits": 548,
      "leak": {
-      "k": 6,
+      "k": 4,
       "n": 453,
-      "rate": 0.0132,
+      "rate": 0.0088,
       "wilson95": [
-       0.0061,
-       0.0286
+       0.0034,
+       0.0225
       ]
      },
      "leaked_by_type": {
@@ -5024,23 +5026,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 1,
+      "ORG": 3,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.0106,
      "message_leak": {
-      "k": 6,
+      "k": 4,
       "n": 125,
-      "rate": 0.048,
+      "rate": 0.032,
       "wilson95": [
-       0.0222,
-       0.1008
+       0.0125,
+       0.0794
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 32,
+     "messages_with_spurious": 23,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5050,12 +5052,12 @@
      "protect_values": 453,
      "refused": 0,
      "spurious": {
-      "k": 115,
-      "n": 600,
-      "rate": 0.1917,
+      "k": 65,
+      "n": 548,
+      "rate": 0.1186,
       "wilson95": [
-       0.1622,
-       0.2251
+       0.0942,
+       0.1484
       ]
      },
      "values_by_type": {
@@ -5146,14 +5148,14 @@
      }
     },
     "fast": {
-     "edits": 578,
+     "edits": 529,
      "leak": {
-      "k": 7,
+      "k": 5,
       "n": 453,
-      "rate": 0.0155,
+      "rate": 0.011,
       "wilson95": [
-       0.0075,
-       0.0315
+       0.0047,
+       0.0256
       ]
      },
      "leaked_by_type": {
@@ -5166,23 +5168,23 @@
       "ID": 0,
       "LOCATION": 1,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 1,
+      "ORG": 3,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.0178,
+     "macro_leak_rate": 0.0145,
      "message_leak": {
-      "k": 7,
+      "k": 5,
       "n": 125,
-      "rate": 0.056,
+      "rate": 0.04,
       "wilson95": [
-       0.0274,
-       0.1111
+       0.0172,
+       0.0902
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 20,
+     "messages_with_spurious": 14,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5192,12 +5194,12 @@
      "protect_values": 453,
      "refused": 0,
      "spurious": {
-      "k": 98,
-      "n": 578,
-      "rate": 0.1696,
+      "k": 50,
+      "n": 529,
+      "rate": 0.0945,
       "wilson95": [
-       0.1412,
-       0.2023
+       0.0724,
+       0.1225
       ]
      },
      "values_by_type": {
@@ -5359,14 +5361,14 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 600,
+     "edits": 548,
      "leak": {
-      "k": 6,
+      "k": 4,
       "n": 453,
-      "rate": 0.0132,
+      "rate": 0.0088,
       "wilson95": [
-       0.0061,
-       0.0286
+       0.0034,
+       0.0225
       ]
      },
      "leaked_by_type": {
@@ -5379,23 +5381,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 1,
+      "ORG": 3,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.0106,
      "message_leak": {
-      "k": 6,
+      "k": 4,
       "n": 125,
-      "rate": 0.048,
+      "rate": 0.032,
       "wilson95": [
-       0.0222,
-       0.1008
+       0.0125,
+       0.0794
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 32,
+     "messages_with_spurious": 23,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5405,12 +5407,12 @@
      "protect_values": 453,
      "refused": 0,
      "spurious": {
-      "k": 115,
-      "n": 600,
-      "rate": 0.1917,
+      "k": 65,
+      "n": 548,
+      "rate": 0.1186,
       "wilson95": [
-       0.1622,
-       0.2251
+       0.0942,
+       0.1484
       ]
      },
      "values_by_type": {
@@ -5430,14 +5432,14 @@
      }
     },
     "no_gate": {
-     "edits": 616,
+     "edits": 559,
      "leak": {
-      "k": 6,
+      "k": 4,
       "n": 453,
-      "rate": 0.0132,
+      "rate": 0.0088,
       "wilson95": [
-       0.0061,
-       0.0286
+       0.0034,
+       0.0225
       ]
      },
      "leaked_by_type": {
@@ -5450,23 +5452,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 1,
+      "ORG": 3,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.0106,
      "message_leak": {
-      "k": 6,
+      "k": 4,
       "n": 125,
-      "rate": 0.048,
+      "rate": 0.032,
       "wilson95": [
-       0.0222,
-       0.1008
+       0.0125,
+       0.0794
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 38,
+     "messages_with_spurious": 29,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5476,12 +5478,12 @@
      "protect_values": 453,
      "refused": 0,
      "spurious": {
-      "k": 127,
-      "n": 616,
-      "rate": 0.2062,
+      "k": 76,
+      "n": 559,
+      "rate": 0.136,
       "wilson95": [
-       0.1761,
-       0.2399
+       0.11,
+       0.1669
       ]
      },
      "values_by_type": {
@@ -5572,14 +5574,14 @@
      }
     },
     "no_structural": {
-     "edits": 582,
+     "edits": 528,
      "leak": {
-      "k": 4,
+      "k": 2,
       "n": 453,
-      "rate": 0.0088,
+      "rate": 0.0044,
       "wilson95": [
-       0.0034,
-       0.0225
+       0.0012,
+       0.016
       ]
      },
      "leaked_by_type": {
@@ -5592,23 +5594,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
-      "PERSON": 1,
+      "ORG": 1,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.0087,
+     "macro_leak_rate": 0.0053,
      "message_leak": {
-      "k": 4,
+      "k": 2,
       "n": 125,
-      "rate": 0.032,
+      "rate": 0.016,
       "wilson95": [
-       0.0125,
-       0.0794
+       0.0044,
+       0.0565
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 31,
+     "messages_with_spurious": 22,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5618,12 +5620,12 @@
      "protect_values": 453,
      "refused": 0,
      "spurious": {
-      "k": 98,
-      "n": 582,
-      "rate": 0.1684,
+      "k": 46,
+      "n": 528,
+      "rate": 0.0871,
       "wilson95": [
-       0.1402,
-       0.2009
+       0.066,
+       0.1143
       ]
      },
      "values_by_type": {
@@ -5643,14 +5645,14 @@
      }
     },
     "no_tagger": {
-     "edits": 508,
+     "edits": 501,
      "leak": {
-      "k": 38,
+      "k": 40,
       "n": 453,
-      "rate": 0.0839,
+      "rate": 0.0883,
       "wilson95": [
-       0.0617,
-       0.113
+       0.0655,
+       0.118
       ]
      },
      "leaked_by_type": {
@@ -5664,22 +5666,22 @@
       "LOCATION": 2,
       "NETWORK": 0,
       "ORG": 10,
-      "PERSON": 23,
+      "PERSON": 25,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.058,
+     "macro_leak_rate": 0.0595,
      "message_leak": {
-      "k": 34,
+      "k": 36,
       "n": 125,
-      "rate": 0.272,
+      "rate": 0.288,
       "wilson95": [
-       0.2017,
-       0.3559
+       0.2159,
+       0.3728
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 25,
+     "messages_with_spurious": 22,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5689,12 +5691,12 @@
      "protect_values": 453,
      "refused": 0,
      "spurious": {
-      "k": 63,
-      "n": 508,
-      "rate": 0.124,
+      "k": 59,
+      "n": 501,
+      "rate": 0.1178,
       "wilson95": [
-       0.0981,
-       0.1555
+       0.0924,
+       0.1489
       ]
      },
      "values_by_type": {
@@ -5714,14 +5716,14 @@
      }
     },
     "strict": {
-     "edits": 788,
+     "edits": 753,
      "leak": {
-      "k": 5,
+      "k": 3,
       "n": 453,
-      "rate": 0.011,
+      "rate": 0.0066,
       "wilson95": [
-       0.0047,
-       0.0256
+       0.0023,
+       0.0193
       ]
      },
      "leaked_by_type": {
@@ -5734,23 +5736,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 4,
+      "ORG": 2,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.0133,
+     "macro_leak_rate": 0.008,
      "message_leak": {
-      "k": 5,
+      "k": 3,
       "n": 125,
-      "rate": 0.04,
+      "rate": 0.024,
       "wilson95": [
-       0.0172,
-       0.0902
+       0.0082,
+       0.0682
       ]
      },
      "messages": 125,
-     "messages_with_spurious": 66,
+     "messages_with_spurious": 68,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -5758,14 +5760,14 @@
       "wilson95": null
      },
      "protect_values": 453,
-     "refused": 1,
+     "refused": 0,
      "spurious": {
-      "k": 275,
-      "n": 788,
-      "rate": 0.349,
+      "k": 232,
+      "n": 753,
+      "rate": 0.3081,
       "wilson95": [
-       0.3165,
-       0.3829
+       0.2762,
+       0.342
       ]
      },
      "values_by_type": {
@@ -5787,7 +5789,7 @@
    },
    "multi": {
     "balanced": {
-     "edits": 124,
+     "edits": 111,
      "leak": {
       "k": 3,
       "n": 93,
@@ -5823,25 +5825,25 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 93,
      "refused": 0,
      "spurious": {
-      "k": 34,
-      "n": 124,
-      "rate": 0.2742,
+      "k": 20,
+      "n": 111,
+      "rate": 0.1802,
       "wilson95": [
-       0.2034,
-       0.3586
+       0.1198,
+       0.262
       ]
      },
      "values_by_type": {
@@ -5935,7 +5937,7 @@
      }
     },
     "fast": {
-     "edits": 112,
+     "edits": 96,
      "leak": {
       "k": 3,
       "n": 93,
@@ -5971,25 +5973,25 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 5,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 93,
      "refused": 0,
      "spurious": {
-      "k": 24,
-      "n": 112,
-      "rate": 0.2143,
+      "k": 7,
+      "n": 96,
+      "rate": 0.0729,
       "wilson95": [
-       0.1484,
-       0.2991
+       0.0358,
+       0.1429
       ]
      },
      "values_by_type": {
@@ -6157,7 +6159,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 124,
+     "edits": 111,
      "leak": {
       "k": 3,
       "n": 93,
@@ -6193,25 +6195,25 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 93,
      "refused": 0,
      "spurious": {
-      "k": 34,
-      "n": 124,
-      "rate": 0.2742,
+      "k": 20,
+      "n": 111,
+      "rate": 0.1802,
       "wilson95": [
-       0.2034,
-       0.3586
+       0.1198,
+       0.262
       ]
      },
      "values_by_type": {
@@ -6231,7 +6233,7 @@
      }
     },
     "no_gate": {
-     "edits": 133,
+     "edits": 119,
      "leak": {
       "k": 1,
       "n": 93,
@@ -6267,25 +6269,25 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 10,
      "negatives_untouched": {
-      "k": 37,
+      "k": 39,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.8864,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7602,
+       0.9505
       ]
      },
      "protect_values": 93,
      "refused": 0,
      "spurious": {
-      "k": 42,
-      "n": 133,
-      "rate": 0.3158,
+      "k": 27,
+      "n": 119,
+      "rate": 0.2269,
       "wilson95": [
-       0.2429,
-       0.399
+       0.1609,
+       0.31
       ]
      },
      "values_by_type": {
@@ -6379,7 +6381,7 @@
      }
     },
     "no_structural": {
-     "edits": 125,
+     "edits": 112,
      "leak": {
       "k": 3,
       "n": 93,
@@ -6415,25 +6417,25 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
-      "k": 37,
+      "k": 40,
       "n": 44,
-      "rate": 0.8409,
+      "rate": 0.9091,
       "wilson95": [
-       0.7063,
-       0.9207
+       0.7884,
+       0.9641
       ]
      },
      "protect_values": 93,
      "refused": 0,
      "spurious": {
-      "k": 35,
-      "n": 125,
-      "rate": 0.28,
+      "k": 21,
+      "n": 112,
+      "rate": 0.1875,
       "wilson95": [
-       0.2088,
-       0.3644
+       0.126,
+       0.2697
       ]
      },
      "values_by_type": {
@@ -6453,7 +6455,7 @@
      }
     },
     "no_tagger": {
-     "edits": 102,
+     "edits": 101,
      "leak": {
       "k": 16,
       "n": 93,
@@ -6502,12 +6504,12 @@
      "protect_values": 93,
      "refused": 0,
      "spurious": {
-      "k": 21,
-      "n": 102,
-      "rate": 0.2059,
+      "k": 20,
+      "n": 101,
+      "rate": 0.198,
       "wilson95": [
-       0.1388,
-       0.2943
+       0.132,
+       0.2862
       ]
      },
      "values_by_type": {
@@ -6527,7 +6529,7 @@
      }
     },
     "strict": {
-     "edits": 209,
+     "edits": 187,
      "leak": {
       "k": 0,
       "n": 93,
@@ -6563,25 +6565,25 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 32,
+     "messages_with_spurious": 29,
      "negatives_untouched": {
-      "k": 26,
+      "k": 30,
       "n": 44,
-      "rate": 0.5909,
+      "rate": 0.6818,
       "wilson95": [
-       0.4441,
-       0.7231
+       0.5344,
+       0.8
       ]
      },
      "protect_values": 93,
      "refused": 1,
      "spurious": {
-      "k": 119,
-      "n": 209,
-      "rate": 0.5694,
+      "k": 94,
+      "n": 187,
+      "rate": 0.5027,
       "wilson95": [
-       0.5016,
-       0.6347
+       0.4317,
+       0.5736
       ]
      },
      "values_by_type": {
@@ -6603,50 +6605,50 @@
    },
    "natural": {
     "balanced": {
-     "edits": 285,
+     "edits": 193,
      "leak": {
-      "k": 6,
+      "k": 7,
       "n": 16,
-      "rate": 0.375,
+      "rate": 0.4375,
       "wilson95": [
-       0.1848,
-       0.6136
+       0.231,
+       0.6682
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 6
+      "PERSON": 7
      },
-     "macro_leak_rate": 0.2,
+     "macro_leak_rate": 0.2334,
      "message_leak": {
-      "k": 5,
+      "k": 6,
       "n": 11,
-      "rate": 0.4545,
+      "rate": 0.5455,
       "wilson95": [
-       0.2127,
-       0.7199
+       0.2801,
+       0.7873
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 59,
+     "messages_with_spurious": 43,
      "negatives_untouched": {
-      "k": 361,
+      "k": 377,
       "n": 431,
-      "rate": 0.8376,
+      "rate": 0.8747,
       "wilson95": [
-       0.7998,
-       0.8694
+       0.8401,
+       0.9027
       ]
      },
      "protect_values": 16,
      "refused": 0,
      "spurious": {
-      "k": 221,
-      "n": 285,
-      "rate": 0.7754,
+      "k": 133,
+      "n": 193,
+      "rate": 0.6891,
       "wilson95": [
-       0.7235,
-       0.82
+       0.6207,
+       0.7502
       ]
      },
      "values_by_type": {
@@ -6707,7 +6709,7 @@
      }
     },
     "fast": {
-     "edits": 254,
+     "edits": 186,
      "leak": {
       "k": 6,
       "n": 16,
@@ -6732,25 +6734,25 @@
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 54,
+     "messages_with_spurious": 43,
      "negatives_untouched": {
-      "k": 365,
+      "k": 377,
       "n": 431,
-      "rate": 0.8469,
+      "rate": 0.8747,
       "wilson95": [
-       0.8098,
-       0.8778
+       0.8401,
+       0.9027
       ]
      },
      "protect_values": 16,
      "refused": 0,
      "spurious": {
-      "k": 189,
-      "n": 254,
-      "rate": 0.7441,
+      "k": 126,
+      "n": 186,
+      "rate": 0.6774,
       "wilson95": [
-       0.6871,
-       0.7938
+       0.6072,
+       0.7404
       ]
      },
      "values_by_type": {
@@ -6863,50 +6865,50 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 285,
+     "edits": 193,
      "leak": {
-      "k": 6,
+      "k": 7,
       "n": 16,
-      "rate": 0.375,
+      "rate": 0.4375,
       "wilson95": [
-       0.1848,
-       0.6136
+       0.231,
+       0.6682
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 6
+      "PERSON": 7
      },
-     "macro_leak_rate": 0.2,
+     "macro_leak_rate": 0.2334,
      "message_leak": {
-      "k": 5,
+      "k": 6,
       "n": 11,
-      "rate": 0.4545,
+      "rate": 0.5455,
       "wilson95": [
-       0.2127,
-       0.7199
+       0.2801,
+       0.7873
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 59,
+     "messages_with_spurious": 43,
      "negatives_untouched": {
-      "k": 361,
+      "k": 377,
       "n": 431,
-      "rate": 0.8376,
+      "rate": 0.8747,
       "wilson95": [
-       0.7998,
-       0.8694
+       0.8401,
+       0.9027
       ]
      },
      "protect_values": 16,
      "refused": 0,
      "spurious": {
-      "k": 221,
-      "n": 285,
-      "rate": 0.7754,
+      "k": 133,
+      "n": 193,
+      "rate": 0.6891,
       "wilson95": [
-       0.7235,
-       0.82
+       0.6207,
+       0.7502
       ]
      },
      "values_by_type": {
@@ -6915,50 +6917,50 @@
      }
     },
     "no_gate": {
-     "edits": 419,
+     "edits": 294,
      "leak": {
-      "k": 6,
+      "k": 7,
       "n": 16,
-      "rate": 0.375,
+      "rate": 0.4375,
       "wilson95": [
-       0.1848,
-       0.6136
+       0.231,
+       0.6682
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 6
+      "PERSON": 7
      },
-     "macro_leak_rate": 0.2,
+     "macro_leak_rate": 0.2334,
      "message_leak": {
-      "k": 5,
+      "k": 6,
       "n": 11,
-      "rate": 0.4545,
+      "rate": 0.5455,
       "wilson95": [
-       0.2127,
-       0.7199
+       0.2801,
+       0.7873
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 101,
+     "messages_with_spurious": 86,
      "negatives_untouched": {
-      "k": 318,
+      "k": 332,
       "n": 431,
-      "rate": 0.7378,
+      "rate": 0.7703,
       "wilson95": [
-       0.6943,
-       0.7771
+       0.7283,
+       0.8075
       ]
      },
      "protect_values": 16,
-     "refused": 1,
+     "refused": 0,
      "spurious": {
-      "k": 341,
-      "n": 419,
-      "rate": 0.8138,
+      "k": 226,
+      "n": 294,
+      "rate": 0.7687,
       "wilson95": [
-       0.7738,
-       0.8482
+       0.7172,
+       0.8133
       ]
      },
      "values_by_type": {
@@ -7019,50 +7021,50 @@
      }
     },
     "no_structural": {
-     "edits": 240,
+     "edits": 140,
      "leak": {
-      "k": 6,
+      "k": 7,
       "n": 16,
-      "rate": 0.375,
+      "rate": 0.4375,
       "wilson95": [
-       0.1848,
-       0.6136
+       0.231,
+       0.6682
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 6
+      "PERSON": 7
      },
-     "macro_leak_rate": 0.2,
+     "macro_leak_rate": 0.2334,
      "message_leak": {
-      "k": 5,
+      "k": 6,
       "n": 11,
-      "rate": 0.4545,
+      "rate": 0.5455,
       "wilson95": [
-       0.2127,
-       0.7199
+       0.2801,
+       0.7873
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 55,
+     "messages_with_spurious": 38,
      "negatives_untouched": {
-      "k": 365,
+      "k": 382,
       "n": 431,
-      "rate": 0.8469,
+      "rate": 0.8863,
       "wilson95": [
-       0.8098,
-       0.8778
+       0.8529,
+       0.9129
       ]
      },
      "protect_values": 16,
      "refused": 0,
      "spurious": {
-      "k": 180,
-      "n": 240,
-      "rate": 0.75,
+      "k": 84,
+      "n": 140,
+      "rate": 0.6,
       "wilson95": [
-       0.6916,
-       0.8006
+       0.5172,
+       0.6774
       ]
      },
      "values_by_type": {
@@ -7071,7 +7073,7 @@
      }
     },
     "no_tagger": {
-     "edits": 135,
+     "edits": 133,
      "leak": {
       "k": 15,
       "n": 16,
@@ -7096,25 +7098,25 @@
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 38,
+     "messages_with_spurious": 37,
      "negatives_untouched": {
-      "k": 386,
+      "k": 387,
       "n": 431,
-      "rate": 0.8956,
+      "rate": 0.8979,
       "wilson95": [
-       0.8631,
-       0.921
+       0.8657,
+       0.9231
       ]
      },
      "protect_values": 16,
      "refused": 0,
      "spurious": {
-      "k": 103,
-      "n": 135,
-      "rate": 0.763,
+      "k": 101,
+      "n": 133,
+      "rate": 0.7594,
       "wilson95": [
-       0.6846,
-       0.8268
+       0.6801,
+       0.8241
       ]
      },
      "values_by_type": {
@@ -7123,7 +7125,7 @@
      }
     },
     "strict": {
-     "edits": 961,
+     "edits": 857,
      "leak": {
       "k": 1,
       "n": 16,
@@ -7148,25 +7150,25 @@
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 193,
+     "messages_with_spurious": 194,
      "negatives_untouched": {
-      "k": 227,
+      "k": 226,
       "n": 431,
-      "rate": 0.5267,
+      "rate": 0.5244,
       "wilson95": [
-       0.4795,
-       0.5734
+       0.4772,
+       0.5711
       ]
      },
      "protect_values": 16,
-     "refused": 4,
+     "refused": 1,
      "spurious": {
-      "k": 827,
-      "n": 961,
-      "rate": 0.8606,
+      "k": 722,
+      "n": 857,
+      "rate": 0.8425,
       "wilson95": [
-       0.8372,
-       0.881
+       0.8166,
+       0.8653
       ]
      },
      "values_by_type": {
@@ -7177,7 +7179,7 @@
    },
    "shift": {
     "balanced": {
-     "edits": 100,
+     "edits": 94,
      "leak": {
       "k": 2,
       "n": 81,
@@ -7213,7 +7215,7 @@
       ]
      },
      "messages": 23,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -7223,12 +7225,12 @@
      "protect_values": 81,
      "refused": 0,
      "spurious": {
-      "k": 20,
-      "n": 100,
-      "rate": 0.2,
+      "k": 14,
+      "n": 94,
+      "rate": 0.1489,
       "wilson95": [
-       0.1334,
-       0.2888
+       0.0908,
+       0.2346
       ]
      },
      "values_by_type": {
@@ -7319,7 +7321,7 @@
      }
     },
     "fast": {
-     "edits": 96,
+     "edits": 90,
      "leak": {
       "k": 2,
       "n": 81,
@@ -7355,7 +7357,7 @@
       ]
      },
      "messages": 23,
-     "messages_with_spurious": 6,
+     "messages_with_spurious": 4,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -7365,12 +7367,12 @@
      "protect_values": 81,
      "refused": 0,
      "spurious": {
-      "k": 16,
-      "n": 96,
-      "rate": 0.1667,
+      "k": 10,
+      "n": 90,
+      "rate": 0.1111,
       "wilson95": [
-       0.1053,
-       0.2537
+       0.0615,
+       0.1926
       ]
      },
      "values_by_type": {
@@ -7532,7 +7534,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 93,
+     "edits": 87,
      "leak": {
       "k": 9,
       "n": 81,
@@ -7568,7 +7570,7 @@
       ]
      },
      "messages": 23,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -7578,12 +7580,12 @@
      "protect_values": 81,
      "refused": 0,
      "spurious": {
-      "k": 20,
-      "n": 93,
-      "rate": 0.2151,
+      "k": 14,
+      "n": 87,
+      "rate": 0.1609,
       "wilson95": [
-       0.1438,
-       0.309
+       0.0983,
+       0.2522
       ]
      },
      "values_by_type": {
@@ -7603,7 +7605,7 @@
      }
     },
     "no_gate": {
-     "edits": 105,
+     "edits": 99,
      "leak": {
       "k": 2,
       "n": 81,
@@ -7639,7 +7641,7 @@
       ]
      },
      "messages": 23,
-     "messages_with_spurious": 10,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -7649,12 +7651,12 @@
      "protect_values": 81,
      "refused": 0,
      "spurious": {
-      "k": 25,
-      "n": 105,
-      "rate": 0.2381,
+      "k": 19,
+      "n": 99,
+      "rate": 0.1919,
       "wilson95": [
-       0.1668,
-       0.3279
+       0.1265,
+       0.2804
       ]
      },
      "values_by_type": {
@@ -7745,7 +7747,7 @@
      }
     },
     "no_structural": {
-     "edits": 96,
+     "edits": 90,
      "leak": {
       "k": 2,
       "n": 81,
@@ -7781,7 +7783,7 @@
       ]
      },
      "messages": 23,
-     "messages_with_spurious": 8,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -7791,12 +7793,12 @@
      "protect_values": 81,
      "refused": 0,
      "spurious": {
-      "k": 16,
-      "n": 96,
-      "rate": 0.1667,
+      "k": 10,
+      "n": 90,
+      "rate": 0.1111,
       "wilson95": [
-       0.1053,
-       0.2537
+       0.0615,
+       0.1926
       ]
      },
      "values_by_type": {
@@ -7887,7 +7889,7 @@
      }
     },
     "strict": {
-     "edits": 151,
+     "edits": 130,
      "leak": {
       "k": 1,
       "n": 81,
@@ -7933,12 +7935,12 @@
      "protect_values": 81,
      "refused": 0,
      "spurious": {
-      "k": 68,
-      "n": 151,
-      "rate": 0.4503,
+      "k": 47,
+      "n": 130,
+      "rate": 0.3615,
       "wilson95": [
-       0.3732,
-       0.5299
+       0.284,
+       0.447
       ]
      },
      "values_by_type": {
@@ -7962,14 +7964,14 @@
   "oasst1": {
    "injected": {
     "balanced": {
-     "edits": 256,
+     "edits": 236,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 210,
-      "rate": 0.0095,
+      "rate": 0.0048,
       "wilson95": [
-       0.0026,
-       0.0341
+       0.0008,
+       0.0265
       ]
      },
      "leaked_by_type": {
@@ -7983,22 +7985,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 2,
+      "PERSON": 1,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0031,
+     "macro_leak_rate": 0.0015,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 60,
-      "rate": 0.0333,
+      "rate": 0.0167,
       "wilson95": [
-       0.0092,
-       0.1136
+       0.0029,
+       0.0886
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
       "k": 12,
       "n": 12,
@@ -8011,12 +8013,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 48,
-      "n": 256,
-      "rate": 0.1875,
+      "k": 27,
+      "n": 236,
+      "rate": 0.1144,
       "wilson95": [
-       0.1444,
-       0.2398
+       0.0798,
+       0.1613
       ]
      },
      "values_by_type": {
@@ -8110,14 +8112,14 @@
      }
     },
     "fast": {
-     "edits": 243,
+     "edits": 224,
      "leak": {
-      "k": 3,
+      "k": 2,
       "n": 210,
-      "rate": 0.0143,
+      "rate": 0.0095,
       "wilson95": [
-       0.0049,
-       0.0412
+       0.0026,
+       0.0341
       ]
      },
      "leaked_by_type": {
@@ -8131,22 +8133,22 @@
       "LOCATION": 1,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 2,
+      "PERSON": 1,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0101,
+     "macro_leak_rate": 0.0085,
      "message_leak": {
-      "k": 3,
+      "k": 2,
       "n": 60,
-      "rate": 0.05,
+      "rate": 0.0333,
       "wilson95": [
-       0.0171,
-       0.137
+       0.0092,
+       0.1136
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
       "k": 12,
       "n": 12,
@@ -8159,12 +8161,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 36,
-      "n": 243,
-      "rate": 0.1481,
+      "k": 16,
+      "n": 224,
+      "rate": 0.0714,
       "wilson95": [
-       0.109,
-       0.1983
+       0.0444,
+       0.1129
       ]
      },
      "values_by_type": {
@@ -8332,14 +8334,14 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 253,
+     "edits": 233,
      "leak": {
-      "k": 5,
+      "k": 4,
       "n": 210,
-      "rate": 0.0238,
+      "rate": 0.019,
       "wilson95": [
-       0.0102,
-       0.0545
+       0.0074,
+       0.0479
       ]
      },
      "leaked_by_type": {
@@ -8353,22 +8355,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 2,
+      "PERSON": 1,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0259,
+     "macro_leak_rate": 0.0244,
      "message_leak": {
-      "k": 5,
+      "k": 4,
       "n": 60,
-      "rate": 0.0833,
+      "rate": 0.0667,
       "wilson95": [
-       0.0361,
-       0.1807
+       0.0262,
+       0.1593
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
       "k": 12,
       "n": 12,
@@ -8381,12 +8383,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 48,
-      "n": 253,
-      "rate": 0.1897,
+      "k": 27,
+      "n": 233,
+      "rate": 0.1159,
       "wilson95": [
-       0.1462,
-       0.2425
+       0.0809,
+       0.1633
       ]
      },
      "values_by_type": {
@@ -8406,14 +8408,14 @@
      }
     },
     "no_gate": {
-     "edits": 261,
+     "edits": 240,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 210,
-      "rate": 0.0095,
+      "rate": 0.0048,
       "wilson95": [
-       0.0026,
-       0.0341
+       0.0008,
+       0.0265
       ]
      },
      "leaked_by_type": {
@@ -8427,22 +8429,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 2,
+      "PERSON": 1,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0031,
+     "macro_leak_rate": 0.0015,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 60,
-      "rate": 0.0333,
+      "rate": 0.0167,
       "wilson95": [
-       0.0092,
-       0.1136
+       0.0029,
+       0.0886
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 16,
+     "messages_with_spurious": 13,
      "negatives_untouched": {
       "k": 12,
       "n": 12,
@@ -8455,12 +8457,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 53,
-      "n": 261,
-      "rate": 0.2031,
+      "k": 31,
+      "n": 240,
+      "rate": 0.1292,
       "wilson95": [
-       0.1587,
-       0.256
+       0.0925,
+       0.1775
       ]
      },
      "values_by_type": {
@@ -8554,14 +8556,14 @@
      }
     },
     "no_structural": {
-     "edits": 253,
+     "edits": 233,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 210,
-      "rate": 0.0095,
+      "rate": 0.0048,
       "wilson95": [
-       0.0026,
-       0.0341
+       0.0008,
+       0.0265
       ]
      },
      "leaked_by_type": {
@@ -8575,22 +8577,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 2,
+      "PERSON": 1,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0031,
+     "macro_leak_rate": 0.0015,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 60,
-      "rate": 0.0333,
+      "rate": 0.0167,
       "wilson95": [
-       0.0092,
-       0.1136
+       0.0029,
+       0.0886
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
       "k": 12,
       "n": 12,
@@ -8603,12 +8605,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 45,
-      "n": 253,
-      "rate": 0.1779,
+      "k": 24,
+      "n": 233,
+      "rate": 0.103,
       "wilson95": [
-       0.1357,
-       0.2297
+       0.0702,
+       0.1487
       ]
      },
      "values_by_type": {
@@ -8628,7 +8630,7 @@
      }
     },
     "no_tagger": {
-     "edits": 221,
+     "edits": 220,
      "leak": {
       "k": 19,
       "n": 210,
@@ -8677,12 +8679,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 27,
-      "n": 221,
-      "rate": 0.1222,
+      "k": 26,
+      "n": 220,
+      "rate": 0.1182,
       "wilson95": [
-       0.0853,
-       0.1719
+       0.0819,
+       0.1675
       ]
      },
      "values_by_type": {
@@ -8702,7 +8704,7 @@
      }
     },
     "strict": {
-     "edits": 323,
+     "edits": 281,
      "leak": {
       "k": 1,
       "n": 210,
@@ -8751,12 +8753,12 @@
      "protect_values": 210,
      "refused": 0,
      "spurious": {
-      "k": 113,
-      "n": 323,
-      "rate": 0.3498,
+      "k": 70,
+      "n": 281,
+      "rate": 0.2491,
       "wilson95": [
-       0.2999,
-       0.4033
+       0.2022,
+       0.3028
       ]
      },
      "values_by_type": {
@@ -8778,14 +8780,14 @@
    },
    "injected_single": {
     "balanced": {
-     "edits": 193,
+     "edits": 172,
      "leak": {
-      "k": 1,
+      "k": 0,
       "n": 154,
-      "rate": 0.0065,
+      "rate": 0.0,
       "wilson95": [
-       0.0011,
-       0.0359
+       0.0,
+       0.0243
       ]
      },
      "leaked_by_type": {
@@ -8799,22 +8801,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 1,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0024,
+     "macro_leak_rate": 0.0,
      "message_leak": {
-      "k": 1,
+      "k": 0,
       "n": 42,
-      "rate": 0.0238,
+      "rate": 0.0,
       "wilson95": [
-       0.0042,
-       0.1232
+       0.0,
+       0.0838
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 10,
+     "messages_with_spurious": 8,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -8824,12 +8826,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 39,
-      "n": 193,
-      "rate": 0.2021,
+      "k": 18,
+      "n": 172,
+      "rate": 0.1047,
       "wilson95": [
-       0.1515,
-       0.2643
+       0.0672,
+       0.1593
       ]
      },
      "values_by_type": {
@@ -8920,14 +8922,14 @@
      }
     },
     "fast": {
-     "edits": 186,
+     "edits": 166,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 154,
-      "rate": 0.013,
+      "rate": 0.0065,
       "wilson95": [
-       0.0036,
-       0.0461
+       0.0011,
+       0.0359
       ]
      },
      "leaked_by_type": {
@@ -8941,22 +8943,22 @@
       "LOCATION": 1,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 1,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0152,
+     "macro_leak_rate": 0.0128,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 42,
-      "rate": 0.0476,
+      "rate": 0.0238,
       "wilson95": [
-       0.0132,
-       0.1579
+       0.0042,
+       0.1232
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 7,
+     "messages_with_spurious": 5,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -8966,12 +8968,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 33,
-      "n": 186,
-      "rate": 0.1774,
+      "k": 13,
+      "n": 166,
+      "rate": 0.0783,
       "wilson95": [
-       0.1292,
-       0.2387
+       0.0463,
+       0.1294
       ]
      },
      "values_by_type": {
@@ -9133,14 +9135,14 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 193,
+     "edits": 172,
      "leak": {
-      "k": 1,
+      "k": 0,
       "n": 154,
-      "rate": 0.0065,
+      "rate": 0.0,
       "wilson95": [
-       0.0011,
-       0.0359
+       0.0,
+       0.0243
       ]
      },
      "leaked_by_type": {
@@ -9154,22 +9156,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 1,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0024,
+     "macro_leak_rate": 0.0,
      "message_leak": {
-      "k": 1,
+      "k": 0,
       "n": 42,
-      "rate": 0.0238,
+      "rate": 0.0,
       "wilson95": [
-       0.0042,
-       0.1232
+       0.0,
+       0.0838
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 10,
+     "messages_with_spurious": 8,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -9179,12 +9181,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 39,
-      "n": 193,
-      "rate": 0.2021,
+      "k": 18,
+      "n": 172,
+      "rate": 0.1047,
       "wilson95": [
-       0.1515,
-       0.2643
+       0.0672,
+       0.1593
       ]
      },
      "values_by_type": {
@@ -9204,14 +9206,14 @@
      }
     },
     "no_gate": {
-     "edits": 198,
+     "edits": 176,
      "leak": {
-      "k": 1,
+      "k": 0,
       "n": 154,
-      "rate": 0.0065,
+      "rate": 0.0,
       "wilson95": [
-       0.0011,
-       0.0359
+       0.0,
+       0.0243
       ]
      },
      "leaked_by_type": {
@@ -9225,22 +9227,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 1,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0024,
+     "macro_leak_rate": 0.0,
      "message_leak": {
-      "k": 1,
+      "k": 0,
       "n": 42,
-      "rate": 0.0238,
+      "rate": 0.0,
       "wilson95": [
-       0.0042,
-       0.1232
+       0.0,
+       0.0838
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 10,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -9250,12 +9252,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 44,
-      "n": 198,
-      "rate": 0.2222,
+      "k": 22,
+      "n": 176,
+      "rate": 0.125,
       "wilson95": [
-       0.1699,
-       0.2851
+       0.084,
+       0.182
       ]
      },
      "values_by_type": {
@@ -9346,14 +9348,14 @@
      }
     },
     "no_structural": {
-     "edits": 192,
+     "edits": 171,
      "leak": {
-      "k": 1,
+      "k": 0,
       "n": 154,
-      "rate": 0.0065,
+      "rate": 0.0,
       "wilson95": [
-       0.0011,
-       0.0359
+       0.0,
+       0.0243
       ]
      },
      "leaked_by_type": {
@@ -9367,22 +9369,22 @@
       "LOCATION": 0,
       "NETWORK": 0,
       "ORG": 0,
-      "PERSON": 1,
+      "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.0024,
+     "macro_leak_rate": 0.0,
      "message_leak": {
-      "k": 1,
+      "k": 0,
       "n": 42,
-      "rate": 0.0238,
+      "rate": 0.0,
       "wilson95": [
-       0.0042,
-       0.1232
+       0.0,
+       0.0838
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 10,
+     "messages_with_spurious": 8,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -9392,12 +9394,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 38,
-      "n": 192,
-      "rate": 0.1979,
+      "k": 17,
+      "n": 171,
+      "rate": 0.0994,
       "wilson95": [
-       0.1477,
-       0.26
+       0.063,
+       0.1534
       ]
      },
      "values_by_type": {
@@ -9417,7 +9419,7 @@
      }
     },
     "no_tagger": {
-     "edits": 161,
+     "edits": 160,
      "leak": {
       "k": 12,
       "n": 154,
@@ -9463,12 +9465,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 18,
-      "n": 161,
-      "rate": 0.1118,
+      "k": 17,
+      "n": 160,
+      "rate": 0.1062,
       "wilson95": [
-       0.0719,
-       0.1698
+       0.0674,
+       0.1636
       ]
      },
      "values_by_type": {
@@ -9488,7 +9490,7 @@
      }
     },
     "strict": {
-     "edits": 252,
+     "edits": 209,
      "leak": {
       "k": 0,
       "n": 154,
@@ -9534,12 +9536,12 @@
      "protect_values": 154,
      "refused": 0,
      "spurious": {
-      "k": 96,
-      "n": 252,
-      "rate": 0.381,
+      "k": 53,
+      "n": 209,
+      "rate": 0.2536,
       "wilson95": [
-       0.3232,
-       0.4423
+       0.1994,
+       0.3167
       ]
      },
      "values_by_type": {
@@ -9561,7 +9563,7 @@
    },
    "multi": {
     "balanced": {
-     "edits": 34,
+     "edits": 35,
      "leak": {
       "k": 0,
       "n": 31,
@@ -9608,11 +9610,11 @@
      "refused": 0,
      "spurious": {
       "k": 5,
-      "n": 34,
-      "rate": 0.1471,
+      "n": 35,
+      "rate": 0.1429,
       "wilson95": [
-       0.0645,
-       0.3013
+       0.0626,
+       0.2938
       ]
      },
      "values_by_type": {
@@ -9697,7 +9699,7 @@
      }
     },
     "fast": {
-     "edits": 29,
+     "edits": 30,
      "leak": {
       "k": 0,
       "n": 31,
@@ -9744,11 +9746,11 @@
      "refused": 0,
      "spurious": {
       "k": 0,
-      "n": 29,
+      "n": 30,
       "rate": 0.0,
       "wilson95": [
        0.0,
-       0.117
+       0.1135
       ]
      },
      "values_by_type": {
@@ -9901,7 +9903,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 34,
+     "edits": 35,
      "leak": {
       "k": 0,
       "n": 31,
@@ -9948,11 +9950,11 @@
      "refused": 0,
      "spurious": {
       "k": 5,
-      "n": 34,
-      "rate": 0.1471,
+      "n": 35,
+      "rate": 0.1429,
       "wilson95": [
-       0.0645,
-       0.3013
+       0.0626,
+       0.2938
       ]
      },
      "values_by_type": {
@@ -9969,7 +9971,7 @@
      }
     },
     "no_gate": {
-     "edits": 34,
+     "edits": 35,
      "leak": {
       "k": 0,
       "n": 31,
@@ -10016,11 +10018,11 @@
      "refused": 0,
      "spurious": {
       "k": 5,
-      "n": 34,
-      "rate": 0.1471,
+      "n": 35,
+      "rate": 0.1429,
       "wilson95": [
-       0.0645,
-       0.3013
+       0.0626,
+       0.2938
       ]
      },
      "values_by_type": {
@@ -10105,7 +10107,7 @@
      }
     },
     "no_structural": {
-     "edits": 34,
+     "edits": 35,
      "leak": {
       "k": 0,
       "n": 31,
@@ -10152,11 +10154,11 @@
      "refused": 0,
      "spurious": {
       "k": 5,
-      "n": 34,
-      "rate": 0.1471,
+      "n": 35,
+      "rate": 0.1429,
       "wilson95": [
-       0.0645,
-       0.3013
+       0.0626,
+       0.2938
       ]
      },
      "values_by_type": {
@@ -10241,7 +10243,7 @@
      }
     },
     "strict": {
-     "edits": 37,
+     "edits": 38,
      "leak": {
       "k": 0,
       "n": 31,
@@ -10288,11 +10290,11 @@
      "refused": 0,
      "spurious": {
       "k": 8,
-      "n": 37,
-      "rate": 0.2162,
+      "n": 38,
+      "rate": 0.2105,
       "wilson95": [
-       0.1139,
-       0.372
+       0.1107,
+       0.3635
       ]
      },
      "values_by_type": {
@@ -10311,7 +10313,7 @@
    },
    "natural": {
     "balanced": {
-     "edits": 56,
+     "edits": 28,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10335,25 +10337,25 @@
       ]
      },
      "messages": 143,
-     "messages_with_spurious": 12,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
-      "k": 129,
+      "k": 130,
       "n": 142,
-      "rate": 0.9085,
+      "rate": 0.9155,
       "wilson95": [
-       0.8497,
-       0.9457
+       0.8581,
+       0.951
       ]
      },
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 52,
-      "n": 56,
-      "rate": 0.9286,
+      "k": 23,
+      "n": 28,
+      "rate": 0.8214,
       "wilson95": [
-       0.8302,
-       0.9719
+       0.6441,
+       0.9212
       ]
      },
      "values_by_type": {
@@ -10411,7 +10413,7 @@
      }
     },
     "fast": {
-     "edits": 51,
+     "edits": 24,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10435,25 +10437,25 @@
       ]
      },
      "messages": 143,
-     "messages_with_spurious": 10,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
-      "k": 131,
+      "k": 132,
       "n": 142,
-      "rate": 0.9225,
+      "rate": 0.9296,
       "wilson95": [
-       0.8666,
-       0.9562
+       0.8752,
+       0.9613
       ]
      },
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 47,
-      "n": 51,
-      "rate": 0.9216,
+      "k": 19,
+      "n": 24,
+      "rate": 0.7917,
       "wilson95": [
-       0.815,
-       0.9691
+       0.5953,
+       0.9076
       ]
      },
      "values_by_type": {
@@ -10561,7 +10563,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 56,
+     "edits": 28,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10585,25 +10587,25 @@
       ]
      },
      "messages": 143,
-     "messages_with_spurious": 12,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
-      "k": 129,
+      "k": 130,
       "n": 142,
-      "rate": 0.9085,
+      "rate": 0.9155,
       "wilson95": [
-       0.8497,
-       0.9457
+       0.8581,
+       0.951
       ]
      },
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 52,
-      "n": 56,
-      "rate": 0.9286,
+      "k": 23,
+      "n": 28,
+      "rate": 0.8214,
       "wilson95": [
-       0.8302,
-       0.9719
+       0.6441,
+       0.9212
       ]
      },
      "values_by_type": {
@@ -10611,7 +10613,7 @@
      }
     },
     "no_gate": {
-     "edits": 83,
+     "edits": 49,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10635,25 +10637,25 @@
       ]
      },
      "messages": 143,
-     "messages_with_spurious": 26,
+     "messages_with_spurious": 22,
      "negatives_untouched": {
-      "k": 115,
+      "k": 119,
       "n": 142,
-      "rate": 0.8099,
+      "rate": 0.838,
       "wilson95": [
-       0.7375,
-       0.8659
+       0.7687,
+       0.8896
       ]
      },
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 78,
-      "n": 83,
-      "rate": 0.9398,
+      "k": 43,
+      "n": 49,
+      "rate": 0.8776,
       "wilson95": [
-       0.8666,
-       0.974
+       0.7576,
+       0.9427
       ]
      },
      "values_by_type": {
@@ -10711,7 +10713,7 @@
      }
     },
     "no_structural": {
-     "edits": 57,
+     "edits": 26,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10735,25 +10737,25 @@
       ]
      },
      "messages": 143,
-     "messages_with_spurious": 13,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
-      "k": 128,
+      "k": 130,
       "n": 142,
-      "rate": 0.9014,
+      "rate": 0.9155,
       "wilson95": [
-       0.8413,
-       0.9404
+       0.8581,
+       0.951
       ]
      },
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 53,
-      "n": 57,
-      "rate": 0.9298,
+      "k": 21,
+      "n": 26,
+      "rate": 0.8077,
       "wilson95": [
-       0.833,
-       0.9724
+       0.6212,
+       0.9149
       ]
      },
      "values_by_type": {
@@ -10761,7 +10763,7 @@
      }
     },
     "no_tagger": {
-     "edits": 24,
+     "edits": 23,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10798,12 +10800,12 @@
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 23,
-      "n": 24,
-      "rate": 0.9583,
+      "k": 22,
+      "n": 23,
+      "rate": 0.9565,
       "wilson95": [
-       0.7976,
-       0.9926
+       0.7901,
+       0.9923
       ]
      },
      "values_by_type": {
@@ -10811,7 +10813,7 @@
      }
     },
     "strict": {
-     "edits": 160,
+     "edits": 110,
      "leak": {
       "k": 0,
       "n": 1,
@@ -10835,7 +10837,7 @@
       ]
      },
      "messages": 143,
-     "messages_with_spurious": 52,
+     "messages_with_spurious": 51,
      "negatives_untouched": {
       "k": 89,
       "n": 142,
@@ -10848,12 +10850,12 @@
      "protect_values": 1,
      "refused": 0,
      "spurious": {
-      "k": 152,
-      "n": 160,
-      "rate": 0.95,
+      "k": 102,
+      "n": 110,
+      "rate": 0.9273,
       "wilson95": [
-       0.9044,
-       0.9744
+       0.863,
+       0.9627
       ]
      },
      "values_by_type": {
@@ -11604,7 +11606,7 @@
   "sharegpt": {
    "injected": {
     "balanced": {
-     "edits": 271,
+     "edits": 247,
      "leak": {
       "k": 6,
       "n": 208,
@@ -11640,25 +11642,25 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 23,
+     "messages_with_spurious": 16,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 208,
      "refused": 0,
      "spurious": {
-      "k": 60,
-      "n": 271,
-      "rate": 0.2214,
+      "k": 37,
+      "n": 247,
+      "rate": 0.1498,
       "wilson95": [
-       0.1761,
-       0.2745
+       0.1107,
+       0.1996
       ]
      },
      "values_by_type": {
@@ -11752,7 +11754,7 @@
      }
     },
     "fast": {
-     "edits": 257,
+     "edits": 234,
      "leak": {
       "k": 6,
       "n": 208,
@@ -11788,25 +11790,25 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 17,
+     "messages_with_spurious": 11,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 208,
      "refused": 0,
      "spurious": {
-      "k": 52,
-      "n": 257,
-      "rate": 0.2023,
+      "k": 29,
+      "n": 234,
+      "rate": 0.1239,
       "wilson95": [
-       0.1578,
-       0.2557
+       0.0877,
+       0.1723
       ]
      },
      "values_by_type": {
@@ -11974,7 +11976,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 269,
+     "edits": 245,
      "leak": {
       "k": 8,
       "n": 208,
@@ -12010,25 +12012,25 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 23,
+     "messages_with_spurious": 16,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 208,
      "refused": 0,
      "spurious": {
-      "k": 60,
-      "n": 269,
-      "rate": 0.223,
+      "k": 37,
+      "n": 245,
+      "rate": 0.151,
       "wilson95": [
-       0.1774,
-       0.2765
+       0.1116,
+       0.2012
       ]
      },
      "values_by_type": {
@@ -12048,7 +12050,7 @@
      }
     },
     "no_gate": {
-     "edits": 283,
+     "edits": 255,
      "leak": {
       "k": 4,
       "n": 208,
@@ -12084,25 +12086,25 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 24,
+     "messages_with_spurious": 19,
      "negatives_untouched": {
-      "k": 12,
+      "k": 14,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.7778,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.5479,
+       0.91
       ]
      },
      "protect_values": 208,
      "refused": 0,
      "spurious": {
-      "k": 67,
-      "n": 283,
-      "rate": 0.2367,
+      "k": 44,
+      "n": 255,
+      "rate": 0.1725,
       "wilson95": [
-       0.191,
-       0.2896
+       0.1311,
+       0.2237
       ]
      },
      "values_by_type": {
@@ -12196,7 +12198,7 @@
      }
     },
     "no_structural": {
-     "edits": 259,
+     "edits": 233,
      "leak": {
       "k": 4,
       "n": 208,
@@ -12232,25 +12234,25 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 20,
+     "messages_with_spurious": 14,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 208,
      "refused": 0,
      "spurious": {
-      "k": 47,
-      "n": 259,
-      "rate": 0.1815,
+      "k": 22,
+      "n": 233,
+      "rate": 0.0944,
       "wilson95": [
-       0.1393,
-       0.2329
+       0.0632,
+       0.1388
       ]
      },
      "values_by_type": {
@@ -12270,14 +12272,14 @@
      }
     },
     "no_tagger": {
-     "edits": 228,
+     "edits": 225,
      "leak": {
-      "k": 24,
+      "k": 25,
       "n": 208,
-      "rate": 0.1154,
+      "rate": 0.1202,
       "wilson95": [
-       0.0788,
-       0.1659
+       0.0828,
+       0.1714
       ]
      },
      "leaked_by_type": {
@@ -12291,22 +12293,22 @@
       "LOCATION": 3,
       "NETWORK": 0,
       "ORG": 5,
-      "PERSON": 14,
+      "PERSON": 15,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.0771,
+     "macro_leak_rate": 0.0785,
      "message_leak": {
-      "k": 19,
+      "k": 20,
       "n": 59,
-      "rate": 0.322,
+      "rate": 0.339,
       "wilson95": [
-       0.2169,
-       0.4489
+       0.2314,
+       0.4663
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 17,
+     "messages_with_spurious": 16,
      "negatives_untouched": {
       "k": 15,
       "n": 18,
@@ -12319,12 +12321,12 @@
      "protect_values": 208,
      "refused": 0,
      "spurious": {
-      "k": 34,
-      "n": 228,
-      "rate": 0.1491,
+      "k": 33,
+      "n": 225,
+      "rate": 0.1467,
       "wilson95": [
-       0.1087,
-       0.2012
+       0.1064,
+       0.1988
       ]
      },
      "values_by_type": {
@@ -12344,7 +12346,7 @@
      }
     },
     "strict": {
-     "edits": 353,
+     "edits": 362,
      "leak": {
       "k": 3,
       "n": 208,
@@ -12380,25 +12382,25 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 38,
+     "messages_with_spurious": 37,
      "negatives_untouched": {
-      "k": 7,
+      "k": 11,
       "n": 18,
-      "rate": 0.3889,
+      "rate": 0.6111,
       "wilson95": [
-       0.2031,
-       0.6138
+       0.3862,
+       0.7969
       ]
      },
      "protect_values": 208,
-     "refused": 2,
+     "refused": 1,
      "spurious": {
-      "k": 139,
-      "n": 353,
-      "rate": 0.3938,
+      "k": 140,
+      "n": 362,
+      "rate": 0.3867,
       "wilson95": [
-       0.3442,
-       0.4456
+       0.338,
+       0.4378
       ]
      },
      "values_by_type": {
@@ -12420,7 +12422,7 @@
    },
    "injected_single": {
     "balanced": {
-     "edits": 185,
+     "edits": 173,
      "leak": {
       "k": 3,
       "n": 144,
@@ -12456,7 +12458,7 @@
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -12466,12 +12468,12 @@
      "protect_values": 144,
      "refused": 0,
      "spurious": {
-      "k": 37,
-      "n": 185,
-      "rate": 0.2,
+      "k": 26,
+      "n": 173,
+      "rate": 0.1503,
       "wilson95": [
-       0.1487,
-       0.2635
+       0.1047,
+       0.2111
       ]
      },
      "values_by_type": {
@@ -12562,7 +12564,7 @@
      }
     },
     "fast": {
-     "edits": 174,
+     "edits": 167,
      "leak": {
       "k": 3,
       "n": 144,
@@ -12608,12 +12610,12 @@
      "protect_values": 144,
      "refused": 0,
      "spurious": {
-      "k": 30,
-      "n": 174,
-      "rate": 0.1724,
+      "k": 23,
+      "n": 167,
+      "rate": 0.1377,
       "wilson95": [
-       0.1235,
-       0.2355
+       0.0936,
+       0.1982
       ]
      },
      "values_by_type": {
@@ -12775,7 +12777,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 185,
+     "edits": 173,
      "leak": {
       "k": 3,
       "n": 144,
@@ -12811,7 +12813,7 @@
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -12821,12 +12823,12 @@
      "protect_values": 144,
      "refused": 0,
      "spurious": {
-      "k": 37,
-      "n": 185,
-      "rate": 0.2,
+      "k": 26,
+      "n": 173,
+      "rate": 0.1503,
       "wilson95": [
-       0.1487,
-       0.2635
+       0.1047,
+       0.2111
       ]
      },
      "values_by_type": {
@@ -12846,7 +12848,7 @@
      }
     },
     "no_gate": {
-     "edits": 189,
+     "edits": 173,
      "leak": {
       "k": 3,
       "n": 144,
@@ -12882,7 +12884,7 @@
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -12892,12 +12894,12 @@
      "protect_values": 144,
      "refused": 0,
      "spurious": {
-      "k": 37,
-      "n": 189,
-      "rate": 0.1958,
+      "k": 26,
+      "n": 173,
+      "rate": 0.1503,
       "wilson95": [
-       0.1455,
-       0.2582
+       0.1047,
+       0.2111
       ]
      },
      "values_by_type": {
@@ -12988,7 +12990,7 @@
      }
     },
     "no_structural": {
-     "edits": 173,
+     "edits": 159,
      "leak": {
       "k": 1,
       "n": 144,
@@ -13024,7 +13026,7 @@
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -13034,12 +13036,12 @@
      "protect_values": 144,
      "refused": 0,
      "spurious": {
-      "k": 24,
-      "n": 173,
-      "rate": 0.1387,
+      "k": 11,
+      "n": 159,
+      "rate": 0.0692,
       "wilson95": [
-       0.095,
-       0.1981
+       0.0391,
+       0.1196
       ]
      },
      "values_by_type": {
@@ -13059,14 +13061,14 @@
      }
     },
     "no_tagger": {
-     "edits": 162,
+     "edits": 159,
      "leak": {
-      "k": 12,
+      "k": 13,
       "n": 144,
-      "rate": 0.0833,
+      "rate": 0.0903,
       "wilson95": [
-       0.0483,
-       0.14
+       0.0535,
+       0.1483
       ]
      },
      "leaked_by_type": {
@@ -13080,22 +13082,22 @@
       "LOCATION": 1,
       "NETWORK": 0,
       "ORG": 3,
-      "PERSON": 7,
+      "PERSON": 8,
       "PHONE": 0,
       "URL": 1
      },
-     "macro_leak_rate": 0.0597,
+     "macro_leak_rate": 0.0617,
      "message_leak": {
-      "k": 11,
+      "k": 12,
       "n": 42,
-      "rate": 0.2619,
+      "rate": 0.2857,
       "wilson95": [
-       0.153,
-       0.4107
+       0.1717,
+       0.4357
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 10,
+     "messages_with_spurious": 9,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -13105,12 +13107,12 @@
      "protect_values": 144,
      "refused": 0,
      "spurious": {
-      "k": 23,
-      "n": 162,
-      "rate": 0.142,
+      "k": 22,
+      "n": 159,
+      "rate": 0.1384,
       "wilson95": [
-       0.0965,
-       0.204
+       0.0932,
+       0.2006
       ]
      },
      "values_by_type": {
@@ -13130,7 +13132,7 @@
      }
     },
     "strict": {
-     "edits": 216,
+     "edits": 245,
      "leak": {
       "k": 3,
       "n": 144,
@@ -13166,7 +13168,7 @@
       ]
      },
      "messages": 42,
-     "messages_with_spurious": 16,
+     "messages_with_spurious": 18,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -13174,14 +13176,14 @@
       "wilson95": null
      },
      "protect_values": 144,
-     "refused": 1,
+     "refused": 0,
      "spurious": {
-      "k": 65,
-      "n": 216,
-      "rate": 0.3009,
+      "k": 88,
+      "n": 245,
+      "rate": 0.3592,
       "wilson95": [
-       0.2437,
-       0.3651
+       0.3017,
+       0.421
       ]
      },
      "values_by_type": {
@@ -13203,7 +13205,7 @@
    },
    "multi": {
     "balanced": {
-     "edits": 53,
+     "edits": 44,
      "leak": {
       "k": 2,
       "n": 34,
@@ -13236,25 +13238,25 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 6,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 34,
      "refused": 0,
      "spurious": {
-      "k": 19,
-      "n": 53,
-      "rate": 0.3585,
+      "k": 10,
+      "n": 44,
+      "rate": 0.2273,
       "wilson95": [
-       0.243,
-       0.4931
+       0.1284,
+       0.3699
       ]
      },
      "values_by_type": {
@@ -13339,7 +13341,7 @@
      }
     },
     "fast": {
-     "edits": 50,
+     "edits": 37,
      "leak": {
       "k": 2,
       "n": 34,
@@ -13372,25 +13374,25 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 8,
+     "messages_with_spurious": 4,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 34,
      "refused": 0,
      "spurious": {
-      "k": 18,
-      "n": 50,
-      "rate": 0.36,
+      "k": 5,
+      "n": 37,
+      "rate": 0.1351,
       "wilson95": [
-       0.2414,
-       0.4986
+       0.0591,
+       0.2798
       ]
      },
      "values_by_type": {
@@ -13543,7 +13545,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 53,
+     "edits": 44,
      "leak": {
       "k": 2,
       "n": 34,
@@ -13576,25 +13578,25 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 6,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 34,
      "refused": 0,
      "spurious": {
-      "k": 19,
-      "n": 53,
-      "rate": 0.3585,
+      "k": 10,
+      "n": 44,
+      "rate": 0.2273,
       "wilson95": [
-       0.243,
-       0.4931
+       0.1284,
+       0.3699
       ]
      },
      "values_by_type": {
@@ -13611,7 +13613,7 @@
      }
     },
     "no_gate": {
-     "edits": 59,
+     "edits": 50,
      "leak": {
       "k": 0,
       "n": 34,
@@ -13644,25 +13646,25 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
-      "k": 12,
+      "k": 14,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.7778,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.5479,
+       0.91
       ]
      },
      "protect_values": 34,
      "refused": 0,
      "spurious": {
-      "k": 24,
-      "n": 59,
-      "rate": 0.4068,
+      "k": 15,
+      "n": 50,
+      "rate": 0.3,
       "wilson95": [
-       0.2909,
-       0.5341
+       0.191,
+       0.4375
       ]
      },
      "values_by_type": {
@@ -13747,7 +13749,7 @@
      }
     },
     "no_structural": {
-     "edits": 53,
+     "edits": 44,
      "leak": {
       "k": 2,
       "n": 34,
@@ -13780,25 +13782,25 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 9,
+     "messages_with_spurious": 6,
      "negatives_untouched": {
-      "k": 12,
+      "k": 15,
       "n": 18,
-      "rate": 0.6667,
+      "rate": 0.8333,
       "wilson95": [
-       0.4375,
-       0.8372
+       0.6078,
+       0.9416
       ]
      },
      "protect_values": 34,
      "refused": 0,
      "spurious": {
-      "k": 19,
-      "n": 53,
-      "rate": 0.3585,
+      "k": 10,
+      "n": 44,
+      "rate": 0.2273,
       "wilson95": [
-       0.243,
-       0.4931
+       0.1284,
+       0.3699
       ]
      },
      "values_by_type": {
@@ -13883,7 +13885,7 @@
      }
     },
     "strict": {
-     "edits": 94,
+     "edits": 79,
      "leak": {
       "k": 0,
       "n": 34,
@@ -13916,25 +13918,25 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 17,
+     "messages_with_spurious": 14,
      "negatives_untouched": {
-      "k": 7,
+      "k": 11,
       "n": 18,
-      "rate": 0.3889,
+      "rate": 0.6111,
       "wilson95": [
-       0.2031,
-       0.6138
+       0.3862,
+       0.7969
       ]
      },
      "protect_values": 34,
      "refused": 1,
      "spurious": {
-      "k": 61,
-      "n": 94,
-      "rate": 0.6489,
+      "k": 44,
+      "n": 79,
+      "rate": 0.557,
       "wilson95": [
-       0.5483,
-       0.7378
+       0.4473,
+       0.6613
       ]
      },
      "values_by_type": {
@@ -13953,7 +13955,7 @@
    },
    "natural": {
     "balanced": {
-     "edits": 68,
+     "edits": 47,
      "leak": {
       "k": 3,
       "n": 4,
@@ -13977,25 +13979,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 23,
+     "messages_with_spurious": 17,
      "negatives_untouched": {
-      "k": 122,
+      "k": 129,
       "n": 149,
-      "rate": 0.8188,
+      "rate": 0.8658,
       "wilson95": [
-       0.7492,
-       0.8724
+       0.8018,
+       0.9114
       ]
      },
      "protect_values": 4,
      "refused": 0,
      "spurious": {
-      "k": 59,
-      "n": 68,
-      "rate": 0.8676,
+      "k": 38,
+      "n": 47,
+      "rate": 0.8085,
       "wilson95": [
-       0.7672,
-       0.9288
+       0.6746,
+       0.8958
       ]
      },
      "values_by_type": {
@@ -14053,7 +14055,7 @@
      }
     },
     "fast": {
-     "edits": 67,
+     "edits": 46,
      "leak": {
       "k": 3,
       "n": 4,
@@ -14077,25 +14079,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 24,
+     "messages_with_spurious": 18,
      "negatives_untouched": {
-      "k": 121,
+      "k": 128,
       "n": 149,
-      "rate": 0.8121,
+      "rate": 0.8591,
       "wilson95": [
-       0.7418,
-       0.8667
+       0.7941,
+       0.9059
       ]
      },
      "protect_values": 4,
      "refused": 0,
      "spurious": {
-      "k": 58,
-      "n": 67,
-      "rate": 0.8657,
+      "k": 38,
+      "n": 46,
+      "rate": 0.8261,
       "wilson95": [
-       0.764,
-       0.9277
+       0.6928,
+       0.9091
       ]
      },
      "values_by_type": {
@@ -14203,7 +14205,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 68,
+     "edits": 47,
      "leak": {
       "k": 3,
       "n": 4,
@@ -14227,25 +14229,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 23,
+     "messages_with_spurious": 17,
      "negatives_untouched": {
-      "k": 122,
+      "k": 129,
       "n": 149,
-      "rate": 0.8188,
+      "rate": 0.8658,
       "wilson95": [
-       0.7492,
-       0.8724
+       0.8018,
+       0.9114
       ]
      },
      "protect_values": 4,
      "refused": 0,
      "spurious": {
-      "k": 59,
-      "n": 68,
-      "rate": 0.8676,
+      "k": 38,
+      "n": 47,
+      "rate": 0.8085,
       "wilson95": [
-       0.7672,
-       0.9288
+       0.6746,
+       0.8958
       ]
      },
      "values_by_type": {
@@ -14253,7 +14255,7 @@
      }
     },
     "no_gate": {
-     "edits": 123,
+     "edits": 84,
      "leak": {
       "k": 3,
       "n": 4,
@@ -14277,25 +14279,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 39,
+     "messages_with_spurious": 32,
      "negatives_untouched": {
-      "k": 104,
+      "k": 111,
       "n": 149,
-      "rate": 0.698,
+      "rate": 0.745,
       "wilson95": [
-       0.6201,
-       0.766
+       0.6694,
+       0.8082
       ]
      },
      "protect_values": 4,
      "refused": 0,
      "spurious": {
-      "k": 101,
-      "n": 123,
-      "rate": 0.8211,
+      "k": 68,
+      "n": 84,
+      "rate": 0.8095,
       "wilson95": [
-       0.744,
-       0.8788
+       0.7128,
+       0.8792
       ]
      },
      "values_by_type": {
@@ -14353,7 +14355,7 @@
      }
     },
     "no_structural": {
-     "edits": 52,
+     "edits": 32,
      "leak": {
       "k": 3,
       "n": 4,
@@ -14377,25 +14379,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 20,
+     "messages_with_spurious": 14,
      "negatives_untouched": {
-      "k": 125,
+      "k": 132,
       "n": 149,
-      "rate": 0.8389,
+      "rate": 0.8859,
       "wilson95": [
-       0.7715,
-       0.8893
+       0.8249,
+       0.9275
       ]
      },
      "protect_values": 4,
      "refused": 0,
      "spurious": {
-      "k": 43,
-      "n": 52,
-      "rate": 0.8269,
+      "k": 23,
+      "n": 32,
+      "rate": 0.7188,
       "wilson95": [
-       0.7027,
-       0.9062
+       0.5463,
+       0.8444
       ]
      },
      "values_by_type": {
@@ -14453,7 +14455,7 @@
      }
     },
     "strict": {
-     "edits": 260,
+     "edits": 279,
      "leak": {
       "k": 1,
       "n": 4,
@@ -14477,25 +14479,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 71,
+     "messages_with_spurious": 72,
      "negatives_untouched": {
-      "k": 78,
+      "k": 77,
       "n": 149,
-      "rate": 0.5235,
+      "rate": 0.5168,
       "wilson95": [
-       0.4437,
-       0.6021
+       0.4371,
+       0.5956
       ]
      },
      "protect_values": 4,
-     "refused": 3,
+     "refused": 1,
      "spurious": {
-      "k": 227,
-      "n": 260,
-      "rate": 0.8731,
+      "k": 246,
+      "n": 279,
+      "rate": 0.8817,
       "wilson95": [
-       0.8271,
-       0.9082
+       0.8385,
+       0.9145
       ]
      },
      "values_by_type": {
@@ -14505,7 +14507,7 @@
    },
    "shift": {
     "balanced": {
-     "edits": 33,
+     "edits": 30,
      "leak": {
       "k": 1,
       "n": 30,
@@ -14539,7 +14541,7 @@
       ]
      },
      "messages": 7,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 1,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -14549,12 +14551,12 @@
      "protect_values": 30,
      "refused": 0,
      "spurious": {
-      "k": 4,
-      "n": 33,
-      "rate": 0.1212,
+      "k": 1,
+      "n": 30,
+      "rate": 0.0333,
       "wilson95": [
-       0.0482,
-       0.2733
+       0.0059,
+       0.1667
       ]
      },
      "values_by_type": {
@@ -14639,7 +14641,7 @@
      }
     },
     "fast": {
-     "edits": 33,
+     "edits": 30,
      "leak": {
       "k": 1,
       "n": 30,
@@ -14673,7 +14675,7 @@
       ]
      },
      "messages": 7,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 1,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -14683,12 +14685,12 @@
      "protect_values": 30,
      "refused": 0,
      "spurious": {
-      "k": 4,
-      "n": 33,
-      "rate": 0.1212,
+      "k": 1,
+      "n": 30,
+      "rate": 0.0333,
       "wilson95": [
-       0.0482,
-       0.2733
+       0.0059,
+       0.1667
       ]
      },
      "values_by_type": {
@@ -14840,7 +14842,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 31,
+     "edits": 28,
      "leak": {
       "k": 3,
       "n": 30,
@@ -14874,7 +14876,7 @@
       ]
      },
      "messages": 7,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 1,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -14884,12 +14886,12 @@
      "protect_values": 30,
      "refused": 0,
      "spurious": {
-      "k": 4,
-      "n": 31,
-      "rate": 0.129,
+      "k": 1,
+      "n": 28,
+      "rate": 0.0357,
       "wilson95": [
-       0.0513,
-       0.2885
+       0.0063,
+       0.1771
       ]
      },
      "values_by_type": {
@@ -14907,7 +14909,7 @@
      }
     },
     "no_gate": {
-     "edits": 35,
+     "edits": 32,
      "leak": {
       "k": 1,
       "n": 30,
@@ -14941,7 +14943,7 @@
       ]
      },
      "messages": 7,
-     "messages_with_spurious": 4,
+     "messages_with_spurious": 3,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -14951,12 +14953,12 @@
      "protect_values": 30,
      "refused": 0,
      "spurious": {
-      "k": 6,
-      "n": 35,
-      "rate": 0.1714,
+      "k": 3,
+      "n": 32,
+      "rate": 0.0938,
       "wilson95": [
-       0.081,
-       0.3268
+       0.0324,
+       0.2422
       ]
      },
      "values_by_type": {
@@ -15041,7 +15043,7 @@
      }
     },
     "no_structural": {
-     "edits": 33,
+     "edits": 30,
      "leak": {
       "k": 1,
       "n": 30,
@@ -15075,7 +15077,7 @@
       ]
      },
      "messages": 7,
-     "messages_with_spurious": 2,
+     "messages_with_spurious": 1,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -15085,12 +15087,12 @@
      "protect_values": 30,
      "refused": 0,
      "spurious": {
-      "k": 4,
-      "n": 33,
-      "rate": 0.1212,
+      "k": 1,
+      "n": 30,
+      "rate": 0.0333,
       "wilson95": [
-       0.0482,
-       0.2733
+       0.0059,
+       0.1667
       ]
      },
      "values_by_type": {
@@ -15175,7 +15177,7 @@
      }
     },
     "strict": {
-     "edits": 43,
+     "edits": 38,
      "leak": {
       "k": 0,
       "n": 30,
@@ -15219,12 +15221,12 @@
      "protect_values": 30,
      "refused": 0,
      "spurious": {
-      "k": 13,
-      "n": 43,
-      "rate": 0.3023,
+      "k": 8,
+      "n": 38,
+      "rate": 0.2105,
       "wilson95": [
-       0.186,
-       0.4511
+       0.1107,
+       0.3635
       ]
      },
      "values_by_type": {
@@ -15246,14 +15248,14 @@
   "wildchat": {
    "injected": {
     "balanced": {
-     "edits": 297,
+     "edits": 270,
      "leak": {
-      "k": 3,
+      "k": 2,
       "n": 209,
-      "rate": 0.0144,
+      "rate": 0.0096,
       "wilson95": [
-       0.0049,
-       0.0413
+       0.0026,
+       0.0342
       ]
      },
      "leaked_by_type": {
@@ -15266,23 +15268,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 1,
       "URL": 0
      },
-     "macro_leak_rate": 0.0151,
+     "macro_leak_rate": 0.0099,
      "message_leak": {
-      "k": 3,
+      "k": 2,
       "n": 57,
-      "rate": 0.0526,
+      "rate": 0.0351,
       "wilson95": [
-       0.0181,
-       0.1437
+       0.0097,
+       0.1192
       ]
      },
      "messages": 71,
-     "messages_with_spurious": 18,
+     "messages_with_spurious": 12,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -15295,12 +15297,12 @@
      "protect_values": 209,
      "refused": 0,
      "spurious": {
-      "k": 61,
-      "n": 297,
-      "rate": 0.2054,
+      "k": 35,
+      "n": 270,
+      "rate": 0.1296,
       "wilson95": [
-       0.1633,
-       0.255
+       0.0947,
+       0.1749
       ]
      },
      "values_by_type": {
@@ -15394,14 +15396,14 @@
      }
     },
     "fast": {
-     "edits": 286,
+     "edits": 257,
      "leak": {
-      "k": 3,
+      "k": 2,
       "n": 209,
-      "rate": 0.0144,
+      "rate": 0.0096,
       "wilson95": [
-       0.0049,
-       0.0413
+       0.0026,
+       0.0342
       ]
      },
      "leaked_by_type": {
@@ -15414,23 +15416,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 1,
       "URL": 0
      },
-     "macro_leak_rate": 0.0151,
+     "macro_leak_rate": 0.0099,
      "message_leak": {
-      "k": 3,
+      "k": 2,
       "n": 57,
-      "rate": 0.0526,
+      "rate": 0.0351,
       "wilson95": [
-       0.0181,
-       0.1437
+       0.0097,
+       0.1192
       ]
      },
      "messages": 71,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 5,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -15443,12 +15445,12 @@
      "protect_values": 209,
      "refused": 0,
      "spurious": {
-      "k": 50,
-      "n": 286,
-      "rate": 0.1748,
+      "k": 22,
+      "n": 257,
+      "rate": 0.0856,
       "wilson95": [
-       0.1352,
-       0.2231
+       0.0572,
+       0.1262
       ]
      },
      "values_by_type": {
@@ -15616,14 +15618,14 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 295,
+     "edits": 268,
      "leak": {
-      "k": 5,
+      "k": 4,
       "n": 209,
-      "rate": 0.0239,
+      "rate": 0.0191,
       "wilson95": [
-       0.0103,
-       0.0548
+       0.0075,
+       0.0482
       ]
      },
      "leaked_by_type": {
@@ -15636,23 +15638,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 1,
       "URL": 0
      },
-     "macro_leak_rate": 0.028,
+     "macro_leak_rate": 0.0228,
      "message_leak": {
-      "k": 5,
+      "k": 4,
       "n": 57,
-      "rate": 0.0877,
+      "rate": 0.0702,
       "wilson95": [
-       0.0381,
-       0.1894
+       0.0276,
+       0.167
       ]
      },
      "messages": 71,
-     "messages_with_spurious": 18,
+     "messages_with_spurious": 12,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -15665,12 +15667,12 @@
      "protect_values": 209,
      "refused": 0,
      "spurious": {
-      "k": 61,
-      "n": 295,
-      "rate": 0.2068,
+      "k": 35,
+      "n": 268,
+      "rate": 0.1306,
       "wilson95": [
-       0.1645,
-       0.2566
+       0.0954,
+       0.1762
       ]
      },
      "values_by_type": {
@@ -15690,14 +15692,14 @@
      }
     },
     "no_gate": {
-     "edits": 310,
+     "edits": 282,
      "leak": {
-      "k": 3,
+      "k": 2,
       "n": 209,
-      "rate": 0.0144,
+      "rate": 0.0096,
       "wilson95": [
-       0.0049,
-       0.0413
+       0.0026,
+       0.0342
       ]
      },
      "leaked_by_type": {
@@ -15710,23 +15712,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 1,
       "URL": 0
      },
-     "macro_leak_rate": 0.0151,
+     "macro_leak_rate": 0.0099,
      "message_leak": {
-      "k": 3,
+      "k": 2,
       "n": 57,
-      "rate": 0.0526,
+      "rate": 0.0351,
       "wilson95": [
-       0.0181,
-       0.1437
+       0.0097,
+       0.1192
       ]
      },
      "messages": 71,
-     "messages_with_spurious": 21,
+     "messages_with_spurious": 16,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -15739,12 +15741,12 @@
      "protect_values": 209,
      "refused": 0,
      "spurious": {
-      "k": 74,
-      "n": 310,
-      "rate": 0.2387,
+      "k": 47,
+      "n": 282,
+      "rate": 0.1667,
       "wilson95": [
-       0.1946,
-       0.2892
+       0.1277,
+       0.2146
       ]
      },
      "values_by_type": {
@@ -15838,155 +15840,7 @@
      }
     },
     "no_structural": {
-     "edits": 291,
-     "leak": {
-      "k": 3,
-      "n": 209,
-      "rate": 0.0144,
-      "wilson95": [
-       0.0049,
-       0.0413
-      ]
-     },
-     "leaked_by_type": {
-      "ADDRESS": 0,
-      "AGE": 0,
-      "CREDENTIAL": 0,
-      "DATE_OF_BIRTH": 0,
-      "EMAIL": 0,
-      "HANDLE": 0,
-      "ID": 0,
-      "LOCATION": 0,
-      "NETWORK": 0,
-      "ORG": 2,
-      "PERSON": 0,
-      "PHONE": 1,
-      "URL": 0
-     },
-     "macro_leak_rate": 0.0151,
-     "message_leak": {
-      "k": 3,
-      "n": 57,
-      "rate": 0.0526,
-      "wilson95": [
-       0.0181,
-       0.1437
-      ]
-     },
-     "messages": 71,
-     "messages_with_spurious": 19,
-     "negatives_untouched": {
-      "k": 13,
-      "n": 14,
-      "rate": 0.9286,
-      "wilson95": [
-       0.6853,
-       0.9873
-      ]
-     },
-     "protect_values": 209,
-     "refused": 0,
-     "spurious": {
-      "k": 57,
-      "n": 291,
-      "rate": 0.1959,
-      "wilson95": [
-       0.1544,
-       0.2453
-      ]
-     },
-     "values_by_type": {
-      "ADDRESS": 11,
-      "AGE": 11,
-      "CREDENTIAL": 9,
-      "DATE_OF_BIRTH": 13,
-      "EMAIL": 20,
-      "HANDLE": 12,
-      "ID": 20,
-      "LOCATION": 10,
-      "NETWORK": 9,
-      "ORG": 15,
-      "PERSON": 48,
-      "PHONE": 16,
-      "URL": 15
-     }
-    },
-    "no_tagger": {
-     "edits": 244,
-     "leak": {
-      "k": 25,
-      "n": 209,
-      "rate": 0.1196,
-      "wilson95": [
-       0.0823,
-       0.1706
-      ]
-     },
-     "leaked_by_type": {
-      "ADDRESS": 0,
-      "AGE": 0,
-      "CREDENTIAL": 0,
-      "DATE_OF_BIRTH": 0,
-      "EMAIL": 0,
-      "HANDLE": 0,
-      "ID": 4,
-      "LOCATION": 2,
-      "NETWORK": 0,
-      "ORG": 4,
-      "PERSON": 14,
-      "PHONE": 1,
-      "URL": 0
-     },
-     "macro_leak_rate": 0.0785,
-     "message_leak": {
-      "k": 20,
-      "n": 57,
-      "rate": 0.3509,
-      "wilson95": [
-       0.24,
-       0.4806
-      ]
-     },
-     "messages": 71,
-     "messages_with_spurious": 13,
-     "negatives_untouched": {
-      "k": 13,
-      "n": 14,
-      "rate": 0.9286,
-      "wilson95": [
-       0.6853,
-       0.9873
-      ]
-     },
-     "protect_values": 209,
-     "refused": 0,
-     "spurious": {
-      "k": 36,
-      "n": 244,
-      "rate": 0.1475,
-      "wilson95": [
-       0.1085,
-       0.1975
-      ]
-     },
-     "values_by_type": {
-      "ADDRESS": 11,
-      "AGE": 11,
-      "CREDENTIAL": 9,
-      "DATE_OF_BIRTH": 13,
-      "EMAIL": 20,
-      "HANDLE": 12,
-      "ID": 20,
-      "LOCATION": 10,
-      "NETWORK": 9,
-      "ORG": 15,
-      "PERSON": 48,
-      "PHONE": 16,
-      "URL": 15
-     }
-    },
-    "strict": {
-     "edits": 472,
+     "edits": 264,
      "leak": {
       "k": 2,
       "n": 209,
@@ -16006,12 +15860,12 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
-      "PHONE": 0,
+      "PHONE": 1,
       "URL": 0
      },
-     "macro_leak_rate": 0.0103,
+     "macro_leak_rate": 0.0099,
      "message_leak": {
       "k": 2,
       "n": 57,
@@ -16019,6 +15873,154 @@
       "wilson95": [
        0.0097,
        0.1192
+      ]
+     },
+     "messages": 71,
+     "messages_with_spurious": 13,
+     "negatives_untouched": {
+      "k": 13,
+      "n": 14,
+      "rate": 0.9286,
+      "wilson95": [
+       0.6853,
+       0.9873
+      ]
+     },
+     "protect_values": 209,
+     "refused": 0,
+     "spurious": {
+      "k": 31,
+      "n": 264,
+      "rate": 0.1174,
+      "wilson95": [
+       0.084,
+       0.1619
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 11,
+      "AGE": 11,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 20,
+      "HANDLE": 12,
+      "ID": 20,
+      "LOCATION": 10,
+      "NETWORK": 9,
+      "ORG": 15,
+      "PERSON": 48,
+      "PHONE": 16,
+      "URL": 15
+     }
+    },
+    "no_tagger": {
+     "edits": 240,
+     "leak": {
+      "k": 26,
+      "n": 209,
+      "rate": 0.1244,
+      "wilson95": [
+       0.0863,
+       0.176
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 4,
+      "LOCATION": 2,
+      "NETWORK": 0,
+      "ORG": 4,
+      "PERSON": 15,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0801,
+     "message_leak": {
+      "k": 21,
+      "n": 57,
+      "rate": 0.3684,
+      "wilson95": [
+       0.2552,
+       0.4982
+      ]
+     },
+     "messages": 71,
+     "messages_with_spurious": 11,
+     "negatives_untouched": {
+      "k": 13,
+      "n": 14,
+      "rate": 0.9286,
+      "wilson95": [
+       0.6853,
+       0.9873
+      ]
+     },
+     "protect_values": 209,
+     "refused": 0,
+     "spurious": {
+      "k": 33,
+      "n": 240,
+      "rate": 0.1375,
+      "wilson95": [
+       0.0996,
+       0.1868
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 11,
+      "AGE": 11,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 20,
+      "HANDLE": 12,
+      "ID": 20,
+      "LOCATION": 10,
+      "NETWORK": 9,
+      "ORG": 15,
+      "PERSON": 48,
+      "PHONE": 16,
+      "URL": 15
+     }
+    },
+    "strict": {
+     "edits": 427,
+     "leak": {
+      "k": 0,
+      "n": 209,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.018
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0,
+     "message_leak": {
+      "k": 0,
+      "n": 57,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0631
       ]
      },
      "messages": 71,
@@ -16035,12 +16037,12 @@
      "protect_values": 209,
      "refused": 0,
      "spurious": {
-      "k": 210,
-      "n": 472,
-      "rate": 0.4449,
+      "k": 163,
+      "n": 427,
+      "rate": 0.3817,
       "wilson95": [
-       0.4007,
-       0.49
+       0.3369,
+       0.4287
       ]
      },
      "values_by_type": {
@@ -16062,14 +16064,14 @@
    },
    "injected_single": {
     "balanced": {
-     "edits": 222,
+     "edits": 203,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 155,
-      "rate": 0.0129,
+      "rate": 0.0065,
       "wilson95": [
-       0.0035,
-       0.0458
+       0.0011,
+       0.0356
       ]
      },
      "leaked_by_type": {
@@ -16082,23 +16084,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.007,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 41,
-      "rate": 0.0488,
+      "rate": 0.0244,
       "wilson95": [
-       0.0135,
-       0.1614
+       0.0043,
+       0.126
       ]
      },
      "messages": 41,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 6,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -16108,12 +16110,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 39,
-      "n": 222,
-      "rate": 0.1757,
+      "k": 21,
+      "n": 203,
+      "rate": 0.1034,
       "wilson95": [
-       0.1313,
-       0.2311
+       0.0687,
+       0.153
       ]
      },
      "values_by_type": {
@@ -16204,14 +16206,14 @@
      }
     },
     "fast": {
-     "edits": 218,
+     "edits": 196,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 155,
-      "rate": 0.0129,
+      "rate": 0.0065,
       "wilson95": [
-       0.0035,
-       0.0458
+       0.0011,
+       0.0356
       ]
      },
      "leaked_by_type": {
@@ -16224,23 +16226,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.007,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 41,
-      "rate": 0.0488,
+      "rate": 0.0244,
       "wilson95": [
-       0.0135,
-       0.1614
+       0.0043,
+       0.126
       ]
      },
      "messages": 41,
-     "messages_with_spurious": 7,
+     "messages_with_spurious": 3,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -16250,12 +16252,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 35,
-      "n": 218,
-      "rate": 0.1606,
+      "k": 14,
+      "n": 196,
+      "rate": 0.0714,
       "wilson95": [
-       0.1178,
-       0.2151
+       0.043,
+       0.1163
       ]
      },
      "values_by_type": {
@@ -16417,14 +16419,14 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 222,
+     "edits": 203,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 155,
-      "rate": 0.0129,
+      "rate": 0.0065,
       "wilson95": [
-       0.0035,
-       0.0458
+       0.0011,
+       0.0356
       ]
      },
      "leaked_by_type": {
@@ -16437,23 +16439,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.007,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 41,
-      "rate": 0.0488,
+      "rate": 0.0244,
       "wilson95": [
-       0.0135,
-       0.1614
+       0.0043,
+       0.126
       ]
      },
      "messages": 41,
-     "messages_with_spurious": 11,
+     "messages_with_spurious": 6,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -16463,12 +16465,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 39,
-      "n": 222,
-      "rate": 0.1757,
+      "k": 21,
+      "n": 203,
+      "rate": 0.1034,
       "wilson95": [
-       0.1313,
-       0.2311
+       0.0687,
+       0.153
       ]
      },
      "values_by_type": {
@@ -16488,14 +16490,14 @@
      }
     },
     "no_gate": {
-     "edits": 229,
+     "edits": 210,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 155,
-      "rate": 0.0129,
+      "rate": 0.0065,
       "wilson95": [
-       0.0035,
-       0.0458
+       0.0011,
+       0.0356
       ]
      },
      "leaked_by_type": {
@@ -16508,23 +16510,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.007,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 41,
-      "rate": 0.0488,
+      "rate": 0.0244,
       "wilson95": [
-       0.0135,
-       0.1614
+       0.0043,
+       0.126
       ]
      },
      "messages": 41,
-     "messages_with_spurious": 14,
+     "messages_with_spurious": 10,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -16534,12 +16536,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 46,
-      "n": 229,
-      "rate": 0.2009,
+      "k": 28,
+      "n": 210,
+      "rate": 0.1333,
       "wilson95": [
-       0.1541,
-       0.2575
+       0.0939,
+       0.186
       ]
      },
      "values_by_type": {
@@ -16630,14 +16632,14 @@
      }
     },
     "no_structural": {
-     "edits": 217,
+     "edits": 198,
      "leak": {
-      "k": 2,
+      "k": 1,
       "n": 155,
-      "rate": 0.0129,
+      "rate": 0.0065,
       "wilson95": [
-       0.0035,
-       0.0458
+       0.0011,
+       0.0356
       ]
      },
      "leaked_by_type": {
@@ -16650,23 +16652,23 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 1,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.007,
      "message_leak": {
-      "k": 2,
+      "k": 1,
       "n": 41,
-      "rate": 0.0488,
+      "rate": 0.0244,
       "wilson95": [
-       0.0135,
-       0.1614
+       0.0043,
+       0.126
       ]
      },
      "messages": 41,
-     "messages_with_spurious": 12,
+     "messages_with_spurious": 7,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -16676,12 +16678,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 36,
-      "n": 217,
-      "rate": 0.1659,
+      "k": 18,
+      "n": 198,
+      "rate": 0.0909,
       "wilson95": [
-       0.1223,
-       0.2211
+       0.0583,
+       0.1391
       ]
      },
      "values_by_type": {
@@ -16701,14 +16703,14 @@
      }
     },
     "no_tagger": {
-     "edits": 185,
+     "edits": 182,
      "leak": {
-      "k": 14,
+      "k": 15,
       "n": 155,
-      "rate": 0.0903,
+      "rate": 0.0968,
       "wilson95": [
-       0.0546,
-       0.1459
+       0.0595,
+       0.1535
       ]
      },
      "leaked_by_type": {
@@ -16722,22 +16724,22 @@
       "LOCATION": 1,
       "NETWORK": 0,
       "ORG": 3,
-      "PERSON": 8,
+      "PERSON": 9,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.06,
+     "macro_leak_rate": 0.0622,
      "message_leak": {
-      "k": 12,
+      "k": 13,
       "n": 41,
-      "rate": 0.2927,
+      "rate": 0.3171,
       "wilson95": [
-       0.1761,
-       0.4448
+       0.1956,
+       0.4698
       ]
      },
      "messages": 41,
-     "messages_with_spurious": 7,
+     "messages_with_spurious": 5,
      "negatives_untouched": {
       "k": 0,
       "n": 0,
@@ -16747,12 +16749,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 22,
-      "n": 185,
-      "rate": 0.1189,
+      "k": 20,
+      "n": 182,
+      "rate": 0.1099,
       "wilson95": [
-       0.0799,
-       0.1735
+       0.0723,
+       0.1636
       ]
      },
      "values_by_type": {
@@ -16772,14 +16774,14 @@
      }
     },
     "strict": {
-     "edits": 320,
+     "edits": 299,
      "leak": {
-      "k": 2,
+      "k": 0,
       "n": 155,
-      "rate": 0.0129,
+      "rate": 0.0,
       "wilson95": [
-       0.0035,
-       0.0458
+       0.0,
+       0.0242
       ]
      },
      "leaked_by_type": {
@@ -16792,19 +16794,19 @@
       "ID": 0,
       "LOCATION": 0,
       "NETWORK": 0,
-      "ORG": 2,
+      "ORG": 0,
       "PERSON": 0,
       "PHONE": 0,
       "URL": 0
      },
-     "macro_leak_rate": 0.014,
+     "macro_leak_rate": 0.0,
      "message_leak": {
-      "k": 2,
+      "k": 0,
       "n": 41,
-      "rate": 0.0488,
+      "rate": 0.0,
       "wilson95": [
-       0.0135,
-       0.1614
+       0.0,
+       0.0857
       ]
      },
      "messages": 41,
@@ -16818,12 +16820,12 @@
      "protect_values": 155,
      "refused": 0,
      "spurious": {
-      "k": 114,
-      "n": 320,
-      "rate": 0.3563,
+      "k": 91,
+      "n": 299,
+      "rate": 0.3043,
       "wilson95": [
-       0.3058,
-       0.4101
+       0.2549,
+       0.3587
       ]
      },
      "values_by_type": {
@@ -16845,7 +16847,7 @@
    },
    "multi": {
     "balanced": {
-     "edits": 37,
+     "edits": 32,
      "leak": {
       "k": 1,
       "n": 28,
@@ -16880,7 +16882,7 @@
       ]
      },
      "messages": 22,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 2,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -16893,12 +16895,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 10,
-      "n": 37,
-      "rate": 0.2703,
+      "k": 5,
+      "n": 32,
+      "rate": 0.1562,
       "wilson95": [
-       0.154,
-       0.4298
+       0.0686,
+       0.3175
       ]
      },
      "values_by_type": {
@@ -16989,7 +16991,7 @@
      }
     },
     "fast": {
-     "edits": 33,
+     "edits": 29,
      "leak": {
       "k": 1,
       "n": 28,
@@ -17024,7 +17026,7 @@
       ]
      },
      "messages": 22,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 1,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -17037,12 +17039,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 6,
-      "n": 33,
-      "rate": 0.1818,
+      "k": 2,
+      "n": 29,
+      "rate": 0.069,
       "wilson95": [
-       0.0861,
-       0.3439
+       0.0191,
+       0.2196
       ]
      },
      "values_by_type": {
@@ -17205,7 +17207,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 37,
+     "edits": 32,
      "leak": {
       "k": 1,
       "n": 28,
@@ -17240,7 +17242,7 @@
       ]
      },
      "messages": 22,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 2,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -17253,12 +17255,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 10,
-      "n": 37,
-      "rate": 0.2703,
+      "k": 5,
+      "n": 32,
+      "rate": 0.1562,
       "wilson95": [
-       0.154,
-       0.4298
+       0.0686,
+       0.3175
       ]
      },
      "values_by_type": {
@@ -17277,7 +17279,7 @@
      }
     },
     "no_gate": {
-     "edits": 40,
+     "edits": 34,
      "leak": {
       "k": 1,
       "n": 28,
@@ -17312,7 +17314,7 @@
       ]
      },
      "messages": 22,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 2,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -17325,12 +17327,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 13,
-      "n": 40,
-      "rate": 0.325,
+      "k": 7,
+      "n": 34,
+      "rate": 0.2059,
       "wilson95": [
-       0.2008,
-       0.4798
+       0.1035,
+       0.368
       ]
      },
      "values_by_type": {
@@ -17421,7 +17423,7 @@
      }
     },
     "no_structural": {
-     "edits": 38,
+     "edits": 33,
      "leak": {
       "k": 1,
       "n": 28,
@@ -17456,7 +17458,7 @@
       ]
      },
      "messages": 22,
-     "messages_with_spurious": 3,
+     "messages_with_spurious": 2,
      "negatives_untouched": {
       "k": 13,
       "n": 14,
@@ -17469,12 +17471,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 11,
-      "n": 38,
-      "rate": 0.2895,
+      "k": 6,
+      "n": 33,
+      "rate": 0.1818,
       "wilson95": [
-       0.17,
-       0.4476
+       0.0861,
+       0.3439
       ]
      },
      "values_by_type": {
@@ -17493,7 +17495,7 @@
      }
     },
     "no_tagger": {
-     "edits": 28,
+     "edits": 27,
      "leak": {
       "k": 6,
       "n": 28,
@@ -17541,12 +17543,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 6,
-      "n": 28,
-      "rate": 0.2143,
+      "k": 5,
+      "n": 27,
+      "rate": 0.1852,
       "wilson95": [
-       0.1021,
-       0.3954
+       0.0818,
+       0.367
       ]
      },
      "values_by_type": {
@@ -17565,7 +17567,7 @@
      }
     },
     "strict": {
-     "edits": 78,
+     "edits": 70,
      "leak": {
       "k": 0,
       "n": 28,
@@ -17613,12 +17615,12 @@
      "protect_values": 28,
      "refused": 0,
      "spurious": {
-      "k": 50,
-      "n": 78,
-      "rate": 0.641,
+      "k": 42,
+      "n": 70,
+      "rate": 0.6,
       "wilson95": [
-       0.5303,
-       0.7385
+       0.4829,
+       0.7067
       ]
      },
      "values_by_type": {
@@ -17639,50 +17641,50 @@
    },
    "natural": {
     "balanced": {
-     "edits": 161,
+     "edits": 118,
      "leak": {
-      "k": 3,
+      "k": 4,
       "n": 11,
-      "rate": 0.2727,
+      "rate": 0.3636,
       "wilson95": [
-       0.0975,
-       0.5656
+       0.1517,
+       0.6462
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 3
+      "PERSON": 4
      },
-     "macro_leak_rate": 0.15,
+     "macro_leak_rate": 0.2,
      "message_leak": {
-      "k": 3,
+      "k": 4,
       "n": 7,
-      "rate": 0.4286,
+      "rate": 0.5714,
       "wilson95": [
-       0.1582,
-       0.7495
+       0.2505,
+       0.8418
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 24,
+     "messages_with_spurious": 15,
      "negatives_untouched": {
-      "k": 110,
+      "k": 118,
       "n": 140,
-      "rate": 0.7857,
+      "rate": 0.8429,
       "wilson95": [
-       0.7106,
-       0.8456
+       0.7735,
+       0.8939
       ]
      },
      "protect_values": 11,
      "refused": 0,
      "spurious": {
-      "k": 110,
-      "n": 161,
-      "rate": 0.6832,
+      "k": 72,
+      "n": 118,
+      "rate": 0.6102,
       "wilson95": [
-       0.6078,
-       0.7501
+       0.52,
+       0.6934
       ]
      },
      "values_by_type": {
@@ -17743,7 +17745,7 @@
      }
     },
     "fast": {
-     "edits": 136,
+     "edits": 116,
      "leak": {
       "k": 3,
       "n": 11,
@@ -17768,25 +17770,25 @@
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 20,
+     "messages_with_spurious": 16,
      "negatives_untouched": {
-      "k": 113,
+      "k": 117,
       "n": 140,
-      "rate": 0.8071,
+      "rate": 0.8357,
       "wilson95": [
-       0.7339,
-       0.8639
+       0.7655,
+       0.888
       ]
      },
      "protect_values": 11,
      "refused": 0,
      "spurious": {
-      "k": 84,
-      "n": 136,
-      "rate": 0.6176,
+      "k": 69,
+      "n": 116,
+      "rate": 0.5948,
       "wilson95": [
-       0.5338,
-       0.695
+       0.5038,
+       0.6797
       ]
      },
      "values_by_type": {
@@ -17899,50 +17901,50 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 161,
+     "edits": 118,
      "leak": {
-      "k": 3,
+      "k": 4,
       "n": 11,
-      "rate": 0.2727,
+      "rate": 0.3636,
       "wilson95": [
-       0.0975,
-       0.5656
+       0.1517,
+       0.6462
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 3
+      "PERSON": 4
      },
-     "macro_leak_rate": 0.15,
+     "macro_leak_rate": 0.2,
      "message_leak": {
-      "k": 3,
+      "k": 4,
       "n": 7,
-      "rate": 0.4286,
+      "rate": 0.5714,
       "wilson95": [
-       0.1582,
-       0.7495
+       0.2505,
+       0.8418
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 24,
+     "messages_with_spurious": 15,
      "negatives_untouched": {
-      "k": 110,
+      "k": 118,
       "n": 140,
-      "rate": 0.7857,
+      "rate": 0.8429,
       "wilson95": [
-       0.7106,
-       0.8456
+       0.7735,
+       0.8939
       ]
      },
      "protect_values": 11,
      "refused": 0,
      "spurious": {
-      "k": 110,
-      "n": 161,
-      "rate": 0.6832,
+      "k": 72,
+      "n": 118,
+      "rate": 0.6102,
       "wilson95": [
-       0.6078,
-       0.7501
+       0.52,
+       0.6934
       ]
      },
      "values_by_type": {
@@ -17951,50 +17953,50 @@
      }
     },
     "no_gate": {
-     "edits": 213,
+     "edits": 161,
      "leak": {
-      "k": 3,
+      "k": 4,
       "n": 11,
-      "rate": 0.2727,
+      "rate": 0.3636,
       "wilson95": [
-       0.0975,
-       0.5656
+       0.1517,
+       0.6462
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 3
+      "PERSON": 4
      },
-     "macro_leak_rate": 0.15,
+     "macro_leak_rate": 0.2,
      "message_leak": {
-      "k": 3,
+      "k": 4,
       "n": 7,
-      "rate": 0.4286,
+      "rate": 0.5714,
       "wilson95": [
-       0.1582,
-       0.7495
+       0.2505,
+       0.8418
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 36,
+     "messages_with_spurious": 32,
      "negatives_untouched": {
-      "k": 99,
+      "k": 102,
       "n": 140,
-      "rate": 0.7071,
+      "rate": 0.7286,
       "wilson95": [
-       0.627,
-       0.7762
+       0.6495,
+       0.7954
       ]
      },
      "protect_values": 11,
-     "refused": 1,
+     "refused": 0,
      "spurious": {
-      "k": 162,
-      "n": 213,
-      "rate": 0.7606,
+      "k": 115,
+      "n": 161,
+      "rate": 0.7143,
       "wilson95": [
-       0.699,
-       0.8129
+       0.6401,
+       0.7784
       ]
      },
      "values_by_type": {
@@ -18055,50 +18057,50 @@
      }
     },
     "no_structural": {
-     "edits": 131,
+     "edits": 82,
      "leak": {
-      "k": 3,
+      "k": 4,
       "n": 11,
-      "rate": 0.2727,
+      "rate": 0.3636,
       "wilson95": [
-       0.0975,
-       0.5656
+       0.1517,
+       0.6462
       ]
      },
      "leaked_by_type": {
       "LOCATION": 0,
-      "PERSON": 3
+      "PERSON": 4
      },
-     "macro_leak_rate": 0.15,
+     "macro_leak_rate": 0.2,
      "message_leak": {
-      "k": 3,
+      "k": 4,
       "n": 7,
-      "rate": 0.4286,
+      "rate": 0.5714,
       "wilson95": [
-       0.1582,
-       0.7495
+       0.2505,
+       0.8418
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 22,
+     "messages_with_spurious": 13,
      "negatives_untouched": {
-      "k": 112,
+      "k": 120,
       "n": 140,
-      "rate": 0.8,
+      "rate": 0.8571,
       "wilson95": [
-       0.7261,
-       0.8578
+       0.7896,
+       0.9056
       ]
      },
      "protect_values": 11,
      "refused": 0,
      "spurious": {
-      "k": 84,
-      "n": 131,
-      "rate": 0.6412,
+      "k": 40,
+      "n": 82,
+      "rate": 0.4878,
       "wilson95": [
-       0.5561,
-       0.7183
+       0.3826,
+       0.5941
       ]
      },
      "values_by_type": {
@@ -18107,7 +18109,7 @@
      }
     },
     "no_tagger": {
-     "edits": 81,
+     "edits": 80,
      "leak": {
       "k": 11,
       "n": 11,
@@ -18132,25 +18134,25 @@
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 14,
+     "messages_with_spurious": 13,
      "negatives_untouched": {
-      "k": 121,
+      "k": 122,
       "n": 140,
-      "rate": 0.8643,
+      "rate": 0.8714,
       "wilson95": [
-       0.7977,
-       0.9114
+       0.8059,
+       0.9171
       ]
      },
      "protect_values": 11,
      "refused": 0,
      "spurious": {
-      "k": 55,
-      "n": 81,
-      "rate": 0.679,
+      "k": 54,
+      "n": 80,
+      "rate": 0.675,
       "wilson95": [
-       0.5712,
-       0.7706
+       0.5664,
+       0.7676
       ]
      },
      "values_by_type": {
@@ -18159,7 +18161,7 @@
      }
     },
     "strict": {
-     "edits": 541,
+     "edits": 468,
      "leak": {
       "k": 0,
       "n": 11,
@@ -18184,7 +18186,7 @@
       ]
      },
      "messages": 147,
-     "messages_with_spurious": 70,
+     "messages_with_spurious": 71,
      "negatives_untouched": {
       "k": 60,
       "n": 140,
@@ -18195,14 +18197,14 @@
       ]
      },
      "protect_values": 11,
-     "refused": 1,
+     "refused": 0,
      "spurious": {
-      "k": 448,
-      "n": 541,
-      "rate": 0.8281,
+      "k": 374,
+      "n": 468,
+      "rate": 0.7991,
       "wilson95": [
-       0.794,
-       0.8575
+       0.7605,
+       0.8329
       ]
      },
      "values_by_type": {
@@ -18213,7 +18215,7 @@
    },
    "shift": {
     "balanced": {
-     "edits": 38,
+     "edits": 35,
      "leak": {
       "k": 0,
       "n": 26,
@@ -18258,12 +18260,12 @@
      "protect_values": 26,
      "refused": 0,
      "spurious": {
-      "k": 12,
-      "n": 38,
-      "rate": 0.3158,
+      "k": 9,
+      "n": 35,
+      "rate": 0.2571,
       "wilson95": [
-       0.1908,
-       0.4746
+       0.1416,
+       0.4207
       ]
      },
      "values_by_type": {
@@ -18351,7 +18353,7 @@
      }
     },
     "fast": {
-     "edits": 35,
+     "edits": 32,
      "leak": {
       "k": 0,
       "n": 26,
@@ -18396,12 +18398,12 @@
      "protect_values": 26,
      "refused": 0,
      "spurious": {
-      "k": 9,
-      "n": 35,
-      "rate": 0.2571,
+      "k": 6,
+      "n": 32,
+      "rate": 0.1875,
       "wilson95": [
-       0.1416,
-       0.4207
+       0.0889,
+       0.3531
       ]
      },
      "values_by_type": {
@@ -18558,7 +18560,7 @@
      }
     },
     "no_canonicaliser": {
-     "edits": 36,
+     "edits": 33,
      "leak": {
       "k": 2,
       "n": 26,
@@ -18603,12 +18605,12 @@
      "protect_values": 26,
      "refused": 0,
      "spurious": {
-      "k": 12,
-      "n": 36,
-      "rate": 0.3333,
+      "k": 9,
+      "n": 33,
+      "rate": 0.2727,
       "wilson95": [
-       0.2021,
-       0.4967
+       0.1507,
+       0.4422
       ]
      },
      "values_by_type": {
@@ -18627,7 +18629,7 @@
      }
     },
     "no_gate": {
-     "edits": 41,
+     "edits": 38,
      "leak": {
       "k": 0,
       "n": 26,
@@ -18672,12 +18674,12 @@
      "protect_values": 26,
      "refused": 0,
      "spurious": {
-      "k": 15,
-      "n": 41,
-      "rate": 0.3659,
+      "k": 12,
+      "n": 38,
+      "rate": 0.3158,
       "wilson95": [
-       0.2359,
-       0.5188
+       0.1908,
+       0.4746
       ]
      },
      "values_by_type": {
@@ -18765,7 +18767,7 @@
      }
     },
     "no_structural": {
-     "edits": 36,
+     "edits": 33,
      "leak": {
       "k": 0,
       "n": 26,
@@ -18810,12 +18812,12 @@
      "protect_values": 26,
      "refused": 0,
      "spurious": {
-      "k": 10,
-      "n": 36,
-      "rate": 0.2778,
+      "k": 7,
+      "n": 33,
+      "rate": 0.2121,
       "wilson95": [
-       0.1585,
-       0.4399
+       0.1068,
+       0.3775
       ]
      },
      "values_by_type": {
@@ -18903,7 +18905,7 @@
      }
     },
     "strict": {
-     "edits": 74,
+     "edits": 58,
      "leak": {
       "k": 0,
       "n": 26,
@@ -18948,12 +18950,12 @@
      "protect_values": 26,
      "refused": 0,
      "spurious": {
-      "k": 46,
-      "n": 74,
-      "rate": 0.6216,
+      "k": 30,
+      "n": 58,
+      "rate": 0.5172,
       "wilson95": [
-       0.5077,
-       0.7235
+       0.3916,
+       0.6407
       ]
      },
      "values_by_type": {
