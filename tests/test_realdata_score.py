@@ -146,6 +146,23 @@ def test_hypotheses_need_a_lower_point_and_an_interval_below_zero():
     assert not h[DS]["H1"] and h[DS]["ss_leak_worse_than_presidio_default"]
 
 
+
+def test_differences_by_type_pair_each_type_and_seed_per_type():
+    # SS leaks PERSON in conversation c0 only; the other arm leaks every EMAIL and no PERSON
+    def sc(person_leak, email_leak):
+        return {"values": Counter({"PERSON": 1, "EMAIL": 1}), "policy": Counter(),
+                "leaked": Counter({**({"PERSON": 1} if person_leak else {}), **({"EMAIL": 1} if email_leak else {})})}
+    units = [{"conv": f"c{i}"} for i in range(20)]
+    scores = {"ss": [sc(i == 0, False) for i in range(20)], "gliner_pii": [sc(False, True) for i in range(20)]}
+    d = S.differences_by_type(units, scores, "test2", "all", ("ss", "gliner_pii"))
+    assert set(d) == {"gliner_pii"} and set(d["gliner_pii"]) == {"EMAIL", "PERSON"}
+    assert d["gliner_pii"]["EMAIL"]["diff"] == -1.0 and d["gliner_pii"]["EMAIL"]["excludes_0"]
+    assert d["gliner_pii"]["PERSON"]["diff"] == 0.05 and d["gliner_pii"]["PERSON"]["ci95"][0] == 0.0
+    assert d == S.differences_by_type(units, scores, "test2", "all", ("ss", "gliner_pii"))
+    other = S.differences_by_type(units, scores, "test2", "oasst1", ("ss", "gliner_pii"))
+    assert other["gliner_pii"]["PERSON"]["diff"] == 0.05      # same point; draws seeded by group and type
+
+
 # ── a synthetic benchmark ────────────────────────────────────────────────────
 
 INJ = [
@@ -320,6 +337,11 @@ def test_end_to_end_counts_privacy_and_byte_identical_rerun(bench, tmp_path):
     assert len(doc["git"]["commit"]) == 40 and isinstance(doc["git"]["modified"], list)
     assert f"at commit `{doc['git']['commit'][:12]}`" in out.with_suffix(".md").read_text()
     assert doc["hypotheses"][DS]["H1_per_baseline"] == {"presidio_default": True}
+    bt = doc["differences_by_type"]
+    assert bt["slice"] == "injected" and bt["difference"] == "ss − arm" and set(bt["groups"]) == {DS}
+    assert {t: v["diff"] for t, v in bt["groups"][DS]["presidio_default"].items()} == \
+        {"EMAIL": -1.0, "PERSON": -1.0, "PHONE": -1.0}
+    assert "Δ leak rate by type" in out.with_suffix(".md").read_text()
     # counts only: no text and no value in the outputs
     blob = first.decode() + out.with_suffix(".md").read_text()
     for t in [x for r_ in INJ for x in (r_["text"], r_["protect"][0]["value"])] + MULTI + ["Ola Nwosu", "Explain recursion"]:

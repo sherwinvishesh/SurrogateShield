@@ -7,7 +7,14 @@
 Each configuration is a committed file under ``bench/realdata/configs/``: a
 preset or an ablation (``DetectionConfig.preset``) with every address
 redrawn, as ``benchmark()`` does, so ``balanced.json`` is the benchmark
-config. SS runs once per file and dataset through ``bench.arms.ss`` with
+config. ``h9/no_patterns.json`` (``EXTRA``) is ``balanced`` with the
+PatternScan and canonicaliser stages off, so no pattern of PatternScan
+matches anything, and AGE, DATE_OF_BIRTH, EMAIL, NETWORK and URL routed to
+the tagger as the other structured types are ("the tagger carries structured
+types as free text when regex is gone"): H9''(a) of ``HYPOTHESES_TEST2.md``
+(H9''(b), the tagger removed, is ``no_tagger``). ``h9/no_patterns_unrouted``
+keeps the default routing, under which nothing reports those five types, and
+is reported beside it. SS runs once per file and dataset through ``bench.arms.ss`` with
 ``$SURROGATESHIELD_DETECTION_CONFIG`` set to the file, and the run's recorded
 config hash must be the file's. Span files stay under the git-ignored
 ``bench/realdata/build/spans/components/``; ``--reuse`` keeps one only if it
@@ -39,6 +46,8 @@ from surrogateshield.core.detection import config as C
 CONFIGS = ROOT / "bench" / "realdata" / "configs"
 NAMES = ("balanced", "no_tagger", "no_canonicaliser", "no_gate", "no_models", "no_structural",
          "fast", "strict", "classic")
+EXTRA = ("h9/no_patterns", "h9/no_patterns_unrouted")   # not presets: a subfolder, named by path
+RUN = (*NAMES, *EXTRA)
 BASE = "balanced"
 REFERENCE = ("gliner_pii", "gliner_pii_tuned")
 SPANS = PRIVATE / "components"
@@ -121,7 +130,7 @@ def p50(rows_by_ds: Dict[str, Dict[str, dict]]) -> Optional[float]:
     return round(statistics.median(ms), 1) if ms else None
 
 
-def components(run: str, out: Path, names: Sequence[str] = NAMES, datasets: Sequence[str] = DATASETS,
+def components(run: str, out: Path, names: Sequence[str] = RUN, datasets: Sequence[str] = DATASETS,
                reference: Sequence[str] = REFERENCE, reuse: bool = False, configs: Path = CONFIGS,
                spans: Path = SPANS, runner: Optional[Callable] = None, loaded: Optional[dict] = None,
                log=print) -> dict:
@@ -144,7 +153,7 @@ def components(run: str, out: Path, names: Sequence[str] = NAMES, datasets: Sequ
               for a, r in rows.items()}
     for n in names:
         infos[n]["in_run_p50_ms"] = p50(rows[n])
-    some = "" if list(names) == list(NAMES) else f"--configs {' '.join(names)} "
+    some = "" if list(names) == list(RUN) else f"--configs {' '.join(names)} "
     doc = {"command": f"PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python "
                       f"-m bench.realdata.components --split {run} {some}--out {score.rel(out)}",
            "git": git_state(), "code": stamp, "split": run, "role": role,
@@ -206,7 +215,7 @@ def markdown(doc: dict) -> str:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--split", required=True, choices=sorted(score.RUNS))
-    ap.add_argument("--configs", nargs="+", default=list(NAMES), help=f"files under {score.rel(CONFIGS)}/")
+    ap.add_argument("--configs", nargs="+", default=list(RUN), help=f"files under {score.rel(CONFIGS)}/")
     ap.add_argument("--datasets", nargs="+", default=list(DATASETS))
     ap.add_argument("--reuse", action="store_true", help="keep span files made on this code from the same file")
     ap.add_argument("--out", type=Path, required=True)

@@ -412,6 +412,26 @@ def differences(units: Sequence[dict], scores: Dict[str, Sequence[dict]], seed: 
     return out
 
 
+def differences_by_type(units: Sequence[dict], scores: Dict[str, Sequence[dict]], data: str, group: str,
+                        arms: Sequence[str], sl: str = "injected") -> dict:
+    """Per protect type: the paired cluster bootstrap of SS's leak rate of that
+    type minus each arm's (V3 H5''), from per-message (leaked, values − policy)
+    of the type; one seed per type, the same draws for every arm."""
+    clusters = [u["conv"] for u in units]
+    types = sorted({t for s in scores["ss"] for t in s["values"]})
+    out: Dict[str, Dict[str, dict]] = {}
+    for arm in arms:
+        if arm == "ss":
+            continue
+        out[arm] = {}
+        for t in types:
+            def pair(s, t=t):
+                return s["leaked"].get(t, 0), s["values"].get(t, 0) - s["policy"].get(t, 0)
+            out[arm][t] = bootstrap(clusters, [pair(s) for s in scores["ss"]], [pair(s) for s in scores[arm]],
+                                    derive_seed("score-bootstrap-type", data, group, sl, t))
+    return out
+
+
 def hypotheses(results: dict, diffs: dict, datasets: Sequence[str], arms: Sequence[str]) -> dict:
     """H1 and H2 as pre-registered, per dataset, on the injected slice. The
     verdict is the paper's only on the test split."""
@@ -499,7 +519,7 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
             config_hashes[arm] = next(iter(seen))
     pooled = "all" if len(datasets) > 1 else None
     groups = list(datasets) + ([pooled] if pooled else [])
-    results, diffs = {}, {}
+    results, diffs, by_type = {}, {}, {}
     for g in groups:
         dss = datasets if g == "all" else [g]
         units = [u for ds in dss for u in all_units[ds]]
@@ -511,6 +531,8 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
             sc = {a: [scores[a][i] for i in keep] for a in arms}
             results[g][sl] = {a: aggregate(us, sc[a]) for a in arms}
             diffs[g][sl] = differences(us, sc, derive_seed("score-bootstrap", data, g, sl), arms) if "ss" in arms else {}
+            if sl == "injected" and "ss" in arms:
+                by_type[g] = differences_by_type(us, sc, data, g, arms, sl)
     out = out or ROOT / "bench" / "results" / f"realdata_{split}.json"
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score "
                       f"--split {split} --out {rel(out)}",
@@ -525,6 +547,9 @@ def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[s
                          "seed": "derive_seed('score-bootstrap', split, dataset, slice)", "ci": "percentile 2.5 / 97.5",
                          "difference": "ss − arm"},
            "results": results, "differences": diffs,
+           **({"differences_by_type": {"slice": "injected", "metric": "leak_rate", "difference": "ss − arm",
+                                       "seed": "derive_seed('score-bootstrap-type', split, group, slice, type)",
+                                       "groups": by_type}} if by_type else {}),
            "held_out_formats": {"formats": [f"{t}/{f}" for t, f in HELD_OUT_FORMATS], "slice": "injected",
                                 "results": {g: {a: held_out([s for ds in (datasets if g == "all" else [g])
                                                              for u, s in zip(all_units[ds], all_scores[ds][a])
@@ -665,6 +690,16 @@ def markdown(doc: dict) -> str:
                   "|---|---|" + "---|" * len(arms)]
         for u, types_u in doc["universes"].items():
             lines.append(f"| {u} | {', '.join(types_u)} | " + " | ".join(_pct(r[a]["universes"][u]) for a in arms) + " |")
+        lines.append("")
+    if doc.get("differences_by_type"):
+        bt = doc["differences_by_type"]["groups"]
+        g = "all" if "all" in bt else next(iter(bt))
+        others = [a for a in arms if a in bt[g]]
+        types = sorted({t for a in others for t in bt[g][a]})
+        lines += [f"## {g} — injected, Δ leak rate by type (SS − arm, percentage points, paired cluster bootstrap 95 %)", "",
+                  "| type | " + " | ".join(others) + " |", "|---|" + "---|" * len(others)]
+        for t in types:
+            lines.append(f"| {t} | " + " | ".join(_diff(bt[g][a].get(t)) for a in others) + " |")
         lines.append("")
     if doc.get("held_out_formats"):
         h = doc["held_out_formats"]

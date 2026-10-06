@@ -1,0 +1,48 @@
+{
+ "preset": "balanced",
+ "type_actions": {
+  "ADDRESS": "replace"
+ },
+ "detectors": [
+  {
+   "name": "pattern_scan",
+   "enabled": false
+  },
+  {
+   "name": "canonicaliser",
+   "enabled": false
+  }
+ ],
+ "type_sources": {
+  "AGE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "DATE_OF_BIRTH": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "EMAIL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "NETWORK": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "URL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ]
+ }
+}

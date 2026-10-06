@@ -53,6 +53,27 @@ def test_each_committed_config_is_its_preset_with_every_address_redrawn():
     assert {**v2.to_dict(), "preset": "classic"} == classic.to_dict()
 
 
+@pytest.mark.parametrize("name", ["h9/no_patterns", "h9/no_patterns_unrouted"])
+def test_the_h9_configs_are_balanced_with_every_patternscan_pattern_off(name):
+    assert K.RUN == (*K.NAMES, "h9/no_patterns", "h9/no_patterns_unrouted")
+    assert sorted(str(p.relative_to(K.CONFIGS)) for p in K.CONFIGS.glob("h9/*.json")) == \
+        ["h9/no_patterns.json", "h9/no_patterns_unrouted.json"]
+    info = K.config_info(name)
+    assert info["preset"] == "balanced" and info["file"] == f"bench/realdata/configs/{name}.json"
+    off = C.from_partial(json.loads((K.CONFIGS / f"{name}.json").read_text()), C.benchmark()).to_dict()
+    on = C.benchmark().to_dict()
+    stages = lambda d: {s["name"]: s for s in d["detectors"]}
+    assert {n for n, s in stages(off).items() if not s["enabled"]} == \
+        {n for n, s in stages(on).items() if not s["enabled"]} | {"pattern_scan", "canonicaliser"}
+    for n, s in stages(on).items():
+        assert stages(off)[n] == (s if n not in ("pattern_scan", "canonicaliser") else {**s, "enabled": False})
+    routed = {t: [*v, "pii_tagger"] for t, v in on["type_sources"].items()
+              if t in ("AGE", "DATE_OF_BIRTH", "EMAIL", "NETWORK", "URL")}
+    assert len(routed) == 5 and all("pii_tagger" not in on["type_sources"][t] for t in routed)
+    assert off["type_sources"] == {**on["type_sources"], **(routed if name == "h9/no_patterns" else {})}
+    assert {**off, "detectors": None, "type_sources": None} == {**on, "detectors": None, "type_sources": None}
+
+
 def test_differences_are_each_arm_minus_balanced_per_group_and_slice():
     units = {ds: _units(ds) for ds in ("oasst1", "wildchat")}
     rows = {"balanced": {}, "no_tagger": {}, "gliner_pii": {}}
