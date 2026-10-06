@@ -1,0 +1,6742 @@
+{
+ "causes": [
+  "protected",
+  "policy",
+  "refused",
+  "surrogate",
+  "partial",
+  "unplanned",
+  "gated",
+  "missed"
+ ],
+ "collection": "test1",
+ "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute --split devlarge --out bench/results/attribution_devlarge_person.json",
+ "data_split": "test",
+ "datasets": [
+  "oasst1",
+  "sharegpt",
+  "wildchat"
+ ],
+ "git": {
+  "commit": "e8f1636dbd18b3281667934db6357d956bbd0b97",
+  "modified": []
+ },
+ "injected": {
+  "address_kept_parts": {
+   "none": 135
+  },
+  "all": {
+   "by_cause": {
+    "gated": 12,
+    "missed": 16,
+    "partial": 15,
+    "protected": 2325
+   },
+   "leak_rate": 0.0182,
+   "leaked": 43,
+   "values": 2368
+  },
+  "by_format": {
+   "ADDRESS:plain": {
+    "by_cause": {
+     "protected": 135
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 135
+   },
+   "AGE:plain": {
+    "by_cause": {
+     "protected": 118
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 118
+   },
+   "AGE:words": {
+    "by_cause": {
+     "protected": 16
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 16
+   },
+   "CREDENTIAL:hex": {
+    "by_cause": {
+     "protected": 30
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 30
+   },
+   "CREDENTIAL:password": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 3,
+     "protected": 30
+    },
+    "leak_rate": 0.1176,
+    "leaked": 4,
+    "values": 34
+   },
+   "CREDENTIAL:secret": {
+    "by_cause": {
+     "protected": 37
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 37
+   },
+   "CREDENTIAL:zqk": {
+    "by_cause": {
+     "protected": 30
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 30
+   },
+   "DATE_OF_BIRTH:month-ordinal": {
+    "by_cause": {
+     "protected": 5
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 5
+   },
+   "DATE_OF_BIRTH:ordinal-of": {
+    "by_cause": {
+     "protected": 8
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 8
+   },
+   "DATE_OF_BIRTH:plain": {
+    "by_cause": {
+     "protected": 114
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 114
+   },
+   "EMAIL:plain": {
+    "by_cause": {
+     "protected": 193
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 193
+   },
+   "EMAIL:spelled": {
+    "by_cause": {
+     "protected": 12
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 12
+   },
+   "HANDLE:plain": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 2,
+     "partial": 5,
+     "protected": 119
+    },
+    "leak_rate": 0.063,
+    "leaked": 8,
+    "values": 127
+   },
+   "ID:card": {
+    "by_cause": {
+     "protected": 36
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 36
+   },
+   "ID:card-spaced": {
+    "by_cause": {
+     "protected": 15
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 15
+   },
+   "ID:iban": {
+    "by_cause": {
+     "protected": 18
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 18
+   },
+   "ID:iban-spaced": {
+    "by_cause": {
+     "protected": 3
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 3
+   },
+   "ID:license": {
+    "by_cause": {
+     "protected": 19
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 19
+   },
+   "ID:nhs": {
+    "by_cause": {
+     "protected": 1
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 1
+   },
+   "ID:nino": {
+    "by_cause": {
+     "protected": 1
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 1
+   },
+   "ID:passport": {
+    "by_cause": {
+     "protected": 34
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 34
+   },
+   "ID:policy": {
+    "by_cause": {
+     "missed": 1,
+     "protected": 22
+    },
+    "leak_rate": 0.0435,
+    "leaked": 1,
+    "values": 23
+   },
+   "ID:ssn": {
+    "by_cause": {
+     "protected": 8
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 8
+   },
+   "ID:ssn-nodash": {
+    "by_cause": {
+     "protected": 2
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 2
+   },
+   "ID:student": {
+    "by_cause": {
+     "partial": 3,
+     "protected": 11
+    },
+    "leak_rate": 0.2143,
+    "leaked": 3,
+    "values": 14
+   },
+   "LOCATION:plain": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 3,
+     "protected": 138
+    },
+    "leak_rate": 0.0282,
+    "leaked": 4,
+    "values": 142
+   },
+   "NETWORK:ipv4": {
+    "by_cause": {
+     "protected": 78
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 78
+   },
+   "NETWORK:ipv6": {
+    "by_cause": {
+     "protected": 8
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 8
+   },
+   "NETWORK:mac": {
+    "by_cause": {
+     "partial": 1,
+     "protected": 35
+    },
+    "leak_rate": 0.0278,
+    "leaked": 1,
+    "values": 36
+   },
+   "ORG:plain": {
+    "by_cause": {
+     "partial": 3,
+     "protected": 176
+    },
+    "leak_rate": 0.0168,
+    "leaked": 3,
+    "values": 179
+   },
+   "PERSON:lower": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 2,
+     "partial": 1,
+     "protected": 20
+    },
+    "leak_rate": 0.1667,
+    "leaked": 4,
+    "values": 24
+   },
+   "PERSON:plain": {
+    "by_cause": {
+     "gated": 6,
+     "missed": 1,
+     "partial": 1,
+     "protected": 513
+    },
+    "leak_rate": 0.0154,
+    "leaked": 8,
+    "values": 521
+   },
+   "PERSON:surname-first": {
+    "by_cause": {
+     "protected": 32
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 32
+   },
+   "PERSON:upper": {
+    "by_cause": {
+     "gated": 2,
+     "missed": 2,
+     "protected": 18
+    },
+    "leak_rate": 0.1818,
+    "leaked": 4,
+    "values": 22
+   },
+   "PHONE:dots": {
+    "by_cause": {
+     "protected": 15
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 15
+   },
+   "PHONE:plain": {
+    "by_cause": {
+     "missed": 2,
+     "partial": 1,
+     "protected": 145
+    },
+    "leak_rate": 0.0203,
+    "leaked": 3,
+    "values": 148
+   },
+   "PHONE:words": {
+    "by_cause": {
+     "protected": 3
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 3
+   },
+   "URL:plain": {
+    "by_cause": {
+     "protected": 127
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 127
+   }
+  },
+  "by_layout": {
+   "form": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 1,
+     "partial": 6,
+     "protected": 543
+    },
+    "leak_rate": 0.0145,
+    "leaked": 8,
+    "values": 551
+   },
+   "inline": {
+    "by_cause": {
+     "gated": 2,
+     "missed": 1,
+     "partial": 3,
+     "protected": 532
+    },
+    "leak_rate": 0.0112,
+    "leaked": 6,
+    "values": 538
+   },
+   "intro": {
+    "by_cause": {
+     "gated": 1,
+     "partial": 1,
+     "protected": 625
+    },
+    "leak_rate": 0.0032,
+    "leaked": 2,
+    "values": 627
+   },
+   "json": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 2,
+     "partial": 1,
+     "protected": 92
+    },
+    "leak_rate": 0.0417,
+    "leaked": 4,
+    "values": 96
+   },
+   "signature": {
+    "by_cause": {
+     "gated": 7,
+     "missed": 12,
+     "partial": 4,
+     "protected": 533
+    },
+    "leak_rate": 0.0414,
+    "leaked": 23,
+    "values": 556
+   }
+  },
+  "by_slice": {
+   "injected_single": {
+    "by_cause": {
+     "gated": 6,
+     "missed": 11,
+     "partial": 13,
+     "protected": 1722
+    },
+    "leak_rate": 0.0171,
+    "leaked": 30,
+    "values": 1752
+   },
+   "multi": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 1,
+     "partial": 1,
+     "protected": 312
+    },
+    "leak_rate": 0.0095,
+    "leaked": 3,
+    "values": 315
+   },
+   "shift": {
+    "by_cause": {
+     "gated": 5,
+     "missed": 4,
+     "partial": 1,
+     "protected": 291
+    },
+    "leak_rate": 0.0332,
+    "leaked": 10,
+    "values": 301
+   }
+  },
+  "by_type": {
+   "ADDRESS": {
+    "by_cause": {
+     "protected": 135
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 135
+   },
+   "AGE": {
+    "by_cause": {
+     "protected": 134
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 134
+   },
+   "CREDENTIAL": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 3,
+     "protected": 127
+    },
+    "leak_rate": 0.0305,
+    "leaked": 4,
+    "values": 131
+   },
+   "DATE_OF_BIRTH": {
+    "by_cause": {
+     "protected": 127
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 127
+   },
+   "EMAIL": {
+    "by_cause": {
+     "protected": 205
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 205
+   },
+   "HANDLE": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 2,
+     "partial": 5,
+     "protected": 119
+    },
+    "leak_rate": 0.063,
+    "leaked": 8,
+    "values": 127
+   },
+   "ID": {
+    "by_cause": {
+     "missed": 1,
+     "partial": 3,
+     "protected": 170
+    },
+    "leak_rate": 0.023,
+    "leaked": 4,
+    "values": 174
+   },
+   "LOCATION": {
+    "by_cause": {
+     "gated": 1,
+     "missed": 3,
+     "protected": 138
+    },
+    "leak_rate": 0.0282,
+    "leaked": 4,
+    "values": 142
+   },
+   "NETWORK": {
+    "by_cause": {
+     "partial": 1,
+     "protected": 121
+    },
+    "leak_rate": 0.0082,
+    "leaked": 1,
+    "values": 122
+   },
+   "ORG": {
+    "by_cause": {
+     "partial": 3,
+     "protected": 176
+    },
+    "leak_rate": 0.0168,
+    "leaked": 3,
+    "values": 179
+   },
+   "PERSON": {
+    "by_cause": {
+     "gated": 9,
+     "missed": 5,
+     "partial": 2,
+     "protected": 583
+    },
+    "leak_rate": 0.0267,
+    "leaked": 16,
+    "values": 599
+   },
+   "PHONE": {
+    "by_cause": {
+     "missed": 2,
+     "partial": 1,
+     "protected": 163
+    },
+    "leak_rate": 0.0181,
+    "leaked": 3,
+    "values": 166
+   },
+   "URL": {
+    "by_cause": {
+     "protected": 127
+    },
+    "leak_rate": 0.0,
+    "leaked": 0,
+    "values": 127
+   }
+  },
+  "details": {
+   "CREDENTIAL": {
+    "gated": {
+     "needs_confirmation <- slm": 1
+    },
+    "missed": {
+     "-": 3
+    }
+   },
+   "HANDLE": {
+    "gated": {
+     "topical_geo <- ner": 1
+    },
+    "missed": {
+     "-": 2
+    },
+    "partial": {
+     "inner": 1,
+     "prefix": 3,
+     "suffix": 1
+    }
+   },
+   "ID": {
+    "missed": {
+     "-": 1
+    },
+    "partial": {
+     "prefix": 3
+    }
+   },
+   "LOCATION": {
+    "gated": {
+     "relation_gate:untied <- ner": 1
+    },
+    "missed": {
+     "-": 3
+    }
+   },
+   "NETWORK": {
+    "partial": {
+     "prefix": 1
+    }
+   },
+   "ORG": {
+    "partial": {
+     "inner": 2,
+     "prefix": 1
+    }
+   },
+   "PERSON": {
+    "gated": {
+     "implausible_org <- ner": 1,
+     "implausible_org <- slm": 1,
+     "needs_confirmation <- slm": 4,
+     "relation_gate:junk <- pattern": 1,
+     "relation_gate:public_person <- ner": 1,
+     "relation_gate:untied <- ner": 1
+    },
+    "missed": {
+     "-": 5
+    },
+    "partial": {
+     "last": 2
+    }
+   },
+   "PHONE": {
+    "missed": {
+     "-": 2
+    },
+    "partial": {
+     "prefix": 1
+    }
+   }
+  },
+  "rows": [
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "words",
+    "layout": "form",
+    "n": 3,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "words",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "words",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "words",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "password",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "form",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "password",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "password",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "password",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "intro",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "password",
+    "layout": "json",
+    "n": 4,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "signature",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "gated",
+    "dataset": "oasst1",
+    "detail": "needs_confirmation <- slm",
+    "fmt": "password",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "missed",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "password",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "multi",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 3,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 3,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "partial",
+    "dataset": "oasst1",
+    "detail": "prefix",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 4,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "iban-spaced",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card",
+    "layout": "inline",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "license",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "license",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "student",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "signature",
+    "n": 3,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ssn-nodash",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 3,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "missed",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "form",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "form",
+    "n": 2,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "inline",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "inline",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "intro",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv6",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "signature",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 16,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 6,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 4,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "gated",
+    "dataset": "oasst1",
+    "detail": "implausible_org <- slm",
+    "fmt": "lower",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 34,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 4,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "form",
+    "n": 4,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 26,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 8,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 31,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 12,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "missed",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "json",
+    "n": 5,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "oasst1",
+    "detail": "needs_confirmation <- slm",
+    "fmt": "upper",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 33,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 10,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "oasst1",
+    "detail": "needs_confirmation <- slm",
+    "fmt": "upper",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "partial",
+    "dataset": "oasst1",
+    "detail": "prefix",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 6,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "words",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "words",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "oasst1",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 3,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 16,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "words",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "words",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "intro",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "missed",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "password",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "signature",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "month-ordinal",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "month-ordinal",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 14,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 17,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "partial",
+    "dataset": "sharegpt",
+    "detail": "prefix",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 4,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "missed",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "form",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "license",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "student",
+    "layout": "form",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "student",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "student",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "license",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "intro",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ssn-nodash",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "iban-spaced",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "card",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "license",
+    "layout": "signature",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "missed",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "missed",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "form",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv6",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv6",
+    "layout": "inline",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "intro",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv6",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv6",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "signature",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "partial",
+    "dataset": "sharegpt",
+    "detail": "prefix",
+    "fmt": "mac",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 14,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 3,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 3,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 41,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 7,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 30,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "sharegpt",
+    "detail": "relation_gate:junk <- pattern",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 12,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "inline",
+    "n": 6,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "inline",
+    "n": 3,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "sharegpt",
+    "detail": "implausible_org <- ner",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 42,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 7,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "partial",
+    "dataset": "sharegpt",
+    "detail": "last",
+    "fmt": "lower",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "json",
+    "n": 5,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "json",
+    "n": 5,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "sharegpt",
+    "detail": "needs_confirmation <- slm",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "sharegpt",
+    "detail": "relation_gate:untied <- ner",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 36,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 8,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "missed",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 4,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "words",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 3,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 4,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "sharegpt",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 4,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "multi",
+    "type": "ADDRESS"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "words",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "words",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "words",
+    "layout": "intro",
+    "n": 3,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "words",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "words",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "AGE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "password",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "form",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "password",
+    "layout": "inline",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "password",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "inline",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "intro",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "password",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "intro",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "intro",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "hex",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "password",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "secret",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "zqk",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "CREDENTIAL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "month-ordinal",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "month-ordinal",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ordinal-of",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 4,
+    "slice": "multi",
+    "type": "DATE_OF_BIRTH"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 15,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 17,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 4,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 17,
+    "slice": "injected_single",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 4,
+    "slice": "multi",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "spelled",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "EMAIL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "inner",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "suffix",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "gated",
+    "dataset": "wildchat",
+    "detail": "topical_geo <- ner",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "HANDLE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "license",
+    "layout": "form",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "form",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "student",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "card",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "inline",
+    "n": 3,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "license",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "inline",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "prefix",
+    "fmt": "student",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "card",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "iban-spaced",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "license",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "nino",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "intro",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ssn",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "prefix",
+    "fmt": "student",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "student",
+    "layout": "intro",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "card-spaced",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "iban",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "license",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "nhs",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "passport",
+    "layout": "signature",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "policy",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "student",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ID"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "prefix",
+    "fmt": "student",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "ID"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "gated",
+    "dataset": "wildchat",
+    "detail": "relation_gate:untied <- ner",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "LOCATION"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "form",
+    "n": 5,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "inline",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "inline",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "intro",
+    "n": 6,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "intro",
+    "n": 3,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "signature",
+    "n": 8,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "ipv4",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "signature",
+    "n": 4,
+    "slice": "injected_single",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "mac",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "NETWORK"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "inner",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "prefix",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 10,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 5,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "inner",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 9,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 2,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 4,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 2,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 5,
+    "slice": "multi",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "shift",
+    "type": "ORG"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 36,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 6,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "form",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "inline",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "wildchat",
+    "detail": "relation_gate:public_person <- ner",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "partial",
+    "dataset": "wildchat",
+    "detail": "last",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 30,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 9,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "inline",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 40,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 6,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "intro",
+    "n": 2,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "surname-first",
+    "layout": "json",
+    "n": 3,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "upper",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "lower",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "PERSON"
+   },
+   {
+    "cause": "gated",
+    "dataset": "wildchat",
+    "detail": "needs_confirmation <- slm",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 33,
+    "slice": "injected_single",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 12,
+    "slice": "multi",
+    "type": "PERSON"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 12,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 3,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "intro",
+    "n": 4,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "dots",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "PHONE"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "PHONE"
+   },
+   {
+    "cause": "missed",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 3,
+    "slice": "multi",
+    "type": "PHONE"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 7,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "form",
+    "n": 1,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "inline",
+    "n": 11,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 13,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 2,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "intro",
+    "n": 1,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "json",
+    "n": 1,
+    "slice": "shift",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 2,
+    "slice": "injected_single",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "multi",
+    "type": "URL"
+   },
+   {
+    "cause": "protected",
+    "dataset": "wildchat",
+    "detail": "",
+    "fmt": "plain",
+    "layout": "signature",
+    "n": 1,
+    "slice": "shift",
+    "type": "URL"
+   }
+  ]
+ },
+ "natural": {
+  "messages": 1739,
+  "spurious_by_source": {
+   "ner": 688,
+   "pattern": 130,
+   "pattern:worded": 2,
+   "repeat": 574,
+   "slm": 127,
+   "structural": 114
+  },
+  "spurious_by_source_type": {
+   "ner:FAC": 3,
+   "ner:GPE": 100,
+   "ner:LOC": 13,
+   "ner:ORG": 161,
+   "ner:PERSON": 411,
+   "pattern:ORG": 4,
+   "pattern:PERSON": 33,
+   "pattern:address": 1,
+   "pattern:age": 34,
+   "pattern:credential": 2,
+   "pattern:dob": 25,
+   "pattern:handle": 14,
+   "pattern:id_number": 1,
+   "pattern:ip_address": 1,
+   "pattern:phone_intl": 3,
+   "pattern:url": 11,
+   "pattern:worded:age": 2,
+   "pattern:zip_us": 1,
+   "repeat": 574,
+   "slm:LOC": 28,
+   "slm:ORG": 22,
+   "slm:PERSON": 77,
+   "structural:GPE": 1,
+   "structural:ORG": 10,
+   "structural:PERSON": 100,
+   "structural:hostname": 3
+  },
+  "spurious_edits": 1635,
+  "untouched": 1306
+ },
+ "reproduced_vs_ss_arm": {
+  "differ": 294,
+  "equal": 2314
+ },
+ "split": "devlarge"
+}
