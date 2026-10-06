@@ -307,6 +307,19 @@ def test_a_registered_pii_tagger_replaces_the_builtin():
         plugins.unregister_detector("pii_tagger")
 
 
+def test_as_configured_runs_the_benchmark_config_with_its_pinned_weights(tmp_path):
+    from surrogateshield.core.detection import config as C
+    with pytest.raises(SystemExit, match="needs --ss"):
+        E.main(["--model", str(tmp_path), "--as-configured", "--out", str(tmp_path / "o.json")])
+    with pytest.raises(SystemExit, match="takes no --extra"):
+        E.main(["--model", str(tmp_path), "--ss", "--as-configured", "--extra", "x.json",
+                "--out", str(tmp_path / "o.json")])
+    (tmp_path / "model.safetensors").write_bytes(b"other weights")
+    with pytest.raises(SystemExit, match="does not hold the weights"):
+        E.with_ss(tmp_path, "dev", "dev", {}, {}, "cpu", True, as_configured=True)
+    assert C.from_partial({}, C.benchmark()).config_hash() == C.benchmark().config_hash()
+
+
 def test_an_extra_config_merges_onto_the_tagger_stage():
     from pathlib import Path
     extra = {"type_sources": {"PHONE": ["pattern_scan", "pii_tagger"]},

@@ -27,7 +27,10 @@ benchmark config), run on this checkout.
 The variants chosen on dev-large's calib half are kept in
 ``bench/tagger/configs/``: ``sel3ga9-spacyloc`` (the tagger for every
 free-text and most structured types, spaCy for places only, no ContextGuard)
-and ``sel3ga9-loc4`` (no spaCy; places from the tagger at 0.4).
+and ``sel3ga9-loc4`` (no spaCy; places from the tagger at 0.4); they are now
+``balanced`` and ``fast``. ``--as-configured`` runs ``benchmark()`` itself as
+the SS + tagger arm (the tagger installed under its configured name, see
+``bench/tagger/install.py``), so the result carries the default config's hash.
 """
 
 from __future__ import annotations
@@ -46,6 +49,7 @@ from bench.arms.run import PRIVATE
 from bench.realdata import gliner_sweep, score, yardstick
 from bench.realdata.common import DATASETS, ROOT, file_sha256, git_state, read_jsonl, write_jsonl
 from bench.tagger import splits
+from surrogateshield.core.detection import config as C
 from surrogateshield.core.detection import pii_tagger as T
 
 BUILD = ROOT / "bench" / "tagger" / "build" / "eval"
@@ -190,11 +194,21 @@ def _run_ss(config: Optional[Path], src: Path, path: Path, stamp: str) -> None:
 
 def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device: str, reuse: bool,
             thresholds: Optional[dict] = None, log=print, variant: str = "base",
-            extra: Optional[dict] = None) -> dict:
-    """SS with the tagger on, beside the recorded arms of the split, on the same messages."""
+            extra: Optional[dict] = None, as_configured: bool = False) -> dict:
+    """SS with the tagger on, beside the recorded arms of the split, on the same
+    messages. *as_configured*: the SS + tagger arm is ``benchmark()`` as it
+    stands (the tagger by its configured name), and *model* must hold the
+    weights it pins."""
+    if as_configured:
+        pinned = C.benchmark().stage("pii_tagger").revision
+        if pinned != "sha256:" + model_sha(model):
+            raise SystemExit(f"{model} does not hold the weights benchmark() pins ({pinned})")
+        partial = {}
+    else:
+        partial = tagger_config(model, device, thresholds, extra)
     cfg = BUILD / model.name / f"ss-{split}-{variant}.config.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
-    body = json.dumps(tagger_config(model, device, thresholds, extra), indent=1, sort_keys=True) + "\n"
+    body = json.dumps(partial, indent=1, sort_keys=True) + "\n"
     if not (cfg.exists() and cfg.read_text() == body):
         reuse_tagged = False                    # another config under this name: rerun
         cfg.write_text(body)
@@ -222,7 +236,8 @@ def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device
     if ms:
         out["ss_tagger"]["p50_ms"] = round(statistics.median(ms), 1)
     out["config"] = {"variant": variant, "file": score.rel(cfg), "sha256": file_sha256(cfg), "code": stamp,
-                     "extra": extra or {}, "thresholds": thresholds or {}}
+                     "extra": extra or {}, "thresholds": thresholds or {}, "as_configured": as_configured,
+                     "hash": C.from_partial(partial, C.benchmark()).config_hash()[:16]}
     return out
 
 
@@ -279,8 +294,13 @@ def main(argv=None) -> int:
     ap.add_argument("--ss", action="store_true", help="also run SS with the tagger on, beside the recorded arms")
     ap.add_argument("--variant", default="base", help="name of the --extra config (caches SS runs by it)")
     ap.add_argument("--extra", type=Path, help="partial config JSON merged on the tagger's")
+    ap.add_argument("--as-configured", action="store_true",
+                    help="with --ss: run benchmark() as it stands (the default config's tagger, by name); "
+                         "--model must hold the weights it pins")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args(argv)
+    if a.as_configured and (a.extra or not a.ss):
+        raise SystemExit("--as-configured needs --ss and takes no --extra")
     if a.split == "devlarge" and not a.half:
         raise SystemExit("--split devlarge needs --half (calib or val)")
     model = a.model.resolve()
@@ -296,6 +316,7 @@ def main(argv=None) -> int:
     doc = {"command": f"... -m bench.tagger.evaluate --model {score.rel(a.model.resolve())} --split {a.split}"
                       + (f" --half {a.half}" if a.half else "")
                       + (f" --ss --variant {a.variant}" if a.ss else "")
+                      + (" --as-configured" if a.as_configured else "")
                       + (f" --extra {score.rel(a.extra.resolve())}" if a.extra else "")
                       + f" --out {score.rel(a.out.resolve())}",
            "git": git_state(), "model": {"path": score.rel(model), "weights_sha256": model_sha(model),
@@ -305,7 +326,7 @@ def main(argv=None) -> int:
     if a.ss:
         extra = json.loads(a.extra.read_text()) if a.extra else None
         doc["with_ss"] = with_ss(model, a.split, tag, loaded, units_by_ds, a.device, a.reuse,
-                                 variant=a.variant, extra=extra)
+                                 variant=a.variant, extra=extra, as_configured=a.as_configured)
         for arm, r in doc["with_ss"].items():
             if arm != "config":
                 print(f"{arm:18s} leak {r['leak']['k']}/{r['leak']['n']} = {r['leak']['rate']}  natural spurious "
