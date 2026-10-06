@@ -358,6 +358,9 @@ def test_natural_sends_edited_prompts_only_and_reuses_the_rerun(run):
     assert res["bertscore"]["presidio_default"]["mean"] == 1.0
     sent_texts = [_text_of(p) for b in r.stub.batches for p in b[3]]
     assert sum("Rython" in t for t in sent_texts) == 2
+    eo = res["edited_only"]
+    assert eo["ss"]["n"] == 2 and eo["ss"]["mean"] == 1.0 and eo["presidio_default"]["n"] == 0
+    assert eo["ss"]["minus_rerun"]["diff"] == 0.0
 
 
 def test_multiturn_replays_the_app_restores_and_compares_with_presidio_faker(run, tmp_path, monkeypatch):

@@ -692,6 +692,15 @@ def natural(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opt
             res["differences"][f"{a}-{b}"] = mean_diff([f"{ds}/{m}" for ds, m in both], [f1[(ds, m, a)] for ds, m in both],
                                                        [f1[(ds, m, b)] for ds, m in both],
                                                        derive_seed("live-boot", "natural", a, b, g))
+        res["edited_only"] = {}                  # the cost per edited prompt, against the noise floor
+        for a in ("ss", "presidio_default"):
+            both = [(ds, m) for ds, m in mids if edited[(ds, m, a)] and (ds, m, a) in f1 and (ds, m, "rerun") in f1]
+            res["edited_only"][a] = {"n": len(both), "mean": mean([f1[(ds, m, a)] for ds, m in both]),
+                                     "rerun_mean": mean([f1[(ds, m, "rerun")] for ds, m in both]),
+                                     "minus_rerun": mean_diff([f"{ds}/{m}" for ds, m in both],
+                                                              [f1[(ds, m, a)] for ds, m in both],
+                                                              [f1[(ds, m, "rerun")] for ds, m in both],
+                                                              derive_seed("live-boot", "natural-edited", a, g))}
         out[g] = res
     return {"sample": sample, "results": out}
 
