@@ -16,7 +16,7 @@ credentials (passwords, one-time and backup codes, tokens) — audit I14.
 
 • URLs are found first (audit I1). A personal URL (a profile on a known
   host, a person path such as /in/ or /team/, a personal domain introduced
-  as "my site") is one "url" entity. Any other URL is opaque: nothing inside
+  as "my site" or named after someone in the message) is one "url" entity. Any other URL is opaque: nothing inside
   it is matched except secret query parameters (?t=, token=) and e-mail
   addresses, and opaque_spans() lets the pipeline hide it from the NER
   stages.
@@ -59,6 +59,7 @@ from __future__ import annotations
 import datetime
 import logging
 import re
+import unicodedata
 from typing import List, Optional, Set
 
 from ..entities import DetectedEntity
@@ -627,16 +628,67 @@ def find_urls(text: str) -> List[tuple]:
     """``(start, end, personal)`` for every URL or bare domain in *text*.
 
     Personal URLs (a profile on a social or code host, a personal domain
-    introduced as "my site", a page under /team/ or /people/) are PII and get
-    a surrogate. Every other URL is opaque: no pattern or NER stage may match
-    inside it, so "api.example.com/v1?key=…" never yields a phone number and
+    introduced as "my site" or spelling a name from the message, such as
+    "anakovac.dev" beside "Ana Kovač", a page under /team/ or /people/) are
+    PII and get a surrogate. Every other URL is opaque: no pattern or NER
+    stage may match inside it, so "api.example.com/v1?key=…" never yields a phone number and
     "github.com/Microsoft" never yields an ORG (audit I1, I8)."""
+    found = [m for m in _URL_RE.finditer(text) if "." in m.group()]
+    names = None
     out = []
-    for m in _URL_RE.finditer(text):
+    for m in found:
         url = m.group()
-        if "." not in url:
-            continue
-        out.append((m.start(), m.end(), _is_personal_url(url, text[max(0, m.start() - 60):m.start()])))
+        personal = _is_personal_url(url, text[max(0, m.start() - 60):m.start()])
+        if not personal:
+            label = _host_label(_split_url(url)[0])
+            if len(label) >= 6:
+                if names is None:
+                    names = _name_spellings(text, [x.span() for x in found])
+                personal = label in names
+        out.append((m.start(), m.end(), personal))
+    return out
+
+
+def _fold(s: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c)).lower()
+
+
+# second-level labels under which a country registers names ("co.uk")
+_SLD = frozenset({"co", "com", "org", "net", "ac", "gov", "edu", "ne", "or", "go"})
+
+
+def _host_label(host: str) -> str:
+    """The registered name of *host*, letters only: "anakovac" for
+    "www.ana-kovac.co.uk"."""
+    labels = host.split(".")
+    if len(labels) < 2:
+        return ""
+    i = -3 if len(labels) >= 3 and labels[-2] in _SLD else -2
+    return re.sub(r"[^a-z]", "", _fold(labels[i]))
+
+
+def _name_spellings(text: str, url_spans: List[tuple]) -> Set[str]:
+    """What a site named after someone in *text* would be called: two to
+    four adjacent words run together, in order or surname first ("Ó
+    Cainnigh, Niall" → "niallocainnigh"), with or without their initials,
+    and the letters of each e-mail's local part. The URLs themselves are
+    left out, so "jane-doe.com" alone names no one."""
+    chars = list(text)
+    for s, e in url_spans:
+        chars[s:e] = " " * (e - s)
+    folded = _fold("".join(chars))
+    out = {re.sub(r"[^a-z]", "", m.group(1)) for m in re.finditer(r"([\w.+\-]+)@", folded)}
+    toks = re.findall(r"[a-z]+", folded)
+    for i in range(len(toks)):
+        for k in (2, 3, 4):
+            w = toks[i:i + k]
+            if len(w) < k:
+                break
+            for v in (w, w[-1:] + w[:-1]):
+                out.add("".join(v))
+                long = [t for t in v if len(t) > 1]
+                if len(long) >= 2:
+                    out.add("".join(long))
     return out
 
 
@@ -705,6 +757,19 @@ _LIST_CONTINUATION = re.compile(r"\s*(?:/|,|&|\band\b|\bor\b|\by\b|\bund\b|\bet\
 
 
 _ID_KEYWORD_RE = re.compile(_ID_KEYWORDS, re.IGNORECASE)
+_BARE_ID = re.compile(
+    r"(?:(?-i:\bID\b)|\bidentifier\b|\blicen[sc]e\b|\binsurance\b|保险单?号|保单号)"
+    r"(?:[\s:=#(\-：]|\bis\b|\bwas\b)*"
+    r"(?P<v>(?-i:(?:[A-Z]{1,4}[ \-]?)?\d{6,14}))(?![\w\-])",
+    re.IGNORECASE,
+)
+# The ID of a thing, not a person ("process ID 4412345", "order ID …")
+_NOT_PERSONAL_ID = re.compile(
+    r"\b(?:process|thread|job|task|build|commit|request|run|event|object|product|item|error"
+    r"|issue|bug|sku|model|version|app|channel|guild|server|chat|message|video|post|order"
+    r"|transaction|tracking|session|node|row|column|table|field|file)\s*$",
+    re.IGNORECASE,
+)
 _MONTH_NAMES = (r"(?i:January|February|March|April|May|June|July|August|September"
                 r"|October|November|December)")
 
@@ -1019,6 +1084,40 @@ _PATTERNS: list = [
                    r"[\"'‘“`](?P<v>[^\s\"'’”`]{4,64})[\"'’”`]", re.IGNORECASE),
         lambda m: not _CODE_REFERENCE.match(m.group("v")),
     ),
+    # A quoted key: '"password": "Thistle%summit637"', "'pin': '4821'"
+    (
+        "credential",
+        re.compile(r"[\"'](?:pas+w(?:or)?d|passcode|passphrase|pin|pwd|pw|secret|token)[\"']"
+                   r"\s*[:=]\s*[\"'](?P<v>[^\s\"']{4,128})[\"']", re.IGNORECASE),
+        _credential_validator,
+    ),
+    # The secret named for something: "my password for the sim session is
+    # …", "password for registry: …". "is" or a colon is required, so
+    # "reset my password for Gmail" stays.
+    (
+        "credential",
+        re.compile(r"(?:pas+w(?:or)?d|passcode|passphrase|\bpin\b|\bkey\b|\btoken\b)\s+(?:for|to|on|at)\s+"
+                   r"(?:[\w\-.]+\s+){0,3}?[\w\-.]+\s*(?:\bis\b|\bwas\b|:|=)\s*[\"'`]?"
+                   r"(?P<v>[^\s\"'`]{4,128})", re.IGNORECASE),
+        _credential_validator,
+    ),
+    # "Use Nectar*summit835 as the access password"
+    (
+        "credential",
+        re.compile(r"\buse\s+[\"'`]?(?P<v>[^\s\"'`]{4,128}?)[\"'`]?\s+as\s+"
+                   r"(?:the\s+|my\s+|your\s+|our\s+|an?\s+)?(?:[\w\-]+\s+){0,2}?"
+                   r"(?:password|passcode|passphrase|pin)\b", re.IGNORECASE),
+        _credential_validator,
+    ),
+    # A bare "key: …" whose value looks generated: letters and digits
+    # alternating ("key: 5xyjpbtq-1t4bh4zw-sqa79f5e", "Key 4f8a9b2c7d1e3f6a"),
+    # so "key: value", "cache key: session12345" and "key of C" stay.
+    (
+        "credential",
+        re.compile(r"(?<![\w\-])key\s*(?:\bis\b|:|=)?\s*[\"'`]?"
+                   r"(?P<v>[A-Za-z0-9][A-Za-z0-9\-]{11,127})(?![\w\-])", re.IGNORECASE),
+        lambda m: len(re.findall(r"[A-Za-z](?=\d)|\d(?=[A-Za-z])", m.group("v"))) >= 4,
+    ),
     # A seed / recovery phrase: 12–24 lower-case words
     (
         "credential",
@@ -1233,6 +1332,15 @@ _PATTERNS: list = [
         "id_number",
         _ID_PATTERN,
         _id_value_validator,
+    ),
+    # A bare label: "ID: U043480", "(ID S7701234)", "licence Q0262707",
+    # "insurance HMO-2098444", "保险单号 INS-9495746". The value is mostly
+    # digits (six or more, after at most four capitals), so "MIT license
+    # 2024" and "insurance costs" never match.
+    (
+        "id_number",
+        _BARE_ID,
+        lambda m: not _NOT_PERSONAL_ID.search(_before(m, 30)),
     ),
 
     # ── International phone (non-US, non-UK) ───────────────────────────────────
