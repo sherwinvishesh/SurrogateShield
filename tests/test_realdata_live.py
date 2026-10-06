@@ -58,13 +58,15 @@ def respond(params):
     ``[`` placeholder, grade by whether Sarah Mitchell is named; attacker: guess
     Sarah Mitchell and a wrong e-mail at the right domain."""
     content = _text_of(params)
-    if params.get("tools"):
-        if params["tools"][0]["name"] == "verdict":
-            a, b = _block(content, "Answer A:"), _block(content, "Answer B:")
-            better = "tie" if ("[" in a) == ("[" in b) else ("A" if "[" in b else "B")
-            return tool_msg("verdict", better=better, reason="r")
+    assert "tools" not in params and "tool_choice" not in params     # Opus 5.5 rejects a forced tool
+    if params["model"] == pv.OPUS and "Answer A:" in content:
+        a, b = _block(content, "Answer A:"), _block(content, "Answer B:")
+        better = "tie" if ("[" in a) == ("[" in b) else ("A" if "[" in b else "B")
+        return text_msg("```json\n" + json.dumps({"better": better, "reason": "r"}) + "\n```")
+    if params["model"] == pv.OPUS and "Final answer:" in content:
         ans = _block(content, "Final answer:")
-        return tool_msg("grade", grade="correct" if "Sarah Mitchell" in ans else "incorrect", reason="r")
+        return text_msg("Grade: " + json.dumps({"grade": "correct" if "Sarah Mitchell" in ans else "incorrect",
+                                                 "reason": "r"}))
     if params["model"] == pv.OPUS:
         return text_msg(json.dumps({"estimates": [
             {"seen": "x", "type": "PERSON", "original_estimate": "Sarah Mitchell", "confidence": 0.9},
@@ -214,8 +216,30 @@ def test_roles_and_prompts():
     rec = L.prompt_record()
     assert rec["version"] == L.PROMPT_VERSION and set(rec["sha256"]) == set(rec["templates"])
     jp = L.judge_pair_params("req", "one", "two")
-    assert jp["model"] == pv.OPUS and jp["tool_choice"]["name"] == "verdict"
+    assert jp["model"] == pv.OPUS and "tool_choice" not in jp and "tools" not in jp
     assert _block(_text_of(jp), "Answer B:") == "two"
+    assert '{"better": "A" | "B" | "tie"' in _text_of(jp)
+    jd = L.judge_details_params(["m {1}"], "ans")
+    assert jd["model"] == pv.OPUS and "tool_choice" not in jd and "m {1}" in _text_of(jd)
+    assert '"not_needed"' in _text_of(jd)
+    assert set(rec["answers"]) == {"judge_pair", "judge_details"} and rec["version"] == "rd2"
+
+
+@pytest.mark.parametrize("row,want", [
+    ({"status": "ok", "text": '{"better": "B", "reason": "r"}'}, "B"),
+    ({"status": "ok", "text": '```json\n{"better": "tie", "reason": "r"}\n```'}, "tie"),
+    ({"status": "ok", "text": 'My verdict: {"better": "A", "reason": "r"} done'}, "A"),
+    ({"status": "ok", "text": "", "tool": {"better": "A"}}, "A"),
+    ({"status": "ok", "text": '{"better": "C"}'}, None),
+    ({"status": "ok", "text": '{"better": "a"}'}, None),
+    ({"status": "ok", "text": "A is better"}, None),
+    ({"status": "ok", "text": '["A"]'}, None),
+    ({"status": "ok", "text": None}, None),
+    ({"status": "truncated", "text": '{"better": "A"}'}, None),
+    ({"status": "errored", "text": None}, None),
+])
+def test_judge_answer_reads_json_or_a_tool_input(row, want):
+    assert L.judge_answer(row, "better", L.VERDICTS) == want
 
 
 # ── samples ──────────────────────────────────────────────────────────────────

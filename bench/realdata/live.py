@@ -52,7 +52,9 @@ Metrics.
   restore. Truncated answers are kept and counted.
 * Pairwise judge (E5b): ``ss`` against ``presidio_default``; Opus sees the
   original prompt and the two displayed answers, positions drawn per prompt
-  with ``derive_seed("live-judge", id)``, arm names hidden; A, B or tie.
+  with ``derive_seed("live-judge", id)``, arm names hidden; A, B or tie, as
+  a JSON reply (Opus 5.5 rejects a forced tool choice, so the judges answer
+  in JSON, as the attacker does; an answer that does not parse is unscored).
   Score +1 / −1 / 0 for SurrogateShield; agreement with BERTScore is the
   share of non-tie verdicts whose winner has the higher BERTScore.
 * E7b: (i) restoration: a turn whose raw answer contains one of the arm's
@@ -127,7 +129,7 @@ from bench.realdata.common import BUILD, DATASETS, ROOT, derive_seed, git_state,
 
 RUNS = ROOT / "experiment" / "realdata"
 TMP = BUILD / "live-tmp"
-PROMPT_VERSION = "rd1"
+PROMPT_VERSION = "rd2"           # rd1 forced a judge tool, which Opus 5.5 rejects; no rd1 verdict exists
 RESPONDER_MAX_TOKENS = 4096          # chatbot.providers.MAX_TOKENS
 JUDGE_MAX_TOKENS = 1024
 ATTACKER_MAX_TOKENS = 4096           # attacker.ATTACKER_MAX_TOKENS
@@ -158,16 +160,10 @@ JUDGE_PAIR_PROMPT = (
     "Request:\n<<<\n{prompt}\n>>>\n\n"
     "Answer A:\n<<<\n{a}\n>>>\n\n"
     "Answer B:\n<<<\n{b}\n>>>\n\n"
-    "Give your verdict with the verdict tool."
+    "Reply with JSON only, in this form:\n"
+    '{{"better": "A" | "B" | "tie", "reason": "<one or two sentences>"}}'
 )
-VERDICT_TOOL = {
-    "name": "verdict",
-    "description": "Record which answer better serves the user's request.",
-    "input_schema": {"type": "object", "properties": {
-        "better": {"type": "string", "enum": ["A", "B", "tie"]},
-        "reason": {"type": "string", "description": "One or two sentences."}},
-        "required": ["better", "reason"]},
-}
+VERDICTS = ("A", "B", "tie")
 
 JUDGE_DETAILS_PROMPT = (
     "Below are the messages a user sent to an AI assistant, in order, and the "
@@ -183,16 +179,10 @@ JUDGE_DETAILS_PROMPT = (
     "- not_needed: the answer has no reason to use any of the user's details.\n\n"
     "User messages:\n{turns}\n\n"
     "Final answer:\n<<<\n{answer}\n>>>\n\n"
-    "Give your grade with the grade tool."
+    "Reply with JSON only, in this form:\n"
+    '{{"grade": "correct" | "partly" | "incorrect" | "not_needed", "reason": "<one or two sentences>"}}'
 )
-GRADE_TOOL = {
-    "name": "grade",
-    "description": "Record how the final answer uses the user's details.",
-    "input_schema": {"type": "object", "properties": {
-        "grade": {"type": "string", "enum": ["correct", "partly", "incorrect", "not_needed"]},
-        "reason": {"type": "string", "description": "One or two sentences."}},
-        "required": ["grade", "reason"]},
-}
+GRADE_VALUES = ("correct", "partly", "incorrect", "not_needed")
 
 ATTACK_CONV_PROMPT = (
     "The conversation below, between a user and an AI assistant, was sent to a "
@@ -237,7 +227,7 @@ def prompt_record() -> dict:
          **{f"attack_{k}": v for k, v in attack_prompts().items()}}
     return {"version": PROMPT_VERSION, "responder_system_sha256": sha256(system_prompt()),
             "templates": t, "sha256": {k: sha256(v) for k, v in t.items()},
-            "tools": {"verdict": VERDICT_TOOL, "grade": GRADE_TOOL}}
+            "answers": {"judge_pair": {"better": list(VERDICTS)}, "judge_details": {"grade": list(GRADE_VALUES)}}}
 
 
 def responder_params(messages: List[dict]) -> dict:
@@ -246,15 +236,13 @@ def responder_params(messages: List[dict]) -> dict:
 
 
 def judge_pair_params(prompt: str, a: str, b: str) -> dict:
-    return {"model": pv.OPUS, "max_tokens": JUDGE_MAX_TOKENS, "tools": [VERDICT_TOOL],
-            "tool_choice": {"type": "tool", "name": "verdict"},
+    return {"model": pv.OPUS, "max_tokens": JUDGE_MAX_TOKENS,
             "messages": [{"role": "user", "content": JUDGE_PAIR_PROMPT.format(prompt=prompt, a=a, b=b)}]}
 
 
 def judge_details_params(turns: Sequence[str], answer: str) -> dict:
     shown = "\n\n".join(f"Message {i + 1}:\n<<<\n{t}\n>>>" for i, t in enumerate(turns))
-    return {"model": pv.OPUS, "max_tokens": JUDGE_MAX_TOKENS, "tools": [GRADE_TOOL],
-            "tool_choice": {"type": "tool", "name": "grade"},
+    return {"model": pv.OPUS, "max_tokens": JUDGE_MAX_TOKENS,
             "messages": [{"role": "user", "content": JUDGE_DETAILS_PROMPT.format(turns=shown, answer=answer)}]}
 
 
@@ -301,6 +289,29 @@ def reply_row(key: str, slot: str, stage: str, kind: str, attempt: int, res: Opt
                status="truncated" if msg.get("stop_reason") == "max_tokens" else "ok")
     return row
 
+
+
+def judge_answer(row: dict, field: str, allowed: Sequence[str]) -> Optional[str]:
+    """The judge's ``field`` from a complete reply: the JSON object in its text
+    (fenced or not), or a tool input; None when absent or not an allowed value."""
+    if row["status"] != "ok":
+        return None
+    obj = row.get("tool")
+    if not isinstance(obj, dict):
+        text = (row.get("text") or "").strip()
+        if text.startswith("```"):
+            text = "\n".join(ln for ln in text.split("\n") if not ln.strip().startswith("```")).strip()
+        obj = None
+        for cand in (text, text[text.find("{"): text.rfind("}") + 1] if "{" in text else ""):
+            try:
+                obj = json.loads(cand) if cand else None
+            except json.JSONDecodeError:
+                continue
+            if isinstance(obj, dict):
+                break
+            obj = None
+    v = obj.get(field) if isinstance(obj, dict) else None
+    return v if v in allowed else None
 
 class Run:
     """One run directory: every provider reply, cached by request."""
@@ -591,8 +602,8 @@ def utility(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opt
             jitems.append((slot(ds, mid, "judge"), judge_pair_params(original(data, ds, mid), *((a, b) if ss_first else (b, a)))))
     verdicts = {}
     for (ds, mid, ss_first), row in zip(jindex, run.fetch("judge", "6-judge", "judge", jitems)):
-        better = (row.get("tool") or {}).get("better") if row["status"] == "ok" else None
-        if better not in ("A", "B", "tie"):
+        better = judge_answer(row, "better", VERDICTS)
+        if better is None:
             verdicts[(ds, mid)] = {"score": None, "first": None}
             continue
         ss_won = better == ("A" if ss_first else "B")
@@ -912,8 +923,7 @@ def multiturn(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: O
                 [original(data, ds, m) for m in turn_mids(data, ds, conv)], v["turns"][-1]["shown"])))
     grades = {}
     for k, row in zip(jindex, run.fetch("judge-mt", "6-judge", "judge", jitems)):
-        g = (row.get("tool") or {}).get("grade") if row["status"] == "ok" else None
-        grades[k] = g if g in GRADES or g == "not_needed" else None
+        grades[k] = judge_answer(row, "grade", GRADE_VALUES)
 
     out = {}
     for g in _groups(datasets):
