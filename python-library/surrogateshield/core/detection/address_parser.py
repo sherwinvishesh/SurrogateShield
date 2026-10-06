@@ -168,8 +168,9 @@ _STATE_ABBREV_ALT = "|".join(sorted(US_STATE_ABBREVS))
 
 # House number: 1-6 digits, optional NYC-style hyphenated part, optional
 # letter ("123A").  Lookbehind rejects prices, decimals, ranges, fragments
-# of longer numbers ("$20", "2.4.1", "3-5", "#42", "9999123 …").
-_HOUSE = r"(?<![\d.,$#/-])(?P<house>\d{1,6}(?:-\d{1,4})?[A-Za-z]?)"
+# of longer numbers or of a word, handle or MAC ("$20", "2.4.1", "3-5",
+# "#42", "9999123 …", "@ana_37", "0d:36").
+_HOUSE = r"(?<![\w.,$#/:@-])(?P<house>\d{1,6}(?:-\d{1,4})?[A-Za-z]?)"
 
 _DIRECTIONAL = (
     r"(?:N\.?E\.?|N\.?W\.?|S\.?E\.?|S\.?W\.?|[NSEW]\.?|"
@@ -229,14 +230,16 @@ _TAIL = (
     rf"(?:(?P<zipsep>{_SEP})(?P<zip>{_ZIP}))?"
 )
 
+# The house number and the street share a line: "…683525\nLondon way" is a
+# number at a line's end and the next line's words.
 _STREET_ADDRESS_RE = re.compile(
     rf"{_HOUSE}"
-    r"\s+"
-    rf"(?:(?P<predir>{_DIRECTIONAL})\s+)?"
+    r"[ \t]+"
+    rf"(?:(?P<predir>{_DIRECTIONAL})[ \t]+)?"
     r"(?:"
     rf"(?P<hwystreet>{_HWY_STREET})"
     r"|"
-    rf"(?P<street>(?:{_STREET_WORD}\s+){{0,4}})"
+    rf"(?P<street>(?:{_STREET_WORD}[ \t]+){{0,4}})"
     rf"(?P<suffix>(?:{_SUFFIX_ALT})\.?)(?=[\s,.;:!?)\"']|$)"
     rf"(?:\s+(?P<postdir>{_DIRECTIONAL})(?=[\s,.;:!?)\"']|$))?"
     r")"

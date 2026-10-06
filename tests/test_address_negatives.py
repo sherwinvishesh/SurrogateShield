@@ -82,6 +82,11 @@ NEGATIVES = [
     # a copyright line: a year, an ordinal and a weak suffix, then a company's legal form
     "// Copyright (c) 2019 3rd Wall, Inc.",
     "(c) 2021 5th Light, LLC. All rights reserved.",
+    # a number at a line's end, or the tail of a handle, a MAC or a phone, then the next line's words
+    "reach me at @jgoddard_37\nABC way works too",
+    "my number is +44 7937 683525\nLondon way and back",
+    "mac 53:e0:75:b9:0d:36\nThanks way more",
+    "ticket a85 Main St",
 ]
 
 

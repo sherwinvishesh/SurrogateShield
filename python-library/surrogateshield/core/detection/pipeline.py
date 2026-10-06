@@ -1698,6 +1698,9 @@ def run_cascade(
         all_skipped = list(all_skipped) + follows
     _mark("gender_follows_name")
 
+    confirmed = _cut_partial_overlaps(confirmed, text, config)
+    _mark("partial_overlaps")
+
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
     qi_matches = qi_score(confirmed)
@@ -1838,6 +1841,51 @@ def _snap_to_words(entities: List[DetectedEntity], text: str) -> List[DetectedEn
         else:
             out.append(_dc_replace(e, text=text[s:t], start=s, end=t))
     return out
+
+
+_CUT_EDGE = " \t\r\n,;:.-–—/|()[]{}<>\"'`*_"
+
+
+def _cut_partial_overlaps(entities: List[DetectedEntity], text: str,
+                          config: "dconfig.DetectionConfig") -> List[DetectedEntity]:
+    """Two spans that overlap without one holding the other (V3 §3.5).
+    ``plan_substitutions`` keeps the longer of two overlapping spans, so the
+    other one's own part would go out as typed: "+44 7937 683525" under an
+    address read from "683525" on, or "22/05/1960" under one read from
+    "1960" on. The better-ranked source keeps its span (``source_priority``,
+    then the longer, then the earlier); the other is cut back to its part
+    outside, stripped of separators, and dropped when no letter or digit is
+    left. Every character a span covered stays covered. A hit on a canonical
+    view keeps its span (its surrogate is drawn for the view's spelling)."""
+    if len(entities) < 2:
+        return entities
+    order = sorted(range(len(entities)), key=lambda i: (
+        config.rank(stage_of(entities[i])), -(entities[i].end - entities[i].start), entities[i].start))
+    kept: List[Tuple[int, int]] = []
+    out: Dict[int, Optional[DetectedEntity]] = {}
+    for i in order:
+        ent = entities[i]
+        s, e = ent.start, ent.end
+        if ent.canonical is None:
+            for a, b in kept:
+                if s < b and a < e and not (a <= s and e <= b) and not (s <= a and b <= e):
+                    s, e = (s, a) if s < a else (b, e)
+            if s != ent.start:
+                while s < e and text[s] in _CUT_EDGE:
+                    s += 1
+            if e != ent.end:
+                while e > s and text[e - 1] in _CUT_EDGE:
+                    e -= 1
+        if (s, e) == (ent.start, ent.end):
+            out[i] = ent
+        elif any(ch.isalnum() for ch in text[s:e]):
+            out[i] = _dc_replace(ent, text=text[s:e], start=s, end=e, parsed=None)
+            logger.debug(f"[SentinelLayer] cut {ent.type} {ent.start}:{ent.end} to {s}:{e}")
+        else:
+            out[i] = None
+            continue
+        kept.append((out[i].start, out[i].end))
+    return [out[i] for i in range(len(entities)) if out[i] is not None]
 
 
 def _outside_opaque(entities: List[DetectedEntity], spans) -> List[DetectedEntity]:

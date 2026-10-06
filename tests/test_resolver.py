@@ -103,3 +103,50 @@ def test_cascade_output_goes_through_the_resolver(monkeypatch):
     found, _ = pipeline.run_cascade("Mail jane.roe@example.org", config=cfg)
     pipeline.deduplicate(found, cfg)
     assert seen and all(c is cfg for c in seen)
+
+
+# ── partial overlaps ─────────────────────────────────────────────────────────
+
+def _span(text, piece, typ, src, score=0.9):
+    s = text.index(piece)
+    return DetectedEntity(piece, s, s + len(piece), typ, score, src)
+
+
+def _covered(text, ents):
+    return {i for e in ents for i in range(e.start, e.end) if text[i].isalnum()}
+
+
+def test_a_partial_overlap_is_cut_back_to_the_worse_ranked_spans_own_part():
+    text = "born 22/05/1960, Hauptstr 9, 80331 Lübeck"
+    dob = _span(text, "22/05/1960", "dob", "pattern", 1.0)
+    addr = _span(text, "1960, Hauptstr 9, 80331 Lübeck", "address", "pii_tagger")
+    got = pipeline._cut_partial_overlaps([dob, addr], text, BAL)
+    assert [(e.text, e.type) for e in got] == [("22/05/1960", "dob"), ("Hauptstr 9, 80331 Lübeck", "address")]
+    assert _covered(text, got) == _covered(text, [dob, addr])
+    assert all(text[e.start:e.end] == e.text for e in got)
+
+
+def test_the_better_ranked_span_keeps_itself_even_when_shorter():
+    text = "call +44 7937 683525 London Road"
+    phone = _span(text, "+44 7937 683525", "phone_intl", "pii_tagger")
+    addr = _span(text, "683525 London Road", "address", "pattern", 1.0)
+    got = pipeline._cut_partial_overlaps([phone, addr], text, BAL)
+    assert [e.text for e in got] == ["+44 7937", "683525 London Road"]
+    assert _covered(text, got) == _covered(text, [phone, addr])
+
+
+def test_containment_and_disjoint_spans_are_left_alone():
+    text = "Ana Ruiz, Acme Ltd."
+    person = _span(text, "Ana Ruiz", "PERSON", "slm")
+    inner = _span(text, "Ruiz", "PERSON", "pattern", 1.0)
+    org = _span(text, "Acme Ltd.", "ORG", "ner")
+    ents = [person, inner, org]
+    assert pipeline._cut_partial_overlaps(ents, text, BAL) == ents
+
+
+def test_a_cut_with_nothing_left_drops_the_span():
+    text = "id: 4471-2290"
+    ident = _span(text, "4471-2290", "id_number", "pattern", 1.0)
+    tail = DetectedEntity(text[2:11], 2, 11, "PERSON", 0.9, "slm")      # ": 4471-22"
+    got = pipeline._cut_partial_overlaps([ident, tail], text, BAL)
+    assert got == [ident]
