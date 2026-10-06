@@ -18,7 +18,10 @@ the result.
 ``pii_tagger`` stage, through ``$SURROGATESHIELD_DETECTION_CONFIG``, as
 ``bench/realdata/yardstick.py`` runs its configs) and scores it beside the
 recorded ``ss``, ``gliner_pii`` and ``gliner_pii_tuned`` runs of the same
-split (``bench/arms/run.PRIVATE``), on the same messages.
+split (``bench/arms/run.PRIVATE``), on the same messages. ``--extra`` is a
+partial config merged on the tagger's (other types it may emit, per-type
+thresholds, gate options), named by ``--variant``; SS runs over the whole
+split once per variant, and either half is scored from the same spans.
 """
 
 from __future__ import annotations
@@ -125,29 +128,50 @@ def tuned_rows(split: str, ds: str, v: dict) -> dict:
     return score.read_spans(PRIVATE / "gliner_pii_tuned" / f"{split}-{ds}.jsonl", v["units"], v["input_sha"])
 
 
-def tagger_config(model: Path, device: str, thresholds: Optional[dict] = None) -> dict:
+def tagger_config(model: Path, device: str, thresholds: Optional[dict] = None,
+                  extra: Optional[dict] = None) -> dict:
+    """The partial config that switches the tagger on; *extra* is merged on
+    it (its ``pii_tagger`` stage key by key, ``options`` too; any other key
+    replaces)."""
     stage = {"name": "pii_tagger", "enabled": True, "model": str(model), "options": {"device": device}}
     if thresholds:
         stage["thresholds"] = thresholds
-    return {"detectors": [stage]}
+    cfg = {"detectors": [stage]}
+    for k, v in (extra or {}).items():
+        if k != "detectors":
+            cfg[k] = v
+            continue
+        for st in v:
+            if st.get("name") != "pii_tagger":
+                cfg["detectors"].append(st)
+                continue
+            for sk, sv in st.items():
+                stage[sk] = {**stage.get(sk, {}), **sv} if sk in ("options", "thresholds") else sv
+    return cfg
 
 
 def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device: str, reuse: bool,
-            thresholds: Optional[dict] = None, log=print) -> dict:
+            thresholds: Optional[dict] = None, log=print, variant: str = "base",
+            extra: Optional[dict] = None) -> dict:
     """SS with the tagger on, beside the recorded arms of the split, on the same messages."""
-    cfg = BUILD / model.name / f"ss-{tag}.config.json"
+    cfg = BUILD / model.name / f"ss-{split}-{variant}.config.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
-    cfg.write_text(json.dumps(tagger_config(model, device, thresholds), indent=1) + "\n")
+    body = json.dumps(tagger_config(model, device, thresholds, extra), indent=1, sort_keys=True) + "\n"
+    if not (cfg.exists() and cfg.read_text() == body):
+        reuse_tagged = False                    # another config under this name: rerun
+        cfg.write_text(body)
+    else:
+        reuse_tagged = reuse
     rows: Dict[str, dict] = {"ss_tagger": {}, "ss": {}, "gliner_pii": {}, "gliner_pii_tuned": {}}
     ms: List[float] = []
     for ds, v in loaded.items():
-        path = BUILD / model.name / f"ss-{tag}-{ds}.jsonl"
-        if not (reuse and path.exists()):
+        path = BUILD / model.name / f"ss-{split}-{variant}-{ds}.jsonl"
+        if not (reuse_tagged and path.exists()):
             t0 = time.time()
             yardstick.run_ss(cfg, v["src"], path)
-            log(f"ss + {model.name} {tag} {ds}: {len(v['units'])} messages in {time.time() - t0:.0f}s")
+            log(f"ss + {model.name} {variant} {split} {ds}: {len(v['units'])} messages in {time.time() - t0:.0f}s")
         rows["ss_tagger"][ds] = score.read_spans(path, v["units"], v["input_sha"])
-        ms += [r["ms"] for r in rows["ss_tagger"][ds].values() if "ms" in r]
+        ms += [r["ms"] for u in units_by_ds[ds] if "ms" in (r := rows["ss_tagger"][ds][u["mid"]])]
         base = BUILD / "ss" / f"{split}-{ds}.jsonl"            # SS as configured, on this checkout
         if not (reuse and base.exists()):
             yardstick.run_ss(None, v["src"], base)
@@ -158,7 +182,8 @@ def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device
     out = {arm: brief(score_rows(units_by_ds, r)) for arm, r in rows.items()}
     if ms:
         out["ss_tagger"]["p50_ms"] = round(statistics.median(ms), 1)
-    out["config"] = {"file": score.rel(cfg), "sha256": file_sha256(cfg)}
+    out["config"] = {"variant": variant, "file": score.rel(cfg), "sha256": file_sha256(cfg),
+                     "extra": extra or {}, "thresholds": thresholds or {}}
     return out
 
 
@@ -194,6 +219,8 @@ def main(argv=None) -> int:
     ap.add_argument("--reuse", action="store_true")
     ap.add_argument("--no-latency", action="store_true")
     ap.add_argument("--ss", action="store_true", help="also run SS with the tagger on, beside the recorded arms")
+    ap.add_argument("--variant", default="base", help="name of the --extra config (caches SS runs by it)")
+    ap.add_argument("--extra", type=Path, help="partial config JSON merged on the tagger's")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args(argv)
     if a.split == "devlarge" and not a.half:
@@ -209,13 +236,18 @@ def main(argv=None) -> int:
               f"natural spurious {r['natural_spurious']} of {r['natural_edits']}  {r['leaked_by_type']}")
     meta = json.loads((model / "train_meta.json").read_text()) if (model / "train_meta.json").exists() else {}
     doc = {"command": f"... -m bench.tagger.evaluate --model {score.rel(a.model.resolve())} --split {a.split}"
-                      + (f" --half {a.half}" if a.half else "") + f" --out {score.rel(a.out.resolve())}",
+                      + (f" --half {a.half}" if a.half else "")
+                      + (f" --ss --variant {a.variant}" if a.ss else "")
+                      + (f" --extra {score.rel(a.extra.resolve())}" if a.extra else "")
+                      + f" --out {score.rel(a.out.resolve())}",
            "git": git_state(), "model": {"path": score.rel(model), "weights_sha256": model_sha(model),
                                          "encoder": meta.get("encoder"), "revision": meta.get("revision"),
                                          "licence": meta.get("licence"), "data_sha256": meta.get("data_sha256")},
            "split": tag, "messages": {ds: len(u) for ds, u in units_by_ds.items()}, "sweep": sweep}
     if a.ss:
-        doc["with_ss"] = with_ss(model, a.split, tag, loaded, units_by_ds, a.device, a.reuse)
+        extra = json.loads(a.extra.read_text()) if a.extra else None
+        doc["with_ss"] = with_ss(model, a.split, tag, loaded, units_by_ds, a.device, a.reuse,
+                                 variant=a.variant, extra=extra)
         for arm, r in doc["with_ss"].items():
             if arm != "config":
                 print(f"{arm:18s} leak {r['leak']['k']}/{r['leak']['n']} = {r['leak']['rate']}  natural spurious "

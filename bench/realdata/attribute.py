@@ -426,7 +426,14 @@ def main(argv=None) -> int:
                                env=env, cwd=ROOT)
     doc = run(args.split, args.datasets)
     out = args.out.resolve()
-    doc["command"] = ("HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute "
+    from bench.arms import ss
+    from surrogateshield.core.detection.config import ENV_FILE
+    # a config file merged on the benchmark config (a candidate stage, a
+    # threshold) is part of what was attributed
+    doc["config_file"] = ss.config_file()
+    doc["config_hash"] = ss.effective_config().config_hash()
+    env = f"{ENV_FILE}={doc['config_file']['path']} " if doc["config_file"] else ""
+    doc["command"] = (f"{env}HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute "
                       f"--split {args.split}"
                       + (f" --datasets {' '.join(args.datasets)}" if list(args.datasets) != list(DATASETS) else "")
                       + f" --out {S.rel(out)}")

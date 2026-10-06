@@ -249,3 +249,16 @@ def test_a_registered_pii_tagger_replaces_the_builtin():
         assert plugins.get_detector(Stage("pii_tagger", enabled=True)).detect("Ana", None)[0].type == "PERSON"
     finally:
         plugins.unregister_detector("pii_tagger")
+
+
+def test_an_extra_config_merges_onto_the_tagger_stage():
+    from pathlib import Path
+    extra = {"type_sources": {"PHONE": ["pattern_scan", "pii_tagger"]},
+             "detectors": [{"name": "pii_tagger", "thresholds": {"PHONE": 0.9}, "options": {"window": 128}},
+                           {"name": "context_guard", "enabled": False}]}
+    cfg = E.tagger_config(Path("m"), "cpu", {"PERSON": 0.5}, extra)
+    tagger, other = cfg["detectors"]
+    assert tagger["thresholds"] == {"PERSON": 0.5, "PHONE": 0.9}
+    assert tagger["options"] == {"device": "cpu", "window": 128} and tagger["enabled"] is True
+    assert other == {"name": "context_guard", "enabled": False}
+    assert cfg["type_sources"] == {"PHONE": ["pattern_scan", "pii_tagger"]}
