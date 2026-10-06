@@ -9,6 +9,7 @@ import random
 import pytest
 
 from bench.realdata import identities as ids
+from bench.tagger import accept as A
 from bench.tagger import data as D
 from bench.tagger import evaluate as E
 from bench.tagger import train as TR
@@ -275,3 +276,18 @@ def test_acceptance_per_type_pooled_and_spurious():
     bad = E.acceptance({**arms, "ss_tagger": arm({"ORG": 5, "URL": 3}, 60)})
     assert not bad["ok"] and bad["checks"] == {"types": False, "pooled": True, "spurious": False}
     assert [t for t, v in bad["by_type"].items() if not v["ok"]] == ["ORG", "URL"]
+
+
+def test_acceptance_pools_the_splits_before_the_bounds():
+    """One leaked ORG in 40 fails 0.02 on a split; pooled with a clean split of 60 it passes."""
+    def arm(org, values, spurious):
+        return {"leaked_by_type": {"ORG": org}, "values_by_type": {"ORG": values},
+                "leak": {"k": org, "n": values, "rate": org / values}, "natural_spurious": spurious,
+                "natural_edits": spurious}
+    def split(org, values):
+        return {"ss_tagger": arm(org, values, 10), "ss": arm(org, values, 20),
+                "gliner_pii": arm(0, values, 90), "gliner_pii_tuned": arm(0, values, 99)}
+    assert not E.acceptance(split(1, 40))["ok"]
+    pooled = A.pool([split(1, 40), split(0, 60)])
+    assert pooled["ss_tagger"]["values_by_type"] == {"ORG": 100} and pooled["ss"]["natural_spurious"] == 40
+    assert pooled["ss_tagger"]["leak"]["rate"] == 0.01 and E.acceptance(pooled)["ok"]
