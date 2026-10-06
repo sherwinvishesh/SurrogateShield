@@ -48,6 +48,7 @@ from ..entities import DetectedEntity
 from .geo_data import US_STATE_ABBREVS
 from .pattern_scan import _KIN as _KIN_WORDS
 from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE, WORD_NAMES, is_listed_public_person
+from . import org_assembly
 
 GATED_TYPES = frozenset({"ORG", "GPE", "LOC", "FAC", "PERSON"})
 _PLACE_ORG = frozenset({"ORG", "GPE", "LOC", "FAC"})
@@ -763,6 +764,14 @@ def is_tied(ent: DetectedEntity, text: str, persons: List[DetectedEntity],
             return True
     if _csv_column_label(text, ent):
         return True
+    # an organisation in a field, a work relation or a sign-off made for one
+    # ("Company name: …", "hired by …", "— Ana Ruiz | … |"); a public one only
+    # as an employer or school
+    if ent.type == "ORG":
+        where = org_assembly.slot(text, ent.start, list(persons) + [
+            c for c in context if c.type in org_assembly._CONTACT and c not in persons], ent.end)
+        if where in ("label", "work") or where in ("link", "closing") and not public:
+            return True
     return _in_signature_or_header(text, ent, persons)
 
 
@@ -826,7 +835,7 @@ def gate(
         if e.type not in _PLACE_ORG or id(e) in tied_ids:
             kept.append(e)
         elif (e.type == "ORG" and " " in _core(e.text).strip()
-              and _LEGAL_SUFFIX.search(_core(e.text))
+              and (_LEGAL_SUFFIX.search(_core(e.text)) or org_assembly.has_form(e.text.strip()))
               and _core(e.text).lower() not in PUBLIC_ORGS):
             kept.append(e)
         elif is_public_org(_core(e.text)):

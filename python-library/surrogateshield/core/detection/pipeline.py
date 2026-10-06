@@ -44,6 +44,7 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity, mask_spans
 from . import canonical, pattern_scan, entity_trace, context_guard, relation_gate, structural
+from . import org_assembly
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -303,6 +304,10 @@ _FORM_LABEL_PATTERNS = [
         re.IGNORECASE), True),
 ]
 
+# what may precede a label at the start of a field, on its line: nothing, a
+# bullet or quote, or a field separator ("… | Name: …", "…; Full name: …")
+_FIELD_START = re.compile(r"(?:^|[|;{,\t])[ \t]*(?:[-*•][ \t]+)?[\"']?$")
+
 # E4: title frames in lowercase text ("mr. thompson") — properly-cased
 # titles are already handled by NER, so this only fires on lowercase names.
 _TITLE_FRAME = re.compile(
@@ -481,12 +486,17 @@ def _detect_structural_persons(
                 and not any(_verbish(t) for t in toks)):
             candidates.append((m.start(1), m.end(1), m.group(1)))
 
-    for label_re, require_case in _FORM_LABEL_PATTERNS:
+    for i, (label_re, require_case) in enumerate(_FORM_LABEL_PATTERNS):
         for m in label_re.finditer(text):
             cand = _form_label_candidate(m.group(1), require_case=require_case)
             if cand:
                 start = m.start(1) + m.group(1).find(cand.split()[0])
                 candidates.append((start, start + len(cand), cand))
+                # a field that starts with "Name:" holds a person's name,
+                # whatever type the model gave it ("Company name:" is not one)
+                if i == 1 or i == 0 and _FIELD_START.search(
+                        text[text.rfind("\n", 0, m.start()) + 1:m.start()]):
+                    strong.add((start, start + len(cand)))
 
     for m in _TITLE_FRAME.finditer(text):
         tok = m.group(1)
@@ -1300,6 +1310,18 @@ def run_cascade(
         confirmed          = _merge_adjacent_persons(confirmed, text)
         needs_confirmation = _merge_adjacent_persons(needs_confirmation, text)
         _mark("merge_persons")
+
+        # ── Pass O: an organisation's name read whole (V3 §3.5) ──────────────────
+        # "Singh, Adams and Ellis" (three PERSON pieces), "… GmbH & Co. KG"
+        # (the "KG" cut off), "Smith and Sons" (dropped by Pass F): where a
+        # field, a work relation, a sign-off or the legal form says it is an
+        # organisation, the whole name replaces every candidate inside it.
+        org_names, org_parts = org_assembly.assemble(text, confirmed + needs_confirmation, opaque)
+        if org_names:
+            gone = {id(e) for e in org_parts}
+            confirmed          = [e for e in confirmed          if id(e) not in gone] + org_names
+            needs_confirmation = [e for e in needs_confirmation if id(e) not in gone]
+        _mark("org_assembly")
 
         # ── Pass H: Card-brand ORG detection ─────────────────────────────────────
         brand_orgs = _detect_card_brand_orgs(confirmed, text)

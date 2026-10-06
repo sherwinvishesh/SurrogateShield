@@ -10,7 +10,7 @@ from surrogateshield.core.detection import relation_gate as rg
 from surrogateshield.core.entities import DetectedEntity
 
 STAGES = ["pattern_scan", "canonicaliser", "entity_trace", "service_query_geo", "context_guard", "reanchor",
-          "structural_org", "structural_person", "implausible_org", "merge_persons", "card_brand_org",
+          "structural_org", "structural_person", "implausible_org", "merge_persons", "org_assembly", "card_brand_org",
           "email_username", "person_components", "inside_url", "topical_geo", "sentence_frame",
           "relation_gate", "structural", "gender_follows_name", "pii_off"]
 

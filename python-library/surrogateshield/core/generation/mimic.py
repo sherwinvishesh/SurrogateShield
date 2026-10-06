@@ -244,9 +244,16 @@ _BECH32 = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 # Words of an organisation or facility name that say what it is, not who:
 # kept as written ("Mitchell Family Dental LLC" → "Garrison Family Dental LLC").
 _LEGAL = re.compile(r"(?i)^(?:inc|llc|l\.l\.c|ltd|limited|gmbh|plc|corp|corporation|co|company"
-                    r"|llp|lp|s\.a|sa|ag|pty|pvt|bv|nv|srl|spa|sarl|oy|ab|kk|pc|pllc)\.?$")
+                    r"|llp|lp|s\.a|sa|ag|pty|pvt|bv|nv|srl|spa|sarl|oy|ab|kk|pc|pllc"
+                    # the rest of detection/org_assembly.py's legal forms
+                    r"|kg|kgaa|ohg|gbr|ug|mbh|ggmbh|e\.v|e\.g|e\.k|sas|s\.a\.s|sasu|eurl|s\.a\.u|s\.a\.c"
+                    r"|s\.l|s\.l\.n\.e|s\.l\.u|s\.coop|s\.c|ltda|lda|eireli|s\.p\.a|s\.r\.l|s\.a\.r\.l"
+                    r"|b\.v|n\.v|bvba|vzw|vof|v\.o\.f|aps|asa|oyj|kft|zrt|nyrt|s\.r\.o|d\.o\.o|k\.k"
+                    r"|sdn|bhd|pte|cie)\.?$")
 _GENERIC = frozenset("""
-    the of and for at in on de la le del des du di da y und
+    the of and for at in on de la le del des du di da y und e et en
+    sons son daughters brothers bros filhos figli söhne zonen zn fils hermanos hnos irmãos
+    asociados associados associés cía cia
     hospital medical center centre clinic health healthcare care dental dentistry pharmacy
     family pediatrics pediatric orthopedics surgery surgical urgent emergency rehab rehabilitation
     therapy wellness vision eye animal veterinary vet labs lab laboratory diagnostics imaging
@@ -1378,13 +1385,21 @@ class MimicGen:
         contained = sorted({o for o in originals | {f.strip().lower() for f in blocked}
                             if len(o) >= 3 and not is_low_entropy(o)}, key=len)
 
-        def contains_original(surrogate: str) -> bool:
+        def kept_kind(o: str, own: str) -> bool:
+            # a word an organisation's surrogate keeps from its own name by
+            # design ("Buried Treasures Inn" → "Carlson Johnson Inn"): it says
+            # what the place is, not who, so a separately detected "Inn" may
+            # stay in it (otherwise every draw fails and the message is refused)
+            return all(w in _GENERIC or _LEGAL.match(w) for w in o.split()) and occurs(own, o)
+
+        def contains_original(surrogate: str, ent: DetectedEntity) -> bool:
             # words: as a whole word ("Ann" in "Joanna" is fine); structured
             # values (URL, e-mail, number): anywhere ("…/team/sarah" in
             # "…/team/sarahjohnson" is not)
             folded = surrogate.lower()
             return any(o in folded and o != folded
                        and (not o.replace(" ", "").isalpha() or occurs(surrogate, o))
+                       and not (ent.type in ("ORG", "FAC") and kept_kind(o, ent.text))
                        for o in contained)
 
         def carry_mapped(surrogate: str) -> str:
@@ -1437,7 +1452,7 @@ class MimicGen:
                         surrogate = carry_mapped(surrogate)
                     reject = surrogate.strip().lower() in equal_blocked or (
                         ent.type != "address" and (
-                            contains_original(surrogate)
+                            contains_original(surrogate, ent)
                             or len(key) >= 3 and key.lower() in surrogate.lower()))
                     # a surrogate issued earlier stands for another original
                     # (originals already mapped are reused by the caller)

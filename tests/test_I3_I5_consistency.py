@@ -234,6 +234,21 @@ def test_J2_surrogate_never_contains_an_original_of_the_message():
             assert not occurs(surrogate, "Daniel") and not occurs(surrogate, "Sarah"), (seed, m)
 
 
+def test_J2_an_organisation_keeps_its_kind_word_beside_a_detected_one():
+    # "Inn" was flagged alone elsewhere; the firm's surrogate keeps its own
+    # "Inn" by design, and every draw of it used to be rejected (message refused)
+    text = "Business name: Buried Treasures Inn. The Inn is open late. Ask Mark Hall at the Hall."
+    ents = [DetectedEntity(v, text.index(v), text.index(v) + len(v), t, 0.9, "t")
+            for v, t in (("Buried Treasures Inn", "ORG"), ("Inn", "ORG"), ("Mark Hall", "PERSON"),
+                         ("Hall", "ORG"))]
+    for seed in range(50):
+        m = MimicGen(seed=seed).generate_all(ents, text=text)
+        assert m["Buried Treasures Inn"].endswith(" Inn"), (seed, m)
+        assert not occurs(m["Buried Treasures Inn"], "Buried") and not occurs(m["Buried Treasures Inn"], "Treasures")
+        # a person keeps no generic word of the message: "Hall" stays out
+        assert not occurs(m["Mark Hall"], "Hall") and not occurs(m["Mark Hall"], "Mark"), (seed, m)
+
+
 def test_J2_surrogate_never_contains_an_earlier_original():
     ents = [DetectedEntity("Mia Lopez", 0, 9, "PERSON", 0.9, "t")]
     for seed in range(200):
