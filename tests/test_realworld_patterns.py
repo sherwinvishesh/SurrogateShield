@@ -273,6 +273,10 @@ def _org(text_value, start, text, source="ner"):
     ("Meridian Capital Group", True),
     ("the national insurance board", True),   # suffix word beats lowercase
     ("phoenix program", False),    # lowercase junk
+    ("Hallissey, O'Hea and McEvilly", True),   # a connector between names
+    ("Procter and Gamble", True),
+    ("Proctor and", False),        # a connector only between two names
+    ("and Gamble", False),
     ("B22", False),                # gate/seat code
 ])
 def test_org_plausibility(value, keep):

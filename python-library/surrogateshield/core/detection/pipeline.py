@@ -644,6 +644,10 @@ _ORG_SUFFIX_TOKENS = frozenset({
     "ministry",
 })
 
+# Lowercase words a firm's name may carry between its capitalised words
+# ("Hallissey, O'Hea and McEvilly", "Bank of the West", "Dolce e Gabbana")
+_ORG_CONNECTORS = frozenset("and & of the for de des du del la le y e et und".split())
+
 def _org_is_plausible(ent: DetectedEntity, text: str) -> bool:
     """
     Keep every ORG that is case-marked as a proper name (the project's
@@ -653,7 +657,8 @@ def _org_is_plausible(ent: DetectedEntity, text: str) -> bool:
       • names containing an all-digit token ("ISO 27001", "SOC 2") —
         those are standards/models, not organisations
       • names whose words are not case-marked ("phoenix program",
-        "lient") — proper names are capitalised in English
+        "lient") — proper names are capitalised in English, but for a
+        connector between two capitalised words ("Procter and Gamble")
     """
     if ent.source == "pattern":
         return True  # structural Pass A ORGs carry their own evidence
@@ -667,7 +672,8 @@ def _org_is_plausible(ent: DetectedEntity, text: str) -> bool:
     # ("the national insurance board", "Meridian Capital Group")
     if any(w.strip(".,").lower() in _ORG_SUFFIX_TOKENS for w in words):
         return True
-    if not all(w[0].isupper() for w in words if w[0].isalpha()):
+    if not all(w[0].isupper() or (0 < i < len(words) - 1 and w.lower() in _ORG_CONNECTORS)
+               for i, w in enumerate(words) if w[0].isalpha()):
         return False
     # acronym immediately followed by a bare number in the text is a
     # standard/spec ("SOC 2", "ISO 27001"), not an organisation
