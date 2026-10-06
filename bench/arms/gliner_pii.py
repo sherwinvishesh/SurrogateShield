@@ -39,24 +39,40 @@ def windows(text: str, size: int = WINDOW, overlap: int = OVERLAP):
         i = j - overlap
 
 
-def load():
+def model():
     import logging
     import warnings
     from gliner import GLiNER
     logging.getLogger("transformers").setLevel(logging.ERROR)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        model = GLiNER.from_pretrained(MODEL)
+        return GLiNER.from_pretrained(MODEL)
+
+
+def window_spans(model, text: str, labels, threshold: float):
+    """``(start, end, label, score)`` of every window's decoded entities,
+    before overlaps between windows are resolved."""
+    spans = []
+    for ws, we in windows(text):
+        for ent in model.predict_entities(text[ws:we], labels, threshold=threshold):
+            s, e = ws + ent["start"], ws + ent["end"]
+            if text[s:e].strip():
+                spans.append((s, e, ent["label"], float(ent["score"])))
+    return list(set(spans))
+
+
+def to_edits(spans):
+    """The arm's edits: overlaps resolved longest-then-score, each span
+    replaced by ``[LABEL]``."""
+    return [[s, e, t, "[" + t.upper().replace(" ", "_").replace("'", "") + "]"]
+            for s, e, t, _ in resolve_overlaps(spans)]
+
+
+def load(threshold: float = THRESHOLD, labels=LABELS):
+    m = model()
 
     def fn(text: str, _seed: int):
-        spans = []
-        for ws, we in windows(text):
-            for ent in model.predict_entities(text[ws:we], LABELS, threshold=THRESHOLD):
-                s, e = ws + ent["start"], ws + ent["end"]
-                if text[s:e].strip():
-                    spans.append((s, e, ent["label"], float(ent["score"])))
-        return [[s, e, t, "[" + t.upper().replace(" ", "_").replace("'", "") + "]"]
-                for s, e, t, _ in resolve_overlaps(list(set(spans)))]
+        return to_edits(window_spans(m, text, labels, threshold))
     return fn
 
 
