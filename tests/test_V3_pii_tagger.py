@@ -359,3 +359,17 @@ def test_acceptance_pools_the_splits_before_the_bounds():
     pooled = A.pool([split(1, 40), split(0, 60)])
     assert pooled["ss_tagger"]["values_by_type"] == {"ORG": 100} and pooled["ss"]["natural_spurious"] == 40
     assert pooled["ss_tagger"]["leak"]["rate"] == 0.01 and E.acceptance(pooled)["ok"]
+
+
+@pytest.mark.heavy                      # loads the shipped tagger (local weights only; skipped when not installed)
+def test_the_shipped_tagger_loads_with_its_pinned_weights_and_finds_pii():
+    from surrogateshield.core.detection import config as C
+    stage = next(s for s in C.benchmark().detectors if s.name == "pii_tagger")
+    folder = T.local_dir(stage.model)
+    if not folder:
+        pytest.skip(f"{stage.model} is not installed under {T.models_dir()}")
+    T.check_pin(folder, stage.revision)
+    text = "Hi, I'm Priya Raman, write to priya.raman@example.org; I live at 42 Wren Lane, Leeds LS6 2AB and I'm 34."
+    found = {(text[c.start:c.end], c.type) for c in T.PIITagger(stage).detect(text)}
+    assert {("Priya Raman", "PERSON"), ("priya.raman@example.org", "EMAIL"),
+            ("42 Wren Lane, Leeds LS6 2AB", "ADDRESS"), ("34", "AGE")} <= found
