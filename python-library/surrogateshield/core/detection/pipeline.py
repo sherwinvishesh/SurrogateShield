@@ -1323,6 +1323,7 @@ def run_cascade(
     context_guard_device=_UNSET,
     use_entity_trace=_UNSET,
     use_context_guard=_UNSET,
+    use_tagger=_UNSET,
     use_post_passes=_UNSET,
     canonical_views=_UNSET,
     trace: Optional[list] = None,
@@ -1348,7 +1349,7 @@ def run_cascade(
                                 (detected, then deliberately not replaced),
                                 as are the config's types with action "keep".
         spacy_model:            spaCy model for EntityTrace (en_core_web_lg).
-        context_guard_enabled:  Run ContextGuard; when off, borderline NER
+        context_guard_enabled:  Run ContextGuard (off in ``balanced``); when off, borderline NER
                                 entities at or above
                                 entity_trace_fallback_threshold are promoted.
         entity_trace_high_threshold / entity_trace_low_threshold:
@@ -1360,6 +1361,8 @@ def run_cascade(
         use_entity_trace:       False skips spaCy NER (ablation, audit A9).
         use_context_guard:      None follows context_guard_enabled; a bool
                                 overrides it (ablation).
+        use_tagger:             False skips the PIITagger stage (ablation;
+                                the model-free tests).
         use_post_passes:        False skips structural passes A, B, C, E–H.
                                 Pass D (topical geo policy) always runs.
         canonical_views:        Views of the message PatternScan also reads
@@ -1384,7 +1387,7 @@ def run_cascade(
         context_guard_threshold=context_guard_threshold,
         entity_trace_fallback_threshold=entity_trace_fallback_threshold,
         context_guard_model=context_guard_model, context_guard_device=context_guard_device,
-        use_entity_trace=use_entity_trace, use_context_guard=use_context_guard,
+        use_entity_trace=use_entity_trace, use_context_guard=use_context_guard, use_tagger=use_tagger,
         use_post_passes=use_post_passes, canonical_views=canonical_views)
     et_stage, cg_stage = config.stage("entity_trace"), config.stage("context_guard")
     et_th, cg_th = et_stage.thresholds, cg_stage.thresholds

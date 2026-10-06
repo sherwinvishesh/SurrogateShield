@@ -31,7 +31,7 @@ CONTEXT_GUARD_CONFIDENCE_THRESHOLD: float = 0.70  # borderline type score ≥ th
 # First run will download ~250 MB from HuggingFace Hub (cached afterwards).
 CONTEXT_GUARD_MODEL: str = "dslim/distilbert-NER"
 CONTEXT_GUARD_DEVICE: int = -1                # -1 = CPU, >= 0 = GPU device id
-CONTEXT_GUARD_ENABLED: bool = True            # always on — no Ollama required
+CONTEXT_GUARD_ENABLED: bool = False           # off in balanced: the PIITagger reads names (V3)
 
 # Model ids live here only (audit F2); each can be overridden from the
 # environment without editing code.

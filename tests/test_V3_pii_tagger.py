@@ -232,6 +232,42 @@ def test_a_local_model_is_found_by_name_and_pinned_by_its_weights(tmp_path, monk
         T.check_pin(str(tmp_path), pin)
 
 
+def test_a_named_model_that_is_not_installed_fails_closed_before_torch(tmp_path, monkeypatch):
+    import sys
+    monkeypatch.setenv(T.MODELS_ENV, str(tmp_path))
+    monkeypatch.setitem(sys.modules, "torch", None)              # importing it would raise
+    with pytest.raises(DetectorUnavailable, match="no model folder 'pii-tagger-x'.*'classic'"):
+        T.TaggerModel("pii-tagger-x", "sha256:" + "0" * 64)
+    (tmp_path / "pii-tagger-x").mkdir()
+    (tmp_path / "pii-tagger-x" / "model.safetensors").write_bytes(b"weights")
+    with pytest.raises(DetectorUnavailable, match="not the pinned"):
+        T.TaggerModel("pii-tagger-x", "sha256:" + "0" * 64)
+
+
+def test_install_copies_a_model_under_its_name_and_checks_the_pin(tmp_path, monkeypatch):
+    import hashlib
+    from bench.tagger import install as I
+    from surrogateshield.core.detection import config as C
+    src, root = tmp_path / "run", tmp_path / "models"
+    src.mkdir()
+    (src / "model.safetensors").write_bytes(b"weights")
+    (src / "config.json").write_text("{}")
+    (src / "train.log").write_text("")
+    (src / "checkpoint-10").mkdir()
+    with pytest.raises(DetectorUnavailable, match="not the pinned"):
+        I.install(src, root=root)                                # the default name needs the pinned weights
+    dest = I.install(src, "pii-tagger-x", root=root)
+    assert dest == root / "pii-tagger-x"
+    assert sorted(p.name for p in dest.iterdir()) == ["config.json", "model.safetensors"]
+    assert I.install(src, "pii-tagger-x", root=root) == dest     # the same weights: kept
+    (src / "model.safetensors").write_bytes(b"other")
+    with pytest.raises(SystemExit, match="holds other weights"):
+        I.install(src, "pii-tagger-x", root=root)
+    monkeypatch.setattr(C, "PII_TAGGER_REVISION", "sha256:" + hashlib.sha256(b"other").hexdigest())
+    assert I.install(src, root=root) == root / C.PII_TAGGER_MODEL
+    assert not list(root.glob("*.part"))
+
+
 def test_edits_at_thresholds():
     cands = [[0, 3, "PERSON", .55], [4, 8, "AGE", .95], [9, 12, "ORG", .45]]
     assert [e[2] for e in E.edits_at(cands, .5)] == ["PERSON", "AGE"]

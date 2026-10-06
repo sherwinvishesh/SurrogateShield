@@ -230,6 +230,9 @@ def _check_models(det) -> List[tuple]:
         rows.append(("transformers / huggingface_hub", False, cg.enabled, str(exc)))
     from .core.detection import plugins
     for st in det.plugin_stages():
+        if st.name == "pii_tagger":
+            rows.append(_check_tagger(st, MODEL_LICENCES))
+            continue
         try:
             plugins.get_detector(st)
             rows.append((f"detector {st.name}", True, True, f"model {st.model}" if st.model else ""))
@@ -238,14 +241,43 @@ def _check_models(det) -> List[tuple]:
     return rows
 
 
+def _check_tagger(st, licences) -> tuple:
+    """The tagger's weights: a local folder whose weights match the pin, or
+    a hub id in the local cache; not loaded (``--cold-start`` times that)."""
+    from .core.detection import pii_tagger
+    from .core.errors import DetectorUnavailable
+    name = f"PIITagger model {st.model}"
+    if not st.model:
+        return (name, False, True, "the pii_tagger stage names no model")
+    licence = f"licence {licences.get(st.model, 'not recorded')}"
+    local = pii_tagger.local_dir(st.model)
+    if local:
+        try:
+            pii_tagger.check_pin(local, st.revision)
+        except DetectorUnavailable as exc:
+            return (name, False, True, str(exc))
+        return (name, True, True, f"{local}, " + (f"weights {st.revision[:19]}…, " if st.revision else "") + licence)
+    if "/" not in st.model:
+        return (name, False, True, f"no folder of that name under {pii_tagger.models_dir()} "
+                                   f"(${pii_tagger.MODELS_ENV}); python -m bench.tagger.install puts it there, "
+                                   "or --preset classic runs without it")
+    try:
+        from huggingface_hub import try_to_load_from_cache
+        ok = isinstance(try_to_load_from_cache(st.model, "config.json", revision=st.revision), str)
+    except ImportError as exc:
+        return (name, False, True, str(exc))
+    return (name, ok, True, licence if ok else "not in the local Hugging Face cache at this revision")
+
+
 def _cold_start(det) -> List[tuple]:
     """Load each enabled model stage once and time it (a fresh process
     pays this on its first message)."""
-    from .core.detection import context_guard, entity_trace
+    from .core.detection import context_guard, entity_trace, plugins
     rows = []
     for name, load in (
         ("entity_trace", lambda st: entity_trace._get_nlp(st.model)),
         ("context_guard", lambda st: context_guard._get_ner(st.model, st.device, st.revision)),
+        ("pii_tagger", plugins.get_detector),
     ):
         st = det.stage(name)
         if not st.enabled:
@@ -314,14 +346,14 @@ def cmd_doctor(args, out) -> int:
         out.write(line + "\n")
     if args.show_config:
         out.write(det.to_json() + "\n")
-    cg_on = det.enabled("context_guard")
+    cg_on, tagger_on = det.enabled("context_guard"), det.enabled("pii_tagger")
     rows = [("python " + ".".join(map(str, sys.version_info[:3])), sys.version_info >= (3, 9), True, "")]
     for mod in ("faker", "cryptography", "rapidfuzz", "spacy", "transformers", "torch"):
         try:
             __import__(mod)
             rows.append((f"import {mod}", True, True, ""))
         except ImportError as exc:
-            rows.append((f"import {mod}", False, (mod not in ("transformers", "torch") or cg_on)
+            rows.append((f"import {mod}", False, (mod not in ("transformers", "torch") or cg_on or tagger_on)
                          and (mod != "spacy" or det.enabled("entity_trace")), str(exc)))
     rows += _check_models(det)
     if args.cold_start and all(ok or not req for _, ok, req, _ in rows):

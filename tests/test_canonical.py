@@ -165,7 +165,7 @@ def test_views_respect_the_patterns_validators():
 # ── the cascade and the surrogates ───────────────────────────────────────────
 
 def _send(text, **kw):
-    conf, _ = pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False, **kw)
+    conf, _ = pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False, use_tagger=False, **kw)
     mapping = MimicGen(seed=7).generate_all(conf, text=text)
     out = text
     for s, e, _o, r in sorted(plan_substitutions(text, conf, mapping), reverse=True):
@@ -245,7 +245,7 @@ def test_prepared_spans_carry_the_view():
 def test_trace_shows_view_hits_at_their_own_stage():
     text = "I'm twenty-nine, mail jane.doe@example.com"
     trace = []
-    pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False, trace=trace)
+    pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False, use_tagger=False, trace=trace)
     by = {t["stage"]: {(r[0], r[1], r[2]) for r in t["entities"]} for t in trace}
     age = (text.index("twenty"), text.index(","), "age")
     assert age not in by["pattern_scan"] and age in by["canonicaliser"]
@@ -267,8 +267,8 @@ def test_view_hits_leave_the_ner_input_alone_and_absorb_model_spans(monkeypatch)
 
     monkeypatch.setattr(pipeline.entity_trace, "trace", fake_trace)
     monkeypatch.setattr(pipeline.context_guard, "guard", fake_guard)
-    off, _ = pipeline.run_cascade(text, use_context_guard=True, canonical_views=())
-    on, _ = pipeline.run_cascade(text, use_context_guard=True)
+    off, _ = pipeline.run_cascade(text, use_context_guard=True, use_tagger=False, canonical_views=())
+    on, _ = pipeline.run_cascade(text, use_context_guard=True, use_tagger=False)
     assert seen[0] == seen[1]                                   # same text for the NER stages
     assert sorted(e.view for e in on if e.view) == ["dates", "spelled"]
     assert [e.text for e in on if e.type == "PERSON"] == ["Ada Byrne"]

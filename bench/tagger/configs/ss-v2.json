@@ -1,0 +1,51 @@
+{
+ "detectors": [
+  {
+   "name": "pii_tagger",
+   "enabled": false
+  },
+  {
+   "name": "context_guard",
+   "enabled": true
+  }
+ ],
+ "type_sources": {
+  "PERSON": [
+   "*"
+  ],
+  "ORG": [
+   "*"
+  ],
+  "LOCATION": [
+   "*"
+  ],
+  "OTHER": [
+   "*"
+  ],
+  "PHONE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural"
+  ],
+  "ID": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural"
+  ],
+  "ADDRESS": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural"
+  ],
+  "HANDLE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural"
+  ],
+  "CREDENTIAL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural"
+  ]
+ }
+}

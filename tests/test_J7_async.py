@@ -14,6 +14,8 @@ import pytest
 from surrogateshield import Config, DetectorUnavailable, Session
 from surrogateshield.core.detection import entity_trace
 
+pytestmark = pytest.mark.usefixtures("stub_tagger")    # balanced runs the tagger
+
 TEXT = "Mail me at dana.w@example.com, SSN 219-09-9999."
 CFG = dataclasses.replace(Config(), context_guard_enabled=False)
 

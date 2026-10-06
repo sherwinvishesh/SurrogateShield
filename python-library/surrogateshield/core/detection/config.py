@@ -12,8 +12,12 @@ A :class:`DetectionConfig` names:
   the model stages, in list order.
 * ``type_sources``: which stages may report each public type. Structured
   types come from the pattern stages (and the structural passes, which read
-  addresses and host names off the text's layout); free-text types from
-  every stage (``"*"``).
+  addresses and host names off the text's layout; the tagger reads phones,
+  IDs, addresses, handles and credentials too); names and organisations
+  from the tagger (and ContextGuard when it is on), places from the tagger
+  and spaCy; ``"*"`` lets every stage report a type (``OTHER``, and the
+  free-text types in ``strict`` and ``classic``). A plugin is added with
+  :meth:`DetectionConfig.with_plugin`, which lists it as a source.
 * ``type_actions``: per type ``replace``, ``shift``, ``redact`` (a
   ``[PERSON_1]`` placeholder) or ``keep`` (detected, sent as typed). An
   address may also be ``auto`` (shift inside a service query, replace
@@ -162,9 +166,25 @@ SPACY_MODEL = "en_core_web_lg"
 SPACY_REVISION = "3.8.0"
 CONTEXT_GUARD_MODEL = "dslim/distilbert-NER"
 CONTEXT_GUARD_REVISION = "dfa2838a127384aabb82ed7719e16dab84c42a2a"
+# The project's tagger (bench/tagger/, V3 §3.3), fine-tuned from
+# microsoft/deberta-v3-xsmall (MIT) on generated text only. Its weights are
+# not on a hub: the stage names a folder under $SURROGATESHIELD_MODELS
+# (default ~/.cache/surrogateshield/models; ``python -m bench.tagger.install``
+# puts it there) and pins the weights file by its SHA-256.
+PII_TAGGER_MODEL = "pii-tagger-dv3xs-40k"
+PII_TAGGER_REVISION = "sha256:05cca9b0062299e3335e63e92624789b8ef4b1b93db43d8488a7551fce5ff31b"
 # Their licences, as recorded (doctor prints them; a spaCy package's own
 # meta.json wins when it is installed). Permissive only (V3 §0).
-MODEL_LICENCES = {SPACY_MODEL: "MIT", CONTEXT_GUARD_MODEL: "Apache-2.0"}
+MODEL_LICENCES = {SPACY_MODEL: "MIT", CONTEXT_GUARD_MODEL: "Apache-2.0", PII_TAGGER_MODEL: "MIT"}
+
+# The tagger's lowest kept score per type, chosen on dev-large's calib half
+# (bench/tagger/configs/sel3ga9-spacyloc.json): names and places at 0.5, the
+# structured types it adds to the patterns only when it is near certain. Its
+# places and organisations scored 0.9 or more count as tied to the writer at
+# the relation gate (``gate_above``).
+PII_TAGGER_THRESHOLDS = {"PERSON": 0.5, "ORG": 0.5, "LOCATION": 0.5, "PHONE": 0.9, "ID": 0.9,
+                         "ADDRESS": 0.8, "HANDLE": 0.9, "CREDENTIAL": 0.95}
+PII_TAGGER_GATE_ABOVE = 0.9
 
 
 def _default_stages() -> Tuple[Stage, ...]:
@@ -174,18 +194,29 @@ def _default_stages() -> Tuple[Stage, ...]:
         Stage("canonicaliser", options={"views": list(DEFAULT_VIEWS)}),
         Stage("entity_trace", model=SPACY_MODEL, revision=SPACY_REVISION,
               thresholds={"high": 0.85, "low": 0.60, "fallback": 0.65}),
-        Stage("context_guard", model=CONTEXT_GUARD_MODEL, revision=CONTEXT_GUARD_REVISION,
+        Stage("context_guard", enabled=False, model=CONTEXT_GUARD_MODEL, revision=CONTEXT_GUARD_REVISION,
               thresholds={"accept": 0.70}),
-        Stage("pii_tagger", enabled=False),
+        Stage("pii_tagger", model=PII_TAGGER_MODEL, revision=PII_TAGGER_REVISION,
+              thresholds=dict(PII_TAGGER_THRESHOLDS), options={"gate_above": PII_TAGGER_GATE_ABOVE}),
         Stage("structural"),
     )
 
 
 _STRUCTURED_SOURCES = ("pattern_scan", "canonicaliser", "structural")
+# the structured types the tagger adds to the patterns (it reads e-mails,
+# URLs, network addresses, ages and dates of birth no better than they do)
+TAGGER_STRUCTURED_TYPES = ("PHONE", "ID", "ADDRESS", "HANDLE", "CREDENTIAL")
 
 
 def _default_type_sources() -> Dict[str, Tuple[str, ...]]:
-    return {t: (("*",) if t in FREE_TEXT_TYPES else _STRUCTURED_SOURCES) for t in ALL_TYPES}
+    """Names come from the tagger (ContextGuard too, when it is switched on);
+    places from spaCy as well; spaCy's names cost more harmless edits than
+    they find (bench/tagger/configs/sel1ga9-slm, DETECTOR_PROGRESS)."""
+    names = _STRUCTURED_SOURCES + ("pii_tagger", "context_guard")
+    out = {t: (_STRUCTURED_SOURCES + ("pii_tagger",) if t in TAGGER_STRUCTURED_TYPES else _STRUCTURED_SOURCES)
+           for t in ALL_TYPES}
+    out.update(PERSON=names, ORG=names, LOCATION=names + ("entity_trace",), OTHER=("*",))
+    return out
 
 
 DEFAULT_SOURCE_PRIORITY = ("pattern_scan", "canonicaliser", "structural", "pii_tagger",
@@ -321,8 +352,8 @@ class DetectionConfig:
                                           **{k: tuple(v) for k, v in sources.items()}})
 
     def with_plugin(self, name: str, types=("*",), **stage) -> "DetectionConfig":
-        """Add detector *name* and let it report *types* (public types; free-
-        text types already accept every stage)."""
+        """Add detector *name* and let it report *types* (public types; a
+        type whose sources are ``"*"`` already accepts every stage)."""
         cfg = self.with_stage(name, enabled=True, **stage)
         targets = ALL_TYPES if "*" in types else types
         return cfg.with_sources(**{t: tuple(dict.fromkeys(cfg.type_sources.get(t, ()) + (name,)))
@@ -467,26 +498,41 @@ def _update_stage(s: Stage, changes: Mapping[str, Any]) -> Stage:
 # Presets
 # ─────────────────────────────────────────────────────────────────────────────
 
-PRESETS = ("fast", "balanced", "strict")
+PRESETS = ("fast", "balanced", "strict", "classic")
 # E9 ablations: one part of the balanced config switched off each
-ABLATIONS = ("no_canonicaliser", "no_gate", "no_models", "no_structural")
+ABLATIONS = ("no_tagger", "no_canonicaliser", "no_gate", "no_models", "no_structural")
 
 
 def preset(name: str = "balanced") -> DetectionConfig:
-    """``balanced``: every stage at the benchmark settings (the default).
-    ``fast``: no spaCy (EntityTrace off); the transformer stage reads the
-    text alone. ``strict``: lower thresholds, every type past the gate.
-    Ablations: ``no_canonicaliser``, ``no_gate``, ``no_models``,
+    """``balanced``: the benchmark configuration (the default): PatternScan,
+    the canonicaliser, the tagger, spaCy for places, the structural passes;
+    ContextGuard off. ``fast``: no spaCy; the tagger reads places too, from
+    0.4 (bench/tagger/configs/sel3ga9-loc4.json). ``strict``: every stage for
+    every type it reads, low thresholds, every type past the gate (maximal
+    recall; it edits far more harmless text). ``classic``: the detector
+    before the tagger (spaCy and ContextGuard read names and places), for a
+    machine without the tagger's weights. Ablations, each one component off:
+    ``no_tagger``, ``no_canonicaliser``, ``no_gate``, ``no_models``,
     ``no_structural``."""
     base = DetectionConfig()
     if name == "balanced":
         return base
     if name == "fast":
-        return base.with_stage("entity_trace", enabled=False).replace(preset="fast")
+        return (base.with_stage("entity_trace", enabled=False)
+                    .with_stage("pii_tagger", thresholds={"LOCATION": 0.4}).replace(preset="fast"))
     if name == "strict":
+        sources = {t: (("*",) if t in FREE_TEXT_TYPES else _STRUCTURED_SOURCES + ("pii_tagger",))
+                   for t in ALL_TYPES}
         return (base.with_stage("entity_trace", thresholds={"high": 0.70, "low": 0.40, "fallback": 0.45})
-                    .with_stage("context_guard", thresholds={"accept": 0.50})
-                    .replace(preset="strict", gate_bypass=("*",)))
+                    .with_stage("context_guard", enabled=True, thresholds={"accept": 0.50})
+                    .with_stage("pii_tagger", thresholds={t: 0.3 for t in PII_TAGGER_THRESHOLDS})
+                    .replace(preset="strict", gate_bypass=("*",), type_sources=sources))
+    if name == "classic":
+        sources = {t: (("*",) if t in FREE_TEXT_TYPES else _STRUCTURED_SOURCES) for t in ALL_TYPES}
+        return (base.with_stage("pii_tagger", enabled=False).with_stage("context_guard", enabled=True)
+                    .replace(preset="classic", type_sources=sources))
+    if name == "no_tagger":
+        return base.with_stage("pii_tagger", enabled=False).replace(preset=name)
     if name == "no_canonicaliser":
         return base.with_stage("canonicaliser", enabled=False).replace(preset=name)
     if name == "no_gate":
@@ -555,7 +601,7 @@ def from_settings(base: Optional[DetectionConfig] = None, **settings) -> Detecti
     """*base* with the flat settings of ``run_cascade`` / the library
     ``Config`` / ``config.py`` applied: ``spacy_model``,
     ``context_guard_enabled``, ``use_context_guard``, ``use_entity_trace``,
-    ``use_post_passes``, ``canonical_views``, the four thresholds,
+    ``use_tagger``, ``use_post_passes``, ``canonical_views``, the four thresholds,
     ``context_guard_model`` / ``_device``, ``address_mode``,
     ``address_shift_range``, ``service``."""
     cfg = base if base is not None else preset("balanced")
@@ -587,6 +633,8 @@ def from_settings(base: Optional[DetectionConfig] = None, **settings) -> Detecti
         cfg = cfg.with_stage("entity_trace", **et)
     if cg:
         cfg = cfg.with_stage("context_guard", **cg)
+    if "use_tagger" in s:
+        cfg = cfg.with_stage("pii_tagger", enabled=bool(s.pop("use_tagger")))
     if "use_post_passes" in s:
         cfg = cfg.with_stage("structural", enabled=bool(s.pop("use_post_passes")))
     if "canonical_views" in s:

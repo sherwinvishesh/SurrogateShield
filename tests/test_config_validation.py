@@ -20,7 +20,7 @@ def test_library_defaults():
     assert cfg.address_shift_range == 1
     assert cfg.fuzzy_threshold == 85
     assert cfg.spacy_model == "en_core_web_lg"
-    assert cfg.context_guard_enabled is True
+    assert cfg.context_guard_enabled is False      # V3: the tagger reads names; ContextGuard is opt-in
     assert cfg.context_guard_model == "dslim/distilbert-NER"
     assert cfg.context_guard_device == -1
     assert cfg.entity_trace_high_threshold == 0.85

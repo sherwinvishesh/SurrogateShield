@@ -16,6 +16,8 @@ from surrogateshield import cli
 from surrogateshield.core.detection import context_guard, entity_trace
 from surrogateshield.core.errors import DetectorUnavailable
 
+pytestmark = pytest.mark.usefixtures("stub_tagger")    # balanced runs the tagger
+
 TEXT = "Mail me at dana.w@example.com, SSN 219-09-9999."
 
 
@@ -111,6 +113,21 @@ def test_J13_packaging_has_entry_point_and_py_typed():
     assert 'surrogateshield = "surrogateshield.cli:main"' in toml and '"py.typed"' in toml
 
 
+def test_J13_doctor_checks_the_taggers_folder_and_pin(tmp_path, monkeypatch):
+    import hashlib
+    from surrogateshield.core.detection import config as dconfig, pii_tagger
+    monkeypatch.setenv(pii_tagger.MODELS_ENV, str(tmp_path))
+    st = dconfig.Stage("pii_tagger", model="pii-tagger-x", revision="sha256:" + hashlib.sha256(b"w").hexdigest())
+    _name, ok, required, note = cli._check_tagger(st, {"pii-tagger-x": "MIT"})
+    assert not ok and required and "bench.tagger.install" in note and "--preset classic" in note
+    (tmp_path / "pii-tagger-x").mkdir()
+    (tmp_path / "pii-tagger-x" / "model.safetensors").write_bytes(b"w")
+    _name, ok, _req, note = cli._check_tagger(st, {"pii-tagger-x": "MIT"})
+    assert ok and note.endswith("licence MIT")
+    (tmp_path / "pii-tagger-x" / "model.safetensors").write_bytes(b"x")
+    assert not cli._check_tagger(st, {})[1]
+
+
 def test_J13_doctor_prints_the_detection_config(monkeypatch, tmp_path):
     from surrogateshield.core.detection import config as dconfig
     monkeypatch.delenv(dconfig.ENV_PRESET, raising=False)
@@ -119,7 +136,8 @@ def test_J13_doctor_prints_the_detection_config(monkeypatch, tmp_path):
     rc, out = run("doctor")
     balanced = dconfig.preset("balanced").config_hash()[:16]
     assert rc == 0 and f"preset balanced, hash {balanced} (default)" in out
-    assert "stage context_guard  on, dslim/distilbert-NER@dfa2838a1273" in out
+    assert "stage context_guard  off, dslim/distilbert-NER@dfa2838a1273" in out
+    assert f"stage pii_tagger     on, {dconfig.PII_TAGGER_MODEL}@{dconfig.PII_TAGGER_REVISION[:12]}" in out
     rc, out = run("doctor", "--preset", "strict", "--show-config")
     strict = dconfig.preset("strict")
     assert rc == 0 and f"hash {strict.config_hash()[:16]} (--preset / --detection-config)" in out

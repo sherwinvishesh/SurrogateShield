@@ -10,7 +10,7 @@ import warnings
 import pytest
 
 import surrogateshield as ss
-from surrogateshield.core.detection import entity_trace, pipeline
+from surrogateshield.core.detection import config as C, entity_trace, pipeline
 
 TEXT = "Dana Price met Acme in Tempe near Lake Pleasant at Gate Arena."
 LABELS = {"Dana Price": "PERSON", "Acme": "ORG", "Tempe": "GPE",
@@ -32,7 +32,8 @@ def stub_models(monkeypatch):
 
 
 def _types(guard=True, **kw):
-    conf, nc = pipeline.run_cascade(TEXT, use_context_guard=guard, use_post_passes=False, **kw)
+    conf, nc = pipeline.run_cascade(TEXT, config=C.preset("classic"), use_context_guard=guard,
+                                    use_post_passes=False, **kw)
     return ({e.type for e in conf if e.source == "ner"},
             {e.type for e in nc if e.source == "ner"})
 

@@ -183,7 +183,7 @@ def test_I13_wired_into_cascade_model_free():
     text = ("first,last,zip\nleah,okonkwo,85251\n"
             "j'habite au 14 rue des Lilas. Ping Kev about it.\n"
             "the basement flat at Storgata 41B, Lillehammer")
-    conf, _ = pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False)
+    conf, _ = pipeline.run_cascade(text, use_entity_trace=False, use_context_guard=False, use_tagger=False)
     got = {(e.type, e.text, e.source) for e in conf}
     assert ("PERSON", "okonkwo", "structural") in got
     # a French layout is PatternScan's now (address_assembly); a weak
@@ -193,5 +193,5 @@ def test_I13_wired_into_cascade_model_free():
     assert ("PERSON", "Kev", "structural") in got
     # service-query mode keeps place cues off
     conf, _ = pipeline.run_cascade("vivo en Sevilla", skip_location_entities=True,
-                                   use_entity_trace=False, use_context_guard=False)
+                                   use_entity_trace=False, use_context_guard=False, use_tagger=False)
     assert not [e for e in conf if e.source == "structural"]

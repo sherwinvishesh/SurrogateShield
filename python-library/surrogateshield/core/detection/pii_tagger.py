@@ -118,17 +118,24 @@ class TaggerModel:
     """A tokenizer and encoder, loaded once per (model, revision, device)."""
 
     def __init__(self, model: str, revision: Optional[str] = None, device: str = "cpu"):
+        local = local_dir(model)                    # found and pinned before torch is imported
+        if local:
+            check_pin(local, revision)
+        elif "/" not in model and os.sep not in model:      # a folder name, not a hub id
+            raise DetectorUnavailable(
+                f"PIITagger: no model folder {model!r} under {models_dir()} (${MODELS_ENV}). Copy the "
+                f"trained tagger there (python -m bench.tagger.install), point ${MODELS_ENV} at the "
+                "folder that holds it, or use the 'classic' detection preset (spaCy and "
+                "ContextGuard read names; no tagger).")
         try:
             import torch
             from transformers import AutoModelForTokenClassification, AutoTokenizer
         except ImportError as exc:
             raise DetectorUnavailable(
-                "PIITagger needs transformers and torch, which are not installed. "
-                "Run: pip install transformers torch — or switch the pii_tagger stage off.") from exc
+                "PIITagger needs transformers and torch, which are not installed. Run: pip install "
+                "transformers torch, or use the 'classic' detection preset.") from exc
         try:
-            local = local_dir(model)
             if local:
-                check_pin(local, revision)
                 path, hub_revision = local, None
             else:
                 path = _local_model(model, revision)

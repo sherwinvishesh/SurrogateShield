@@ -18,6 +18,8 @@ from fastapi.testclient import TestClient   # noqa: E402
 from surrogateshield import Config, DetectorUnavailable   # noqa: E402
 from surrogateshield.core.detection import entity_trace   # noqa: E402
 
+pytestmark = pytest.mark.usefixtures("stub_tagger")    # balanced runs the tagger
+
 _path = Path(__file__).resolve().parent.parent / "python-library" / "examples" / "fastapi_app.py"
 _spec = importlib.util.spec_from_file_location("fastapi_app", _path)
 

@@ -193,7 +193,7 @@ def config(
                                         standalone city/state replacement for map
                                         queries; also drives address_mode="auto").
         spacy_model:                    spaCy model name for named entity recognition.
-        context_guard_enabled:          Enable the HuggingFace NER second-pass.
+        context_guard_enabled:          Enable the HuggingFace NER second-pass (off by default).
         entity_trace_high_threshold:    spaCy score ≥ this → confirmed entity.
         entity_trace_low_threshold:     spaCy score ≥ this → borderline entity.
         context_guard_threshold:        ContextGuard score ≥ this → confirmed.

@@ -40,12 +40,12 @@ A whole config (the output of `to_dict()`) comes back unchanged.
    - `Config.detection` wins when set.
    - If it is not set, the environment's preset or file applies.
    - Otherwise `balanced`.
-   - On top of that, every flat setting in `Config` that differs from its default is applied: `spacy_model`, `context_guard_enabled`, the four thresholds, `context_guard_model` / `_device`, `address_mode`, `address_shift_range`, `service`. So existing code that sets `context_guard_enabled=False` keeps working.
+   - On top of that, every flat setting in `Config` that differs from its default is applied: `spacy_model`, `context_guard_enabled`, the four thresholds, `context_guard_model` / `_device`, `address_mode`, `address_shift_range`, `service`. So existing code that sets `context_guard_enabled` keeps working. Its default is now `False`: in `balanced` the PII tagger reads names, and ContextGuard is opt-in.
    - `Session(...).detection_config` shows the result.
 2. **`run_cascade(text, config=...)`.**
    - The `config` argument wins.
    - If no `config` is passed, the environment applies, else `balanced`.
-   - Flat keyword arguments that are passed explicitly (`use_context_guard=False`, `canonical_views=()`, …) are applied on top.
+   - Flat keyword arguments that are passed explicitly (`use_tagger=False`, `use_context_guard=True`, `canonical_views=()`, …) are applied on top.
 3. **The application (`main.py`, `pipeline.py`, `json_tester.py`).**
    - These read the root `config.py` unless `SURROGATESHIELD_PRESET` or `SURROGATESHIELD_DETECTION_CONFIG` is set.
    - When either is set, the environment config is used as is.
@@ -59,21 +59,30 @@ A whole config (the output of `to_dict()`) comes back unchanged.
 
 | preset | what changes from `balanced` | hash (first 16 hex) |
 |---|---|---|
-| `balanced` | the default: every stage at the benchmark settings | `68b6f9e8aba3a23f` |
-| `fast` | EntityTrace (spaCy) off | `733e3211082fb461` |
-| `strict` | EntityTrace thresholds high 0.70 / low 0.40 / fallback 0.45; ContextGuard accept 0.50; every type bypasses the relation gate | `28f7bff49e4f4041` |
+| `balanced` | the default, at the benchmark settings: PatternScan, the canonicaliser, the PII tagger (names, organisations, places, and phones, IDs, addresses, handles and credentials beside the patterns), spaCy for places only, the structural passes; ContextGuard off | `2e234aafc5810433` |
+| `fast` | no spaCy: the tagger reads places too, from 0.4 | `99373088e689605a` |
+| `strict` | every model stage for every type it reads: spaCy and ContextGuard back on names, EntityTrace thresholds high 0.70 / low 0.40 / fallback 0.45, ContextGuard accept 0.50, the tagger from 0.3; every type bypasses the relation gate | `da22ad81803a548c` |
+| `classic` | the detector before the tagger: no tagger, spaCy and ContextGuard read names, organisations and places. For a machine without the tagger's weights | `17ae41687553c75c` |
 
-There are also four ablations, used by the benchmark only:
+There are also five ablations, each with one component off, used by the
+benchmark only:
 
 | ablation | hash (first 16 hex) |
 |---|---|
-| `no_canonicaliser` | `9a6999141b7394b8` |
-| `no_gate` | `f5f172775702cf7b` |
-| `no_models` | `0db23db11b36e200` |
-| `no_structural` | `07b35e9f70a4a1c7` |
+| `no_tagger` | `32d7b81891cac54a` |
+| `no_canonicaliser` | `bf17aef0cb0f7b84` |
+| `no_gate` | `0ff2a0e0ba7530d7` |
+| `no_models` | `a752b44211b0090a` |
+| `no_structural` | `96531ae8fd6d8666` |
+
+`no_tagger` leaves names to the structural passes, because `balanced` no
+longer routes them to spaCy; `classic` is the usable config without the
+tagger.
 
 `benchmark()` is the config of the real-data benchmark: `balanced` with
-`type_actions["ADDRESS"] = "replace"` (hash `8e463c3c6b7562fd`). The product
+`type_actions["ADDRESS"] = "replace"` (hash `7d524abba90c7696`; before the
+tagger joined `balanced` it was `8e463c3c6b7562fd`, which
+`bench/tagger/configs/ss-v2.json` restores). The product
 default `auto` keeps street and town inside a service query ("is there a
 pharmacy near …"), and a leak scorer cannot tell that apart from a miss, so
 the benchmark redraws every address. The SS arm writes `detection_config` and
@@ -94,7 +103,7 @@ with what the earlier ones found already masked:
 | `canonicaliser` | the same patterns on rewritten views of the text: `worded` (number words to digits), `spelled` (`dot`/`at` in e-mail shapes), `dates`, `folded` (full-width forms, look-alikes, zero-width), `joined` (spaced digit groups); `options.views` picks them | — | — |
 | `entity_trace` | spaCy NER | `en_core_web_lg` (3.8.0, MIT) | `high` 0.85, `low` 0.60, `fallback` 0.65 |
 | `context_guard` | transformer NER over the masked text | `dslim/distilbert-NER` (`dfa2838a127384aabb82ed7719e16dab84c42a2a`, Apache-2.0) | `accept` 0.70 |
-| `pii_tagger` | the PII tagger (off; resolved through the detector registry like a plugin) | — | — |
+| `pii_tagger` | the PII tagger: a token classifier trained on generated text (`bench/tagger/`), resolved through the detector registry like a plugin (a registered `pii_tagger` detector replaces it) | `pii-tagger-dv3xs-40k`, a local folder pinned by its weights' SHA-256 (DeBERTa-v3-xsmall, MIT) | one per type: PERSON / ORG / LOCATION 0.5, ADDRESS 0.8, PHONE / ID / HANDLE 0.9, CREDENTIAL 0.95; `options.gate_above` 0.9 |
 | `structural` | the layout passes: addresses read part by part, organisation names read whole, names after titles and greetings, host names, Pass S | — | — |
 
 Every `Stage` has these fields:
@@ -108,6 +117,22 @@ Every `Stage` has these fields:
 - `window`, `stride`
 - `max_latency_ms`
 - `options`
+
+### The tagger's weights
+
+The tagger's weights are not downloaded: they stay on the machine that
+trained them. `model` names a folder under `$SURROGATESHIELD_MODELS`
+(default `~/.cache/surrogateshield/models`), or is a path. `revision` is
+`sha256:` plus the SHA-256 of the weights file, so other weights under the
+same name fail closed. To put a trained model there:
+
+```
+python -m bench.tagger.install bench/tagger/build/models/dv3xs-40k
+```
+
+Without the folder, `balanced`, `fast` and `strict` fail closed with
+`DetectorUnavailable`, and `doctor` says so. `classic` (or
+`use_tagger=False` together with routing names to spaCy) runs without it.
 
 A stage that runs past `max_latency_ms` is logged and reported in the timings
 as `<stage>_over_budget_ms`. Its candidates are kept, because dropping them
@@ -146,8 +171,17 @@ internal name, and the internal name wins.
 
 - Structured types (EMAIL, PHONE, ID, …) default to `pattern_scan`,
   `canonicaliser` and `structural`. A model's guess at a phone number is
-  therefore ignored unless you allow it.
-- PERSON, ORG, LOCATION and OTHER default to `"*"`, meaning every stage.
+  therefore ignored unless you allow it. The tagger is allowed for PHONE,
+  ID, ADDRESS, HANDLE and CREDENTIAL (at its high thresholds).
+- PERSON and ORG default to those stages plus `pii_tagger` and
+  `context_guard`; LOCATION adds `entity_trace` (spaCy). On the dev split,
+  spaCy's names and organisations added far more harmless edits than leaks
+  caught, so `balanced` uses it for places only.
+- OTHER defaults to `"*"`, meaning every stage; `strict` and `classic` set
+  PERSON, ORG and LOCATION to `"*"` too.
+- A plugin added with `with_plugin(name, types=...)` is listed as a source
+  of those types; one added with `with_stage` reports only types set to
+  `"*"`.
 
 ```python
 cfg = preset("balanced").with_sources(ID=("pattern_scan", "canonicaliser", "pii_tagger"))
@@ -279,21 +313,23 @@ Flags:
 - `--smoke` masks one sample message.
 
 ```
-$ surrogateshield doctor --cold-start
-detection config: preset balanced, hash 68b6f9e8aba3a23f (default)
+$ surrogateshield doctor
+detection config: preset balanced, hash 2e234aafc5810433 (default)
   stage pattern_scan   on
   stage canonicaliser  on
   stage entity_trace   on, en_core_web_lg@3.8.0, fallback=0.65 high=0.85 low=0.6
-  stage context_guard  on, dslim/distilbert-NER@dfa2838a1273, accept=0.7
-  stage pii_tagger     off
+  stage context_guard  off, dslim/distilbert-NER@dfa2838a1273, accept=0.7
+  stage pii_tagger     on, pii-tagger-dv3xs-40k@sha256:05cca, ADDRESS=0.8 CREDENTIAL=0.95 HANDLE=0.9 ID=0.9 LOCATION=0.5 ORG=0.5 PERSON=0.5 PHONE=0.9
   stage structural     on
   actions        ADDRESS auto (others replace)
   relation gate  on
 [  ok] spaCy model en_core_web_lg — version 3.8.0, licence MIT
 [  ok] ContextGuard model dslim/distilbert-NER@dfa2838a1273 — licence Apache-2.0
-[  ok] cold start entity_trace (en_core_web_lg) — 739 ms
-[  ok] cold start context_guard (dslim/distilbert-NER) — 2230 ms
+[  ok] PIITagger model pii-tagger-dv3xs-40k — ~/.cache/surrogateshield/models/pii-tagger-dv3xs-40k, weights sha256:05cca9b00622…, licence MIT
 …
 ```
 
-(Cold-start times are from one laptop run, Apple-silicon CPU.)
+A disabled stage's model is listed but not required. Without the tagger's
+folder the row reads `[FAIL] … python -m bench.tagger.install puts it
+there, or --preset classic runs without it`, and doctor exits non-zero.
+

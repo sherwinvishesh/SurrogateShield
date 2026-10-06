@@ -51,7 +51,7 @@ TEXTS = [
 
 @pytest.mark.parametrize("text", TEXTS)
 def test_trace_lists_every_pass_and_changes_nothing(text):
-    kw = dict(use_entity_trace=False, use_context_guard=False)
+    kw = dict(use_entity_trace=False, use_context_guard=False, use_tagger=False)
     plain, plain_nc = pipeline.run_cascade(text, **kw)
     trace = []
     traced, traced_nc = pipeline.run_cascade(text, trace=trace, **kw)
@@ -72,7 +72,7 @@ def test_trace_lists_every_pass_and_changes_nothing(text):
 
 def test_trace_off_by_default_keeps_the_signature():
     trace = None
-    conf, _ = pipeline.run_cascade(TEXTS[0], use_entity_trace=False, use_context_guard=False, trace=trace)
+    conf, _ = pipeline.run_cascade(TEXTS[0], use_entity_trace=False, use_context_guard=False, use_tagger=False, trace=trace)
     assert any(e.type.lower() == "email" for e in conf)
 
 

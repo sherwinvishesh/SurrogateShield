@@ -16,7 +16,7 @@ def test_A9_stage_switches_change_detection():
     text = "Please ask Margaret Okonkwo to email me at m.ok@example.com."
     full = {e.text for e in run_cascade(text)[0]}
     pattern_only = {e.text for e in run_cascade(text, use_entity_trace=False,
-                                                use_context_guard=False)[0]}
+                                                use_context_guard=False, use_tagger=False)[0]}
     assert "m.ok@example.com" in full and "m.ok@example.com" in pattern_only
     assert "Margaret Okonkwo" in full
     assert "Margaret Okonkwo" not in pattern_only

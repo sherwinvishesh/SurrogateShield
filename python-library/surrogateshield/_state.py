@@ -20,7 +20,7 @@ class Config:
     pii_off: List[str] = field(default_factory=list)
     service: bool = True
     spacy_model: str = "en_core_web_lg"
-    context_guard_enabled: bool = True
+    context_guard_enabled: bool = False       # off in balanced: the tagger reads names (V3)
     entity_trace_high_threshold: float = 0.85
     entity_trace_low_threshold: float = 0.60
     context_guard_threshold: float = 0.70

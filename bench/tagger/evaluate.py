@@ -21,7 +21,9 @@ recorded ``ss``, ``gliner_pii`` and ``gliner_pii_tuned`` runs of the same
 split (``bench/arms/run.PRIVATE``), on the same messages. ``--extra`` is a
 partial config merged on the tagger's (other types it may emit, per-type
 thresholds, gate options), named by ``--variant``; SS runs over the whole
-split once per variant, and either half is scored from the same spans.
+split once per variant, and either half is scored from the same spans. The
+``ss`` arm is the SS before the tagger (``configs/ss-v2.json`` on the
+benchmark config), run on this checkout.
 The variants chosen on dev-large's calib half are kept in
 ``bench/tagger/configs/``: ``sel3ga9-spacyloc`` (the tagger for every
 free-text and most structured types, spaCy for places only, no ContextGuard)
@@ -140,6 +142,8 @@ def tagger_config(model: Path, device: str, thresholds: Optional[dict] = None,
     it (its ``pii_tagger`` stage key by key, ``options`` too; any other key
     replaces)."""
     stage = {"name": "pii_tagger", "enabled": True, "model": str(model), "options": {"device": device}}
+    if Path(model).is_dir():
+        stage["revision"] = "sha256:" + T.weights_sha256(str(model))
     if thresholds:
         stage["thresholds"] = thresholds
     cfg = {"detectors": [stage]}
@@ -157,6 +161,9 @@ def tagger_config(model: Path, device: str, thresholds: Optional[dict] = None,
 
 
 CODE = ("python-library/surrogateshield", "bench/arms", "generation", "json_tester.py")
+# the SS the tagger is measured against (V3 §3.3 "the current SS"): the
+# pre-tagger default, ContextGuard on and spaCy for every free-text type
+SS_V2 = ROOT / "bench" / "tagger" / "configs" / "ss-v2.json"
 
 
 def code_stamp() -> str:
@@ -204,9 +211,9 @@ def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device
             log(f"ss + {model.name} {variant} {split} {ds}: {len(v['units'])} messages in {time.time() - t0:.0f}s")
         rows["ss_tagger"][ds] = score.read_spans(path, v["units"], v["input_sha"])
         ms += [r["ms"] for u in units_by_ds[ds] if "ms" in (r := rows["ss_tagger"][ds][u["mid"]])]
-        base = BUILD / "ss" / f"{split}-{ds}.jsonl"            # SS as configured, on this checkout
+        base = BUILD / "ss-v2" / f"{split}-{ds}.jsonl"         # the SS before the tagger, on this checkout
         if not (reuse and _fresh(base, stamp)):
-            _run_ss(None, v["src"], base, stamp)
+            _run_ss(SS_V2, v["src"], base, stamp)
         rows["ss"][ds] = score.read_spans(base, v["units"], v["input_sha"])
         rows["gliner_pii"][ds] = score.read_spans(PRIVATE / "gliner_pii" / f"{split}-{ds}.jsonl", v["units"],
                                                   v["input_sha"])

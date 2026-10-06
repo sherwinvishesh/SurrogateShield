@@ -20,11 +20,14 @@ ROOT = Path(__file__).resolve().parent.parent
 
 # The hashes of the shipped configs. A change to a default changes one of
 # these on purpose: update it, and say so in the commit (the benchmark's is
-# recorded in every ss .meta.json and in realdata_test2.json).
-BALANCED_HASH = "68b6f9e8aba3a23f"
-BENCHMARK_HASH = "8e463c3c6b7562fd"
+# recorded in every ss .meta.json and in realdata_test2.json). 2026-10-06:
+# the tagger joined balanced, ContextGuard left it, spaCy reads places only.
+BALANCED_HASH = "2e234aafc5810433"
+BENCHMARK_HASH = "7d524abba90c7696"
+# the benchmark before the tagger (v2), which bench/tagger/configs/ss-v2.json restores
+V2_BENCHMARK_HASH = "8e463c3c6b7562fd"
 
-NO_MODELS = dict(use_entity_trace=False, use_context_guard=False)
+NO_MODELS = dict(use_entity_trace=False, use_context_guard=False, use_tagger=False)
 TEXT = ("Mail jane.roe@example.org or call +44 20 7946 0958; "
         "account ID 4471-2290-8813, see https://example.org/u/jroe")
 
@@ -70,14 +73,64 @@ def test_presets_round_trip_through_json(name):
 
 
 def test_presets_differ_where_documented():
-    fast, strict = C.preset("fast"), C.preset("strict")
-    assert not fast.enabled("entity_trace") and fast.enabled("context_guard")
-    assert strict.stage("entity_trace").thresholds["high"] < C.preset("balanced").stage("entity_trace").thresholds["high"]
+    fast, balanced, strict = C.preset("fast"), C.preset("balanced"), C.preset("strict")
+    assert not fast.enabled("entity_trace") and not fast.enabled("context_guard") and fast.enabled("pii_tagger")
+    assert fast.min_score("pii_tagger", "LOCATION") == 0.4 < balanced.min_score("pii_tagger", "LOCATION")
+    assert strict.stage("entity_trace").thresholds["high"] < balanced.stage("entity_trace").thresholds["high"]
+    assert strict.enabled("context_guard") and strict.allows("entity_trace", "PERSON")
+    assert all(strict.min_score("pii_tagger", t) <= balanced.min_score("pii_tagger", t) for t in C.PUBLIC_TYPES)
+    assert C.preset("classic").allows("entity_trace", "PERSON") and C.preset("classic").enabled("context_guard")
+    assert not C.preset("classic").enabled("pii_tagger")
+    assert all(strict.allows("pii_tagger", t) for t in C.PUBLIC_TYPES)
     assert all(strict.bypasses_gate(t) for t in C.PUBLIC_TYPES)
-    assert not C.preset("balanced").bypasses_gate("PERSON")
+    assert not balanced.bypasses_gate("PERSON")
+    assert not C.preset("no_tagger").enabled("pii_tagger")
+    assert not any(C.preset("no_models").enabled(s) for s in C.MODEL_STAGES)
     assert len({C.preset(n).config_hash() for n in C.PRESETS + C.ABLATIONS}) == len(C.PRESETS + C.ABLATIONS)
     with pytest.raises(ValueError, match="unknown preset"):
         C.preset("turbo")
+
+
+def test_balanced_runs_the_tagger_pinned_by_its_weights():
+    from surrogateshield.core.detection import pii_tagger
+    cfg = C.preset("balanced")
+    st = cfg.stage("pii_tagger")
+    assert st.enabled and st.model == C.PII_TAGGER_MODEL and "/" not in st.model     # a folder name
+    assert pii_tagger._PIN.fullmatch(st.revision) and st.revision == C.PII_TAGGER_REVISION
+    assert C.MODEL_LICENCES[st.model] in ("MIT", "Apache-2.0", "BSD-3-Clause")
+    assert dict(st.thresholds) == C.PII_TAGGER_THRESHOLDS and st.options["gate_above"] == C.PII_TAGGER_GATE_ABOVE
+    assert not cfg.enabled("context_guard") and cfg.enabled("entity_trace")
+    assert cfg.allows("entity_trace", "LOCATION") and not cfg.allows("entity_trace", "PERSON")
+    assert not cfg.allows("entity_trace", "ORG")
+    assert {t for t in C.PUBLIC_TYPES if cfg.allows("pii_tagger", t)} == \
+        {"PERSON", "ORG", "LOCATION", *C.TAGGER_STRUCTURED_TYPES}
+    # switching ContextGuard on is enough for it to report names again
+    on = C.from_settings(cfg, context_guard_enabled=True)
+    assert all(on.allows("context_guard", t) for t in ("PERSON", "ORG", "LOCATION"))
+
+
+def test_ss_v2_config_is_the_benchmark_before_the_tagger():
+    import dataclasses
+    v2 = C.from_partial(json.loads((ROOT / "bench" / "tagger" / "configs" / "ss-v2.json").read_text()),
+                        C.benchmark())
+    assert not v2.enabled("pii_tagger")
+    d = v2.to_dict()
+    d["detectors"] = [C.Stage("pii_tagger", enabled=False).to_dict() if s["name"] == "pii_tagger" else s
+                      for s in d["detectors"]]
+    assert C.DetectionConfig.from_dict(d).config_hash()[:16] == V2_BENCHMARK_HASH
+
+
+def test_use_tagger_switches_the_stage(monkeypatch):
+    assert not C.from_settings(None, use_tagger=False).enabled("pii_tagger")
+    assert C.from_settings(C.preset("no_tagger"), use_tagger=True) == \
+        C.preset("balanced").replace(preset="no_tagger")
+
+    def loaded(stage):
+        raise AssertionError(f"{stage.name} was loaded")
+    monkeypatch.setattr(plugins, "get_detector", loaded)
+    pipeline.run_cascade(TEXT, **NO_MODELS)
+    with pytest.raises(AssertionError, match="pii_tagger was loaded"):
+        pipeline.run_cascade(TEXT, use_entity_trace=False)
 
 
 def test_hash_ignores_key_order_but_not_values():
@@ -201,7 +254,7 @@ def test_gate_above_vouches_for_a_stages_sure_places(monkeypatch):
     plugins.register_detector("places", lambda stage: Places())
     try:
         text = "Lyon and Porto are lovely in spring"
-        base = C.preset("no_models").with_stage("places", enabled=True)
+        base = C.preset("no_models").with_plugin("places", types=("LOCATION",))
         conf, _ = pipeline.run_cascade(text, config=base)
         assert {"Lyon", "Porto"} <= set(seen) and not {"Lyon", "Porto"} & {e.text for e in conf}
         seen.clear()
