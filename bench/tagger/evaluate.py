@@ -27,8 +27,10 @@ split once per variant, and either half is scored from the same spans.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import statistics
+import subprocess
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence
@@ -150,6 +152,31 @@ def tagger_config(model: Path, device: str, thresholds: Optional[dict] = None,
     return cfg
 
 
+CODE = ("python-library/surrogateshield", "bench/arms", "generation", "json_tester.py")
+
+
+def code_stamp() -> str:
+    """SHA-256 of the files an SS run executes (tracked, as on disk now): a
+    spans file made under another stamp is not reused."""
+    files = subprocess.run(["git", "ls-files", "--", *CODE], cwd=ROOT, capture_output=True, text=True,
+                           check=True).stdout.split()
+    h = hashlib.sha256()
+    for f in sorted(files):
+        path = ROOT / f
+        h.update(f.encode() + b"\0" + (path.read_bytes() if path.exists() else b"") + b"\0")
+    return h.hexdigest()
+
+
+def _fresh(path: Path, stamp: str) -> bool:
+    mark = path.with_name(path.name + ".code")
+    return path.exists() and mark.exists() and mark.read_text() == stamp
+
+
+def _run_ss(config: Optional[Path], src: Path, path: Path, stamp: str) -> None:
+    yardstick.run_ss(config, src, path)
+    path.with_name(path.name + ".code").write_text(stamp)
+
+
 def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device: str, reuse: bool,
             thresholds: Optional[dict] = None, log=print, variant: str = "base",
             extra: Optional[dict] = None) -> dict:
@@ -164,17 +191,18 @@ def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device
         reuse_tagged = reuse
     rows: Dict[str, dict] = {"ss_tagger": {}, "ss": {}, "gliner_pii": {}, "gliner_pii_tuned": {}}
     ms: List[float] = []
+    stamp = code_stamp()
     for ds, v in loaded.items():
         path = BUILD / model.name / f"ss-{split}-{variant}-{ds}.jsonl"
-        if not (reuse_tagged and path.exists()):
+        if not (reuse_tagged and _fresh(path, stamp)):
             t0 = time.time()
-            yardstick.run_ss(cfg, v["src"], path)
+            _run_ss(cfg, v["src"], path, stamp)
             log(f"ss + {model.name} {variant} {split} {ds}: {len(v['units'])} messages in {time.time() - t0:.0f}s")
         rows["ss_tagger"][ds] = score.read_spans(path, v["units"], v["input_sha"])
         ms += [r["ms"] for u in units_by_ds[ds] if "ms" in (r := rows["ss_tagger"][ds][u["mid"]])]
         base = BUILD / "ss" / f"{split}-{ds}.jsonl"            # SS as configured, on this checkout
-        if not (reuse and base.exists()):
-            yardstick.run_ss(None, v["src"], base)
+        if not (reuse and _fresh(base, stamp)):
+            _run_ss(None, v["src"], base, stamp)
         rows["ss"][ds] = score.read_spans(base, v["units"], v["input_sha"])
         rows["gliner_pii"][ds] = score.read_spans(PRIVATE / "gliner_pii" / f"{split}-{ds}.jsonl", v["units"],
                                                   v["input_sha"])
@@ -182,7 +210,7 @@ def with_ss(model: Path, split: str, tag: str, loaded: dict, units_by_ds, device
     out = {arm: brief(score_rows(units_by_ds, r)) for arm, r in rows.items()}
     if ms:
         out["ss_tagger"]["p50_ms"] = round(statistics.median(ms), 1)
-    out["config"] = {"variant": variant, "file": score.rel(cfg), "sha256": file_sha256(cfg),
+    out["config"] = {"variant": variant, "file": score.rel(cfg), "sha256": file_sha256(cfg), "code": stamp,
                      "extra": extra or {}, "thresholds": thresholds or {}}
     return out
 
