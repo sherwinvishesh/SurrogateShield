@@ -9,8 +9,11 @@ and four under ``bench/realdata/configs/curve/`` that move the model-based
 sources together: the tagger's per-type thresholds, spaCy's place
 thresholds and the score from which the tagger vouches for a place or an
 organisation at the relation gate (``gate_above``; op5 never vouches).
-op1 and op2 protect more, op4 and op5 edit less; patterns, the canonicaliser
-and the structural passes do not move. They run as in
+op1, op2 and op3 protect more, op5 edits less; patterns, the canonicaliser
+and the structural passes do not move. ``balanced`` was the point now in
+op3 until, with deberta-v3-small, the point then in op4 met the default
+rule on dev (same leak, fewer harmless edits, §3.3 acceptance passed); the
+five points are the same values as before. They run as in
 ``bench.realdata.components`` (same span files, same reuse rule).
 GLiNER-PII's points are its thresholds (``gliner_pii@0.5`` is the
 ``gliner_pii`` arm, ``@0.3`` is ``gliner_pii_tuned``), from one run at the
@@ -47,7 +50,7 @@ from bench.realdata import gliner_sweep, score
 from bench.realdata.common import COLLECTIONS, DATASETS, derive_seed, git_state
 from bench.tagger.evaluate import code_stamp
 
-OPS = ("curve/op1", "curve/op2", "balanced", "curve/op4", "curve/op5")
+OPS = ("curve/op1", "curve/op2", "curve/op3", "balanced", "curve/op5")
 DEFAULT = "balanced"
 LABELS = tuned.LABEL_SET
 GLINER_AT = (0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)

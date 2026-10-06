@@ -22,9 +22,11 @@ ROOT = Path(__file__).resolve().parent.parent
 # these on purpose: update it, and say so in the commit (the benchmark's is
 # recorded in every ss .meta.json and in realdata_test2.json). 2026-10-06:
 # the tagger joined balanced, ContextGuard left it, spaCy reads places only;
-# then the tagger became deberta-v3-small (bench/results/tagger_selection.json).
-BALANCED_HASH = "2af4dcc2650e3b81"
-BENCHMARK_HASH = "82c6c21dcc740c1a"
+# then the tagger became deberta-v3-small (bench/results/tagger_selection.json),
+# and balanced moved to the operating curve's op4 point (benchmark() was
+# 82c6c21dcc740c1a, now bench/realdata/configs/curve/op3.json).
+BALANCED_HASH = "9470f9336d853f67"
+BENCHMARK_HASH = "a1abaa92142b0db9"
 # the benchmark before the tagger (v2), which bench/tagger/configs/ss-v2.json restores
 V2_BENCHMARK_HASH = "8e463c3c6b7562fd"
 

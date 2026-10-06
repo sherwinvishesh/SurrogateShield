@@ -21,10 +21,10 @@ class Config:
     service: bool = True
     spacy_model: str = "en_core_web_lg"
     context_guard_enabled: bool = False       # off in balanced: the tagger reads names (V3)
-    entity_trace_high_threshold: float = 0.85
-    entity_trace_low_threshold: float = 0.60
+    entity_trace_high_threshold: float = 0.90      # balanced's (core/detection/config.py)
+    entity_trace_low_threshold: float = 0.70
     context_guard_threshold: float = 0.70
-    entity_trace_fallback_threshold: float = 0.65
+    entity_trace_fallback_threshold: float = 0.75
     fuzzy_threshold: int = 85
     # ── Address handling (v2) ────────────────────────────────────────────
     # "shift"   → house number ±address_shift_range, everything else kept

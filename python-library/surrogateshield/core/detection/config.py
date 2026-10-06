@@ -179,14 +179,28 @@ PII_TAGGER_REVISION = "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d300
 # meta.json wins when it is installed). Permissive only (V3 §0).
 MODEL_LICENCES = {SPACY_MODEL: "MIT", CONTEXT_GUARD_MODEL: "Apache-2.0", PII_TAGGER_MODEL: "MIT"}
 
-# The tagger's lowest kept score per type, chosen on dev-large's calib half
-# (bench/tagger/configs/sel3ga9-spacyloc.json): names and places at 0.5, the
-# structured types it adds to the patterns only when it is near certain. Its
-# places and organisations scored 0.9 or more count as tied to the writer at
-# the relation gate (``gate_above``).
-PII_TAGGER_THRESHOLDS = {"PERSON": 0.5, "ORG": 0.5, "LOCATION": 0.5, "PHONE": 0.9, "ID": 0.9,
-                         "ADDRESS": 0.8, "HANDLE": 0.9, "CREDENTIAL": 0.95}
-PII_TAGGER_GATE_ABOVE = 0.9
+# The tagger's lowest kept score per type, as first chosen on dev-large's
+# calib half (bench/tagger/configs/sel3ga9-spacyloc.json): names and places
+# at 0.5, the structured types it adds to the patterns only when it is near
+# certain. Its places and organisations scored 0.9 or more count as tied to
+# the writer at the relation gate (``gate_above``). ``fast`` keeps these;
+# with them spaCy's per-label scores pass at SPACY_TYPE_GATES.
+SEL3_TAGGER_THRESHOLDS = {"PERSON": 0.5, "ORG": 0.5, "LOCATION": 0.5, "PHONE": 0.9, "ID": 0.9,
+                          "ADDRESS": 0.8, "HANDLE": 0.9, "CREDENTIAL": 0.95}
+SEL3_GATE_ABOVE = 0.9
+SPACY_TYPE_GATES = {"high": 0.85, "low": 0.60, "fallback": 0.65}
+# ``balanced``: the operating curve's point that was op4 (the values above
+# are now its op3, bench/realdata/configs/curve/). With deberta-v3-small it
+# leaks no more than they do on dev and edits less harmless text, and it
+# passes the §3.3 acceptance: the default rule fixed before the curve was
+# run (bench/results/operating_curve_dev.json, tagger_acceptance_dev.json).
+# spaCy's labels score PERSON 0.88, GPE/ORG 0.85, LOC 0.74, FAC 0.70: at
+# these thresholds none is confirmed outright, PERSON, GPE and ORG are
+# promoted at the fallback (ContextGuard off), LOC and FAC are dropped.
+PII_TAGGER_THRESHOLDS = {"PERSON": 0.7, "ORG": 0.7, "LOCATION": 0.7, "PHONE": 0.95, "ID": 0.95,
+                         "ADDRESS": 0.9, "HANDLE": 0.95, "CREDENTIAL": 0.97}
+PII_TAGGER_GATE_ABOVE = 0.97
+ENTITY_TRACE_THRESHOLDS = {"high": 0.90, "low": 0.70, "fallback": 0.75}
 
 
 def _default_stages() -> Tuple[Stage, ...]:
@@ -195,7 +209,7 @@ def _default_stages() -> Tuple[Stage, ...]:
         Stage("pattern_scan"),
         Stage("canonicaliser", options={"views": list(DEFAULT_VIEWS)}),
         Stage("entity_trace", model=SPACY_MODEL, revision=SPACY_REVISION,
-              thresholds={"high": 0.85, "low": 0.60, "fallback": 0.65}),
+              thresholds=dict(ENTITY_TRACE_THRESHOLDS)),
         Stage("context_guard", enabled=False, model=CONTEXT_GUARD_MODEL, revision=CONTEXT_GUARD_REVISION,
               thresholds={"accept": 0.70}),
         Stage("pii_tagger", model=PII_TAGGER_MODEL, revision=PII_TAGGER_REVISION,
@@ -513,25 +527,33 @@ def preset(name: str = "balanced") -> DetectionConfig:
     every type it reads, low thresholds, every type past the gate (maximal
     recall; it edits far more harmless text). ``classic``: the detector
     before the tagger (spaCy and ContextGuard read names and places), for a
-    machine without the tagger's weights. Ablations, each one component off:
-    ``no_tagger``, ``no_canonicaliser``, ``no_gate``, ``no_models``,
-    ``no_structural``."""
+    machine without the tagger's weights. ``fast``, ``strict`` and
+    ``classic`` keep the values they were defined with when ``balanced``
+    moved to the curve's op4 (SEL3_*, SPACY_TYPE_GATES). Ablations, each one
+    component of ``balanced`` off: ``no_tagger``, ``no_canonicaliser``,
+    ``no_gate``, ``no_models``, ``no_structural``."""
     base = DetectionConfig()
     if name == "balanced":
         return base
     if name == "fast":
-        return (base.with_stage("entity_trace", enabled=False)
-                    .with_stage("pii_tagger", thresholds={"LOCATION": 0.4}).replace(preset="fast"))
+        return (base.with_stage("entity_trace", enabled=False, thresholds=dict(SPACY_TYPE_GATES))
+                    .with_stage("pii_tagger", thresholds={**SEL3_TAGGER_THRESHOLDS, "LOCATION": 0.4},
+                                options={"gate_above": SEL3_GATE_ABOVE})
+                    .replace(preset="fast"))
     if name == "strict":
         sources = {t: (("*",) if t in FREE_TEXT_TYPES else _STRUCTURED_SOURCES + ("pii_tagger",))
                    for t in ALL_TYPES}
         return (base.with_stage("entity_trace", thresholds={"high": 0.70, "low": 0.40, "fallback": 0.45})
                     .with_stage("context_guard", enabled=True, thresholds={"accept": 0.50})
-                    .with_stage("pii_tagger", thresholds={t: 0.3 for t in PII_TAGGER_THRESHOLDS})
+                    .with_stage("pii_tagger", thresholds={t: 0.3 for t in PII_TAGGER_THRESHOLDS},
+                                options={"gate_above": SEL3_GATE_ABOVE})
                     .replace(preset="strict", gate_bypass=("*",), type_sources=sources))
     if name == "classic":
         sources = {t: (("*",) if t in FREE_TEXT_TYPES else _STRUCTURED_SOURCES) for t in ALL_TYPES}
-        return (base.with_stage("pii_tagger", enabled=False).with_stage("context_guard", enabled=True)
+        return (base.with_stage("pii_tagger", enabled=False, thresholds=dict(SEL3_TAGGER_THRESHOLDS),
+                                options={"gate_above": SEL3_GATE_ABOVE})
+                    .with_stage("entity_trace", thresholds=dict(SPACY_TYPE_GATES))
+                    .with_stage("context_guard", enabled=True)
                     .replace(preset="classic", type_sources=sources))
     if name == "no_tagger":
         return base.with_stage("pii_tagger", enabled=False).replace(preset=name)

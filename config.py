@@ -16,10 +16,13 @@ from typing import Optional
 
 # spaCy's NER gives no per-entity confidence, so EntityTrace assigns one per
 # label: PERSON 0.88, GPE/ORG 0.85, LOC 0.74, FAC 0.70. These thresholds are
-# therefore TYPE GATES, not confidence cut-offs: with the defaults PERSON/GPE/
-# ORG are confirmed and LOC/FAC are borderline (tests/test_F3_settings.py).
-ENTITY_TRACE_HIGH_THRESHOLD: float = 0.85   # type score ≥ this → confirmed
-ENTITY_TRACE_LOW_THRESHOLD: float = 0.60    # type score ≥ this → borderline (sent to ContextGuard)
+# therefore TYPE GATES, not confidence cut-offs: with the defaults (the
+# balanced preset's) no label is confirmed outright, PERSON/GPE/ORG are
+# borderline and promoted at the fallback, LOC/FAC are dropped. The classic
+# preset keeps the earlier 0.85 / 0.60 / 0.65, which confirm PERSON/GPE/ORG
+# and promote LOC/FAC too (tests/test_F3_settings.py).
+ENTITY_TRACE_HIGH_THRESHOLD: float = 0.90   # type score ≥ this → confirmed
+ENTITY_TRACE_LOW_THRESHOLD: float = 0.70    # type score ≥ this → borderline (sent to ContextGuard)
 
 CONTEXT_GUARD_CONFIDENCE_THRESHOLD: float = 0.70  # borderline type score ≥ this → confirmed
 
@@ -79,9 +82,9 @@ FUZZY_MATCH_THRESHOLD: int = 85                  # rapidfuzz partial_ratio thres
 # ─────────────────────────────────────────────
 
 # When ContextGuard is disabled, borderline NER entities above this score
-# are promoted to confirmed rather than silently dropped.
-# Catches LOC (0.74) and FAC (0.70) entities in the default configuration.
-ENTITY_TRACE_FALLBACK_THRESHOLD: float = 0.65
+# are promoted to confirmed rather than silently dropped. At 0.75 that is
+# PERSON (0.88), GPE and ORG (0.85); not LOC (0.74) or FAC (0.70).
+ENTITY_TRACE_FALLBACK_THRESHOLD: float = 0.75
 
 # ─────────────────────────────────────────────
 # Address handling (v2)

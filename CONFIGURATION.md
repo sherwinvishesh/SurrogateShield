@@ -59,10 +59,10 @@ A whole config (the output of `to_dict()`) comes back unchanged.
 
 | preset | what changes from `balanced` | hash (first 16 hex) |
 |---|---|---|
-| `balanced` | the default, at the benchmark settings: PatternScan, the canonicaliser, the PII tagger (names, organisations, places, and phones, IDs, addresses, handles and credentials beside the patterns), spaCy for places only, the structural passes; ContextGuard off | `2af4dcc2650e3b81` |
-| `fast` | no spaCy: the tagger reads places too, from 0.4 | `99373088e689605a` |
-| `strict` | every model stage for every type it reads: spaCy and ContextGuard back on names, EntityTrace thresholds high 0.70 / low 0.40 / fallback 0.45, ContextGuard accept 0.50, the tagger from 0.3; every type bypasses the relation gate | `da22ad81803a548c` |
-| `classic` | the detector before the tagger: no tagger, spaCy and ContextGuard read names, organisations and places. For a machine without the tagger's weights | `17ae41687553c75c` |
+| `balanced` | the default, at the benchmark settings: PatternScan, the canonicaliser, the PII tagger (names, organisations, places, and phones, IDs, addresses, handles and credentials beside the patterns), spaCy for places only, the structural passes; ContextGuard off | `9470f9336d853f67` |
+| `fast` | no spaCy: the tagger reads places too, from 0.4, its other thresholds those `balanced` had until the operating-curve move (PERSON / ORG 0.5, ADDRESS 0.8, PHONE / ID / HANDLE 0.9, CREDENTIAL 0.95, `gate_above` 0.9) | `2c41977891a20c88` |
+| `strict` | every model stage for every type it reads: spaCy and ContextGuard back on names, EntityTrace thresholds high 0.70 / low 0.40 / fallback 0.45, ContextGuard accept 0.50, the tagger from 0.3; every type bypasses the relation gate | `d3afc88e9e1c94c5` |
+| `classic` | the detector before the tagger: no tagger, spaCy and ContextGuard read names, organisations and places. EntityTrace at its earlier type gates (high 0.85 / low 0.60 / fallback 0.65). For a machine without the tagger's weights | `6e5419989f2b9a70` |
 
 There are also five ablations, each with one component off, used by the
 benchmark only:
@@ -80,7 +80,7 @@ longer routes them to spaCy; `classic` is the usable config without the
 tagger.
 
 `benchmark()` is the config of the real-data benchmark: `balanced` with
-`type_actions["ADDRESS"] = "replace"` (hash `82c6c21dcc740c1a`; `7d524abba90c7696` with the deberta-v3-xsmall tagger; before the
+`type_actions["ADDRESS"] = "replace"` (hash `a1abaa92142b0db9`; `82c6c21dcc740c1a` at the thresholds now in `bench/realdata/configs/curve/op3.json`, `7d524abba90c7696` with the deberta-v3-xsmall tagger; before the
 tagger joined `balanced` it was `8e463c3c6b7562fd`, which
 `bench/tagger/configs/ss-v2.json` restores). The product
 default `auto` keeps street and town inside a service query ("is there a
@@ -101,9 +101,9 @@ with what the earlier ones found already masked:
 |---|---|---|---|
 | `pattern_scan` | regexes with checksums and context cues (email, phone, ID, card, IBAN, IP, credential, DOB, age, …) | — | — |
 | `canonicaliser` | the same patterns on rewritten views of the text: `worded` (number words to digits), `spelled` (`dot`/`at` in e-mail shapes), `dates`, `folded` (full-width forms, look-alikes, zero-width), `joined` (spaced digit groups); `options.views` picks them | — | — |
-| `entity_trace` | spaCy NER | `en_core_web_lg` (3.8.0, MIT) | `high` 0.85, `low` 0.60, `fallback` 0.65 |
+| `entity_trace` | spaCy NER | `en_core_web_lg` (3.8.0, MIT) | `high` 0.90, `low` 0.70, `fallback` 0.75. spaCy gives no per-entity score: EntityTrace scores PERSON 0.88, GPE / ORG 0.85, LOC 0.74, FAC 0.70, so these are type gates (here PERSON, GPE and ORG pass at the fallback; LOC and FAC do not) |
 | `context_guard` | transformer NER over the masked text | `dslim/distilbert-NER` (`dfa2838a127384aabb82ed7719e16dab84c42a2a`, Apache-2.0) | `accept` 0.70 |
-| `pii_tagger` | the PII tagger: a token classifier trained on generated text (`bench/tagger/`), resolved through the detector registry like a plugin (a registered `pii_tagger` detector replaces it) | `pii-tagger-dv3s-40k`, a local folder pinned by its weights' SHA-256 (DeBERTa-v3-small, MIT) | one per type: PERSON / ORG / LOCATION 0.5, ADDRESS 0.8, PHONE / ID / HANDLE 0.9, CREDENTIAL 0.95; `options.gate_above` 0.9 |
+| `pii_tagger` | the PII tagger: a token classifier trained on generated text (`bench/tagger/`), resolved through the detector registry like a plugin (a registered `pii_tagger` detector replaces it) | `pii-tagger-dv3s-40k`, a local folder pinned by its weights' SHA-256 (DeBERTa-v3-small, MIT) | one per type: PERSON / ORG / LOCATION 0.7, ADDRESS 0.9, PHONE / ID / HANDLE 0.95, CREDENTIAL 0.97; `options.gate_above` 0.97 |
 | `structural` | the layout passes: addresses read part by part, organisation names read whole, names after titles and greetings, host names, Pass S | — | — |
 
 Every `Stage` has these fields:
@@ -314,12 +314,12 @@ Flags:
 
 ```
 $ surrogateshield doctor
-detection config: preset balanced, hash 2af4dcc2650e3b81 (default)
+detection config: preset balanced, hash 9470f9336d853f67 (default)
   stage pattern_scan   on
   stage canonicaliser  on
-  stage entity_trace   on, en_core_web_lg@3.8.0, fallback=0.65 high=0.85 low=0.6
+  stage entity_trace   on, en_core_web_lg@3.8.0, fallback=0.75 high=0.9 low=0.7
   stage context_guard  off, dslim/distilbert-NER@dfa2838a1273, accept=0.7
-  stage pii_tagger     on, pii-tagger-dv3s-40k@sha256:f9e58, ADDRESS=0.8 CREDENTIAL=0.95 HANDLE=0.9 ID=0.9 LOCATION=0.5 ORG=0.5 PERSON=0.5 PHONE=0.9
+  stage pii_tagger     on, pii-tagger-dv3s-40k@sha256:f9e58, ADDRESS=0.9 CREDENTIAL=0.97 HANDLE=0.95 ID=0.95 LOCATION=0.7 ORG=0.7 PERSON=0.7 PHONE=0.95
   stage structural     on
   actions        ADDRESS auto (others replace)
   relation gate  on
