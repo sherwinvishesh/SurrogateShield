@@ -275,12 +275,11 @@ class DetectionConfig:
         return not self.gate or "*" in self.gate_bypass or public_type(typ) in self.gate_bypass
 
     def rank(self, stage: str) -> int:
-        """Position in ``source_priority`` (lower wins); unlisted stages come
-        after it, in ``detectors`` order."""
+        """Position in ``source_priority`` (lower wins); stages not listed
+        share the last rank (an empty list: every stage ties)."""
         if stage in self.source_priority:
             return self.source_priority.index(stage)
-        names = [s.name for s in self.detectors]
-        return len(self.source_priority) + (names.index(stage) if stage in names else len(names))
+        return len(self.source_priority)
 
     def conflict_winner(self, a: str, b: str) -> str:
         """``type_conflicts`` entry for two public types: a type, or "score"."""

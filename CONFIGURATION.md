@@ -184,15 +184,33 @@ than PERSON never pass through the gate.
 
 ## Conflicts (`source_priority`, `type_conflicts`)
 
-These settle which candidate stands when two stages report the same value
-differently. They are part of the config and its hash.
+Several stages can report the same value: spaCy and distilbert both read
+"Mercy General", or PatternScan and a plugin both read an ID. A value gets
+one surrogate, so the resolver (`core/detection/resolver.py`) keeps one
+candidate for it:
 
-- `source_priority` ranks the stages (default `pattern_scan`, `canonicaliser`, `structural`, `pii_tagger`, `context_guard`, `entity_trace`). Plugins not listed rank after it, in `detectors` order.
-- `type_conflicts` is keyed by a sorted pair of public types (`"ORG|PERSON"`). Its value names the type that stands, or `"score"`.
+1. **source rank.** `source_priority` lists the stages, best first. The
+   default is `pattern_scan`, `canonicaliser`, `structural`, `pii_tagger`,
+   `context_guard`, `entity_trace`. Stages not listed (plugins, unless you
+   add them) share the last rank.
+2. **type table.** If the best-ranked candidates read the value as
+   different public types, `type_conflicts` decides. It is keyed by the
+   sorted pair (`"ORG|PERSON"`), and its value is the type that stands or
+   `"score"` (no preference).
+3. **score.** The highest score wins, then the first reported.
 
-They are read by the resolver (V3 §3.5). Until the resolver lands, a value
-reported twice keeps its highest-scored candidate, which is the rule every
-committed benchmark number used.
+`source_priority=()` together with every pair set to `"score"` gives the
+score-only rule used before the resolver.
+
+Every pair in the default table is `"score"`. On the dev and devlarge
+splits, the resolver picked a different candidate from the score rule in
+6 of 264 injected groups and 15 of 381 natural ones, and none of those
+changes moved an injected value to another public type. So no evidence
+favours one type over another
+(`bench/realdata/resolver_effect.py`, `bench/results/resolver_effect.json`).
+
+Spans of different values that overlap are replaced longest first. The
+shorter value still gets its surrogate wherever it appears on its own.
 
 ## Plugins
 

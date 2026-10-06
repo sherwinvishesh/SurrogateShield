@@ -191,7 +191,7 @@ def prepare_send(question: str, mimic, cascade_options: Optional[dict] = None,
     if config is not None:
         options["config"] = config
     confirmed, _ = run_cascade(question, skip_location_entities=is_svc, timings=timings, **options)
-    confirmed = deduplicate(confirmed)
+    confirmed = deduplicate(confirmed, config)
     skipped = list(getattr(confirmed, "_skipped_entities", []))
 
     t = time.perf_counter()

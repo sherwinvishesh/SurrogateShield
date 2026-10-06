@@ -45,7 +45,8 @@ from typing import Dict, List, Optional, Sequence, Set, Tuple
 from ..entities import DetectedEntity, mask_spans
 from . import canonical, pattern_scan, entity_trace, context_guard, relation_gate, structural
 from . import config as dconfig
-from . import org_assembly, plugins
+from . import org_assembly, plugins, resolver
+from .resolver import stage_of
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -1103,22 +1104,6 @@ def term_gender(text: str) -> Optional[str]:
 _UNSET = object()
 
 
-def stage_of(ent: DetectedEntity) -> str:
-    """The config stage an entity came from (``DetectionConfig.detectors``):
-    a PatternScan hit, one on a canonical view, a structural pass's PERSON
-    or ORG (Passes A, E, H mark theirs "pattern"), a model, or a plugin
-    (its source is the stage name)."""
-    src = ent.source
-    if src == "pattern":
-        if ent.view is not None:
-            return "canonicaliser"
-        return "structural" if ent.type in ("PERSON", "ORG") else "pattern_scan"
-    return _STAGE_OF_SOURCE.get(src, src)
-
-
-_STAGE_OF_SOURCE = {"ner": "entity_trace", "slm": "context_guard", "structural": "structural"}
-
-
 def detection_config(config: Optional["dconfig.DetectionConfig"] = None,
                      **settings) -> "dconfig.DetectionConfig":
     """The config a cascade runs with: *config*, else the environment's
@@ -1701,14 +1686,14 @@ def _outside_opaque(entities: List[DetectedEntity], spans) -> List[DetectedEntit
             if e.source == "pattern" or not any(e.start < b and a < e.end for a, b in spans)]
 
 
-def deduplicate(entities: List[DetectedEntity]) -> List[DetectedEntity]:
-    """Remove duplicate entities by text, keeping the highest-scored one."""
-    seen: dict = {}
-    for ent in entities:
-        key = ent.text.strip()
-        if key not in seen or ent.score > seen[key].score:
-            seen[key] = ent
-    result = _TaggedList(seen.values())
+def deduplicate(entities: List[DetectedEntity],
+                config: Optional["dconfig.DetectionConfig"] = None) -> List[DetectedEntity]:
+    """One entity per value (stripped text), chosen by the resolver
+    (source priority, the type-conflict table, then score; see
+    resolver.py). *config*: the cascade's (default: the environment's,
+    else ``balanced``)."""
+    result = _TaggedList(resolver.resolve(entities, config if config is not None
+                                          else detection_config()))
     result.sort(key=lambda e: e.start)
     if hasattr(entities, "_qi_matches"):
         result._qi_matches = entities._qi_matches

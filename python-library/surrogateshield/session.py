@@ -181,7 +181,7 @@ class Session:
         return result
 
     def _substitute(self, text, is_svc, address_mode, detections, masked, det) -> MaskResult:
-        unique = _pipeline.deduplicate(masked)
+        unique = _pipeline.deduplicate(masked, det)
         replacements = assign_surrogates(
             unique, text, self._mimic, [self._shadow],
             forbidden=set(self._shadow.originals()),
