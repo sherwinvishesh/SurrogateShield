@@ -1,8 +1,8 @@
 # Leak attribution — `dev` (data split `dev`, collection `test1`)
 
-Command: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute --split dev --out bench/results/attribution_dev_tagger.json` at commit `84d009521027`. Counts only.
+Command: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute --split dev --out bench/results/attribution_dev_tagger.json` at commit `91e1ff68d99d` with 6 modified tracked file(s). Counts only.
 
-Traced edits vs the `ss` arm's span file: {'differ': 204, 'equal': 458}.
+Traced edits vs the `ss` arm's span file: {'equal': 662}.
 
 ## Injected slice: cause by type
 

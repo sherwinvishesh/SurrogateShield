@@ -2,7 +2,7 @@
 
 `PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.operating_curve --split dev --out bench/results/operating_curve_dev.json`
 
-Commit 4e9df88d1bba, library code f425573baadf. x = injected leak rate (Wilson 95 %); y = natural-slice spurious edits / natural-slice edits (score.aggregate; Wilson 95 %); y' = natural-slice spurious edits / natural-slice messages (conversation-cluster bootstrap 95 %). Rule: per y: SS dominates if every GLiNER-PII point has an SS point with lower leak and lower y (point estimates); the default dominates if balanced alone does.
+Commit 91e1ff68d99d, library code c4e3e9d4d87d. x = injected leak rate (Wilson 95 %); y = natural-slice spurious edits / natural-slice edits (score.aggregate; Wilson 95 %); y' = natural-slice spurious edits / natural-slice messages (conversation-cluster bootstrap 95 %). Rule: per y: SS dominates if every GLiNER-PII point has an SS point with lower leak and lower y (point estimates); the default dominates if balanced alone does.
 
 ## all
 

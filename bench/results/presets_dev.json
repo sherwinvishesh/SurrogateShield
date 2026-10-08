@@ -7,41 +7,55 @@
   "seed": "derive_seed('components-bootstrap', data split, group, slice)",
   "unit": "conversation (a single-turn prompt is its own)"
  },
- "code": "f425573baadf73d7565f6b73b975afbc25e3629113030ecf2db853bf2bfb02f3",
+ "code": "c4e3e9d4d87d57a6cac5a3d545fa2e4ccdea7e884f4dc293c059168b405c1b88",
  "command": "PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.components --split dev --out bench/results/presets_dev.json",
  "configs": {
   "balanced": {
    "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
    "file": "bench/realdata/configs/balanced.json",
-   "in_run_p50_ms": 45.5,
+   "in_run_p50_ms": 51.2,
    "preset": "balanced",
    "sha256": "844015945409431deda3c0f27fc4aee4dd653428b81249f3686ca2c382d3a8de"
   },
   "classic": {
    "detection_config_hash": "4b37e3914e9733e5a5fe3ed49ff12f373c57051b96a493407d308365b92098ee",
    "file": "bench/realdata/configs/classic.json",
-   "in_run_p50_ms": 29.3,
+   "in_run_p50_ms": 30.5,
    "preset": "classic",
    "sha256": "ba2dc23e606d5c86e74bc2028e6711da4a302c51070a60b40441676b59d0d37b"
   },
   "fast": {
    "detection_config_hash": "19a19bd9a129c4557a4ac6928d36e9391b5f53ba0b664518cbe55d5715b81629",
    "file": "bench/realdata/configs/fast.json",
-   "in_run_p50_ms": 36.0,
+   "in_run_p50_ms": 38.7,
    "preset": "fast",
    "sha256": "c25dfd127d260cd8d7a9fe950d0138148c5f9f7462ddbb4269b181a153326b48"
+  },
+  "h9/no_patterns": {
+   "detection_config_hash": "18a8cd8e4a2def8c5b01828b97821b2aba31b49e9960d9ab22d0e114e948b9c5",
+   "file": "bench/realdata/configs/h9/no_patterns.json",
+   "in_run_p50_ms": 49.3,
+   "preset": "balanced",
+   "sha256": "82b1a20d6218230ac852425040e782bfe733a36f2ef7cf396469195392eda4b6"
+  },
+  "h9/no_patterns_unrouted": {
+   "detection_config_hash": "8ddcbca52249af08e36bca007601477bce3d4032f253a3823f148a8552ae67ab",
+   "file": "bench/realdata/configs/h9/no_patterns_unrouted.json",
+   "in_run_p50_ms": 46.3,
+   "preset": "balanced",
+   "sha256": "b40c0f526254a4e5fdd9efed4f65f2c18b0db0e2a34986677ae8d29cad4eb67c"
   },
   "no_canonicaliser": {
    "detection_config_hash": "ca3733979bbdb18b97fa9bfa000bbc322c082187b9352e7e169657aa903f5fae",
    "file": "bench/realdata/configs/no_canonicaliser.json",
-   "in_run_p50_ms": 46.4,
+   "in_run_p50_ms": 47.6,
    "preset": "no_canonicaliser",
    "sha256": "07d3b0e69889a7864bf94fc1a231cbd0a380bb5a4d84395ef130c35eaca50152"
   },
   "no_gate": {
    "detection_config_hash": "d1e5b8274e68263d2a5edee59ffdf6c6d2066799d68c99abde1335a13d6b71d4",
    "file": "bench/realdata/configs/no_gate.json",
-   "in_run_p50_ms": 46.3,
+   "in_run_p50_ms": 48.4,
    "preset": "no_gate",
    "sha256": "5e864dfbb1c140c9e0347cc27b68ad3ba1188df40de84f147f87f9d89c1ac25d"
   },
@@ -55,21 +69,21 @@
   "no_structural": {
    "detection_config_hash": "4a1e5c9003214492e5295e29667ac45d7ad96478cd5aa729d8a0beb251967edf",
    "file": "bench/realdata/configs/no_structural.json",
-   "in_run_p50_ms": 44.6,
+   "in_run_p50_ms": 46.9,
    "preset": "no_structural",
    "sha256": "c3c1d1526e741187dac4f9ba826b55586e931e2fb3f0943a8c129fb66237f68a"
   },
   "no_tagger": {
    "detection_config_hash": "cb25eb674717839e801a041a2114e09d9d355adb0f92d541c5e791c7ccd9126b",
    "file": "bench/realdata/configs/no_tagger.json",
-   "in_run_p50_ms": 11.9,
+   "in_run_p50_ms": 11.8,
    "preset": "no_tagger",
    "sha256": "57379aee58cb9cd6427e8bfbdb5b9af67bf58d90b5001de8d269d835fe8bdd48"
   },
   "strict": {
    "detection_config_hash": "57f6f212a49159828a31b9b171e72bda6db90e4979c863b87f3b45e895ad276e",
    "file": "bench/realdata/configs/strict.json",
-   "in_run_p50_ms": 64.1,
+   "in_run_p50_ms": 67.4,
    "preset": "strict",
    "sha256": "2cb44fada869b690152ec65569297c7e237c7edff1525722169e4385da698093"
   }
@@ -198,6 +212,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       -0.0063,
+       0.0108
+      ],
+      "diff": 0.0016,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0018,
+       0.1402
+      ],
+      "diff": 0.0658,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2881,
+       0.3468
+      ],
+      "diff": 0.3174,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0105,
+       0.0347
+      ],
+      "diff": 0.0135,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -310,10 +364,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.1717,
-       0.2635
+       0.1709,
+       0.2628
       ],
-      "diff": 0.2171,
+      "diff": 0.2165,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -397,6 +451,46 @@
       ],
       "diff": 0.156,
       "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       -0.0046,
+       0.0157
+      ],
+      "diff": 0.0044,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0098,
+       0.111
+      ],
+      "diff": 0.0472,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.3049,
+       0.3742
+      ],
+      "diff": 0.34,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0146,
+       0.0424
+      ],
+      "diff": 0.0144,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -602,6 +696,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       -0.0345,
+       0.0
+      ],
+      "diff": -0.0108,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.3743
+      ],
+      "diff": 0.1719,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.172,
+       0.3146
+      ],
+      "diff": 0.2473,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0792,
+       0.0515
+      ],
+      "diff": -0.0016,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -714,10 +848,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2197,
-       0.4111
+       0.2129,
+       0.41
       ],
-      "diff": 0.3225,
+      "diff": 0.3198,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -800,6 +934,46 @@
        0.3761
       ],
       "diff": 0.2194,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0277,
+       0.1968
+      ],
+      "diff": 0.1054,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.078,
+       -0.0005
+      ],
+      "diff": -0.0304,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -916,10 +1090,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0328,
-       0.2934
+       0.0338,
+       0.2932
       ],
-      "diff": 0.1534,
+      "diff": 0.1542,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -1002,6 +1176,46 @@
        0.187
       ],
       "diff": 0.0358,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0224,
+       0.0332
+      ],
+      "diff": 0.009,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2051,
+       0.3445
+      ],
+      "diff": 0.2716,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0053,
+       0.0501
+      ],
+      "diff": 0.0225,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -1210,6 +1424,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0309
+      ],
+      "diff": 0.0095,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0761,
+       -0.0047
+      ],
+      "diff": -0.0351,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2553,
+       0.3602
+      ],
+      "diff": 0.3095,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.063,
+       0.027
+      ],
+      "diff": -0.015,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -1409,6 +1663,46 @@
       ],
       "diff": 0.2064,
       "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0414
+      ],
+      "diff": 0.013,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0939,
+       -0.0055
+      ],
+      "diff": -0.0437,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2622,
+       0.3819
+      ],
+      "diff": 0.3247,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0875,
+       0.0169
+      ],
+      "diff": -0.0339,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -1614,6 +1908,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.0714,
+       0.3871
+      ],
+      "diff": 0.2258,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0823
+      ],
+      "diff": 0.0357,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -1816,6 +2150,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 1236
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.2805,
+       0.0456
+      ],
+      "diff": -0.0942,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 1236
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.3704,
+       0.0
+      ],
+      "diff": -0.1786,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -2014,6 +2388,46 @@
        0.4048
       ],
       "diff": 0.1478,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0915,
+       0.0
+      ],
+      "diff": -0.0308,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2222,
+       0.44
+      ],
+      "diff": 0.32,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.049,
+       0.0677
+      ],
+      "diff": 0.0121,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2222,6 +2636,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       -0.0244,
+       0.0098
+      ],
+      "diff": -0.0048,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0364,
+       0.3055
+      ],
+      "diff": 0.1825,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2689,
+       0.3628
+      ],
+      "diff": 0.3173,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.029,
+       0.0552
+      ],
+      "diff": 0.0178,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -2334,10 +2788,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.1581,
-       0.3258
+       0.1565,
+       0.3246
       ],
-      "diff": 0.2369,
+      "diff": 0.2352,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2421,6 +2875,46 @@
       ],
       "diff": 0.1056,
       "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       -0.0216,
+       0.0195
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0051,
+       0.2693
+      ],
+      "diff": 0.1497,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2908,
+       0.4122
+      ],
+      "diff": 0.3542,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0016,
+       0.0831
+      ],
+      "diff": 0.0433,
+      "excludes_0": false,
       "resamples": 2000
      }
     },
@@ -2626,6 +3120,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       -0.0968,
+       0.0
+      ],
+      "diff": -0.0294,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.517
+      ],
+      "diff": 0.3061,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.1818,
+       0.3333
+      ],
+      "diff": 0.2647,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.2222,
+       0.0535
+      ],
+      "diff": -0.066,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -2738,10 +3272,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.2335,
-       0.4517
+       0.2214,
+       0.4479
       ],
-      "diff": 0.3297,
+      "diff": 0.324,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -2824,6 +3358,46 @@
        0.3319
       ],
       "diff": 0.1248,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 1898
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0286,
+       0.2678
+      ],
+      "diff": 0.1195,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 1898
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0779,
+       0.0737
+      ],
+      "diff": 0.012,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -2940,10 +3514,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       -0.0459,
-       0.2598
+       -0.0465,
+       0.2587
       ],
-      "diff": 0.0732,
+      "diff": 0.0728,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3026,6 +3600,46 @@
        0.0811
       ],
       "diff": 0.0333,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0854
+      ],
+      "diff": 0.0312,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.1153,
+       0.2632
+      ],
+      "diff": 0.2,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0216
+      ],
+      "diff": 0.0083,
       "excludes_0": false,
       "resamples": 2000
      }
@@ -3234,6 +3848,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0206
+      ],
+      "diff": 0.0096,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2722,
+       0.3744
+      ],
+      "diff": 0.3254,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0117,
+       0.0577
+      ],
+      "diff": 0.0313,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -3432,6 +4086,46 @@
        0.2315
       ],
       "diff": 0.1571,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0232
+      ],
+      "diff": 0.0087,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.2802,
+       0.3987
+      ],
+      "diff": 0.3419,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0039,
+       0.0603
+      ],
+      "diff": 0.0264,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -3638,6 +4332,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.1154,
+       0.3549
+      ],
+      "diff": 0.25,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0892
+      ],
+      "diff": 0.0438,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -3840,6 +4574,46 @@
       "resamples": 2000
      }
     },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 1997
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0152,
+       0.2138
+      ],
+      "diff": 0.0795,
+      "excludes_0": true,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 1997
+     },
+     "spurious_rate": {
+      "ci95": [
+       -0.0266,
+       0.0113
+      ],
+      "diff": -0.0049,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
     "no_canonicaliser": {
      "leak_rate": {
       "ci95": [
@@ -3952,10 +4726,10 @@
      },
      "spurious_rate": {
       "ci95": [
-       0.0193,
-       0.4073
+       0.02,
+       0.4092
       ],
-      "diff": 0.189,
+      "diff": 0.1907,
       "excludes_0": true,
       "resamples": 2000
      }
@@ -4039,6 +4813,46 @@
       ],
       "diff": -0.072,
       "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns": {
+     "leak_rate": {
+      "ci95": [
+       0.0,
+       0.0
+      ],
+      "diff": 0.0,
+      "excludes_0": false,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0,
+       0.0343
+      ],
+      "diff": 0.0206,
+      "excludes_0": false,
+      "resamples": 2000
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "leak_rate": {
+      "ci95": [
+       0.1364,
+       0.4231
+      ],
+      "diff": 0.3077,
+      "excludes_0": true,
+      "resamples": 2000
+     },
+     "spurious_rate": {
+      "ci95": [
+       0.0101,
+       0.0959
+      ],
+      "diff": 0.0505,
+      "excludes_0": true,
       "resamples": 2000
      }
     },
@@ -4177,10 +4991,8 @@
   "wildchat/pool.jsonl": "912b55e509227bdf0a2c6442352ac668d44153febd369d3930489c0154843c9f"
  },
  "git": {
-  "commit": "4e9df88d1bba302bfae237fa661b5557a84209a9",
-  "modified": [
-   "bench/results/tagger_acceptance_dev.json"
-  ]
+  "commit": "91e1ff68d99d17f0135074d19737bfc0fe5847ca",
+  "modified": []
  },
  "reference": [
   "gliner_pii",
@@ -4541,6 +5353,154 @@
       "wilson95": [
        0.3856,
        0.4429
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 30,
+      "AGE": 33,
+      "CREDENTIAL": 32,
+      "DATE_OF_BIRTH": 35,
+      "EMAIL": 55,
+      "HANDLE": 37,
+      "ID": 53,
+      "LOCATION": 32,
+      "NETWORK": 37,
+      "ORG": 44,
+      "PERSON": 152,
+      "PHONE": 47,
+      "URL": 40
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 816,
+     "leak": {
+      "k": 10,
+      "n": 627,
+      "rate": 0.0159,
+      "wilson95": [
+       0.0087,
+       0.0291
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 3,
+      "PERSON": 3,
+      "PHONE": 2,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0148,
+     "message_leak": {
+      "k": 9,
+      "n": 176,
+      "rate": 0.0511,
+      "wilson95": [
+       0.0271,
+       0.0943
+      ]
+     },
+     "messages": 220,
+     "messages_with_spurious": 42,
+     "negatives_untouched": {
+      "k": 40,
+      "n": 44,
+      "rate": 0.9091,
+      "wilson95": [
+       0.7884,
+       0.9641
+      ]
+     },
+     "protect_values": 627,
+     "refused": 1,
+     "spurious": {
+      "k": 161,
+      "n": 816,
+      "rate": 0.1973,
+      "wilson95": [
+       0.1714,
+       0.226
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 30,
+      "AGE": 33,
+      "CREDENTIAL": 32,
+      "DATE_OF_BIRTH": 35,
+      "EMAIL": 55,
+      "HANDLE": 37,
+      "ID": 53,
+      "LOCATION": 32,
+      "NETWORK": 37,
+      "ORG": 44,
+      "PERSON": 152,
+      "PHONE": 47,
+      "URL": 40
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 545,
+     "leak": {
+      "k": 208,
+      "n": 627,
+      "rate": 0.3317,
+      "wilson95": [
+       0.296,
+       0.3695
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 32,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 35,
+      "EMAIL": 55,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 37,
+      "ORG": 3,
+      "PERSON": 3,
+      "PHONE": 2,
+      "URL": 40
+     },
+     "macro_leak_rate": 0.3949,
+     "message_leak": {
+      "k": 133,
+      "n": 176,
+      "rate": 0.7557,
+      "wilson95": [
+       0.6872,
+       0.8133
+      ]
+     },
+     "messages": 220,
+     "messages_with_spurious": 31,
+     "negatives_untouched": {
+      "k": 43,
+      "n": 44,
+      "rate": 0.9773,
+      "wilson95": [
+       0.8819,
+       0.996
+      ]
+     },
+     "protect_values": 627,
+     "refused": 0,
+     "spurious": {
+      "k": 79,
+      "n": 545,
+      "rate": 0.145,
+      "wilson95": [
+       0.1179,
+       0.177
       ]
      },
      "values_by_type": {
@@ -4930,7 +5890,7 @@
      }
     },
     "strict": {
-     "edits": 1070,
+     "edits": 1069,
      "leak": {
       "k": 4,
       "n": 627,
@@ -4966,7 +5926,7 @@
       ]
      },
      "messages": 220,
-     "messages_with_spurious": 110,
+     "messages_with_spurious": 109,
      "negatives_untouched": {
       "k": 30,
       "n": 44,
@@ -4979,12 +5939,12 @@
      "protect_values": 627,
      "refused": 1,
      "spurious": {
-      "k": 373,
-      "n": 1070,
-      "rate": 0.3486,
+      "k": 372,
+      "n": 1069,
+      "rate": 0.348,
       "wilson95": [
-       0.3206,
-       0.3776
+       0.32,
+       0.377
       ]
      },
      "values_by_type": {
@@ -5342,6 +6302,148 @@
       "wilson95": [
        0.2424,
        0.3093
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 28,
+      "AGE": 25,
+      "CREDENTIAL": 20,
+      "DATE_OF_BIRTH": 27,
+      "EMAIL": 45,
+      "HANDLE": 26,
+      "ID": 36,
+      "LOCATION": 20,
+      "NETWORK": 27,
+      "ORG": 29,
+      "PERSON": 105,
+      "PHONE": 36,
+      "URL": 29
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 579,
+     "leak": {
+      "k": 6,
+      "n": 453,
+      "rate": 0.0132,
+      "wilson95": [
+       0.0061,
+       0.0286
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 3,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0157,
+     "message_leak": {
+      "k": 5,
+      "n": 125,
+      "rate": 0.04,
+      "wilson95": [
+       0.0172,
+       0.0902
+      ]
+     },
+     "messages": 125,
+     "messages_with_spurious": 24,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 453,
+     "refused": 0,
+     "spurious": {
+      "k": 96,
+      "n": 579,
+      "rate": 0.1658,
+      "wilson95": [
+       0.1377,
+       0.1983
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 28,
+      "AGE": 25,
+      "CREDENTIAL": 20,
+      "DATE_OF_BIRTH": 27,
+      "EMAIL": 45,
+      "HANDLE": 26,
+      "ID": 36,
+      "LOCATION": 20,
+      "NETWORK": 27,
+      "ORG": 29,
+      "PERSON": 105,
+      "PHONE": 36,
+      "URL": 29
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 391,
+     "leak": {
+      "k": 158,
+      "n": 453,
+      "rate": 0.3488,
+      "wilson95": [
+       0.3063,
+       0.3938
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 25,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 27,
+      "EMAIL": 45,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 27,
+      "ORG": 3,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 29
+     },
+     "macro_leak_rate": 0.3975,
+     "message_leak": {
+      "k": 95,
+      "n": 125,
+      "rate": 0.76,
+      "wilson95": [
+       0.6781,
+       0.8264
+      ]
+     },
+     "messages": 125,
+     "messages_with_spurious": 19,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 453,
+     "refused": 0,
+     "spurious": {
+      "k": 52,
+      "n": 391,
+      "rate": 0.133,
+      "wilson95": [
+       0.1029,
+       0.1702
       ]
      },
      "values_by_type": {
@@ -6158,6 +7260,154 @@
       "URL": 5
      }
     },
+    "h9/no_patterns": {
+     "edits": 142,
+     "leak": {
+      "k": 2,
+      "n": 93,
+      "rate": 0.0215,
+      "wilson95": [
+       0.0059,
+       0.0751
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0141,
+     "message_leak": {
+      "k": 2,
+      "n": 28,
+      "rate": 0.0714,
+      "wilson95": [
+       0.0198,
+       0.2265
+      ]
+     },
+     "messages": 72,
+     "messages_with_spurious": 10,
+     "negatives_untouched": {
+      "k": 40,
+      "n": 44,
+      "rate": 0.9091,
+      "wilson95": [
+       0.7884,
+       0.9641
+      ]
+     },
+     "protect_values": 93,
+     "refused": 1,
+     "spurious": {
+      "k": 50,
+      "n": 142,
+      "rate": 0.3521,
+      "wilson95": [
+       0.2784,
+       0.4336
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "AGE": 6,
+      "CREDENTIAL": 4,
+      "DATE_OF_BIRTH": 3,
+      "EMAIL": 5,
+      "HANDLE": 5,
+      "ID": 9,
+      "LOCATION": 8,
+      "NETWORK": 6,
+      "ORG": 9,
+      "PERSON": 25,
+      "PHONE": 7,
+      "URL": 5
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 84,
+     "leak": {
+      "k": 26,
+      "n": 93,
+      "rate": 0.2796,
+      "wilson95": [
+       0.1985,
+       0.3781
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 5,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 3,
+      "EMAIL": 5,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 6,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 1,
+      "URL": 5
+     },
+     "macro_leak_rate": 0.3859,
+     "message_leak": {
+      "k": 20,
+      "n": 28,
+      "rate": 0.7143,
+      "wilson95": [
+       0.5294,
+       0.8475
+      ]
+     },
+     "messages": 72,
+     "messages_with_spurious": 5,
+     "negatives_untouched": {
+      "k": 43,
+      "n": 44,
+      "rate": 0.9773,
+      "wilson95": [
+       0.8819,
+       0.996
+      ]
+     },
+     "protect_values": 93,
+     "refused": 0,
+     "spurious": {
+      "k": 15,
+      "n": 84,
+      "rate": 0.1786,
+      "wilson95": [
+       0.1113,
+       0.2739
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "AGE": 6,
+      "CREDENTIAL": 4,
+      "DATE_OF_BIRTH": 3,
+      "EMAIL": 5,
+      "HANDLE": 5,
+      "ID": 9,
+      "LOCATION": 8,
+      "NETWORK": 6,
+      "ORG": 9,
+      "PERSON": 25,
+      "PHONE": 7,
+      "URL": 5
+     }
+    },
     "no_canonicaliser": {
      "edits": 111,
      "leak": {
@@ -6529,7 +7779,7 @@
      }
     },
     "strict": {
-     "edits": 187,
+     "edits": 186,
      "leak": {
       "k": 0,
       "n": 93,
@@ -6565,7 +7815,7 @@
       ]
      },
      "messages": 72,
-     "messages_with_spurious": 29,
+     "messages_with_spurious": 28,
      "negatives_untouched": {
       "k": 30,
       "n": 44,
@@ -6578,12 +7828,12 @@
      "protect_values": 93,
      "refused": 1,
      "spurious": {
-      "k": 94,
-      "n": 187,
-      "rate": 0.5027,
+      "k": 93,
+      "n": 186,
+      "rate": 0.5,
       "wilson95": [
-       0.4317,
-       0.5736
+       0.4289,
+       0.5711
       ]
      },
      "values_by_type": {
@@ -6864,6 +8114,110 @@
       "PERSON": 15
      }
     },
+    "h9/no_patterns": {
+     "edits": 292,
+     "leak": {
+      "k": 7,
+      "n": 16,
+      "rate": 0.4375,
+      "wilson95": [
+       0.231,
+       0.6682
+      ]
+     },
+     "leaked_by_type": {
+      "LOCATION": 0,
+      "PERSON": 7
+     },
+     "macro_leak_rate": 0.2334,
+     "message_leak": {
+      "k": 6,
+      "n": 11,
+      "rate": 0.5455,
+      "wilson95": [
+       0.2801,
+       0.7873
+      ]
+     },
+     "messages": 442,
+     "messages_with_spurious": 54,
+     "negatives_untouched": {
+      "k": 365,
+      "n": 431,
+      "rate": 0.8469,
+      "wilson95": [
+       0.8098,
+       0.8778
+      ]
+     },
+     "protect_values": 16,
+     "refused": 1,
+     "spurious": {
+      "k": 232,
+      "n": 292,
+      "rate": 0.7945,
+      "wilson95": [
+       0.7445,
+       0.8369
+      ]
+     },
+     "values_by_type": {
+      "LOCATION": 1,
+      "PERSON": 15
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 167,
+     "leak": {
+      "k": 7,
+      "n": 16,
+      "rate": 0.4375,
+      "wilson95": [
+       0.231,
+       0.6682
+      ]
+     },
+     "leaked_by_type": {
+      "LOCATION": 0,
+      "PERSON": 7
+     },
+     "macro_leak_rate": 0.2334,
+     "message_leak": {
+      "k": 6,
+      "n": 11,
+      "rate": 0.5455,
+      "wilson95": [
+       0.2801,
+       0.7873
+      ]
+     },
+     "messages": 442,
+     "messages_with_spurious": 32,
+     "negatives_untouched": {
+      "k": 388,
+      "n": 431,
+      "rate": 0.9002,
+      "wilson95": [
+       0.8683,
+       0.9251
+      ]
+     },
+     "protect_values": 16,
+     "refused": 0,
+     "spurious": {
+      "k": 110,
+      "n": 167,
+      "rate": 0.6587,
+      "wilson95": [
+       0.5839,
+       0.7263
+      ]
+     },
+     "values_by_type": {
+      "LOCATION": 1,
+      "PERSON": 15
+     }
+    },
     "no_canonicaliser": {
      "edits": 193,
      "leak": {
@@ -7125,7 +8479,7 @@
      }
     },
     "strict": {
-     "edits": 857,
+     "edits": 855,
      "leak": {
       "k": 1,
       "n": 16,
@@ -7150,25 +8504,25 @@
       ]
      },
      "messages": 442,
-     "messages_with_spurious": 194,
+     "messages_with_spurious": 193,
      "negatives_untouched": {
-      "k": 226,
+      "k": 227,
       "n": 431,
-      "rate": 0.5244,
+      "rate": 0.5267,
       "wilson95": [
-       0.4772,
-       0.5711
+       0.4795,
+       0.5734
       ]
      },
      "protect_values": 16,
      "refused": 1,
      "spurious": {
-      "k": 722,
-      "n": 857,
-      "rate": 0.8425,
+      "k": 721,
+      "n": 855,
+      "rate": 0.8433,
       "wilson95": [
-       0.8166,
-       0.8653
+       0.8174,
+       0.8661
       ]
      },
      "values_by_type": {
@@ -7515,6 +8869,148 @@
       "wilson95": [
        0.1187,
        0.2761
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "AGE": 2,
+      "CREDENTIAL": 8,
+      "DATE_OF_BIRTH": 5,
+      "EMAIL": 5,
+      "HANDLE": 6,
+      "ID": 8,
+      "LOCATION": 4,
+      "NETWORK": 4,
+      "ORG": 6,
+      "PERSON": 22,
+      "PHONE": 4,
+      "URL": 6
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 95,
+     "leak": {
+      "k": 2,
+      "n": 81,
+      "rate": 0.0247,
+      "wilson95": [
+       0.0068,
+       0.0856
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 2,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.007,
+     "message_leak": {
+      "k": 2,
+      "n": 23,
+      "rate": 0.087,
+      "wilson95": [
+       0.0242,
+       0.268
+      ]
+     },
+     "messages": 23,
+     "messages_with_spurious": 8,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 81,
+     "refused": 0,
+     "spurious": {
+      "k": 15,
+      "n": 95,
+      "rate": 0.1579,
+      "wilson95": [
+       0.0981,
+       0.2443
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "AGE": 2,
+      "CREDENTIAL": 8,
+      "DATE_OF_BIRTH": 5,
+      "EMAIL": 5,
+      "HANDLE": 6,
+      "ID": 8,
+      "LOCATION": 4,
+      "NETWORK": 4,
+      "ORG": 6,
+      "PERSON": 22,
+      "PHONE": 4,
+      "URL": 6
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 70,
+     "leak": {
+      "k": 24,
+      "n": 81,
+      "rate": 0.2963,
+      "wilson95": [
+       0.2079,
+       0.4031
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 2,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 5,
+      "EMAIL": 5,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 4,
+      "ORG": 0,
+      "PERSON": 2,
+      "PHONE": 0,
+      "URL": 6
+     },
+     "macro_leak_rate": 0.3916,
+     "message_leak": {
+      "k": 18,
+      "n": 23,
+      "rate": 0.7826,
+      "wilson95": [
+       0.581,
+       0.9034
+      ]
+     },
+     "messages": 23,
+     "messages_with_spurious": 7,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 81,
+     "refused": 0,
+     "spurious": {
+      "k": 12,
+      "n": 70,
+      "rate": 0.1714,
+      "wilson95": [
+       0.1009,
+       0.2762
       ]
      },
      "values_by_type": {
@@ -8315,6 +9811,154 @@
       "wilson95": [
        0.3285,
        0.4336
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 13,
+      "AGE": 7,
+      "CREDENTIAL": 14,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 13,
+      "HANDLE": 11,
+      "ID": 19,
+      "LOCATION": 11,
+      "NETWORK": 18,
+      "ORG": 13,
+      "PERSON": 50,
+      "PHONE": 14,
+      "URL": 14
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 227,
+     "leak": {
+      "k": 3,
+      "n": 210,
+      "rate": 0.0143,
+      "wilson95": [
+       0.0049,
+       0.0412
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0134,
+     "message_leak": {
+      "k": 2,
+      "n": 60,
+      "rate": 0.0333,
+      "wilson95": [
+       0.0092,
+       0.1136
+      ]
+     },
+     "messages": 72,
+     "messages_with_spurious": 10,
+     "negatives_untouched": {
+      "k": 12,
+      "n": 12,
+      "rate": 1.0,
+      "wilson95": [
+       0.7575,
+       1.0
+      ]
+     },
+     "protect_values": 210,
+     "refused": 0,
+     "spurious": {
+      "k": 18,
+      "n": 227,
+      "rate": 0.0793,
+      "wilson95": [
+       0.0507,
+       0.1218
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 13,
+      "AGE": 7,
+      "CREDENTIAL": 14,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 13,
+      "HANDLE": 11,
+      "ID": 19,
+      "LOCATION": 11,
+      "NETWORK": 18,
+      "ORG": 13,
+      "PERSON": 50,
+      "PHONE": 14,
+      "URL": 14
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 161,
+     "leak": {
+      "k": 66,
+      "n": 210,
+      "rate": 0.3143,
+      "wilson95": [
+       0.2553,
+       0.3799
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 6,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 13,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 18,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 14
+     },
+     "macro_leak_rate": 0.3811,
+     "message_leak": {
+      "k": 42,
+      "n": 60,
+      "rate": 0.7,
+      "wilson95": [
+       0.5749,
+       0.801
+      ]
+     },
+     "messages": 72,
+     "messages_with_spurious": 9,
+     "negatives_untouched": {
+      "k": 12,
+      "n": 12,
+      "rate": 1.0,
+      "wilson95": [
+       0.7575,
+       1.0
+      ]
+     },
+     "protect_values": 210,
+     "refused": 0,
+     "spurious": {
+      "k": 16,
+      "n": 161,
+      "rate": 0.0994,
+      "wilson95": [
+       0.0621,
+       0.1553
       ]
      },
      "values_by_type": {
@@ -9134,6 +10778,148 @@
       "URL": 11
      }
     },
+    "h9/no_patterns": {
+     "edits": 164,
+     "leak": {
+      "k": 2,
+      "n": 154,
+      "rate": 0.013,
+      "wilson95": [
+       0.0036,
+       0.0461
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0136,
+     "message_leak": {
+      "k": 1,
+      "n": 42,
+      "rate": 0.0238,
+      "wilson95": [
+       0.0042,
+       0.1232
+      ]
+     },
+     "messages": 42,
+     "messages_with_spurious": 7,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 154,
+     "refused": 0,
+     "spurious": {
+      "k": 10,
+      "n": 164,
+      "rate": 0.061,
+      "wilson95": [
+       0.0335,
+       0.1086
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 13,
+      "AGE": 5,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL": 10,
+      "HANDLE": 10,
+      "ID": 16,
+      "LOCATION": 6,
+      "NETWORK": 13,
+      "ORG": 8,
+      "PERSON": 32,
+      "PHONE": 11,
+      "URL": 11
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 113,
+     "leak": {
+      "k": 50,
+      "n": 154,
+      "rate": 0.3247,
+      "wilson95": [
+       0.2558,
+       0.4021
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 1,
+      "AGE": 5,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL": 10,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 13,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 11
+     },
+     "macro_leak_rate": 0.3905,
+     "message_leak": {
+      "k": 30,
+      "n": 42,
+      "rate": 0.7143,
+      "wilson95": [
+       0.5643,
+       0.8283
+      ]
+     },
+     "messages": 42,
+     "messages_with_spurious": 6,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 154,
+     "refused": 0,
+     "spurious": {
+      "k": 8,
+      "n": 113,
+      "rate": 0.0708,
+      "wilson95": [
+       0.0363,
+       0.1335
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 13,
+      "AGE": 5,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL": 10,
+      "HANDLE": 10,
+      "ID": 16,
+      "LOCATION": 6,
+      "NETWORK": 13,
+      "ORG": 8,
+      "PERSON": 32,
+      "PHONE": 11,
+      "URL": 11
+     }
+    },
     "no_canonicaliser": {
      "edits": 172,
      "leak": {
@@ -9902,6 +11688,142 @@
       "URL": 2
      }
     },
+    "h9/no_patterns": {
+     "edits": 35,
+     "leak": {
+      "k": 0,
+      "n": 31,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.1103
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0,
+     "message_leak": {
+      "k": 0,
+      "n": 10,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.2775
+      ]
+     },
+     "messages": 22,
+     "messages_with_spurious": 1,
+     "negatives_untouched": {
+      "k": 12,
+      "n": 12,
+      "rate": 1.0,
+      "wilson95": [
+       0.7575,
+       1.0
+      ]
+     },
+     "protect_values": 31,
+     "refused": 0,
+     "spurious": {
+      "k": 5,
+      "n": 35,
+      "rate": 0.1429,
+      "wilson95": [
+       0.0626,
+       0.2938
+      ]
+     },
+     "values_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 2,
+      "DATE_OF_BIRTH": 1,
+      "ID": 1,
+      "LOCATION": 5,
+      "NETWORK": 4,
+      "ORG": 3,
+      "PERSON": 10,
+      "PHONE": 2,
+      "URL": 2
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 28,
+     "leak": {
+      "k": 7,
+      "n": 31,
+      "rate": 0.2258,
+      "wilson95": [
+       0.114,
+       0.3981
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 1,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 4,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 2
+     },
+     "macro_leak_rate": 0.3,
+     "message_leak": {
+      "k": 5,
+      "n": 10,
+      "rate": 0.5,
+      "wilson95": [
+       0.2366,
+       0.7634
+      ]
+     },
+     "messages": 22,
+     "messages_with_spurious": 1,
+     "negatives_untouched": {
+      "k": 12,
+      "n": 12,
+      "rate": 1.0,
+      "wilson95": [
+       0.7575,
+       1.0
+      ]
+     },
+     "protect_values": 31,
+     "refused": 0,
+     "spurious": {
+      "k": 5,
+      "n": 28,
+      "rate": 0.1786,
+      "wilson95": [
+       0.0788,
+       0.3559
+      ]
+     },
+     "values_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 2,
+      "DATE_OF_BIRTH": 1,
+      "ID": 1,
+      "LOCATION": 5,
+      "NETWORK": 4,
+      "ORG": 3,
+      "PERSON": 10,
+      "PHONE": 2,
+      "URL": 2
+     }
+    },
     "no_canonicaliser": {
      "edits": 35,
      "leak": {
@@ -10562,6 +12484,106 @@
       "PERSON": 1
      }
     },
+    "h9/no_patterns": {
+     "edits": 22,
+     "leak": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.7935
+      ]
+     },
+     "leaked_by_type": {
+      "PERSON": 0
+     },
+     "macro_leak_rate": 0.0,
+     "message_leak": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.7935
+      ]
+     },
+     "messages": 143,
+     "messages_with_spurious": 9,
+     "negatives_untouched": {
+      "k": 131,
+      "n": 142,
+      "rate": 0.9225,
+      "wilson95": [
+       0.8666,
+       0.9562
+      ]
+     },
+     "protect_values": 1,
+     "refused": 0,
+     "spurious": {
+      "k": 16,
+      "n": 22,
+      "rate": 0.7273,
+      "wilson95": [
+       0.5185,
+       0.8685
+      ]
+     },
+     "values_by_type": {
+      "PERSON": 1
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 14,
+     "leak": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.7935
+      ]
+     },
+     "leaked_by_type": {
+      "PERSON": 0
+     },
+     "macro_leak_rate": 0.0,
+     "message_leak": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.7935
+      ]
+     },
+     "messages": 143,
+     "messages_with_spurious": 7,
+     "negatives_untouched": {
+      "k": 134,
+      "n": 142,
+      "rate": 0.9437,
+      "wilson95": [
+       0.8928,
+       0.9712
+      ]
+     },
+     "protect_values": 1,
+     "refused": 0,
+     "spurious": {
+      "k": 9,
+      "n": 14,
+      "rate": 0.6429,
+      "wilson95": [
+       0.3876,
+       0.8366
+      ]
+     },
+     "values_by_type": {
+      "PERSON": 1
+     }
+    },
     "no_canonicaliser": {
      "edits": 28,
      "leak": {
@@ -11183,6 +13205,140 @@
       "wilson95": [
        0.1633,
        0.4505
+      ]
+     },
+     "values_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 3,
+      "DATE_OF_BIRTH": 2,
+      "EMAIL": 3,
+      "HANDLE": 1,
+      "ID": 2,
+      "NETWORK": 1,
+      "ORG": 2,
+      "PERSON": 8,
+      "PHONE": 1,
+      "URL": 1
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 28,
+     "leak": {
+      "k": 1,
+      "n": 25,
+      "rate": 0.04,
+      "wilson95": [
+       0.0071,
+       0.1954
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0114,
+     "message_leak": {
+      "k": 1,
+      "n": 8,
+      "rate": 0.125,
+      "wilson95": [
+       0.0224,
+       0.4709
+      ]
+     },
+     "messages": 8,
+     "messages_with_spurious": 2,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 25,
+     "refused": 0,
+     "spurious": {
+      "k": 3,
+      "n": 28,
+      "rate": 0.1071,
+      "wilson95": [
+       0.0371,
+       0.272
+      ]
+     },
+     "values_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 3,
+      "DATE_OF_BIRTH": 2,
+      "EMAIL": 3,
+      "HANDLE": 1,
+      "ID": 2,
+      "NETWORK": 1,
+      "ORG": 2,
+      "PERSON": 8,
+      "PHONE": 1,
+      "URL": 1
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 20,
+     "leak": {
+      "k": 9,
+      "n": 25,
+      "rate": 0.36,
+      "wilson95": [
+       0.2025,
+       0.5548
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 2,
+      "EMAIL": 3,
+      "HANDLE": 0,
+      "ID": 0,
+      "NETWORK": 1,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 1
+     },
+     "macro_leak_rate": 0.4659,
+     "message_leak": {
+      "k": 7,
+      "n": 8,
+      "rate": 0.875,
+      "wilson95": [
+       0.5291,
+       0.9776
+      ]
+     },
+     "messages": 8,
+     "messages_with_spurious": 2,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 25,
+     "refused": 0,
+     "spurious": {
+      "k": 3,
+      "n": 20,
+      "rate": 0.15,
+      "wilson95": [
+       0.0524,
+       0.3604
       ]
      },
      "values_by_type": {
@@ -11975,6 +14131,154 @@
       "URL": 11
      }
     },
+    "h9/no_patterns": {
+     "edits": 316,
+     "leak": {
+      "k": 5,
+      "n": 208,
+      "rate": 0.024,
+      "wilson95": [
+       0.0103,
+       0.055
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 2,
+      "PERSON": 2,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.017,
+     "message_leak": {
+      "k": 5,
+      "n": 59,
+      "rate": 0.0847,
+      "wilson95": [
+       0.0367,
+       0.1835
+      ]
+     },
+     "messages": 77,
+     "messages_with_spurious": 18,
+     "negatives_untouched": {
+      "k": 15,
+      "n": 18,
+      "rate": 0.8333,
+      "wilson95": [
+       0.6078,
+       0.9416
+      ]
+     },
+     "protect_values": 208,
+     "refused": 1,
+     "spurious": {
+      "k": 105,
+      "n": 316,
+      "rate": 0.3323,
+      "wilson95": [
+       0.2826,
+       0.386
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 6,
+      "AGE": 15,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 9,
+      "EMAIL": 22,
+      "HANDLE": 14,
+      "ID": 14,
+      "LOCATION": 11,
+      "NETWORK": 10,
+      "ORG": 16,
+      "PERSON": 54,
+      "PHONE": 17,
+      "URL": 11
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 179,
+     "leak": {
+      "k": 72,
+      "n": 208,
+      "rate": 0.3462,
+      "wilson95": [
+       0.2848,
+       0.4131
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 15,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 9,
+      "EMAIL": 22,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 10,
+      "ORG": 2,
+      "PERSON": 2,
+      "PHONE": 1,
+      "URL": 11
+     },
+     "macro_leak_rate": 0.4016,
+     "message_leak": {
+      "k": 49,
+      "n": 59,
+      "rate": 0.8305,
+      "wilson95": [
+       0.7154,
+       0.9052
+      ]
+     },
+     "messages": 77,
+     "messages_with_spurious": 10,
+     "negatives_untouched": {
+      "k": 18,
+      "n": 18,
+      "rate": 1.0,
+      "wilson95": [
+       0.8241,
+       1.0
+      ]
+     },
+     "protect_values": 208,
+     "refused": 0,
+     "spurious": {
+      "k": 30,
+      "n": 179,
+      "rate": 0.1676,
+      "wilson95": [
+       0.12,
+       0.2292
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 6,
+      "AGE": 15,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 9,
+      "EMAIL": 22,
+      "HANDLE": 14,
+      "ID": 14,
+      "LOCATION": 11,
+      "NETWORK": 10,
+      "ORG": 16,
+      "PERSON": 54,
+      "PHONE": 17,
+      "URL": 11
+     }
+    },
     "no_canonicaliser": {
      "edits": 245,
      "leak": {
@@ -12346,7 +14650,7 @@
      }
     },
     "strict": {
-     "edits": 362,
+     "edits": 361,
      "leak": {
       "k": 3,
       "n": 208,
@@ -12382,7 +14686,7 @@
       ]
      },
      "messages": 77,
-     "messages_with_spurious": 37,
+     "messages_with_spurious": 36,
      "negatives_untouched": {
       "k": 11,
       "n": 18,
@@ -12395,12 +14699,12 @@
      "protect_values": 208,
      "refused": 1,
      "spurious": {
-      "k": 140,
-      "n": 362,
-      "rate": 0.3867,
+      "k": 139,
+      "n": 361,
+      "rate": 0.385,
       "wilson95": [
-       0.338,
-       0.4378
+       0.3363,
+       0.4362
       ]
      },
      "values_by_type": {
@@ -12758,6 +15062,148 @@
       "wilson95": [
        0.2018,
        0.3188
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 5,
+      "AGE": 11,
+      "CREDENTIAL": 6,
+      "DATE_OF_BIRTH": 7,
+      "EMAIL": 19,
+      "HANDLE": 9,
+      "ID": 7,
+      "LOCATION": 6,
+      "NETWORK": 6,
+      "ORG": 10,
+      "PERSON": 38,
+      "PHONE": 12,
+      "URL": 8
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 210,
+     "leak": {
+      "k": 3,
+      "n": 144,
+      "rate": 0.0208,
+      "wilson95": [
+       0.0071,
+       0.0595
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 2,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0218,
+     "message_leak": {
+      "k": 3,
+      "n": 42,
+      "rate": 0.0714,
+      "wilson95": [
+       0.0246,
+       0.1901
+      ]
+     },
+     "messages": 42,
+     "messages_with_spurious": 9,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 144,
+     "refused": 0,
+     "spurious": {
+      "k": 63,
+      "n": 210,
+      "rate": 0.3,
+      "wilson95": [
+       0.2421,
+       0.3651
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 5,
+      "AGE": 11,
+      "CREDENTIAL": 6,
+      "DATE_OF_BIRTH": 7,
+      "EMAIL": 19,
+      "HANDLE": 9,
+      "ID": 7,
+      "LOCATION": 6,
+      "NETWORK": 6,
+      "ORG": 10,
+      "PERSON": 38,
+      "PHONE": 12,
+      "URL": 8
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 124,
+     "leak": {
+      "k": 54,
+      "n": 144,
+      "rate": 0.375,
+      "wilson95": [
+       0.3001,
+       0.4564
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 11,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 7,
+      "EMAIL": 19,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 6,
+      "ORG": 2,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 8
+     },
+     "macro_leak_rate": 0.4064,
+     "message_leak": {
+      "k": 34,
+      "n": 42,
+      "rate": 0.8095,
+      "wilson95": [
+       0.667,
+       0.9002
+      ]
+     },
+     "messages": 42,
+     "messages_with_spurious": 7,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 144,
+     "refused": 0,
+     "spurious": {
+      "k": 24,
+      "n": 124,
+      "rate": 0.1935,
+      "wilson95": [
+       0.1337,
+       0.2719
       ]
      },
      "values_by_type": {
@@ -13544,6 +15990,142 @@
       "URL": 1
      }
     },
+    "h9/no_patterns": {
+     "edits": 75,
+     "leak": {
+      "k": 1,
+      "n": 34,
+      "rate": 0.0294,
+      "wilson95": [
+       0.0052,
+       0.1492
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0111,
+     "message_leak": {
+      "k": 1,
+      "n": 10,
+      "rate": 0.1,
+      "wilson95": [
+       0.0179,
+       0.4042
+      ]
+     },
+     "messages": 28,
+     "messages_with_spurious": 7,
+     "negatives_untouched": {
+      "k": 15,
+      "n": 18,
+      "rate": 0.8333,
+      "wilson95": [
+       0.6078,
+       0.9416
+      ]
+     },
+     "protect_values": 34,
+     "refused": 1,
+     "spurious": {
+      "k": 40,
+      "n": 75,
+      "rate": 0.5333,
+      "wilson95": [
+       0.4216,
+       0.6418
+      ]
+     },
+     "values_by_type": {
+      "AGE": 4,
+      "EMAIL": 3,
+      "HANDLE": 2,
+      "ID": 3,
+      "LOCATION": 2,
+      "NETWORK": 2,
+      "ORG": 5,
+      "PERSON": 9,
+      "PHONE": 3,
+      "URL": 1
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 31,
+     "leak": {
+      "k": 11,
+      "n": 34,
+      "rate": 0.3235,
+      "wilson95": [
+       0.1913,
+       0.4916
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 4,
+      "EMAIL": 3,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 2,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 1
+     },
+     "macro_leak_rate": 0.4111,
+     "message_leak": {
+      "k": 9,
+      "n": 10,
+      "rate": 0.9,
+      "wilson95": [
+       0.5958,
+       0.9821
+      ]
+     },
+     "messages": 28,
+     "messages_with_spurious": 2,
+     "negatives_untouched": {
+      "k": 18,
+      "n": 18,
+      "rate": 1.0,
+      "wilson95": [
+       0.8241,
+       1.0
+      ]
+     },
+     "protect_values": 34,
+     "refused": 0,
+     "spurious": {
+      "k": 5,
+      "n": 31,
+      "rate": 0.1613,
+      "wilson95": [
+       0.0709,
+       0.3263
+      ]
+     },
+     "values_by_type": {
+      "AGE": 4,
+      "EMAIL": 3,
+      "HANDLE": 2,
+      "ID": 3,
+      "LOCATION": 2,
+      "NETWORK": 2,
+      "ORG": 5,
+      "PERSON": 9,
+      "PHONE": 3,
+      "URL": 1
+     }
+    },
     "no_canonicaliser": {
      "edits": 44,
      "leak": {
@@ -13885,7 +16467,7 @@
      }
     },
     "strict": {
-     "edits": 79,
+     "edits": 78,
      "leak": {
       "k": 0,
       "n": 34,
@@ -13918,7 +16500,7 @@
       ]
      },
      "messages": 28,
-     "messages_with_spurious": 14,
+     "messages_with_spurious": 13,
      "negatives_untouched": {
       "k": 11,
       "n": 18,
@@ -13931,12 +16513,12 @@
      "protect_values": 34,
      "refused": 1,
      "spurious": {
-      "k": 44,
-      "n": 79,
-      "rate": 0.557,
+      "k": 43,
+      "n": 78,
+      "rate": 0.5513,
       "wilson95": [
-       0.4473,
-       0.6613
+       0.4411,
+       0.6567
       ]
      },
      "values_by_type": {
@@ -14204,6 +16786,106 @@
       "PERSON": 4
      }
     },
+    "h9/no_patterns": {
+     "edits": 125,
+     "leak": {
+      "k": 3,
+      "n": 4,
+      "rate": 0.75,
+      "wilson95": [
+       0.3006,
+       0.9544
+      ]
+     },
+     "leaked_by_type": {
+      "PERSON": 3
+     },
+     "macro_leak_rate": 0.75,
+     "message_leak": {
+      "k": 2,
+      "n": 3,
+      "rate": 0.6667,
+      "wilson95": [
+       0.2077,
+       0.9385
+      ]
+     },
+     "messages": 152,
+     "messages_with_spurious": 24,
+     "negatives_untouched": {
+      "k": 122,
+      "n": 149,
+      "rate": 0.8188,
+      "wilson95": [
+       0.7492,
+       0.8724
+      ]
+     },
+     "protect_values": 4,
+     "refused": 1,
+     "spurious": {
+      "k": 116,
+      "n": 125,
+      "rate": 0.928,
+      "wilson95": [
+       0.8688,
+       0.9617
+      ]
+     },
+     "values_by_type": {
+      "PERSON": 4
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 39,
+     "leak": {
+      "k": 3,
+      "n": 4,
+      "rate": 0.75,
+      "wilson95": [
+       0.3006,
+       0.9544
+      ]
+     },
+     "leaked_by_type": {
+      "PERSON": 3
+     },
+     "macro_leak_rate": 0.75,
+     "message_leak": {
+      "k": 2,
+      "n": 3,
+      "rate": 0.6667,
+      "wilson95": [
+       0.2077,
+       0.9385
+      ]
+     },
+     "messages": 152,
+     "messages_with_spurious": 11,
+     "negatives_untouched": {
+      "k": 135,
+      "n": 149,
+      "rate": 0.906,
+      "wilson95": [
+       0.8485,
+       0.9432
+      ]
+     },
+     "protect_values": 4,
+     "refused": 0,
+     "spurious": {
+      "k": 32,
+      "n": 39,
+      "rate": 0.8205,
+      "wilson95": [
+       0.6733,
+       0.9102
+      ]
+     },
+     "values_by_type": {
+      "PERSON": 4
+     }
+    },
     "no_canonicaliser": {
      "edits": 47,
      "leak": {
@@ -14455,7 +17137,7 @@
      }
     },
     "strict": {
-     "edits": 279,
+     "edits": 278,
      "leak": {
       "k": 1,
       "n": 4,
@@ -14479,25 +17161,25 @@
       ]
      },
      "messages": 152,
-     "messages_with_spurious": 72,
+     "messages_with_spurious": 71,
      "negatives_untouched": {
-      "k": 77,
+      "k": 78,
       "n": 149,
-      "rate": 0.5168,
+      "rate": 0.5235,
       "wilson95": [
-       0.4371,
-       0.5956
+       0.4437,
+       0.6021
       ]
      },
      "protect_values": 4,
      "refused": 1,
      "spurious": {
-      "k": 246,
-      "n": 279,
-      "rate": 0.8817,
+      "k": 245,
+      "n": 278,
+      "rate": 0.8813,
       "wilson95": [
-       0.8385,
-       0.9145
+       0.838,
+       0.9142
       ]
      },
      "values_by_type": {
@@ -14825,6 +17507,140 @@
       "wilson95": [
        0.0185,
        0.2132
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "CREDENTIAL": 3,
+      "DATE_OF_BIRTH": 2,
+      "HANDLE": 3,
+      "ID": 4,
+      "LOCATION": 3,
+      "NETWORK": 2,
+      "ORG": 1,
+      "PERSON": 7,
+      "PHONE": 2,
+      "URL": 2
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 31,
+     "leak": {
+      "k": 1,
+      "n": 30,
+      "rate": 0.0333,
+      "wilson95": [
+       0.0059,
+       0.1667
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.013,
+     "message_leak": {
+      "k": 1,
+      "n": 7,
+      "rate": 0.1429,
+      "wilson95": [
+       0.0257,
+       0.5131
+      ]
+     },
+     "messages": 7,
+     "messages_with_spurious": 2,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 30,
+     "refused": 0,
+     "spurious": {
+      "k": 2,
+      "n": 31,
+      "rate": 0.0645,
+      "wilson95": [
+       0.0179,
+       0.2072
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "CREDENTIAL": 3,
+      "DATE_OF_BIRTH": 2,
+      "HANDLE": 3,
+      "ID": 4,
+      "LOCATION": 3,
+      "NETWORK": 2,
+      "ORG": 1,
+      "PERSON": 7,
+      "PHONE": 2,
+      "URL": 2
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 24,
+     "leak": {
+      "k": 7,
+      "n": 30,
+      "rate": 0.2333,
+      "wilson95": [
+       0.1179,
+       0.4093
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 2,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 2,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 2
+     },
+     "macro_leak_rate": 0.2857,
+     "message_leak": {
+      "k": 6,
+      "n": 7,
+      "rate": 0.8571,
+      "wilson95": [
+       0.4869,
+       0.9743
+      ]
+     },
+     "messages": 7,
+     "messages_with_spurious": 1,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 30,
+     "refused": 0,
+     "spurious": {
+      "k": 1,
+      "n": 24,
+      "rate": 0.0417,
+      "wilson95": [
+       0.0074,
+       0.2024
       ]
      },
      "values_by_type": {
@@ -15599,6 +18415,154 @@
       "wilson95": [
        0.3932,
        0.486
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 11,
+      "AGE": 11,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 20,
+      "HANDLE": 12,
+      "ID": 20,
+      "LOCATION": 10,
+      "NETWORK": 9,
+      "ORG": 15,
+      "PERSON": 48,
+      "PHONE": 16,
+      "URL": 15
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 273,
+     "leak": {
+      "k": 2,
+      "n": 209,
+      "rate": 0.0096,
+      "wilson95": [
+       0.0026,
+       0.0342
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 1,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0099,
+     "message_leak": {
+      "k": 2,
+      "n": 57,
+      "rate": 0.0351,
+      "wilson95": [
+       0.0097,
+       0.1192
+      ]
+     },
+     "messages": 71,
+     "messages_with_spurious": 14,
+     "negatives_untouched": {
+      "k": 13,
+      "n": 14,
+      "rate": 0.9286,
+      "wilson95": [
+       0.6853,
+       0.9873
+      ]
+     },
+     "protect_values": 209,
+     "refused": 0,
+     "spurious": {
+      "k": 38,
+      "n": 273,
+      "rate": 0.1392,
+      "wilson95": [
+       0.1031,
+       0.1853
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 11,
+      "AGE": 11,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 20,
+      "HANDLE": 12,
+      "ID": 20,
+      "LOCATION": 10,
+      "NETWORK": 9,
+      "ORG": 15,
+      "PERSON": 48,
+      "PHONE": 16,
+      "URL": 15
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 205,
+     "leak": {
+      "k": 70,
+      "n": 209,
+      "rate": 0.3349,
+      "wilson95": [
+       0.2744,
+       0.4014
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 11,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 20,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 9,
+      "ORG": 1,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 15
+     },
+     "macro_leak_rate": 0.3946,
+     "message_leak": {
+      "k": 42,
+      "n": 57,
+      "rate": 0.7368,
+      "wilson95": [
+       0.6102,
+       0.8335
+      ]
+     },
+     "messages": 71,
+     "messages_with_spurious": 12,
+     "negatives_untouched": {
+      "k": 13,
+      "n": 14,
+      "rate": 0.9286,
+      "wilson95": [
+       0.6853,
+       0.9873
+      ]
+     },
+     "protect_values": 209,
+     "refused": 0,
+     "spurious": {
+      "k": 33,
+      "n": 205,
+      "rate": 0.161,
+      "wilson95": [
+       0.117,
+       0.2174
       ]
      },
      "values_by_type": {
@@ -16418,6 +19382,148 @@
       "URL": 10
      }
     },
+    "h9/no_patterns": {
+     "edits": 205,
+     "leak": {
+      "k": 1,
+      "n": 155,
+      "rate": 0.0065,
+      "wilson95": [
+       0.0011,
+       0.0356
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 1,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.007,
+     "message_leak": {
+      "k": 1,
+      "n": 41,
+      "rate": 0.0244,
+      "wilson95": [
+       0.0043,
+       0.126
+      ]
+     },
+     "messages": 41,
+     "messages_with_spurious": 8,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 155,
+     "refused": 0,
+     "spurious": {
+      "k": 23,
+      "n": 205,
+      "rate": 0.1122,
+      "wilson95": [
+       0.0759,
+       0.1627
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 10,
+      "AGE": 9,
+      "CREDENTIAL": 5,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL": 16,
+      "HANDLE": 7,
+      "ID": 13,
+      "LOCATION": 8,
+      "NETWORK": 8,
+      "ORG": 11,
+      "PERSON": 35,
+      "PHONE": 13,
+      "URL": 10
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 154,
+     "leak": {
+      "k": 54,
+      "n": 155,
+      "rate": 0.3484,
+      "wilson95": [
+       0.2779,
+       0.4262
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 9,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL": 16,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 8,
+      "ORG": 1,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 10
+     },
+     "macro_leak_rate": 0.3916,
+     "message_leak": {
+      "k": 31,
+      "n": 41,
+      "rate": 0.7561,
+      "wilson95": [
+       0.6066,
+       0.8617
+      ]
+     },
+     "messages": 41,
+     "messages_with_spurious": 6,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 155,
+     "refused": 0,
+     "spurious": {
+      "k": 20,
+      "n": 154,
+      "rate": 0.1299,
+      "wilson95": [
+       0.0857,
+       0.1921
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 10,
+      "AGE": 9,
+      "CREDENTIAL": 5,
+      "DATE_OF_BIRTH": 10,
+      "EMAIL": 16,
+      "HANDLE": 7,
+      "ID": 13,
+      "LOCATION": 8,
+      "NETWORK": 8,
+      "ORG": 11,
+      "PERSON": 35,
+      "PHONE": 13,
+      "URL": 10
+     }
+    },
     "no_canonicaliser": {
      "edits": 203,
      "leak": {
@@ -17206,6 +20312,150 @@
       "URL": 2
      }
     },
+    "h9/no_patterns": {
+     "edits": 32,
+     "leak": {
+      "k": 1,
+      "n": 28,
+      "rate": 0.0357,
+      "wilson95": [
+       0.0063,
+       0.1771
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0417,
+     "message_leak": {
+      "k": 1,
+      "n": 8,
+      "rate": 0.125,
+      "wilson95": [
+       0.0224,
+       0.4709
+      ]
+     },
+     "messages": 22,
+     "messages_with_spurious": 2,
+     "negatives_untouched": {
+      "k": 13,
+      "n": 14,
+      "rate": 0.9286,
+      "wilson95": [
+       0.6853,
+       0.9873
+      ]
+     },
+     "protect_values": 28,
+     "refused": 0,
+     "spurious": {
+      "k": 5,
+      "n": 32,
+      "rate": 0.1562,
+      "wilson95": [
+       0.0686,
+       0.3175
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "AGE": 1,
+      "CREDENTIAL": 2,
+      "DATE_OF_BIRTH": 2,
+      "EMAIL": 2,
+      "HANDLE": 3,
+      "ID": 5,
+      "LOCATION": 1,
+      "ORG": 1,
+      "PERSON": 6,
+      "PHONE": 2,
+      "URL": 2
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 25,
+     "leak": {
+      "k": 8,
+      "n": 28,
+      "rate": 0.2857,
+      "wilson95": [
+       0.1525,
+       0.4706
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 2,
+      "EMAIL": 2,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 2
+     },
+     "macro_leak_rate": 0.375,
+     "message_leak": {
+      "k": 6,
+      "n": 8,
+      "rate": 0.75,
+      "wilson95": [
+       0.4093,
+       0.9285
+      ]
+     },
+     "messages": 22,
+     "messages_with_spurious": 2,
+     "negatives_untouched": {
+      "k": 13,
+      "n": 14,
+      "rate": 0.9286,
+      "wilson95": [
+       0.6853,
+       0.9873
+      ]
+     },
+     "protect_values": 28,
+     "refused": 0,
+     "spurious": {
+      "k": 5,
+      "n": 25,
+      "rate": 0.2,
+      "wilson95": [
+       0.0886,
+       0.3913
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 1,
+      "AGE": 1,
+      "CREDENTIAL": 2,
+      "DATE_OF_BIRTH": 2,
+      "EMAIL": 2,
+      "HANDLE": 3,
+      "ID": 5,
+      "LOCATION": 1,
+      "ORG": 1,
+      "PERSON": 6,
+      "PHONE": 2,
+      "URL": 2
+     }
+    },
     "no_canonicaliser": {
      "edits": 32,
      "leak": {
@@ -17900,6 +21150,110 @@
       "PERSON": 10
      }
     },
+    "h9/no_patterns": {
+     "edits": 145,
+     "leak": {
+      "k": 4,
+      "n": 11,
+      "rate": 0.3636,
+      "wilson95": [
+       0.1517,
+       0.6462
+      ]
+     },
+     "leaked_by_type": {
+      "LOCATION": 0,
+      "PERSON": 4
+     },
+     "macro_leak_rate": 0.2,
+     "message_leak": {
+      "k": 4,
+      "n": 7,
+      "rate": 0.5714,
+      "wilson95": [
+       0.2505,
+       0.8418
+      ]
+     },
+     "messages": 147,
+     "messages_with_spurious": 21,
+     "negatives_untouched": {
+      "k": 112,
+      "n": 140,
+      "rate": 0.8,
+      "wilson95": [
+       0.7261,
+       0.8578
+      ]
+     },
+     "protect_values": 11,
+     "refused": 0,
+     "spurious": {
+      "k": 100,
+      "n": 145,
+      "rate": 0.6897,
+      "wilson95": [
+       0.6103,
+       0.7592
+      ]
+     },
+     "values_by_type": {
+      "LOCATION": 1,
+      "PERSON": 10
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 114,
+     "leak": {
+      "k": 4,
+      "n": 11,
+      "rate": 0.3636,
+      "wilson95": [
+       0.1517,
+       0.6462
+      ]
+     },
+     "leaked_by_type": {
+      "LOCATION": 0,
+      "PERSON": 4
+     },
+     "macro_leak_rate": 0.2,
+     "message_leak": {
+      "k": 4,
+      "n": 7,
+      "rate": 0.5714,
+      "wilson95": [
+       0.2505,
+       0.8418
+      ]
+     },
+     "messages": 147,
+     "messages_with_spurious": 14,
+     "negatives_untouched": {
+      "k": 119,
+      "n": 140,
+      "rate": 0.85,
+      "wilson95": [
+       0.7816,
+       0.8997
+      ]
+     },
+     "protect_values": 11,
+     "refused": 0,
+     "spurious": {
+      "k": 69,
+      "n": 114,
+      "rate": 0.6053,
+      "wilson95": [
+       0.5135,
+       0.6902
+      ]
+     },
+     "values_by_type": {
+      "LOCATION": 1,
+      "PERSON": 10
+     }
+    },
     "no_canonicaliser": {
      "edits": 118,
      "leak": {
@@ -18161,7 +21515,7 @@
      }
     },
     "strict": {
-     "edits": 468,
+     "edits": 467,
      "leak": {
       "k": 0,
       "n": 11,
@@ -18200,11 +21554,11 @@
      "refused": 0,
      "spurious": {
       "k": 374,
-      "n": 468,
-      "rate": 0.7991,
+      "n": 467,
+      "rate": 0.8009,
       "wilson95": [
-       0.7605,
-       0.8329
+       0.7622,
+       0.8346
       ]
      },
      "values_by_type": {
@@ -18542,6 +21896,144 @@
       "wilson95": [
        0.0818,
        0.367
+      ]
+     },
+     "values_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 2,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 2,
+      "HANDLE": 2,
+      "ID": 2,
+      "LOCATION": 1,
+      "NETWORK": 1,
+      "ORG": 3,
+      "PERSON": 7,
+      "PHONE": 1,
+      "URL": 3
+     }
+    },
+    "h9/no_patterns": {
+     "edits": 36,
+     "leak": {
+      "k": 0,
+      "n": 26,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.1287
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "macro_leak_rate": 0.0,
+     "message_leak": {
+      "k": 0,
+      "n": 8,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.3244
+      ]
+     },
+     "messages": 8,
+     "messages_with_spurious": 4,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 26,
+     "refused": 0,
+     "spurious": {
+      "k": 10,
+      "n": 36,
+      "rate": 0.2778,
+      "wilson95": [
+       0.1585,
+       0.4399
+      ]
+     },
+     "values_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 2,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 2,
+      "HANDLE": 2,
+      "ID": 2,
+      "LOCATION": 1,
+      "NETWORK": 1,
+      "ORG": 3,
+      "PERSON": 7,
+      "PHONE": 1,
+      "URL": 3
+     }
+    },
+    "h9/no_patterns_unrouted": {
+     "edits": 26,
+     "leak": {
+      "k": 8,
+      "n": 26,
+      "rate": 0.3077,
+      "wilson95": [
+       0.165,
+       0.4999
+      ]
+     },
+     "leaked_by_type": {
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 1,
+      "EMAIL": 2,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 1,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 3
+     },
+     "macro_leak_rate": 0.4167,
+     "message_leak": {
+      "k": 5,
+      "n": 8,
+      "rate": 0.625,
+      "wilson95": [
+       0.3057,
+       0.8632
+      ]
+     },
+     "messages": 8,
+     "messages_with_spurious": 4,
+     "negatives_untouched": {
+      "k": 0,
+      "n": 0,
+      "rate": null,
+      "wilson95": null
+     },
+     "protect_values": 26,
+     "refused": 0,
+     "spurious": {
+      "k": 8,
+      "n": 26,
+      "rate": 0.3077,
+      "wilson95": [
+       0.165,
+       0.4999
       ]
      },
      "values_by_type": {

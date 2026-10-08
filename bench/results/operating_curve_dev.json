@@ -6,7 +6,7 @@
   "seed": "derive_seed('operating-curve', data split, group)",
   "unit": "conversation (a single-turn prompt is its own)"
  },
- "code": "f425573baadf73d7565f6b73b975afbc25e3629113030ecf2db853bf2bfb02f3",
+ "code": "c4e3e9d4d87d57a6cac5a3d545fa2e4ccdea7e884f4dc293c059168b405c1b88",
  "command": "PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.operating_curve --split dev --out bench/results/operating_curve_dev.json",
  "default": "ss@balanced",
  "differences": {
@@ -1290,11 +1290,12 @@
   "wildchat/pool.jsonl": "912b55e509227bdf0a2c6442352ac668d44153febd369d3930489c0154843c9f"
  },
  "git": {
-  "commit": "4e9df88d1bba302bfae237fa661b5557a84209a9",
+  "commit": "91e1ff68d99d17f0135074d19737bfc0fe5847ca",
   "modified": [
+   "bench/results/h9_ablation_dev.json",
+   "bench/results/h9_ablation_dev.md",
    "bench/results/presets_dev.json",
-   "bench/results/presets_dev.md",
-   "bench/results/tagger_acceptance_dev.json"
+   "bench/results/presets_dev.md"
   ]
  },
  "gliner_arms": {

@@ -1,8 +1,8 @@
 # Leak attribution — `devlarge` (data split `test`, collection `test1`)
 
-Command: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute --split devlarge --out bench/results/attribution_devlarge_tagger.json` at commit `84d009521027`. Counts only.
+Command: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.attribute --split devlarge --out bench/results/attribution_devlarge_tagger.json` at commit `91e1ff68d99d` with 8 modified tracked file(s). Counts only.
 
-Traced edits vs the `ss` arm's span file: {'differ': 698, 'equal': 1910}.
+Traced edits vs the `ss` arm's span file: {'equal': 2608}.
 
 ## Injected slice: cause by type
 
