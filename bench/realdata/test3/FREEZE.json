@@ -1,0 +1,256 @@
+{
+ "code": "c4e3e9d4d87d57a6cac5a3d545fa2e4ccdea7e884f4dc293c059168b405c1b88",
+ "commit": "8a703a7fe6fb1e3d79f82daf3ee1a6becfe11e61",
+ "config_files": {
+  "bench/realdata/configs/balanced.json": "844015945409431deda3c0f27fc4aee4dd653428b81249f3686ca2c382d3a8de",
+  "bench/realdata/configs/classic.json": "ba2dc23e606d5c86e74bc2028e6711da4a302c51070a60b40441676b59d0d37b",
+  "bench/realdata/configs/curve/op1.json": "423a13fbaa7376595227244323527ed76e1e40fd2e8871e308945cbd790cc0f5",
+  "bench/realdata/configs/curve/op2.json": "095de35ebf471196c7ffa696777659fe8823be307aed1d9324b5f072ef9b8169",
+  "bench/realdata/configs/curve/op3.json": "9c437b26c82296063f03ce9be447897c893dbc74bbfc8fb33e62815df5b5f1b6",
+  "bench/realdata/configs/curve/op5.json": "4b52c7b47643bd66e108631151a3be159ed1bce9ec007f546b1ead4c7a0fda7b",
+  "bench/realdata/configs/fast.json": "c25dfd127d260cd8d7a9fe950d0138148c5f9f7462ddbb4269b181a153326b48",
+  "bench/realdata/configs/h9/no_patterns.json": "82b1a20d6218230ac852425040e782bfe733a36f2ef7cf396469195392eda4b6",
+  "bench/realdata/configs/h9/no_patterns_unrouted.json": "b40c0f526254a4e5fdd9efed4f65f2c18b0db0e2a34986677ae8d29cad4eb67c",
+  "bench/realdata/configs/no_canonicaliser.json": "07d3b0e69889a7864bf94fc1a231cbd0a380bb5a4d84395ef130c35eaca50152",
+  "bench/realdata/configs/no_gate.json": "5e864dfbb1c140c9e0347cc27b68ad3ba1188df40de84f147f87f9d89c1ac25d",
+  "bench/realdata/configs/no_models.json": "d9b71bfe7ff2b1a8fbade47413b3fc0afbbcace6d606105e32081c9d747bcdae",
+  "bench/realdata/configs/no_structural.json": "c3c1d1526e741187dac4f9ba826b55586e931e2fb3f0943a8c129fb66237f68a",
+  "bench/realdata/configs/no_tagger.json": "57379aee58cb9cd6427e8bfbdb5b9af67bf58d90b5001de8d269d835fe8bdd48",
+  "bench/realdata/configs/strict.json": "2cb44fada869b690152ec65569297c7e237c7edff1525722169e4385da698093"
+ },
+ "date": "2026-10-08",
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "pii-tagger-dv3s-40k",
+    "name": "pii_tagger",
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    "stride": null,
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "LOCATION": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+ "external_samples": {
+  "bench/realdata/external/nemotron_pii.json": "d50b5a7f87bea873bf0b3c22621d1ac399434c1c5bda5c65d5aa6dace0042f0b"
+ },
+ "gliner_pii_tuned": {
+  "label_set": "published",
+  "threshold": 0.3
+ },
+ "hypotheses_sha256": "bd43f11d9b827ea05d2b9c0833d1e460127eb66764b02c3e99ccef90d7202c8a",
+ "models": [
+  {
+   "licence": "MIT",
+   "model": "en_core_web_lg",
+   "revision": "3.8.0",
+   "stage": "entity_trace"
+  },
+  {
+   "licence": "MIT",
+   "model": "pii-tagger-dv3s-40k",
+   "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+   "stage": "pii_tagger",
+   "weights_sha256_checked": "f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173"
+  }
+ ],
+ "note": "test-3 is scored at this commit, once: E5''', E6''', E7''', E9''', attribution, the external benchmark, E10''', foreign and the live phase (PROMPT_FOR_OPUS_V4)"
+}
