@@ -281,6 +281,106 @@ Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 281752575515060318
 }
 ```
 
+## Collection `test3`
+
+The sealed third test (PROMPT_FOR_OPUS_V4, `HYPOTHESES_TEST3.md`): drawn by
+`python -m bench.realdata.pull --collection test3` from sources neither earlier draw touched
+(test1's and test2's ids skipped, their first turns seeding the near-duplicate check), one split,
+files under
+`bench/realdata/test3/<dataset>/`.
+
+### test3 / oasst1
+
+| step | count |
+|---|---|
+| `source_roots` | 10,364 |
+| `drop_deleted` | 1 |
+| `drop_not_english` | 6,693 |
+| `drop_first_turn_too_short` | 1,775 |
+| `drop_first_turn_too_long` | 6 |
+| `drop_first_turn_only_code` | 2 |
+| `drop_first_turn_jailbreak` | 3 |
+| `first_turn_kept` | 1,884 |
+| `single_exact_duplicates` | 1 |
+| `single_near_duplicates_skipped` | 2 |
+| `drawn_single` | 441 |
+| `multi_candidates` | 1,399 |
+| `drop_multi_later_turn_too_long` | 1 |
+| `multi_kept` | 1,398 |
+| `multi_exact_duplicates` | 0 |
+| `drawn_multi` | 120 |
+| `single_floor` | 400 |
+| `single_target` | 600 |
+| `taken_by_test1` | 600 |
+| `taken_by_test2` | 720 |
+
+Drawn: multi_test3 = 120, single_test3 = 441
+
+Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 5192946058356430922, single = 4762911692612335318
+
+### test3 / sharegpt
+
+| step | count |
+|---|---|
+| `source_conversations` | 45,332 |
+| `drop_not_starting_with_user` | 1,673 |
+| `drop_first_turn_empty` | 5 |
+| `drop_first_turn_not_english` | 14,651 |
+| `drop_first_turn_too_short` | 9,369 |
+| `drop_first_turn_too_long` | 1,929 |
+| `drop_first_turn_only_code` | 106 |
+| `drop_first_turn_jailbreak` | 286 |
+| `first_turn_kept` | 17,313 |
+| `single_exact_duplicates` | 2,158 |
+| `single_near_duplicates_skipped` | 5 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 12,464 |
+| `drop_multi_later_turn_empty` | 1 |
+| `drop_multi_later_turn_too_long` | 421 |
+| `drop_multi_later_turn_not_english` | 859 |
+| `drop_multi_later_turn_jailbreak` | 4 |
+| `multi_kept` | 11,179 |
+| `multi_exact_duplicates` | 1,445 |
+| `multi_near_duplicates_skipped` | 2 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+| `taken_by_test2` | 720 |
+
+Drawn: multi_test3 = 120, single_test3 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 7657607999476220337, single = 1073398702621200168
+
+### test3 / wildchat
+
+| step | count |
+|---|---|
+| `source_conversations` | 119,713 |
+| `drop_duplicate_hash` | 1,428 |
+| `drop_not_english` | 51,104 |
+| `drop_first_turn_empty` | 204 |
+| `drop_first_turn_too_short` | 16,212 |
+| `drop_first_turn_too_long` | 13,276 |
+| `drop_first_turn_only_code` | 601 |
+| `drop_first_turn_jailbreak` | 148 |
+| `first_turn_kept` | 36,740 |
+| `single_exact_duplicates` | 6,271 |
+| `single_near_duplicates_skipped` | 34 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 10,678 |
+| `drop_multi_later_turn_empty` | 301 |
+| `drop_multi_later_turn_too_long` | 299 |
+| `drop_multi_later_turn_jailbreak` | 3 |
+| `multi_kept` | 10,075 |
+| `multi_exact_duplicates` | 706 |
+| `multi_near_duplicates_skipped` | 2 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+| `taken_by_test2` | 720 |
+
+Drawn: multi_test3 = 120, single_test3 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 4521544721967241027, single = 3609028807091034370
+
 ## Systems under test
 
 Recorded by `python -m bench.arms.run` from each arm's meta sidecar
@@ -855,6 +955,9 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
 | `bench/realdata/test2/wildchat/pii_free.json` | `130cef94435b569f819ba772f8bbd14772e701f6c4f473d1a50fe7f34c344a15` |
 | `bench/realdata/test2/wildchat/pool.jsonl` | `620fa2417c307affab9c3a52ef15eb095ea1db78be5ef4b9a3c9216fcd863359` |
 | `bench/realdata/test2/wildchat/test2.jsonl` | `83556c7767e357603fbd0ba985ee5da451105671c30f8cc0340a4a9e4d91eb2c` |
+| `bench/realdata/test3/oasst1/pool.jsonl` | `1eb00411379bc4b3794c121ae75205df81c63319e5d987ea8bc4f744ae87d4ce` |
+| `bench/realdata/test3/sharegpt/pool.jsonl` | `d38ec67639652254e1f3f4974ea2a0c50aa07a7ad65e29288497c52764c1a3ba` |
+| `bench/realdata/test3/wildchat/pool.jsonl` | `c55106aeb663df3159e94bcc72c3cfa24d4df7a0c4b171379a82e6208e3d7434` |
 | `bench/realdata/wildchat/dev.jsonl` | `de853c7174b008199bd8fd6b7bd05a5654908b99b71a6f94f9b0c638c43a91cf` |
 | `bench/realdata/wildchat/labels.jsonl` | `8e2669d041deb6e91de36e49a1b44cb112cf9853c0b5b5682320bfa4974b628f` |
 | `bench/realdata/wildchat/pii_free.json` | `fd096fe8325d5dd1a54dab3c14dc512069e7772790f2914d56efb1ea190b124d` |
