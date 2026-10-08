@@ -206,13 +206,49 @@ def plan(ds: str, units: Optional[Dict[str, dict]] = None, free: Optional[dict] 
             rows[i]["types"] = types
     named = sorted(r["source_id"] for r in rows if r["shift"] and "PERSON" in r["types"])
     json_ids = set(rng.sample(named, min(len(named), round(sum(n_shift.values()) * JSON_SHARE))))
+    used = {r["source_id"] for r in rows}
     for r in rows:
-        u = units[r["source_id"]]
-        r_rng = random.Random(coll.seed("inject-identity", ds, r["source_id"]))
-        r["identity"] = I.identity(r_rng, r["types"], r["task"], r["shift"], text="\n".join(u["turns"]),
-                                   avoid=avoid_values(u["labels"]), pool=pool_of(coll))
-        r["layout"] = "json" if r["source_id"] in json_ids else r_rng.choice(LAYOUTS)
+        json_row = r["source_id"] in json_ids
+        try:
+            r_rng = _identity(r, units[r["source_id"]], coll, ds)
+        except RuntimeError:
+            r_rng = _replace_base(r, units, free, used, coll, ds)
+        r["layout"] = "json" if json_row else r_rng.choice(LAYOUTS)
     return rows
+
+
+def _identity(r: dict, u: dict, coll: Collection, ds: str) -> random.Random:
+    """The row's identity, fitted to its base's text; the row's seeded generator."""
+    r_rng = random.Random(coll.seed("inject-identity", ds, r["source_id"]))
+    r["identity"] = I.identity(r_rng, r["types"], r["task"], r["shift"], text="\n".join(u["turns"]),
+                               avoid=avoid_values(u["labels"]), pool=pool_of(coll))
+    return r_rng
+
+
+def _replace_base(r: dict, units: Dict[str, dict], free: dict, used: set, coll: Collection, ds: str) -> random.Random:
+    """A base whose text leaves no room for the row's values (test-3: a long
+    prompt that already holds every number from 18 to 79, so no age in digits
+    can be told apart from its own) gives its place to an unused PII-free base
+    of the same kind and split with room for the row's types, chosen by a
+    seeded draw. Never reached by test-1 or test-2, whose plans are unchanged;
+    the row keeps its types, shift and layout, takes the new base's task and
+    size, and records the base it replaces (``replaces``)."""
+    old = r["source_id"]
+    cands = sorted(s for s in free[r["kind"]]["adjudicated"]
+                   if s not in used and units[s]["split"] == r["split"]
+                   and I.capacity(units[s]["words"][0]) >= len(r["types"]))
+    random.Random(coll.seed("inject-replace", ds, old)).shuffle(cands)
+    for sid in cands:
+        u = units[sid]
+        r.update(key=f"{ds}/{sid}", source_id=sid, task=u["labels"][0]["task"], words=u["words"][0])
+        try:
+            r_rng = _identity(r, u, coll, ds)
+        except RuntimeError:
+            continue
+        used.add(sid)
+        r["replaces"] = old
+        return r_rng
+    raise RuntimeError(f"{ds}/{old}: no unused base can take the row's values")
 
 
 # ── the placement request ────────────────────────────────────────────────────
@@ -792,6 +828,8 @@ def summary(rows: Sequence[dict], final: Dict[str, dict]) -> dict:
                                                  for v in r["identity"]["values"]).items()))
         d["layouts"] = dict(sorted(Counter(r["layout"] for r in acc).items()))
         d["split"] = dict(sorted(Counter(r["split"] for r in acc).items()))
+        if any("replaces" in r for r in mine):
+            d["replaced_bases"] = sum("replaces" in r for r in mine)
         d["round1_problem_kinds"] = dict(Counter(problem_kind(p) for r in mine
                                                  for p in final[r["key"]]["first_problems"]).most_common())
         d["drop_problem_kinds"] = dict(Counter(problem_kind(p) for r in mine if final[r["key"]]["status"] == "dropped"
@@ -877,7 +915,9 @@ def main(argv=None) -> int:
                   f"{sum(r['layout'] == 'json' for r in single)}), multi {len(mine) - len(single)}; "
                   f"split {dict(sorted(Counter(r['split'] for r in mine).items()))}; "
                   f"values per item median {sorted(len(r['identity']['values']) for r in mine)[len(mine) // 2]}; "
-                  f"rows per type (single) min {min(tc.values())} {dict(sorted(tc.items()))}")
+                  f"rows per type (single) min {min(tc.values())} {dict(sorted(tc.items()))}"
+                  + (f"; bases replaced {sum('replaces' in r for r in mine)}" if any('replaces' in r for r in mine)
+                     else ""))
         if args.estimate:
             gs = groups(rows, texts)
             chars = [sum(len(t) for r in grp for t in texts[r["key"]]) for grp in gs]

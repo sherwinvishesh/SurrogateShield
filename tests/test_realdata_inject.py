@@ -440,3 +440,27 @@ def test_run_accepts_re_asks_once_then_drops(three):
     assert s["multi"]["accepted_round1"] == 1 and s["types_single"]["rows"]["PERSON"] == 2
     blob = json.dumps(s)
     assert "Ana" not in blob and "tides" not in blob and "<text>" in blob
+
+
+def test_a_base_with_no_room_for_an_age_gives_its_place_to_an_unused_base(synthetic3):
+    # a prompt holding every number from 18 to 79, in digits and in words, leaves an
+    # injected age nothing it can be told apart from; test-3 met one such base
+    t3 = common.COLLECTIONS["test3"]
+    units, free = synthetic3
+    a = J.plan("oasst1", units, free, coll=t3)
+    assert not any("replaces" in r for r in a)
+    full = next(r for r in a if r["kind"] == "single" and "AGE" in r["types"])["source_id"]
+    numbers = " ".join(f"{n} {I.number_words(n)} {I.number_words(n).replace('-', ' ')}" for n in range(18, 80))
+    crowded = {**units, full: {**units[full], "turns": [units[full]["turns"][0] + " " + numbers]}}
+    b = J.plan("oasst1", crowded, free, coll=t3)
+    assert json.dumps(b, sort_keys=True) == json.dumps(J.plan("oasst1", crowded, free, coll=t3), sort_keys=True)
+    (moved,) = [r for r in b if "replaces" in r]
+    assert moved["replaces"] == full and moved["source_id"] != full and moved["key"] == f"oasst1/{moved['source_id']}"
+    assert moved["source_id"] in free["single"]["adjudicated"] and moved["source_id"] not in {r["source_id"] for r in a}
+    assert len({r["source_id"] for r in b}) == len(b) and full not in {r["source_id"] for r in b}
+    old = next(r for r in a if r["source_id"] == full)
+    assert (moved["types"], moved["shift"], moved["split"], moved["kind"]) == (old["types"], old["shift"], "test3", "single")
+    assert moved["task"] == units[moved["source_id"]]["labels"][0]["task"]
+    assert not any(rw.occurrences(units[moved["source_id"]]["turns"][0], v["value"]) for v in moved["identity"]["values"])
+    others = [r for r in b if r is not moved]
+    assert [r["identity"] for r in others] == [r["identity"] for r in a if r["source_id"] != full]
