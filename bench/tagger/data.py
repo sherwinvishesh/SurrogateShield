@@ -18,6 +18,15 @@ training entirely (``HELD_OUT``) so generalisation to an unseen format can be
 measured on dev. Augmentations (case, missing spaces, typos in the carrier,
 Markdown, line breaks inside a value, negatives next to values) are applied
 to recorded fractions of the messages (``AUG``).
+
+VERSION 2 (V4 §3.1 D) adds the "age" layout: ages next to the people they
+belong to (a sign-off "Ana Ruiz, 34", a header line, mid-sentence, bracketed,
+"of <city>", Reddit's "(34F)", worded, a form row), lines of the same shape
+whose number is not an age (labelled O), and AGE in signature blocks. Its
+templates (``bank.AGE_*``) are worded apart from the AGE probe's
+(tests/test_V4_tagger_age_data.py). It also trims spaces off address parts.
+The V4 model trains on ``train-40k-v4.jsonl`` / ``val-2k-v4.jsonl``; the
+VERSION 1 files stay as the record of ``pii-tagger-dv3s-40k``.
 """
 
 from __future__ import annotations
@@ -46,10 +55,14 @@ LABELS = ("O",) + tuple(f"{p}-{t}" for t in TAGS for p in ("B", "I"))
 HELD_OUT = (("PHONE", "words"), ("DATE_OF_BIRTH", "month-ordinal"))
 BUILD = ROOT / "bench" / "tagger" / "build"
 PUBLIC_PEOPLE = ROOT / "python-library" / "surrogateshield" / "core" / "detection" / "public_people.txt"
-VERSION = 1
+VERSION = 2                         # 2: ages of named people (V4 §3.1 D: the "age" layout, AGE in signatures)
 
 LAYOUTS = {"intro": .24, "inline": .18, "signature": .14, "form": .14, "json": .07, "env": .06, "table": .04,
-           "story": .03, "none": .24}
+           "story": .03, "none": .24, "age": .05}
+# the "age" layout's forms (bank.AGE_*): a name and an age closing a sign-off, a labelled line, mid-sentence, ...
+AGE_LAYOUTS = {"signoff": .24, "line": .16, "mid": .14, "bracket": .14, "reddit": .12, "from": .08, "worded": .07,
+               "form": .05}
+AGE_NEAR = .4        # share of "age" messages with a same-shape line whose number is not an age
 # fraction of messages each augmentation is applied to
 AUG = {"lower": .07, "upper": .02, "nospace": .06, "typos": .15, "markdown": .06, "linebreak": .05,
        "negatives": .30, "third_party": .20, "greeting": .45, "closing": .35}
@@ -100,6 +113,7 @@ def address_parts(value: str, country: str) -> List[Piece]:
         cuts = sorted((m.start(g), m.end(g), g.upper()) for g in m.groupdict() if m.group(g))
         out, pos = [], 0
         for s, e, g in cuts:
+            s, e = s + len(value[s:e]) - len(value[s:e].lstrip()), e - len(value[s:e]) + len(value[s:e].rstrip())
             if s > pos:
                 out.append(Piece(value[pos:s]))
             out.append(Piece(value[s:e], g, "v"))
@@ -392,8 +406,8 @@ def table_block(rng: random.Random, values: Sequence[dict], country: str) -> Lis
 
 SIG_PREFIX = {"PHONE": ("", "Tel: ", "M: ", "Mobile: ", "Phone: ", "T "), "EMAIL": ("", "E: ", "Email: "),
               "URL": ("", "Web: ", "W: "), "HANDLE": ("", "Twitter: "), "ADDRESS": ("",), "ORG": ("",),
-              "PERSON": ("",), "LOCATION": ("",)}
-SIG_ORDER = ("PERSON", "ORG", "ADDRESS", "LOCATION", "PHONE", "EMAIL", "URL", "HANDLE")
+              "PERSON": ("",), "LOCATION": ("",), "AGE": ("", "Age: ", "age ")}
+SIG_ORDER = ("PERSON", "AGE", "ORG", "ADDRESS", "LOCATION", "PHONE", "EMAIL", "URL", "HANDLE")
 
 
 def signature_block(rng: random.Random, values: Sequence[dict], country: str) -> Tuple[List[Piece], List[dict]]:
@@ -402,14 +416,100 @@ def signature_block(rng: random.Random, values: Sequence[dict], country: str) ->
     rest = [v for v in values if v not in inside]
     out = [Piece(rng.choice(bank.SIGN_OFFS) + "\n")]
     for i, v in enumerate(inside):
-        title = ""
+        title, prefix = "", rng.choice(SIG_PREFIX[v["type"]])
         if v["type"] == "ORG" and rng.random() < .5:
             title = rng.choice(("Senior Analyst, ", "Project Manager | ", "Office Manager at ", "Student, ",
                                 "Founder, ", "Head of Sales — "))
-        out += [Piece(title + rng.choice(SIG_PREFIX[v["type"]]))] + value_pieces(v, country)
+        if v["type"] == "AGE" and not prefix:
+            if i and inside[i - 1]["type"] == "PERSON":          # on the name's line: "Ana Ruiz, 34", "Ana Ruiz (34)"
+                join = rng.choice((", ", ", ", " ("))
+                out[-1] = Piece(join)                             # the separator after the name
+                out += value_pieces(v, country) + ([Piece(")")] if join == " (" else [])
+                out += [Piece("\n")] if i < len(inside) - 1 else []
+                continue
+            prefix = "Age: "                                      # a bare number on its own line is not an age
+        out += [Piece(title + prefix)] + value_pieces(v, country)
         if i < len(inside) - 1:
             out.append(Piece(rng.choice(("\n", "\n", " | ")) if v["type"] in ("PHONE", "EMAIL", "URL") else "\n"))
     return out, rest
+
+
+# ── ages of named people (V4 §3.1 D) ─────────────────────────────────────────
+
+def _age_value(rng: random.Random, lo: int = 18, hi: int = 89, worded: bool = False) -> dict:
+    n = rng.randint(lo, hi)
+    return {"value": ids.number_words(n) if worded else str(n), "type": "AGE", "fmt": "words" if worded else "plain"}
+
+
+def _slots(rng: random.Random, template: str, people: Sequence[ids.Ctx], ages: Sequence[dict],
+           kin: Sequence[str] = bank.RELATIONS) -> List[Piece]:
+    """*template* (bank.AGE_*) as pieces: names PERSON, cities LOCATION, ages AGE, negative slots O;
+    a relation ``{r}`` comes from *kin*."""
+    out: List[Piece] = []
+    for part in re.split(r"(\{(?:n2?|f2?|c|v2?|r|k)\})", template):
+        if not part:
+            continue
+        key = part[1:-1] if part.startswith("{") and part.endswith("}") else None
+        if key is None:
+            out += fill(rng, part)
+            continue
+        p = people[1] if key.endswith("2") and key != "v2" else people[0]
+        if key in ("n", "n2"):
+            out.append(Piece(f"{p.first} {p.last}", "PERSON", "v"))
+        elif key in ("f", "f2"):
+            out.append(Piece(p.first, "PERSON", "v"))
+        elif key == "c":
+            out.append(Piece(ids.city(p)[0], "LOCATION", "v"))
+        elif key in ("v", "v2"):
+            out.append(Piece(ages[key == "v2"]["value"], "AGE", "v"))
+        elif key == "r":
+            out.append(Piece(rng.choice(kin)))
+        else:                                                      # {k}: a number that is not an age
+            out.append(Piece(str(rng.choice((rng.randint(2, 99), rng.randint(10, 99))))))
+    return out
+
+
+def age_block(rng: random.Random) -> Tuple[List[Piece], List[str], List[dict], str]:
+    """One "age" layout (``AGE_LAYOUTS``): its pieces, the pool tokens of its
+    names, its ages, and which form it took. Names and cities belong to new
+    training-half people (``identities.Ctx(pool="train")``)."""
+    kind = rng.choices(list(AGE_LAYOUTS), weights=list(AGE_LAYOUTS.values()))[0]
+    people = [ids.Ctx(rng, False, "train"), ids.Ctx(rng, False, "train")]
+    table = {"line": bank.AGE_LINES, "mid": bank.AGE_MID, "bracket": bank.AGE_BRACKET, "from": bank.AGE_FROM,
+             "reddit": bank.AGE_REDDIT, "worded": bank.AGE_WORDED}.get(kind)
+    t = rng.choice(table) if table else ""
+    who, key = rng.choice(bank.AGE_FORM) if kind == "form" else ("", "")
+    child = (t or who).startswith(bank.AGE_CHILDREN) or ("{f}" in t and rng.random() < .6)  # named by first name
+    lo, hi = (2, 17) if child else (18, 89)
+    ages = [_age_value(rng, lo, hi, worded=kind == "worded"), _age_value(rng, lo, hi)]
+    if kind == "signoff":
+        pieces = [Piece(rng.choice(bank.SIGN_OFFS) + "\n"), Piece(f"{people[0].first} {people[0].last}", "PERSON", "v"),
+                  Piece(", "), Piece(ages[0]["value"], "AGE", "v")]
+        r = rng.random()
+        if r < .1:
+            pieces.append(Piece("."))
+        elif r < .25:
+            pieces += [Piece("\n"), Piece(ids.city(people[0])[0], "LOCATION", "v")]
+        elif r < .32:
+            pieces.append(Piece("\nSent from my phone"))
+    elif kind == "form":
+        sep_ = rng.choice((": ", " - ", ":\t"))
+        pieces = [Piece(who + sep_), Piece(f"{people[0].first} {people[0].last}", "PERSON", "v"),
+                  Piece(rng.choice(("\n", "\n", " | ", ", ")) + key + sep_), Piece(ages[0]["value"], "AGE", "v")]
+    else:
+        pieces = _slots(rng, t, people, ages, bank.CHILD_KIN if child else bank.RELATIONS)
+    named = [people[0]] if kind in ("signoff", "form") or re.search(r"\{[nfc]\}", t) else []
+    named += [people[1]] if re.search(r"\{[nf]2\}", t) else []
+    toks = sorted({tok for c in named for tok in c.pool_tokens})
+    return pieces, toks, ages[:2 if "{v2}" in t else 1], kind
+
+
+def age_near(rng: random.Random) -> Tuple[List[Piece], List[str]]:
+    """A line in an "age" shape whose number is not an age (bank.AGE_NEAR; numbers O)."""
+    p = ids.Ctx(rng, False, "train")
+    t = rng.choice(bank.AGE_NEAR)
+    pieces = _slots(rng, t, [p, p], [])
+    return pieces, sorted(p.pool_tokens) if "{n}" in t else []
 
 
 # ── one message ──────────────────────────────────────────────────────────────
@@ -437,7 +537,7 @@ def message(rng: random.Random, i: int) -> dict:
     pool_tokens: set = set()
     values: List[dict] = []
     country = "US"
-    if layout != "none":
+    if layout not in ("none", "age") or (layout == "age" and rng.random() < .5):
         types = choose_types(rng, task)
         if layout == "env":
             types = [t for t in types if t in bank.ENV_KEYS] or ["CREDENTIAL"]
@@ -449,6 +549,8 @@ def message(rng: random.Random, i: int) -> dict:
     main = body(rng, task, negatives_only=not values)
     head: List[Piece] = []
     tail: List[Piece] = []
+    ending: List[Piece] = []          # an "age" sign-off or line that closes the message
+    extra: dict = {}
     if rng.random() < AUG["greeting"]:
         head.append(Piece(rng.choice(bank.GREETINGS) + rng.choice((",", "!", "", ".")) + sep(rng)))
         aug.append("greeting")
@@ -480,6 +582,25 @@ def message(rng: random.Random, i: int) -> dict:
             head += block + [Piece("\n\n")]
         else:
             tail += [Piece(rng.choice(("\n\n", "\n", "\n\n")))] + block
+    elif layout == "age":
+        block, toks, ages, kind = age_block(rng)
+        pool_tokens.update(toks)
+        extra = {"age_form": kind, "age_values": [["AGE", a["fmt"]] for a in ages]}
+        if kind == "signoff":
+            values = [v for v in values if v["type"] != "PERSON"]
+        for v in values:
+            head += closed_sentence(rng, v, country) + [Piece(" ")]
+        if kind != "signoff" and rng.random() < .4:                  # opens the message
+            head = block + [Piece(rng.choice(("\n", "\n\n") if kind in ("line", "form", "from") else ("\n", " ")))] + head
+        elif kind in ("signoff", "line", "form", "from"):
+            ending = [Piece(rng.choice(("\n\n", "\n")))] + block
+        else:
+            tail += [Piece(sep(rng))] + block
+        if rng.random() < AGE_NEAR:
+            near, ntoks = age_near(rng)
+            pool_tokens.update(ntoks)
+            head = near + [Piece("\n")] + head
+            extra["age_near"] = True
 
     if rng.random() < AUG["third_party"]:
         name, toks = third_party(rng)
@@ -499,17 +620,17 @@ def message(rng: random.Random, i: int) -> dict:
         else:
             main = neg + [Piece(sep(rng))] + main
         aug.append("negatives")
-    if layout != "signature" and rng.random() < AUG["closing"]:
+    if layout != "signature" and not ending and rng.random() < AUG["closing"]:
         tail.append(Piece(sep(rng) + rng.choice(bank.CLOSINGS)))
         aug.append("closing")
-    pieces = head + main + tail
+    pieces = head + main + tail + ending
     pieces = augment(rng, pieces, aug)
     text, spans = join(pieces)
     text, spans = _strip(text, spans)
     return {"id": f"tg-{i:06d}", "text": text, "spans": spans,
             "meta": {"task": task, "layout": layout, "aug": aug, "country": country,
-                     "values": [[v["type"], v["fmt"]] for v in values],
-                     "pool_tokens": sorted(pool_tokens)}}
+                     "values": [[v["type"], v["fmt"]] for v in values] + extra.pop("age_values", []),
+                     "pool_tokens": sorted(pool_tokens), **extra}}
 
 
 def _strip(text: str, spans: List[List]) -> Tuple[str, List[List]]:

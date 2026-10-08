@@ -475,3 +475,62 @@ CODE_WRAPPERS = [
     "```python\n{block}\n```", "```json\n{block}\n```", "```\n{block}\n```", "```yaml\n{block}\n```",
     "{block}", "```js\n{block}\n```", "```bash\n{block}\n```", "```sql\n{block}\n```",
 ]
+
+# ── ages of named people (V4 §3.1 D) ─────────────────────────────────────────
+# The layouts the V4 AGE probe found the tagger reading as another type, or
+# not at all: a name, a comma and an age closing a sign-off line, an age after
+# a third person's name, in brackets, a Reddit "(29F)". Slots: {n} a full name,
+# {f} a first name, {c} a city, {v} an age, {r} a relation, and a second
+# person's {f2} / {v2}. Worded apart from ``age_probe.TEMPLATES``: the probe
+# measures the layout, not these strings (tests/test_V4_tagger_age_data.py).
+AGE_LINES = [
+    "Written by {n}, {v}", "Candidate: {n}, {v}", "Volunteer - {n}, {v}", "Guest: {n}, {v}", "Member: {n}, {v}",
+    "Prepared by {n}, {v}", "Driver: {n}, {v}", "Author: {n}, {v}", "Participant 3: {n}, {v}",
+    "Next of kin: {n}, {v}", "Emergency contact - {n}, {v}", "Player: {n}, {v}", "Interviewee: {n}, {v}",
+    "Owner — {n}, {v}", "Requested by {n}, {v}", "Passenger 2: {n}, {v}",
+]
+AGE_MID = [
+    "My {r} {n}, {v}, has had a cough for a week.", "{n}, {v}, will be taking over the account.",
+    "Our tenant {n}, {v}, hasn't paid since March.", "I'm helping my {r}, {n}, {v}, with a cover letter.",
+    "Yesterday {n}, {v}, slipped on the ice outside the shop.", "The applicant, {n}, {v}, has five years of experience.",
+    "Our youngest volunteer, {n}, {v}, organised the whole event.", "Last week {n}, {v}, was promoted to manager.",
+    "Is it normal that {n}, {v}, sleeps eleven hours a night?", "We're hiring {n}, {v}, as a part-time tutor.",
+    "The witness, {n}, {v}, said the car was red.", "My {r}, {f}, {v}, wants to try climbing.",
+]
+AGE_BRACKET = [
+    "My {r} {f} ({v}) is starting school soon.", "{n} ({v}) has applied for the role.",
+    "{n} (age {v}) needs a referral letter.", "My {r} {f} (aged {v}) won't eat vegetables.",
+    "Our kids, {f} ({v}) and {f2} ({v2}), share a room.", "Attendee: {n} ({v})", "{n} [{v}] joined the team today.",
+    "I look after {f} ({v}) on weekends.", "Can you write a birthday card for {f} ({v})?",
+    "Patient {n} ({v}) missed two appointments.", "The new manager, {n} ({v}), starts in May.",
+]
+AGE_FROM = [
+    "{n}, {v}, of {c}", "{n} ({v}), {c}", "{n}, {v} — {c}", "Winner: {n}, {v}, {c}",
+    "{n}, {v}, lives in {c} and works nights.", "Profile: {n}, {v}, {c}", "{n}, {v}, {c}, says the bus is always late.",
+]
+AGE_REDDIT = [
+    "I ({v}F) don't know what to do about my roommate.", "{v}m, uni student here.",
+    "So my BF ({v}M) said something weird last night.", "[{v}F] Update on my job situation",
+    "Me, {v}M, and my GF, {v2}F, are moving in together.", "AITA? I'm {v}F and my sister is {v2}.",
+    "My husband ({v}M) and I ({v2}F) can't agree on a budget.", "F{v} here, first post.",
+    "My ({v}F) manager keeps changing my shifts.", "{v}/M, need some career advice.",
+]
+AGE_WORDED = [
+    "My {r} {f} turned {v} on Sunday.", "{f}, who is {v}, has asked for help with this.",
+    "{n} is {v} and retiring soon.", "My {r} is {v} and has never used email.",
+    "{n}, now {v}, still runs every morning.", "We're planning a party because {f} turns {v} next month.",
+]
+AGE_FORM = [("Member", "Age"), ("Guest", "Yrs"), ("Attendee", "Age (yrs)"), ("Child", "age"),
+            ("Kid's name", "Age"), ("Participant", "AGE"), ("Traveller", "Years")]
+# forms and lines that only hold a child's age, and the kin a child's age goes with
+AGE_CHILDREN = ("Our kids", "Child", "Kid's name")
+CHILD_KIN = ["son", "daughter", "sister", "brother", "cousin", "nephew", "niece", "grandson", "granddaughter",
+             "stepson", "stepdaughter", "little brother", "little sister"]
+# the same shapes, where the number is not an age (label O)
+AGE_NEAR = [
+    "{n}, {k} tickets", "{n}, Room {k}", "{n}, ext. {k}", "{n}, Desk {k}", "{n}, Table {k}", "{n}, Flat {k}",
+    "{n}, Team {k}", "{n}, {YEAR} cohort", "{n}, {k}:30", "{n} ({k} votes)", "{n} (page {k})",
+    "Gate {NUM}, platform {k}", "Week {NUM}, day {k}", "Total items, {k}", "{PLACE} {NUM}, {PLACE} {k}",
+    "Chapter {NUM}, page {k}", "{LIB} {VERSION}, {k} open issues", "{BRAND} Pro, {k} GB", "Bus {NUM}, stop {k}",
+    "Table {NUM}, {k} guests", "Order {NUM}, {k} items", "{FICTION}, chapter {k}",
+]
