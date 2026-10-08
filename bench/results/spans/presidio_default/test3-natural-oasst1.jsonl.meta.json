@@ -1,0 +1,19 @@
+{
+ "arm": "presidio_default",
+ "command": ".venv/bin/python -m bench.arms.presidio_default --in bench/realdata/build/test3/oasst1/messages.jsonl --out bench/realdata/build/spans/presidio_default/test3-natural-oasst1.jsonl",
+ "config": {
+  "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+  "overlap_resolution": "longest span, then highest score",
+  "presidio_analyzer_version": "2.2.362",
+  "replacement": "[ENTITY_TYPE] placeholder (presidio/redact.py)",
+  "score_threshold": 0.4
+ },
+ "edits": 456,
+ "input": "bench/realdata/build/test3/oasst1/messages.jsonl",
+ "input_sha256": "7fd50356bd0ebfe1f446b84b12f239daf5c93c7945e3688f690080a6fec5b02f",
+ "load_seconds": 0.0,
+ "messages": 694,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

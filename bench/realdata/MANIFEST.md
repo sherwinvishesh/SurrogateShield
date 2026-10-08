@@ -381,6 +381,24 @@ Drawn: multi_test3 = 120, single_test3 = 600
 
 Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 4521544721967241027, single = 3609028807091034370
 
+**test3 pooling**
+
+```
+{
+ "arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "clean": false,
+ "commit": "a07f845836a8660d36e42a15395752b9976651db",
+ "ss_detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b"
+}
+```
+
 ## Systems under test
 
 Recorded by `python -m bench.arms.run` from each arm's meta sidecar
@@ -894,6 +912,466 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
   }
  },
  "detection_config_hash": "8e463c3c6b7562fd6ae3070109edd178a248cd7e5ab350168aeb122bd4c81c15",
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`test2-oasst1`, `test2-sharegpt`, `test2-wildchat`): the frozen test-2 SS (FREEZE.json, e2c8fa5); test-2's scores (realdata_test2.json) were made from them.
+
+```
+{
+ "ADDRESS_MODE": "replace",
+ "ADDRESS_MODE_product": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "pii-tagger-dv3s-40k",
+    "name": "pii_tagger",
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    "stride": null,
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "LOCATION": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`test3-natural-oasst1`, `test3-natural-sharegpt`, `test3-natural-wildchat`): the frozen test-2 SS (FREEZE.json, e2c8fa5); the silver-label candidates of test-3's natural pools were made from them.
+
+```
+{
+ "ADDRESS_MODE": "replace",
+ "ADDRESS_MODE_product": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "pii-tagger-dv3s-40k",
+    "name": "pii_tagger",
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    "stride": null,
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "LOCATION": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
  "versions": {
