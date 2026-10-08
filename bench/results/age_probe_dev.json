@@ -1,7 +1,7 @@
 {
- "command": "PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.tagger.age_probe --ss frozen --out bench/results/age_probe_dev.json",
+ "command": "PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.tagger.age_probe --ss bc --out bench/results/age_probe_dev.json",
  "git": {
-  "commit": "c59f8a1c90b246f6f95a99b879dab6f61365f3b4",
+  "commit": "1c4fd79516970cf7e8674a9d66f6208e2cac6527",
   "modified": []
  },
  "layouts": {
@@ -83,6 +83,179 @@
  "role": "diagnostic, synthetic",
  "seed": 2688461741158155648,
  "ss": {
+  "bc": {
+   "all": {
+    "k": 532,
+    "n": 602,
+    "rate": 0.8837,
+    "wilson95": [
+     0.8556,
+     0.9069
+    ]
+   },
+   "by_layout": {
+    "bracket": {
+     "k": 37,
+     "n": 38,
+     "rate": 0.9737,
+     "wilson95": [
+      0.8651,
+      0.9953
+     ]
+    },
+    "contact": {
+     "k": 28,
+     "n": 38,
+     "rate": 0.7368,
+     "wilson95": [
+      0.5799,
+      0.8503
+     ]
+    },
+    "eol": {
+     "k": 35,
+     "n": 38,
+     "rate": 0.9211,
+     "wilson95": [
+      0.792,
+      0.9728
+     ]
+    },
+    "form": {
+     "k": 43,
+     "n": 75,
+     "rate": 0.5733,
+     "wilson95": [
+      0.4605,
+      0.679
+     ]
+    },
+    "from_city": {
+     "k": 38,
+     "n": 38,
+     "rate": 1.0,
+     "wilson95": [
+      0.9082,
+      1.0
+     ]
+    },
+    "json": {
+     "k": 75,
+     "n": 75,
+     "rate": 1.0,
+     "wilson95": [
+      0.9513,
+      1.0
+     ]
+    },
+    "mid": {
+     "k": 38,
+     "n": 38,
+     "rate": 1.0,
+     "wilson95": [
+      0.9082,
+      1.0
+     ]
+    },
+    "reddit": {
+     "k": 26,
+     "n": 37,
+     "rate": 0.7027,
+     "wilson95": [
+      0.5422,
+      0.8251
+     ]
+    },
+    "sentence": {
+     "k": 63,
+     "n": 75,
+     "rate": 0.84,
+     "wilson95": [
+      0.7408,
+      0.906
+     ]
+    },
+    "signoff": {
+     "k": 37,
+     "n": 38,
+     "rate": 0.9737,
+     "wilson95": [
+      0.8651,
+      0.9953
+     ]
+    },
+    "table": {
+     "k": 75,
+     "n": 75,
+     "rate": 1.0,
+     "wilson95": [
+      0.9513,
+      1.0
+     ]
+    },
+    "worded": {
+     "k": 37,
+     "n": 37,
+     "rate": 1.0,
+     "wilson95": [
+      0.9059,
+      1.0
+     ]
+    }
+   },
+   "by_script": {
+    "ascii": {
+     "k": 140,
+     "n": 146,
+     "rate": 0.9589,
+     "wilson95": [
+      0.9132,
+      0.981
+     ]
+    },
+    "non_ascii": {
+     "k": 110,
+     "n": 119,
+     "rate": 0.9244,
+     "wilson95": [
+      0.8625,
+      0.9597
+     ]
+    }
+   },
+   "code": "370c18c0f9fc68060c504c6f6eea18f0a9450745bb53aec0b593ada07380ea5f",
+   "config_file": null,
+   "date": "2026-10-08",
+   "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+   "new": {
+    "k": 276,
+    "n": 302,
+    "rate": 0.9139,
+    "wilson95": [
+     0.8768,
+     0.9406
+    ]
+   },
+   "refused": 0,
+   "sign_off": {
+    "k": 72,
+    "n": 76,
+    "rate": 0.9474,
+    "wilson95": [
+     0.8723,
+     0.9793
+    ]
+   },
+   "trained": {
+    "k": 256,
+    "n": 300,
+    "rate": 0.8533,
+    "wilson95": [
+     0.8088,
+     0.8889
+    ]
+   }
+  },
   "frozen": {
    "all": {
     "k": 420,
