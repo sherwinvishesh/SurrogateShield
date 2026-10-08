@@ -267,6 +267,8 @@ def test_test3_pooling_records_its_commit_and_ss_config_and_keeps_the_frozen_ss_
     for ds in ("oasst1", "sharegpt", "wildchat"):
         assert "e2c8fa5" in run.HISTORICAL[("ss", f"test2-{ds}")]
         assert run.HISTORICAL[("ss", f"test3-natural-{ds}")].startswith("the frozen test-2 SS")
+        # dev and devlarge are re-scored at the default frozen for test-3: the current SS
+        assert ("ss", f"dev-{ds}") not in run.HISTORICAL and ("ss", f"devlarge-{ds}") not in run.HISTORICAL
 
 
 def test_record_arms_lists_historical_span_files_apart(tmp_path):

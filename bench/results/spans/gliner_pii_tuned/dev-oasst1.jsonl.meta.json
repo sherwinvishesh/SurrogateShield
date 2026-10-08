@@ -1,6 +1,6 @@
 {
  "arm": "gliner_pii_tuned",
- "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/test/oasst1.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/devlarge-oasst1.jsonl",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/dev/oasst1.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/dev-oasst1.jsonl",
  "config": {
   "backbone_revision": {
    "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
@@ -45,11 +45,11 @@
   },
   "window_words": 200
  },
- "edits": 2457,
- "input": "bench/realdata/build/score/test/oasst1.jsonl",
- "input_sha256": "2a89e2d98e3e797a684c70982166e5e60d3c63f6de605b9222670774dec5afe1",
- "load_seconds": 10.9,
- "messages": 848,
+ "edits": 717,
+ "input": "bench/realdata/build/score/dev/oasst1.jsonl",
+ "input_sha256": "d9380fa70e5acb740d08648b2a3740dfe1e7d8ccd2428c61b987e4b67e9ae34a",
+ "load_seconds": 10.8,
+ "messages": 215,
  "offline": true,
  "refused": 0,
  "seed": 20261005

@@ -737,29 +737,6 @@ Interpreter `.venv-baselines/bin/python`, seed 20261005.
 
 Interpreter `.venv/bin/python`, seed 20261005.
 
-No current span file: every committed one is historical.
-
-Historical span files (`dev-oasst1`, `dev-sharegpt`, `dev-wildchat`, `natural-oasst1`, `natural-sharegpt`, `natural-wildchat`, `test-oasst1`, `test-sharegpt`, `test-wildchat`, `test2-natural-oasst1`, `test2-natural-sharegpt`, `test2-natural-wildchat`): the pre-V3 SS (before the detection config); test-1's scores (realdata_dev/test) and the silver-label candidates of test-1's and test-2's natural pools were made from them.
-
-```
-{
- "ADDRESS_MODE": "auto",
- "SERVICE_QUERY_DETECTION_ENABLED": true,
- "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
- "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
- "versions": {
-  "faker": "40.15.0",
-  "python": "3.13.2",
-  "spacy": "3.8.14",
-  "surrogateshield": "2.1.0",
-  "torch": "2.12.0",
-  "transformers": "5.8.1"
- }
-}
-```
-
-Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildchat`): V3 Checkpoint A, the SS before the tagger; realdata_devlarge.json was scored from them.
-
 ```
 {
  "ADDRESS_MODE": "replace",
@@ -810,15 +787,15 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
     "revision": "3.8.0",
     "stride": null,
     "thresholds": {
-     "fallback": 0.65,
-     "high": 0.85,
-     "low": 0.6
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
     },
     "window": null
    },
    {
     "device": -1,
-    "enabled": true,
+    "enabled": false,
     "max_latency_ms": null,
     "model": "dslim/distilbert-NER",
     "name": "context_guard",
@@ -832,14 +809,25 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
    },
    {
     "device": -1,
-    "enabled": false,
+    "enabled": true,
     "max_latency_ms": null,
-    "model": null,
+    "model": "pii-tagger-dv3s-40k",
     "name": "pii_tagger",
-    "options": {},
-    "revision": null,
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
     "stride": null,
-    "thresholds": {},
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
     "window": null
    },
    {
@@ -879,7 +867,8 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
    "ADDRESS": [
     "pattern_scan",
     "canonicaliser",
-    "structural"
+    "structural",
+    "pii_tagger"
    ],
    "AGE": [
     "pattern_scan",
@@ -889,7 +878,8 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
    "CREDENTIAL": [
     "pattern_scan",
     "canonicaliser",
-    "structural"
+    "structural",
+    "pii_tagger"
    ],
    "DATE_OF_BIRTH": [
     "pattern_scan",
@@ -909,15 +899,22 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
    "HANDLE": [
     "pattern_scan",
     "canonicaliser",
-    "structural"
+    "structural",
+    "pii_tagger"
    ],
    "ID": [
     "pattern_scan",
     "canonicaliser",
-    "structural"
+    "structural",
+    "pii_tagger"
    ],
    "LOCATION": [
-    "*"
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
    ],
    "NETWORK": [
     "pattern_scan",
@@ -925,18 +922,27 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
     "structural"
    ],
    "ORG": [
-    "*"
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
    ],
    "OTHER": [
     "*"
    ],
    "PERSON": [
-    "*"
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
    ],
    "PHONE": [
     "pattern_scan",
     "canonicaliser",
-    "structural"
+    "structural",
+    "pii_tagger"
    ],
    "URL": [
     "pattern_scan",
@@ -945,9 +951,28 @@ Historical span files (`devlarge-oasst1`, `devlarge-sharegpt`, `devlarge-wildcha
    ]
   }
  },
- "detection_config_hash": "8e463c3c6b7562fd6ae3070109edd178a248cd7e5ab350168aeb122bd4c81c15",
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`natural-oasst1`, `natural-sharegpt`, `natural-wildchat`, `test-oasst1`, `test-sharegpt`, `test-wildchat`, `test2-natural-oasst1`, `test2-natural-sharegpt`, `test2-natural-wildchat`): the pre-V3 SS (before the detection config); test-1's test scores (realdata_test) and the silver-label candidates of test-1's and test-2's natural pools were made from them.
+
+```
+{
+ "ADDRESS_MODE": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
  "versions": {
   "faker": "40.15.0",
   "python": "3.13.2",

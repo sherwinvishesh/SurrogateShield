@@ -21,7 +21,10 @@ LLM Guard puts its NER pipeline on ``mps`` when Apple's GPU is present, and
 MPS float results vary between runs: on the dev split one message gained or
 lost six two-character IP_ADDRESS spans from run to run (the DeBERTa span
 edges moved, so conflict removal kept different regex hits). The arm pins the
-pipeline to the CPU, like every other arm, and records the device.
+pipeline to the CPU, like every other arm, and records the device. The variation
+remains on the CPU: two CPU runs of one configuration on devlarge-wildchat
+(62f4356, b35777e) moved IP_ADDRESS spans on 11 of 870 messages (leaks
+unchanged).
 """
 
 from __future__ import annotations

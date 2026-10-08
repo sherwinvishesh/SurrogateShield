@@ -34,10 +34,10 @@
    "transformers": "4.51.3"
   }
  },
- "edits": 2088,
+ "edits": 2136,
  "input": "bench/realdata/build/score/test/wildchat.jsonl",
  "input_sha256": "67b2df52060b8741acf2e553237f52eff6e902137fb24dff0cf5cd115ca8804e",
- "load_seconds": 1.2,
+ "load_seconds": 1.1,
  "messages": 870,
  "offline": true,
  "refused": 0,

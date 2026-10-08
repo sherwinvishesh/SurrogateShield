@@ -1,218 +1,218 @@
-{"id": "rd-wildchat-dev-0001", "ms": 27.49, "edits": [[90, 95, "DATE_TIME", 11, 0], [118, 128, "DATE_TIME", 11, 0], [270, 286, "PERSON", 8, 0], [294, 304, "DATE_TIME", 11, 0], [338, 355, "MAC_ADDRESS", 13, 0]]}
-{"id": "rd-wildchat-dev-0002", "ms": 32.42, "edits": [[4, 17, "PERSON", 8, 0], [23, 35, "DATE_TIME", 11, 0], [49, 64, "PHONE_NUMBER", 14, 0], [84, 100, "CREDIT_CARD", 13, 0], [124, 133, "US_DRIVER_LICENSE", 19, 0], [155, 170, "IP_ADDRESS", 12, 0], [226, 230, "PERSON", 8, 0], [275, 285, "DATE_TIME", 11, 0], [316, 319, "PERSON", 8, 0], [392, 396, "PERSON", 8, 0], [418, 421, "PERSON", 8, 0], [650, 654, "PERSON", 8, 0], [669, 673, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0003", "ms": 20.96, "edits": [[411, 434, "PERSON", 8, 0], [436, 445, "LOCATION", 10, 0], [447, 472, "PERSON", 8, 0], [527, 533, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0004", "ms": 21.55, "edits": [[4, 22, "PERSON", 8, 0], [29, 42, "DATE_TIME", 11, 0], [53, 57, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0005", "ms": 59.3, "edits": [[11, 23, "PERSON", 8, 0], [71, 94, "EMAIL_ADDRESS", 15, 0], [99, 114, "IP_ADDRESS", 12, 0], [157, 164, "PERSON", 8, 0], [267, 274, "PERSON", 8, 0], [332, 339, "PERSON", 8, 0], [366, 373, "PERSON", 8, 0], [495, 502, "PERSON", 8, 0], [520, 527, "PERSON", 8, 0], [667, 674, "PERSON", 8, 0], [720, 725, "LOCATION", 10, 0], [795, 801, "PERSON", 8, 0], [843, 850, "PERSON", 8, 0], [871, 878, "PERSON", 8, 0], [888, 895, "PERSON", 8, 0], [1058, 1062, "PERSON", 8, 0], [1201, 1208, "PERSON", 8, 0], [1298, 1305, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0006", "ms": 10.84, "edits": [[47, 54, "PERSON", 8, 0], [56, 61, "PERSON", 8, 0], [109, 117, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0007", "ms": 8.9, "edits": [[145, 156, "PERSON", 8, 0], [164, 180, "EMAIL_ADDRESS", 15, 0], [200, 210, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0008", "ms": 10.03, "edits": [[4, 20, "PERSON", 8, 0], [27, 41, "DATE_TIME", 11, 0], [79, 115, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0009", "ms": 26.12, "edits": [[4, 18, "PERSON", 8, 0], [20, 26, "DATE_TIME", 11, 0], [33, 41, "LOCATION", 10, 0], [49, 75, "EMAIL_ADDRESS", 15, 0], [86, 95, "US_PASSPORT", 13, 0], [285, 292, "NRP", 5, 0], [307, 311, "DATE_TIME", 11, 0], [352, 355, "PERSON", 8, 0], [364, 371, "NRP", 5, 0], [412, 419, "DATE_TIME", 11, 0], [445, 452, "DATE_TIME", 11, 0], [482, 486, "LOCATION", 10, 0], [492, 500, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-0010", "ms": 16.51, "edits": [[285, 300, "PERSON", 8, 0], [302, 309, "LOCATION", 10, 0], [312, 337, "EMAIL_ADDRESS", 15, 0], [345, 355, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0011", "ms": 26.24, "edits": [[43, 59, "PERSON", 8, 0], [67, 86, "CREDIT_CARD", 13, 0], [98, 103, "DATE_TIME", 11, 0], [136, 139, "PERSON", 8, 0], [160, 165, "PERSON", 8, 0], [269, 272, "PERSON", 8, 0], [283, 288, "PERSON", 8, 0], [490, 495, "PERSON", 8, 0], [497, 500, "PERSON", 8, 0], [541, 544, "PERSON", 8, 0], [554, 559, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0012", "ms": 31.92, "edits": [[4, 19, "PERSON", 8, 0], [25, 33, "LOCATION", 10, 0], [35, 40, "PERSON", 8, 0], [63, 78, "PERSON", 8, 0], [80, 90, "PERSON", 8, 0], [109, 138, "EMAIL_ADDRESS", 15, 0], [156, 169, "IP_ADDRESS", 12, 0], [186, 258, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0013", "ms": 5.93, "edits": [[6, 25, "PERSON", 8, 0], [62, 68, "DATE_TIME", 11, 0], [72, 86, "LOCATION", 10, 0], [91, 97, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0014", "ms": 10.03, "edits": [[4, 18, "PERSON", 8, 0], [20, 22, "DATE_TIME", 11, 0], [58, 71, "IP_ADDRESS", 12, 0], [76, 90, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0015", "ms": 11.7, "edits": [[63, 71, "NRP", 5, 0], [205, 233, "EMAIL_ADDRESS", 15, 0], [282, 291, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0016", "ms": 23.8, "edits": [[6, 19, "PERSON", 8, 0], [32, 44, "PERSON", 8, 0], [67, 83, "PHONE_NUMBER", 14, 0], [140, 151, "PERSON", 8, 0], [510, 511, "DATE_TIME", 11, 0], [513, 514, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0017", "ms": 13.84, "edits": [[31, 39, "NRP", 5, 0], [199, 216, "PERSON", 8, 0], [217, 233, "PHONE_NUMBER", 14, 0], [236, 270, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0018", "ms": 9.02, "edits": [[56, 64, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0019", "ms": 22.29, "edits": [[644, 658, "PERSON", 8, 0], [659, 682, "EMAIL_ADDRESS", 15, 0], [683, 698, "PHONE_NUMBER", 14, 0], [699, 712, "IP_ADDRESS", 12, 0], [713, 751, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0020", "ms": 11.19, "edits": [[3, 19, "PERSON", 8, 0], [29, 40, "PERSON", 8, 0], [50, 73, "EMAIL_ADDRESS", 15, 0], [219, 233, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0021", "ms": 57.14, "edits": [[4, 19, "PERSON", 8, 0], [30, 40, "LOCATION", 10, 0], [89, 101, "PHONE_NUMBER", 14, 0], [242, 246, "URL", 5, 0], [884, 888, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0022", "ms": 7.11, "edits": [[6, 40, "PERSON", 8, 0], [57, 61, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0023", "ms": 6.54, "edits": []}
-{"id": "rd-wildchat-dev-0024", "ms": 12.18, "edits": [[8, 20, "PERSON", 8, 0], [28, 40, "PHONE_NUMBER", 14, 0], [125, 131, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0025", "ms": 8.3, "edits": [[6, 21, "PERSON", 8, 0], [29, 43, "PHONE_NUMBER", 14, 0], [50, 58, "LOCATION", 10, 0], [93, 97, "PERSON", 8, 0], [147, 152, "PERSON", 8, 0], [158, 163, "PERSON", 8, 0], [165, 169, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0026", "ms": 124.76, "edits": [[68, 79, "URL", 5, 0], [125, 136, "URL", 5, 0], [229, 236, "URL", 5, 0], [248, 268, "PERSON", 8, 0], [307, 318, "PERSON", 8, 0], [329, 339, "URL", 5, 0], [368, 376, "URL", 5, 0], [411, 421, "URL", 5, 0], [447, 455, "URL", 5, 0], [649, 661, "URL", 5, 0], [679, 696, "URL", 5, 0], [711, 726, "URL", 5, 0], [795, 803, "URL", 5, 0], [823, 831, "URL", 5, 0], [914, 924, "URL", 5, 0], [945, 956, "URL", 5, 0], [1099, 1107, "URL", 5, 0], [1162, 1172, "URL", 5, 0], [1173, 1181, "URL", 5, 0], [1201, 1209, "URL", 5, 0], [1283, 1291, "URL", 5, 0], [1308, 1316, "URL", 5, 0], [1399, 1430, "PERSON", 8, 0], [1490, 1503, "URL", 5, 0], [1513, 1526, "URL", 5, 0], [1547, 1555, "URL", 5, 0], [1607, 1616, "LOCATION", 10, 0], [1705, 1715, "NRP", 5, 0], [1742, 1750, "URL", 5, 0], [1891, 1899, "URL", 5, 0], [1939, 1957, "URL", 5, 0], [1982, 2009, "DATE_TIME", 11, 0], [2087, 2099, "URL", 5, 0], [2117, 2134, "URL", 5, 0], [2149, 2164, "URL", 5, 0], [2230, 2238, "URL", 5, 0], [2258, 2266, "URL", 5, 0], [2349, 2359, "URL", 5, 0], [2377, 2388, "URL", 5, 0], [2534, 2542, "URL", 5, 0], [2597, 2607, "URL", 5, 0], [2608, 2616, "URL", 5, 0], [2636, 2644, "URL", 5, 0], [2718, 2726, "URL", 5, 0], [2743, 2751, "URL", 5, 0], [2841, 2872, "PERSON", 8, 0], [2935, 2948, "URL", 5, 0], [2958, 2971, "URL", 5, 0], [2992, 3000, "URL", 5, 0], [3052, 3061, "LOCATION", 10, 0], [3150, 3160, "NRP", 5, 0], [3187, 3195, "URL", 5, 0], [3336, 3344, "URL", 5, 0], [3384, 3402, "URL", 5, 0], [3427, 3454, "DATE_TIME", 11, 0], [3562, 3587, "EMAIL_ADDRESS", 15, 0], [3590, 3613, "URL", 5, 0], [3658, 3672, "IP_ADDRESS", 12, 0]]}
-{"id": "rd-wildchat-dev-0027", "ms": 19.2, "edits": [[82, 95, "PERSON", 8, 0], [101, 111, "DATE_TIME", 11, 0], [140, 146, "LOCATION", 10, 0], [154, 158, "LOCATION", 10, 0], [165, 198, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0028", "ms": 10.1, "edits": [[17, 22, "LOCATION", 10, 0], [24, 31, "PERSON", 8, 0], [57, 69, "LOCATION", 10, 0], [71, 79, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0029", "ms": 72.96, "edits": [[0, 10, "PERSON", 8, 0], [13, 29, "PHONE_NUMBER", 14, 0], [37, 50, "DATE_TIME", 11, 0], [53, 74, "URL", 5, 0], [136, 154, "PERSON", 8, 0], [171, 179, "PERSON", 8, 0], [382, 389, "LOCATION", 10, 0], [506, 529, "LOCATION", 10, 0], [553, 563, "NRP", 5, 0], [933, 952, "LOCATION", 10, 0], [1539, 1544, "LOCATION", 10, 0], [1559, 1569, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0030", "ms": 29.62, "edits": [[719, 740, "EMAIL_ADDRESS", 15, 0], [747, 766, "CREDIT_CARD", 13, 0], [773, 800, "IBAN_CODE", 11, 0], [810, 853, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0031", "ms": 7.32, "edits": [[4, 20, "PERSON", 8, 0], [22, 50, "EMAIL_ADDRESS", 15, 0], [88, 103, "LOCATION", 10, 0], [148, 159, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0032", "ms": 28.74, "edits": [[8, 20, "PERSON", 8, 0], [22, 34, "DATE_TIME", 11, 0], [46, 69, "LOCATION", 10, 0], [80, 86, "LOCATION", 10, 0], [101, 116, "PHONE_NUMBER", 14, 0]]}
-{"id": "rd-wildchat-dev-0033", "ms": 15.76, "edits": [[6, 17, "DATE_TIME", 11, 0], [23, 32, "LOCATION", 10, 0], [40, 53, "PHONE_NUMBER", 14, 0], [65, 97, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0034", "ms": 14.86, "edits": [[4, 6, "DATE_TIME", 11, 0], [20, 46, "EMAIL_ADDRESS", 15, 0], [83, 91, "LOCATION", 10, 0], [112, 125, "PERSON", 8, 0], [186, 195, "LOCATION", 10, 0], [197, 210, "LOCATION", 10, 0], [232, 237, "PERSON", 8, 0], [278, 290, "PERSON", 8, 0], [296, 302, "NRP", 5, 0], [357, 359, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-0035", "ms": 22.01, "edits": [[4, 20, "PERSON", 8, 0], [49, 68, "EMAIL_ADDRESS", 15, 0], [78, 126, "URL", 5, 0], [206, 211, "PERSON", 8, 0], [224, 235, "PERSON", 8, 0], [240, 243, "PERSON", 8, 0], [257, 262, "PERSON", 8, 0], [302, 305, "PERSON", 8, 0], [476, 479, "PERSON", 8, 0], [489, 494, "PERSON", 8, 0], [587, 592, "PERSON", 8, 0], [597, 600, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0036", "ms": 11.05, "edits": [[160, 166, "DATE_TIME", 11, 0], [213, 225, "PERSON", 8, 0], [227, 233, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0037", "ms": 7.56, "edits": [[6, 22, "PERSON", 8, 0], [28, 55, "IBAN_CODE", 11, 0]]}
-{"id": "rd-wildchat-dev-0038", "ms": 11.95, "edits": [[6, 15, "PERSON", 8, 0], [17, 29, "PERSON", 8, 0], [37, 53, "PHONE_NUMBER", 14, 0], [59, 82, "DATE_TIME", 11, 0], [140, 145, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0039", "ms": 7.48, "edits": [[34, 59, "URL", 5, 0], [178, 183, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0040", "ms": 18.83, "edits": [[430, 447, "LOCATION", 10, 0], [457, 467, "PHONE_NUMBER", 14, 0], [480, 489, "US_PASSPORT", 13, 0], [497, 508, "US_SSN", 8, 0]]}
-{"id": "rd-wildchat-dev-0041", "ms": 16.36, "edits": [[377, 395, "PERSON", 8, 0], [397, 405, "US_DRIVER_LICENSE", 19, 0], [418, 426, "US_DRIVER_LICENSE", 19, 0]]}
-{"id": "rd-wildchat-dev-0042", "ms": 19.54, "edits": [[308, 324, "PERSON", 8, 0], [326, 351, "EMAIL_ADDRESS", 15, 0], [353, 363, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0043", "ms": 27.1, "edits": [[133, 139, "PERSON", 8, 0], [242, 258, "DATE_TIME", 11, 0], [270, 273, "PERSON", 8, 0], [327, 331, "PERSON", 8, 0], [521, 535, "PERSON", 8, 0], [538, 560, "EMAIL_ADDRESS", 15, 0], [626, 631, "LOCATION", 10, 0], [640, 667, "IBAN_CODE", 11, 0], [678, 692, "IP_ADDRESS", 12, 0]]}
-{"id": "rd-wildchat-dev-0044", "ms": 16.52, "edits": [[6, 22, "PERSON", 8, 0], [24, 34, "DATE_TIME", 11, 0], [41, 64, "URL", 5, 0], [69, 74, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0045", "ms": 20.56, "edits": [[4, 16, "PERSON", 8, 0], [23, 32, "LOCATION", 10, 0], [39, 49, "DATE_TIME", 11, 0], [79, 103, "EMAIL_ADDRESS", 15, 0], [115, 132, "DATE_TIME", 11, 0], [134, 139, "PERSON", 8, 0], [154, 160, "PERSON", 8, 0], [192, 198, "PERSON", 8, 0], [211, 216, "PERSON", 8, 0], [272, 278, "PERSON", 8, 0], [308, 319, "PERSON", 8, 0], [339, 345, "PERSON", 8, 0], [426, 431, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0046", "ms": 36.39, "edits": [[63, 78, "PERSON", 8, 0], [86, 109, "EMAIL_ADDRESS", 15, 0], [120, 129, "US_PASSPORT", 13, 0]]}
-{"id": "rd-wildchat-dev-0047", "ms": 55.25, "edits": [[1567, 1578, "LOCATION", 10, 0], [1580, 1588, "LOCATION", 10, 0], [1612, 1624, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0048", "ms": 67.68, "edits": [[2, 16, "PERSON", 8, 0], [19, 39, "EMAIL_ADDRESS", 15, 0], [42, 58, "PHONE_NUMBER", 14, 0], [81, 95, "IP_ADDRESS", 12, 0], [98, 139, "URL", 5, 0], [471, 480, "URL", 5, 0], [934, 940, "URL", 5, 0], [1426, 1428, "LOCATION", 10, 0], [1430, 1432, "LOCATION", 10, 0], [1434, 1436, "PERSON", 8, 0], [1450, 1454, "NRP", 5, 0], [1798, 1800, "NRP", 5, 0], [1896, 1901, "URL", 5, 0], [1921, 1930, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0049", "ms": 22.83, "edits": [[41, 58, "PERSON", 8, 0], [102, 119, "PERSON", 8, 0], [129, 143, "DATE_TIME", 11, 0], [155, 164, "LOCATION", 10, 0], [166, 174, "LOCATION", 10, 0], [186, 212, "PERSON", 8, 0], [271, 292, "PERSON", 8, 0], [369, 375, "PERSON", 8, 0], [393, 398, "PERSON", 8, 0], [478, 515, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0050#t0", "ms": 16.83, "edits": [[8, 24, "PERSON", 8, 0], [30, 38, "PERSON", 8, 0], [47, 61, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0050#t1", "ms": 9.35, "edits": []}
-{"id": "rd-wildchat-dev-0050#t2", "ms": 5.08, "edits": []}
-{"id": "rd-wildchat-dev-0051#t0", "ms": 24.27, "edits": [[54, 59, "PERSON", 8, 0], [92, 114, "EMAIL_ADDRESS", 15, 0], [127, 199, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0051#t1", "ms": 4.4, "edits": []}
-{"id": "rd-wildchat-dev-0052#t0", "ms": 20.01, "edits": [[4, 22, "PERSON", 8, 0], [29, 43, "DATE_TIME", 11, 0], [67, 83, "CREDIT_CARD", 13, 0]]}
-{"id": "rd-wildchat-dev-0052#t1", "ms": 9.3, "edits": [[37, 44, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0052#t2", "ms": 12.91, "edits": []}
-{"id": "rd-wildchat-dev-0053#t0", "ms": 75.69, "edits": [[68, 73, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0053#t1", "ms": 6.98, "edits": []}
-{"id": "rd-wildchat-dev-0053#t2", "ms": 5.08, "edits": []}
-{"id": "rd-wildchat-dev-0054#t0", "ms": 10.89, "edits": [[6, 14, "PERSON", 8, 0], [22, 36, "EMAIL_ADDRESS", 15, 0], [44, 60, "PHONE_NUMBER", 14, 0]]}
-{"id": "rd-wildchat-dev-0054#t1", "ms": 8.04, "edits": []}
-{"id": "rd-wildchat-dev-0054#t2", "ms": 7.51, "edits": []}
-{"id": "rd-wildchat-dev-0055#t0", "ms": 58.09, "edits": [[4, 16, "PERSON", 8, 0], [18, 24, "DATE_TIME", 11, 0], [155, 161, "NRP", 5, 0], [387, 401, "DATE_TIME", 11, 0], [626, 636, "NRP", 5, 0], [647, 653, "PERSON", 8, 0], [763, 773, "NRP", 5, 0], [787, 793, "PERSON", 8, 0], [798, 806, "LOCATION", 10, 0], [869, 879, "NRP", 5, 0], [900, 906, "PERSON", 8, 0], [926, 932, "PERSON", 8, 0], [1279, 1286, "LOCATION", 10, 0], [1394, 1400, "LOCATION", 10, 0], [1548, 1551, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0055#t1", "ms": 4.86, "edits": []}
-{"id": "rd-wildchat-dev-0056#t0", "ms": 22.65, "edits": [[105, 112, "DATE_TIME", 11, 0], [335, 340, "DATE_TIME", 11, 0], [435, 456, "DATE_TIME", 11, 0], [481, 492, "PERSON", 8, 0], [500, 512, "DATE_TIME", 11, 0], [521, 539, "IBAN_CODE", 11, 0], [542, 580, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-0056#t1", "ms": 76.95, "edits": [[79, 86, "DATE_TIME", 11, 0], [96, 113, "DATE_TIME", 11, 0], [380, 389, "DATE_TIME", 11, 0], [932, 940, "DATE_TIME", 11, 0], [1145, 1154, "DATE_TIME", 11, 0], [1390, 1397, "DATE_TIME", 11, 0], [1819, 1834, "DATE_TIME", 11, 0], [2181, 2189, "DATE_TIME", 11, 0], [2418, 2434, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0056#t2", "ms": 7.57, "edits": [[154, 162, "NRP", 5, 0], [171, 177, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-0057#t0", "ms": 70.13, "edits": [[12, 26, "PERSON", 8, 0], [28, 37, "LOCATION", 10, 0], [80, 93, "US_DRIVER_LICENSE", 19, 0], [547, 564, "DATE_TIME", 11, 0], [1036, 1045, "DATE_TIME", 11, 0], [1073, 1076, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0057#t1", "ms": 62.22, "edits": [[508, 525, "DATE_TIME", 11, 0], [995, 1004, "DATE_TIME", 11, 0], [1032, 1035, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-0057#t2", "ms": 15.23, "edits": []}
-{"id": "rd-wildchat-dev-1001", "ms": 11.85, "edits": [[90, 95, "DATE_TIME", 11, 0], [118, 128, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1002", "ms": 16.98, "edits": [[0, 3, "PERSON", 8, 0], [53, 57, "PERSON", 8, 0], [102, 112, "DATE_TIME", 11, 0], [143, 146, "PERSON", 8, 0], [219, 223, "PERSON", 8, 0], [245, 248, "PERSON", 8, 0], [477, 481, "PERSON", 8, 0], [496, 500, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1003", "ms": 45.5, "edits": [[269, 276, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1004", "ms": 13.6, "edits": []}
-{"id": "rd-wildchat-dev-1005", "ms": 14.78, "edits": [[1, 5, "PERSON", 8, 0], [159, 167, "DATE_TIME", 11, 0], [198, 204, "LOCATION", 10, 0], [298, 302, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1006", "ms": 13.63, "edits": []}
-{"id": "rd-wildchat-dev-1007", "ms": 45.78, "edits": [[20, 27, "PERSON", 8, 0], [130, 137, "PERSON", 8, 0], [195, 202, "PERSON", 8, 0], [229, 236, "PERSON", 8, 0], [358, 365, "PERSON", 8, 0], [383, 390, "PERSON", 8, 0], [530, 537, "PERSON", 8, 0], [583, 588, "LOCATION", 10, 0], [658, 664, "PERSON", 8, 0], [706, 713, "PERSON", 8, 0], [734, 741, "PERSON", 8, 0], [751, 758, "PERSON", 8, 0], [921, 925, "PERSON", 8, 0], [1064, 1071, "PERSON", 8, 0], [1161, 1168, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1008", "ms": 11.24, "edits": []}
-{"id": "rd-wildchat-dev-1009", "ms": 6.95, "edits": []}
-{"id": "rd-wildchat-dev-1010", "ms": 7.15, "edits": []}
-{"id": "rd-wildchat-dev-1011", "ms": 6.4, "edits": []}
-{"id": "rd-wildchat-dev-1012", "ms": 5.86, "edits": []}
-{"id": "rd-wildchat-dev-1013", "ms": 44.66, "edits": []}
-{"id": "rd-wildchat-dev-1014", "ms": 49.09, "edits": [[0, 5, "PERSON", 8, 0], [105, 112, "PERSON", 8, 0], [536, 541, "PERSON", 8, 0], [866, 873, "PERSON", 8, 0], [926, 932, "PERSON", 8, 0], [1104, 1110, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1015", "ms": 21.19, "edits": [[144, 151, "NRP", 5, 0], [166, 170, "DATE_TIME", 11, 0], [211, 214, "PERSON", 8, 0], [223, 230, "NRP", 5, 0], [271, 278, "DATE_TIME", 11, 0], [304, 311, "DATE_TIME", 11, 0], [341, 345, "LOCATION", 10, 0], [351, 359, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-1016", "ms": 11.31, "edits": []}
-{"id": "rd-wildchat-dev-1017", "ms": 16.77, "edits": [[72, 87, "DATE_TIME", 11, 0], [191, 198, "PERSON", 8, 0], [283, 292, "DATE_TIME", 11, 0], [296, 308, "PERSON", 8, 0], [418, 432, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1018", "ms": 14.69, "edits": [[329, 336, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1019", "ms": 19.25, "edits": [[67, 70, "PERSON", 8, 0], [91, 96, "PERSON", 8, 0], [200, 203, "PERSON", 8, 0], [214, 219, "PERSON", 8, 0], [421, 426, "PERSON", 8, 0], [428, 431, "PERSON", 8, 0], [472, 475, "PERSON", 8, 0], [485, 490, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1020", "ms": 18.19, "edits": []}
-{"id": "rd-wildchat-dev-1021", "ms": 18.35, "edits": [[86, 92, "PERSON", 8, 0], [114, 120, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1022", "ms": 4.6, "edits": [[24, 30, "DATE_TIME", 11, 0], [34, 48, "LOCATION", 10, 0], [53, 59, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1023", "ms": 10.34, "edits": [[152, 156, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1024", "ms": 6.12, "edits": [[3, 17, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1025", "ms": 14.05, "edits": [[37, 54, "PERSON", 8, 0], [59, 75, "PERSON", 8, 0], [112, 116, "PERSON", 8, 0], [172, 179, "PERSON", 8, 0], [184, 190, "PERSON", 8, 0], [236, 243, "PERSON", 8, 0], [248, 254, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1026", "ms": 9.46, "edits": [[63, 71, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-1027", "ms": 12.88, "edits": []}
-{"id": "rd-wildchat-dev-1029", "ms": 13.69, "edits": [[27, 38, "PERSON", 8, 0], [397, 398, "DATE_TIME", 11, 0], [400, 401, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1030", "ms": 7.44, "edits": [[31, 39, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-1031", "ms": 4.67, "edits": [[5, 13, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1032", "ms": 16.45, "edits": []}
-{"id": "rd-wildchat-dev-1033", "ms": 5.83, "edits": [[144, 158, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1034", "ms": 40.15, "edits": [[138, 142, "URL", 5, 0], [780, 784, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-1035", "ms": 5.65, "edits": [[15, 19, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1036", "ms": 12.43, "edits": [[43, 50, "PERSON", 8, 0], [113, 129, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1037", "ms": 10.67, "edits": []}
-{"id": "rd-wildchat-dev-1038", "ms": 11.71, "edits": []}
-{"id": "rd-wildchat-dev-1039", "ms": 8.01, "edits": [[134, 198, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-1040", "ms": 13.36, "edits": [[79, 84, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1041", "ms": 63.29, "edits": [[36, 45, "PERSON", 8, 0], [80, 86, "NRP", 5, 0], [210, 219, "PERSON", 8, 0], [330, 341, "DATE_TIME", 11, 0], [982, 989, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-1042", "ms": 8.17, "edits": []}
-{"id": "rd-wildchat-dev-1043", "ms": 21.22, "edits": []}
-{"id": "rd-wildchat-dev-1044", "ms": 20.22, "edits": [[45, 51, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-1045", "ms": 11.46, "edits": [[116, 144, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1046", "ms": 11.64, "edits": [[77, 83, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1047", "ms": 6.36, "edits": [[33, 37, "PERSON", 8, 0], [87, 92, "PERSON", 8, 0], [98, 103, "PERSON", 8, 0], [105, 109, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1049", "ms": 112.96, "edits": [[68, 79, "URL", 5, 0], [125, 136, "URL", 5, 0], [229, 236, "URL", 5, 0], [248, 268, "PERSON", 8, 0], [307, 318, "PERSON", 8, 0], [329, 339, "URL", 5, 0], [368, 376, "URL", 5, 0], [411, 421, "URL", 5, 0], [447, 455, "URL", 5, 0], [649, 661, "URL", 5, 0], [679, 696, "URL", 5, 0], [711, 726, "URL", 5, 0], [795, 803, "URL", 5, 0], [823, 831, "URL", 5, 0], [914, 924, "URL", 5, 0], [945, 956, "URL", 5, 0], [1099, 1107, "URL", 5, 0], [1162, 1172, "URL", 5, 0], [1173, 1181, "URL", 5, 0], [1201, 1209, "URL", 5, 0], [1283, 1291, "URL", 5, 0], [1308, 1316, "URL", 5, 0], [1399, 1430, "PERSON", 8, 0], [1490, 1503, "URL", 5, 0], [1513, 1526, "URL", 5, 0], [1547, 1555, "URL", 5, 0], [1607, 1616, "LOCATION", 10, 0], [1705, 1715, "NRP", 5, 0], [1742, 1750, "URL", 5, 0], [1891, 1899, "URL", 5, 0], [1939, 1957, "URL", 5, 0], [1982, 2009, "DATE_TIME", 11, 0], [2087, 2099, "URL", 5, 0], [2117, 2134, "URL", 5, 0], [2149, 2164, "URL", 5, 0], [2230, 2238, "URL", 5, 0], [2258, 2266, "URL", 5, 0], [2349, 2359, "URL", 5, 0], [2377, 2388, "URL", 5, 0], [2534, 2542, "URL", 5, 0], [2597, 2607, "URL", 5, 0], [2608, 2616, "URL", 5, 0], [2636, 2644, "URL", 5, 0], [2718, 2726, "URL", 5, 0], [2743, 2751, "URL", 5, 0], [2841, 2872, "PERSON", 8, 0], [2935, 2948, "URL", 5, 0], [2958, 2971, "URL", 5, 0], [2992, 3000, "URL", 5, 0], [3052, 3061, "LOCATION", 10, 0], [3150, 3160, "NRP", 5, 0], [3187, 3195, "URL", 5, 0], [3336, 3344, "URL", 5, 0], [3384, 3402, "URL", 5, 0], [3427, 3454, "DATE_TIME", 11, 0], [3543, 3566, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1050", "ms": 11.49, "edits": []}
-{"id": "rd-wildchat-dev-1051", "ms": 19.01, "edits": []}
-{"id": "rd-wildchat-dev-1052", "ms": 14.4, "edits": [[204, 212, "DATE_TIME", 11, 0], [216, 226, "DATE_TIME", 11, 0], [228, 232, "DATE_TIME", 11, 0], [236, 243, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1053", "ms": 8.07, "edits": []}
-{"id": "rd-wildchat-dev-1054", "ms": 14.58, "edits": [[54, 71, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1055", "ms": 6.79, "edits": []}
-{"id": "rd-wildchat-dev-1056", "ms": 111.34, "edits": [[734, 736, "DATE_TIME", 11, 0], [993, 996, "PERSON", 8, 0], [1724, 1735, "URL", 5, 0], [1813, 1824, "URL", 5, 0], [1861, 1870, "URL", 5, 0], [1890, 1898, "URL", 5, 0], [1932, 1940, "URL", 5, 0], [1961, 1973, "URL", 5, 0], [1996, 2008, "URL", 5, 0], [2077, 2085, "URL", 5, 0], [2102, 2110, "URL", 5, 0], [2136, 2144, "URL", 5, 0], [2186, 2197, "URL", 5, 0], [2233, 2245, "URL", 5, 0], [2286, 2294, "URL", 5, 0], [2334, 2345, "URL", 5, 0], [2374, 2386, "URL", 5, 0], [2436, 2447, "URL", 5, 0], [2476, 2504, "URL", 5, 0], [2592, 2603, "URL", 5, 0], [2632, 2643, "URL", 5, 0], [2672, 2683, "URL", 5, 0], [2722, 2736, "URL", 5, 0], [2814, 2822, "URL", 5, 0], [2844, 2866, "URL", 5, 0], [2907, 2915, "URL", 5, 0], [2963, 2975, "URL", 5, 0], [3004, 3012, "URL", 5, 0], [3072, 3090, "URL", 5, 0], [3232, 3261, "URL", 5, 0], [3308, 3320, "URL", 5, 0], [3345, 3357, "URL", 5, 0], [3415, 3426, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-1057", "ms": 6.02, "edits": [[21, 25, "DATE_TIME", 11, 0], [64, 73, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1058", "ms": 57.16, "edits": [[60, 78, "PERSON", 8, 0], [95, 103, "PERSON", 8, 0], [306, 313, "LOCATION", 10, 0], [430, 453, "LOCATION", 10, 0], [477, 487, "NRP", 5, 0], [857, 876, "LOCATION", 10, 0], [1463, 1468, "LOCATION", 10, 0], [1483, 1493, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1059", "ms": 11.69, "edits": [[1, 8, "PERSON", 8, 0], [110, 120, "DATE_TIME", 11, 0], [140, 147, "PERSON", 8, 0], [149, 155, "PERSON", 8, 0], [160, 164, "PERSON", 8, 0], [207, 214, "PERSON", 8, 0], [257, 264, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1060", "ms": 8.8, "edits": [[86, 91, "DATE_TIME", 11, 0], [157, 162, "DATE_TIME", 11, 0], [177, 185, "DATE_TIME", 11, 0], [219, 227, "DATE_TIME", 11, 0], [231, 237, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1061", "ms": 19.43, "edits": []}
-{"id": "rd-wildchat-dev-1062", "ms": 6.43, "edits": [[35, 50, "LOCATION", 10, 0], [95, 106, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1064", "ms": 21.55, "edits": []}
-{"id": "rd-wildchat-dev-1065", "ms": 9.75, "edits": []}
-{"id": "rd-wildchat-dev-1066", "ms": 10.61, "edits": [[19, 32, "PERSON", 8, 0], [93, 102, "LOCATION", 10, 0], [104, 117, "LOCATION", 10, 0], [139, 144, "PERSON", 8, 0], [185, 197, "PERSON", 8, 0], [203, 209, "NRP", 5, 0], [264, 266, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1067", "ms": 17.52, "edits": [[79, 84, "PERSON", 8, 0], [97, 108, "PERSON", 8, 0], [113, 116, "PERSON", 8, 0], [130, 135, "PERSON", 8, 0], [175, 178, "PERSON", 8, 0], [349, 352, "PERSON", 8, 0], [362, 367, "PERSON", 8, 0], [460, 465, "PERSON", 8, 0], [470, 473, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1068", "ms": 8.22, "edits": [[160, 166, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1069", "ms": 5.01, "edits": []}
-{"id": "rd-wildchat-dev-1070", "ms": 7.91, "edits": [[56, 61, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1071", "ms": 4.17, "edits": [[116, 121, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1072", "ms": 14.04, "edits": []}
-{"id": "rd-wildchat-dev-1073", "ms": 6.02, "edits": []}
-{"id": "rd-wildchat-dev-1074", "ms": 11.41, "edits": [[24, 33, "PERSON", 8, 0], [140, 146, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1075", "ms": 16.51, "edits": []}
-{"id": "rd-wildchat-dev-1076", "ms": 15.3, "edits": []}
-{"id": "rd-wildchat-dev-1077", "ms": 4.67, "edits": []}
-{"id": "rd-wildchat-dev-1078", "ms": 11.35, "edits": []}
-{"id": "rd-wildchat-dev-1079", "ms": 18.99, "edits": [[133, 139, "PERSON", 8, 0], [242, 258, "DATE_TIME", 11, 0], [270, 273, "PERSON", 8, 0], [327, 331, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1080", "ms": 12.3, "edits": []}
-{"id": "rd-wildchat-dev-1081", "ms": 14.1, "edits": [[10, 27, "DATE_TIME", 11, 0], [29, 34, "PERSON", 8, 0], [49, 55, "PERSON", 8, 0], [87, 93, "PERSON", 8, 0], [106, 111, "PERSON", 8, 0], [167, 173, "PERSON", 8, 0], [203, 214, "PERSON", 8, 0], [234, 240, "PERSON", 8, 0], [321, 326, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1082", "ms": 28.8, "edits": []}
-{"id": "rd-wildchat-dev-1083", "ms": 8.85, "edits": [[47, 49, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1084", "ms": 10.22, "edits": []}
-{"id": "rd-wildchat-dev-1085", "ms": 11.7, "edits": [[64, 68, "PERSON", 8, 0], [144, 149, "PERSON", 8, 0], [232, 237, "PERSON", 8, 0], [265, 269, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1086", "ms": 3.88, "edits": []}
-{"id": "rd-wildchat-dev-1087", "ms": 5.17, "edits": [[17, 87, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-1088", "ms": 7.75, "edits": [[38, 42, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1089", "ms": 45.09, "edits": []}
-{"id": "rd-wildchat-dev-1090", "ms": 4.94, "edits": []}
-{"id": "rd-wildchat-dev-1091", "ms": 59.54, "edits": [[289, 298, "URL", 5, 0], [752, 758, "URL", 5, 0], [1244, 1246, "LOCATION", 10, 0], [1248, 1250, "LOCATION", 10, 0], [1252, 1254, "PERSON", 8, 0], [1268, 1272, "NRP", 5, 0], [1616, 1618, "NRP", 5, 0], [1714, 1719, "URL", 5, 0], [1739, 1748, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-1092", "ms": 18.32, "edits": [[41, 58, "PERSON", 8, 0], [102, 119, "PERSON", 8, 0], [129, 143, "DATE_TIME", 11, 0], [155, 164, "LOCATION", 10, 0], [166, 174, "LOCATION", 10, 0], [186, 212, "PERSON", 8, 0], [271, 292, "PERSON", 8, 0], [369, 375, "PERSON", 8, 0], [393, 398, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1093", "ms": 11.05, "edits": []}
+{"id": "rd-wildchat-dev-0001", "ms": 27.87, "edits": [[90, 95, "DATE_TIME", 11, 0], [118, 128, "DATE_TIME", 11, 0], [270, 286, "PERSON", 8, 0], [294, 304, "DATE_TIME", 11, 0], [338, 355, "MAC_ADDRESS", 13, 0]]}
+{"id": "rd-wildchat-dev-0002", "ms": 29.69, "edits": [[4, 17, "PERSON", 8, 0], [23, 35, "DATE_TIME", 11, 0], [49, 64, "PHONE_NUMBER", 14, 0], [84, 100, "CREDIT_CARD", 13, 0], [124, 133, "US_DRIVER_LICENSE", 19, 0], [155, 170, "IP_ADDRESS", 12, 0], [226, 230, "PERSON", 8, 0], [275, 285, "DATE_TIME", 11, 0], [316, 319, "PERSON", 8, 0], [392, 396, "PERSON", 8, 0], [418, 421, "PERSON", 8, 0], [650, 654, "PERSON", 8, 0], [669, 673, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0003", "ms": 20.42, "edits": [[411, 434, "PERSON", 8, 0], [436, 445, "LOCATION", 10, 0], [447, 472, "PERSON", 8, 0], [527, 533, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0004", "ms": 19.2, "edits": [[4, 22, "PERSON", 8, 0], [29, 42, "DATE_TIME", 11, 0], [53, 57, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0005", "ms": 52.33, "edits": [[11, 23, "PERSON", 8, 0], [71, 94, "EMAIL_ADDRESS", 15, 0], [99, 114, "IP_ADDRESS", 12, 0], [157, 164, "PERSON", 8, 0], [267, 274, "PERSON", 8, 0], [332, 339, "PERSON", 8, 0], [366, 373, "PERSON", 8, 0], [495, 502, "PERSON", 8, 0], [520, 527, "PERSON", 8, 0], [667, 674, "PERSON", 8, 0], [720, 725, "LOCATION", 10, 0], [795, 801, "PERSON", 8, 0], [843, 850, "PERSON", 8, 0], [871, 878, "PERSON", 8, 0], [888, 895, "PERSON", 8, 0], [1058, 1062, "PERSON", 8, 0], [1201, 1208, "PERSON", 8, 0], [1298, 1305, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0006", "ms": 10.28, "edits": [[47, 54, "PERSON", 8, 0], [56, 61, "PERSON", 8, 0], [109, 117, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0007", "ms": 7.74, "edits": [[145, 156, "PERSON", 8, 0], [164, 180, "EMAIL_ADDRESS", 15, 0], [200, 210, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0008", "ms": 9.7, "edits": [[4, 20, "PERSON", 8, 0], [27, 41, "DATE_TIME", 11, 0], [79, 115, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0009", "ms": 27.35, "edits": [[4, 18, "PERSON", 8, 0], [20, 26, "DATE_TIME", 11, 0], [33, 41, "LOCATION", 10, 0], [49, 75, "EMAIL_ADDRESS", 15, 0], [86, 95, "US_PASSPORT", 13, 0], [285, 292, "NRP", 5, 0], [307, 311, "DATE_TIME", 11, 0], [352, 355, "PERSON", 8, 0], [364, 371, "NRP", 5, 0], [412, 419, "DATE_TIME", 11, 0], [445, 452, "DATE_TIME", 11, 0], [482, 486, "LOCATION", 10, 0], [492, 500, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-0010", "ms": 14.36, "edits": [[285, 300, "PERSON", 8, 0], [302, 309, "LOCATION", 10, 0], [312, 337, "EMAIL_ADDRESS", 15, 0], [345, 355, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0011", "ms": 24.19, "edits": [[43, 59, "PERSON", 8, 0], [67, 86, "CREDIT_CARD", 13, 0], [98, 103, "DATE_TIME", 11, 0], [136, 139, "PERSON", 8, 0], [160, 165, "PERSON", 8, 0], [269, 272, "PERSON", 8, 0], [283, 288, "PERSON", 8, 0], [490, 495, "PERSON", 8, 0], [497, 500, "PERSON", 8, 0], [541, 544, "PERSON", 8, 0], [554, 559, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0012", "ms": 30.75, "edits": [[4, 19, "PERSON", 8, 0], [25, 33, "LOCATION", 10, 0], [35, 40, "PERSON", 8, 0], [63, 78, "PERSON", 8, 0], [80, 90, "PERSON", 8, 0], [109, 138, "EMAIL_ADDRESS", 15, 0], [156, 169, "IP_ADDRESS", 12, 0], [186, 258, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0013", "ms": 6.77, "edits": [[6, 25, "PERSON", 8, 0], [62, 68, "DATE_TIME", 11, 0], [72, 86, "LOCATION", 10, 0], [91, 97, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0014", "ms": 10.63, "edits": [[4, 18, "PERSON", 8, 0], [20, 22, "DATE_TIME", 11, 0], [58, 71, "IP_ADDRESS", 12, 0], [76, 90, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0015", "ms": 11.99, "edits": [[63, 71, "NRP", 5, 0], [205, 233, "EMAIL_ADDRESS", 15, 0], [282, 291, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0016", "ms": 24.62, "edits": [[6, 19, "PERSON", 8, 0], [32, 44, "PERSON", 8, 0], [67, 83, "PHONE_NUMBER", 14, 0], [140, 151, "PERSON", 8, 0], [510, 511, "DATE_TIME", 11, 0], [513, 514, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0017", "ms": 11.68, "edits": [[31, 39, "NRP", 5, 0], [199, 216, "PERSON", 8, 0], [217, 233, "PHONE_NUMBER", 14, 0], [236, 270, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0018", "ms": 7.75, "edits": [[56, 64, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0019", "ms": 22.24, "edits": [[644, 658, "PERSON", 8, 0], [659, 682, "EMAIL_ADDRESS", 15, 0], [683, 698, "PHONE_NUMBER", 14, 0], [699, 712, "IP_ADDRESS", 12, 0], [713, 751, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0020", "ms": 9.43, "edits": [[3, 19, "PERSON", 8, 0], [29, 40, "PERSON", 8, 0], [50, 73, "EMAIL_ADDRESS", 15, 0], [219, 233, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0021", "ms": 55.76, "edits": [[4, 19, "PERSON", 8, 0], [30, 40, "LOCATION", 10, 0], [89, 101, "PHONE_NUMBER", 14, 0], [242, 246, "URL", 5, 0], [884, 888, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0022", "ms": 7.13, "edits": [[6, 40, "PERSON", 8, 0], [57, 61, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0023", "ms": 7.35, "edits": []}
+{"id": "rd-wildchat-dev-0024", "ms": 13.1, "edits": [[8, 20, "PERSON", 8, 0], [28, 40, "PHONE_NUMBER", 14, 0], [125, 131, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0025", "ms": 9.21, "edits": [[6, 21, "PERSON", 8, 0], [29, 43, "PHONE_NUMBER", 14, 0], [50, 58, "LOCATION", 10, 0], [93, 97, "PERSON", 8, 0], [147, 152, "PERSON", 8, 0], [158, 163, "PERSON", 8, 0], [165, 169, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0026", "ms": 118.01, "edits": [[68, 79, "URL", 5, 0], [125, 136, "URL", 5, 0], [229, 236, "URL", 5, 0], [248, 268, "PERSON", 8, 0], [307, 318, "PERSON", 8, 0], [329, 339, "URL", 5, 0], [368, 376, "URL", 5, 0], [411, 421, "URL", 5, 0], [447, 455, "URL", 5, 0], [649, 661, "URL", 5, 0], [679, 696, "URL", 5, 0], [711, 726, "URL", 5, 0], [795, 803, "URL", 5, 0], [823, 831, "URL", 5, 0], [914, 924, "URL", 5, 0], [945, 956, "URL", 5, 0], [1099, 1107, "URL", 5, 0], [1162, 1172, "URL", 5, 0], [1173, 1181, "URL", 5, 0], [1201, 1209, "URL", 5, 0], [1283, 1291, "URL", 5, 0], [1308, 1316, "URL", 5, 0], [1399, 1430, "PERSON", 8, 0], [1490, 1503, "URL", 5, 0], [1513, 1526, "URL", 5, 0], [1547, 1555, "URL", 5, 0], [1607, 1616, "LOCATION", 10, 0], [1705, 1715, "NRP", 5, 0], [1742, 1750, "URL", 5, 0], [1891, 1899, "URL", 5, 0], [1939, 1957, "URL", 5, 0], [1982, 2009, "DATE_TIME", 11, 0], [2087, 2099, "URL", 5, 0], [2117, 2134, "URL", 5, 0], [2149, 2164, "URL", 5, 0], [2230, 2238, "URL", 5, 0], [2258, 2266, "URL", 5, 0], [2349, 2359, "URL", 5, 0], [2377, 2388, "URL", 5, 0], [2534, 2542, "URL", 5, 0], [2597, 2607, "URL", 5, 0], [2608, 2616, "URL", 5, 0], [2636, 2644, "URL", 5, 0], [2718, 2726, "URL", 5, 0], [2743, 2751, "URL", 5, 0], [2841, 2872, "PERSON", 8, 0], [2935, 2948, "URL", 5, 0], [2958, 2971, "URL", 5, 0], [2992, 3000, "URL", 5, 0], [3052, 3061, "LOCATION", 10, 0], [3150, 3160, "NRP", 5, 0], [3187, 3195, "URL", 5, 0], [3336, 3344, "URL", 5, 0], [3384, 3402, "URL", 5, 0], [3427, 3454, "DATE_TIME", 11, 0], [3562, 3587, "EMAIL_ADDRESS", 15, 0], [3590, 3613, "URL", 5, 0], [3658, 3672, "IP_ADDRESS", 12, 0]]}
+{"id": "rd-wildchat-dev-0027", "ms": 16.77, "edits": [[82, 95, "PERSON", 8, 0], [101, 111, "DATE_TIME", 11, 0], [140, 146, "LOCATION", 10, 0], [154, 158, "LOCATION", 10, 0], [165, 198, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0028", "ms": 10.58, "edits": [[17, 22, "LOCATION", 10, 0], [24, 31, "PERSON", 8, 0], [57, 69, "LOCATION", 10, 0], [71, 79, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0029", "ms": 72.07, "edits": [[0, 10, "PERSON", 8, 0], [13, 29, "PHONE_NUMBER", 14, 0], [37, 50, "DATE_TIME", 11, 0], [53, 74, "URL", 5, 0], [136, 154, "PERSON", 8, 0], [171, 179, "PERSON", 8, 0], [382, 389, "LOCATION", 10, 0], [506, 529, "LOCATION", 10, 0], [553, 563, "NRP", 5, 0], [933, 952, "LOCATION", 10, 0], [1539, 1544, "LOCATION", 10, 0], [1559, 1569, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0030", "ms": 29.13, "edits": [[719, 740, "EMAIL_ADDRESS", 15, 0], [747, 766, "CREDIT_CARD", 13, 0], [773, 800, "IBAN_CODE", 11, 0], [810, 853, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0031", "ms": 6.19, "edits": [[4, 20, "PERSON", 8, 0], [22, 50, "EMAIL_ADDRESS", 15, 0], [88, 103, "LOCATION", 10, 0], [148, 159, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0032", "ms": 27.62, "edits": [[8, 20, "PERSON", 8, 0], [22, 34, "DATE_TIME", 11, 0], [46, 69, "LOCATION", 10, 0], [80, 86, "LOCATION", 10, 0], [101, 116, "PHONE_NUMBER", 14, 0]]}
+{"id": "rd-wildchat-dev-0033", "ms": 13.06, "edits": [[6, 17, "DATE_TIME", 11, 0], [23, 32, "LOCATION", 10, 0], [40, 53, "PHONE_NUMBER", 14, 0], [65, 97, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0034", "ms": 14.39, "edits": [[4, 6, "DATE_TIME", 11, 0], [20, 46, "EMAIL_ADDRESS", 15, 0], [83, 91, "LOCATION", 10, 0], [112, 125, "PERSON", 8, 0], [186, 195, "LOCATION", 10, 0], [197, 210, "LOCATION", 10, 0], [232, 237, "PERSON", 8, 0], [278, 290, "PERSON", 8, 0], [296, 302, "NRP", 5, 0], [357, 359, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-0035", "ms": 20.04, "edits": [[4, 20, "PERSON", 8, 0], [49, 68, "EMAIL_ADDRESS", 15, 0], [78, 126, "URL", 5, 0], [206, 211, "PERSON", 8, 0], [224, 235, "PERSON", 8, 0], [240, 243, "PERSON", 8, 0], [257, 262, "PERSON", 8, 0], [302, 305, "PERSON", 8, 0], [476, 479, "PERSON", 8, 0], [489, 494, "PERSON", 8, 0], [587, 592, "PERSON", 8, 0], [597, 600, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0036", "ms": 10.44, "edits": [[160, 166, "DATE_TIME", 11, 0], [213, 225, "PERSON", 8, 0], [227, 233, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0037", "ms": 7.08, "edits": [[6, 22, "PERSON", 8, 0], [28, 55, "IBAN_CODE", 11, 0]]}
+{"id": "rd-wildchat-dev-0038", "ms": 11.68, "edits": [[6, 15, "PERSON", 8, 0], [17, 29, "PERSON", 8, 0], [37, 53, "PHONE_NUMBER", 14, 0], [59, 82, "DATE_TIME", 11, 0], [140, 145, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0039", "ms": 7.44, "edits": [[34, 59, "URL", 5, 0], [178, 183, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0040", "ms": 19.64, "edits": [[430, 447, "LOCATION", 10, 0], [457, 467, "PHONE_NUMBER", 14, 0], [480, 489, "US_PASSPORT", 13, 0], [497, 508, "US_SSN", 8, 0]]}
+{"id": "rd-wildchat-dev-0041", "ms": 16.63, "edits": [[377, 395, "PERSON", 8, 0], [397, 405, "US_DRIVER_LICENSE", 19, 0], [418, 426, "US_DRIVER_LICENSE", 19, 0]]}
+{"id": "rd-wildchat-dev-0042", "ms": 17.43, "edits": [[308, 324, "PERSON", 8, 0], [326, 351, "EMAIL_ADDRESS", 15, 0], [353, 363, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0043", "ms": 25.82, "edits": [[133, 139, "PERSON", 8, 0], [242, 258, "DATE_TIME", 11, 0], [270, 273, "PERSON", 8, 0], [327, 331, "PERSON", 8, 0], [521, 535, "PERSON", 8, 0], [538, 560, "EMAIL_ADDRESS", 15, 0], [626, 631, "LOCATION", 10, 0], [640, 667, "IBAN_CODE", 11, 0], [678, 692, "IP_ADDRESS", 12, 0]]}
+{"id": "rd-wildchat-dev-0044", "ms": 15.8, "edits": [[6, 22, "PERSON", 8, 0], [24, 34, "DATE_TIME", 11, 0], [41, 64, "URL", 5, 0], [69, 74, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0045", "ms": 19.07, "edits": [[4, 16, "PERSON", 8, 0], [23, 32, "LOCATION", 10, 0], [39, 49, "DATE_TIME", 11, 0], [79, 103, "EMAIL_ADDRESS", 15, 0], [115, 132, "DATE_TIME", 11, 0], [134, 139, "PERSON", 8, 0], [154, 160, "PERSON", 8, 0], [192, 198, "PERSON", 8, 0], [211, 216, "PERSON", 8, 0], [272, 278, "PERSON", 8, 0], [308, 319, "PERSON", 8, 0], [339, 345, "PERSON", 8, 0], [426, 431, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0046", "ms": 37.61, "edits": [[63, 78, "PERSON", 8, 0], [86, 109, "EMAIL_ADDRESS", 15, 0], [120, 129, "US_PASSPORT", 13, 0]]}
+{"id": "rd-wildchat-dev-0047", "ms": 52.96, "edits": [[1567, 1578, "LOCATION", 10, 0], [1580, 1588, "LOCATION", 10, 0], [1612, 1624, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0048", "ms": 64.94, "edits": [[2, 16, "PERSON", 8, 0], [19, 39, "EMAIL_ADDRESS", 15, 0], [42, 58, "PHONE_NUMBER", 14, 0], [81, 95, "IP_ADDRESS", 12, 0], [98, 139, "URL", 5, 0], [471, 480, "URL", 5, 0], [934, 940, "URL", 5, 0], [1426, 1428, "LOCATION", 10, 0], [1430, 1432, "LOCATION", 10, 0], [1434, 1436, "PERSON", 8, 0], [1450, 1454, "NRP", 5, 0], [1798, 1800, "NRP", 5, 0], [1896, 1901, "URL", 5, 0], [1921, 1930, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0049", "ms": 19.32, "edits": [[41, 58, "PERSON", 8, 0], [102, 119, "PERSON", 8, 0], [129, 143, "DATE_TIME", 11, 0], [155, 164, "LOCATION", 10, 0], [166, 174, "LOCATION", 10, 0], [186, 212, "PERSON", 8, 0], [271, 292, "PERSON", 8, 0], [369, 375, "PERSON", 8, 0], [393, 398, "PERSON", 8, 0], [478, 515, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0050#t0", "ms": 12.06, "edits": [[8, 24, "PERSON", 8, 0], [30, 38, "PERSON", 8, 0], [47, 61, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0050#t1", "ms": 7.34, "edits": []}
+{"id": "rd-wildchat-dev-0050#t2", "ms": 4.34, "edits": []}
+{"id": "rd-wildchat-dev-0051#t0", "ms": 23.21, "edits": [[54, 59, "PERSON", 8, 0], [92, 114, "EMAIL_ADDRESS", 15, 0], [127, 199, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0051#t1", "ms": 4.23, "edits": []}
+{"id": "rd-wildchat-dev-0052#t0", "ms": 20.29, "edits": [[4, 22, "PERSON", 8, 0], [29, 43, "DATE_TIME", 11, 0], [67, 83, "CREDIT_CARD", 13, 0]]}
+{"id": "rd-wildchat-dev-0052#t1", "ms": 9.28, "edits": [[37, 44, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0052#t2", "ms": 12.99, "edits": []}
+{"id": "rd-wildchat-dev-0053#t0", "ms": 74.25, "edits": [[68, 73, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0053#t1", "ms": 6.2, "edits": []}
+{"id": "rd-wildchat-dev-0053#t2", "ms": 4.31, "edits": []}
+{"id": "rd-wildchat-dev-0054#t0", "ms": 9.75, "edits": [[6, 14, "PERSON", 8, 0], [22, 36, "EMAIL_ADDRESS", 15, 0], [44, 60, "PHONE_NUMBER", 14, 0]]}
+{"id": "rd-wildchat-dev-0054#t1", "ms": 7.81, "edits": []}
+{"id": "rd-wildchat-dev-0054#t2", "ms": 7.47, "edits": []}
+{"id": "rd-wildchat-dev-0055#t0", "ms": 53.2, "edits": [[4, 16, "PERSON", 8, 0], [18, 24, "DATE_TIME", 11, 0], [155, 161, "NRP", 5, 0], [387, 401, "DATE_TIME", 11, 0], [626, 636, "NRP", 5, 0], [647, 653, "PERSON", 8, 0], [763, 773, "NRP", 5, 0], [787, 793, "PERSON", 8, 0], [798, 806, "LOCATION", 10, 0], [869, 879, "NRP", 5, 0], [900, 906, "PERSON", 8, 0], [926, 932, "PERSON", 8, 0], [1279, 1286, "LOCATION", 10, 0], [1394, 1400, "LOCATION", 10, 0], [1548, 1551, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0055#t1", "ms": 4.77, "edits": []}
+{"id": "rd-wildchat-dev-0056#t0", "ms": 21.94, "edits": [[105, 112, "DATE_TIME", 11, 0], [335, 340, "DATE_TIME", 11, 0], [435, 456, "DATE_TIME", 11, 0], [481, 492, "PERSON", 8, 0], [500, 512, "DATE_TIME", 11, 0], [521, 539, "IBAN_CODE", 11, 0], [542, 580, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-0056#t1", "ms": 75.36, "edits": [[79, 86, "DATE_TIME", 11, 0], [96, 113, "DATE_TIME", 11, 0], [380, 389, "DATE_TIME", 11, 0], [932, 940, "DATE_TIME", 11, 0], [1145, 1154, "DATE_TIME", 11, 0], [1390, 1397, "DATE_TIME", 11, 0], [1819, 1834, "DATE_TIME", 11, 0], [2181, 2189, "DATE_TIME", 11, 0], [2418, 2434, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0056#t2", "ms": 7.83, "edits": [[154, 162, "NRP", 5, 0], [171, 177, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-0057#t0", "ms": 70.39, "edits": [[12, 26, "PERSON", 8, 0], [28, 37, "LOCATION", 10, 0], [80, 93, "US_DRIVER_LICENSE", 19, 0], [547, 564, "DATE_TIME", 11, 0], [1036, 1045, "DATE_TIME", 11, 0], [1073, 1076, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0057#t1", "ms": 57.75, "edits": [[508, 525, "DATE_TIME", 11, 0], [995, 1004, "DATE_TIME", 11, 0], [1032, 1035, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-0057#t2", "ms": 15.58, "edits": []}
+{"id": "rd-wildchat-dev-1001", "ms": 11.35, "edits": [[90, 95, "DATE_TIME", 11, 0], [118, 128, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1002", "ms": 16.5, "edits": [[0, 3, "PERSON", 8, 0], [53, 57, "PERSON", 8, 0], [102, 112, "DATE_TIME", 11, 0], [143, 146, "PERSON", 8, 0], [219, 223, "PERSON", 8, 0], [245, 248, "PERSON", 8, 0], [477, 481, "PERSON", 8, 0], [496, 500, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1003", "ms": 44.06, "edits": [[269, 276, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1004", "ms": 13.29, "edits": []}
+{"id": "rd-wildchat-dev-1005", "ms": 13.43, "edits": [[1, 5, "PERSON", 8, 0], [159, 167, "DATE_TIME", 11, 0], [198, 204, "LOCATION", 10, 0], [298, 302, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1006", "ms": 13.19, "edits": []}
+{"id": "rd-wildchat-dev-1007", "ms": 42.38, "edits": [[20, 27, "PERSON", 8, 0], [130, 137, "PERSON", 8, 0], [195, 202, "PERSON", 8, 0], [229, 236, "PERSON", 8, 0], [358, 365, "PERSON", 8, 0], [383, 390, "PERSON", 8, 0], [530, 537, "PERSON", 8, 0], [583, 588, "LOCATION", 10, 0], [658, 664, "PERSON", 8, 0], [706, 713, "PERSON", 8, 0], [734, 741, "PERSON", 8, 0], [751, 758, "PERSON", 8, 0], [921, 925, "PERSON", 8, 0], [1064, 1071, "PERSON", 8, 0], [1161, 1168, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1008", "ms": 9.89, "edits": []}
+{"id": "rd-wildchat-dev-1009", "ms": 5.73, "edits": []}
+{"id": "rd-wildchat-dev-1010", "ms": 5.26, "edits": []}
+{"id": "rd-wildchat-dev-1011", "ms": 4.57, "edits": []}
+{"id": "rd-wildchat-dev-1012", "ms": 5.1, "edits": []}
+{"id": "rd-wildchat-dev-1013", "ms": 43.09, "edits": []}
+{"id": "rd-wildchat-dev-1014", "ms": 46.21, "edits": [[0, 5, "PERSON", 8, 0], [105, 112, "PERSON", 8, 0], [536, 541, "PERSON", 8, 0], [866, 873, "PERSON", 8, 0], [926, 932, "PERSON", 8, 0], [1104, 1110, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1015", "ms": 19.7, "edits": [[144, 151, "NRP", 5, 0], [166, 170, "DATE_TIME", 11, 0], [211, 214, "PERSON", 8, 0], [223, 230, "NRP", 5, 0], [271, 278, "DATE_TIME", 11, 0], [304, 311, "DATE_TIME", 11, 0], [341, 345, "LOCATION", 10, 0], [351, 359, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1016", "ms": 9.84, "edits": []}
+{"id": "rd-wildchat-dev-1017", "ms": 17.74, "edits": [[72, 87, "DATE_TIME", 11, 0], [191, 198, "PERSON", 8, 0], [283, 292, "DATE_TIME", 11, 0], [296, 308, "PERSON", 8, 0], [418, 432, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1018", "ms": 14.9, "edits": [[329, 336, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1019", "ms": 17.6, "edits": [[67, 70, "PERSON", 8, 0], [91, 96, "PERSON", 8, 0], [200, 203, "PERSON", 8, 0], [214, 219, "PERSON", 8, 0], [421, 426, "PERSON", 8, 0], [428, 431, "PERSON", 8, 0], [472, 475, "PERSON", 8, 0], [485, 490, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1020", "ms": 16.67, "edits": []}
+{"id": "rd-wildchat-dev-1021", "ms": 16.35, "edits": [[86, 92, "PERSON", 8, 0], [114, 120, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1022", "ms": 4.33, "edits": [[24, 30, "DATE_TIME", 11, 0], [34, 48, "LOCATION", 10, 0], [53, 59, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1023", "ms": 9.03, "edits": [[152, 156, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1024", "ms": 4.88, "edits": [[3, 17, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1025", "ms": 12.83, "edits": [[37, 54, "PERSON", 8, 0], [59, 75, "PERSON", 8, 0], [112, 116, "PERSON", 8, 0], [172, 179, "PERSON", 8, 0], [184, 190, "PERSON", 8, 0], [236, 243, "PERSON", 8, 0], [248, 254, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1026", "ms": 7.75, "edits": [[63, 71, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1027", "ms": 11.84, "edits": []}
+{"id": "rd-wildchat-dev-1029", "ms": 13.53, "edits": [[27, 38, "PERSON", 8, 0], [397, 398, "DATE_TIME", 11, 0], [400, 401, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1030", "ms": 6.82, "edits": [[31, 39, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1031", "ms": 4.07, "edits": [[5, 13, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1032", "ms": 15.66, "edits": []}
+{"id": "rd-wildchat-dev-1033", "ms": 5.79, "edits": [[144, 158, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1034", "ms": 36.81, "edits": [[138, 142, "URL", 5, 0], [780, 784, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-1035", "ms": 5.13, "edits": [[15, 19, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1036", "ms": 11.32, "edits": [[43, 50, "PERSON", 8, 0], [113, 129, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1037", "ms": 9.15, "edits": []}
+{"id": "rd-wildchat-dev-1038", "ms": 11.28, "edits": []}
+{"id": "rd-wildchat-dev-1039", "ms": 7.46, "edits": [[134, 198, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-1040", "ms": 12.2, "edits": [[79, 84, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1041", "ms": 61.24, "edits": [[36, 45, "PERSON", 8, 0], [80, 86, "NRP", 5, 0], [210, 219, "PERSON", 8, 0], [330, 341, "DATE_TIME", 11, 0], [982, 989, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1042", "ms": 3.85, "edits": []}
+{"id": "rd-wildchat-dev-1043", "ms": 19.82, "edits": []}
+{"id": "rd-wildchat-dev-1044", "ms": 17.55, "edits": [[45, 51, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1045", "ms": 9.71, "edits": [[116, 144, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1046", "ms": 9.46, "edits": [[77, 83, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1047", "ms": 5.5, "edits": [[33, 37, "PERSON", 8, 0], [87, 92, "PERSON", 8, 0], [98, 103, "PERSON", 8, 0], [105, 109, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1049", "ms": 104.77, "edits": [[68, 79, "URL", 5, 0], [125, 136, "URL", 5, 0], [229, 236, "URL", 5, 0], [248, 268, "PERSON", 8, 0], [307, 318, "PERSON", 8, 0], [329, 339, "URL", 5, 0], [368, 376, "URL", 5, 0], [411, 421, "URL", 5, 0], [447, 455, "URL", 5, 0], [649, 661, "URL", 5, 0], [679, 696, "URL", 5, 0], [711, 726, "URL", 5, 0], [795, 803, "URL", 5, 0], [823, 831, "URL", 5, 0], [914, 924, "URL", 5, 0], [945, 956, "URL", 5, 0], [1099, 1107, "URL", 5, 0], [1162, 1172, "URL", 5, 0], [1173, 1181, "URL", 5, 0], [1201, 1209, "URL", 5, 0], [1283, 1291, "URL", 5, 0], [1308, 1316, "URL", 5, 0], [1399, 1430, "PERSON", 8, 0], [1490, 1503, "URL", 5, 0], [1513, 1526, "URL", 5, 0], [1547, 1555, "URL", 5, 0], [1607, 1616, "LOCATION", 10, 0], [1705, 1715, "NRP", 5, 0], [1742, 1750, "URL", 5, 0], [1891, 1899, "URL", 5, 0], [1939, 1957, "URL", 5, 0], [1982, 2009, "DATE_TIME", 11, 0], [2087, 2099, "URL", 5, 0], [2117, 2134, "URL", 5, 0], [2149, 2164, "URL", 5, 0], [2230, 2238, "URL", 5, 0], [2258, 2266, "URL", 5, 0], [2349, 2359, "URL", 5, 0], [2377, 2388, "URL", 5, 0], [2534, 2542, "URL", 5, 0], [2597, 2607, "URL", 5, 0], [2608, 2616, "URL", 5, 0], [2636, 2644, "URL", 5, 0], [2718, 2726, "URL", 5, 0], [2743, 2751, "URL", 5, 0], [2841, 2872, "PERSON", 8, 0], [2935, 2948, "URL", 5, 0], [2958, 2971, "URL", 5, 0], [2992, 3000, "URL", 5, 0], [3052, 3061, "LOCATION", 10, 0], [3150, 3160, "NRP", 5, 0], [3187, 3195, "URL", 5, 0], [3336, 3344, "URL", 5, 0], [3384, 3402, "URL", 5, 0], [3427, 3454, "DATE_TIME", 11, 0], [3543, 3566, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1050", "ms": 11.47, "edits": []}
+{"id": "rd-wildchat-dev-1051", "ms": 17.83, "edits": []}
+{"id": "rd-wildchat-dev-1052", "ms": 13.87, "edits": [[204, 212, "DATE_TIME", 11, 0], [216, 226, "DATE_TIME", 11, 0], [228, 232, "DATE_TIME", 11, 0], [236, 243, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1053", "ms": 7.31, "edits": []}
+{"id": "rd-wildchat-dev-1054", "ms": 13.99, "edits": [[54, 71, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1055", "ms": 6.35, "edits": []}
+{"id": "rd-wildchat-dev-1056", "ms": 107.49, "edits": [[734, 736, "DATE_TIME", 11, 0], [993, 996, "PERSON", 8, 0], [1724, 1735, "URL", 5, 0], [1813, 1824, "URL", 5, 0], [1861, 1870, "URL", 5, 0], [1890, 1898, "URL", 5, 0], [1932, 1940, "URL", 5, 0], [1961, 1973, "URL", 5, 0], [1996, 2008, "URL", 5, 0], [2077, 2085, "URL", 5, 0], [2102, 2110, "URL", 5, 0], [2136, 2144, "URL", 5, 0], [2186, 2197, "URL", 5, 0], [2233, 2245, "URL", 5, 0], [2286, 2294, "URL", 5, 0], [2334, 2345, "URL", 5, 0], [2374, 2386, "URL", 5, 0], [2436, 2447, "URL", 5, 0], [2476, 2504, "URL", 5, 0], [2592, 2603, "URL", 5, 0], [2632, 2643, "URL", 5, 0], [2672, 2683, "URL", 5, 0], [2722, 2736, "URL", 5, 0], [2814, 2822, "URL", 5, 0], [2844, 2866, "URL", 5, 0], [2907, 2915, "URL", 5, 0], [2963, 2975, "URL", 5, 0], [3004, 3012, "URL", 5, 0], [3072, 3090, "URL", 5, 0], [3232, 3261, "URL", 5, 0], [3308, 3320, "URL", 5, 0], [3345, 3357, "URL", 5, 0], [3415, 3426, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-1057", "ms": 6.31, "edits": [[21, 25, "DATE_TIME", 11, 0], [64, 73, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1058", "ms": 54.71, "edits": [[60, 78, "PERSON", 8, 0], [95, 103, "PERSON", 8, 0], [306, 313, "LOCATION", 10, 0], [430, 453, "LOCATION", 10, 0], [477, 487, "NRP", 5, 0], [857, 876, "LOCATION", 10, 0], [1463, 1468, "LOCATION", 10, 0], [1483, 1493, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1059", "ms": 11.56, "edits": [[1, 8, "PERSON", 8, 0], [110, 120, "DATE_TIME", 11, 0], [140, 147, "PERSON", 8, 0], [149, 155, "PERSON", 8, 0], [160, 164, "PERSON", 8, 0], [207, 214, "PERSON", 8, 0], [257, 264, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1060", "ms": 8.1, "edits": [[86, 91, "DATE_TIME", 11, 0], [157, 162, "DATE_TIME", 11, 0], [177, 185, "DATE_TIME", 11, 0], [219, 227, "DATE_TIME", 11, 0], [231, 237, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1061", "ms": 19.32, "edits": []}
+{"id": "rd-wildchat-dev-1062", "ms": 4.3, "edits": [[35, 50, "LOCATION", 10, 0], [95, 106, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1064", "ms": 19.93, "edits": []}
+{"id": "rd-wildchat-dev-1065", "ms": 9.13, "edits": []}
+{"id": "rd-wildchat-dev-1066", "ms": 10.13, "edits": [[19, 32, "PERSON", 8, 0], [93, 102, "LOCATION", 10, 0], [104, 117, "LOCATION", 10, 0], [139, 144, "PERSON", 8, 0], [185, 197, "PERSON", 8, 0], [203, 209, "NRP", 5, 0], [264, 266, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1067", "ms": 16.04, "edits": [[79, 84, "PERSON", 8, 0], [97, 108, "PERSON", 8, 0], [113, 116, "PERSON", 8, 0], [130, 135, "PERSON", 8, 0], [175, 178, "PERSON", 8, 0], [349, 352, "PERSON", 8, 0], [362, 367, "PERSON", 8, 0], [460, 465, "PERSON", 8, 0], [470, 473, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1068", "ms": 8.23, "edits": [[160, 166, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1069", "ms": 4.76, "edits": []}
+{"id": "rd-wildchat-dev-1070", "ms": 7.69, "edits": [[56, 61, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1071", "ms": 4.22, "edits": [[116, 121, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1072", "ms": 14.03, "edits": []}
+{"id": "rd-wildchat-dev-1073", "ms": 4.21, "edits": []}
+{"id": "rd-wildchat-dev-1074", "ms": 9.75, "edits": [[24, 33, "PERSON", 8, 0], [140, 146, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1075", "ms": 14.27, "edits": []}
+{"id": "rd-wildchat-dev-1076", "ms": 14.55, "edits": []}
+{"id": "rd-wildchat-dev-1077", "ms": 4.37, "edits": []}
+{"id": "rd-wildchat-dev-1078", "ms": 11.02, "edits": []}
+{"id": "rd-wildchat-dev-1079", "ms": 18.17, "edits": [[133, 139, "PERSON", 8, 0], [242, 258, "DATE_TIME", 11, 0], [270, 273, "PERSON", 8, 0], [327, 331, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1080", "ms": 11.92, "edits": []}
+{"id": "rd-wildchat-dev-1081", "ms": 13.46, "edits": [[10, 27, "DATE_TIME", 11, 0], [29, 34, "PERSON", 8, 0], [49, 55, "PERSON", 8, 0], [87, 93, "PERSON", 8, 0], [106, 111, "PERSON", 8, 0], [167, 173, "PERSON", 8, 0], [203, 214, "PERSON", 8, 0], [234, 240, "PERSON", 8, 0], [321, 326, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1082", "ms": 27.66, "edits": []}
+{"id": "rd-wildchat-dev-1083", "ms": 8.8, "edits": [[47, 49, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1084", "ms": 10.04, "edits": []}
+{"id": "rd-wildchat-dev-1085", "ms": 11.73, "edits": [[64, 68, "PERSON", 8, 0], [144, 149, "PERSON", 8, 0], [232, 237, "PERSON", 8, 0], [265, 269, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1086", "ms": 3.73, "edits": []}
+{"id": "rd-wildchat-dev-1087", "ms": 5.11, "edits": [[17, 87, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-1088", "ms": 7.59, "edits": [[38, 42, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1089", "ms": 44.77, "edits": []}
+{"id": "rd-wildchat-dev-1090", "ms": 4.39, "edits": []}
+{"id": "rd-wildchat-dev-1091", "ms": 55.0, "edits": [[289, 298, "URL", 5, 0], [752, 758, "URL", 5, 0], [1244, 1246, "LOCATION", 10, 0], [1248, 1250, "LOCATION", 10, 0], [1252, 1254, "PERSON", 8, 0], [1268, 1272, "NRP", 5, 0], [1616, 1618, "NRP", 5, 0], [1714, 1719, "URL", 5, 0], [1739, 1748, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-1092", "ms": 16.76, "edits": [[41, 58, "PERSON", 8, 0], [102, 119, "PERSON", 8, 0], [129, 143, "DATE_TIME", 11, 0], [155, 164, "LOCATION", 10, 0], [166, 174, "LOCATION", 10, 0], [186, 212, "PERSON", 8, 0], [271, 292, "PERSON", 8, 0], [369, 375, "PERSON", 8, 0], [393, 398, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1093", "ms": 9.85, "edits": []}
 {"id": "rd-wildchat-dev-1094", "ms": 12.78, "edits": []}
-{"id": "rd-wildchat-dev-1095", "ms": 7.64, "edits": [[76, 86, "PERSON", 8, 0], [113, 117, "PERSON", 8, 0], [134, 141, "NRP", 5, 0], [162, 169, "NRP", 5, 0]]}
-{"id": "rd-wildchat-dev-1097", "ms": 14.5, "edits": []}
-{"id": "rd-wildchat-dev-1098", "ms": 33.21, "edits": [[88, 95, "LOCATION", 10, 0], [128, 133, "LOCATION", 10, 0], [182, 189, "PERSON", 8, 0], [255, 263, "LOCATION", 10, 0], [517, 524, "LOCATION", 10, 0], [566, 576, "LOCATION", 10, 0], [603, 610, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1099", "ms": 15.69, "edits": []}
-{"id": "rd-wildchat-dev-1100", "ms": 22.1, "edits": []}
-{"id": "rd-wildchat-dev-1101#t0", "ms": 7.83, "edits": []}
-{"id": "rd-wildchat-dev-1101#t1", "ms": 7.78, "edits": []}
-{"id": "rd-wildchat-dev-1101#t2", "ms": 4.33, "edits": []}
-{"id": "rd-wildchat-dev-1102#t0", "ms": 11.39, "edits": [[50, 57, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1102#t1", "ms": 13.35, "edits": [[47, 54, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1103#t0", "ms": 16.62, "edits": []}
-{"id": "rd-wildchat-dev-1103#t1", "ms": 3.39, "edits": []}
-{"id": "rd-wildchat-dev-1104#t0", "ms": 14.33, "edits": []}
-{"id": "rd-wildchat-dev-1104#t1", "ms": 6.63, "edits": [[37, 44, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1104#t2", "ms": 8.61, "edits": []}
-{"id": "rd-wildchat-dev-1105#t0", "ms": 72.28, "edits": [[32, 38, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1105#t1", "ms": 4.85, "edits": []}
-{"id": "rd-wildchat-dev-1105#t2", "ms": 3.04, "edits": []}
+{"id": "rd-wildchat-dev-1095", "ms": 6.89, "edits": [[76, 86, "PERSON", 8, 0], [113, 117, "PERSON", 8, 0], [134, 141, "NRP", 5, 0], [162, 169, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1097", "ms": 14.35, "edits": []}
+{"id": "rd-wildchat-dev-1098", "ms": 31.26, "edits": [[88, 95, "LOCATION", 10, 0], [128, 133, "LOCATION", 10, 0], [182, 189, "PERSON", 8, 0], [255, 263, "LOCATION", 10, 0], [517, 524, "LOCATION", 10, 0], [566, 576, "LOCATION", 10, 0], [603, 610, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1099", "ms": 15.72, "edits": []}
+{"id": "rd-wildchat-dev-1100", "ms": 21.13, "edits": []}
+{"id": "rd-wildchat-dev-1101#t0", "ms": 7.41, "edits": []}
+{"id": "rd-wildchat-dev-1101#t1", "ms": 5.67, "edits": []}
+{"id": "rd-wildchat-dev-1101#t2", "ms": 3.31, "edits": []}
+{"id": "rd-wildchat-dev-1102#t0", "ms": 9.94, "edits": [[50, 57, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1102#t1", "ms": 11.0, "edits": [[47, 54, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1103#t0", "ms": 15.05, "edits": []}
+{"id": "rd-wildchat-dev-1103#t1", "ms": 2.52, "edits": []}
+{"id": "rd-wildchat-dev-1104#t0", "ms": 12.8, "edits": []}
+{"id": "rd-wildchat-dev-1104#t1", "ms": 6.07, "edits": [[37, 44, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1104#t2", "ms": 8.22, "edits": []}
+{"id": "rd-wildchat-dev-1105#t0", "ms": 67.79, "edits": [[32, 38, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1105#t1", "ms": 4.7, "edits": []}
+{"id": "rd-wildchat-dev-1105#t2", "ms": 3.12, "edits": []}
 {"id": "rd-wildchat-dev-1106#t0", "ms": 6.45, "edits": []}
-{"id": "rd-wildchat-dev-1106#t1", "ms": 6.46, "edits": []}
-{"id": "rd-wildchat-dev-1106#t2", "ms": 6.29, "edits": []}
-{"id": "rd-wildchat-dev-1107#t0", "ms": 22.98, "edits": []}
-{"id": "rd-wildchat-dev-1107#t1", "ms": 14.51, "edits": []}
-{"id": "rd-wildchat-dev-1107#t2", "ms": 23.91, "edits": []}
-{"id": "rd-wildchat-dev-1108#t1", "ms": 7.6, "edits": []}
-{"id": "rd-wildchat-dev-1108#t2", "ms": 3.67, "edits": []}
-{"id": "rd-wildchat-dev-1109#t0", "ms": 84.38, "edits": [[198, 207, "URL", 5, 0], [1876, 1882, "DATE_TIME", 11, 0], [1956, 1966, "URL", 5, 0], [2002, 2008, "DATE_TIME", 11, 0], [2082, 2092, "URL", 5, 0], [2121, 2131, "URL", 5, 0], [2243, 2253, "URL", 5, 0], [2371, 2381, "URL", 5, 0], [2417, 2427, "URL", 5, 0], [2540, 2550, "URL", 5, 0], [2674, 2684, "URL", 5, 0], [2725, 2735, "URL", 5, 0]]}
-{"id": "rd-wildchat-dev-1109#t1", "ms": 4.12, "edits": []}
-{"id": "rd-wildchat-dev-1109#t2", "ms": 4.49, "edits": []}
-{"id": "rd-wildchat-dev-1110#t0", "ms": 47.58, "edits": [[105, 111, "NRP", 5, 0], [337, 351, "DATE_TIME", 11, 0], [576, 586, "NRP", 5, 0], [597, 603, "PERSON", 8, 0], [713, 723, "NRP", 5, 0], [737, 743, "PERSON", 8, 0], [748, 756, "LOCATION", 10, 0], [819, 829, "NRP", 5, 0], [850, 856, "PERSON", 8, 0], [876, 882, "PERSON", 8, 0], [1229, 1236, "LOCATION", 10, 0], [1344, 1350, "LOCATION", 10, 0], [1498, 1501, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1110#t1", "ms": 2.34, "edits": []}
-{"id": "rd-wildchat-dev-1111#t0", "ms": 15.62, "edits": [[105, 112, "DATE_TIME", 11, 0], [335, 340, "DATE_TIME", 11, 0], [435, 456, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1111#t1", "ms": 70.12, "edits": [[79, 86, "DATE_TIME", 11, 0], [96, 113, "DATE_TIME", 11, 0], [380, 389, "DATE_TIME", 11, 0], [932, 940, "DATE_TIME", 11, 0], [1145, 1154, "DATE_TIME", 11, 0], [1390, 1397, "DATE_TIME", 11, 0], [1819, 1834, "DATE_TIME", 11, 0], [2181, 2189, "DATE_TIME", 11, 0], [2418, 2434, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1111#t2", "ms": 6.27, "edits": [[99, 107, "NRP", 5, 0], [116, 122, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1112#t0", "ms": 7.35, "edits": []}
-{"id": "rd-wildchat-dev-1112#t1", "ms": 4.53, "edits": []}
-{"id": "rd-wildchat-dev-1113#t0", "ms": 52.16, "edits": [[5, 44, "PERSON", 8, 0], [51, 60, "PERSON", 8, 0], [61, 67, "PERSON", 8, 0], [69, 77, "PERSON", 8, 0], [131, 135, "DATE_TIME", 11, 0], [183, 187, "PERSON", 8, 0], [189, 195, "PERSON", 8, 0], [197, 202, "PERSON", 8, 0], [204, 209, "PERSON", 8, 0], [211, 216, "PERSON", 8, 0], [234, 239, "PERSON", 8, 0], [241, 245, "PERSON", 8, 0], [254, 259, "PERSON", 8, 0], [261, 268, "PERSON", 8, 0], [270, 277, "PERSON", 8, 0], [288, 295, "PERSON", 8, 0], [301, 306, "PERSON", 8, 0], [308, 316, "PERSON", 8, 0], [318, 327, "PERSON", 8, 0], [343, 347, "PERSON", 8, 0], [349, 354, "PERSON", 8, 0], [399, 416, "LOCATION", 10, 0], [456, 465, "PERSON", 8, 0], [500, 509, "PERSON", 8, 0], [877, 882, "PERSON", 8, 0], [1110, 1121, "PERSON", 8, 0], [1328, 1334, "PERSON", 8, 0], [1349, 1369, "LOCATION", 10, 0], [1519, 1528, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1113#t1", "ms": 3.69, "edits": []}
-{"id": "rd-wildchat-dev-1113#t2", "ms": 7.04, "edits": [[22, 31, "PERSON", 8, 0], [138, 158, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1114#t0", "ms": 58.52, "edits": [[452, 469, "DATE_TIME", 11, 0], [941, 950, "DATE_TIME", 11, 0], [978, 981, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1114#t1", "ms": 60.09, "edits": [[459, 476, "DATE_TIME", 11, 0], [946, 955, "DATE_TIME", 11, 0], [983, 986, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1114#t2", "ms": 11.91, "edits": []}
-{"id": "rd-wildchat-dev-1115#t0", "ms": 7.32, "edits": [[78, 94, "DATE_TIME", 11, 0]]}
-{"id": "rd-wildchat-dev-1116#t0", "ms": 5.4, "edits": [[12, 15, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1116#t1", "ms": 2.67, "edits": []}
-{"id": "rd-wildchat-dev-1117#t0", "ms": 13.41, "edits": []}
-{"id": "rd-wildchat-dev-1117#t1", "ms": 6.59, "edits": []}
-{"id": "rd-wildchat-dev-1117#t2", "ms": 12.14, "edits": []}
-{"id": "rd-wildchat-dev-1118#t0", "ms": 29.41, "edits": [[159, 188, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1118#t2", "ms": 53.26, "edits": []}
-{"id": "rd-wildchat-dev-1119#t0", "ms": 21.56, "edits": [[16, 29, "PERSON", 8, 0], [50, 59, "LOCATION", 10, 0], [122, 137, "LOCATION", 10, 0], [141, 145, "DATE_TIME", 11, 0], [147, 156, "LOCATION", 10, 0], [174, 185, "LOCATION", 10, 0], [233, 244, "LOCATION", 10, 0], [282, 288, "LOCATION", 10, 0], [319, 325, "LOCATION", 10, 0], [343, 360, "LOCATION", 10, 0], [375, 398, "LOCATION", 10, 0], [423, 432, "LOCATION", 10, 0], [438, 444, "LOCATION", 10, 0], [453, 462, "LOCATION", 10, 0], [539, 545, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1119#t1", "ms": 15.23, "edits": [[30, 39, "LOCATION", 10, 0], [57, 68, "LOCATION", 10, 0], [106, 112, "LOCATION", 10, 0], [179, 196, "LOCATION", 10, 0], [211, 234, "LOCATION", 10, 0], [328, 334, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1119#t2", "ms": 12.16, "edits": [[9, 20, "PERSON", 8, 0], [22, 37, "PERSON", 8, 0], [59, 65, "PERSON", 8, 0], [356, 365, "LOCATION", 10, 0]]}
-{"id": "rd-wildchat-dev-1120#t0", "ms": 4.64, "edits": []}
-{"id": "rd-wildchat-dev-1120#t1", "ms": 4.79, "edits": [[71, 84, "NRP", 5, 0], [89, 100, "PERSON", 8, 0]]}
-{"id": "rd-wildchat-dev-1120#t2", "ms": 6.94, "edits": [[180, 185, "NRP", 5, 0]]}
+{"id": "rd-wildchat-dev-1106#t1", "ms": 6.33, "edits": []}
+{"id": "rd-wildchat-dev-1106#t2", "ms": 6.27, "edits": []}
+{"id": "rd-wildchat-dev-1107#t0", "ms": 19.96, "edits": []}
+{"id": "rd-wildchat-dev-1107#t1", "ms": 13.69, "edits": []}
+{"id": "rd-wildchat-dev-1107#t2", "ms": 22.82, "edits": []}
+{"id": "rd-wildchat-dev-1108#t1", "ms": 6.81, "edits": []}
+{"id": "rd-wildchat-dev-1108#t2", "ms": 3.2, "edits": []}
+{"id": "rd-wildchat-dev-1109#t0", "ms": 80.19, "edits": [[198, 207, "URL", 5, 0], [1876, 1882, "DATE_TIME", 11, 0], [1956, 1966, "URL", 5, 0], [2002, 2008, "DATE_TIME", 11, 0], [2082, 2092, "URL", 5, 0], [2121, 2131, "URL", 5, 0], [2243, 2253, "URL", 5, 0], [2371, 2381, "URL", 5, 0], [2417, 2427, "URL", 5, 0], [2540, 2550, "URL", 5, 0], [2674, 2684, "URL", 5, 0], [2725, 2735, "URL", 5, 0]]}
+{"id": "rd-wildchat-dev-1109#t1", "ms": 2.84, "edits": []}
+{"id": "rd-wildchat-dev-1109#t2", "ms": 3.62, "edits": []}
+{"id": "rd-wildchat-dev-1110#t0", "ms": 45.04, "edits": [[105, 111, "NRP", 5, 0], [337, 351, "DATE_TIME", 11, 0], [576, 586, "NRP", 5, 0], [597, 603, "PERSON", 8, 0], [713, 723, "NRP", 5, 0], [737, 743, "PERSON", 8, 0], [748, 756, "LOCATION", 10, 0], [819, 829, "NRP", 5, 0], [850, 856, "PERSON", 8, 0], [876, 882, "PERSON", 8, 0], [1229, 1236, "LOCATION", 10, 0], [1344, 1350, "LOCATION", 10, 0], [1498, 1501, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1110#t1", "ms": 2.17, "edits": []}
+{"id": "rd-wildchat-dev-1111#t0", "ms": 15.35, "edits": [[105, 112, "DATE_TIME", 11, 0], [335, 340, "DATE_TIME", 11, 0], [435, 456, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1111#t1", "ms": 65.33, "edits": [[79, 86, "DATE_TIME", 11, 0], [96, 113, "DATE_TIME", 11, 0], [380, 389, "DATE_TIME", 11, 0], [932, 940, "DATE_TIME", 11, 0], [1145, 1154, "DATE_TIME", 11, 0], [1390, 1397, "DATE_TIME", 11, 0], [1819, 1834, "DATE_TIME", 11, 0], [2181, 2189, "DATE_TIME", 11, 0], [2418, 2434, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1111#t2", "ms": 5.46, "edits": [[99, 107, "NRP", 5, 0], [116, 122, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1112#t0", "ms": 4.91, "edits": []}
+{"id": "rd-wildchat-dev-1112#t1", "ms": 3.6, "edits": []}
+{"id": "rd-wildchat-dev-1113#t0", "ms": 47.61, "edits": [[5, 44, "PERSON", 8, 0], [51, 60, "PERSON", 8, 0], [61, 67, "PERSON", 8, 0], [69, 77, "PERSON", 8, 0], [131, 135, "DATE_TIME", 11, 0], [183, 187, "PERSON", 8, 0], [189, 195, "PERSON", 8, 0], [197, 202, "PERSON", 8, 0], [204, 209, "PERSON", 8, 0], [211, 216, "PERSON", 8, 0], [234, 239, "PERSON", 8, 0], [241, 245, "PERSON", 8, 0], [254, 259, "PERSON", 8, 0], [261, 268, "PERSON", 8, 0], [270, 277, "PERSON", 8, 0], [288, 295, "PERSON", 8, 0], [301, 306, "PERSON", 8, 0], [308, 316, "PERSON", 8, 0], [318, 327, "PERSON", 8, 0], [343, 347, "PERSON", 8, 0], [349, 354, "PERSON", 8, 0], [399, 416, "LOCATION", 10, 0], [456, 465, "PERSON", 8, 0], [500, 509, "PERSON", 8, 0], [877, 882, "PERSON", 8, 0], [1110, 1121, "PERSON", 8, 0], [1328, 1334, "PERSON", 8, 0], [1349, 1369, "LOCATION", 10, 0], [1519, 1528, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1113#t1", "ms": 3.38, "edits": []}
+{"id": "rd-wildchat-dev-1113#t2", "ms": 6.65, "edits": [[22, 31, "PERSON", 8, 0], [138, 158, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1114#t0", "ms": 55.85, "edits": [[452, 469, "DATE_TIME", 11, 0], [941, 950, "DATE_TIME", 11, 0], [978, 981, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1114#t1", "ms": 54.78, "edits": [[459, 476, "DATE_TIME", 11, 0], [946, 955, "DATE_TIME", 11, 0], [983, 986, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1114#t2", "ms": 11.08, "edits": []}
+{"id": "rd-wildchat-dev-1115#t0", "ms": 6.76, "edits": [[78, 94, "DATE_TIME", 11, 0]]}
+{"id": "rd-wildchat-dev-1116#t0", "ms": 4.76, "edits": [[12, 15, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1116#t1", "ms": 2.23, "edits": []}
+{"id": "rd-wildchat-dev-1117#t0", "ms": 13.26, "edits": []}
+{"id": "rd-wildchat-dev-1117#t1", "ms": 6.57, "edits": []}
+{"id": "rd-wildchat-dev-1117#t2", "ms": 12.19, "edits": []}
+{"id": "rd-wildchat-dev-1118#t0", "ms": 26.62, "edits": [[159, 188, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1118#t2", "ms": 48.32, "edits": []}
+{"id": "rd-wildchat-dev-1119#t0", "ms": 19.8, "edits": [[16, 29, "PERSON", 8, 0], [50, 59, "LOCATION", 10, 0], [122, 137, "LOCATION", 10, 0], [141, 145, "DATE_TIME", 11, 0], [147, 156, "LOCATION", 10, 0], [174, 185, "LOCATION", 10, 0], [233, 244, "LOCATION", 10, 0], [282, 288, "LOCATION", 10, 0], [319, 325, "LOCATION", 10, 0], [343, 360, "LOCATION", 10, 0], [375, 398, "LOCATION", 10, 0], [423, 432, "LOCATION", 10, 0], [438, 444, "LOCATION", 10, 0], [453, 462, "LOCATION", 10, 0], [539, 545, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1119#t1", "ms": 15.33, "edits": [[30, 39, "LOCATION", 10, 0], [57, 68, "LOCATION", 10, 0], [106, 112, "LOCATION", 10, 0], [179, 196, "LOCATION", 10, 0], [211, 234, "LOCATION", 10, 0], [328, 334, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1119#t2", "ms": 11.7, "edits": [[9, 20, "PERSON", 8, 0], [22, 37, "PERSON", 8, 0], [59, 65, "PERSON", 8, 0], [356, 365, "LOCATION", 10, 0]]}
+{"id": "rd-wildchat-dev-1120#t0", "ms": 4.27, "edits": []}
+{"id": "rd-wildchat-dev-1120#t1", "ms": 4.68, "edits": [[71, 84, "NRP", 5, 0], [89, 100, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-dev-1120#t2", "ms": 6.51, "edits": [[180, 185, "NRP", 5, 0]]}

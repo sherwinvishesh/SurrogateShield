@@ -1,6 +1,6 @@
 {
  "arm": "gliner_pii_tuned",
- "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/test/oasst1.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/devlarge-oasst1.jsonl",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/dev/wildchat.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/dev-wildchat.jsonl",
  "config": {
   "backbone_revision": {
    "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
@@ -45,11 +45,11 @@
   },
   "window_words": 200
  },
- "edits": 2457,
- "input": "bench/realdata/build/score/test/oasst1.jsonl",
- "input_sha256": "2a89e2d98e3e797a684c70982166e5e60d3c63f6de605b9222670774dec5afe1",
- "load_seconds": 10.9,
- "messages": 848,
+ "edits": 1017,
+ "input": "bench/realdata/build/score/dev/wildchat.jsonl",
+ "input_sha256": "b97cd51cfe4b9e5cac3e47298ce3412ed8f73777079d50c0ec4a4d971f51ccd2",
+ "load_seconds": 10.8,
+ "messages": 218,
  "offline": true,
  "refused": 0,
  "seed": 20261005

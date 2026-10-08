@@ -111,18 +111,18 @@ def run_arm(arm: str, src: Path, name: str) -> dict:
 # the manifest lists them apart, one entry per reason. LLM Guard's natural
 # runs were made on Apple's GPU before fc4ab21 pinned the arm to the CPU, and
 # test-1's silver labels took their candidates from them. SS is the system
-# under development: its pre-V3 runs gave test-1's scores and the silver-label
-# candidates of both natural pools, and its Checkpoint A runs (V3 before the
-# tagger) gave realdata_devlarge.json.
+# under development: its pre-V3 runs gave test-1's test scores and the
+# silver-label candidates of both natural pools, and the frozen test-2 SS gave
+# test-2's scores and test-3's silver-label candidates. Its dev and devlarge
+# runs are the current SS's (V4 Phase 1: realdata_dev.json and
+# realdata_devlarge.json were re-scored at the default frozen for test-3).
 _DS = ("oasst1", "sharegpt", "wildchat")
 HISTORICAL = {
     **{("llm_guard", f"natural-{ds}"): "made on mps before fc4ab21 pinned LLM Guard to the CPU; "
        "test-1's silver-label candidates were drawn from them" for ds in _DS},
-    **{("ss", f"{name}-{ds}"): "the pre-V3 SS (before the detection config); test-1's scores "
-       "(realdata_dev/test) and the silver-label candidates of test-1's and test-2's natural pools "
-       "were made from them" for name in ("dev", "test", "natural", "test2-natural") for ds in _DS},
-    **{("ss", f"devlarge-{ds}"): "V3 Checkpoint A, the SS before the tagger; realdata_devlarge.json "
-       "was scored from them" for ds in _DS},
+    **{("ss", f"{name}-{ds}"): "the pre-V3 SS (before the detection config); test-1's test scores "
+       "(realdata_test) and the silver-label candidates of test-1's and test-2's natural pools "
+       "were made from them" for name in ("test", "natural", "test2-natural") for ds in _DS},
     **{("ss", f"test2-{ds}"): "the frozen test-2 SS (FREEZE.json, e2c8fa5); test-2's scores "
        "(realdata_test2.json) were made from them" for ds in _DS},
     **{("ss", f"test3-natural-{ds}"): "the frozen test-2 SS (FREEZE.json, e2c8fa5); the silver-label "

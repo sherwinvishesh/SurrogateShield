@@ -1,6 +1,6 @@
 {
  "arm": "gliner_pii_tuned",
- "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/test/oasst1.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/devlarge-oasst1.jsonl",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/score/dev/sharegpt.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/dev-sharegpt.jsonl",
  "config": {
   "backbone_revision": {
    "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
@@ -45,11 +45,11 @@
   },
   "window_words": 200
  },
- "edits": 2457,
- "input": "bench/realdata/build/score/test/oasst1.jsonl",
- "input_sha256": "2a89e2d98e3e797a684c70982166e5e60d3c63f6de605b9222670774dec5afe1",
+ "edits": 929,
+ "input": "bench/realdata/build/score/dev/sharegpt.jsonl",
+ "input_sha256": "b0267999596895278df73195feb3bb6c2b3cf3b2b8631972ceec919fde3f2db8",
  "load_seconds": 10.9,
- "messages": 848,
+ "messages": 229,
  "offline": true,
  "refused": 0,
  "seed": 20261005
