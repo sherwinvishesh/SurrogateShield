@@ -324,6 +324,14 @@ def _case_like(model: str, value: str) -> str:
     return value
 
 
+def _age_words_kept(original: str, surrogate: str) -> bool:
+    """True when an age's surrogate repeats the original written in words,
+    or the original's tens word ("thirty" in "thirty-one")."""
+    o, s = original.casefold().strip(), surrogate.casefold()
+    tens = [w for w in canonical.TENS if re.search(rf"\b{w}\b", o)]
+    return o in s or any(re.search(rf"\b{w}\b", s) for w in tens)
+
+
 class MimicGen:
     """Generates realistic, collision-resistant surrogates for detected PII.
 
@@ -1096,11 +1104,34 @@ class MimicGen:
                 return self._shape_like(original)
             canon = canonical.Canon(view.text, tuple((a, b, view.starts[a], view.ends[b - 1])
                                                      for a, b in view.changed))
-            return canonical.render_like("worded", original, canon, self._gen_age_like(view.text))
+            return self._age_worded(original, canon)
         n = int(m.group())
         step = self._rng.randint(1, 3) * self._rng.choice((-1, 1))
         new = n + step if n + step >= 1 else n + abs(step)
         return original[:m.start()] + str(new) + original[m.end():]
+
+    def _age_worded(self, original: str, canon: "canonical.Canon") -> str:
+        """An age written in words, re-drawn on its digits (``canon.text``)
+        and spelled back. The surrogate never repeats the original's words:
+        "thirty" → "thirty-one" would carry the value inside the surrogate.
+        A draw that holds the original or its tens word is replaced by a
+        near age that does not, else by one outside the decade (30 → 27–29
+        or 40–43, never 31–39)."""
+        def spelled(digits: str) -> str:
+            return canonical.render_like("worded", original, canon, digits)
+
+        first = spelled(self._gen_age_like(canon.text))
+        if not _age_words_kept(original, first):
+            return first
+        m = re.search(r"\d+", canon.text)
+        n = int(m.group())
+        for ages in ((n - 3, n - 2, n - 1, n + 1, n + 2, n + 3),
+                     (*range(n // 10 * 10 - 3, n // 10 * 10), *range(n // 10 * 10 + 10, n // 10 * 10 + 14))):
+            ok = [s for s in (spelled(canon.text[:m.start()] + str(k) + canon.text[m.end():])
+                              for k in ages if k >= 1) if not _age_words_kept(original, s)]
+            if ok:
+                return self._rng.choice(ok)
+        return first
 
     # ── dates of birth (audit D2) ──────────────────────────────────────────────
 
@@ -1327,6 +1358,8 @@ class MimicGen:
         if getattr(entity, "canonical", None) is not None:
             # found on a rewritten view ("twenty-nine", "jdoe at x dot com"):
             # draw for the written form, then spell it the message's way
+            if entity.type == "age" and entity.view == "worded":
+                return self._age_worded(entity.text.strip(), entity.canonical)
             written = dataclasses.replace(entity, text=entity.canonical.text, view=None, canonical=None)
             return canonical.render_like(entity.view, entity.text.strip(), entity.canonical,
                                          self.generate(written, address_mode, address_shift_range, forbidden))
