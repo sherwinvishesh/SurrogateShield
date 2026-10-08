@@ -1,0 +1,19 @@
+{
+ "arm": "presidio_default",
+ "command": ".venv/bin/python -m bench.arms.presidio_default --in bench/realdata/build/test3/score/test3/wildchat.jsonl --out bench/realdata/build/spans/presidio_default/test3-wildchat.jsonl",
+ "config": {
+  "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+  "overlap_resolution": "longest span, then highest score",
+  "presidio_analyzer_version": "2.2.362",
+  "replacement": "[ENTITY_TYPE] placeholder (presidio/redact.py)",
+  "score_threshold": 0.4
+ },
+ "edits": 4133,
+ "input": "bench/realdata/build/test3/score/test3/wildchat.jsonl",
+ "input_sha256": "666ef17d4245ababf0954bc4d677408bd4d3dd91196da8ba273cb6bcb26972e5",
+ "load_seconds": 0.0,
+ "messages": 1311,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}
