@@ -1427,7 +1427,8 @@ def run_cascade(
     confirmed.extend(pattern_results)
     # URLs are opaque to the NER stages (audit I1): a model never sees
     # "github.com/Microsoft" or a query string, so it cannot tag a fragment.
-    opaque = pattern_scan.opaque_spans(text)
+    # The URL rule is PatternScan's: with the stage off it contributes nothing.
+    opaque = pattern_scan.opaque_spans(text) if config.enabled("pattern_scan") else []
     _mark("pattern_scan", opaque=[[s, e] for s, e in opaque])
     # The canonicaliser: PatternScan again on rewritten views of the message
     # ("six one seven …", "jane dot doe at …"); hits keep their view. It only
