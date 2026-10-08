@@ -94,3 +94,20 @@ def test_markdown_lists_layouts_tagger_thresholds_and_ss_variants(msgs):
     assert "| signoff | no | 4 |" in md and "SS `frozen`" in md and "tagger as_age @0.7" in md
     assert "sign-off layouts by threshold" in md and "0.5: 1.0" in md
     json.dumps(doc)
+
+
+def test_a_retrained_tagger_keeps_the_one_before_it(msgs, tmp_path, monkeypatch):
+    part = A.summary(msgs, {m["id"]: True for m in msgs})
+    weights = iter(["1" * 64, "2" * 64, "2" * 64])
+    monkeypatch.setattr(A, "build", lambda seed: msgs)
+    monkeypatch.setattr(A, "BUILD", tmp_path / "build")
+    monkeypatch.setattr(A, "tagger_part", lambda *a, **k: {
+        "model": "m", "weights_sha256": next(weights),
+        "thresholds": {t: {"any": part, "as_age": part} for t in ("0.5", "0.7", "0.9")}})
+    out = tmp_path / "probe.json"
+    assert "earlier_taggers" not in A.run(out, [], None, "cpu", 1, False, log=lambda *_: None)
+    doc = A.run(out, [], None, "cpu", 1, False, log=lambda *_: None)
+    assert doc["tagger"]["weights_sha256"] == "2" * 64 and list(doc["earlier_taggers"]) == ["1" * 64]
+    assert "Earlier tagger `m` (weights `111111111111`)" in out.with_suffix(".md").read_text()
+    # the same weights again: nothing more is kept
+    assert list(A.run(out, [], None, "cpu", 1, False, log=lambda *_: None)["earlier_taggers"]) == ["1" * 64]

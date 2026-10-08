@@ -275,9 +275,13 @@ def markdown(doc: dict) -> str:
         cells += [_pct(get(doc["ss"][v])) for v in variants]
         lines.append(f"| {name} | {tr} | {n} | {na} | " + " | ".join(cells) + " |")
     lines += ["", "Tagger `as_age` recall on the sign-off layouts by threshold (D's trigger: < 0.95 after A–C): "
-              + ", ".join(f"{t}: {th[t]['as_age']['sign_off']['rate']}" for t in th) + ".", "",
-              "SS variants: " + "; ".join(f"`{v}` config `{str(s['detection_config_hash'])[:16]}`, code "
-                                          f"`{s['code'][:12]}`, {s['date']}" for v, s in doc["ss"].items()) + "."]
+              + ", ".join(f"{t}: {th[t]['as_age']['sign_off']['rate']}" for t in th) + ".", ""]
+    for sha, old in doc.get("earlier_taggers", {}).items():
+        lines += [f"Earlier tagger `{old['model']}` (weights `{sha[:12]}`), `as_age` sign-off recall: "
+                  + ", ".join(f"{t}: {v['as_age']['sign_off']['rate']}" for t, v in old["thresholds"].items())
+                  + "; new layouts at 0.5: " + _pct(old["thresholds"]["0.5"]["as_age"]["new"]) + ".", ""]
+    lines.append("SS variants: " + "; ".join(f"`{v}` config `{str(s['detection_config_hash'])[:16]}`, code "
+                                             f"`{s['code'][:12]}`, {s['date']}" for v, s in doc["ss"].items()) + ".")
     return "\n".join(lines) + "\n"
 
 
@@ -298,9 +302,14 @@ def run(out: Path, variants: Sequence[str], config: Optional[Path], device: str,
     cmd = ("PYTHONPATH=.:python-library HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m "
            "bench.tagger.age_probe" + "".join(f" --ss {v}" for v in variants)
            + (f" --config {rel(config)}" if config else "") + f" --out {rel(out)}")
+    tagger = tagger_part(msgs, device, batch, reuse, log)
+    # a tagger with other weights (D's retrain) keeps the one before it beside it, by its weights
+    earlier = dict(old.get("earlier_taggers", {}))
+    if old.get("tagger") and old["tagger"].get("weights_sha256") != tagger["weights_sha256"]:
+        earlier[old["tagger"]["weights_sha256"]] = old["tagger"]
     doc = {"command": cmd, "git": git_state(), "role": "diagnostic, synthetic", "version": VERSION, "seed": seed,
            "messages_sha256": messages_sha(msgs), "n": len(msgs), "layouts": layouts_doc(msgs),
-           "tagger": tagger_part(msgs, device, batch, reuse, log), "ss": ss}
+           "tagger": tagger, "ss": ss, **({"earlier_taggers": earlier} if earlier else {})}
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
     out.with_suffix(".md").write_text(markdown(doc))
