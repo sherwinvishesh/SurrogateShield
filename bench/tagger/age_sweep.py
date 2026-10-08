@@ -15,15 +15,14 @@ the spans ``evaluate --as-configured --variant balanced`` made with
 ``dv3s-40k``, kept under the git-ignored ``bench/tagger/build/eval/`` and
 checked here by the config hash in their metadata.
 
-The rule (§3.3, read on the choice data): a threshold passes when
-G1  AGE leaks at most max(0.02, GLiNER-PII's rate) of the AGE values, on dev
-    and on calib (0 of 33 on dev);
-G2  no type's leaked count rises against the reference;
-G3  natural spurious edits do not exceed the reference's, negatives untouched
-    do not fall, OASST1's included.
-The highest passing threshold is chosen (the one with the fewest natural AGE
-edits: they fall as the threshold rises, and both are recorded). If none
-passes, none is chosen and the file says which check failed where.
+The rule (V4 §4 Phase 1 step 4, §3.3 G1): the highest threshold at which AGE
+leaks at most max(0.02, GLiNER-PII's rate) of the AGE values on dev and on
+calib (0 of 33 on dev) is chosen; ties go to fewer natural AGE edits. If none
+meets G1, none is chosen. G2 (no type's leaked count rises against the
+reference) and G3 (natural spurious edits not above the reference's,
+negatives untouched not fallen, OASST1's included) are recorded on the choice
+data beside it; they are gates on dev and dev-large's val half, in the
+acceptance run.
 
 Counts only: no text and no value is written. Natural edits of type AGE are
 counted by label, ``age`` and ``age:worded`` apart (§5.6).
@@ -113,13 +112,20 @@ def checks(got: dict, ref: dict, gliner: dict, per_type: float = 0.02) -> dict:
                    "spurious": [r["natural_spurious"], a["natural_spurious"]], "negatives_fallen": fallen}}
 
 
+def natural_age_edits(v: dict) -> int:
+    return sum(sum(p["all"]["natural_age_edits"].values()) for p in v.get("parts", {}).values())
+
+
 def choose(results: dict) -> dict:
-    passing = [t for t, v in results.items() if t != "off" and all(c["ok"] for part in v["checks"].values()
-                                                                    for c in part.values())]
+    """The highest threshold meeting G1 on every part of the choice data,
+    ties to fewer natural AGE edits; with the thresholds meeting all three
+    checks there too (a diagnostic)."""
+    passing = [t for t, v in results.items() if t != "off" and all(p["G1"]["ok"] for p in v["checks"].values())]
+    clean = [t for t in passing if all(c["ok"] for p in results[t]["checks"].values() for c in p.values())]
     if not passing:
-        return {"threshold": None, "passing": []}
-    best = max(passing, key=float)
-    return {"threshold": float(best), "passing": sorted(passing, key=float)}
+        return {"threshold": None, "passing": [], "all_checks": []}
+    best = max(passing, key=lambda t: (float(t), -natural_age_edits(results[t])))
+    return {"threshold": float(best), "passing": sorted(passing, key=float), "all_checks": sorted(clean, key=float)}
 
 
 def main(argv=None) -> int:
@@ -181,8 +187,9 @@ def markdown(doc: dict) -> str:
                          f"{c['G3']['spurious'][0]} → {c['G3']['spurious'][1]} | {'yes' if c['G3']['ok'] else 'no'} | "
                          f"{v['parts'][part]['all']['natural_age_edits'] or 0} |")
     ch = doc["choice"]
-    lines += ["", f"Chosen: **{ch['threshold']}** (passing: {', '.join(ch['passing']) or 'none'})." if ch["threshold"]
-              else "No threshold passes all three checks on the choice data.", ""]
+    lines += ["", f"Chosen by G1: **{ch['threshold']}** (meeting G1: {', '.join(ch['passing'])}; meeting G1–G3 on "
+              f"the choice data: {', '.join(ch['all_checks']) or 'none'})." if ch["threshold"]
+              else "No threshold meets G1 on the choice data.", ""]
     return "\n".join(lines)
 
 

@@ -50,11 +50,13 @@ def test_g1_g2_g3_on_one_part():
     assert not g3["ok"] and g3["negatives_fallen"] == {"oasst1": [130, 129]}
 
 
-def test_the_highest_threshold_passing_everywhere_is_chosen():
+def test_the_highest_threshold_meeting_g1_is_chosen_g2_g3_beside_it():
     yes = {"G1": {"ok": True}, "G2": {"ok": True}, "G3": {"ok": True}}
-    no = {**yes, "G3": {"ok": False}}
-    sweep = {"off": {"checks": {"dev": yes}}, "0.5": {"checks": {"dev": yes, "devlarge-calib": yes}},
+    g3 = {**yes, "G3": {"ok": False}}
+    g1 = {**yes, "G1": {"ok": False}}
+    sweep = {"off": {"checks": {"dev": g1}}, "0.5": {"checks": {"dev": yes, "devlarge-calib": yes}},
              "0.8": {"checks": {"dev": yes, "devlarge-calib": yes}},
-             "0.9": {"checks": {"dev": yes, "devlarge-calib": no}}}
-    assert S.choose(sweep) == {"threshold": 0.8, "passing": ["0.5", "0.8"]}
-    assert S.choose({"0.9": sweep["0.9"]}) == {"threshold": None, "passing": []}
+             "0.9": {"checks": {"dev": yes, "devlarge-calib": g3}},
+             "0.95": {"checks": {"dev": g1, "devlarge-calib": yes}}}
+    assert S.choose(sweep) == {"threshold": 0.9, "passing": ["0.5", "0.8", "0.9"], "all_checks": ["0.5", "0.8"]}
+    assert S.choose({"0.95": sweep["0.95"]}) == {"threshold": None, "passing": [], "all_checks": []}
