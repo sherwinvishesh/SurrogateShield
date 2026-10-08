@@ -526,35 +526,24 @@ shield.config(
     # legal, shelter-related) always override this and force full replacement.
 
     spacy_model="en_core_web_lg",
-    # The spaCy model used by EntityTrace for named-entity recognition.
-    # Install it once with python -m spacy download en_core_web_lg.
-    # You can substitute a smaller model such as en_core_web_sm for faster
-    # inference at the cost of NER accuracy.
+    # The spaCy model EntityTrace loads. In the default detection config
+    # ("balanced") spaCy reads places only; the PII tagger reads names and
+    # organisations. Install it once with python -m spacy download en_core_web_lg.
 
-    context_guard_enabled=True,
-    # When True, a second NER pass using dslim/distilbert-NER (~250 MB) is
-    # run over text not already claimed by PatternScan or EntityTrace. It
-    # also makes the final call on borderline EntityTrace entities.
-    # Set to False to use spaCy only; this is faster but has lower recall
-    # for edge-case names and organisations.
+    context_guard_enabled=False,
+    # ContextGuard, a second NER pass with dslim/distilbert-NER (~250 MB),
+    # is off by default: the PII tagger reads names. True turns it back on.
 
-    entity_trace_high_threshold=0.85,
-    # spaCy entities with a confidence score at or above this value are
-    # confirmed immediately without passing to ContextGuard.
-
-    entity_trace_low_threshold=0.60,
-    # spaCy entities with a score at or above this value but below the high
-    # threshold are treated as borderline and sent to ContextGuard for
-    # verification. Entities below this value are discarded.
+    entity_trace_high_threshold=0.90,
+    entity_trace_low_threshold=0.70,
+    entity_trace_fallback_threshold=0.75,
+    # spaCy gives no per-entity score: EntityTrace scores PERSON 0.88,
+    # GPE / ORG 0.85, LOC 0.74, FAC 0.70, so these act as type gates.
+    # At or above high: kept. Between low and high: sent to ContextGuard
+    # when it is on, else kept at or above fallback. Below low: dropped.
 
     context_guard_threshold=0.70,
-    # The HuggingFace NER confidence score at or above which a borderline
-    # entity or a new ContextGuard-detected entity is promoted to confirmed.
-
-    entity_trace_fallback_threshold=0.65,
-    # Used only when context_guard_enabled=False. Borderline EntityTrace
-    # entities with a score at or above this value are promoted to confirmed
-    # directly, since there is no ContextGuard to consult.
+    # The ContextGuard score at or above which its entity is kept.
 
     fuzzy_threshold=85,
     # The rapidfuzz score (0–100) used in the fuzzy reconstruction pass of
@@ -562,14 +551,15 @@ shield.config(
     # reformatted, at the cost of a higher chance of incorrect replacements.
     # 85 is a conservative default.
 
-    address_mode="shift",
+    address_mode="auto",
     # How detected addresses are surrogated:
+    #   "auto"    — shift for service queries, replace for everything else
+    #               (default).
     #   "shift"   — house number shifted by up to ±address_shift_range;
     #               street, city, state, ZIP, and formatting preserved
-    #               byte-for-byte (default).
+    #               byte-for-byte.
     #   "replace" — structure-preserving fake address (every component
     #               faked, same shape, one unit).
-    #   "auto"    — shift for service queries, replace for everything else.
     # Raises ValueError for any other value.
 
     address_shift_range=1,
@@ -583,6 +573,16 @@ shield.config(
 
     context_guard_device=-1,
     # Device for ContextGuard inference: -1 = CPU (default), 0+ = GPU id.
+
+    detection=None,
+    # The detection config: a preset name ("balanced", "fast", "strict",
+    # "classic"), a DetectionConfig, or a dict of one. None: the config the
+    # environment names (SURROGATESHIELD_PRESET or
+    # SURROGATESHIELD_DETECTION_CONFIG), else "balanced". The stages, their
+    # models and per-type thresholds, and which stage may report each type
+    # are set there (ages: the patterns only, by default); see
+    # CONFIGURATION.md. The flat settings above apply on top of it where
+    # they differ from their defaults.
 )
 ```
 

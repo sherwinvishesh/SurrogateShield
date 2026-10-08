@@ -177,6 +177,21 @@ internal name, and the internal name wins.
   `context_guard`; LOCATION adds `entity_trace` (spaCy). On the dev split,
   spaCy's names and organisations added far more harmless edits than leaks
   caught, so `balanced` uses it for places only.
+- AGE defaults to the patterns alone (`pattern_scan`, `canonicaliser`,
+  `structural`): an age with a cue (`I'm 34`, `aged 63`, `34yo`, `29F`),
+  a worded one (`thirty-four`), and a number after a name at the end of a
+  line (`Marta Kowalczyk, 41`). The tagger reads ages too, but `balanced`,
+  `fast` and `classic` do not route them to it: on the development data,
+  routing them to the tagger at 0.95 caught the one age the patterns
+  missed on dev and added spurious edits on dev-large (1 on its
+  calibration half, 5 on its validation half;
+  `bench/results/age_sweep_dev_guard.md` and its row in
+  `bench/results/README.md`). `strict` routes AGE to the
+  tagger at the tagger's own choice (no AGE threshold). Wherever the
+  tagger or a plugin reports AGE, it is kept only in an age's shape: a
+  number from 1 to 120, in digits or words, with at most an age cue
+  (`aged`, `years old`, `yo`, `F`, `M`) and no unit or count after it
+  (`45 minutes` is not an age).
 - OTHER defaults to `"*"`, meaning every stage; `strict` and `classic` set
   PERSON, ORG and LOCATION to `"*"` too.
 - A plugin added with `with_plugin(name, types=...)` is listed as a source
