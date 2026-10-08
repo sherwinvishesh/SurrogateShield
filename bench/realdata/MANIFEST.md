@@ -381,6 +381,28 @@ Drawn: multi_test3 = 120, single_test3 = 600
 
 Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 4521544721967241027, single = 3609028807091034370
 
+**test3 labels**
+
+```
+{
+ "annotator": "claude-sonnet-4-6",
+ "literal_rule_arms": [
+  "ss",
+  "presidio_default",
+  "gliner_pii"
+ ],
+ "pooled_arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "prompt_version": "bebc6e281801fa74"
+}
+```
+
 **test3 pooling**
 
 ```
@@ -1433,8 +1455,14 @@ Historical span files (`test3-natural-oasst1`, `test3-natural-sharegpt`, `test3-
 | `bench/realdata/test2/wildchat/pii_free.json` | `130cef94435b569f819ba772f8bbd14772e701f6c4f473d1a50fe7f34c344a15` |
 | `bench/realdata/test2/wildchat/pool.jsonl` | `620fa2417c307affab9c3a52ef15eb095ea1db78be5ef4b9a3c9216fcd863359` |
 | `bench/realdata/test2/wildchat/test2.jsonl` | `83556c7767e357603fbd0ba985ee5da451105671c30f8cc0340a4a9e4d91eb2c` |
+| `bench/realdata/test3/oasst1/labels.jsonl` | `2f9d0ee11bfbee97dceaa4cb94c68018b6b1e40083c3470315f7e2e7f5aafcbb` |
+| `bench/realdata/test3/oasst1/pii_free.json` | `80099824dc3f6ccdc959dbbedcf8ab3f5f43c25809b893fb12fcdafa95fd6172` |
 | `bench/realdata/test3/oasst1/pool.jsonl` | `1eb00411379bc4b3794c121ae75205df81c63319e5d987ea8bc4f744ae87d4ce` |
+| `bench/realdata/test3/sharegpt/labels.jsonl` | `19a52f18c29ade3f3b024ad001bc3a5ab0e5e33e6c82608922a1a54f1c6144f7` |
+| `bench/realdata/test3/sharegpt/pii_free.json` | `305542a2ceeb4b84e0e3d9d68c509210a12152daacabaa35f83a0d13b715a003` |
 | `bench/realdata/test3/sharegpt/pool.jsonl` | `d38ec67639652254e1f3f4974ea2a0c50aa07a7ad65e29288497c52764c1a3ba` |
+| `bench/realdata/test3/wildchat/labels.jsonl` | `ce95981fc75a904251e8eb6289b69d818c0b774d48c21308080c52a464515021` |
+| `bench/realdata/test3/wildchat/pii_free.json` | `59c824825e3aea9c0890bae6504da49f1da55ae699884b03903e91034d7f336f` |
 | `bench/realdata/test3/wildchat/pool.jsonl` | `c55106aeb663df3159e94bcc72c3cfa24d4df7a0c4b171379a82e6208e3d7434` |
 | `bench/realdata/wildchat/dev.jsonl` | `de853c7174b008199bd8fd6b7bd05a5654908b99b71a6f94f9b0c638c43a91cf` |
 | `bench/realdata/wildchat/labels.jsonl` | `8e2669d041deb6e91de36e49a1b44cb112cf9853c0b5b5682320bfa4974b628f` |
