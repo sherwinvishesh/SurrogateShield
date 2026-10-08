@@ -64,6 +64,7 @@ from typing import List, Optional, Set
 
 from ..entities import DetectedEntity
 from . import address_assembly, address_parser
+from .canonical import number_value
 
 logger = logging.getLogger(__name__)
 
@@ -376,6 +377,26 @@ def _age_validator(m: "re.Match") -> bool:
     if not digits or not (0 < int(digits[0]) <= 120):
         return False
     return not _NOT_AGE_AFTER.match(_after(m, 12))
+
+
+# The shape of an age a model reads (V4 §3.3: the tagger's AGE candidates
+# keep only these): a number from 1 to 120, in digits or in words, with at
+# most an age cue around it ("34", "34yo", "34 years old", "aged 34",
+# "thirty-four"), and no unit or count after it, as for the patterns.
+_AGE_SHAPE = re.compile(
+    r"(?i)(?:aged?[ \t]*[:=]?[ \t]*)?(?P<v>\d{1,3}|[a-z]+(?:[ \t]*-[ \t]*|[ \t]+)?[a-z]*)"
+    r"(?:[ \t]*-?[ \t]*(?:years?|yrs?\.?|y/o|yo)(?:[ \t]*-?[ \t]*old)?|[mf])?"
+)
+
+
+def age_shape(text: str, start: int, end: int) -> bool:
+    """Whether ``text[start:end]``, read as an age by a model, has an age's shape."""
+    m = _AGE_SHAPE.fullmatch(text, start, end)
+    if m is None:
+        return False
+    v = m.group("v")
+    n = int(v) if v.isdigit() else number_value(v)
+    return n is not None and 0 < n <= 120 and not _NOT_AGE_AFTER.match(text, end)
 
 
 # ── handles, credentials ─────────────────────────────────────────────────────

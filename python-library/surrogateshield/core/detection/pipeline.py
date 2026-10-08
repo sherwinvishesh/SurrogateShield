@@ -1517,6 +1517,9 @@ def run_cascade(
             _t_pl = _clock()
             found = plugins.get_detector(st).detect(text, pview)
             ents = _routed(config, plugins.candidates_to_entities(st.name, text, found), st.name)
+            # a model's age must have an age's shape (V4 §3.3), as a pattern's must
+            ents = [e for e in ents if dconfig.public_type(e.type) != "AGE"
+                    or pattern_scan.age_shape(text, e.start, e.end)]
             if skip_location_entities:
                 ents = [e for e in ents if e.type not in _GEO_TYPES]
             confirmed.extend(ents)
