@@ -335,6 +335,13 @@ def _ipv4_validator(m: "re.Match") -> bool:
 
 # ── age ──────────────────────────────────────────────────────────────────────
 
+# The letters of a name in the age rules: ASCII and the Latin letters beyond
+# it (Latin-1 Supplement, Extended-A and -B: "Özge", "Ștefan", "Łukasz",
+# "İlkay"), capitals and small letters kept apart.
+_LATIN = [chr(c) for c in range(0xC0, 0x250)]
+_UP = "A-Z" + "".join(c for c in _LATIN if c.isupper())
+_LO = "a-z" + "".join(c for c in _LATIN if c.islower())
+
 _KIN = (
     r"(?:mom|mum|mother|dad|father|son|daughter|kid|child|baby|toddler|brother"
     r"|sister|grandma|grandmother|granny|grandpa|grandfather|grandson|granddaughter"
@@ -852,8 +859,8 @@ _AGE_PATTERNS = [
     re.compile(
         r"(?:\b(?:i'?m|i\s+am|she'?s|he'?s|they'?re|they\s+are|she\s+is|he\s+is"
         r"|who'?s|who\s+is|(?:are|were)\s+both)"
-        rf"|\b(?:my|our|his|her|their)\s+{_KIN}s?(?:\s+[A-Z][\w'\-]+"
-        r"(?:\s+(?:and|&)\s+[A-Z][\w'\-]+)?)?\s+(?:is|was|are|were|turns|just\s+turned))"
+        rf"|\b(?:my|our|his|her|their)\s+{_KIN}s?(?:\s+[{_UP}][\w'\-]+"
+        rf"(?:\s+(?:and|&)\s+[{_UP}][\w'\-]+)?)?\s+(?:is|was|are|were|turns|just\s+turned))"
         r"\s+(?:(?:only|just|almost|nearly|about)\s+)?(?P<v>\d{1,3})\b",
         re.IGNORECASE,
     ),
@@ -864,7 +871,7 @@ _AGE_PATTERNS = [
         r"|Price|Total|Score|Rate|Chapter|Page|Step|Level|Size|Count|Number|Python|Java"
         r"|Node|Room|Floor|Gate|Platform|Section|Part|Item|Order|Answer|Result|Value"
         r"|Mine|Ours|Yours|Today|Tomorrow|Yesterday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b)"
-        r"[A-Z][a-z]{2,}(?:\s+and\s+[A-Z][a-z]{2,})?,?\s+(?:is|are|was|turns|just\s+turned)"
+        rf"[{_UP}][{_LO}]{{2,}}(?:\s+and\s+[{_UP}][{_LO}]{{2,}})?,?\s+(?:is|are|was|turns|just\s+turned)"
         r"\s+(?:(?:only|just|almost|nearly)\s+)?(?P<v>\d{1,2})"
         r"(?=\s+(?:and|but|now|today|this|next|so|too|already)\b|\s*[.,;!?)]|\s*$)",
     ),
@@ -877,17 +884,17 @@ _AGE_PATTERNS = [
     # "(gloria, 63)", "name 'Dmitri, 39'"
     re.compile(r"[(\"'‘“]\s*(?!(?:fig|figure|table|eq|page|pp|vol|ch|chapter|item|step|line"
                r"|row|col|box|note|part|section|sec|ref|art|para|no|nr|level|round|week|day)\b)"
-               r"[A-Za-z][a-z]{2,},\s*(?P<v>\d{1,2})\s*[)\"'’”]", re.IGNORECASE),
+               rf"[{_UP}{_LO}][{_LO}]{{2,}},\s*(?P<v>\d{{1,2}})\s*[)\"'’”]", re.IGNORECASE),
     # "Nana's 80th", "my 40th birthday"
     re.compile(
-        rf"\b(?:{_KIN}|[A-Z][a-z]{{2,}})['’]s\s+(?P<v>\d{{1,3}}(?:st|nd|rd|th))"
+        rf"\b(?:{_KIN}|[{_UP}][{_LO}]{{2,}})['’]s\s+(?P<v>\d{{1,3}}(?:st|nd|rd|th))"
         r"(?=\s+birthday|\s*[.,!?;)\n]|\s*$)"
         r"|\b(?:my|his|her|their|your)\s+(?P<w>\d{1,3}(?:st|nd|rd|th))(?=\s+birthday)",
         re.IGNORECASE,
     ),
     # "My daughter Ava Lindqvist (14)"
     re.compile(
-        rf"\b{_KIN}(?:\s+[A-Z][\w'\-]+){{0,3}}\s*\((?P<v>\d{{1,2}})\)",
+        rf"\b{_KIN}(?:\s+[{_UP}][\w'\-]+){{0,3}}\s*\((?P<v>\d{{1,2}})\)",
         re.IGNORECASE,
     ),
     # "at the age of 55", "dad had a heart attack at 55", "mum died at 71"
@@ -899,13 +906,16 @@ _AGE_PATTERNS = [
     ),
 ]
 
-# "Ana-Maria Popescu, 29, MSc …", "Our intern Folake Mensah (45) starts …":
-# a capitalised two- or three-part name and a bare number. The words must
-# not be a heading, a unit or a place ("Chapter Two (12)", "Room 4, 12,").
-_NAMED_AGE = re.compile(
-    r"(?<![\w'\-])(?P<n>[A-Z][a-z'\-]+(?:[ \-](?:[A-Z][a-z'\-]+|D'[A-Z][a-z]+)){1,2})"
-    r"(?:,\s+(?P<v>\d{1,2}),|\s*\((?P<w>\d{1,2})\))"
-)
+# "Ana-Maria Popescu, 29, MSc …", "Our intern Folake Mensah (45) starts …",
+# a sign-off "— Özge Yıldız, 34" at a line's end: a capitalised two- or
+# three-part name and a bare number. The words must not be a heading, a unit
+# or a place ("Chapter Two (12)", "Room 4, 12,", "Windows Server, 12").
+_NAME_PARTS = (rf"(?<![\w'\-])(?P<n>[{_UP}][{_LO}'\-]+"
+               rf"(?:[ \-](?:[{_UP}][{_LO}'\-]+|D'[{_UP}][{_LO}]+)){{1,2}})")
+_NAMED_AGE = re.compile(_NAME_PARTS + r"(?:,\s+(?P<v>\d{1,2}),|\s*\((?P<w>\d{1,2})\))")
+# ... or two digits closing the line, a full stop or bracket at most after
+# them (a single digit there is more often a rank, a sequel or a score)
+_NAMED_AGE_END = re.compile(_NAME_PARTS + r",[ \t]+(?P<v>[1-9]\d)[.;:!?)]?(?=[ \t]*(?:\n|$))")
 _NOT_NAME_WORD = frozenset({
     "chapter", "section", "part", "step", "page", "table", "figure", "room",
     "level", "season", "episode", "volume", "version", "phase", "stage",
@@ -926,7 +936,9 @@ def _named_age_validator(m: "re.Match") -> bool:
     if any(w.lower() in _NOT_NAME_WORD for w in words):
         return False
     n = int(m.group("v") or m.group("w"))
-    return 1 <= n <= 99 and not _NOT_AGE_AFTER.match(_after(m, 12))
+    # at a line's end there is no unit after the number: the next line's
+    # first word ("People Ops lead") says nothing about it
+    return 1 <= n <= 99 and (m.re is _NAMED_AGE_END or not _NOT_AGE_AFTER.match(_after(m, 12)))
 
 
 # "aged 7 and 10", "ages 3, 6 and 9" — the numbers after the first one
@@ -1602,6 +1614,7 @@ _PATTERNS: list = [
     # ── Age (audit I14) ──────────────────────────────────────────────────────
     *[("age", _p, _age_validator) for _p in _AGE_PATTERNS],
     ("age", _NAMED_AGE, _named_age_validator),
+    ("age", _NAMED_AGE_END, _named_age_validator),
 
     # ── Gender indicator ───────────────────────────────────────────────────────
     (
