@@ -1,0 +1,1216 @@
+{
+ "command": "PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict --split test3 --out bench/results/verdict_test3.json",
+ "freeze_file": "bench/realdata/test3/FREEZE.json",
+ "freeze_sha256": "31d87c099d6ca5198a42430bfa9a6471154aaa218ee05c7949cb17c512016fff",
+ "git": {
+  "commit": "04540fe3ad7ade0335eeb49ea94a0d9d91fa6fa2",
+  "modified": []
+ },
+ "go_parts": {
+  "H1'''": true,
+  "H2'''": true,
+  "H3'''": true,
+  "H5'''": true,
+  "H6'''": true,
+  "H8'''": null
+ },
+ "hypotheses": {
+  "H1'''": {
+   "datasets_held": 3,
+   "holds": true,
+   "per_dataset": {
+    "oasst1": {
+     "holds": true,
+     "not_worse": {
+      "gliner_pii": true,
+      "gliner_pii_tuned": true
+     },
+     "not_worse_than_gliner": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "arm": 0.0844,
+       "ci95": [
+        -0.0958,
+        -0.0608
+       ],
+       "diff": -0.0775,
+       "holds": true,
+       "ss": 0.0069
+      },
+      "gliner_pii_tuned": {
+       "arm": 0.0663,
+       "ci95": [
+        -0.0758,
+        -0.0438
+       ],
+       "diff": -0.0594,
+       "holds": true,
+       "ss": 0.0069
+      },
+      "llm_guard": {
+       "arm": 0.5624,
+       "ci95": [
+        -0.584,
+        -0.5282
+       ],
+       "diff": -0.5556,
+       "holds": true,
+       "ss": 0.0069
+      },
+      "presidio_default": {
+       "arm": 0.3239,
+       "ci95": [
+        -0.3452,
+        -0.2894
+       ],
+       "diff": -0.317,
+       "holds": true,
+       "ss": 0.0069
+      },
+      "presidio_faker": {
+       "arm": 0.3239,
+       "ci95": [
+        -0.3452,
+        -0.2894
+       ],
+       "diff": -0.317,
+       "holds": true,
+       "ss": 0.0069
+      },
+      "presidio_transformers": {
+       "arm": 0.5151,
+       "ci95": [
+        -0.5405,
+        -0.4775
+       ],
+       "diff": -0.5082,
+       "holds": true,
+       "ss": 0.0069
+      }
+     }
+    },
+    "sharegpt": {
+     "holds": true,
+     "not_worse": {
+      "gliner_pii": true,
+      "gliner_pii_tuned": true
+     },
+     "not_worse_than_gliner": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "arm": 0.101,
+       "ci95": [
+        -0.1106,
+        -0.0736
+       ],
+       "diff": -0.0916,
+       "holds": true,
+       "ss": 0.0094
+      },
+      "gliner_pii_tuned": {
+       "arm": 0.083,
+       "ci95": [
+        -0.0901,
+        -0.0573
+       ],
+       "diff": -0.0736,
+       "holds": true,
+       "ss": 0.0094
+      },
+      "llm_guard": {
+       "arm": 0.5591,
+       "ci95": [
+        -0.5739,
+        -0.5259
+       ],
+       "diff": -0.5497,
+       "holds": true,
+       "ss": 0.0094
+      },
+      "presidio_default": {
+       "arm": 0.3093,
+       "ci95": [
+        -0.3255,
+        -0.2756
+       ],
+       "diff": -0.2999,
+       "holds": true,
+       "ss": 0.0094
+      },
+      "presidio_faker": {
+       "arm": 0.3093,
+       "ci95": [
+        -0.3255,
+        -0.2756
+       ],
+       "diff": -0.2999,
+       "holds": true,
+       "ss": 0.0094
+      },
+      "presidio_transformers": {
+       "arm": 0.545,
+       "ci95": [
+        -0.5648,
+        -0.5077
+       ],
+       "diff": -0.5356,
+       "holds": true,
+       "ss": 0.0094
+      }
+     }
+    },
+    "wildchat": {
+     "holds": true,
+     "not_worse": {
+      "gliner_pii": true,
+      "gliner_pii_tuned": true
+     },
+     "not_worse_than_gliner": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "arm": 0.088,
+       "ci95": [
+        -0.0972,
+        -0.0627
+       ],
+       "diff": -0.0799,
+       "holds": true,
+       "ss": 0.0081
+      },
+      "gliner_pii_tuned": {
+       "arm": 0.0694,
+       "ci95": [
+        -0.0761,
+        -0.0459
+       ],
+       "diff": -0.0613,
+       "holds": true,
+       "ss": 0.0081
+      },
+      "llm_guard": {
+       "arm": 0.5682,
+       "ci95": [
+        -0.5863,
+        -0.5345
+       ],
+       "diff": -0.5601,
+       "holds": true,
+       "ss": 0.0081
+      },
+      "presidio_default": {
+       "arm": 0.3148,
+       "ci95": [
+        -0.3325,
+        -0.2829
+       ],
+       "diff": -0.3067,
+       "holds": true,
+       "ss": 0.0081
+      },
+      "presidio_faker": {
+       "arm": 0.3148,
+       "ci95": [
+        -0.3325,
+        -0.2829
+       ],
+       "diff": -0.3067,
+       "holds": true,
+       "ss": 0.0081
+      },
+      "presidio_transformers": {
+       "arm": 0.5577,
+       "ci95": [
+        -0.5788,
+        -0.5205
+       ],
+       "diff": -0.5496,
+       "holds": true,
+       "ss": 0.0081
+      }
+     }
+    }
+   }
+  },
+  "H10'''": {
+   "gliner_pii": {
+    "holds": true,
+    "leak_not_above": true,
+    "span_f1_not_below": true
+   },
+   "gliner_pii_tuned": {
+    "holds": true,
+    "leak_not_above": true,
+    "span_f1_not_below": true
+   },
+   "holds": true
+  },
+  "H2'''": {
+   "holds": true,
+   "per_dataset": {
+    "oasst1": {
+     "beside": {
+      "gliner_pii_tuned": {
+       "ci95": [
+        -0.3375,
+        -0.2334
+       ],
+       "diff": -0.2892,
+       "lower": true
+      }
+     },
+     "holds": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "ci95": [
+        -0.2633,
+        -0.1614
+       ],
+       "diff": -0.2156,
+       "holds": true
+      },
+      "presidio_default": {
+       "ci95": [
+        -0.1724,
+        -0.1109
+       ],
+       "diff": -0.1416,
+       "holds": true
+      },
+      "presidio_faker": {
+       "ci95": [
+        -0.1715,
+        -0.1102
+       ],
+       "diff": -0.1409,
+       "holds": true
+      }
+     }
+    },
+    "sharegpt": {
+     "beside": {
+      "gliner_pii_tuned": {
+       "ci95": [
+        -0.3322,
+        -0.2332
+       ],
+       "diff": -0.2852,
+       "lower": true
+      }
+     },
+     "holds": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "ci95": [
+        -0.273,
+        -0.17
+       ],
+       "diff": -0.2241,
+       "holds": true
+      },
+      "presidio_default": {
+       "ci95": [
+        -0.2551,
+        -0.1217
+       ],
+       "diff": -0.1884,
+       "holds": true
+      },
+      "presidio_faker": {
+       "ci95": [
+        -0.2567,
+        -0.1224
+       ],
+       "diff": -0.1894,
+       "holds": true
+      }
+     }
+    },
+    "wildchat": {
+     "beside": {
+      "gliner_pii_tuned": {
+       "ci95": [
+        -0.3014,
+        -0.1991
+       ],
+       "diff": -0.2492,
+       "lower": true
+      }
+     },
+     "holds": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "ci95": [
+        -0.2555,
+        -0.1546
+       ],
+       "diff": -0.2027,
+       "holds": true
+      },
+      "presidio_default": {
+       "ci95": [
+        -0.2591,
+        -0.1556
+       ],
+       "diff": -0.2067,
+       "holds": true
+      },
+      "presidio_faker": {
+       "ci95": [
+        -0.2591,
+        -0.1556
+       ],
+       "diff": -0.2067,
+       "holds": true
+      }
+     }
+    }
+   }
+  },
+  "H3'''": {
+   "holds": true,
+   "per_dataset": {
+    "oasst1": {
+     "holds": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "arm": {
+        "k": 223,
+        "n": 689,
+        "rate": 0.3237,
+        "wilson95": [
+         0.2898,
+         0.3595
+        ]
+       },
+       "holds": true
+      },
+      "gliner_pii_tuned": {
+       "arm": {
+        "k": 142,
+        "n": 689,
+        "rate": 0.2061,
+        "wilson95": [
+         0.1776,
+         0.2379
+        ]
+       },
+       "holds": true
+      },
+      "llm_guard": {
+       "arm": {
+        "k": 637,
+        "n": 689,
+        "rate": 0.9245,
+        "wilson95": [
+         0.9024,
+         0.942
+        ]
+       },
+       "holds": true
+      },
+      "presidio_default": {
+       "arm": {
+        "k": 478,
+        "n": 689,
+        "rate": 0.6938,
+        "wilson95": [
+         0.6583,
+         0.727
+        ]
+       },
+       "holds": true
+      },
+      "presidio_faker": {
+       "arm": {
+        "k": 478,
+        "n": 689,
+        "rate": 0.6938,
+        "wilson95": [
+         0.6583,
+         0.727
+        ]
+       },
+       "holds": true
+      },
+      "presidio_transformers": {
+       "arm": {
+        "k": 559,
+        "n": 689,
+        "rate": 0.8113,
+        "wilson95": [
+         0.7804,
+         0.8388
+        ]
+       },
+       "holds": true
+      }
+     },
+     "ss": {
+      "k": 647,
+      "n": 689,
+      "rate": 0.939,
+      "wilson95": [
+       0.9186,
+       0.9546
+      ]
+     }
+    },
+    "sharegpt": {
+     "holds": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "arm": {
+        "k": 239,
+        "n": 892,
+        "rate": 0.2679,
+        "wilson95": [
+         0.2399,
+         0.298
+        ]
+       },
+       "holds": true
+      },
+      "gliner_pii_tuned": {
+       "arm": {
+        "k": 169,
+        "n": 892,
+        "rate": 0.1895,
+        "wilson95": [
+         0.1651,
+         0.2165
+        ]
+       },
+       "holds": true
+      },
+      "llm_guard": {
+       "arm": {
+        "k": 760,
+        "n": 892,
+        "rate": 0.852,
+        "wilson95": [
+         0.8272,
+         0.8738
+        ]
+       },
+       "holds": true
+      },
+      "presidio_default": {
+       "arm": {
+        "k": 530,
+        "n": 892,
+        "rate": 0.5942,
+        "wilson95": [
+         0.5616,
+         0.6259
+        ]
+       },
+       "holds": true
+      },
+      "presidio_faker": {
+       "arm": {
+        "k": 530,
+        "n": 892,
+        "rate": 0.5942,
+        "wilson95": [
+         0.5616,
+         0.6259
+        ]
+       },
+       "holds": true
+      },
+      "presidio_transformers": {
+       "arm": {
+        "k": 615,
+        "n": 892,
+        "rate": 0.6895,
+        "wilson95": [
+         0.6583,
+         0.719
+        ]
+       },
+       "holds": true
+      }
+     },
+     "ss": {
+      "k": 789,
+      "n": 892,
+      "rate": 0.8845,
+      "wilson95": [
+       0.8619,
+       0.9039
+      ]
+     }
+    },
+    "wildchat": {
+     "holds": true,
+     "per_baseline": {
+      "gliner_pii": {
+       "arm": {
+        "k": 242,
+        "n": 852,
+        "rate": 0.284,
+        "wilson95": [
+         0.2548,
+         0.3152
+        ]
+       },
+       "holds": true
+      },
+      "gliner_pii_tuned": {
+       "arm": {
+        "k": 175,
+        "n": 852,
+        "rate": 0.2054,
+        "wilson95": [
+         0.1796,
+         0.2338
+        ]
+       },
+       "holds": true
+      },
+      "llm_guard": {
+       "arm": {
+        "k": 644,
+        "n": 852,
+        "rate": 0.7559,
+        "wilson95": [
+         0.7259,
+         0.7835
+        ]
+       },
+       "holds": true
+      },
+      "presidio_default": {
+       "arm": {
+        "k": 442,
+        "n": 852,
+        "rate": 0.5188,
+        "wilson95": [
+         0.4852,
+         0.5522
+        ]
+       },
+       "holds": true
+      },
+      "presidio_faker": {
+       "arm": {
+        "k": 442,
+        "n": 852,
+        "rate": 0.5188,
+        "wilson95": [
+         0.4852,
+         0.5522
+        ]
+       },
+       "holds": true
+      },
+      "presidio_transformers": {
+       "arm": {
+        "k": 551,
+        "n": 852,
+        "rate": 0.6467,
+        "wilson95": [
+         0.614,
+         0.6781
+        ]
+       },
+       "holds": true
+      }
+     },
+     "ss": {
+      "k": 717,
+      "n": 852,
+      "rate": 0.8415,
+      "wilson95": [
+       0.8155,
+       0.8645
+      ]
+     }
+    }
+   }
+  },
+  "H4'''": {
+   "beside": {
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.0966,
+      -0.0513
+     ],
+     "diff": -0.0736
+    },
+    "oasst1": {
+     "ci95": [
+      -0.1405,
+      -0.0578
+     ],
+     "diff": -0.0994
+    },
+    "sharegpt": {
+     "ci95": [
+      -0.121,
+      -0.0382
+     ],
+     "diff": -0.0765
+    },
+    "wildchat": {
+     "ci95": [
+      -0.1086,
+      -0.0299
+     ],
+     "diff": -0.067
+    }
+   },
+   "ci95": [
+    -0.106,
+    -0.0567
+   ],
+   "diff": -0.0811,
+   "gliner_pii": {
+    "k": 44,
+    "n": 530,
+    "rate": 0.083,
+    "wilson95": [
+     0.0624,
+     0.1096
+    ]
+   },
+   "holds": true,
+   "ss": {
+    "k": 1,
+    "n": 530,
+    "rate": 0.0019,
+    "wilson95": [
+     0.0003,
+     0.0106
+    ]
+   }
+  },
+  "H5'''": {
+   "beside": {
+    "gliner_pii_tuned": {
+     "failing_types": []
+    }
+   },
+   "by_type": {
+    "ADDRESS": {
+     "ci95": [
+      -0.1295,
+      -0.051
+     ],
+     "diff": -0.0863,
+     "gliner_pii": {
+      "leak_rate": 0.0863,
+      "leaked": 17,
+      "policy": 0,
+      "values": 197
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 197
+     }
+    },
+    "AGE": {
+     "ci95": [
+      -0.0187,
+      0.0062
+     ],
+     "diff": -0.0061,
+     "gliner_pii": {
+      "leak_rate": 0.0092,
+      "leaked": 3,
+      "policy": 0,
+      "values": 326
+     },
+     "ss": {
+      "leak_rate": 0.0031,
+      "leaked": 1,
+      "policy": 0,
+      "values": 326
+     }
+    },
+    "CREDENTIAL": {
+     "ci95": [
+      -0.1111,
+      -0.038
+     ],
+     "diff": -0.0718,
+     "gliner_pii": {
+      "leak_rate": 0.0718,
+      "leaked": 14,
+      "policy": 0,
+      "values": 195
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 195
+     }
+    },
+    "DATE_OF_BIRTH": {
+     "ci95": [
+      -0.0995,
+      -0.0305
+     ],
+     "diff": -0.0632,
+     "gliner_pii": {
+      "leak_rate": 0.0632,
+      "leaked": 12,
+      "policy": 0,
+      "values": 190
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 190
+     }
+    },
+    "EMAIL": {
+     "ci95": [
+      -0.0513,
+      -0.0127
+     ],
+     "diff": -0.03,
+     "gliner_pii": {
+      "leak_rate": 0.03,
+      "leaked": 9,
+      "policy": 0,
+      "values": 300
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 300
+     }
+    },
+    "HANDLE": {
+     "ci95": [
+      -0.105,
+      -0.0359
+     ],
+     "diff": -0.0693,
+     "gliner_pii": {
+      "leak_rate": 0.0693,
+      "leaked": 14,
+      "policy": 0,
+      "values": 202
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 202
+     }
+    },
+    "ID": {
+     "ci95": [
+      -0.3803,
+      -0.2579
+     ],
+     "diff": -0.3185,
+     "gliner_pii": {
+      "leak_rate": 0.3306,
+      "leaked": 82,
+      "policy": 0,
+      "values": 248
+     },
+     "ss": {
+      "leak_rate": 0.0121,
+      "leaked": 3,
+      "policy": 0,
+      "values": 248
+     }
+    },
+    "LOCATION": {
+     "ci95": [
+      -0.0765,
+      0.0
+     ],
+     "diff": -0.0369,
+     "gliner_pii": {
+      "leak_rate": 0.0645,
+      "leaked": 14,
+      "policy": 0,
+      "values": 217
+     },
+     "ss": {
+      "leak_rate": 0.0276,
+      "leaked": 6,
+      "policy": 0,
+      "values": 217
+     }
+    },
+    "NETWORK": {
+     "ci95": [
+      -0.2366,
+      -0.1292
+     ],
+     "diff": -0.1837,
+     "gliner_pii": {
+      "leak_rate": 0.1837,
+      "leaked": 36,
+      "policy": 0,
+      "values": 196
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 196
+     }
+    },
+    "ORG": {
+     "ci95": [
+      -0.0902,
+      -0.0147
+     ],
+     "diff": -0.0512,
+     "gliner_pii": {
+      "leak_rate": 0.0866,
+      "leaked": 22,
+      "policy": 0,
+      "values": 254
+     },
+     "ss": {
+      "leak_rate": 0.0354,
+      "leaked": 9,
+      "policy": 0,
+      "values": 254
+     }
+    },
+    "PERSON": {
+     "ci95": [
+      0.0,
+      0.0161
+     ],
+     "diff": 0.0081,
+     "gliner_pii": {
+      "leak_rate": 0.0035,
+      "leaked": 3,
+      "policy": 0,
+      "values": 867
+     },
+     "ss": {
+      "leak_rate": 0.0115,
+      "leaked": 10,
+      "policy": 0,
+      "values": 867
+     }
+    },
+    "PHONE": {
+     "ci95": [
+      -0.0618,
+      -0.0157
+     ],
+     "diff": -0.0368,
+     "gliner_pii": {
+      "leak_rate": 0.0368,
+      "leaked": 10,
+      "policy": 0,
+      "values": 272
+     },
+     "ss": {
+      "leak_rate": 0.0,
+      "leaked": 0,
+      "policy": 0,
+      "values": 272
+     }
+    },
+    "URL": {
+     "ci95": [
+      -0.5349,
+      -0.399
+     ],
+     "diff": -0.4648,
+     "gliner_pii": {
+      "leak_rate": 0.4695,
+      "leaked": 100,
+      "policy": 0,
+      "values": 213
+     },
+     "ss": {
+      "leak_rate": 0.0047,
+      "leaked": 1,
+      "policy": 0,
+      "values": 213
+     }
+    }
+   },
+   "failing_types": [],
+   "holds": true
+  },
+  "H6'''": {
+   "default_pipeline": true,
+   "gliner_pii": {
+    "cold_start_s": 11.0,
+    "model_load_s": 10.2,
+    "p50_ms": 82.1,
+    "p95_ms": 340.9,
+    "peak_rss_mb": 2318.5
+   },
+   "holds": true,
+   "p50_not_above": true,
+   "rss_not_above": true,
+   "ss": {
+    "cold_start_s": 7.2,
+    "model_load_s": 0.0,
+    "p50_ms": 43.5,
+    "p95_ms": 204.4,
+    "peak_rss_mb": 1348.2
+   }
+  },
+  "H7'''": {
+   "holds": null,
+   "status": "utility or multiturn not run"
+  },
+  "H8'''": {
+   "holds": null,
+   "status": "not run"
+  },
+  "H9'''": {
+   "a": true,
+   "b": true,
+   "holds": true,
+   "per_group": {
+    "all": {
+     "a_no_patterns": {
+      "holds": true,
+      "leak": {
+       "k": 52,
+       "n": 3677,
+       "rate": 0.0141,
+       "wilson95": [
+        0.0108,
+        0.0185
+       ]
+      }
+     },
+     "b_no_tagger": {
+      "holds": true,
+      "leak": {
+       "k": 396,
+       "n": 3677,
+       "rate": 0.1077,
+       "wilson95": [
+        0.0981,
+        0.1181
+       ]
+      }
+     },
+     "balanced_equals_ss": true,
+     "beside_unrouted": {
+      "below": false,
+      "leak": {
+       "k": 1267,
+       "n": 3677,
+       "rate": 0.3446,
+       "wilson95": [
+        0.3294,
+        0.3601
+       ]
+      }
+     },
+     "presidio_default": {
+      "k": 1161,
+      "n": 3677,
+      "rate": 0.3157,
+      "wilson95": [
+       0.3009,
+       0.331
+      ]
+     },
+     "same_values": true
+    },
+    "oasst1": {
+     "a_no_patterns": {
+      "holds": true,
+      "leak": {
+       "k": 16,
+       "n": 1161,
+       "rate": 0.0138,
+       "wilson95": [
+        0.0085,
+        0.0223
+       ]
+      }
+     },
+     "b_no_tagger": {
+      "holds": true,
+      "leak": {
+       "k": 118,
+       "n": 1161,
+       "rate": 0.1016,
+       "wilson95": [
+        0.0855,
+        0.1204
+       ]
+      }
+     },
+     "balanced_equals_ss": true,
+     "beside_unrouted": {
+      "below": false,
+      "leak": {
+       "k": 418,
+       "n": 1161,
+       "rate": 0.36,
+       "wilson95": [
+        0.3329,
+        0.3881
+       ]
+      }
+     },
+     "presidio_default": {
+      "k": 376,
+      "n": 1161,
+      "rate": 0.3239,
+      "wilson95": [
+       0.2976,
+       0.3513
+      ]
+     },
+     "same_values": true
+    },
+    "sharegpt": {
+     "a_no_patterns": {
+      "holds": true,
+      "leak": {
+       "k": 15,
+       "n": 1277,
+       "rate": 0.0117,
+       "wilson95": [
+        0.0071,
+        0.0193
+       ]
+      }
+     },
+     "b_no_tagger": {
+      "holds": true,
+      "leak": {
+       "k": 142,
+       "n": 1277,
+       "rate": 0.1112,
+       "wilson95": [
+        0.0951,
+        0.1296
+       ]
+      }
+     },
+     "balanced_equals_ss": true,
+     "beside_unrouted": {
+      "below": false,
+      "leak": {
+       "k": 422,
+       "n": 1277,
+       "rate": 0.3305,
+       "wilson95": [
+        0.3052,
+        0.3567
+       ]
+      }
+     },
+     "presidio_default": {
+      "k": 395,
+      "n": 1277,
+      "rate": 0.3093,
+      "wilson95": [
+       0.2846,
+       0.3352
+      ]
+     },
+     "same_values": true
+    },
+    "wildchat": {
+     "a_no_patterns": {
+      "holds": true,
+      "leak": {
+       "k": 21,
+       "n": 1239,
+       "rate": 0.0169,
+       "wilson95": [
+        0.0111,
+        0.0258
+       ]
+      }
+     },
+     "b_no_tagger": {
+      "holds": true,
+      "leak": {
+       "k": 136,
+       "n": 1239,
+       "rate": 0.1098,
+       "wilson95": [
+        0.0936,
+        0.1284
+       ]
+      }
+     },
+     "balanced_equals_ss": true,
+     "beside_unrouted": {
+      "below": false,
+      "leak": {
+       "k": 427,
+       "n": 1239,
+       "rate": 0.3446,
+       "wilson95": [
+        0.3187,
+        0.3715
+       ]
+      }
+     },
+     "presidio_default": {
+      "k": 390,
+      "n": 1239,
+      "rate": 0.3148,
+      "wilson95": [
+       0.2895,
+       0.3412
+      ]
+     },
+     "same_values": true
+    }
+   }
+  }
+ },
+ "inputs": {
+  "attacker": null,
+  "components": {
+   "commit": "702001f5229fa041f7db58b8190fc05f661ae93c",
+   "file": "bench/results/realdata_components_test3.json",
+   "sha256": "c46dbf458458e72dbbdcd501f992a3912c9788ec5cd22c32ecd8670289d18082"
+  },
+  "e5": {
+   "commit": "8d4ea8b3a49caa1fa8f525adb342edf403b6ae8c",
+   "file": "bench/results/realdata_test3.json",
+   "sha256": "59863bb21d0dbb784c19d0780b6178da422f4d4bdcc4e80f7539f971228bd632"
+  },
+  "external": {
+   "commit": "73098e3fabbeaa248105b9e32998f2984644d190",
+   "file": "bench/results/external_nemotron_pii.json",
+   "sha256": "02374546605a748a78116e26bac3e157da504e74a7a0a0a05defb2962640d7d5"
+  },
+  "multiturn": null,
+  "perf": {
+   "commit": "b173311badad27998bd1aef4df62764d93118515",
+   "file": "bench/results/perf_arms_v4.json",
+   "sha256": "9d0bedd15ce897a806e1fbf29390881df3b5cb305ce0370fff31c34ee2d0d4ec"
+  },
+  "utility": null
+ },
+ "missing": [
+  "H8'''"
+ ],
+ "not_run": [
+  "H7'''",
+  "H8'''"
+ ],
+ "prereg": {
+  "file": "bench/realdata/HYPOTHESES_TEST3.md",
+  "sha256": "bd43f11d9b827ea05d2b9c0833d1e460127eb66764b02c3e99ccef90d7202c8a"
+ },
+ "split": "test3",
+ "verdict": "incomplete"
+}
