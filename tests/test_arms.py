@@ -242,6 +242,31 @@ def test_natural_inputs_per_collection():
     t2 = run.natural("test2")
     assert sorted(t2) == ["test2-natural-oasst1", "test2-natural-sharegpt", "test2-natural-wildchat"]
     assert t2["test2-natural-oasst1"].parts[-4:] == ("build", "test2", "oasst1", "messages.jsonl")
+    t3 = run.natural("test3")
+    assert sorted(t3) == ["test3-natural-oasst1", "test3-natural-sharegpt", "test3-natural-wildchat"]
+    assert t3["test3-natural-wildchat"].parts[-4:] == ("build", "test3", "wildchat", "messages.jsonl")
+
+
+def test_test3_pooling_records_its_commit_and_ss_config_and_keeps_the_frozen_ss_runs_apart(tmp_path):
+    from bench.realdata import manifest
+    pub, mpath = tmp_path / "spans", tmp_path / "manifest.json"
+    (pub / "ss").mkdir(parents=True)
+    for name in run.natural("test3"):
+        (pub / "ss" / f"{name}.jsonl.meta.json").write_text(json.dumps(
+            {"arm": "ss", "config": {"detection_config_hash": "a1ab"}, "seed": 1}))
+    manifest.save({"test3": {"datasets": {}}}, mpath, None)
+    arms = ["ss", "presidio_default", "gliner_pii"]
+    rec = run.record_pooling("test3", arms, pub, mpath, git={"commit": "e" * 40, "modified": []})
+    assert rec == {"commit": "e" * 40, "clean": True, "arms": arms, "ss_detection_config_hash": "a1ab"}
+    m = manifest.load(mpath)
+    assert m["test3"]["pooling"] == rec and m["test3"]["datasets"] == {}
+    assert "**test3 pooling**" in manifest.render(m)
+    dirty = run.record_pooling("test3", ["presidio_default"], pub, mpath, git={"commit": "f" * 40, "modified": ["x"]})
+    assert dirty["clean"] is False and dirty["ss_detection_config_hash"] is None
+    # the frozen test-2 SS's runs stay listed apart once the detector changes (V4 Phase 1)
+    for ds in ("oasst1", "sharegpt", "wildchat"):
+        assert "e2c8fa5" in run.HISTORICAL[("ss", f"test2-{ds}")]
+        assert run.HISTORICAL[("ss", f"test3-natural-{ds}")].startswith("the frozen test-2 SS")
 
 
 def test_record_arms_lists_historical_span_files_apart(tmp_path):

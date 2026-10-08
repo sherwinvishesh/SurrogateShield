@@ -632,6 +632,73 @@ def test_test2_estimate_counts_gliner_pii_and_two_judges(run):
     assert p["multiturn judge"] == 2 * 3 and p["multiturn responder (at most)"] == 2 * 3 * 2
 
 
+# ── test-3: test-2's plan, 20 conversations per dataset, H7''' / H8''' ──────
+
+T3 = L.PLANS["test3"]
+P3 = "'" * 3
+
+
+def test_test3_plan_is_test2s_with_twenty_conversations_and_its_own_names():
+    for f in ("utility", "judged", "natural", "multiturn", "attack", "placeholder", "spans"):
+        assert getattr(T3, f) == getattr(T2, f), f
+    assert (T3.split, T3.multiturn_n, T2.multiturn_n, L.TEST.multiturn_n) == ("test3", 20, 30, 30)
+    assert (T3.h7, T3.h8, T2.h7, T2.h8) == (f"H7{P3}", f"H8{P3}", L.H7, L.H8) == (f"H7{P3}", f"H8{P3}", "H7''", "H8''")
+    assert T3.tag("6-judge") == "6-judge-test3" and L.judge_seed(T3, "m", "gliner_pii") != L.judge_seed(T2, "m", "gliner_pii")
+    data = {"oasst1": {"units": {f"m{i}": {"conv": f"c{i:02d}", "slices": ("injected", "multi")} for i in range(25)}}}
+    assert len(L.multiturn_sample(data, "oasst1", plan=T3)) == 20 and len(L.multiturn_sample(data, "oasst1", plan=T2)) == 25
+    assert L.multiturn_sample(data, "oasst1", plan=T3) != L.multiturn_sample(data, "oasst1", plan=T2)[:20]
+    assert len(L.multiturn_sample(data, "oasst1", 5, plan=T3)) == 5
+
+
+def test_test3_runs_name_their_criteria_with_three_primes(run, tmp_path, monkeypatch):
+    monkeypatch.setattr(L, "TMP", tmp_path / "live-tmp")
+    data = build2()
+    r = run(blind, plan=T3)
+    u = L.utility(r, data, list(data), scorer=stub_scorer)["results"]
+    m = L.multiturn(r, data, list(data), cascade=fake_cascade, log=lambda *_: None)["results"]
+    a = L.attack(r, data, list(data))["results"]
+    assert f"H7{P3}" in u["all"] and L.H7 not in u["all"] and u["all"][f"H7{P3}"]["holds"] is True
+    assert f"H7{P3}" in m["all"] and L.H7 not in m["all"]
+    assert f"H8{P3}" in a["all"] and L.H8 not in a["all"] and a["all"][f"H8{P3}"]["holds"] is True
+    assert {b[1] for b in r.stub.batches} == {"6-utility-test3", "6-judge-test3", "6-multiturn-test3",
+                                              "6-attacker-test3"}
+    doc = dict(_doc(e5b=u, natural=L.natural(r, data, list(data), scorer=stub_scorer)["results"]), split="test3")
+    md = L.markdown("utility", doc)
+    assert md.startswith("# utility (real data, test3)") and f"H7{P3} on E5b" in md
+    assert f"H8{P3} (the verdict" in L.markdown("attacker", dict(_doc(results=a), split="test3"))
+
+
+def test_load_test_reads_test3_only_after_its_freeze_and_e5(tmp_path, monkeypatch):
+    from bench.arms import run as arms_run
+    from bench.realdata import score
+    seen = []
+
+    def load_split(split, datasets, rd, build, prefix=""):
+        seen.append(("load", split, prefix))
+        return {}, {ds: {"units": [{"mid": f"{ds}-1"}], "input_sha": "h"} for ds in datasets}
+
+    monkeypatch.setattr(score, "load_split", load_split)
+    monkeypatch.setattr(score, "read_spans", lambda path, units, sha: seen.append(path.relative_to(tmp_path).as_posix())
+                        or {})
+    monkeypatch.setattr(arms_run, "PRIVATE", tmp_path)
+    monkeypatch.setattr(L, "RESULTS", tmp_path / "res")
+    (tmp_path / "res").mkdir()
+    freezes = []
+
+    def check_freeze(freeze, prereg):
+        freezes.append((freeze.relative_to(L.ROOT).as_posix(), prereg.name))
+        return "sha-3"
+
+    monkeypatch.setattr(score, "check_freeze", check_freeze)
+    (tmp_path / "res" / "realdata_test2.json").write_text(json.dumps({"freeze_sha256": "sha-3"}))
+    with pytest.raises(SystemExit, match="realdata_test3.json is missing"):
+        L.load_test(["oasst1"], T3.spans, "test3")       # test-2's E5 does not open test-3
+    assert freezes == [("bench/realdata/test3/FREEZE.json", "HYPOTHESES_TEST3.md")] and seen == []
+    (tmp_path / "res" / "realdata_test3.json").write_text(json.dumps({"freeze_sha256": "sha-3"}))
+    L.load_test(["oasst1"], T3.spans, "test3")
+    assert seen[0] == ("load", "test3", "test3") and "gliner_pii/test3-oasst1.jsonl" in seen
+
+
 def test_load_test_reads_test2_only_after_the_freeze(tmp_path, monkeypatch):
     from bench.arms import run as arms_run
     from bench.realdata import score
@@ -654,6 +721,15 @@ def test_load_test_reads_test2_only_after_the_freeze(tmp_path, monkeypatch):
         L.load_test(["oasst1"], T2.spans, "test2")
     assert seen == []                                     # nothing of test-2 read before the freeze
     monkeypatch.setattr(score, "check_freeze", lambda *_a, **_k: "ok")
+    monkeypatch.setattr(L, "RESULTS", tmp_path / "res")
+    with pytest.raises(SystemExit, match="only after its sealed E5 result"):
+        L.load_test(["oasst1"], T2.spans, "test2")      # frozen, but E5'' not scored at that freeze
+    (tmp_path / "res").mkdir()
+    (tmp_path / "res" / "realdata_test2.json").write_text(json.dumps({"freeze_sha256": "other"}))
+    with pytest.raises(SystemExit, match="only after its sealed E5 result"):
+        L.load_test(["oasst1"], T2.spans, "test2")
+    assert seen == []
+    (tmp_path / "res" / "realdata_test2.json").write_text(json.dumps({"freeze_sha256": "ok"}))
     L.load_test(["oasst1"], T2.spans, "test2")
     assert seen[0] == ("load", "test2", "test2") and "gliner_pii/test2-oasst1.jsonl" in seen
     seen.clear()

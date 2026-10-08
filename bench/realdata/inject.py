@@ -50,6 +50,11 @@ conversations per dataset; ≥ 60 prompts per type), with its own seeds, the
 **evaluation** half of the identity pools (``identities.py``, PROMPT_FOR_OPUS_V3
 §5.3), batch names ``test2-inject-…``, and records ``rd-<dataset>-test2-NNNN``
 in ``bench/realdata/test2/<dataset>/test2.jsonl``.
+
+``--collection test3`` (PROMPT_FOR_OPUS_V4, ``HYPOTHESES_TEST3.md`` §5) keeps
+test2's prompt counts and pool half, with test3's own seeds, batch names and
+files, and one change: single-turn prompts are topped up to **100 per
+dataset for AGE** (``TYPE_TARGETS``) and 60 for every other type.
 """
 
 from __future__ import annotations
@@ -92,11 +97,16 @@ INJECT = BUILD / "inject"
 SUMMARY = ROOT / "bench" / "results" / "realdata_injection.json"
 # test2 (1.5x test1's test share): single, shift and multi by split, and single-turn prompts per type
 N_SINGLE_TEST2, N_SHIFT_TEST2, N_MULTI_TEST2, TARGET_TEST2 = {"test2": 300}, {"test2": 48}, {"test2": 60}, 60
+TYPE_TARGETS = {"test3": {"AGE": 100}}   # single-turn prompts per type above the target (HYPOTHESES_TEST3 §5)
 
 
 def sizes(coll: Collection) -> tuple:
+    """Single, shift and multi counts by split, and the per-type target; a
+    sealed collection has test2's sizes under its own split name."""
     if coll.prefix:
-        return N_SINGLE_TEST2, N_SHIFT_TEST2, N_MULTI_TEST2, TARGET_TEST2
+        (split,) = coll.splits
+        return ({split: N_SINGLE_TEST2["test2"]}, {split: N_SHIFT_TEST2["test2"]},
+                {split: N_MULTI_TEST2["test2"]}, TARGET_TEST2)
     return N_SINGLE, N_SHIFT, N_MULTI, I.TARGET
 
 
@@ -189,9 +199,10 @@ def plan(ds: str, units: Optional[Dict[str, dict]] = None, free: Optional[dict] 
     rows = [{"key": f"{ds}/{sid}", "dataset": ds, "source_id": sid, "split": units[sid]["split"], "kind": kind,
              "task": units[sid]["labels"][0]["task"], "shift": sid in shift, "words": units[sid]["words"][0]}
             for kind, ids in (("single", singles), ("multi", multis)) for sid in ids]
-    for kind, tgt in (("single", target), ("multi", 0)):
+    for kind, tgt, per in (("single", target, TYPE_TARGETS.get(coll.name)), ("multi", 0, None)):
         idx = [i for i, r in enumerate(rows) if r["kind"] == kind]
-        for i, types in zip(idx, I.assign_types([rows[i] for i in idx], coll.seed("inject-types", ds, kind), tgt)):
+        for i, types in zip(idx, I.assign_types([rows[i] for i in idx], coll.seed("inject-types", ds, kind), tgt,
+                                                per)):
             rows[i]["types"] = types
     named = sorted(r["source_id"] for r in rows if r["shift"] and "PERSON" in r["types"])
     json_ids = set(rng.sample(named, min(len(named), round(sum(n_shift.values()) * JSON_SHARE))))

@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from bench.realdata.common import RAW, RD, ROOT, SEED, SOURCES, file_sha256  # noqa: F401 (ROOT re-exported)
+from bench.realdata.common import RAW, RD, ROOT, SEALED, SEED, SOURCES, file_sha256  # noqa: F401 (ROOT re-exported)
 
 PATH = RD / "manifest.json"
 MD = RD / "MANIFEST.md"
@@ -68,6 +68,17 @@ _STEP_ORDER = [
 def _counts_table(counts: dict) -> str:
     keys = [k for k in _STEP_ORDER if k in counts] + sorted(k for k in counts if k not in _STEP_ORDER)
     return "\n".join(f"| `{k}` | {counts[k]:,} |" for k in keys)
+
+
+_ABOUT = {
+    "test2": ["The sealed second test (PROMPT_FOR_OPUS_V3 §5.2): drawn by `python -m bench.realdata.pull",
+              "--collection test2` from sources the first draw never touched (its ids skipped, its first turns",
+              "seeding the near-duplicate check), one split, files under"],
+    "test3": ["The sealed third test (PROMPT_FOR_OPUS_V4, `HYPOTHESES_TEST3.md`): drawn by",
+              "`python -m bench.realdata.pull --collection test3` from sources neither earlier draw touched",
+              "(test1's and test2's ids skipped, their first turns seeding the near-duplicate check), one split,",
+              "files under"],
+}
 
 
 def render(m: dict) -> str:
@@ -139,14 +150,10 @@ def render(m: dict) -> str:
         for k in sorted(d):
             if k not in ("pull_counts", "drawn", "seeds", "raw_files"):
                 out += [f"**{k}**", "", "```", json.dumps(d[k], indent=1, sort_keys=True), "```", ""]
-    for name in ("test2",):
+    for name in SEALED:
         if not m.get(name):
             continue
-        out += [f"## Collection `{name}`", "",
-                "The sealed second test (PROMPT_FOR_OPUS_V3 §5.2): drawn by `python -m bench.realdata.pull",
-                f"--collection {name}` from sources the first draw never touched (its ids skipped, its first turns",
-                "seeding the near-duplicate check), one split, files under",
-                f"`bench/realdata/{name}/<dataset>/`.", ""]
+        out += [f"## Collection `{name}`", "", *_ABOUT[name], f"`bench/realdata/{name}/<dataset>/`.", ""]
         for ds, d in m[name].get("datasets", {}).items():
             out += [f"### {name} / {ds}", ""]
             if "pull_counts" in d:
@@ -154,7 +161,7 @@ def render(m: dict) -> str:
             if "drawn" in d:
                 out += ["Drawn: " + ", ".join(f"{k} = {v}" for k, v in d["drawn"].items()), ""]
             if "seeds" in d:
-                out += ["Seeds (`common.derive_seed(dataset, kind, \"test2\")`): "
+                out += [f"Seeds (`common.derive_seed(dataset, kind, \"{name}\")`): "
                         + ", ".join(f"{k} = {v}" for k, v in d["seeds"].items()), ""]
             for k in sorted(d):
                 if k not in ("pull_counts", "drawn", "seeds", "raw_files"):

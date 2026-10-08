@@ -27,7 +27,9 @@ and types only.
 ``--collection test2`` labels the sealed second test the same way (same prompt,
 same pooled arms, run on ``test2-natural-<dataset>``) with batch names
 ``test2-labels-…`` and outputs under ``bench/realdata/test2/`` and
-``build/test2/labels/``.
+``build/test2/labels/``. ``--collection test3`` does the same for the sealed
+third test (``test3-natural-<dataset>``, pooled by the frozen test-2 detector;
+PROMPT_FOR_OPUS_V4). ``--human-check`` stays on test-1 and is not re-drawn.
 """
 
 from __future__ import annotations

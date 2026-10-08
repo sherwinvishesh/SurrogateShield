@@ -1,5 +1,6 @@
 """Phase 6: the live runs of the real-data benchmark, on the test split; with
-``--split test2``, V3 Phase 4 on the sealed second test (see "Test-2" below).
+``--split test2``, V3 Phase 4 on the sealed second test (see "Test-2" below);
+with ``--split test3``, PROMPT_FOR_OPUS_V4 on the sealed third test ("Test-3").
 
     .venv/bin/python -m bench.realdata.live estimate
     .venv/bin/python -m bench.realdata.live utility   --pilot 10
@@ -10,6 +11,7 @@
     .venv/bin/python -m bench.realdata.live utility   --split test2 --out bench/results/utility_realdata_test2.json
     .venv/bin/python -m bench.realdata.live multiturn --split test2 --out bench/results/multiturn_realdata_test2.json
     .venv/bin/python -m bench.realdata.live attacker  --split test2 --out bench/results/attacker_realdata_test2.json
+    .venv/bin/python -m bench.realdata.live estimate  --split test3        # likewise for test-3
 
 ``utility`` is E5b (injected slice) and the natural-slice utility cost;
 ``multiturn`` is E7b; ``attacker`` is E8, whose conversation condition reads
@@ -146,6 +148,15 @@ per-dataset groups are reported beside.
   the difference over messages is reported beside. H8'' is part of the GO
   rule.
 
+Test-3 (``--split test3``; PROMPT_FOR_OPUS_V4, ``HYPOTHESES_TEST3.md``): test-2's
+plan on test-3's rows (``PLANS["test3"]``), read only after
+``bench/realdata/test3/FREEZE.json`` and test-3's sealed E5 result
+(``bench/results/realdata_test3.json`` carrying that freeze's SHA-256), with
+the criteria for test-2 above unchanged, named H7''' and H8''', and one size
+changed: E7b runs **20** conversations per dataset (``Plan.multiturn_n``), so
+the live phase fits the unchanged 6,500-call ledger cap with a reserve. Seed
+names, ledger phases and the run directory end in ``test3``.
+
 Real text: natural-slice prompts go to the responder only; the judge and the
 attacker see injected-slice text only. Committed results hold counts, ids and
 prompt templates, never message text.
@@ -185,7 +196,9 @@ HISTORIES = "multiturn-ss-histories.jsonl"
 UTILITY_PER_DS = 100
 NATURAL_PER_DS = 50
 MULTITURN_PER_DS = 30
+MULTITURN_PER_DS_TEST3 = 20         # HYPOTHESES_TEST3 §5, "Live sizes"
 ATTACK_PER_DS = 60
+RESULTS = ROOT / "bench" / "results"
 
 UTILITY_ARMS = ("original", "ss", "presidio_default", "presidio_faker")
 ATTACK_ARMS = ("ss", "presidio_default", "presidio_faker", "llm_guard")
@@ -200,7 +213,8 @@ H7, H8 = "H7''", "H8''"                              # result keys
 @dataclass(frozen=True)
 class Plan:
     """What one live run compares, and on which split. ``test`` is the
-    real-data benchmark's Phase 6, unchanged; ``test2`` is V3 Phase 4."""
+    real-data benchmark's Phase 6, unchanged; ``test2`` is V3 Phase 4;
+    ``test3`` is test2's plan on the third collection (PROMPT_FOR_OPUS_V4)."""
     split: str                      # a score.RUNS key; arm texts come from its span files <split>-<dataset>
     utility: Tuple[str, ...]        # E5b responder arms, the original first
     judged: Tuple[str, ...]         # the pairwise judge compares ss with each, one call per prompt and arm
@@ -208,6 +222,9 @@ class Plan:
     multiturn: Tuple[str, ...]
     attack: Tuple[str, ...]
     placeholder: Tuple[str, ...]    # arms that write [TYPE]: the attacker reads them with the placeholder prompt
+    multiturn_n: int = MULTITURN_PER_DS   # E7b conversations per dataset
+    h7: str = H7                    # result keys of the criteria for test-2 on this split
+    h8: str = H8
 
     @property
     def spans(self) -> Tuple[str, ...]:
@@ -224,6 +241,9 @@ PLANS = {"test": Plan("test", UTILITY_ARMS, ("presidio_default",), ("ss", "presi
                       ATTACK_ARMS, ("presidio_default",)),
          "test2": Plan("test2", (*UTILITY_ARMS, "gliner_pii"), H7_AGAINST, ("ss", "presidio_default", "gliner_pii"),
                        ("ss", *H7_AGAINST), (*ATTACK_ARMS, "gliner_pii"), ("presidio_default", "gliner_pii"))}
+PLANS["test3"] = Plan("test3", PLANS["test2"].utility, PLANS["test2"].judged, PLANS["test2"].natural,
+                      PLANS["test2"].multiturn, PLANS["test2"].attack, PLANS["test2"].placeholder,
+                      MULTITURN_PER_DS_TEST3, "H7'''", "H8'''")
 TEST = PLANS["test"]
 
 # ── prompts (versioned; their hashes go into every result) ───────────────────
@@ -477,14 +497,19 @@ def load_test(datasets: Sequence[str] = DATASETS, arms: Sequence[str] = SPAN_ARM
               split: str = "test") -> Dict[str, dict]:
     """Per dataset: ``units`` by message id and each arm's checked span rows
     from the scored run *split*. A sealed collection's rows are read only
-    after the freeze, as its scorer reads them."""
+    after the freeze, as its scorer reads them, and after its sealed E5
+    result (``realdata_<split>.json``) records that freeze."""
     from bench.arms.run import PRIVATE
     from bench.realdata import score
     from bench.realdata.common import COLLECTIONS
     data_split, coll_name, _role = score.RUNS[split]
     coll = COLLECTIONS[coll_name]
-    if coll.prefix:
-        score.check_freeze()
+    sealed = score.seal(coll)
+    if sealed:
+        e5 = RESULTS / f"realdata_{split}.json"
+        if not e5.exists() or json.loads(e5.read_text()).get("freeze_sha256") != sealed:
+            raise SystemExit(f"{score.rel(e5)} is missing or not scored at this freeze: the live phase runs on "
+                             f"{split} only after its sealed E5 result")
     _hashes, loaded = score.load_split(data_split, datasets, coll.rd, coll.build, prefix=coll.prefix)
     out = {}
     for ds in datasets:
@@ -542,7 +567,8 @@ def natural_sample(data: dict, ds: str, n: int = NATURAL_PER_DS, plan: Plan = TE
     return random.Random(derive_seed(plan.tag("live-natural"), ds)).sample(mids, min(n, len(mids)))
 
 
-def multiturn_sample(data: dict, ds: str, n: int = MULTITURN_PER_DS, plan: Plan = TEST) -> List[str]:
+def multiturn_sample(data: dict, ds: str, n: Optional[int] = None, plan: Plan = TEST) -> List[str]:
+    n = plan.multiturn_n if n is None else n
     convs = sorted({u["conv"] for u in data[ds]["units"].values() if "multi" in u["slices"]})
     return random.Random(derive_seed(plan.tag("live-multiturn"), ds)).sample(convs, min(n, len(convs)))
 
@@ -787,7 +813,7 @@ def utility(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opt
             res["H3"]["supported"] = all(res["H3"].values())
         else:
             res["judges"] = judges
-            res[H7] = h7_utility(res)
+            res[plan.h7] = h7_utility(res)
         e5b[g] = res
     rows = [{"dataset": ds, "id": mid, "arm": arm, "status": replies[(ds, mid, arm)]["status"],
              "bertscore": f1.get((ds, mid, arm)),
@@ -1112,7 +1138,7 @@ def multiturn(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: O
                          "consistency_above_presidio_faker": bool(cons.get("ci95") and cons["ci95"][0] > 0)}
             res["H4"]["supported"] = all(res["H4"].values())
         else:
-            res[H7] = h7_multiturn(res)
+            res[plan.h7] = h7_multiturn(res)
         out[g] = res
     histories = {f"{ds}/{conv}": done[(ds, conv, "ss")]["turns"] for ds, conv in convs
                  if (ds, conv, "ss") in done and scored[(ds, conv, "ss")]["complete"]}
@@ -1450,7 +1476,7 @@ def attack(run: Run, data: dict, datasets: Sequence[str] = DATASETS, pilot: Opti
                 res["H5-conv"] = {"supported": res["ss-conversation"]["exact"]["k"] == 0,
                                   "exact": res["ss-conversation"]["exact"]}
         else:
-            res[H8] = h8(res, rows, g, plan)
+            res[plan.h8] = h8(res, rows, g, plan)
         out[g] = res
     return {"sample": sample, "results": out, "rows": rows + conv_rows,
             "unparsed": {a: sum(1 for k, r in replies.items() if k[2] == a and _parse(r) is None) for a in plan.attack}}
@@ -1535,7 +1561,7 @@ def _flags(h: dict) -> str:
 
 def markdown_plan(kind: str, doc: dict, plan: Plan) -> List[str]:
     """The tables of a run other than test-1's: every arm of its plan, and H7'' / H8''."""
-    lines = []
+    lines, H7, H8 = [], plan.h7, plan.h8            # the split's result keys
     if kind == "utility":
         others = [a for a in plan.utility if a not in ("original", "ss")]
         lines += ["| group | n | BERTScore ss | ss raw | " + " | ".join(others) + " | "
@@ -1669,7 +1695,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("what", choices=("estimate", "utility", "multiturn", "attacker"))
     ap.add_argument("--split", choices=sorted(PLANS), default="test",
-                    help="test-1's test split, or the sealed test-2 (only after the freeze)")
+                    help="test-1's test split, or a sealed test (test2, test3: only after its freeze)")
     ap.add_argument("--run", help="cache directory under experiment/realdata (default: main for test, else the split)")
     ap.add_argument("--pilot", type=int, help="first N rows only; writes no result")
     ap.add_argument("--out", type=Path)

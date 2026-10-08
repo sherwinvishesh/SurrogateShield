@@ -79,6 +79,35 @@ def test_test2_is_refused_once_the_tree_moves_from_the_freeze(tmp_path, tree):
     assert score.check_freeze(freeze, hyp)
 
 
+def test_test3_freezes_apart_and_never_touches_test2s_freeze(tmp_path, tree, monkeypatch, capsys):
+    import dataclasses
+    from bench.realdata.common import COLLECTIONS
+    hyp2, _cfgs = tree
+    hyp3, freeze2, freeze3 = tmp_path / "HYPOTHESES_TEST3.md", tmp_path / "FREEZE.json", tmp_path / "t3" / "FREEZE.json"
+    hyp3.write_text("H1''' ...\n")
+    freeze2.write_text('{"hypotheses_sha256": "test-2, frozen earlier"}\n')
+    before = freeze2.read_bytes()
+    for name, f, h in (("test2", freeze2, hyp2), ("test3", freeze3, hyp3)):
+        monkeypatch.setitem(COLLECTIONS, name, dataclasses.replace(COLLECTIONS[name], freeze=f, hypotheses=h))
+    monkeypatch.setattr(F, "git_state", lambda: {"commit": "d" * 40, "modified": []})
+    monkeypatch.setattr(F, "untracked", lambda: [])
+    with pytest.raises(SystemExit, match="does not exist"):
+        F.main(["--collection", "test3", "--check"])
+    assert F.main(["--collection", "test3"]) == 0
+    doc = json.loads(freeze3.read_text())
+    assert doc["commit"] == "d" * 40 and doc["hypotheses_sha256"] == file_sha256(hyp3) != file_sha256(hyp2)
+    assert doc["note"] == F.NOTES["test3"] and "test-3" in doc["note"] and "PROMPT_FOR_OPUS_V4" in doc["note"]
+    assert freeze2.read_bytes() == before                                     # test-2's freeze is history
+    with pytest.raises(SystemExit, match="frozen once"):
+        F.main(["--collection", "test3"])
+    capsys.readouterr()
+    assert F.main(["--collection", "test3", "--check"]) == 0 and "frozen tree: ok" in capsys.readouterr().out
+    assert score.check_freeze(freeze3, hyp3) == file_sha256(freeze3)
+    assert score.seal(COLLECTIONS["test3"]) == file_sha256(freeze3)
+    with pytest.raises(SystemExit, match="does not match"):
+        score.seal(COLLECTIONS["test2"])                                     # test-2 still reads its own
+
+
 def test_the_tagger_must_be_installed_with_its_pinned_weights(tmp_path, monkeypatch):
     folder = tmp_path / "models" / "tagger-x"
     folder.mkdir(parents=True)

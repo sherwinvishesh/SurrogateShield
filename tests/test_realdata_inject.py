@@ -273,18 +273,27 @@ def test_plan_refuses_when_a_split_has_too_few_bases(synthetic):
         J.plan("oasst1", units, {**free, "single": {"adjudicated": free["single"]["adjudicated"][60:]}})
 
 
-@pytest.fixture(scope="module")
-def synthetic2():
+def _sealed_units(split):
     units, single, multi_ = {}, [], []
     for i in range(480):
         kind = "single" if i < 400 else "multi"
         n = 3 if kind == "multi" else 1
         turns = [" ".join((WORDS * 6)[(i + k) % 5:][: 20 + (i * 7 + k) % 50]) + "?" for k in range(n)]
         sid = f"t{i:03d}"
-        units[sid] = {"source_id": sid, "split": "test2", "kind": kind, "words": [len(t.split()) for t in turns],
+        units[sid] = {"source_id": sid, "split": split, "kind": kind, "words": [len(t.split()) for t in turns],
                       "turns": turns, "labels": [dict(LAB, task=("qa", "coding", "advice")[i % 3]) for _ in turns]}
         (single if kind == "single" else multi_).append(sid)
     return units, {"single": {"adjudicated": single}, "multi": {"adjudicated": multi_}}
+
+
+@pytest.fixture(scope="module")
+def synthetic2():
+    return _sealed_units("test2")
+
+
+@pytest.fixture(scope="module")
+def synthetic3():
+    return _sealed_units("test3")
 
 
 def test_test2_plan_has_its_own_sizes_seeds_and_only_evaluation_pool_identities(synthetic2):
@@ -305,12 +314,43 @@ def test_test2_plan_has_its_own_sizes_seeds_and_only_evaluation_pool_identities(
     assert t2.seed("inject", "oasst1") != common.derive_seed("inject", "oasst1")
 
 
+def test_test3_plan_has_test2s_sizes_its_own_seeds_and_an_age_target_of_100(synthetic2, synthetic3):
+    t2, t3 = common.COLLECTIONS["test2"], common.COLLECTIONS["test3"]
+    units, free = synthetic3
+    a = J.plan("oasst1", units, free, coll=t3)
+    assert json.dumps(a, sort_keys=True) == json.dumps(J.plan("oasst1", units, free, coll=t3), sort_keys=True)
+    single = [r for r in a if r["kind"] == "single"]
+    assert len(single) == 300 and len(a) == 360 and {r["split"] for r in a} == {"test3"}
+    assert sum(r["shift"] for r in single) == 48
+    assert sum("AGE" in r["types"] for r in single) >= 100 == J.TYPE_TARGETS["test3"]["AGE"]
+    for t in I.TYPES:
+        assert sum(t in r["types"] for r in single) >= J.TARGET_TEST2, t
+    assert all(r["identity"]["pool"] == "eval" for r in a)
+    assert all(I.token_half(w) == "eval" for r in a for w in r["identity"]["pool_tokens"])
+    assert len({c.seed("inject", "oasst1") for c in (common.TEST1, t2, t3)}) == 3
+    a2 = J.plan("oasst1", *synthetic2, coll=t2)
+    assert sum("AGE" in r["types"] for r in a2 if r["kind"] == "single") < 100      # test-2's plan is unchanged
+    assert [r["identity"] for r in a] != [r["identity"] for r in a2]
+
+
+def test_assign_types_meets_a_per_type_target():
+    rows = [{"task": ("qa", "coding", "advice")[i % 3], "words": 40} for i in range(300)]
+    base = I.assign_types(rows, 7, target=20)
+    more = I.assign_types(rows, 7, target=20, targets={"AGE": 90})
+    assert sum("AGE" in o for o in more) >= 90 > sum("AGE" in o for o in base)
+    assert all(sum(t in o for o in more) >= 20 for t in I.TYPES)
+    assert I.assign_types(rows, 7, target=20, targets={}) == base
+
+
 def test_collections_pick_their_sizes_pool_and_summary():
-    t1, t2 = common.TEST1, common.COLLECTIONS["test2"]
+    t1, t2, t3 = common.TEST1, common.COLLECTIONS["test2"], common.COLLECTIONS["test3"]
     assert J.sizes(t1) == (J.N_SINGLE, J.N_SHIFT, J.N_MULTI, I.TARGET)
     assert J.sizes(t2) == ({"test2": 300}, {"test2": 48}, {"test2": 60}, 60)
-    assert J.pool_of(t1) is None and J.pool_of(t2) == "eval"
+    assert J.sizes(t3) == ({"test3": 300}, {"test3": 48}, {"test3": 60}, 60)
+    assert J.pool_of(t1) is None and J.pool_of(t2) == J.pool_of(t3) == "eval"
     assert J.summary_file(t1) == J.SUMMARY and J.summary_file(t2).name == "realdata_injection_test2.json"
+    assert J.summary_file(t3).name == "realdata_injection_test3.json"
+    assert J.TYPE_TARGETS == {"test3": {"AGE": 100}}
 
 
 def test_avoid_values_skip_ones_without_two_letters_or_digits():

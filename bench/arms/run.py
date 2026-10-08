@@ -3,6 +3,7 @@ text-free copies of their spans.
 
     .venv/bin/python -m bench.arms.run --natural                       # every arm, the three natural pools
     .venv/bin/python -m bench.arms.run --natural --collection test2    # ... of the sealed second test
+    .venv/bin/python -m bench.arms.run --natural --collection test3 --arms ss presidio_default ...  # third
     .venv/bin/python -m bench.arms.run --in F.jsonl --name NAME [--arms ss llm_guard]
     .venv/bin/python -m bench.arms.run --record                        # arm configs -> manifest only
 
@@ -17,7 +18,9 @@ system refused to send carries ``refused: 1``. Both run offline. Each arm's
 configuration (versions, model revisions, thresholds) is then recorded under
 ``arms`` in ``bench/realdata/manifest.json``; two runs of one arm with
 different configurations stop the record, unless the older ones are listed in
-``HISTORICAL`` with the reason they are kept.
+``HISTORICAL`` with the reason they are kept. A sealed collection's natural
+run (its silver labels' pooling run) also records, under the collection in the
+manifest, the commit and the SS detection config it ran at (``pooling``).
 """
 
 from __future__ import annotations
@@ -53,7 +56,7 @@ NATURAL = {f"natural-{ds}": ROOT / "bench" / "realdata" / "build" / ds / "messag
 
 def natural(collection: str = "test1") -> Dict[str, Path]:
     """Span-file name → arm input for the natural pools of *collection*
-    (``natural-<ds>`` for test1, ``test2-natural-<ds>`` for test2)."""
+    (``natural-<ds>`` for test1, ``<name>-natural-<ds>`` for a sealed one)."""
     from bench.realdata.common import COLLECTIONS
     coll = COLLECTIONS[collection]
     return {coll.tag(f"natural-{ds}"): coll.build / ds / "messages.jsonl" for ds in ("oasst1", "sharegpt", "wildchat")}
@@ -120,6 +123,10 @@ HISTORICAL = {
        "were made from them" for name in ("dev", "test", "natural", "test2-natural") for ds in _DS},
     **{("ss", f"devlarge-{ds}"): "V3 Checkpoint A, the SS before the tagger; realdata_devlarge.json "
        "was scored from them" for ds in _DS},
+    **{("ss", f"test2-{ds}"): "the frozen test-2 SS (FREEZE.json, e2c8fa5); test-2's scores "
+       "(realdata_test2.json) were made from them" for ds in _DS},
+    **{("ss", f"test3-natural-{ds}"): "the frozen test-2 SS (FREEZE.json, e2c8fa5); the silver-label "
+       "candidates of test-3's natural pools were made from them" for ds in _DS},
 }
 
 
@@ -158,6 +165,24 @@ def record_arms(public: Path = PUBLIC, manifest_path: Optional[Path] = None,
     return arms
 
 
+def record_pooling(collection: str, arms: List[str], public: Path = PUBLIC,
+                   manifest_path: Optional[Path] = None, git: Optional[dict] = None) -> dict:
+    """The commit, the arms and SS's detection config hash a sealed
+    collection's natural pools were run with: the silver labels' candidates."""
+    from bench.realdata import manifest
+    from bench.realdata.common import git_state
+    git = git or git_state()
+    hashes = sorted({json.loads((public / "ss" / f"{name}.jsonl.meta.json").read_text())["config"][
+        "detection_config_hash"] for name in natural(collection)}) if "ss" in arms else []
+    rec = {"commit": git["commit"], "clean": not git["modified"], "arms": list(arms),
+           "ss_detection_config_hash": hashes[0] if len(hashes) == 1 else hashes or None}
+    path = manifest_path or manifest.PATH
+    m = manifest.load(path)
+    m.setdefault(collection, {})["pooling"] = rec
+    manifest.save(m, path, manifest.MD if manifest_path is None else None)
+    return rec
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--in", dest="src", type=Path)
@@ -165,7 +190,7 @@ def main(argv=None) -> int:
     ap.add_argument("--natural", action="store_true", help="the three rebuilt natural pools")
     ap.add_argument("--arms", nargs="*", choices=list(ARMS), default=list(ARMS))
     ap.add_argument("--record", action="store_true", help="only record arm configurations in the manifest")
-    ap.add_argument("--collection", choices=("test1", "test2"), default="test1", help="with --natural")
+    ap.add_argument("--collection", choices=("test1", "test2", "test3"), default="test1", help="with --natural")
     args = ap.parse_args(argv)
     if args.record:
         print("recorded:", ", ".join(record_arms()))
@@ -182,6 +207,10 @@ def main(argv=None) -> int:
             print(f"{name:18} {arm:22} messages {s['messages']:4}  with edits {s['with_edits']:4}  "
                   f"edits {s['edits']:5}  refused {s['refused']}  load {s['load_seconds']:5} s  median {s['median_ms']} ms", flush=True)
     print("recorded:", ", ".join(record_arms()))
+    if args.natural and args.collection == "test3":
+        rec = record_pooling(args.collection, args.arms)
+        print(f"pooling recorded: {rec['commit'][:12]}{'' if rec['clean'] else ' (tree not clean)'}, "
+              f"ss config {str(rec['ss_detection_config_hash'])[:16]}")
     return 0
 
 

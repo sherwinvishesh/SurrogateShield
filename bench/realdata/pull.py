@@ -3,6 +3,7 @@
     .venv/bin/python -m bench.realdata.pull            # all three datasets
     .venv/bin/python -m bench.realdata.pull oasst1     # one
     .venv/bin/python -m bench.realdata.pull --collection test2   # the sealed second test
+    .venv/bin/python -m bench.realdata.pull --collection test3   # the sealed third test
 
 Reads only the pinned files under ``bench/realdata/raw/`` (no network).
 Writes, per dataset:
@@ -32,6 +33,15 @@ as taken: its ids are skipped and its first turns seed the near-duplicate
 check, so no test2 prompt is a test1 prompt or a near copy of one. Everything
 lands in one split, ``test2``, under ``bench/realdata/test2/<dataset>/`` and
 ``build/test2/<dataset>/``.
+
+``--collection test3`` (PROMPT_FOR_OPUS_V4, ``HYPOTHESES_TEST3.md`` §5) is drawn
+the same way at the same size, with seeds ``derive_seed(..., "test3")``, after
+marking every source of **both** committed earlier pools (test1's, then
+test2's) as taken (counts ``taken_by_test1``, ``taken_by_test2``). The OASST1
+pool rule: if OASST1 cannot supply 600 single-turn prompts after exact and
+near-duplicate removal, test3 takes what it has down to a floor of 400 and
+records the target, the floor and the count drawn; the other datasets are not
+reduced to match, and a draw below the floor still fails.
 """
 
 from __future__ import annotations
@@ -41,7 +51,7 @@ import random
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -58,7 +68,8 @@ MAX_TURNS = 3
 DEV_FRACTION = 0.2
 NEAR_DUP = 95
 N_SINGLE_TEST2 = 600          # 1.5x test1's test share (400 + 80), PROMPT_FOR_OPUS_V3 §6 Q1
-N_MULTI_TEST2 = 120
+N_MULTI_TEST2 = 120           # test3 draws the same sizes (HYPOTHESES_TEST3 §5)
+FLOOR_SINGLE = {("test3", "oasst1"): 400}    # HYPOTHESES_TEST3 §5, "OASST1 pool rule": only if carriers run out
 
 
 def filter_candidates(cands, english_check: bool, counts: Counter) -> Tuple[List[dict], List[dict]]:
@@ -95,8 +106,10 @@ def dedup_exact(cands: List[dict], counts: Counter, key: str) -> List[dict]:
 
 
 def draw(cands: List[dict], n: int, rng: random.Random, taken_ids: set,
-         taken_norm: List[str], counts: Counter, key: str) -> List[dict]:
-    """Walk a seeded shuffle; accept until *n*, skipping near duplicates."""
+         taken_norm: List[str], counts: Counter, key: str, floor: Optional[int] = None) -> List[dict]:
+    """Walk a seeded shuffle; accept until *n*, skipping near duplicates.
+    With a *floor*, a draw that runs out of candidates keeps what it has if
+    that is at least *floor* (the target and floor go into *counts*)."""
     from rapidfuzz import fuzz, process
     order = list(cands)
     rng.shuffle(order)
@@ -113,15 +126,18 @@ def draw(cands: List[dict], n: int, rng: random.Random, taken_ids: set,
         out.append(c)
         taken_ids.add(c["source_id"])
         taken_norm.append(norm)
-    if len(out) < n:
-        raise SystemExit(f"only {len(out)} {key} prompts left after filtering (need {n})")
+    if floor is not None:
+        counts[f"{key}_target"], counts[f"{key}_floor"] = n, floor
+    if len(out) < (n if floor is None else min(n, floor)):
+        raise SystemExit(f"only {len(out)} {key} prompts left after filtering (need {n}"
+                         + (f", floor {floor})" if floor is not None else ")"))
     return out
 
 
 def split(rows: List[dict], dataset: str, kind: str, coll: Collection = TEST1) -> None:
-    if coll.splits == ("test2",):
+    if len(coll.splits) == 1:                     # a sealed collection: one split, its own name
         for r in rows:
-            r["split"] = "test2"
+            r["split"] = coll.splits[0]
         return
     ids = sorted(r["source_id"] for r in rows)
     dev = set(random.Random(derive_seed(dataset, kind, "split")).sample(ids, round(len(ids) * DEV_FRACTION)))
@@ -129,20 +145,21 @@ def split(rows: List[dict], dataset: str, kind: str, coll: Collection = TEST1) -
         r["split"] = "dev" if r["source_id"] in dev else "test"
 
 
-def taken_before(dataset: str, cands: List[dict], rd: Path = RD) -> Tuple[set, List[str]]:
-    """The committed test1 pool's source ids and normalised first turns (from
-    the filtered candidates, so no private file is needed)."""
-    ids = {r["source_id"] for r in read_jsonl(rd / dataset / "pool.jsonl")}
+def taken_before(dataset: str, cands: List[dict], rd: Path = RD, name: str = "test1") -> Tuple[set, List[str]]:
+    """The committed pool of collection *name* (under *rd*, laid out as
+    ``bench/realdata/``): its source ids and normalised first turns (from the
+    filtered candidates, so no private file is needed)."""
+    ids = {r["source_id"] for r in read_jsonl(rd / COLLECTIONS[name].rd.relative_to(RD) / dataset / "pool.jsonl")}
     first = {c["source_id"]: c["turns"][0] for c in cands if c["source_id"] in ids}
     if set(first) != ids:
-        raise SystemExit(f"{dataset}: {len(ids - set(first))} test1 sources are not among the candidates; "
+        raise SystemExit(f"{dataset}: {len(ids - set(first))} {name} sources are not among the candidates; "
                          "the raw files or filters changed")
     return set(ids), [normalise(first[i]) for i in sorted(ids)]
 
 
 def sample(dataset: str, raw: Path = RAW, coll: Collection = TEST1, prior: Path = RD) -> Tuple[List[dict], Counter]:
     """The draw of *coll*; a later collection first takes out every source of
-    the test1 pool committed under *prior*."""
+    each earlier collection's pool (``coll.prior``) committed under *prior*."""
     counts: Counter = Counter()
     cands = list(ITERATORS[dataset](raw, counts))
     single, multi = filter_candidates(cands, english_check=(dataset == "sharegpt"), counts=counts)
@@ -150,14 +167,16 @@ def sample(dataset: str, raw: Path = RAW, coll: Collection = TEST1, prior: Path 
     single = dedup_exact(single, counts, "single")
     taken_ids: set = set()
     taken_norm: List[str] = []
-    if coll.prefix:
-        taken_ids, taken_norm = taken_before(dataset, cands, prior)
-        counts["taken_by_test1"] = len(taken_ids)
+    for name in coll.prior:
+        ids, norm = taken_before(dataset, cands, prior, name)
+        counts[f"taken_by_{name}"] = len(ids)
+        taken_ids |= ids
+        taken_norm += norm
     n_single, n_multi = (N_SINGLE_TEST2, N_MULTI_TEST2) if coll.prefix else (N_SINGLE, N_MULTI)
     picked_multi = draw(multi, n_multi, random.Random(coll.seed(dataset, "multi")),
                         taken_ids, taken_norm, counts, "multi")
     picked_single = draw(single, n_single, random.Random(coll.seed(dataset, "single")),
-                         taken_ids, taken_norm, counts, "single")
+                         taken_ids, taken_norm, counts, "single", FLOOR_SINGLE.get((coll.name, dataset)))
     rows = []
     for kind, picked in (("multi", picked_multi), ("single", picked_single)):
         kind_rows = []

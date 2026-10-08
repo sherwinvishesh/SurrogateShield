@@ -51,3 +51,25 @@ def test_a_shared_word_fails_the_report(tmp_path):
                   plan=_plan) == 1
     (train,) = json.loads(out.read_text())["training"].values()
     assert train["overlap_with_test2"] == 1 and train["other_half"] == 1
+
+
+def _plan23(ds, coll):
+    off = {"test2": 1000, "test3": 7000}[coll.name]
+    return [{"identity": _ident(off + 100 * len(ds) + i, "eval")} for i in range(15)]
+
+
+def test_test2_and_test3_are_each_checked_against_the_training_pool(tmp_path, capsys):
+    out = tmp_path / "pools.json"
+    assert P.main(["--data", str(_train_file(tmp_path)), "--datasets", "oasst1", "--collection", "test2", "test3",
+                   "--out", str(out)], plan=_plan23) == 0
+    doc = json.loads(out.read_text())
+    (train,) = doc["training"].values()
+    assert doc["ok"] and train["overlap_with_test2"] == train["overlap_with_test3"] == 0
+    assert doc["test2"]["all"]["sha256"] != doc["test3"]["all"]["sha256"] and doc["test3"]["all"]["other_half"] == 0
+    printed = capsys.readouterr().out
+    assert "0 shared with test-2's" in printed and "0 shared with test-3's" in printed
+    eval_word = _plan23("oasst1", P.COLLECTIONS["test3"])[0]["identity"]["pool_tokens"][0]
+    assert P.main(["--data", str(_train_file(tmp_path, [eval_word])), "--datasets", "oasst1",
+                   "--collection", "test2", "test3", "--out", str(out)], plan=_plan23) == 1
+    (train,) = json.loads(out.read_text())["training"].values()
+    assert train["overlap_with_test3"] >= 1 and not json.loads(out.read_text())["ok"]

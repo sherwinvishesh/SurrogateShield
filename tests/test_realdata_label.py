@@ -202,3 +202,6 @@ def test_test2_labels_and_prevalence_go_to_their_own_files():
     assert L.labels_dir(TEST1) == L.LABELS and L.prevalence_file(TEST1) == L.PREVALENCE
     assert L.labels_dir(t2) == t2.build / "labels" != L.LABELS
     assert L.prevalence_file(t2).name == "realdata_prevalence_test2.json"
+    t3 = COLLECTIONS["test3"]
+    assert L.labels_dir(t3) == t3.build / "labels" not in (L.LABELS, L.labels_dir(t2))
+    assert L.prevalence_file(t3).name == "realdata_prevalence_test3.json"

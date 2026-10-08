@@ -397,6 +397,34 @@ def test_test2_needs_the_freeze_and_reads_its_own_collection(tmp_path):
         S.check_frozen([DS], "test2", {k[len("test2/"):]: v for k, v in frozen.items()}, rd, "test2")
 
 
+def test_test3_is_sealed_by_its_own_freeze_not_test2s(tmp_path, monkeypatch):
+    import dataclasses
+    rd, build, spans, frozen = make_bench(tmp_path, "test3", prefix="test3")
+    hyp2, freeze2 = tmp_path / "HYPOTHESES_TEST2.md", tmp_path / "FREEZE.json"
+    hyp3, freeze3 = tmp_path / "HYPOTHESES_TEST3.md", tmp_path / "test3" / "FREEZE.json"
+    hyp2.write_text("H1'' ...\n")
+    hyp3.write_text("H1''' ...\n")
+    freeze2.write_text(json.dumps({"hypotheses_sha256": file_sha256(hyp2)}))      # test-2 frozen: not enough
+    for name, f, h in (("test2", freeze2, hyp2), ("test3", freeze3, hyp3)):
+        monkeypatch.setitem(S.COLLECTIONS, name, dataclasses.replace(S.COLLECTIONS[name], freeze=f, hypotheses=h))
+    assert S.RUNS["test3"] == ("test3", "test3", "the paper's detection numbers (sealed third test)")
+    assert S.seal(S.COLLECTIONS["test1"]) is None and S.PRIMES == {"test2": "''", "test3": "'''"}
+    kw = dict(rd=rd, build=build, frozen=frozen, runner=_runner(spans), spans=spans, log=lambda *_: None,
+              out=tmp_path / "res" / "realdata_test3.json")
+    with pytest.raises(SystemExit, match="only after the freeze"):
+        S.score_split("test3", [DS], ("ss", "presidio_default"), **kw)
+    freeze3.parent.mkdir()
+    freeze3.write_text(json.dumps({"hypotheses_sha256": file_sha256(hyp2)}))       # test-2's hypotheses: refused
+    with pytest.raises(SystemExit, match="does not match"):
+        S.score_split("test3", [DS], ("ss", "presidio_default"), **kw)
+    freeze3.write_text(json.dumps({"hypotheses_sha256": file_sha256(hyp3)}))
+    doc = S.score_split("test3", [DS], ("ss", "presidio_default"), **kw)
+    assert doc["freeze_sha256"] == file_sha256(freeze3) != file_sha256(freeze2) and doc["collection"] == "test3"
+    assert sorted(doc["frozen"]) == [f"test3/{DS}/labels.jsonl", f"test3/{DS}/pool.jsonl", f"test3/{DS}/test3.jsonl"]
+    assert (spans / "ss" / "test3-oasst1.jsonl").exists()
+    assert not rw.lint(S.read_jsonl(rd / DS / "test3.jsonl"))
+
+
 def test_commit_note_flags_a_dirty_tree():
     from bench.realdata.common import commit_note
     assert commit_note(None) == ""

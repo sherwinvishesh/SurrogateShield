@@ -312,3 +312,21 @@ def test_test2_is_sealed_until_the_freeze_and_reads_its_own_collection(tmp_path)
     assert doc["results"][DS]["injected"]["none"]["leak"] == S.rate(0, 3) and doc["H6"][DS]["H6"]
     assert (spans / "ss_ablate" / f"test2-{DS}").is_dir()
     assert doc["command"].endswith("--split test2 --out " + S.rel(kw["out"]))
+
+
+def test_test3_is_sealed_until_its_freeze_and_reads_its_own_collection(tmp_path):
+    rd, build, spans, frozen = make_bench(tmp_path, "test3", prefix="test3")
+    hyp, freeze = tmp_path / "HYPOTHESES_TEST3.md", tmp_path / "test3" / "FREEZE.json"
+    hyp.write_text("H9 ...\n")
+    kw = dict(out=tmp_path / "res" / "realdata_regex_ablation_test3.json", rd=rd, build=build, frozen=frozen,
+              runner=_runner(spans, [("Python", "x")]), spans=spans, log=lambda *_: None, freeze=freeze, prereg=hyp)
+    with pytest.raises(SystemExit, match="only after the freeze"):
+        E.ablate_split("test3", [DS], **kw)
+    assert not (spans / "ss_ablate").exists()
+    freeze.parent.mkdir()
+    freeze.write_text(json.dumps({"hypotheses_sha256": file_sha256(hyp)}))
+    doc = E.ablate_split("test3", [DS], **kw)
+    assert doc["freeze_sha256"] == file_sha256(freeze) and doc["role"] == "the paper's robustness numbers"
+    assert sorted(doc["frozen"]) == [f"test3/{DS}/labels.jsonl", f"test3/{DS}/pool.jsonl", f"test3/{DS}/test3.jsonl"]
+    assert (spans / "ss_ablate" / f"test3-{DS}").is_dir()
+    assert doc["command"].endswith("--split test3 --out " + S.rel(kw["out"]))

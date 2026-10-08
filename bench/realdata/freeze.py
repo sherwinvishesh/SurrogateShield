@@ -2,6 +2,7 @@
 
     PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.freeze            # writes FREEZE.json
     PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.freeze --check    # is the tree still the frozen one?
+    ... -m bench.realdata.freeze --collection test3 [--check]    # test-3's: bench/realdata/test3/FREEZE.json
 
 ``bench/realdata/FREEZE.json`` records the commit (of a clean tree, with
 nothing untracked under ``python-library/`` or ``bench/``), the library code
@@ -15,6 +16,10 @@ freeze. ``score.check_freeze`` refuses test-2 unless the hypotheses,
 and, when FREEZE.json records them, the code, the default config, the
 config files and the external samples are still the frozen ones;
 ``--check`` prints the same.
+
+``--collection test3`` (PROMPT_FOR_OPUS_V4) writes or checks test-3's own
+freeze, ``bench/realdata/test3/FREEZE.json``, with ``HYPOTHESES_TEST3.md``'s
+hash; it never reads or touches test-2's ``FREEZE.json``.
 """
 
 from __future__ import annotations
@@ -26,11 +31,15 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from bench.arms import gliner_pii_tuned as tuned
-from bench.realdata.common import file_sha256, git_state
+from bench.realdata.common import COLLECTIONS, file_sha256, git_state
 from bench.realdata.score import FREEZE, HYPOTHESES, RD, rel
 
 CONFIGS = RD / "configs"
 EXTERNAL = RD / "external"
+NOTES = {"test2": "test-2 is scored at this commit, once: E5'', E6'', E7'', E9, attribution, the external "
+                  "benchmark and E10 (PROMPT_FOR_OPUS_V3 Phase 3)",
+         "test3": "test-3 is scored at this commit, once: E5''', E6''', E7''', E9''', attribution, "
+                  "the external benchmark, E10''', foreign and the live phase (PROMPT_FOR_OPUS_V4)"}
 
 
 def untracked() -> List[str]:
@@ -88,7 +97,7 @@ def differences(doc: dict, now: Optional[dict] = None, hypotheses: Path = HYPOTH
 
 
 def freeze(out: Path = FREEZE, configs: Optional[Path] = None, hypotheses: Path = HYPOTHESES,
-           git: Optional[dict] = None, today: Optional[str] = None) -> dict:
+           git: Optional[dict] = None, today: Optional[str] = None, note: str = NOTES["test2"]) -> dict:
     if out.exists():
         raise SystemExit(f"{rel(out)} exists: the detector is frozen once")
     git = git or {**git_state(), "untracked": untracked()}
@@ -97,24 +106,25 @@ def freeze(out: Path = FREEZE, configs: Optional[Path] = None, hypotheses: Path 
         raise SystemExit(f"the tree is not clean ({', '.join(dirty[:5])}): commit first")
     from surrogateshield.core.detection import config as C
     doc = {"commit": git["commit"], "date": today or datetime.date.today().isoformat(),
-           **current(configs, hypotheses), "models": models(C.benchmark()),
-           "note": "test-2 is scored at this commit, once: E5'', E6'', E7'', E9, attribution, the external "
-                   "benchmark and E10 (PROMPT_FOR_OPUS_V3 Phase 3)"}
+           **current(configs, hypotheses), "models": models(C.benchmark()), "note": note}
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
     return doc
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--check", action="store_true", help="compare the tree with FREEZE.json; write nothing")
+    ap.add_argument("--check", action="store_true", help="compare the tree with the freeze; write nothing")
+    ap.add_argument("--collection", choices=[n for n, c in COLLECTIONS.items() if c.freeze], default="test2")
     a = ap.parse_args(argv)
+    coll = COLLECTIONS[a.collection]
     if a.check:
-        if not FREEZE.exists():
-            raise SystemExit(f"{rel(FREEZE)} does not exist")
-        diff = differences(json.loads(FREEZE.read_text()))
-        print("frozen tree: ok" if not diff else f"differs from FREEZE.json in: {', '.join(diff)}")
+        if not coll.freeze.exists():
+            raise SystemExit(f"{rel(coll.freeze)} does not exist")
+        diff = differences(json.loads(coll.freeze.read_text()), hypotheses=coll.hypotheses)
+        print("frozen tree: ok" if not diff else f"differs from {rel(coll.freeze)} in: {', '.join(diff)}")
         return 1 if diff else 0
-    doc = freeze()
+    doc = freeze(coll.freeze, hypotheses=coll.hypotheses, note=NOTES[coll.name])
     print(f"frozen at {doc['commit'][:12]}: config {doc['detection_config_hash'][:16]}, code {doc['code'][:12]}, "
           f"{len(doc['models'])} models, {len(doc['config_files'])} config files")
     return 0

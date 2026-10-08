@@ -1,8 +1,8 @@
-"""The identity pools of the tagger's training data and of test-2, and their overlap (V3 §5.3.1).
+"""The identity pools of the tagger's training data and of the sealed tests, and their overlap (V3 §5.3.1).
 
     PYTHONPATH=.:python-library .venv/bin/python -m bench.tagger.pools \\
         --data bench/tagger/build/data/train-40k.jsonl bench/tagger/build/data/train-80k.jsonl \\
-        --out bench/results/tagger_pools.json
+        [--collection test2 test3] --out bench/results/tagger_pools.json
 
 A training row records the pool words its values and third-party names were
 built from (``meta.pool_tokens``, ``identity(pool="train")``). Test-2's
@@ -12,7 +12,9 @@ is what the injection itself draws (no provider call), and record theirs
 the words of each that hash to the other half (0 by construction), the overlap
 of every training file with test-2 (must be 0) and a hash of each pool's sorted
 words; it exits 1 when any of these is not 0. Counts and hashes only: no word
-and no text is written.
+and no text is written. ``--collection`` names the sealed tests to check
+(default test-2 alone; PROMPT_FOR_OPUS_V4 checks test-2 and test-3, each under
+its own key, ``overlap_with_<name>`` per training file).
 """
 
 from __future__ import annotations
@@ -32,11 +34,16 @@ def training_pool(path: Path) -> set:
     return {t for r in read_jsonl(path) for t in r["meta"]["pool_tokens"]}
 
 
-def test2_pools(datasets: Iterable[str] = DATASETS, plan: Callable = None) -> Dict[str, set]:
+def eval_pools(datasets: Iterable[str] = DATASETS, plan: Callable = None, collection: str = "test2") -> Dict[str, set]:
+    """Per dataset, the pool words of a sealed collection's injected identities."""
     if plan is None:
         from bench.realdata.inject import plan
-    coll = COLLECTIONS["test2"]
+    coll = COLLECTIONS[collection]
     return {ds: {t for r in plan(ds, coll=coll) for t in r["identity"]["pool_tokens"]} for ds in datasets}
+
+
+def test2_pools(datasets: Iterable[str] = DATASETS, plan: Callable = None) -> Dict[str, set]:
+    return eval_pools(datasets, plan, "test2")
 
 
 def describe(words: set, half: str) -> dict:
@@ -44,15 +51,19 @@ def describe(words: set, half: str) -> dict:
             "sha256": hashlib.sha256("\n".join(sorted(words)).encode()).hexdigest()}
 
 
-def report(training: Dict[str, set], test2: Dict[str, set]) -> dict:
-    evals = set().union(*test2.values()) if test2 else set()
-    train = {name: {**describe(ws, "train"), "overlap_with_test2": len(ws & evals)} for name, ws in training.items()}
-    out = {"key": ids.POOL_KEY, "rule": "sha256(key:word)[0] >> 7 -> eval | train",
-           "training": train,
-           "test2": {"datasets": {ds: describe(ws, "eval") for ds, ws in test2.items()},
-                     "all": describe(evals, "eval")}}
-    out["ok"] = (all(v["other_half"] == 0 and v["overlap_with_test2"] == 0 for v in train.values())
-                 and all(v["other_half"] == 0 for v in [*out["test2"]["datasets"].values(), out["test2"]["all"]]))
+def report(training: Dict[str, set], test2: Dict[str, set] = None, **sealed: Dict[str, set]) -> dict:
+    """Each training pool against each sealed collection's (``test2``, and any
+    other given by name)."""
+    sealed = {**({"test2": test2} if test2 is not None else {}), **sealed}
+    evals = {name: set().union(*pools.values()) if pools else set() for name, pools in sealed.items()}
+    train = {name: {**describe(ws, "train"), **{f"overlap_with_{c}": len(ws & e) for c, e in evals.items()}}
+             for name, ws in training.items()}
+    out = {"key": ids.POOL_KEY, "rule": "sha256(key:word)[0] >> 7 -> eval | train", "training": train,
+           **{c: {"datasets": {ds: describe(ws, "eval") for ds, ws in pools.items()},
+                  "all": describe(evals[c], "eval")} for c, pools in sealed.items()}}
+    out["ok"] = (all(v["other_half"] == 0 and all(v[f"overlap_with_{c}"] == 0 for c in sealed)
+                     for v in train.values())
+                 and all(v["other_half"] == 0 for c in sealed for v in [*out[c]["datasets"].values(), out[c]["all"]]))
     return out
 
 
@@ -60,18 +71,24 @@ def main(argv: Sequence[str] = None, plan: Callable = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data", type=Path, nargs="+", required=True, help="training files (jsonl)")
     ap.add_argument("--datasets", nargs="+", default=list(DATASETS))
+    ap.add_argument("--collection", nargs="+", default=["test2"],
+                    choices=[n for n, c in COLLECTIONS.items() if c.prefix])
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args(argv)
     doc = {"command": "python -m bench.tagger.pools " + " ".join(argv if argv is not None else []),
            "git": git_state(),
            "data": {rel(p): file_sha256(p) for p in a.data},
-           **report({rel(p): training_pool(p) for p in a.data}, test2_pools(a.datasets, plan))}
+           **report({rel(p): training_pool(p) for p in a.data},
+                    **{c: eval_pools(a.datasets, plan, c) for c in a.collection})}
     a.out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
-    t2 = doc["test2"]["all"]
-    for name, v in doc["training"].items():
-        print(f"{name}: {v['words']} training pool words, {v['overlap_with_test2']} shared with test-2's "
-              f"{t2['words']}; {v['other_half']} in the eval half")
-    print(f"test-2: {t2['other_half']} words in the train half; {'ok' if doc['ok'] else 'NOT DISJOINT'}")
+    for c in a.collection:
+        t = doc[c]["all"]
+        label = c.replace("test", "test-")
+        for name, v in doc["training"].items():
+            print(f"{name}: {v['words']} training pool words, {v[f'overlap_with_{c}']} shared with {label}'s "
+                  f"{t['words']}; {v['other_half']} in the eval half")
+        print(f"{label}: {t['other_half']} words in the train half")
+    print("ok" if doc["ok"] else "NOT DISJOINT")
     return 0 if doc["ok"] else 1
 
 

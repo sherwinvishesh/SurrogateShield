@@ -5,6 +5,7 @@
     ... --reuse        # rescore saved spans whose input hash still matches; runs no arm
     ... --split devlarge   # test-1's test split, development data for the v3 detector
     ... --split test2      # the sealed second test, once, only after FREEZE.json is committed
+    ... --split test3      # the sealed third test, once, only after test3/FREEZE.json is committed
 
 The prompt names this ``bench/realdata.py``; a module of that name would
 shadow the package ``bench.realdata`` (D15), so it lives here.
@@ -35,7 +36,9 @@ draws as ``test``) under its own span-file and result names, because test-1
 is development data for the v3 detector; ``test2`` scores the second
 collection (``bench/realdata/test2/``, frozen keys ``test2/...``) and is
 refused unless ``bench/realdata/FREEZE.json`` exists and records the
-pre-registered hypotheses' current hash.
+pre-registered hypotheses' current hash. ``test3`` (PROMPT_FOR_OPUS_V4) is the
+same for the third collection, sealed by ``bench/realdata/test3/FREEZE.json``
+and ``HYPOTHESES_TEST3.md`` (``Collection.freeze`` / ``.hypotheses``; ``seal``).
 
 ``--external NAME`` (V3 §5.4, H10'') scores the external benchmark built by
 ``bench.realdata.external`` through the same arms, span checks, per-message
@@ -45,7 +48,9 @@ touching a gold value / edits, recall = 1 − leak rate). Also refused before
 the freeze. H10'' (fixed before any arm ran on the data): pooled, SS's leak
 rate ≤ the GLiNER arm's or SS's span F1 ≥ the GLiNER arm's (point
 estimates; the intervals are reported beside), for ``gliner_pii`` (the
-hypothesis) and ``gliner_pii_tuned``.
+hypothesis) and ``gliner_pii_tuned``. It was not run at test-2's freeze;
+it is scored once, sealed by test-3's (``EXTERNAL_COLLECTION``), and the
+result names the hypothesis H10'''.
 """
 
 from __future__ import annotations
@@ -60,8 +65,8 @@ from types import SimpleNamespace
 from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from bench import realworld as rw
-from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RD, ROOT, commit_note, derive_seed, file_sha256,
-                                   git_state, read_jsonl, sha256, write_jsonl)
+from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RD, ROOT, Collection, commit_note, derive_seed,
+                                   file_sha256, git_state, read_jsonl, sha256, write_jsonl)
 
 ARMS = ("ss", "presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii",
         "gliner_pii_tuned")
@@ -75,9 +80,12 @@ NATURAL_FROM = 1001
 RUNS = {"dev": ("dev", "test1", "diagnosis only"),
         "test": ("test", "test1", "the paper's detection numbers"),
         "devlarge": ("test", "test1", "development only (test-1's test split)"),
-        "test2": ("test2", "test2", "the paper's detection numbers (sealed second test)")}
-FREEZE = RD / "FREEZE.json"
+        "test2": ("test2", "test2", "the paper's detection numbers (sealed second test)"),
+        "test3": ("test3", "test3", "the paper's detection numbers (sealed third test)")}
+FREEZE = RD / "FREEZE.json"                  # test2's (COLLECTIONS["test2"].freeze)
 HYPOTHESES = RD / "HYPOTHESES_TEST2.md"
+EXTERNAL_COLLECTION = "test3"                # the freeze the external benchmark is scored at
+PRIMES = {"test2": "''", "test3": "'''"}    # hypothesis marks per sealed collection: H10'' / H10'''
 
 # GUIDE protect types each arm is configured to detect (its recogniser list or
 # label set as recorded in bench/realdata/manifest.json -> arms), not what it
@@ -129,11 +137,12 @@ def check_frozen(datasets: Sequence[str], split: str, frozen: Dict[str, str], rd
 
 
 def check_freeze(freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> str:
-    """The SHA-256 of FREEZE.json, or SystemExit: test2 is scored only after
-    the detector is frozen, with the hypotheses it pre-registered and, when
-    the freeze records them, its code, default config and config files."""
+    """The SHA-256 of the FREEZE file, or SystemExit: a sealed test is scored
+    only after the detector is frozen, with the hypotheses it pre-registered
+    and, when the freeze records them, its code, default config and config
+    files."""
     if not freeze.exists():
-        raise SystemExit(f"{rel(freeze)} does not exist: test2 is scored only after the freeze (Phase 3)")
+        raise SystemExit(f"{rel(freeze)} does not exist: a sealed test is scored only after the freeze")
     doc = json.loads(freeze.read_text())
     want = doc.get("hypotheses_sha256")
     if want is None or file_sha256(prereg) != want:
@@ -142,9 +151,17 @@ def check_freeze(freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> str:
         from bench.realdata.freeze import differences
         diff = differences(doc, hypotheses=prereg)
         if diff:
-            raise SystemExit(f"the tree differs from {rel(freeze)} in {', '.join(diff)}; test2 is scored only "
-                             "with the frozen detector")
+            raise SystemExit(f"the tree differs from {rel(freeze)} in {', '.join(diff)}; a sealed test is scored "
+                             "only with the frozen detector")
     return file_sha256(freeze)
+
+
+def seal(coll: Collection, freeze: Optional[Path] = None, prereg: Optional[Path] = None) -> Optional[str]:
+    """``check_freeze`` against *coll*'s own freeze and hypotheses (or the
+    given files); None for an unsealed collection (test1)."""
+    if not coll.prefix:
+        return None
+    return check_freeze(freeze or coll.freeze, prereg or coll.hypotheses)
 
 
 # ── 2. records ───────────────────────────────────────────────────────────────
@@ -487,14 +504,14 @@ def load_split(split: str, datasets: Sequence[str] = DATASETS, rd: Path = RD, bu
 def score_split(split: str, datasets: Sequence[str] = DATASETS, arms: Sequence[str] = ARMS, reuse: bool = False,
                 out: Optional[Path] = None, rd: Optional[Path] = None, build: Optional[Path] = None,
                 frozen: Optional[dict] = None, runner: Optional[Callable] = None, spans: Optional[Path] = None,
-                log=print, freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> dict:
+                log=print, freeze: Optional[Path] = None, prereg: Optional[Path] = None) -> dict:
     """Score the run *split* (a key of ``RUNS``). Span files are named
     ``<run>-<dataset>``; records, private files and bootstrap draws follow the
     data split, so ``devlarge`` reproduces ``test`` for an unchanged arm."""
     data, coll_name, role = RUNS[split]
     coll = COLLECTIONS[coll_name]
     rd, build = rd or coll.rd, build or coll.build
-    sealed = check_freeze(freeze, prereg) if coll.prefix else None
+    sealed = seal(coll, freeze, prereg)
     hashes, loaded = load_split(data, datasets, rd, build, frozen, coll.prefix)
     all_units: Dict[str, List[dict]] = {}
     all_scores: Dict[str, Dict[str, List[dict]]] = {}
@@ -584,9 +601,13 @@ def h10(res: dict) -> dict:
 
 def score_external(name: str, arms: Sequence[str] = ARMS, reuse: bool = False, out: Optional[Path] = None,
                    loaded: Optional[dict] = None, runner: Optional[Callable] = None, spans: Optional[Path] = None,
-                   log=print, freeze: Path = FREEZE, prereg: Path = HYPOTHESES) -> dict:
-    """Score the external benchmark *name* (``bench.realdata.external``) once, after the freeze."""
-    sealed = check_freeze(freeze, prereg)
+                   log=print, freeze: Optional[Path] = None, prereg: Optional[Path] = None,
+                   collection: str = EXTERNAL_COLLECTION) -> dict:
+    """Score the external benchmark *name* (``bench.realdata.external``) once,
+    after *collection*'s freeze (test-3's)."""
+    coll = COLLECTIONS[collection]
+    sealed = seal(coll, freeze, prereg)
+    h10_name = f"H10{PRIMES[collection]}"
     if loaded is None:
         from bench.realdata import external
         if name != external.NAME:
@@ -615,8 +636,8 @@ def score_external(name: str, arms: Sequence[str] = ARMS, reuse: bool = False, o
     out = out or ROOT / "bench" / "results" / f"external_{name}.json"
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score "
                       f"--external {name} --out {rel(out)}",
-           "git": git_state(), "external": name, "role": "secondary check (H10''), not used for tuning",
-           "freeze_sha256": sealed, "source": loaded.get("description", {}).get("source"),
+           "git": git_state(), "external": name, "role": f"secondary check ({h10_name}), not used for tuning",
+           "collection": collection, "freeze_sha256": sealed, "source": loaded.get("description", {}).get("source"),
            "label_map": loaded.get("description", {}).get("label_map"), "arms": list(arms),
            "corpus": loaded["corpus"], **({"config_hashes": config_hashes} if config_hashes else {}),
            "claimed_types": {a: list(CLAIMED[a]) for a in arms},
@@ -624,7 +645,7 @@ def score_external(name: str, arms: Sequence[str] = ARMS, reuse: bool = False, o
                          "seed": "derive_seed('score-external', name, group)", "ci": "percentile 2.5 / 97.5",
                          "difference": "ss − arm"},
            "span_f1": "value-level: precision 1 − spurious rate, recall 1 − leak rate",
-           "results": results, "differences": diffs, "hypotheses": {"H10''": h10(results["all"])}}
+           "results": results, "differences": diffs, "hypotheses": {h10_name: h10(results["all"])}}
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
     out.with_suffix(".md").write_text(markdown_external(doc))
@@ -757,9 +778,10 @@ def markdown_external(doc: dict) -> str:
             v = r[a]["by_type"].get(t)
             cells.append(f"{v['leaked']} / {v['values'] - v['policy']}" if v else "–")
         lines.append(f"| {t} | " + " | ".join(cells) + " |")
-    lines += ["", "## H10'' (pooled; point estimates)", "", "| GLiNER arm | SS leak ≤ | SS span F1 ≥ | holds |",
+    (h10_name, hyp), = doc["hypotheses"].items()
+    lines += ["", f"## {h10_name} (pooled; point estimates)", "", "| GLiNER arm | SS leak ≤ | SS span F1 ≥ | holds |",
               "|---|---|---|---|"]
-    for g, h in doc["hypotheses"]["H10''"].items():
+    for g, h in hyp.items():
         lines.append(f"| {g} | {'yes' if h['leak_not_above'] else 'no'} | {'yes' if h['span_f1_not_below'] else 'no'} "
                      f"| {'yes' if h['holds'] else 'no'} |")
     if doc.get("label_map"):
@@ -787,8 +809,9 @@ def main(argv=None) -> int:
     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
     if args.external:
         doc = score_external(args.external, args.arms, args.reuse, args.out)
-        for g, h in doc["hypotheses"]["H10''"].items():
-            print(f"H10'' vs {g}: {'holds' if h['holds'] else 'does not hold'} {h}")
+        (h10_name, hyp), = doc["hypotheses"].items()
+        for g, h in hyp.items():
+            print(f"{h10_name} vs {g}: {'holds' if h['holds'] else 'does not hold'} {h}")
         return 0
     doc = score_split(args.split, args.datasets, args.arms, args.reuse, args.out)
     for ds, h in doc["hypotheses"].items():

@@ -283,8 +283,7 @@ def spurious_sources(text: str, gold: dict, prepared) -> Counter:
 def run(split: str, datasets: Sequence[str] = DATASETS, prepare=None) -> dict:
     data_split, coll_name, _role = S.RUNS[split]
     coll = COLLECTIONS[coll_name]
-    if split == "test2":
-        S.check_freeze()
+    S.seal(coll)                        # a sealed collection only after its freeze
     prepare = prepare or traced_prepare()
     _hashes, loaded = S.load_split(data_split, datasets, coll.rd, coll.build, prefix=coll.prefix)
     rows: Counter = Counter()

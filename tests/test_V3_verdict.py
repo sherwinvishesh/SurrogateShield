@@ -249,3 +249,103 @@ def test_run_writes_the_verdict_and_its_table(tmp_path):
     assert "Caveat: H1'' fails on sharegpt" in md
     assert sum(line.startswith("| H") for line in md.splitlines()) == 10
     assert "| H6'' | yes | holds | p50 40.0 vs 80.0 ms; peak RSS 1500.0 vs 2500.0 MB |" in md
+
+
+# ── test-3 (--split test3): the same rule, test-3's files, H1''' ... H10''' ──
+
+P3 = "'" * 3
+
+
+def docs3():
+    """docs() as test-3's files carry them: split test3, the live and external
+    blocks named H7''', H8''', H10''', the external benchmark at test-3."""
+    x = docs()
+    for k in ("e5", "components", "utility", "multiturn", "attacker"):
+        x[k]["split"] = "test3"
+    x["utility"]["e5b"] = {g: {f"H7{P3}": v["H7''"]} for g, v in x["utility"]["e5b"].items()}
+    x["multiturn"]["results"] = {g: {f"H7{P3}": v["H7''"]} for g, v in x["multiturn"]["results"].items()}
+    x["attacker"]["results"] = {g: {f"H8{P3}": v["H8''"]} for g, v in x["attacker"]["results"].items()}
+    x["external"] = {"collection": "test3", "hypotheses": {f"H10{P3}": x["external"]["hypotheses"]["H10''"]}}
+    return x
+
+
+def test_test3_reads_its_own_blocks_and_names_every_hypothesis_with_three_primes():
+    v = V.verdict(docs3(), split="test3")
+    assert v["verdict"] == "GO" and v["not_run"] == []
+    assert {k: x["holds"] for k, x in v["hypotheses"].items()} == {f"H{i}{P3}": True for i in range(1, 11)}
+    assert V.SPLITS["test3"]["inputs"]["perf"] == "perf_arms_v4.json"
+    assert set(V.SPLITS["test3"]["inputs"].values()) - {"external_nemotron_pii.json", "perf_arms_v4.json"} == {
+        f"{n}_test3.json" for n in ("realdata", "realdata_components")} | {
+        f"{n}_realdata_test3.json" for n in ("utility", "multiturn", "attacker")}
+
+
+def test_test3_applies_test2s_rule_unchanged():
+    x = docs3()
+    x["e5"]["differences"]["sharegpt"]["injected"]["gliner_pii"]["leak_rate"] = d(-0.03, -0.06, 0.01)
+    v = V.verdict(x, split="test3")
+    assert v["verdict"] == "GO-with-caveat" and f"H1{P3}" in v["caveat"] and "H1'' " not in v["caveat"]
+    x["attacker"]["results"]["all"][f"H8{P3}"].update(no_exact_single=False, holds=False)
+    v = V.verdict(x, split="test3")
+    assert v["verdict"] == "NO-GO" and v["failed"] == [f"H1{P3}", f"H8{P3}"]     # the caveat needs every other part
+    x["attacker"] = None
+    v = V.verdict(x, split="test3")
+    assert v["missing"] == [f"H8{P3}"] and v["not_run"] == [f"H8{P3}"]
+    x = docs3()
+    x["e5"]["differences_by_type"]["groups"]["all"]["gliner_pii"]["PERSON"] = d(0.03, 0.001, 0.05)
+    v = V.verdict(x, split="test3")
+    assert v["failed"] == [f"H5{P3}"] and v["hypotheses"][f"H5{P3}"]["failing_types"] == ["PERSON"]
+
+
+def _write3(results, x, sealed):
+    for key, name in V.SPLITS["test3"]["inputs"].items():
+        if x.get(key) is not None:
+            doc = dict(x[key], **({"freeze_sha256": sealed} if key in V.SPLITS["test3"]["sealed"] else {}))
+            (results / name).write_text(json.dumps(doc))
+
+
+def test_test3_load_needs_test3s_freeze_on_e5_components_and_the_external_benchmark(tmp_path):
+    freeze = tmp_path / "test3" / "FREEZE.json"
+    freeze.parent.mkdir()
+    freeze.write_text('{"frozen": "test-3"}\n')
+    x = docs3()
+    _write3(tmp_path, x, file_sha256(freeze))
+    got = V.load(tmp_path, freeze, "test3")
+    assert set(got) == set(V.SPLITS["test3"]["inputs"]) and all(got.values())
+    assert got["e5"]["_input"]["file"] == "bench/results/realdata_test3.json"
+    (tmp_path / "external_nemotron_pii.json").write_text(json.dumps({**x["external"], "freeze_sha256": "0" * 64}))
+    with pytest.raises(SystemExit, match="external_nemotron_pii.json: not a test-3 result"):
+        V.load(tmp_path, freeze, "test3")                         # scored at another freeze (test-2's)
+    (tmp_path / "external_nemotron_pii.json").write_text(
+        json.dumps({**x["external"], "collection": "test2", "freeze_sha256": file_sha256(freeze)}))
+    with pytest.raises(SystemExit, match="not a test-3 result"):
+        V.load(tmp_path, freeze, "test3")
+    _write3(tmp_path, x, file_sha256(freeze))
+    (tmp_path / "utility_realdata_test3.json").write_text(json.dumps({**x["utility"], "split": "test2"}))
+    with pytest.raises(SystemExit, match="not test3"):
+        V.load(tmp_path, freeze, "test3")
+    _write3(tmp_path, x, file_sha256(freeze))
+    (tmp_path / "realdata_test3.json").write_text(json.dumps({**x["e5"], "split": "test2",
+                                                              "freeze_sha256": file_sha256(freeze)}))
+    with pytest.raises(SystemExit, match="realdata_test3.json: not a test-3 result"):
+        V.load(tmp_path, freeze, "test3")
+
+
+def test_test3_run_writes_its_own_verdict_and_table(tmp_path):
+    freeze = tmp_path / "test3" / "FREEZE.json"
+    freeze.parent.mkdir()
+    freeze.write_text('{"frozen": "test-3"}\n')
+    x = docs3()
+    x["e5"]["differences"]["sharegpt"]["injected"]["gliner_pii"]["leak_rate"] = d(-0.03, -0.06, 0.01)
+    _write3(tmp_path, x, file_sha256(freeze))
+    out = tmp_path / "out" / "verdict_test3.json"
+    doc = V.run(out, tmp_path, freeze, "test3")
+    back = json.loads(out.read_text())
+    assert back["verdict"] == doc["verdict"] == "GO-with-caveat" and back["split"] == "test3"
+    assert back["freeze_sha256"] == file_sha256(freeze) and back["prereg"]["file"].endswith("HYPOTHESES_TEST3.md")
+    assert " -m bench.realdata.verdict --split test3 --out " in back["command"]
+    md = out.with_suffix(".md").read_text()
+    assert md.startswith("# Test-3 verdict: GO-with-caveat\n")
+    assert f"Caveat: H1{P3} fails on sharegpt" in md
+    assert sum(line.startswith("| H") for line in md.splitlines()) == 10
+    assert f"| H6{P3} | yes | holds | p50 40.0 vs 80.0 ms; peak RSS 1500.0 vs 2500.0 MB |" in md
+    assert f"| H7{P3} | no | holds |" in md and f"| H8{P3} | yes | holds |" in md

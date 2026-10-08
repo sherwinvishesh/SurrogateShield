@@ -14,7 +14,7 @@ import re
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[2]
 RD = ROOT / "bench" / "realdata"
@@ -62,12 +62,19 @@ class Collection:
     (PROMPT_FOR_OPUS_V3 §5.2): one split, ``test2``, drawn only from sources
     test1 never touched, with files under ``bench/realdata/test2/<dataset>/``,
     private text under ``build/test2/``, and its own seeds, frozen-hash keys,
-    provider batch names and span-file names, so nothing of test1 is touched."""
+    provider batch names and span-file names, so nothing of test1 is touched.
+    ``test3`` is the sealed third test (PROMPT_FOR_OPUS_V4, ``HYPOTHESES_TEST3.md``),
+    built the same way from sources neither test1 nor test2 touched. A sealed
+    collection is scored only after its own ``freeze`` file exists and records
+    the current hash of its ``hypotheses``."""
     name: str
     splits: Tuple[str, ...]
     rd: Path              # committed files: <rd>/<dataset>/...
     build: Path           # private text: <build>/<dataset>/..., <build>/labels, <build>/inject
     prefix: str           # "" for test1
+    prior: Tuple[str, ...] = ()           # earlier collections whose sources this one may not reuse
+    freeze: Optional[Path] = None         # the FREEZE file that seals it (bench.realdata.freeze)
+    hypotheses: Optional[Path] = None     # its pre-registration, hashed into the freeze
 
     def tag(self, name: str) -> str:
         """A batch, span-file or result name, unique to the collection."""
@@ -82,7 +89,11 @@ class Collection:
 
 
 COLLECTIONS = {"test1": Collection("test1", ("dev", "test"), RD, BUILD, ""),
-               "test2": Collection("test2", ("test2",), RD / "test2", BUILD / "test2", "test2")}
+               "test2": Collection("test2", ("test2",), RD / "test2", BUILD / "test2", "test2", ("test1",),
+                                   RD / "FREEZE.json", RD / "HYPOTHESES_TEST2.md"),
+               "test3": Collection("test3", ("test3",), RD / "test3", BUILD / "test3", "test3", ("test1", "test2"),
+                                   RD / "test3" / "FREEZE.json", RD / "HYPOTHESES_TEST3.md")}
+SEALED = tuple(n for n, c in COLLECTIONS.items() if c.prefix)
 TEST1 = COLLECTIONS["test1"]
 
 

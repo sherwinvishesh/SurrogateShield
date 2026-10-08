@@ -147,11 +147,15 @@ def test_score_external_is_sealed_until_the_freeze_and_scores_h10(ext, tmp_path)
     assert r["gliner_pii"]["leak"]["k"] == 8 and r["gliner_pii"]["spurious"]["k"] == 8
     assert r["gliner_pii_tuned"]["leak"]["k"] == 16
     assert set(doc["results"]) == {"intl-structured", "intl-unstructured", "us-structured", "us-unstructured", "all"}
-    assert doc["hypotheses"]["H10''"]["gliner_pii"] == {"leak_not_above": True, "span_f1_not_below": True, "holds": True}
+    assert doc["collection"] == "test3" and list(doc["hypotheses"]) == ["H10'''"]      # scored at test-3's freeze
+    assert doc["hypotheses"]["H10'''"]["gliner_pii"] == {"leak_not_above": True, "span_f1_not_below": True, "holds": True}
     assert doc["differences"]["all"]["gliner_pii"]["leak_rate"]["diff"] < 0
     md = out.with_suffix(".md").read_text()
     assert "| gliner_pii | yes | yes | yes |" in md and "| first_name | protect | PERSON |" in md
     assert "example.org" not in md and "Byrne" not in md and "example.org" not in out.read_text()
+    assert "H10'''" in md
+    t2 = S.score_external("x", tuple(pats), **{**kw, "collection": "test2"})       # V3's naming, still available
+    assert t2["collection"] == "test2" and list(t2["hypotheses"]) == ["H10''"]
 
 
 def test_span_f1_and_h10_on_toy_aggregates():

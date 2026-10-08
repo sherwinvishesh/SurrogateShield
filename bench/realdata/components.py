@@ -136,7 +136,7 @@ def components(run: str, out: Path, names: Sequence[str] = RUN, datasets: Sequen
                log=print) -> dict:
     data, coll_name, role = score.RUNS[run]
     coll = COLLECTIONS[coll_name]
-    sealed = score.check_freeze() if coll.prefix else None
+    sealed = score.seal(coll)
     hashes = None
     if loaded is None:
         hashes, loaded = score.load_split(data, datasets, coll.rd, coll.build, None, coll.prefix)

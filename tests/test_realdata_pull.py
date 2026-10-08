@@ -253,6 +253,69 @@ def test_test2_refuses_when_a_test1_source_is_gone(raw, small, tmp_path):
         pull.sample("oasst1", raw, T2, prior=tmp_path / "rd")
 
 
+# ── test3: a third draw from sources neither test1 nor test2 took ─────────────
+
+T3 = common.COLLECTIONS["test3"]
+
+
+def test_test3_is_sealed_apart_from_test2():
+    assert common.SEALED == ("test2", "test3") and T3.prior == ("test1", "test2") and T3.splits == ("test3",)
+    assert (T3.tag("labels-x"), T3.key("oasst1/pool.jsonl")) == ("test3-labels-x", "test3/oasst1/pool.jsonl")
+    assert len({c.seed("oasst1", "single") for c in (common.TEST1, T2, T3)}) == 3
+    assert T3.rd == common.RD / "test3" and T3.build == common.BUILD / "test3"
+    assert (T2.freeze, T2.hypotheses) == (common.RD / "FREEZE.json", common.RD / "HYPOTHESES_TEST2.md")
+    assert (T3.freeze, T3.hypotheses) == (common.RD / "test3" / "FREEZE.json", common.RD / "HYPOTHESES_TEST3.md")
+    assert pull.FLOOR_SINGLE == {("test3", "oasst1"): 400}
+
+
+def _test1_and_test2(ds, raw, tmp_path, monkeypatch):
+    monkeypatch.setattr(pull, "N_SINGLE_TEST2", 8)
+    monkeypatch.setattr(pull, "N_MULTI_TEST2", 4)
+    rows1, _ = pull.sample(ds, raw)
+    pull.write(ds, rows1, rd=tmp_path / "rd", build=tmp_path / "build")
+    rows2, _ = pull.sample(ds, raw, T2, prior=tmp_path / "rd")
+    pull.write(ds, rows2, rd=tmp_path / "rd" / "test2", build=tmp_path / "build" / "test2")
+    return rows1 + rows2
+
+
+@pytest.mark.parametrize("ds", common.DATASETS)
+def test_test3_draws_only_sources_test1_and_test2_never_took(raw, small, monkeypatch, tmp_path, ds):
+    before = _test1_and_test2(ds, raw, tmp_path, monkeypatch)
+    monkeypatch.setattr(pull, "N_SINGLE_TEST2", 6)
+    monkeypatch.setattr(pull, "N_MULTI_TEST2", 1)                # the fixtures' multi-turn pools are small
+    rows3, counts = pull.sample(ds, raw, T3, prior=tmp_path / "rd")
+    assert rows3 == pull.sample(ds, raw, T3, prior=tmp_path / "rd")[0]
+    assert counts["taken_by_test1"] == 15 and counts["taken_by_test2"] == 12
+    assert not {r["source_id"] for r in before} & {r["source_id"] for r in rows3}
+    assert Counter((r["kind"], r["split"]) for r in rows3) == {("single", "test3"): 6, ("multi", "test3"): 1}
+    assert ("single_floor" in counts) == (ds == "oasst1")         # the floor is recorded where it applies
+
+
+def test_test3_refuses_when_a_test2_source_is_gone(raw, small, monkeypatch, tmp_path):
+    _test1_and_test2("oasst1", raw, tmp_path, monkeypatch)
+    common.write_jsonl(tmp_path / "rd" / "test2" / "oasst1" / "pool.jsonl", [{"source_id": "no-such-root"}])
+    with pytest.raises(SystemExit, match="test2 sources are not among the candidates"):
+        pull.sample("oasst1", raw, T3, prior=tmp_path / "rd")
+
+
+def test_test3_oasst1_keeps_a_short_single_draw_only_above_its_floor(raw, small, monkeypatch, tmp_path):
+    for ds in ("oasst1", "wildchat"):
+        _test1_and_test2(ds, raw, tmp_path, monkeypatch)
+    monkeypatch.setattr(pull, "N_SINGLE_TEST2", 100)
+    monkeypatch.setattr(pull, "N_MULTI_TEST2", 1)
+    monkeypatch.setattr(pull, "FLOOR_SINGLE", {("test3", "oasst1"): 5})
+    rows, counts = pull.sample("oasst1", raw, T3, prior=tmp_path / "rd")
+    assert 5 <= sum(r["kind"] == "single" for r in rows) < 100
+    assert (counts["single_target"], counts["single_floor"]) == (100, 5)
+    with pytest.raises(SystemExit, match=r"need 100\)"):
+        pull.sample("wildchat", raw, T3, prior=tmp_path / "rd")         # no floor for another dataset
+    with pytest.raises(SystemExit, match=r"need 100\)"):
+        pull.sample("oasst1", raw, T2, prior=tmp_path / "rd")           # nor for test2
+    monkeypatch.setattr(pull, "FLOOR_SINGLE", {("test3", "oasst1"): 50})
+    with pytest.raises(SystemExit, match="floor 50"):
+        pull.sample("oasst1", raw, T3, prior=tmp_path / "rd")
+
+
 def test_draw_skips_near_duplicates_of_earlier_draws():
     base = sentence("near")
     cands = [{"source_id": "a", "turns": [base + " ok"], "refs": [], "meta": {}},
@@ -272,6 +335,20 @@ def test_manifest_render_lists_frozen_hashes(tmp_path):
     md = (tmp_path / "M.md").read_text()
     assert "ab" * 32 in md and "| `source_roots` | 3 |" in md
     assert manifest.load(tmp_path / "m.json") == m
+
+
+def test_manifest_renders_every_sealed_collection_and_test3_record_ids_lint(tmp_path):
+    from bench import realworld as rw
+    counts = {"source_roots": 3, "taken_by_test1": 2, "taken_by_test2": 2, "single_target": 600, "single_floor": 400}
+    m = {"seed": common.SEED, "frozen": {},
+         **{c: {"datasets": {"oasst1": {"pull_counts": counts, "seeds": {"single": 1}}}} for c in common.SEALED}}
+    m["test3"]["pooling"] = {"commit": "e" * 40}
+    md = manifest.render(m)
+    assert md.index("## Collection `test2`") < md.index("## Collection `test3`")
+    assert "### test3 / oasst1" in md and "| `single_floor` | 400 |" in md and "| `taken_by_test2` | 2 |" in md
+    assert 'common.derive_seed(dataset, kind, "test3")' in md and "**test3 pooling**" in md
+    assert all(rw.ID_RE.match(f"rd-oasst1-{s}-0001") for s in ("dev", "test", "test2", "test3"))
+    assert not rw.ID_RE.match("rd-oasst1-test4-0001")
 
 
 def test_english_check_counts_against_labels(raw):

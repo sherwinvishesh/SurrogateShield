@@ -3,11 +3,12 @@ recogniser families dropped or made wrong, on one frozen split.
 
     HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.regex_ablation --split dev --out bench/results/realdata_regex_ablation_dev.json
     ... --split test2 --out bench/results/realdata_regex_ablation_test2.json   # E6'': once, after FREEZE.json (V3 Phase 3)
+    ... --split test3 --out bench/results/realdata_regex_ablation_test3.json   # E6''': once, after test3/FREEZE.json (V4)
     ... --reuse        # rescore saved spans whose input hash still matches; runs nothing
 
 1. The units and arm inputs are E5's (``score.load_split``): the same frozen
-   files, the same messages, the same input hashes. ``test2`` is refused
-   unless ``score.check_freeze`` passes, as E5'' is.
+   files, the same messages, the same input hashes. ``test2`` and ``test3``
+   are refused unless their freeze passes (``score.seal``), as E5 is.
 2. ``bench.arms.ss_ablate`` runs as a subprocess in ``.venv`` on each
    dataset's input and writes one private span file per condition
    (``build/spans/ss_ablate/<split>-<ds>/<condition>.jsonl``, 0600). This
@@ -110,13 +111,13 @@ def _same_edits(a: Dict[str, dict], b: Dict[str, dict]) -> int:
 def ablate_split(split: str, datasets: Sequence[str] = DATASETS, reuse: bool = False, out: Optional[Path] = None,
                  rd: Optional[Path] = None, build: Optional[Path] = None, frozen: Optional[dict] = None,
                  runner: Optional[Callable] = None, spans: Optional[Path] = None, log=print,
-                 freeze: Path = S.FREEZE, prereg: Path = S.HYPOTHESES) -> dict:
+                 freeze: Optional[Path] = None, prereg: Optional[Path] = None) -> dict:
     runner = runner or run_ablate
     spans = spans or PRIVATE
     data, coll_name, _role = S.RUNS[split]
     coll = COLLECTIONS[coll_name]
     rd, build = rd or coll.rd, build or coll.build
-    sealed = S.check_freeze(freeze, prereg) if coll.prefix else None
+    sealed = S.seal(coll, freeze, prereg)
     hashes, loaded = S.load_split(data, datasets, rd, build, frozen, coll.prefix)
     names: Optional[List[str]] = None
     run_info = {}
@@ -190,7 +191,7 @@ def ablate_split(split: str, datasets: Sequence[str] = DATASETS, reuse: bool = F
     doc = {"command": f"HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.regex_ablation "
                       f"--split {split} --out {S.rel(out)}",
            "git": git_state(),
-           "split": split, "role": "the paper's robustness numbers" if split in ("test", "test2") else "diagnosis only",
+           "split": split, "role": "the paper's robustness numbers" if split in ("test", "test2", "test3") else "diagnosis only",
            **({"freeze_sha256": sealed} if sealed else {}),
            "frozen": hashes, "draw_seed": DRAW_SEED, "families": first["families"],
            "conditions": first["conditions"], "versions": first["versions"],
@@ -248,7 +249,7 @@ def markdown(doc: dict) -> str:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--split", choices=("dev", "test", "test2"), required=True)
+    ap.add_argument("--split", choices=("dev", "test", "test2", "test3"), required=True)
     ap.add_argument("--datasets", nargs="+", default=list(DATASETS), choices=DATASETS)
     ap.add_argument("--reuse", action="store_true")
     ap.add_argument("--out", type=Path)

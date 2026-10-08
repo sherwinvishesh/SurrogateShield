@@ -2,6 +2,7 @@
 the frozen run's result files as ``HYPOTHESES_TEST2.md`` pre-registered it.
 
     PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict --out bench/results/verdict_test2.json
+    ... -m bench.realdata.verdict --split test3 --out bench/results/verdict_test3.json
 
 Committed before ``FREEZE.json``, so the readings below were fixed before any
 test-2 number existed. It reads result files only (no span, no text) and
@@ -67,24 +68,41 @@ GLiNER-PII (the leak interval's lower bound at most 0, against gliner_pii
 and gliner_pii_tuned); every other GO condition held. Anything else is
 NO-GO. H4'', H7'', H9'' and H10'' are reported; the GO rule names none, and
 one not run is listed under ``not_run`` without changing the verdict.
+
+Test-3 (``--split test3``; ``HYPOTHESES_TEST3.md``, PROMPT_FOR_OPUS_V4): the
+same readings and the same ``decide`` over test-3's files
+(``INPUTS_TEST3``: ``realdata_test3.json``, ``realdata_components_test3.json``,
+``perf_arms_v4.json``, the live ``*_realdata_test3.json`` and the external
+benchmark, which is scored at test-3's freeze and must carry it). The rule is
+computed under the names above and the result is written with test-3's
+(H1''' ... H10'''); the live and external files name their blocks H7''',
+H8''' and H10'''.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence
 
 from bench.realdata import score
-from bench.realdata.common import DATASETS, ROOT, file_sha256, git_state
+from bench.realdata.common import COLLECTIONS, DATASETS, ROOT, file_sha256, git_state
 
 RESULTS = ROOT / "bench" / "results"
 INPUTS = {"e5": "realdata_test2.json", "components": "realdata_components_test2.json",
           "perf": "perf_arms_v3.json", "utility": "utility_realdata_test2.json",
           "multiturn": "multiturn_realdata_test2.json", "attacker": "attacker_realdata_test2.json",
           "external": "external_nemotron_pii.json"}
+INPUTS_TEST3 = {"e5": "realdata_test3.json", "components": "realdata_components_test3.json",
+                "perf": "perf_arms_v4.json", "utility": "utility_realdata_test3.json",
+                "multiturn": "multiturn_realdata_test3.json", "attacker": "attacker_realdata_test3.json",
+                "external": "external_nemotron_pii.json"}
 SEALED = ("e5", "components")                    # scored on test-2: carry freeze_sha256
+# per sealed collection: its inputs, the files that must carry its freeze, and its hypothesis mark
+SPLITS = {"test2": {"inputs": INPUTS, "sealed": SEALED, "mark": "''"},
+          "test3": {"inputs": INPUTS_TEST3, "sealed": (*SEALED, "external"), "mark": "'''"}}
 LIVE = ("utility", "multiturn", "attacker")      # live on test-2: carry split
 SIX = ("presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii", "gliner_pii_tuned")
 GLINER, TUNED = "gliner_pii", "gliner_pii_tuned"
@@ -96,21 +114,24 @@ NOT_RUN = {"holds": None, "status": "not run"}
 GO_PARTS = ("H1''", "H2''", "H3''", "H5''", "H6''", "H8''")
 
 
-def load(results: Path = RESULTS, freeze: Path = score.FREEZE) -> Dict[str, Optional[dict]]:
-    """Every input that exists, checked: the sealed ones against FREEZE.json, the live ones by split."""
+def load(results: Path = RESULTS, freeze: Optional[Path] = None, split: str = "test2") -> Dict[str, Optional[dict]]:
+    """Every input that exists, checked: the sealed ones against the split's
+    freeze, the live ones by split."""
+    spec, freeze = SPLITS[split], freeze or COLLECTIONS[split].freeze
     sealed = file_sha256(freeze) if freeze.exists() else None
     docs: Dict[str, Optional[dict]] = {}
-    for key, name in INPUTS.items():
+    for key, name in spec["inputs"].items():
         path = results / name
         if not path.exists():
             docs[key] = None
             continue
         doc = json.loads(path.read_text())
-        if key in SEALED and (sealed is None or doc.get("freeze_sha256") != sealed or doc.get("split") != "test2"):
-            raise SystemExit(f"{name}: not a test-2 result of {score.rel(freeze)} "
-                             f"(freeze {str(doc.get('freeze_sha256'))[:12]}, split {doc.get('split')})")
-        if key in LIVE and doc.get("split") != "test2":
-            raise SystemExit(f"{name}: split {doc.get('split')!r}, not test2")
+        where = doc.get("collection") if key == "external" else doc.get("split")
+        if key in spec["sealed"] and (sealed is None or doc.get("freeze_sha256") != sealed or where != split):
+            raise SystemExit(f"{name}: not a {split.replace('test', 'test-')} result of {score.rel(freeze)} "
+                             f"(freeze {str(doc.get('freeze_sha256'))[:12]}, split {where})")
+        if key in LIVE and doc.get("split") != split:
+            raise SystemExit(f"{name}: split {doc.get('split')!r}, not {split}")
         doc["_input"] = {"file": f"bench/results/{name}", "sha256": file_sha256(path),
                          "commit": (doc.get("git") or {}).get("commit")}
         docs[key] = doc
@@ -208,19 +229,19 @@ def h6(perf: dict) -> dict:
             "holds": default and ss["p50_ms"] <= gl["p50_ms"] and ss["peak_rss_mb"] <= gl["peak_rss_mb"]}
 
 
-def h7(utility: Optional[dict], multiturn: Optional[dict]) -> dict:
+def h7(utility: Optional[dict], multiturn: Optional[dict], key: str = H7) -> dict:
     if utility is None or multiturn is None:
         return {**NOT_RUN, "status": "utility or multiturn not run"}
-    u, m = utility["e5b"]["all"][H7], multiturn["results"]["all"][H7]
+    u, m = utility["e5b"]["all"][key], multiturn["results"]["all"][key]
     return {"e5b": u, "e7b": m, "holds": bool(u["holds"] and m["holds"]),
-            "per_dataset": {g: {"e5b": utility["e5b"][g][H7]["holds"], "e7b": multiturn["results"][g][H7]["holds"]}
+            "per_dataset": {g: {"e5b": utility["e5b"][g][key]["holds"], "e7b": multiturn["results"][g][key]["holds"]}
                             for g in utility["e5b"] if g != "all" and g in multiturn["results"]}}
 
 
-def h8(attacker: dict) -> dict:
-    h = attacker["results"]["all"][H8]
+def h8(attacker: dict, key: str = H8) -> dict:
+    h = attacker["results"]["all"][key]
     return {**h, "holds": bool(h["holds"]),
-            "per_dataset": {g: r[H8]["holds"] for g, r in attacker["results"].items() if g != "all"}}
+            "per_dataset": {g: r[key]["holds"] for g, r in attacker["results"].items() if g != "all"}}
 
 
 def h9(e5: dict, components: dict, datasets: Sequence[str]) -> dict:
@@ -241,8 +262,8 @@ def h9(e5: dict, components: dict, datasets: Sequence[str]) -> dict:
     return {"per_group": out, "a": a, "b": b, "holds": bool(a and b and out["all"]["same_values"])}
 
 
-def h10(external: dict) -> dict:
-    h = external["hypotheses"][H10]
+def h10(external: dict, key: str = H10) -> dict:
+    h = external["hypotheses"][key]
     return {**h, "holds": bool((h.get(GLINER) or {}).get("holds"))}
 
 
@@ -262,7 +283,23 @@ def decide(h: Dict[str, dict]) -> dict:
     return {"verdict": "NO-GO", "go_parts": parts, "failed": sorted(k for k, v in parts.items() if not v)}
 
 
-def verdict(docs: Dict[str, Optional[dict]], datasets: Sequence[str] = DATASETS) -> dict:
+def marked(x, mark: str):
+    """*x* with every hypothesis name H<n>'' renamed H<n><mark> (keys and strings)."""
+    if isinstance(x, dict):
+        return {marked(k, mark): marked(v, mark) for k, v in x.items()}
+    if isinstance(x, list):
+        return [marked(v, mark) for v in x]
+    return re.sub(r"(H\d+)''(?!')", lambda m: m.group(1) + mark, x) if isinstance(x, str) else x
+
+
+def unmarked(name: str) -> str:
+    return re.sub(r"(H\d+)'+$", r"\1''", name)
+
+
+def verdict(docs: Dict[str, Optional[dict]], datasets: Sequence[str] = DATASETS, split: str = "test2") -> dict:
+    """The rule over *docs*, under the names of ``HYPOTHESES_TEST2.md``;
+    renamed with *split*'s mark after ``decide``."""
+    mark = SPLITS[split]["mark"]
     e5 = docs.get("e5")
     h: Dict[str, dict] = {}
     if e5 is None:
@@ -272,18 +309,24 @@ def verdict(docs: Dict[str, Optional[dict]], datasets: Sequence[str] = DATASETS)
         h["H1''"], h["H2''"], h["H3''"] = h1(e5, datasets), h2(e5, datasets), h3(e5, datasets)
         h["H4''"], h["H5''"] = h4(e5, datasets), h5(e5)
     h["H6''"] = h6(docs["perf"]) if docs.get("perf") else dict(NOT_RUN)
-    h["H7''"] = h7(docs.get("utility"), docs.get("multiturn"))
-    h["H8''"] = h8(docs["attacker"]) if docs.get("attacker") else dict(NOT_RUN)
+    h["H7''"] = h7(docs.get("utility"), docs.get("multiturn"), f"H7{mark}")
+    h["H8''"] = h8(docs["attacker"], f"H8{mark}") if docs.get("attacker") else dict(NOT_RUN)
     h["H9''"] = h9(e5, docs["components"], datasets) if e5 and docs.get("components") else dict(NOT_RUN)
-    h["H10''"] = h10(docs["external"]) if docs.get("external") else dict(NOT_RUN)
-    return {**decide(h), "not_run": [k for k, x in h.items() if x.get("holds") is None], "hypotheses": h}
+    h["H10''"] = h10(docs["external"], f"H10{mark}") if docs.get("external") else dict(NOT_RUN)
+    v = {**decide(h), "not_run": [k for k, x in h.items() if x.get("holds") is None], "hypotheses": h}
+    return v if mark == "''" else marked(v, mark)
 
 
-def run(out: Path, results: Path = RESULTS, freeze: Path = score.FREEZE) -> dict:
-    docs = load(results, freeze)
-    v = verdict(docs)
-    doc = {"command": f"PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict --out {score.rel(out)}",
-           "git": git_state(), "prereg": {"file": score.rel(score.HYPOTHESES), "sha256": file_sha256(score.HYPOTHESES)},
+def run(out: Path, results: Path = RESULTS, freeze: Optional[Path] = None, split: str = "test2") -> dict:
+    coll = COLLECTIONS[split]
+    freeze = freeze or coll.freeze
+    docs = load(results, freeze, split)
+    v = verdict(docs, split=split)
+    flag = "" if split == "test2" else f" --split {split}"
+    doc = {"command": f"PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict{flag} "
+                      f"--out {score.rel(out)}",
+           "git": git_state(), "prereg": {"file": score.rel(coll.hypotheses), "sha256": file_sha256(coll.hypotheses)},
+           "split": split, "freeze_file": score.rel(freeze),
            "freeze_sha256": file_sha256(freeze) if freeze.exists() else None,
            "inputs": {k: (d["_input"] if d else None) for k, d in docs.items()}, **v}
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -303,6 +346,7 @@ def _k(r: Optional[dict]) -> str:
 
 
 def _detail(name: str, x: dict) -> str:
+    name = unmarked(name)
     if x.get("holds") is None:
         return x.get("status", "not run")
     if name in ("H1''", "H2''", "H3''"):
@@ -334,15 +378,18 @@ def _detail(name: str, x: dict) -> str:
 
 
 def markdown(doc: dict) -> str:
-    lines = [f"# Test-2 verdict: {doc['verdict']}", "",
+    split = doc.get("split", "test2")
+    freeze = "FREEZE.json" if split == "test2" else doc["freeze_file"]
+    lines = [f"# {split.replace('test', 'Test-')} verdict: {doc['verdict']}", "",
              f"`{doc['command']}` at commit `{(doc['git'].get('commit') or '?')[:12]}`; pre-registration "
-             f"`{doc['prereg']['file']}` ({doc['prereg']['sha256'][:12]}), FREEZE.json {str(doc['freeze_sha256'])[:12]}. "
+             f"`{doc['prereg']['file']}` ({doc['prereg']['sha256'][:12]}), {freeze} {str(doc['freeze_sha256'])[:12]}. "
              "Readings: `bench/realdata/verdict.py`.", ""]
     if doc.get("caveat"):
         lines += [f"Caveat: {doc['caveat']}.", ""]
     lines += ["| hypothesis | in the GO rule | result | detail |", "|---|---|---|---|"]
     for name, x in doc["hypotheses"].items():
-        lines.append(f"| {name} | {'yes' if name in GO_PARTS else 'no'} | {_yn(x.get('holds'))} | {_detail(name, x)} |")
+        lines.append(f"| {name} | {'yes' if unmarked(name) in GO_PARTS else 'no'} | {_yn(x.get('holds'))} "
+                     f"| {_detail(name, x)} |")
     lines += ["", "Inputs:", ""]
     for k, i in doc["inputs"].items():
         lines.append(f"- {k}: " + ("not run" if not i else f"`{i['file']}` ({i['sha256'][:12]}, commit "
@@ -353,11 +400,12 @@ def markdown(doc: dict) -> str:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--split", choices=list(SPLITS), default="test2")
     a = ap.parse_args(argv)
-    doc = run(a.out.resolve())
+    doc = run(a.out.resolve(), split=a.split)
     print(doc["verdict"])
     for name, x in doc["hypotheses"].items():
-        print(f"{name:6} {_yn(x.get('holds'))}")
+        print(f"{name:7} {_yn(x.get('holds'))}")
     return 0
 
 

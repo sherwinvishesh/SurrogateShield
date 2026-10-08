@@ -714,10 +714,12 @@ def capacity(words: int) -> int:
     return max(2, min(7, 2 + words // 20))
 
 
-def assign_types(rows: Sequence[dict], seed: int, target: int = TARGET) -> List[List[str]]:
+def assign_types(rows: Sequence[dict], seed: int, target: int = TARGET,
+                 targets: Optional[Dict[str, int]] = None) -> List[List[str]]:
     """Types per row (``rows``: ``{"task", "words"}``), drawn from the task
     priors under each row's capacity, then topped up so every type reaches
-    *target* rows, adding where the prior is highest and there is room.
+    *target* rows (or its own target in *targets*, e.g. test3's AGE),
+    adding where the prior is highest and there is room.
     Where short prompts leave no room, the type takes PERSON's place in a
     full row, while PERSON stays in at least ``2 * target`` rows (the priors
     put a name in nine prompts of ten)."""
@@ -736,7 +738,7 @@ def assign_types(rows: Sequence[dict], seed: int, target: int = TARGET) -> List[
             chosen.insert(0, "PERSON")
         out.append(chosen[:cap] or ["PERSON"])
     for t in sorted(TYPES, key=lambda t: sum(t in o for o in out)):
-        need = target - sum(t in o for o in out)
+        need = (targets or {}).get(t, target) - sum(t in o for o in out)
         if need <= 0:
             continue
         excl = {b for a, b in EXCLUSIVE if a == t} | {a for a, b in EXCLUSIVE if b == t}
