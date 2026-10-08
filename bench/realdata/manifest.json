@@ -1151,12 +1151,15 @@
   "test3/oasst1/labels.jsonl": "2f9d0ee11bfbee97dceaa4cb94c68018b6b1e40083c3470315f7e2e7f5aafcbb",
   "test3/oasst1/pii_free.json": "80099824dc3f6ccdc959dbbedcf8ab3f5f43c25809b893fb12fcdafa95fd6172",
   "test3/oasst1/pool.jsonl": "1eb00411379bc4b3794c121ae75205df81c63319e5d987ea8bc4f744ae87d4ce",
+  "test3/oasst1/test3.jsonl": "8d5871c3ab81cfbab574e61160b3cef59d9e63819990ba290f647ca4eb98c7bb",
   "test3/sharegpt/labels.jsonl": "19a52f18c29ade3f3b024ad001bc3a5ab0e5e33e6c82608922a1a54f1c6144f7",
   "test3/sharegpt/pii_free.json": "305542a2ceeb4b84e0e3d9d68c509210a12152daacabaa35f83a0d13b715a003",
   "test3/sharegpt/pool.jsonl": "d38ec67639652254e1f3f4974ea2a0c50aa07a7ad65e29288497c52764c1a3ba",
+  "test3/sharegpt/test3.jsonl": "0d0f23056e7d8a24f4374bb8f86b85ab6692a20175ab5e74b701d86387e58c6e",
   "test3/wildchat/labels.jsonl": "ce95981fc75a904251e8eb6289b69d818c0b774d48c21308080c52a464515021",
   "test3/wildchat/pii_free.json": "59c824825e3aea9c0890bae6504da49f1da55ae699884b03903e91034d7f336f",
   "test3/wildchat/pool.jsonl": "c55106aeb663df3159e94bcc72c3cfa24d4df7a0c4b171379a82e6208e3d7434",
+  "test3/wildchat/test3.jsonl": "aea379679357bc2bec769a95422bb2fbc1d7a4dc840fa0cb64514ccf66e2e682",
   "wildchat/dev.jsonl": "de853c7174b008199bd8fd6b7bd05a5654908b99b71a6f94f9b0c638c43a91cf",
   "wildchat/labels.jsonl": "8e2669d041deb6e91de36e49a1b44cb112cf9853c0b5b5682320bfa4974b628f",
   "wildchat/pii_free.json": "fd096fe8325d5dd1a54dab3c14dc512069e7772790f2914d56efb1ea190b124d",
@@ -1431,6 +1434,13 @@
      "single": 3609028807091034370
     }
    }
+  },
+  "injection": {
+   "faker": "40.15.0",
+   "identity_pool": "eval",
+   "placer": "claude-sonnet-4-6",
+   "pool_key": "surrogateshield-identity-pool-v1",
+   "prompt_version": "9d5a86e933bd6fef"
   },
   "labels": {
    "annotator": "claude-sonnet-4-6",
