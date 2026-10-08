@@ -1,11 +1,12 @@
 {
- "command": "python -m bench.tagger.pools --data bench/tagger/build/data/train-40k.jsonl bench/tagger/build/data/train-80k.jsonl --out bench/results/tagger_pools.json",
+ "command": "python -m bench.tagger.pools --data bench/tagger/build/data/train-40k.jsonl bench/tagger/build/data/train-80k.jsonl bench/tagger/build/data/train-40k-v4.jsonl --collection test2 test3 --out bench/results/tagger_pools.json",
  "data": {
+  "bench/tagger/build/data/train-40k-v4.jsonl": "de48bd11c66442abfdb9aac280f459c9126f343c6d35eda6a523ae9c3ce93967",
   "bench/tagger/build/data/train-40k.jsonl": "45385de32536c41bd4ab2c4c2523997c66febcf2af5179c429e83b6ad614d046",
   "bench/tagger/build/data/train-80k.jsonl": "70686d6d374c14c00257e01cbfc65d400859160b9ce4c49ccd795db79cc73a51"
  },
  "git": {
-  "commit": "7bde61452d7705e6676d44d2c1c7d4b91c6f43fc",
+  "commit": "c4a2a0dadc46f546703a6816331dd7b6f1374597",
   "modified": []
  },
  "key": "surrogateshield-identity-pool-v1",
@@ -35,16 +36,49 @@
    }
   }
  },
+ "test3": {
+  "all": {
+   "other_half": 0,
+   "sha256": "28267f197889c1acbe5f38a24e4168b316f7bd73c361441fabeb491aec6ab870",
+   "words": 1915
+  },
+  "datasets": {
+   "oasst1": {
+    "other_half": 0,
+    "sha256": "c78ce757fb9bb5d9a7a2c1083ab63ce6d03a654ed2c2047b80ec134e4634bfa1",
+    "words": 836
+   },
+   "sharegpt": {
+    "other_half": 0,
+    "sha256": "3104ca9450a6d2412d1bb506aaededd3311709cb09a33ef4a7a7e4c89189c083",
+    "words": 840
+   },
+   "wildchat": {
+    "other_half": 0,
+    "sha256": "381a347468757cd743120012284c03dd6b02ce6c03db0d49e56d6156c652c581",
+    "words": 877
+   }
+  }
+ },
  "training": {
+  "bench/tagger/build/data/train-40k-v4.jsonl": {
+   "other_half": 0,
+   "overlap_with_test2": 0,
+   "overlap_with_test3": 0,
+   "sha256": "25c3f6d37a166d5b86202b71aa5b3b6ca779fa53c9fe8ec4727951542a8cedef",
+   "words": 10670
+  },
   "bench/tagger/build/data/train-40k.jsonl": {
    "other_half": 0,
    "overlap_with_test2": 0,
+   "overlap_with_test3": 0,
    "sha256": "361c19d335a44eca79e098babc735bfceae0e45473ce2ee338ed0aafe10e4ecc",
    "words": 10628
   },
   "bench/tagger/build/data/train-80k.jsonl": {
    "other_half": 0,
    "overlap_with_test2": 0,
+   "overlap_with_test3": 0,
    "sha256": "0d6837aa70ca750ea5119626c32a8932c2dedf98613c94fec81e2a6ce10f80c8",
    "words": 12379
   }
