@@ -1,9 +1,12 @@
 {
  "command": "PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict --split test3 --out bench/results/verdict_test3.json",
+ "failed": [
+  "H8'''"
+ ],
  "freeze_file": "bench/realdata/test3/FREEZE.json",
  "freeze_sha256": "31d87c099d6ca5198a42430bfa9a6471154aaa218ee05c7949cb17c512016fff",
  "git": {
-  "commit": "04540fe3ad7ade0335eeb49ea94a0d9d91fa6fa2",
+  "commit": "e6d01369ab47e46be93d20f0d471d565d5ee7f9e",
   "modified": []
  },
  "go_parts": {
@@ -12,7 +15,7 @@
   "H3'''": true,
   "H5'''": true,
   "H6'''": true,
-  "H8'''": null
+  "H8'''": false
  },
  "hypotheses": {
   "H1'''": {
@@ -964,12 +967,82 @@
    }
   },
   "H7'''": {
-   "holds": null,
-   "status": "utility or multiturn not run"
+   "e5b": {
+    "bertscore_not_below_gliner_pii": true,
+    "bertscore_not_below_presidio_faker": true,
+    "holds": false,
+    "judge_not_below_gliner_pii": false,
+    "judge_not_below_presidio_faker": true,
+    "strict": {
+     "bertscore_above_gliner_pii": true,
+     "bertscore_above_presidio_faker": true,
+     "judge_above_gliner_pii": false,
+     "judge_above_presidio_faker": true
+    }
+   },
+   "e7b": {
+    "consistency_above_gliner_pii": false,
+    "consistency_above_presidio_faker": false,
+    "holds": false,
+    "judge_above_gliner_pii": true,
+    "judge_above_presidio_faker": true
+   },
+   "holds": false,
+   "per_dataset": {
+    "oasst1": {
+     "e5b": false,
+     "e7b": false
+    },
+    "sharegpt": {
+     "e5b": false,
+     "e7b": false
+    },
+    "wildchat": {
+     "e5b": false,
+     "e7b": false
+    }
+   }
   },
   "H8'''": {
-   "holds": null,
-   "status": "not run"
+   "holds": false,
+   "no_exact_conversation": false,
+   "no_exact_single": false,
+   "per_dataset": {
+    "oasst1": false,
+    "sharegpt": false,
+    "wildchat": false
+   },
+   "recovery": {
+    "gliner_pii": {
+     "k": 11,
+     "n": 556,
+     "rate": 0.0198,
+     "wilson95": [
+      0.0111,
+      0.0351
+     ]
+    },
+    "ss": {
+     "k": 102,
+     "n": 620,
+     "rate": 0.1645,
+     "wilson95": [
+      0.1374,
+      0.1957
+     ]
+    },
+    "ss-gliner_pii": {
+     "ci95": [
+      0.1161,
+      0.1726
+     ],
+     "diff": 0.1447,
+     "excludes_0": true,
+     "messages": 178,
+     "resamples": 2000
+    }
+   },
+   "recovery_not_above_gliner_pii": false
   },
   "H9'''": {
    "a": true,
@@ -1176,7 +1249,11 @@
   }
  },
  "inputs": {
-  "attacker": null,
+  "attacker": {
+   "commit": "d777625e9907b53d89de5d11e775b0635dc36093",
+   "file": "bench/results/attacker_realdata_test3.json",
+   "sha256": "e9519ee3d5aee41c05f376b28fcf9af0ed10b670929b0ce3659ebc603433616e"
+  },
   "components": {
    "commit": "702001f5229fa041f7db58b8190fc05f661ae93c",
    "file": "bench/results/realdata_components_test3.json",
@@ -1192,25 +1269,27 @@
    "file": "bench/results/external_nemotron_pii.json",
    "sha256": "02374546605a748a78116e26bac3e157da504e74a7a0a0a05defb2962640d7d5"
   },
-  "multiturn": null,
+  "multiturn": {
+   "commit": "3fa246c52302662a116b814d9a8ed0f835bf10ce",
+   "file": "bench/results/multiturn_realdata_test3.json",
+   "sha256": "7bd9c04f6c28439ef5056c76f52d0f9aa78b5b805abaede11d61cc13fdc48c78"
+  },
   "perf": {
    "commit": "b173311badad27998bd1aef4df62764d93118515",
    "file": "bench/results/perf_arms_v4.json",
    "sha256": "9d0bedd15ce897a806e1fbf29390881df3b5cb305ce0370fff31c34ee2d0d4ec"
   },
-  "utility": null
+  "utility": {
+   "commit": "cb2b83353ebdc9d08e0c51eecb0875016bc74674",
+   "file": "bench/results/utility_realdata_test3.json",
+   "sha256": "69a71cefe58b236c741c59da61b6f6aca4df85e08ff3d9938ad603554c709cb2"
+  }
  },
- "missing": [
-  "H8'''"
- ],
- "not_run": [
-  "H7'''",
-  "H8'''"
- ],
+ "not_run": [],
  "prereg": {
   "file": "bench/realdata/HYPOTHESES_TEST3.md",
   "sha256": "bd43f11d9b827ea05d2b9c0833d1e460127eb66764b02c3e99ccef90d7202c8a"
  },
  "split": "test3",
- "verdict": "incomplete"
+ "verdict": "NO-GO"
 }
