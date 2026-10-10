@@ -2,7 +2,9 @@
 
 The natural slice of the real-data benchmark is labelled by Claude Sonnet 4.6
 (`bench/realdata/label.py`). This check measures how far those labels can be
-trusted. It takes about two hours.
+trusted. It takes about two hours with the review page below, and must be
+done by a person: the labels it produces stand as the human reference in the
+paper.
 
 ## Files
 
@@ -26,17 +28,44 @@ Each line is one message:
 | `checked` | set to `true` once you have gone over the row |
 | `notes` | optional, free text; never copy message text into it |
 
-Save the corrected file as `bench/realdata/human_check.done.jsonl` (also
-git-ignored), then:
+## The review page (the fast way)
 
 ```
-python -m bench.realdata.label --agreement bench/realdata/human_check.done.jsonl
+python -m bench.realdata.human_check_page          # writes bench/realdata/build/human_check/index.html
 ```
 
-That writes `bench/results/realdata_label_agreement.json`: per type, the
-precision and recall of Sonnet's `protect` and `sensitive` values against yours
-(same exact value and type), and message-level agreement on "carries personal
-data" with Cohen's kappa. Only rows with `checked: true` count.
+Open that file in a browser. It is a plain page (no network, nothing sent),
+git-ignored and 0600, with the 100 messages in a list on the left and one
+message at a time on the right, Sonnet's labels marked in the text. For each
+message: select text to add it to `protect` (choose the type), `sensitive`,
+`optional` or `keep`; edit or remove the entries Sonnet gave; fix `task` and
+`service_query`; tick **checked**; add a note if you want. Every entry is
+linted as you type with the benchmark's rule (exact whole-word substring of
+the message, known type, listed once, `keep` never overlapping `protect`).
+Keys: `j`/`k` next and previous message, `n` next unchecked, `c` toggle
+checked. Your work is kept in the browser's local storage between sessions;
+"Reset to file" discards it.
+
+When all rows are checked, **Export** downloads `human_check.done.jsonl`.
+Move it to `bench/realdata/human_check.done.jsonl` (git-ignored) and run:
+
+```
+python -m bench.realdata.human_check_page --check bench/realdata/human_check.done.jsonl
+python -m bench.realdata.label --agreement bench/realdata/human_check.done.jsonl --annotator "<your name or role>"
+```
+
+The first prints row ids and lint problems only (no text) and confirms the
+rows match the source file; the second writes
+`bench/results/realdata_label_agreement.json`: per type, the precision and
+recall of Sonnet's `protect` and `sensitive` values against yours (same exact
+value and type), message-level agreement on "carries personal data" with
+Cohen's kappa, the annotator, the checked file's hash and the count of checked
+rows per dataset. Only rows with `checked: true` count. Then add the row to
+`bench/results/README.md`.
+
+Editing the JSONL by hand instead of using the page works the same way: save
+the corrected rows as `bench/realdata/human_check.done.jsonl` and run the two
+commands above.
 
 ## Rules
 

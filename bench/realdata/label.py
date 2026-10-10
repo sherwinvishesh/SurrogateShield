@@ -45,7 +45,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 from bench.arms.inputs import message_id, parse_id
 from bench.realdata.common import (BUILD, COLLECTIONS, DATASETS, RD, ROOT, SEED, TASKS, TEST1, Collection,
-                                   read_jsonl, sha256, write_jsonl)
+                                   file_sha256, git_state, read_jsonl, sha256, write_jsonl)
 
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -645,7 +645,9 @@ def main(argv=None) -> int:
     g.add_argument("--agreement", type=Path)
     ap.add_argument("--write", action="store_true", help="with --run: write labels, prevalence, PII-free sets")
     ap.add_argument("--out", type=Path, help="with --write: the prevalence counts file "
-                    "(default bench/results/realdata_prevalence[_<collection>].json)")
+                    "(default bench/results/realdata_prevalence[_<collection>].json); with --agreement: the "
+                    "agreement file (default bench/results/realdata_label_agreement.json)")
+    ap.add_argument("--annotator", default="human", help="with --agreement: who checked the rows, recorded in the file")
     ap.add_argument("--datasets", nargs="*", choices=list(DATASETS), default=list(DATASETS))
     ap.add_argument("--collection", choices=list(COLLECTIONS), default="test1")
     args = ap.parse_args(argv)
@@ -685,13 +687,28 @@ def main(argv=None) -> int:
         ids = write_human_check()
         print(f"{len(ids)} rows -> {HUMAN_CHECK.relative_to(ROOT)} (0600, git-ignored)")
         return 0
+    from bench.realdata.provider import SONNET
     rows = read_jsonl(args.agreement)
     res = agreement(rows)
-    out = ROOT / "bench" / "results" / "realdata_label_agreement.json"
-    out.write_text(json.dumps({"command": f"python -m bench.realdata.label --agreement {args.agreement}",
+    if not res["rows"]:
+        raise SystemExit(f"{args.agreement}: no row has checked: true; nothing written")
+    out = args.out or ROOT / "bench" / "results" / "realdata_label_agreement.json"
+    rel, shown = _rel(args.agreement), _rel(out)
+    out.write_text(json.dumps({"command": f"python -m bench.realdata.label --agreement {rel} --annotator {args.annotator}",
+                               "git": git_state(), "checked_file": {"path": str(rel), "sha256": file_sha256(args.agreement),
+                                                                    "rows": len(rows), "checked": res["rows"]},
+                               "annotator": args.annotator, "silver": {"annotator": SONNET, "prompt_version": prompt_version()},
+                               "datasets": dict(sorted(Counter(r.get("dataset", "?") for r in rows if r.get("checked")).items())),
                                **res}, indent=1, sort_keys=True) + "\n")
-    print(json.dumps(res["message_level"]), f"-> {out.relative_to(ROOT)}")
+    print(json.dumps(res["message_level"]), f"-> {shown}")
     return 0
+
+
+def _rel(path: Path) -> Path:
+    try:
+        return path.resolve().relative_to(ROOT)
+    except ValueError:
+        return path
 
 
 if __name__ == "__main__":
