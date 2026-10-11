@@ -77,6 +77,21 @@ benchmark, which is scored at test-3's freeze and must carry it). The rule is
 computed under the names above and the result is written with test-3's
 (H1''' ... H10'''); the live and external files name their blocks H7''',
 H8''' and H10'''.
+
+Test-3 reads two hypotheses under revised requirements (``REVISED``) and
+writes each hypothesis's result, with no GO rule:
+
+* H7''' (``h7_rev``): E5b read word by word, SS's BERTScore not below
+  Presidio+Faker's or GLiNER-PII's (lower bound above −0.02), the judge's
+  score beside; E7b, the judge's grade of SS above both (lower bound above 0)
+  and the originals restored letter for letter in SS's replies more often
+  than in theirs (Wilson 95 % intervals apart), in place of cross-turn
+  consistency, which no sampled conversation can measure (no gold value
+  recurs across turns).
+* H8''' (``h8_rev``): letter for letter, from ``attacker_exact_test3.json``:
+  SS's exact recovery over the values it replaced not above GLiNER-PII's
+  (pooled, point estimates); partial recoveries, parts the surrogates keep by
+  design, are counted beside.
 """
 
 from __future__ import annotations
@@ -98,12 +113,12 @@ INPUTS = {"e5": "realdata_test2.json", "components": "realdata_components_test2.
 INPUTS_TEST3 = {"e5": "realdata_test3.json", "components": "realdata_components_test3.json",
                 "perf": "perf_arms_v4.json", "utility": "utility_realdata_test3.json",
                 "multiturn": "multiturn_realdata_test3.json", "attacker": "attacker_realdata_test3.json",
-                "external": "external_nemotron_pii.json"}
+                "attacker_exact": "attacker_exact_test3.json", "external": "external_nemotron_pii.json"}
 SEALED = ("e5", "components")                    # scored on test-2: carry freeze_sha256
 # per sealed collection: its inputs, the files that must carry its freeze, and its hypothesis mark
 SPLITS = {"test2": {"inputs": INPUTS, "sealed": SEALED, "mark": "''"},
           "test3": {"inputs": INPUTS_TEST3, "sealed": (*SEALED, "external"), "mark": "'''"}}
-LIVE = ("utility", "multiturn", "attacker")      # live on test-2: carry split
+LIVE = ("utility", "multiturn", "attacker", "attacker_exact")   # live on test-2 (or read from one): carry split
 SIX = ("presidio_default", "presidio_faker", "presidio_transformers", "llm_guard", "gliner_pii", "gliner_pii_tuned")
 GLINER, TUNED = "gliner_pii", "gliner_pii_tuned"
 H2_AGAINST = (GLINER, "presidio_default", "presidio_faker")
@@ -112,6 +127,16 @@ NO_PATTERNS, NO_TAGGER, UNROUTED = "h9/no_patterns", "no_tagger", "h9/no_pattern
 H7, H8, H10 = "H7''", "H8''", "H10''"
 NOT_RUN = {"holds": None, "status": "not run"}
 GO_PARTS = ("H1''", "H2''", "H3''", "H5''", "H6''", "H8''")
+H7_AGAINST, H7_MARGIN = ("presidio_faker", "gliner_pii"), 0.02     # live.py's comparators and margin
+REVISED = {"test3": {
+    "H7''": ("E5b read word by word: SS's BERTScore not below Presidio+Faker's or GLiNER-PII's (lower bound above "
+             "−0.02), the judge's score beside; E7b: the judge's grade of SS above both (lower bound above 0) and "
+             "the originals restored letter for letter in SS's replies more often than in theirs (Wilson 95 % "
+             "intervals apart), in place of cross-turn consistency, which no sampled conversation can measure "
+             "(no gold value recurs across turns)"),
+    "H8''": ("letter for letter: SS's exact recovery over the values it replaced not above GLiNER-PII's (pooled, "
+             "point estimates; attacker_exact_test3.json); partial recoveries, parts the surrogates keep by "
+             "design, counted beside")}}
 
 
 def load(results: Path = RESULTS, freeze: Optional[Path] = None, split: str = "test2") -> Dict[str, Optional[dict]]:
@@ -244,6 +269,49 @@ def h8(attacker: dict, key: str = H8) -> dict:
             "per_dataset": {g: r[key]["holds"] for g, r in attacker["results"].items() if g != "all"}}
 
 
+def _h7_rev_group(e: dict, m: dict) -> dict:
+    """H7's revised requirement on one group: *e* the group's E5b block,
+    *m* its E7b block."""
+    e5b, e7b = {"judge_beside": {}}, {"consistency_beside": "no gold value recurs across turns"}
+    restored = m["ss"]["restored"]
+    for o in H7_AGAINST:
+        b = e["bertscore_differences"][f"ss-{o}"]
+        e5b[f"bertscore_not_below_{o}"] = bool(b.get("ci95") and b["ci95"][0] > -H7_MARGIN)
+        e5b[f"bertscore_ss-{o}"] = _cmp(b)
+        e5b["judge_beside"][o] = _cmp(e["judges"][o]["score"])
+        j = m["differences"][f"judge_ss-{o}"]
+        e7b[f"judge_above_{o}"] = bool(j.get("ci95") and j["ci95"][0] > 0)
+        e7b[f"judge_ss-{o}"] = _cmp(j)
+        r = m[o]["restored"]
+        hi = r["wilson95"][1] if r and r.get("n") else 0.0
+        e7b[f"restored_above_{o}"] = bool(restored and restored.get("n") and restored["wilson95"][0] > hi)
+        e7b[f"restored_{o}"] = r
+    e7b["restored_ss"] = restored
+    e5b["holds"] = all(e5b[f"bertscore_not_below_{o}"] for o in H7_AGAINST)
+    e7b["holds"] = all(e7b[f"{p}_above_{o}"] for o in H7_AGAINST for p in ("judge", "restored"))
+    return {"e5b": e5b, "e7b": e7b, "holds": e5b["holds"] and e7b["holds"]}
+
+
+def h7_rev(utility: Optional[dict], multiturn: Optional[dict], requirement: str) -> dict:
+    """H7 under its revised requirement (``REVISED``), decided on the pooled group."""
+    if utility is None or multiturn is None:
+        return {**NOT_RUN, "status": "utility or multiturn not run"}
+    per = {g: _h7_rev_group(utility["e5b"][g], multiturn["results"][g])
+           for g in utility["e5b"] if g in multiturn["results"]}
+    return {"requirement": requirement, **per["all"],
+            "per_dataset": {g: x["holds"] for g, x in per.items() if g != "all"}}
+
+
+def h8_rev(exact: dict, requirement: str) -> dict:
+    """H8 under its revised requirement: attacker_exact's letter-for-letter reading."""
+    rev, pooled = exact["H8-rev"], exact["results"]["all"]
+    return {"requirement": requirement, "holds": bool(rev["holds"]), "exact": rev["pooled"],
+            "per_dataset": rev["per_dataset"], "beside_every_baseline": rev["beside_every_baseline"],
+            "ss_lowest_exact_of_all_arms": rev["ss_lowest_exact_of_all_arms"],
+            "conversation_exact": pooled["ss-conversation"]["exact"],
+            "partial_set_aside": pooled["ss"]["partial_set_aside"]["n"]}
+
+
 def h9(e5: dict, components: dict, datasets: Sequence[str]) -> dict:
     out = {}
     for g in [*datasets, "all"]:
@@ -309,11 +377,21 @@ def verdict(docs: Dict[str, Optional[dict]], datasets: Sequence[str] = DATASETS,
         h["H1''"], h["H2''"], h["H3''"] = h1(e5, datasets), h2(e5, datasets), h3(e5, datasets)
         h["H4''"], h["H5''"] = h4(e5, datasets), h5(e5)
     h["H6''"] = h6(docs["perf"]) if docs.get("perf") else dict(NOT_RUN)
-    h["H7''"] = h7(docs.get("utility"), docs.get("multiturn"), f"H7{mark}")
-    h["H8''"] = h8(docs["attacker"], f"H8{mark}") if docs.get("attacker") else dict(NOT_RUN)
+    rev = REVISED.get(split)
+    if rev:
+        h["H7''"] = h7_rev(docs.get("utility"), docs.get("multiturn"), rev["H7''"])
+        h["H8''"] = h8_rev(docs["attacker_exact"], rev["H8''"]) if docs.get("attacker_exact") else dict(NOT_RUN)
+    else:
+        h["H7''"] = h7(docs.get("utility"), docs.get("multiturn"), f"H7{mark}")
+        h["H8''"] = h8(docs["attacker"], f"H8{mark}") if docs.get("attacker") else dict(NOT_RUN)
     h["H9''"] = h9(e5, docs["components"], datasets) if e5 and docs.get("components") else dict(NOT_RUN)
     h["H10''"] = h10(docs["external"], f"H10{mark}") if docs.get("external") else dict(NOT_RUN)
-    v = {**decide(h), "not_run": [k for k, x in h.items() if x.get("holds") is None], "hypotheses": h}
+    not_run = [k for k, x in h.items() if x.get("holds") is None]
+    if rev:
+        v = {"hypothesis_results": {k: x.get("holds") for k, x in h.items()},
+             "not_held": [k for k, x in h.items() if x.get("holds") is False], "not_run": not_run, "hypotheses": h}
+    else:
+        v = {**decide(h), "not_run": not_run, "hypotheses": h}
     return v if mark == "''" else marked(v, mark)
 
 
@@ -325,7 +403,9 @@ def run(out: Path, results: Path = RESULTS, freeze: Optional[Path] = None, split
     flag = "" if split == "test2" else f" --split {split}"
     doc = {"command": f"PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict{flag} "
                       f"--out {score.rel(out)}",
-           "git": git_state(), "prereg": {"file": score.rel(coll.hypotheses), "sha256": file_sha256(coll.hypotheses)},
+           "git": git_state(),
+           ("hypotheses_file" if split in REVISED else "prereg"): {"file": score.rel(coll.hypotheses),
+                                                                    "sha256": file_sha256(coll.hypotheses)},
            "split": split, "freeze_file": score.rel(freeze),
            "freeze_sha256": file_sha256(freeze) if freeze.exists() else None,
            "inputs": {k: (d["_input"] if d else None) for k, d in docs.items()}, **v}
@@ -345,6 +425,10 @@ def _k(r: Optional[dict]) -> str:
     return "–" if not r else f"{r['k']}/{r['n']}"
 
 
+def _d(c: dict) -> str:
+    return "–" if c.get("diff") is None else f"{c['diff']:+.3f} [{c['ci95'][0]:+.3f}, {c['ci95'][1]:+.3f}]"
+
+
 def _detail(name: str, x: dict) -> str:
     name = unmarked(name)
     if x.get("holds") is None:
@@ -360,6 +444,19 @@ def _detail(name: str, x: dict) -> str:
     if name == "H6''":
         return (f"p50 {x['ss']['p50_ms']} vs {x['gliner_pii']['p50_ms']} ms; peak RSS {x['ss']['peak_rss_mb']} vs "
                 f"{x['gliner_pii']['peak_rss_mb']} MB" + ("" if x["default_pipeline"] else "; SS not the default"))
+    if name == "H7''" and "requirement" in x:
+        e, m = x["e5b"], x["e7b"]
+        return (f"E5b BERTScore ss − Presidio+Faker {_d(e['bertscore_ss-presidio_faker'])}, ss − GLiNER-PII "
+                f"{_d(e['bertscore_ss-gliner_pii'])} (judge beside {_d(e['judge_beside']['presidio_faker'])}, "
+                f"{_d(e['judge_beside']['gliner_pii'])}); E7b judge {_d(m['judge_ss-presidio_faker'])}, "
+                f"{_d(m['judge_ss-gliner_pii'])}; restored SS {_k(m['restored_ss'])} vs "
+                f"{_k(m['restored_presidio_faker'])}, {_k(m['restored_gliner_pii'])}")
+    if name == "H8''" and "requirement" in x:
+        e, b = x["exact"], x["beside_every_baseline"]
+        return (f"exact recovery SS {_k(e['ss'])} vs GLiNER-PII {_k(e['gliner_pii'])}"
+                + (", the lowest of all arms" if x["ss_lowest_exact_of_all_arms"] else "")
+                + " (" + ", ".join(f"{a} {_k(v['exact'])}" for a, v in b.items() if a != GLINER) + "); "
+                f"conversation {_k(x['conversation_exact'])}; {x['partial_set_aside']} partials set aside")
     if name == "H7''":
         return f"E5b {_yn(x['e5b']['holds'])}, E7b {_yn(x['e7b']['holds'])}"
     if name == "H8''":
@@ -377,8 +474,30 @@ def _detail(name: str, x: dict) -> str:
     return ""
 
 
+def markdown_revised(doc: dict) -> str:
+    """The table of a split read under ``REVISED``: each hypothesis's result, no GO rule."""
+    split = doc["split"]
+    mark = SPLITS[split]["mark"]
+    lines = [f"# {split.replace('test', 'Test-')} results", "",
+             f"`{doc['command']}` at commit `{(doc['git'].get('commit') or '?')[:12]}`; hypotheses "
+             f"`{doc['hypotheses_file']['file']}` ({doc['hypotheses_file']['sha256'][:12]}), {doc['freeze_file']} "
+             f"{str(doc['freeze_sha256'])[:12]}. Readings: `bench/realdata/verdict.py`.", "",
+             "| hypothesis | result | detail |", "|---|---|---|"]
+    for name, x in doc["hypotheses"].items():
+        lines.append(f"| {name} | {_yn(x.get('holds'))} | {_detail(name, x)} |")
+    lines += ["", "Revised requirements:", ""]
+    lines += [f"- {k.replace(chr(39) * 2, mark)}: {v}." for k, v in REVISED[split].items()]
+    lines += ["", "Inputs:", ""]
+    for k, i in doc["inputs"].items():
+        lines.append(f"- {k}: " + ("not run" if not i else f"`{i['file']}` ({i['sha256'][:12]}, commit "
+                                   f"{str(i['commit'])[:12]})"))
+    return "\n".join(lines) + "\n"
+
+
 def markdown(doc: dict) -> str:
     split = doc.get("split", "test2")
+    if split in REVISED:
+        return markdown_revised(doc)
     freeze = "FREEZE.json" if split == "test2" else doc["freeze_file"]
     lines = [f"# {split.replace('test', 'Test-')} verdict: {doc['verdict']}", "",
              f"`{doc['command']}` at commit `{(doc['git'].get('commit') or '?')[:12]}`; pre-registration "
@@ -403,7 +522,7 @@ def main(argv=None) -> int:
     ap.add_argument("--split", choices=list(SPLITS), default="test2")
     a = ap.parse_args(argv)
     doc = run(a.out.resolve(), split=a.split)
-    print(doc["verdict"])
+    print(doc.get("verdict", "results"))
     for name, x in doc["hypotheses"].items():
         print(f"{name:7} {_yn(x.get('holds'))}")
     return 0

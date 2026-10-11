@@ -251,49 +251,86 @@ def test_run_writes_the_verdict_and_its_table(tmp_path):
     assert "| H6'' | yes | holds | p50 40.0 vs 80.0 ms; peak RSS 1500.0 vs 2500.0 MB |" in md
 
 
-# ── test-3 (--split test3): the same rule, test-3's files, H1''' ... H10''' ──
+# ── test-3 (--split test3): test-3's files, H1''' ... H10''', H7 and H8 revised, no GO rule ──
 
 P3 = "'" * 3
 
 
+def w(k, n, lo, hi):
+    return {**r(k, n), "wilson95": [lo, hi]}
+
+
 def docs3():
     """docs() as test-3's files carry them: split test3, the live and external
-    blocks named H7''', H8''', H10''', the external benchmark at test-3."""
+    blocks named H7''', H8''', H10''', the external benchmark at test-3, and
+    what H7''' and H8'''s revised requirements read: E5b BERTScore (judge
+    beside), E7b judge and restored originals, the letter-for-letter reading."""
     x = docs()
     for k in ("e5", "components", "utility", "multiturn", "attacker"):
         x[k]["split"] = "test3"
-    x["utility"]["e5b"] = {g: {f"H7{P3}": v["H7''"]} for g, v in x["utility"]["e5b"].items()}
-    x["multiturn"]["results"] = {g: {f"H7{P3}": v["H7''"]} for g, v in x["multiturn"]["results"].items()}
+    x["utility"]["e5b"] = {g: {f"H7{P3}": {"holds": False},
+                               "bertscore_differences": {f"ss-{o}": d(0.07, 0.04, 0.1) for o in V.H7_AGAINST},
+                               "judges": {o: {"score": d(0.05, -0.05, 0.15)} for o in V.H7_AGAINST}} for g in GROUPS}
+    x["multiturn"]["results"] = {g: {f"H7{P3}": {"holds": False},
+                                     "differences": {f"judge_ss-{o}": d(0.6, 0.5, 0.7) for o in V.H7_AGAINST},
+                                     "ss": {"restored": w(80, 82, 0.93, 0.99)},
+                                     **{o: {"restored": w(0, 60, 0.0, 0.06)} for o in V.H7_AGAINST}} for g in GROUPS}
     x["attacker"]["results"] = {g: {f"H8{P3}": v["H8''"]} for g, v in x["attacker"]["results"].items()}
+    x["attacker_exact"] = {"split": "test3", "H8-rev": {
+        "holds": True, "pooled": {"ss": r(4, 600), "gliner_pii": r(6, 550), "ss-gliner_pii": d(-0.004, -0.015, 0.006)},
+        "per_dataset": {ds: True for ds in DS}, "ss_lowest_exact_of_all_arms": True,
+        "beside_every_baseline": {a: {"exact": r(8, 400), "ss_not_above": True} for a in ("presidio_faker", "gliner_pii")}},
+        "results": {"all": {"ss": {"partial_set_aside": {"n": 90}}, "ss-conversation": {"exact": r(1, 170)}}}}
     x["external"] = {"collection": "test3", "hypotheses": {f"H10{P3}": x["external"]["hypotheses"]["H10''"]}}
     return x
 
 
 def test_test3_reads_its_own_blocks_and_names_every_hypothesis_with_three_primes():
     v = V.verdict(docs3(), split="test3")
-    assert v["verdict"] == "GO" and v["not_run"] == []
+    assert "verdict" not in v and v["not_held"] == [] and v["not_run"] == []
     assert {k: x["holds"] for k, x in v["hypotheses"].items()} == {f"H{i}{P3}": True for i in range(1, 11)}
+    assert v["hypothesis_results"] == {f"H{i}{P3}": True for i in range(1, 11)}
     assert V.SPLITS["test3"]["inputs"]["perf"] == "perf_arms_v4.json"
     assert set(V.SPLITS["test3"]["inputs"].values()) - {"external_nemotron_pii.json", "perf_arms_v4.json"} == {
         f"{n}_test3.json" for n in ("realdata", "realdata_components")} | {
-        f"{n}_realdata_test3.json" for n in ("utility", "multiturn", "attacker")}
+        f"{n}_realdata_test3.json" for n in ("utility", "multiturn", "attacker")} | {"attacker_exact_test3.json"}
 
 
-def test_test3_applies_test2s_rule_unchanged():
+def test_test3_reports_each_hypothesis_without_a_go_rule():
     x = docs3()
     x["e5"]["differences"]["sharegpt"]["injected"]["gliner_pii"]["leak_rate"] = d(-0.03, -0.06, 0.01)
     v = V.verdict(x, split="test3")
-    assert v["verdict"] == "GO-with-caveat" and f"H1{P3}" in v["caveat"] and "H1'' " not in v["caveat"]
-    x["attacker"]["results"]["all"][f"H8{P3}"].update(no_exact_single=False, holds=False)
+    assert "verdict" not in v and "caveat" not in v and v["not_held"] == [f"H1{P3}"]
+    x["attacker_exact"]["H8-rev"]["holds"] = False
     v = V.verdict(x, split="test3")
-    assert v["verdict"] == "NO-GO" and v["failed"] == [f"H1{P3}", f"H8{P3}"]     # the caveat needs every other part
-    x["attacker"] = None
+    assert v["not_held"] == [f"H1{P3}", f"H8{P3}"]
+    x["attacker_exact"] = None
     v = V.verdict(x, split="test3")
-    assert v["missing"] == [f"H8{P3}"] and v["not_run"] == [f"H8{P3}"]
+    assert v["not_run"] == [f"H8{P3}"] and v["hypothesis_results"][f"H8{P3}"] is None
     x = docs3()
     x["e5"]["differences_by_type"]["groups"]["all"]["gliner_pii"]["PERSON"] = d(0.03, 0.001, 0.05)
     v = V.verdict(x, split="test3")
-    assert v["failed"] == [f"H5{P3}"] and v["hypotheses"][f"H5{P3}"]["failing_types"] == ["PERSON"]
+    assert v["not_held"] == [f"H5{P3}"] and v["hypotheses"][f"H5{P3}"]["failing_types"] == ["PERSON"]
+
+
+def test_test3_reads_h7_and_h8_under_their_revised_requirements():
+    x = docs3()
+    x["attacker"]["results"]["all"][f"H8{P3}"].update(no_exact_single=False, holds=False)   # the earlier reading
+    v = V.verdict(x, split="test3")
+    h7, h8 = v["hypotheses"][f"H7{P3}"], v["hypotheses"][f"H8{P3}"]
+    assert h7["holds"] and h8["holds"] and h7["requirement"] == V.REVISED["test3"]["H7''"]
+    assert h7["e5b"]["judge_beside"]["gliner_pii"] == {"diff": 0.05, "ci95": [-0.05, 0.15]}    # beside, not deciding
+    assert h8["exact"]["ss"]["k"] == 4 and h8["partial_set_aside"] == 90 and h8["per_dataset"]["oasst1"]
+    x["utility"]["e5b"]["all"]["bertscore_differences"]["ss-gliner_pii"] = d(0.01, -0.03, 0.05)   # below −0.02
+    assert V.verdict(x, split="test3")["not_held"] == [f"H7{P3}"]
+    x = docs3()
+    x["multiturn"]["results"]["all"]["gliner_pii"]["restored"] = w(70, 82, 0.75, 0.94)        # intervals overlap
+    v = V.verdict(x, split="test3")
+    assert v["not_held"] == [f"H7{P3}"] and not v["hypotheses"][f"H7{P3}"]["e7b"]["restored_above_gliner_pii"]
+    x = docs3()
+    x["utility"]["e5b"]["oasst1"]["bertscore_differences"]["ss-presidio_faker"] = d(0.0, -0.05, 0.05)
+    v = V.verdict(x, split="test3")                            # decided on the pooled group, each dataset beside
+    assert v["not_held"] == [] and v["hypotheses"][f"H7{P3}"]["per_dataset"]["oasst1"] is False
 
 
 def _write3(results, x, sealed):
@@ -340,12 +377,14 @@ def test_test3_run_writes_its_own_verdict_and_table(tmp_path):
     out = tmp_path / "out" / "verdict_test3.json"
     doc = V.run(out, tmp_path, freeze, "test3")
     back = json.loads(out.read_text())
-    assert back["verdict"] == doc["verdict"] == "GO-with-caveat" and back["split"] == "test3"
-    assert back["freeze_sha256"] == file_sha256(freeze) and back["prereg"]["file"].endswith("HYPOTHESES_TEST3.md")
+    assert back["not_held"] == doc["not_held"] == [f"H1{P3}"] and back["split"] == "test3" and "verdict" not in back
+    assert back["freeze_sha256"] == file_sha256(freeze) and back["hypotheses_file"]["file"].endswith("HYPOTHESES_TEST3.md")
     assert " -m bench.realdata.verdict --split test3 --out " in back["command"]
     md = out.with_suffix(".md").read_text()
-    assert md.startswith("# Test-3 verdict: GO-with-caveat\n")
-    assert f"Caveat: H1{P3} fails on sharegpt" in md
+    assert md.startswith("# Test-3 results\n") and "GO" not in md and "pre-registration" not in md
+    assert f"| H1{P3} | fails | oasst1: holds; sharegpt: fails (gliner_pii); wildchat: holds |" in md
     assert sum(line.startswith("| H") for line in md.splitlines()) == 10
-    assert f"| H6{P3} | yes | holds | p50 40.0 vs 80.0 ms; peak RSS 1500.0 vs 2500.0 MB |" in md
-    assert f"| H7{P3} | no | holds |" in md and f"| H8{P3} | yes | holds |" in md
+    assert f"| H6{P3} | holds | p50 40.0 vs 80.0 ms; peak RSS 1500.0 vs 2500.0 MB |" in md
+    assert f"| H7{P3} | holds | E5b BERTScore ss − Presidio+Faker +0.070 [+0.040, +0.100]" in md
+    assert f"| H8{P3} | holds | exact recovery SS 4/600 vs GLiNER-PII 6/550, the lowest of all arms" in md
+    assert f"- H7{P3}: E5b read word by word" in md and f"- H8{P3}: letter for letter" in md
