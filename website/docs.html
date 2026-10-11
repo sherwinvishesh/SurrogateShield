@@ -68,6 +68,29 @@
   .topnav .back-link { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--muted); border: 1px solid var(--border-strong); padding: 5px 12px; }
   .topnav .back-link:hover { color: var(--neon); border-color: var(--neon); text-decoration: none; }
 
+  /* ---- Search ---- */
+  .doc-search { position: relative; margin-left: auto; }
+  .doc-search + .back-link { margin-left: 0; }
+  .doc-search input { width: 260px; height: 32px; padding: 0 12px; font-family: var(--font-mono); font-size: 12.5px; color: var(--text); background: var(--bg-elev); border: 1px solid var(--border-strong); border-radius: 0; outline: none; }
+  .doc-search input:focus { border-color: var(--neon); }
+  .doc-search input::placeholder { color: var(--dim); }
+  .search-results { display: none; position: absolute; top: 40px; right: 0; width: 460px; max-height: 70vh; overflow-y: auto; background: var(--bg-elev); border: 1px solid var(--border-strong); box-shadow: 0 16px 40px rgba(0,0,0,0.55); }
+  .search-results.open { display: block; }
+  .search-results a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 13px; line-height: 1.5; text-decoration: none; }
+  .search-results a:last-child { border-bottom: 0; }
+  .search-results a:hover, .search-results a.sel { background: rgba(79,240,212,0.05); }
+  .search-results .r-title { display: block; margin-bottom: 2px; color: var(--text); font-weight: 500; }
+  .search-results .r-group { margin-right: 8px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  .search-results mark { background: rgba(79,240,212,0.16); color: var(--neon); }
+  .search-results .r-empty { padding: 12px 14px; color: var(--dim); font-size: 13px; }
+  @media (max-width: 768px) {
+    .topnav { padding: 0 16px; gap: 12px; }
+    .topnav .sep, .topnav .page-title, .topnav .back-link { display: none; }
+    .doc-search { flex: 1; min-width: 0; }
+    .doc-search input { width: 100%; }
+    .search-results { position: fixed; top: 56px; left: 0; right: 0; width: auto; }
+  }
+
   /* ---- Layout ---- */
   .layout {
     display: flex;
@@ -167,7 +190,7 @@
     margin: 4px 0;
     min-height: 16px;
   }
-  .step-body { padding-bottom: 20px; }
+  .step-body { padding-bottom: 20px; min-width: 0; }
   .step-body h3 { margin-top: 4px; margin-bottom: 6px; font-size: 15px; }
   .step:last-child .step-num .line { display: none; }
 
@@ -239,6 +262,10 @@
   <a href="index.html" class="brand">Surrogate<span>Shield</span></a>
   <span class="sep">/</span>
   <span class="page-title">Documentation</span>
+  <div class="doc-search" role="search">
+    <input type="search" id="doc-search" placeholder="Search the docs  ( / )" aria-label="Search the docs" autocomplete="off" spellcheck="false">
+    <div class="search-results" id="search-results"></div>
+  </div>
   <a href="index.html" class="back-link">← Back to home</a>
 </nav>
 
@@ -4211,6 +4238,82 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest tests python-
       setTimeout(() => { btn.textContent = 'Copy docs.md'; }, 2500);
     });
   });
+
+  // Search the docs: every section's title and text, ranked by title hits
+  (() => {
+    const input = document.getElementById('doc-search');
+    const box = document.getElementById('search-results');
+    const group = {};
+    document.querySelectorAll('.sidebar-section').forEach(sec => {
+      const h = sec.querySelector('.sidebar-heading').textContent.trim();
+      sec.querySelectorAll('a').forEach(a => { group[a.getAttribute('href').slice(1)] = h; });
+    });
+    const index = [...sections].map(s => {
+      const h = s.querySelector('h1, h2');
+      const title = h ? h.textContent.replace(/\s+/g, ' ').trim() : s.id;
+      let text = s.innerText.replace(/\s+/g, ' ').trim();
+      if (text.startsWith(title)) text = text.slice(title.length).trim();
+      return { id: s.id, title, text, group: group[s.id] || '' };
+    });
+    const esc = t => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const hl = (t, re) => t.split(re).map((p, i) => i % 2 ? '<mark>' + esc(p) + '</mark>' : esc(p)).join('');
+    let hits = [], sel = 0;
+
+    function search(q) {
+      const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) { box.classList.remove('open'); hits = []; return; }
+      const phrase = words.join(' ');
+      hits = index.map(e => {
+        const title = e.title.toLowerCase(), text = e.text.toLowerCase();
+        if (!words.every(w => title.includes(w) || text.includes(w))) return null;
+        let score = title.includes(phrase) ? 100 : 0;
+        words.forEach(w => { if (title.includes(w)) score += 10; score += Math.min(text.split(w).length - 1, 10); });
+        return { e, score };
+      }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 8);
+      const re = new RegExp('(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+      box.innerHTML = hits.length ? hits.map(({ e }, i) => {
+        const at = Math.max(0, e.text.toLowerCase().indexOf(words[0]));
+        const start = Math.max(0, at - 50);
+        const snip = (start ? '…' : '') + e.text.slice(start, start + 150) + (start + 150 < e.text.length ? '…' : '');
+        return '<a href="#' + e.id + '"' + (i === sel ? ' class="sel"' : '') + '><span class="r-title"><span class="r-group">' +
+               esc(e.group) + '</span>' + hl(e.title, re) + '</span>' + hl(snip, re) + '</a>';
+      }).join('') : '<div class="r-empty">No section mentions that.</div>';
+      box.classList.add('open');
+    }
+    function close() { box.classList.remove('open'); input.blur(); }
+    function go(i) {
+      if (!hits[i]) return;
+      close();
+      const id = hits[i].e.id;
+      if (location.hash === '#' + id) document.getElementById(id).scrollIntoView();
+      else location.hash = id;
+    }
+
+    input.addEventListener('input', () => { sel = 0; search(input.value); });
+    input.addEventListener('focus', () => { if (input.value.trim()) search(input.value); });
+    input.addEventListener('keydown', ev => {
+      const links = box.querySelectorAll('a');
+      if ((ev.key === 'ArrowDown' || ev.key === 'ArrowUp') && links.length) {
+        ev.preventDefault();
+        sel = (sel + (ev.key === 'ArrowDown' ? 1 : -1) + links.length) % links.length;
+        links.forEach((a, i) => a.classList.toggle('sel', i === sel));
+        const a = links[sel];  // scroll the list only, never the page
+        if (a.offsetTop < box.scrollTop) box.scrollTop = a.offsetTop;
+        else if (a.offsetTop + a.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = a.offsetTop + a.offsetHeight - box.clientHeight;
+      } else if (ev.key === 'Enter') { ev.preventDefault(); go(sel); }
+      else if (ev.key === 'Escape') close();
+    });
+    box.addEventListener('click', ev => { if (ev.target.closest('a')) close(); });
+    document.addEventListener('click', ev => { if (!ev.target.closest('.doc-search')) box.classList.remove('open'); });
+    document.addEventListener('keydown', ev => {
+      const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+      if ((ev.key === '/' && !typing) || (ev.key === 'k' && (ev.metaKey || ev.ctrlKey))) {
+        ev.preventDefault();
+        input.focus();
+        input.select();
+      }
+    });
+  })();
 </script>
 </body>
 </html>

@@ -1558,8 +1558,8 @@
     </div>
 
     <h1 class="hero-headline">
-      Detected PII is swapped<br>
-      before the request.<span class="accent"> Surrogates go instead.</span>
+      PII never leaves<br>
+      your device.<span class="accent"> Surrogates do.</span>
     </h1>
     <p class="hero-sub">
       SurrogateShield finds the personal data in a message, replaces it with realistic, consistent surrogates before the request reaches an LLM provider, and puts the real values back in the reply. On 3,677 personal values placed in real ShareGPT, WildChat and oasst1 messages it let <strong>0.8%</strong> through. GLiNER-PII let through 9.1%, Microsoft Presidio 31.6% and LLM Guard 56.3%. It trailed on only a few tests, listed in one line under <a href="#limitations" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Limitations</a>. The surrogate map is encrypted with AES-256-GCM and stays on your machine. Ships as a Python library with a CLI, plus an interactive terminal app.

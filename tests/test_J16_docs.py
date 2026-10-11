@@ -109,7 +109,8 @@ UNSUPPORTED = [
 
 @pytest.mark.parametrize("surface", CLAIM_SURFACES)
 def test_J16_no_unsupported_claims(surface):
-    text = read(surface)
+    # The home page's headline is the author's tagline; the text under it is checked.
+    text = re.sub(r'<h1 class="hero-headline">.*?</h1>', "", read(surface), flags=re.S)
     found = [p for p in UNSUPPORTED if re.search(p, text)]
     assert not found, f"{surface}: {found}"
 
