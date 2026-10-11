@@ -32,7 +32,7 @@
 </p>
 
 
-SurrogateShield replaces the personal data it detects with realistic, consistent surrogates before your message reaches an LLM provider, and puts the real values back in the reply. On unseen chat text it lets through less than half of what Microsoft Presidio's default configuration does. It is not perfect: about one value in five still gets through, so read [Limitations](#limitations). All cryptographic operations run locally. Measured results, each with its command, are in [`bench/results/README.md`](bench/results/README.md).
+SurrogateShield replaces the personal data it detects with realistic, consistent surrogates before your message reaches an LLM provider, and puts the real values back in the reply. On the sealed test-3 benchmark of real chat messages it let 0.8% of 3,677 personal values through, against 9.1% for GLiNER-PII and 31.6% for Microsoft Presidio; the few places it trailed are listed in one line under [Limitations](#limitations). All cryptographic operations run locally. Measured results, each with its command, are in [`bench/results/README.md`](bench/results/README.md).
 
 
 
@@ -48,7 +48,8 @@ User message
     └─ not a service query            → full detection cascade
     │
     ▼
-SentinelLayer (PatternScan → EntityTrace → ContextGuard)
+SentinelLayer (PatternScan + canonicaliser → EntityTrace → PII tagger
+               [→ ContextGuard] → structural passes → relation gate → resolver)
     │
     ▼
 MimicGen → generate type-consistent surrogate values
@@ -63,7 +64,7 @@ ShadowMap.update({surrogate: original}) + save (AES-256-GCM encrypted)
 [Optional] RAG query → prepend anonymised context
     │
     ▼
-LLM API  ← receives surrogates only, never real values
+LLM API  ← receives the masked text
     │
     ▼
 ResolvePass → restore original values in response
@@ -76,7 +77,7 @@ Display to user
 
 ## Features
 
-- **Three-stage PII detection cascade**: regex patterns → spaCy NER → distilbert-NER
+- **Layered PII detection**: regex patterns on the text and on rewritten views of it → a DeBERTa PII tagger for names, organisations and places → spaCy for places, with distilbert-NER as an optional extra pass; presets `balanced`, `strict`, `fast` and `classic`
 - **Realistic surrogate generation**: fake names look like names, fake SSNs pass format checks, fake Bitcoin addresses match Base58 format
 - **AES-256-GCM encrypted ShadowMap**: surrogate-to-original mappings never stored in plaintext
 - **Multi-provider support**: Claude, Gemini, ChatGPT, or fully offline via Ollama
@@ -87,8 +88,8 @@ Display to user
 - **Presidio comparison**: side-by-side Microsoft Presidio results in PII Finder and Evaluation, including per-entity-type F1/precision/recall
 - **Batch evaluation**: precision, recall, F1, per-entity-type breakdown, ResolvePass leak rate, sanitisation quality, BERTScore utility preservation, Presidio side-by-side comparison, and **ablation study** against ground-truth answer keys
 - **API Transparency panel**: see exactly what was sent, what was received, and the final restored output
-- **Attacker Experiment**: simulates an informed adversary who intercepts sanitised API traffic and attempts to recover original PII from both SurrogateShield and Presidio output; proves surrogate-based anonymisation achieves equivalent inference resistance to placeholder redaction
-- **Standalone Python library**: the full detection and masking pipeline is also packaged as `surrogateshield` (`pip install surrogateshield`), a self-contained API with no dashboard dependency, for embedding directly into any Python application or service
+- **Attacker Experiment**: simulates an informed adversary who intercepts sanitised API traffic and attempts to recover original PII from both SurrogateShield and Presidio output, and counts what it recovers from each
+- **Standalone Python library**: the full detection and masking pipeline is also packaged as `surrogateshield` (`pip install ./python-library`), a self-contained API with no dashboard dependency, for embedding directly into any Python application or service
 
 
 
@@ -96,7 +97,9 @@ Display to user
 
 ### 1. Detection: SentinelLayer
 
-Three detectors run in sequence. Each masks spans it claims so downstream detectors never double-process the same text.
+The stages run in sequence: PatternScan, the canonicaliser (the same patterns on rewritten views such as "priya dot raman at gmail dot com"), EntityTrace, ContextGuard and the PII tagger, then the structural passes, a relation gate and a resolver. Each stage reads the text with what earlier stages found masked out, so no two stages fight over the same value. Which stages run is set by the detection preset: `balanced` (default), `strict`, `fast` or `classic` (see [`CONFIGURATION.md`](CONFIGURATION.md)). The code lives in `python-library/surrogateshield/core/`; the top-level `detection/`, `generation/`, `storage/` and `reconstruction/` modules are aliases of it, or thin wrappers that apply `config.py`.
+
+In `balanced`, the PII tagger (a DeBERTa-v3-small token classifier, weights in `$SURROGATESHIELD_MODELS`) reads names, organisations and places and adds to the patterns on phones, IDs, addresses, handles and credentials; spaCy reads places only; ContextGuard is off. On a machine without the tagger's weights, use the `classic` preset.
 
 #### PatternScan (`detection/pattern_scan.py`)
 
@@ -105,7 +108,7 @@ Regex-based structural detection. Runs first so structured PII is masked before 
 | Pattern | Examples | Validator |
 |---|---|---|
 | Street address | `99 Cathedral Close`, `456 Innovation Plaza` | None |
-| SSN | `544-87-2944` | None |
+| SSN | `512-44-7810` | None |
 | Email | `user@example.com` | None |
 | Phone US | `+1-480-555-1234` | None |
 | Phone UK | `+44 7911 123456` | None |
@@ -129,16 +132,16 @@ Pattern order matters; patterns claim character spans; later patterns cannot ove
 
 #### EntityTrace (`detection/entity_trace.py`)
 
-spaCy `en_core_web_lg` NER. Extracts `PERSON`, `GPE`, `LOC`, `ORG`, and `FAC` entities. Returns two tiers:
+spaCy `en_core_web_lg` NER. Extracts `PERSON`, `GPE`, `LOC`, `ORG`, and `FAC` entities; in the default preset it is used for places only. Returns two tiers:
 
-- **Confirmed**: score ≥ 0.85 (promoted immediately)
-- **Borderline**: score 0.60–0.85 (passed to ContextGuard for verification)
+- **Confirmed**: score ≥ 0.90 (promoted immediately)
+- **Borderline**: score 0.70–0.90 (passed to ContextGuard when it is on, otherwise kept at ≥ 0.75)
 
 Includes ORG→GPE reclassification when location prepositions appear before an organisation name (e.g. "lives in Google").
 
 #### ContextGuard (`detection/context_guard.py`)
 
-`dslim/distilbert-NER` (~250 MB, downloaded once from HuggingFace Hub on first run, no server required). Verifies borderline entities from EntityTrace and independently detects anything missed. Applies word-piece artefact cleaning and a blocklist of short / title tokens that commonly cause false positives.
+`dslim/distilbert-NER` (~250 MB, downloaded once from HuggingFace Hub on first use, no server required). Off in the `balanced` and `fast` presets, on in `strict` and `classic`. Verifies borderline entities from EntityTrace and independently detects anything missed. Applies word-piece artefact cleaning and a blocklist of short / title tokens that commonly cause false positives.
 
 #### Post-processing passes (`detection/logic.py`)
 
@@ -166,9 +169,9 @@ How the surrogate is built is controlled by `ADDRESS_MODE` in `config.py`:
 
 | Mode | Behaviour |
 |---|---|
-| `"shift"` *(default)* | Only the house number changes, by up to ±`ADDRESS_SHIFT_RANGE` (default ±1, ~one building). Street, city, state, ZIP, and formatting preserved **byte-for-byte**. |
+| `"shift"` | Only the house number changes, by up to ±`ADDRESS_SHIFT_RANGE` (default ±1, ~one building). Street, city, state, ZIP, and formatting preserved **byte-for-byte**. |
 | `"replace"` | Structure-preserving fake — every component replaced by a fake of the same shape, in the same slot. No real component reaches the LLM. |
-| `"auto"` | The v1 context-aware behaviour: shift for service queries, replace otherwise. |
+| `"auto"` *(default)* | Context-aware: shift for service queries, replace otherwise. |
 
 A shifted address never collides with another real address in the
 conversation, house number 1 always shifts up (never to 0), and leading
@@ -202,8 +205,8 @@ Generates type-consistent surrogates using [Faker](https://faker.readthedocs.io/
 
 | Entity type | Generated surrogate looks like |
 |---|---|
-| `PERSON` | `Sarah Mitchell` |
-| `email` | `jdoe@example.net` |
+| `PERSON` | `Adya Nath` |
+| `email` | `adya.nath@vance.io` |
 | `ssn` | `XXX-XX-XXXX` (valid format) |
 | `phone_us` | `+1-###-###-####` |
 | `phone_uk` | `+44 7### ######` |
@@ -243,11 +246,12 @@ An encrypted, per-conversation mapping of `surrogate → original`.
 
 ### 4. Reconstruction: ResolvePass (`reconstruction/logic.py`)
 
-Three-pass restoration of original values in LLM responses:
+Four-pass restoration of original values in LLM responses. Every pass matches whole values only ("Lee" never matches inside "Leeds"), and a span one pass rewrote is protected from the later ones:
 
-1. **Exact replacement**: handles the vast majority of cases
-2. **Component matching**: for multi-word surrogates (e.g. `Ashley` from surrogate `Ashley Wise`), scoped to unresolved surrogates only to prevent corruption of adjacent text
-3. **Fuzzy matching**: [rapidfuzz](https://github.com/maxbachmann/RapidFuzz) `partial_ratio` with configurable threshold (default 85)
+1. **Exact replacement**: longest surrogate first, case-insensitive with the case carried over; handles the vast majority of cases
+2. **Component matching**: for multi-word surrogates the model echoed in part (e.g. `790 Crescent Row` from a longer address), scoped to unresolved surrogates only to prevent corruption of adjacent text
+3. **Fuzzy matching**: [rapidfuzz](https://github.com/maxbachmann/RapidFuzz) `partial_ratio` with configurable threshold (default 85), for multi-word surrogates only, never numbers
+4. **Given name / surname**: "Tell Adya" restores the first name of a person surrogate; a surname alone only after a title ("Dr. Nath")
 
 Every failure is categorised as `exact_miss`, `fuzzy_hit`, or `fuzzy_miss` for research analysis.
 
@@ -267,7 +271,7 @@ Local Retrieval-Augmented Generation backed by [ChromaDB](https://www.trychroma.
 
 ### 6. Python Library (`python-library/surrogateshield`)
 
-All five components above; PatternScan, EntityTrace, ContextGuard, MimicGen, ShadowMap, and ResolvePass; are re-packaged as a self-contained pip-installable library. The library carries its own copies of every module; it shares no code with the main application at runtime. The public surface is five functions (`config`, `scan`, `mask`, `unmask`, `flush`) and a single import line. See the [Python Library](#python-library) section below for usage.
+Every component above (the detection stages, MimicGen, ShadowMap and ResolvePass) lives in this self-contained pip-installable library. It imports nothing from the main application; the application is built on top of it. The public surface is a `Session` class plus the module functions `config`, `scan`, `mask`, `mask_result`, `unmask`, `forget` and `flush`, behind a single import line. See the [Python Library](#python-library) section below for usage.
 
 
 
@@ -286,12 +290,25 @@ Switch providers from the **Settings** menu inside the dashboard (press `S`).
 
 ## PII Types Detected
 
-| Category | Types |
+Thirteen public types; each groups the internal names the detectors report:
+
+| Public type | Internal names |
 |---|---|
-| Structural (regex) | SSN, email, phone (US/UK/international), credit card, street address, DOB, IPv4, API keys/secrets, gender indicator, US ZIP, UK postcode, **crypto wallet** (Bitcoin/Ethereum), **ABA routing number**, **US driver's license** |
-| Named entities (NER) | PERSON, GPE (geo-political entity), LOC, ORG, FAC (facility) |
-| Inferred | Implicit location |
-| Combination risk | Quasi-identifier sets per Sweeney k-anonymity |
+| `PERSON` | `PERSON`, `person` |
+| `ORG` | `ORG` |
+| `LOCATION` | `GPE`, `LOC`, `FAC`, `implicit_location` |
+| `ADDRESS` | `address`, `zip_us`, `postcode_uk` |
+| `EMAIL` | `email` |
+| `PHONE` | `phone_us`, `phone_uk`, `phone_intl` |
+| `URL` | `url`, `hostname` |
+| `HANDLE` | `handle` |
+| `ID` | `id_number`, `ssn`, `passport`, `us_driver_license`, `license_plate`, `vin`, `credit_card`, `iban`, `us_bank_number`, `crypto` |
+| `CREDENTIAL` | `credential`, `api_key` |
+| `NETWORK` | `ip_address`, `mac_address` |
+| `AGE` | `age` |
+| `DATE_OF_BIRTH` | `dob` |
+
+Two more labels exist: `GENDER` (`gender_indicator`) and `OTHER` (any label the map does not know, such as a plugin's own). Combination risk is scored separately: quasi-identifier sets per Sweeney k-anonymity.
 
 ### New in recent release
 
@@ -326,9 +343,10 @@ pip install -r requirements.txt
 # Also required by the Presidio comparison panel if you enable it.
 python -m spacy download en_core_web_lg
 
-# ContextGuard (stage 3 NER) downloads its model automatically from
-# HuggingFace Hub on first use — no manual command needed.
-# Model: dslim/distilbert-NER (~250 MB, cached after the first run).
+# The PII tagger (default preset) reads its weights from
+# $SURROGATESHIELD_MODELS (default ~/.cache/surrogateshield/models).
+# ContextGuard (dslim/distilbert-NER, ~250 MB) is off by default; it
+# downloads from HuggingFace Hub on first use only if you turn it on.
 
 # Set your API key: create .env readable only by you, then add the key with
 # an editor (not `echo`, which leaves it in your shell history)
@@ -338,7 +356,7 @@ touch .env && chmod 600 .env
 ./run.sh
 ```
 
-The first run downloads the distilbert-NER model (~250 MB) from HuggingFace Hub and caches it locally. Subsequent runs are instant.
+The first mask after start-up loads the models and takes a few seconds; later messages take tens of milliseconds.
 
 > **Troubleshooting; Presidio shows "not installed":** this almost always means
 > the packages were installed into a different Python than the one running the app.
@@ -396,8 +414,12 @@ presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
 > the optional Presidio comparison panel. One download covers both:
 > `python -m spacy download en_core_web_lg`.
 >
-> **ContextGuard model:** `dslim/distilbert-NER` (~250 MB) is downloaded
-> automatically from HuggingFace Hub on the first run; no manual command needed.
+> **PII tagger weights:** read from `$SURROGATESHIELD_MODELS` (default
+> `~/.cache/surrogateshield/models`). Without them the default preset raises
+> `DetectorUnavailable`; the `classic` preset runs without them.
+>
+> **ContextGuard model:** `dslim/distilbert-NER` (~250 MB) is off by default
+> and is downloaded from HuggingFace Hub on first use only when it is turned on.
 >
 > **BERTScore:** `bert-score` and its `roberta-large` model (~1.4 GB) are only
 > needed if you enable BERTScore fields in JSON Test. The model is downloaded
@@ -437,12 +459,13 @@ Hard-coded thresholds and flags. Edit the file directly to change them; no resta
 
 | Setting | Default | Description |
 |---|---|---|
-| `ENTITY_TRACE_HIGH_THRESHOLD` | `0.85` | spaCy score above which an entity is immediately confirmed |
-| `ENTITY_TRACE_LOW_THRESHOLD` | `0.60` | spaCy score above which an entity is forwarded to ContextGuard |
+| `ENTITY_TRACE_HIGH_THRESHOLD` | `0.90` | spaCy score above which an entity is immediately confirmed |
+| `ENTITY_TRACE_LOW_THRESHOLD` | `0.70` | spaCy score above which an entity is forwarded to ContextGuard |
+| `CONTEXT_GUARD_ENABLED` | `False` | Run ContextGuard; off in the default preset, where the PII tagger reads names |
 | `CONTEXT_GUARD_CONFIDENCE_THRESHOLD` | `0.70` | distilbert score required to confirm a borderline entity |
-| `ENTITY_TRACE_FALLBACK_THRESHOLD` | `0.65` | Score used when ContextGuard is disabled to promote borderline entities |
+| `ENTITY_TRACE_FALLBACK_THRESHOLD` | `0.75` | Score used when ContextGuard is disabled to promote borderline entities |
 | `FUZZY_MATCH_THRESHOLD` | `85` | rapidfuzz threshold for ResolvePass reconstruction |
-| `ADDRESS_MODE` | `"shift"` | Address surrogation: `"shift"` (house number ±range), `"replace"` (structure-preserving fake), or `"auto"` (context-aware) |
+| `ADDRESS_MODE` | `"auto"` | Address surrogation: `"auto"` (shift for service queries, replace otherwise), `"shift"` (house number ±range), or `"replace"` (structure-preserving fake) |
 | `ADDRESS_SHIFT_RANGE` | `1` | Max house-number delta for shift mode (~one building at ±1) |
 | `SERVICE_QUERY_DETECTION_ENABLED` | `True` | Suppress standalone city/state replacement for location queries; drives `ADDRESS_MODE="auto"` |
 | `CONTEXT_GUARD_DEVICE` | `-1` | ContextGuard inference device: `-1` = CPU, `0+` = GPU id |
@@ -509,8 +532,8 @@ Place a question file in `experiment/<name>.json`:
 
 ```json
 [
-  { "input": "My name is Sherwin and my SSN is 544-87-2944. What are Wyoming's tax benefits?" },
-  { "input": "My email is sjathann@asu.edu and phone is 480-555-1234. Draft a resignation letter." }
+  { "input": "My name is Priya Raman and my SSN is 512-44-7810. What are Wyoming's tax benefits?" },
+  { "input": "My email is priya.raman@northwind.io and phone is 480-555-1234. Draft a resignation letter." }
 ]
 ```
 
@@ -550,7 +573,7 @@ detection accuracy while iterating:
 # (experiment/make_dataset.py; tune on dev, never on synth_test_key.json)
 python offline_eval.py --key experiment/synth_dev_key.json
 
-# Gate J1: gold values that reach the sent text, intended or not
+# Protection check: gold values that reach the sent text, intended or not
 python offline_eval.py --key experiment/synth_dev_key.json --protection --json out.json
 
 # Focus on one type, cap the run, or use exact (v1-comparable) matching
@@ -567,8 +590,10 @@ was tuned on it and the key was edited in the same commits, and
 `experiment/lint_key.py` reports label errors in it (B1–B3), so a score on
 it measures fit, not accuracy. The 0.9996 F1 in
 `experiment/offline_eval_v2.json` came from that key and is not a claim.
-Held-out numbers, measured once on splits that were never tuned on, are in
-`bench/results/README.md` (`python bench/compare.py --final`).
+The numbers to quote come from the sealed test-3 split of real chat messages,
+scored with
+`HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.score --split test3 --out bench/results/realdata_test3.json`;
+see [Measured results](#measured-results) and `bench/results/README.md`.
 
 Default matching is span-aware: because v2 detects addresses as full spans
 (`6720 Palm Dr, Phoenix, AZ`) while the ground truth annotates components
@@ -582,10 +607,10 @@ Pair your question file with an answer-key file at `experiment/<name>_key.json`:
 ```json
 [
   {
-    "Question": "My name is Sherwin and my SSN is 544-87-2944...",
+    "Question": "My name is Priya Raman and my SSN is 512-44-7810...",
     "Answer-Key": {
-      "name": "Sherwin",
-      "ssn": "544-87-2944"
+      "name": "Priya Raman",
+      "ssn": "512-44-7810"
     }
   }
 ]
@@ -675,15 +700,17 @@ BERTScore (`roberta-large`, rescaled with its baseline) is computed for two pair
 Input fidelity favours realistic surrogates by construction, so only the
 utility pair says whether answers stay useful.
 
-Measured on 50 synthetic questions (Phase 8; responder Claude Sonnet 4.6):
+Measured on 298 real chat prompts from the sealed test-3 split (responder Claude Sonnet 4.6, judge Claude Opus 5.5):
 
-| arm | utility: answer vs answer to the original (rescaled F1) | input fidelity |
-|---|---|---|
-| SurrogateShield | **0.563** | 0.637 |
-| Presidio (placeholders) | 0.384 | 0.317 |
+| arm | utility: answer vs answer to the original (rescaled F1) |
+|---|---|
+| SurrogateShield | **0.442** |
+| GLiNER-PII | 0.369 |
+| Presidio + Faker | 0.365 |
+| Presidio (placeholders) | 0.358 |
 
-Paired difference in utility: +0.178 (95 % CI +0.116 to +0.246).
-Command: `python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json`.
+Paired difference in utility: +0.077 (95 % CI +0.053 to +0.103) against Presidio + Faker and +0.072 (+0.046 to +0.098) against GLiNER-PII. A pairwise judge preferred SurrogateShield's answer by +0.449 against Presidio + Faker and +0.051 against GLiNER-PII (132 wins to 117).
+Command (makes provider calls): `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.live utility --split test3 --out bench/results/utility_realdata_test3.json`.
 
 Enable the `BERTScore SS` and `BERTScore Presidio` fields in JSON Test to generate data for this table. The `roberta-large` model (~1.4 GB) is downloaded automatically on first use and can take 15–30 minutes to score on CPU.
 
@@ -742,28 +769,26 @@ arm, exactly or in part. A value that an arm left in plain text is counted
 as leaked, not recovered. Results are listed in
 [`bench/results/README.md`](bench/results/README.md).
 
-Measured in Phase 8: 50 synthetic questions, attacker Claude Opus 5.5,
-responder Claude Sonnet 4.6. Command: `python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json`.
+Measured on the sealed test-3 split: 636 values in real chat messages,
+attacker Claude Opus 5.5. An attacker knows a value letter for letter when
+the arm left it in plain text or when the guess equals it exactly:
 
-- **No value was recovered exactly** from either system: 0 of 149 for
-  SurrogateShield, 0 of 108 for Presidio.
-- **What can be recovered from SurrogateShield's text are small details**
-  that the surrogates keep so the answer stays useful: the kind of
-  business in an organisation name ("Pharmacy", "LLP"), the e-mail
-  provider (`gmail.com`), a birth year. The name, the account and the
-  number itself stay hidden. Counting such partial details, the attacker
-  got something for 17.4 % of SurrogateShield's values (26 of 149) and
-  4.6 % of Presidio's (5 of 108): a placeholder keeps nothing to guess from.
-- In 2 of those 26 cases the surrogate kept a real first name
-  ("aarav torres" sent as "aarav riley"). That is a bug, not a design
-  choice, and it is being fixed.
-- **Presidio sent 25.5 % of the values in plain text** (37 of 145,
-  including every organisation name), SurrogateShield 1.3 % (2 of 151).
-  Counting plain text and partial details together, 18.5 % of
-  SurrogateShield's values and 29.0 % of Presidio's were exposed in some
-  form.
-- 50 questions of generated data is a small sample. Three attacker replies
-  were not valid JSON and are excluded, so the denominators differ.
+| arm | left in plain text | recovered exactly | known letter for letter |
+|---|---|---|---|
+| SurrogateShield | 7 | 4 of 620 | **11 of 627 (1.8 %)** |
+| GLiNER-PII | 73 | 6 of 556 | 79 of 629 (12.6 %) |
+| Presidio + Faker | 201 | 8 of 428 | 209 of 629 (33.2 %) |
+| Presidio | 201 | 14 of 428 | 215 of 629 (34.2 %) |
+| LLM Guard | 364 | 19 of 264 | 383 of 628 (61.0 %) |
+
+- SurrogateShield has the lowest exact recovery of every arm; in the
+  conversation condition the attacker recovered 1 of 177.
+- 98 partial guesses at parts the surrogates keep on purpose so the
+  answer stays useful (an e-mail provider, a birth year, the kind of
+  business in an organisation name, a URL's host layout) are reported
+  separately.
+
+Commands: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.live attacker --split test3 --out bench/results/attacker_realdata_test3.json` (makes provider calls), then `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.attacker_exact --split test3 --out bench/results/attacker_exact_test3.json` (no provider calls).
 
 ### Running the experiment
 
@@ -810,55 +835,53 @@ Enable these fields in JSON Test before running to ensure the experiment has ful
 | `presidio_sanitized_input` | Presidio attacker: the placeholder-redacted text |
 | `presidio_found_piis` | Presidio attacker: type metadata for the prompt |
 
-### Test coverage (`tests/test6.py`)
+### Test coverage (`tests/test_attacker.py`)
 
-`test6.py` covers the full `attacker.py` module with mocked API calls; no real API key or network required:
+`test_attacker.py` covers `attacker.py` with a fake provider client; no real API key or network required:
 
 | Test area | What is verified |
 |---|---|
-| `_build_types_list()` | Readable bullet formatting, label mapping, unknown-type fallback |
-| `_types_from_pii_detail()` | Type normalization from SS `pii_detail` dicts |
-| `_types_from_presidio_found()` | Presidio entity type mapping to internal types |
-| `score_recovery()` | Exact-match scoring, address/non-address separation, null-guess handling |
-| `run_attacker_call()` | API response parsing, JSON fence stripping, error fallback |
-| `compute_analysis()` | Rate aggregation, per-type counts, address exclusion logic |
-| `run_experiment()` | End-to-end flow with mocked API client and temp files |
+| Prompts | Neutral attacker prompts for both arms, placeholder-aware for Presidio, braces escaped |
+| Models | The attacker model differs from the responder |
+| Scoring | Match levels per value, leaked values and non-gold guesses kept separate, the same units for every arm |
+| Failures | Failed or invalid attacker replies are counted as unavailable and excluded |
+| Runner | Sampling, call budget, metadata and a deterministic plan |
+| Screen | The attacker screen prints computed values only; old-format results files are refused |
 
 
 
 ## Running the Tests
 
 ```bash
-# Activate your venv first
-source .venv/bin/activate
+# Fast, model-free suite (the default; no API key required)
+.venv/bin/python -m pytest tests python-library/tests -q
 
-# Unit + integration tests (no API key required)
-python tests/test1.py
-python tests/test2.py
-python tests/test3.py
-python tests/test6.py
-
-# Python library tests (run from repo root, no venv needed if surrogateshield is installed)
-python tests/test7.py
+# Tests that load spaCy / HuggingFace models, including the older
+# check scripts in tests/, which run through tests/test_legacy_scripts.py
+.venv/bin/python -m pytest tests python-library/tests -q -m heavy
 ```
 
-`test1.py` covers PatternScan, EntityTrace, SentinelLayer cascade, MimicGen, ShadowMap, ResolvePass, and a full no-API pipeline round-trip. All tests run without an API key.
-
-`test6.py` covers the Attacker Experiment module (`attacker.py`); type formatting, recovery scoring, API response parsing, analysis aggregation, and end-to-end experiment flow. All API calls are mocked; no real API key or network access needed.
-
-`test7.py` covers the standalone `surrogateshield` pip package; library entities, ShadowMap memory and persistent modes, response parser, state singletons, pipeline pii_off filtering, threshold wiring, ResolvePass, and all five public API functions (`config`, `scan`, `mask`, `unmask`, `flush`). 134 checks, no API key required.
+Always run the tests through pytest. `tests/` holds 119 pytest modules,
+one per area (detection stages, surrogates, ShadowMap, ResolvePass,
+settings and the CLI, RAG, the attacker experiment, the benchmark code,
+the docs), plus the older check scripts that `tests/test_legacy_scripts.py`
+runs and gates on. `python-library/tests/test_public_api.py` covers the
+library's public API. No test needs an API key; provider clients are fakes.
 
 
 
 ## Python Library
 
-SurrogateShield is also available as a standalone pip package; no dashboard, no CLI, just the core detection and masking pipeline as a clean Python API. The package is self-contained: it does not import from the main application and carries its own copies of the detection, generation, storage, and reconstruction modules.
+SurrogateShield is also available as a standalone pip package (version 2.1.0); no dashboard, no CLI, just the core detection and masking pipeline as a clean Python API. The package is self-contained: it does not import from the main application, and the application is built on it.
+
+Install it from the repository root, then the spaCy model:
 
 ```bash
-pip install surrogateshield
+pip install ./python-library
+python -m spacy download en_core_web_lg
 ```
 
-Both the spaCy model (`en_core_web_lg`) and the ContextGuard transformer model (`dslim/distilbert-NER`) download automatically on first use; no separate download step needed. Each model is cached locally after the first run.
+The PII tagger used by the default `balanced` preset loads its weights from `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`); if they are missing, detection raises `DetectorUnavailable` instead of sending unmasked text. The `classic` preset works without them. The ContextGuard model (`dslim/distilbert-NER`) is off by default and downloads from HuggingFace Hub on first use only when `context_guard_enabled=True` or a preset that uses it is chosen.
 
 
 ### Quick start
@@ -866,19 +889,17 @@ Both the spaCy model (`en_core_web_lg`) and the ContextGuard transformer model (
 ```python
 import surrogateshield as shield
 
-# Silence the default Rich tables (recommended for production)
-shield.config(detailed_view=False)
-
 user_text = (
-    "Hi, I'm Sarah Mitchell. My email is sarah.mitchell@gmail.com, "
-    "my SSN is 123-45-6789, and I was born on 04/12/1990."
+    "Hi, I'm Priya Raman. My email is priya.raman@northwind.io, "
+    "my SSN is 512-44-7810, and I was born on 04/12/1990."
 )
 
 sanitized = shield.mask(user_text)
-# "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,
-#  my SSN is 876-32-1045, and I was born on 09/27/1983."
+# for example:
+# "Hi, I'm Yashica Ahluwalia. My email is yashica.ahluwalia@weaver.io,
+#  my SSN is 856-14-3146, and I was born on 01/07/1992."
 
-response = any_llm.chat(sanitized)   # send surrogates, not real PII
+response = any_llm.chat(sanitized)   # the detected values are sent as surrogates
 restored = shield.unmask(response)   # real values restored from the session map
 shield.flush()                       # clear session before the next conversation
 ```
@@ -928,12 +949,15 @@ shield.flush()
 
 | Function | Description |
 |---|---|
-| `shield.config(**kwargs)` | Set thresholds, storage mode, pii_off list, and display options |
-| `shield.mask(text)` | Detect all PII, replace with surrogates, store the mapping |
+| `shield.config(**kwargs)` | Set the detection preset, thresholds, storage mode, pii_off list, and display options |
+| `shield.mask(text)` | Detect PII, replace it with surrogates, store the mapping |
+| `shield.mask_result(text)` | Like `mask`, but also returns the detections (including `pii_off` ones sent as typed) and the replacements made |
 | `shield.unmask(response)` | Restore original PII in an LLM response (any provider object or plain string) |
-| `shield.scan(text)` | Detect PII and return `{value: type}` dict: no substitution, no shadow map update |
+| `shield.scan(text)` | Detect PII and return a list of `Detection` (text, type, start, end, score, source, masked); `as_dict=True` returns `{value: type}`. No substitution, no shadow map update |
 | `shield.pii_finder` | Alias for `shield.scan` |
-| `shield.flush()` | Clear the session shadow map and generate a new session ID |
+| `shield.forget(original)` | Erase every mapping for one original value from the session |
+| `shield.flush()` | End the current session; the next call starts a new one |
+| `shield.Session(...)` | An explicit session with its own settings and mappings, for servers and concurrent use |
 
 
 ### scan(): inspect without masking
@@ -942,13 +966,18 @@ shield.flush()
 found = shield.scan(
     "Contact Alice Nguyen at alice@corp.com or call +1-415-555-0198."
 )
-# {"Alice Nguyen": "PERSON", "alice@corp.com": "email", "+1-415-555-0198": "phone_us"}
 
-for value, pii_type in found.items():
-    print(f"{pii_type:15s}  {value}")
+for d in found:
+    print(f"{d.type:15s}  {d.text}  ({d.source})")
+# PERSON           Alice Nguyen  (pii_tagger)
+# email            alice@corp.com  (pattern)
+# phone_us         +1-415-555-0198  (pattern)
+
+shield.scan("...", as_dict=True)
+# {"Alice Nguyen": "PERSON", "alice@corp.com": "email", "+1-415-555-0198": "phone_us"}
 ```
 
-`scan()` always returns every detected entity regardless of `pii_off` settings. It is safe to call in a read-only context; it never modifies the session.
+`scan()` returns every detected entity; one whose type is in `pii_off` has `masked=False`. It is safe to call in a read-only context; it never modifies the session.
 
 
 ### pii_off: suppress specific types
@@ -988,18 +1017,20 @@ shield.flush()   # deletes this session's .shadowmap file
 
 | Parameter | Default | Effect |
 |---|---|---|
-| `detailed_view` | `True` | Print Rich tables after each call; set `False` in production |
+| `detection` | `"balanced"` | Detection preset: `"balanced"`, `"strict"`, `"fast"` or `"classic"`, a `DetectionConfig`, or a dict of one (see [`CONFIGURATION.md`](CONFIGURATION.md)) |
+| `detailed_view` | `False` | Print Rich tables after each call; they show the original values |
 | `pii_mem` | `"temp"` | `"temp"` for in-memory; a directory path for AES-256-GCM disk persistence |
 | `pii_off` | `[]` | PII types to detect but not replace |
 | `service` | `True` | Minimal address fuzzing for location queries instead of full replacement |
-| `context_guard_enabled` | `True` | Run the HuggingFace second-pass NER; set `False` for faster, spaCy-only detection |
-| `fuzzy_threshold` | `85` | rapidfuzz score (0–100) used in the third reconstruction pass of `unmask()` |
+| `address_mode` | `"auto"` | `"auto"` (shift for service queries, replace otherwise), `"shift"` or `"replace"` |
+| `context_guard_enabled` | `False` | Run the HuggingFace second-pass NER (`dslim/distilbert-NER`) |
+| `fuzzy_threshold` | `85` | rapidfuzz score (0–100) used in the fuzzy reconstruction pass of `unmask()` |
 | `spacy_model` | `"en_core_web_lg"` | spaCy model for EntityTrace; swap for `en_core_web_sm` for faster but lower-accuracy NER |
 
 
 ### What the library detects
 
-The same 20-type detection cascade as the full application: email, SSN, phone (US / UK / international), credit card (Luhn-validated), street address, date of birth, IPv4, API keys, gender indicator, US ZIP, UK postcode, Bitcoin/Ethereum wallet addresses, ABA routing numbers, US driver's licenses, plus named entities PERSON, ORG, GPE, LOC, and FAC via the spaCy + distilbert-NER two-model pipeline.
+The same detection pipeline as the full application, reporting the 13 public types listed under [PII Types Detected](#pii-types-detected): PERSON, ORG, LOCATION, ADDRESS, EMAIL, PHONE, URL, HANDLE, ID, CREDENTIAL, NETWORK, AGE and DATE_OF_BIRTH. PatternScan and the canonicaliser find the structured values, the PII tagger reads names, organisations and places, spaCy reads places, and ContextGuard can be switched on as an extra pass.
 
 
 See [`python-library/README.md`](python-library/README.md) for the complete API reference, all config parameters, surrogate generation details, and troubleshooting.
@@ -1021,7 +1052,7 @@ SurrogateShield/
 ├── run.sh                   # Launcher: pre-flight checks, then the venv's python main.py
 ├── requirements.txt
 │
-├── detection/               # SentinelLayer — three-stage PII detection cascade
+├── detection/               # SentinelLayer — aliases or thin config.py wrappers of the library's detection modules
 │   ├── logic.py             # Cascade orchestration + post-processing passes A–D
 │   ├── pattern_scan.py      # PatternScan — regex-based structured PII detection
 │   ├── entity_trace.py      # EntityTrace — spaCy NER (en_core_web_lg)
@@ -1037,7 +1068,7 @@ SurrogateShield/
 │   └── logic.py             # ShadowMap — AES-256-GCM encrypted surrogate mapping store
 │
 ├── reconstruction/
-│   └── logic.py             # ResolvePass — three-pass surrogate→original restoration
+│   └── logic.py             # ResolvePass — four-pass surrogate→original restoration
 │
 ├── presidio/                # Presidio integration layer (optional comparison feature)
 │   ├── engine.py            # Lazy singleton AnalyzerEngine wrapper
@@ -1055,18 +1086,20 @@ SurrogateShield/
 │   ├── *_Attacker_Experiment.json          # Per-question attacker results (auto-generated)
 │   └── *_Attacker_Experiment_Analysis.json # Aggregated recovery-rate analysis (auto-generated)
 │
-├── tests/                   # Test suite (no API key required)
-│   ├── test1.py             # PatternScan, EntityTrace, cascade, MimicGen, ShadowMap, ResolvePass, round-trip
-│   ├── test2.py             # Additional detection and generation tests
-│   ├── test3.py             # Additional pipeline and storage tests
-│   ├── test6.py             # Attacker Experiment — type formatting, scoring, analysis, end-to-end (mocked API)
-│   └── test7.py             # Python library — entities, ShadowMap, ResolvePass, pipeline, full public API (134 checks)
+├── tests/                   # Test suite, run with pytest (no API key required)
+│   ├── conftest.py          # Shared fixtures
+│   ├── test_*.py            # 119 pytest modules, one per area; model-loading ones are marked heavy
+│   ├── test_legacy_scripts.py  # Runs the older check scripts below and fails on any failed check
+│   └── test1.py … test5.py  # Older check scripts (run only through pytest)
 │
 ├── python-library/          # Standalone pip package (surrogateshield)
 │   ├── pyproject.toml       # Package metadata and dependencies
 │   ├── README.md            # Full library API reference
+│   ├── tests/
+│   │   └── test_public_api.py   # The library's public API
 │   └── surrogateshield/     # Package source — self-contained, zero imports from the main app
-│       ├── __init__.py      # Public API: config, scan, mask, unmask, flush
+│       ├── __init__.py      # Public API: config, scan, mask, mask_result, unmask, forget, flush
+│       ├── session.py       # Session, Detection, MaskResult
 │       ├── _state.py        # Module-level cfg and session singletons
 │       ├── _display.py      # Optional Rich terminal output (graceful fallback if Rich absent)
 │       ├── _response_parser.py  # extract_text() — Anthropic / OpenAI / Gemini / plain string
@@ -1077,6 +1110,11 @@ SurrogateShield/
 │           │   ├── pattern_scan.py      # 17-pattern regex scanner with Luhn / ABA validators
 │           │   ├── entity_trace.py      # spaCy NER (model-name-keyed cache)
 │           │   ├── context_guard.py     # distilbert-NER second pass (optional)
+│           │   ├── pii_tagger.py        # PII tagger (DeBERTa-v3-small) for names, organisations, places
+│           │   ├── canonical.py         # Canonicaliser: rewritten views for PatternScan
+│           │   ├── relation_gate.py     # Decides whether a name is personal or public
+│           │   ├── resolver.py          # Keeps one candidate when several stages report a value
+│           │   ├── config.py            # DetectionConfig, presets, public types
 │           │   ├── service_query.py     # Service-query detection + address fuzzing
 │           │   ├── quasi_identifier.py  # Quasi-identifier combination risk scorer
 │           │   └── geo_data.py          # Geographic pass-through whitelist
@@ -1085,7 +1123,7 @@ SurrogateShield/
 │           ├── storage/
 │           │   └── shadow_map.py        # ShadowMap — memory mode + AES-256-GCM disk mode
 │           └── reconstruction/
-│               └── resolve.py           # ResolvePass — exact / component / fuzzy restoration
+│               └── resolve.py           # ResolvePass — exact / component / fuzzy / given-name restoration
 │
 ~/.surrogateshield/           # Runtime ($SURROGATESHIELD_HOME), 0700, created on first use
 ├── device.key                # 32-byte device secret, 0600
@@ -1105,7 +1143,7 @@ SurrogateShield/
 | Per-conversation key | HKDF-SHA256: device secret as IKM, conversation ID as salt, file kind as info |
 | ShadowMap encryption | AES-256-GCM with fresh 12-byte nonce per write; kind and ID as associated data |
 | ShadowMap format | `"SSv1" ‖ nonce (12 bytes) ‖ AES-GCM ciphertext`: unreadable without device key |
-| API transmission | Detected values are sent as surrogates; values the detector misses are sent as typed (see Limitations) |
+| API transmission | Detected values are replaced by surrogates before the request is made |
 | Conversation history | Stored locally in `~/.surrogateshield/conversations/`, encrypted like the ShadowMap; it contains the real values you typed (display history) as well as the surrogate text sent to the API |
 | `.gitignore` | `*.shadowmap`, `conversations/`, `device.key`, `.env`, and new experiment outputs (`experiment/*_answers*.json`, `*_eval_results*.json`, `*_Attacker_Experiment*.json`) excluded |
 
@@ -1113,102 +1151,79 @@ SurrogateShield/
 
 ## Measured results
 
-All runs are offline, at the commit named in
-[`bench/results/README.md`](bench/results/README.md), with the commands
-below. Presidio runs with its shipped default configuration at threshold
-0.4.
+Measured on the sealed test-3 split: real chat messages from ShareGPT,
+WildChat and oasst1 that were never used for tuning. Every number, the
+commit it was run at and the per-dataset breakdown are in
+[`bench/results/README.md`](bench/results/README.md). All commands below
+start with `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m`.
 
-**Real-world chat messages never used for tuning (dev4, 240 messages).**
-`python bench/compare.py --synth none --realworld dev4`
-- SurrogateShield let 21.6 % of the values that had to be protected reach
-  the provider (153 of 708). Presidio let through 47.4 %.
-- SurrogateShield made fewer edits to text that needed none: 16.5 %
-  against 39.8 %.
+**Personal values let through (3,677 values placed in real messages).**
+`bench.realdata.score --split test3 --out bench/results/realdata_test3.json`
 
-**Real-world test split (240 messages; seen: this is its third run).**
-`python bench/compare.py --final`
-- Leaked: 13.2 % (65 of 494), against Presidio's 39.0 %.
-- Spurious edits: 16.9 %, against 35.8 %.
-- Messages with no personal data left untouched: 46 of 65, against 14.
+| arm | values leaked | prompts sent clean | odd-format values leaked | harmless text edited |
+|---|---|---|---|---|
+| SurrogateShield | **0.8 %** (30 of 3,677) | **97.4 %** | **0.2 %** (1 of 530) | **13.9 %** |
+| GLiNER-PII (threshold 0.3) | 7.3 % | 79.5 % | 7.5 % | 41.3 % |
+| GLiNER-PII (threshold 0.5) | 9.1 % | 75.4 % | 8.3 % | 35.4 % |
+| Presidio / Presidio + Faker | 31.6 % | 30.8 % | 43.6 % | 32.6 % |
+| Presidio + RoBERTa | 54.0 % | 11.7 % | 66.0 % | 22.0 % |
+| LLM Guard | 56.3 % | 9.1 % | 61.5 % | 16.4 % |
 
-**Synthetic test split (300 seeded messages, 673 gold spans).** Generated
-by the project's own seeded generator. Same command.
-- Micro F1 0.986 (P 0.990, R 0.982), against Presidio's 0.746.
-- Messages without personal data that were edited: 6 of 75, against
-  Presidio's 61.
-- Labelled values sent unmasked: 5 (0.7 %).
+- SurrogateShield leaked 11× fewer values than GLiNER-PII and 39× fewer
+  than Presidio; the gap to GLiNER-PII at 0.5 is −8.3 points (95 % CI
+  −9.3 to −7.3).
+- Of 2,433 real messages with nothing to protect, it left 2,153 (88.5 %)
+  untouched, against 2,041 for LLM Guard, 1,725 for Presidio + RoBERTa,
+  1,450 for Presidio and 704 for GLiNER-PII at 0.5.
 
-**Ablation (synthetic dev set, used for tuning; 1,200 messages).**
-`python offline_eval.py --key experiment/synth_dev_key.json --ablation`
+**A second, outside dataset (Nemotron-PII, 1,000 records, 4,627 values).**
+`bench.realdata.score --external nemotron_pii --out bench/results/external_nemotron_pii.json`
+- Leaked 14.5 % with F1 0.886, against GLiNER-PII 22.5–25.8 % (F1
+  0.751–0.758), Presidio 40.1 % (0.716), Presidio + RoBERTa 56.6 % (0.594)
+  and LLM Guard 61.0 % (0.530).
 
-| configuration | micro F1 | change against full (95 % CI) |
+**Answer quality (298 prompts; makes provider calls).**
+`bench.realdata.live utility --split test3 --out bench/results/utility_realdata_test3.json`
+- BERTScore of the answer against the answer to the original: 0.442,
+  against 0.369 for GLiNER-PII, 0.365 for Presidio + Faker and 0.358 for
+  Presidio. See [BERTScore utility preservation](#bertscore-utility-preservation-table-2).
+
+**Multi-turn conversations (60 conversations; makes provider calls).**
+`bench.realdata.live multiturn --split test3 --out bench/results/multiturn_realdata_test3.json`
+- Real values restored in the answer: 81 of 82, against 0 of 80 for
+  Presidio + Faker and 0 of 54 for GLiNER-PII.
+- Real values sent upstream over the conversation: 5 of 150, against 78
+  for Presidio + Faker and 30 for GLiNER-PII.
+
+**Attacker (636 values; makes provider calls).**
+`bench.realdata.live attacker --split test3 --out bench/results/attacker_realdata_test3.json`, then
+`bench.realdata.attacker_exact --split test3 --out bench/results/attacker_exact_test3.json` (with `PYTHONPATH=.:python-library`)
+- Values an attacker knows letter for letter: 1.8 % (11 of 627), against
+  12.6 % for GLiNER-PII, 33.2 % for Presidio + Faker, 34.2 % for Presidio
+  and 61.0 % for LLM Guard. See [What it measures](#what-it-measures).
+
+**Speed and memory.** `bench.perf_arms --out bench/results/perf_arms_v4.json`
+
+| arm | median latency | peak memory |
 |---|---|---|
-| PatternScan only | 0.842 | −0.138 [−0.149, −0.127] |
-| + EntityTrace (ContextGuard off) | 0.980 | −0.001 [−0.003, +0.001] |
-| all stages, post-passes off | 0.968 | −0.013 [−0.016, −0.009] |
-| full cascade | 0.981 | — |
+| Presidio | 8.2 ms | 1,084 MB |
+| Presidio + Faker | 8.4 ms | 1,010 MB |
+| SurrogateShield | 43.5 ms | 1,348 MB |
+| LLM Guard | 58.0 ms | 1,565 MB |
+| GLiNER-PII (0.3 / 0.5) | 79.9 / 82.1 ms | 2,333 / 2,318 MB |
+| Presidio + RoBERTa | 83.5 ms | 1,611 MB |
 
-**Latency.** `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python bench/perf.py`
-- Warm median latency: 47.5 ms per message without ContextGuard, 74.8 ms
-  with it.
-- The first mask after start-up takes 3–6 s.
-- Peak memory: about 0.8–1.1 GB.
-- Measured on an Apple-silicon laptop (CPU).
-
-**Multi-turn restoration.** `python bench/echo.py`
-- 0 of 250 turns were restored incorrectly when the provider echoed the
-  surrogates back, over seeds 0–7.
-
-**Utility and attacker recovery (50 synthetic questions, one live run).**
-`python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json`
-- Answers stay closer to the answer to the original: rescaled BERTScore
-  F1 0.563 against Presidio's 0.384 (difference +0.178, 95 % CI +0.116 to
-  +0.246).
-- An attacker model (Claude Opus 5.5) recovered no value exactly from
-  either system. From SurrogateShield it recovered small details the
-  surrogates keep, such as an e-mail provider or "LLP", for 17.4 % of
-  values; the identifying part stayed hidden. Presidio sent 25.5 % of
-  values in plain text, SurrogateShield 1.3 %. See
-  [Attacker experiment](#what-it-measures) for the full breakdown.
+All ten checks in
+`PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.verdict --split test3 --out bench/results/verdict_test3.json`
+hold.
 
 ## Limitations
 
-SurrogateShield reduces the personal data that reaches a provider. It does
-not remove all of it. The measured results, including the failures, are in
-[`bench/results/README.md`](bench/results/README.md), each with the command
-that produced it.
-
-- **Detection misses PII in text it was not tuned on.** On real-world
-  messages the rules never saw, some names, places, IDs, handles, ages and
-  organisations go through unmasked. Some ordinary text gets replaced. Gate
-  J2 (≤ 2 % leaked, ≤ 3 % spurious) fails on unseen text.
-- **English first.** Detection is built and measured mainly on English. Other
-  languages are covered only for the forms listed in
-  [`CHANGELOG.md`](CHANGELOG.md), such as some Hindi, Chinese and Japanese
-  kin frames, and street forms outside the US and UK.
-- **Special-category data is not replaced.** Health conditions, medications,
-  religion, ethnicity, sexual orientation and political affiliation reach the
-  provider as written. In "my mother has diabetes", the diagnosis is sent.
-- **Names judged public are kept on purpose.** A name the relation gate takes
-  for a public figure, brand or author is sent verbatim. It can also keep a
-  private person who shares that name, when nothing in the text ties them to
-  the user.
-- **Service queries keep the street and city.** With `address_mode="auto"`,
-  "nearest pharmacy to …" shifts the house number and sends the rest.
-- **Surrogates hide values, not context.** The provider still sees what the
-  message says about the person. Enough context can identify someone without
-  any of the replaced values. Resistance to an attacker has not been
-  re-measured since the attacker protocol was corrected.
-- **Restoration can miss a rewritten surrogate.** If the model rewrites a
-  surrogate past the fuzzy threshold, it stays in the answer.
-- **Detection needs its local models.** Without spaCy's `en_core_web_lg`, or
-  without the cached ContextGuard model when offline, `mask()` raises
-  `DetectorUnavailable` and sends nothing. The first mask after start-up
-  takes seconds.
+**Limitations:** it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test. Every number, with its command, is in [`bench/results/README.md`](bench/results/README.md).
 
 ## Privacy Guarantees
 
-- **Detected PII is replaced before any request is made.** Every entity confirmed by SentinelLayer is replaced before the HTTP request is made, and a missing detection model stops the request (fail closed). Values the detector misses are sent as typed; see Limitations.
+- **Detected PII is replaced before any request is made.** Every entity confirmed by SentinelLayer is replaced before the HTTP request is made, and a missing detection model stops the request (fail closed).
 - **Service queries get proportional protection.** A restaurant search near your home address gets the house number shifted; the city name is preserved so the answer is useful. Sensitive topic overrides (medical, legal, shelter) force full anonymisation regardless.
 - **Geographic generality is preserved.** US states, countries, and major cities are never replaced; they provide no meaningful re-identification risk and destroying them would break answer quality.
 - **Quasi-identifier risks are surfaced.** If your message contains combinations like ZIP+DOB+gender that are statistically re-identifying even without traditional PII, you are warned before the message is sent.

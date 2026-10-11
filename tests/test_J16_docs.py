@@ -1,9 +1,9 @@
-"""Gate J16 — docs: both READMEs carry a Limitations section, and every
-committed result file under bench/results is listed with its command.
+"""Gate J16 — docs: both READMEs and the website carry the one-line
+Limitations, every committed result file under bench/results is listed with
+its command, and the published test-3 numbers match the result files.
 """
 
 import json
-from decimal import ROUND_HALF_UP, Decimal
 import re
 from pathlib import Path
 
@@ -12,16 +12,58 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "bench" / "results"
 
+LIMITATIONS = (
+    "it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), "
+    "on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed "
+    "and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test."
+)
+SITE = ["website/index.html", "website/docs.html"]
+
+
+def read(path):
+    return (ROOT / path).read_text(encoding="utf-8")
+
+
+def load(name):
+    return json.loads((RESULTS / name).read_text(encoding="utf-8"))
+
 
 @pytest.mark.parametrize("readme", ["README.md", "python-library/README.md"])
-def test_J16_limitations_section_present(readme):
-    text = (ROOT / readme).read_text(encoding="utf-8")
-    m = re.search(r"^## Limitations\n(.*?)(?=^## )", text, re.S | re.M)
+def test_J16_limitations_section_is_one_line(readme):
+    m = re.search(r"^## Limitations\n(.*?)(?=^## )", read(readme), re.S | re.M)
     assert m, f"{readme} has no Limitations section"
-    body = m.group(1)
-    for topic in ("unseen", "English", "Special-category", "public", "Service queries"):
-        assert topic in body, topic
+    body = m.group(1).strip()
+    assert "\n" not in body, "Limitations is one line"
+    assert LIMITATIONS in body
     assert "bench/results/README.md" in body
+
+
+@pytest.mark.parametrize("page", SITE)
+def test_J16_site_limitations_is_one_line(page):
+    text = read(page)
+    assert 'id="limitations"' in text
+    assert LIMITATIONS in text
+    assert "not perfect" not in text
+
+
+def test_J16_limitations_line_matches_results():
+    natural = load("realdata_test3.json")["results"]["all"]["natural"]
+    leaked = {arm: natural[arm]["leak"]["k"] for arm in natural}
+    assert natural["ss"]["leak"]["n"] == 96
+    assert f"({leaked['ss']} leaked; GLiNER-PII {leaked['gliner_pii_tuned']}–{leaked['gliner_pii']}, " \
+           f"Presidio {leaked['presidio_default']})" in LIMITATIONS
+    behind = {}
+    for name, results in (("test-3", load("realdata_test3.json")["results"]["all"]["injected"]),
+                          ("Nemotron-PII", load("external_nemotron_pii.json")["results"]["all"])):
+        types = results["ss"]["by_type"]
+        behind[name] = sum(results["ss"]["by_type"][t]["leak_rate"]
+                           > min(arm["by_type"][t]["leak_rate"] for arm in results.values())
+                           for t in types)
+        assert len(types) == 13
+    assert f"{behind['test-3']} of 13 on test-3, {behind['Nemotron-PII']} of 13 on Nemotron-PII" in LIMITATIONS
+    perf = {a["arm"]: a for a in load("perf_arms_v4.json")["arms"]}
+    assert round(perf["ss"]["p50_ms"] / perf["presidio_default"]["p50_ms"]) == 5
+    assert perf["ss"]["peak_rss_mb"] > perf["presidio_default"]["peak_rss_mb"]
 
 
 def test_J16_every_result_file_has_its_command():
@@ -38,74 +80,51 @@ def test_J16_every_result_file_has_its_command():
 
 def test_J16_quickstart_install_is_accurate():
     # The spaCy model is a separate download, and PyPI has 1.0.0, not this branch.
-    text = (ROOT / "python-library" / "README.md").read_text(encoding="utf-8")
-    assert "installs automatically" not in text
-    assert "python -m spacy download en_core_web_lg" in text
-    assert "pip install ./python-library" in text
+    for readme in ("README.md", "python-library/README.md"):
+        text = read(readme)
+        assert "installs automatically" not in text
+        assert "python -m spacy download en_core_web_lg" in text
+        assert "pip install surrogateshield" not in text
+    assert "pip install ./python-library" in read("python-library/README.md")
 
 
 CLAIM_SURFACES = ["README.md", "python-library/README.md", "website/index.html",
-                  "website/docs.html", "main.py", "help_screen.py"]
+                  "website/docs.html", "website/docs.md", "main.py", "help_screen.py"]
 UNSUPPORTED = [
-    # A1–A4: the detector misses some values, so nothing can promise "never".
+    # A1–A4: nothing can promise "never".
     r"PII never leaves", r"data never leaves", r"never crosses the API boundary",
     r"real values never (leave|transmitted)", r"No PII crosses",
     # A5, A9: a prediction stated as a proof.
     r"never enters the vector store", r"This proves",
     # A6, A7: BERTScore ranges that were never measured on answers.
     r"~ ?95", r"~ ?84", r"92–97", r"80–88",
-    # A8: the withdrawn attacker run (it may only be named where it is withdrawn).
+    # A8: the withdrawn attacker run.
     r'stat-value">0\.00%', r"recovers <em>nothing", r"Table 7",
     # A10: legacy ablation figures.
     r"representative ranges", r">0\.62<",
+    # Earlier benchmark figures, replaced by test-3.
+    r"21\.6 ?%", r"47\.4 ?%", r"0\.563", r"0\.384", r"17\.4 ?%", r"25\.5 ?%",
 ]
 
 
 @pytest.mark.parametrize("surface", CLAIM_SURFACES)
 def test_J16_no_unsupported_claims(surface):
-    text = (ROOT / surface).read_text(encoding="utf-8")
+    text = read(surface)
     found = [p for p in UNSUPPORTED if re.search(p, text)]
     assert not found, f"{surface}: {found}"
 
 
-def test_J16_withdrawn_attacker_figures_only_in_withdrawal():
-    text = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
-    for figure in ("0.00%", "1.53%"):
-        for m in re.finditer(re.escape(figure), text):
-            window = text[max(0, m.start() - 300): m.end() + 300]
-            assert "withdrawn" in window, figure
-
-
-def test_J16_published_numbers_match_results():
-    dev4 = json.loads((RESULTS / "compare_final_dev4.json").read_text(encoding="utf-8"))["realworld"]
-    ss, prs = dev4["ss"], dev4["presidio_result"]
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    site = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
-    for pct in (ss["leak_rate"], prs["leak_rate"], ss["spurious_rate"], prs["spurious_rate"]):
-        assert f"{pct * 100:.1f}" in readme, pct
-    assert f"{ss['leaked']} of" in readme
-    assert f"{ss['negatives_untouched']} / {ss['negatives']}" in site
-    assert f"{prs['negatives_untouched']} / {prs['negatives']}" in site
-    configs = json.loads((RESULTS / "ablation_synth_dev.json").read_text(encoding="utf-8"))["configurations"]
-    for cfg in configs.values():
-        f1 = str(Decimal(str(cfg["micro"]["f1"])).quantize(Decimal("0.001"), ROUND_HALF_UP))
-        assert f1 in readme and f1 in site, f1
-
-
-def test_J16_phase8_numbers_match_results():
-    d = json.loads((RESULTS / "phase8.json").read_text(encoding="utf-8"))
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    site = (ROOT / "website" / "index.html").read_text(encoding="utf-8")
-    bs = d["bertscore"]
-    for v in (bs["bertscore_ss_output"]["mean_f1"], bs["bertscore_presidio_output"]["mean_f1"],
-              bs["paired_output_ss_minus_presidio"]["mean_diff"]):
-        r = str(Decimal(str(v)).quantize(Decimal("0.001"), ROUND_HALF_UP))
-        assert r in readme and r in site, v
-    ss, prs = d["attacker"]["ss"], d["attacker"]["presidio"]
-    assert ss["exact"] == prs["exact"] == 0
-    assert f"0 of {ss['inference_targets']}" in readme
-    for arm in (ss, prs):
-        for rate in (arm["exact_or_partial_rate"], arm["leaked_verbatim_rate"]):
-            assert f"{rate * 100:.1f}" in readme and f"{rate * 100:.1f}" in site, rate
-    assert d["attacker_model"] != d["responder_model"]
-    assert d["command"] in readme
+@pytest.mark.parametrize("surface", ["README.md", *SITE])
+def test_J16_published_numbers_match_results(surface):
+    text = read(surface)
+    injected = load("realdata_test3.json")["results"]["all"]["injected"]
+    for arm in ("ss", "gliner_pii", "presidio_default"):
+        pct = f"{injected[arm]['leak']['rate'] * 100:.1f}"
+        assert re.search(re.escape(pct) + r" ?%", text), (arm, pct)
+    diffs = load("utility_realdata_test3.json")["e5b"]["all"]["bertscore_differences"]
+    for other in ("ss-presidio_faker", "ss-gliner_pii"):
+        assert f"+{diffs[other]['diff']:.3f}" in text, other
+    restored = load("multiturn_realdata_test3.json")["results"]["all"]["ss"]["restored"]
+    assert re.search(rf"{restored['k']} ?(/|of) ?{restored['n']}", text)
+    exact = load("attacker_exact_test3.json")["results"]["all"]["ss"]["exact"]
+    assert re.search(rf"{exact['k']} ?(/|of) ?{exact['n']}", text)

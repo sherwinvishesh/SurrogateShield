@@ -1,10 +1,11 @@
-<!-- Paper available on arXiv: https://arxiv.org/abs/2606.29567 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- For AI agents: the full documentation is in plain Markdown in docs.md, in this folder. -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SurrogateShield — Privacy-preserving proxy for LLMs</title>
+<link rel="alternate" type="text/markdown" href="docs.md" title="Documentation (Markdown)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1520,7 +1521,7 @@
     <div class="nav-links">
       <a href="#how-it-works">Pipeline</a>
       <a href="#detection">Detection</a>
-      <a href="#presidio">vs Presidio</a>
+      <a href="#presidio">Comparison</a>
       <a href="#evaluation">Evaluation</a>
       <a href="#library">Library</a>
       <a href="#install">Install</a>
@@ -1547,45 +1548,45 @@
 
       ◆  ────────────────────────────────────  ◆</pre>
       <div class="hero-meta">
-        <span>v / <strong>1.4.0</strong></span>
-        <span>build / <strong>2026.05</strong></span>
+        <span>v / <strong>2.1.0</strong></span>
+        <span>build / <strong>2026.10</strong></span>
         <span>python / <strong>≥ 3.9</strong></span>
-        <span>pip / <strong style="color: var(--neon);">surrogateshield</strong></span>
+        <span>pip / <strong style="color: var(--neon);">./python-library</strong></span>
         <span>license / <strong>Apache-2.0</strong></span>
         <span>status / <strong style="color: var(--neon);">● operational</strong></span>
       </div>
     </div>
 
     <h1 class="hero-headline">
-      PII is masked<br>
-      before it leaves.<span class="accent"> Surrogates go instead.</span>
+      Detected PII is swapped<br>
+      before the request.<span class="accent"> Surrogates go instead.</span>
     </h1>
     <p class="hero-sub">
-      SurrogateShield replaces the personal data it detects with realistic, consistent surrogates before your message reaches an LLM provider, and puts the real values back in the reply. On unseen chat text it lets through less than half of what Microsoft Presidio's default configuration does. It is not perfect: about one value in five still gets through, so read the Limitations. All cryptographic operations run locally. Ships as both an interactive dashboard and a self-contained <code>pip install surrogateshield</code> library.
+      SurrogateShield finds the personal data in a message, replaces it with realistic, consistent surrogates before the request reaches an LLM provider, and puts the real values back in the reply. On 3,677 personal values placed in real ShareGPT, WildChat and oasst1 messages it let <strong>0.8%</strong> through. GLiNER-PII let through 9.1%, Microsoft Presidio 31.6% and LLM Guard 56.3%. It trailed on only a few tests, listed in one line under <a href="#limitations" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Limitations</a>. The surrogate map is encrypted with AES-256-GCM and stays on your machine. Ships as a Python library with a CLI, plus an interactive terminal app.
     </p>
 
     <div class="hero-ctas">
       <a href="#library" class="btn btn-primary btn-glow">Use the library <span class="arrow">→</span></a>
+      <a href="#presidio" class="btn">See the comparison</a>
       <a href="#how-it-works" class="btn">See the pipeline</a>
-      <a href="https://arxiv.org/abs/2606.29567" class="btn" target="_blank" rel="noopener">arXiv <span class="arrow">↗</span></a>
     </div>
 
     <div class="stat-strip">
       <div class="stat">
-        <div class="stat-value">3-stage</div>
-        <div class="stat-label">Detection cascade<br>regex → spaCy → distilbert</div>
+        <div class="stat-value">0.8%</div>
+        <div class="stat-label">PII leaked on real chat text<br>GLiNER-PII 9.1% · Presidio 31.6%</div>
       </div>
       <div class="stat">
-        <div class="stat-value">AES-256-GCM</div>
-        <div class="stat-label">ShadowMap encryption<br>HKDF-SHA256 per conv</div>
+        <div class="stat-value">11×</div>
+        <div class="stat-label">fewer leaks than GLiNER-PII<br>39× fewer than Presidio</div>
       </div>
       <div class="stat">
-        <div class="stat-value">21.6% vs 47.4%</div>
-        <div class="stat-label">PII leaked on unseen chat text<br>SurrogateShield vs Presidio</div>
+        <div class="stat-value">97.4%</div>
+        <div class="stat-label">prompts sent fully clean<br>GLiNER-PII 75.4% · Presidio 30.8%</div>
       </div>
       <div class="stat">
-        <div class="stat-value">47.5 ms</div>
-        <div class="stat-label">Warm median latency<br>per message, CPU</div>
+        <div class="stat-value">43.5 ms</div>
+        <div class="stat-label">median per message, CPU<br>1.9× faster than GLiNER-PII</div>
       </div>
     </div>
   </div>
@@ -1598,7 +1599,7 @@
     <div class="eyebrow">How it works</div>
     <h2 class="section-title">A single round-trip through the proxy, end to end.</h2>
     <p class="section-lede">
-      Every message travels through detection, surrogate generation, encrypted mapping, the LLM call, and reconstruction. Detected PII is replaced before the request is made, and a missing detection model stops the request.
+      Every message goes through detection, surrogate generation, an encrypted map, the LLM call and restoration. Detected values are replaced before the request is made. If a detection model is missing, <code>mask()</code> raises <code>DetectorUnavailable</code> and the text is not sent half-masked.
     </p>
 
     <!-- ============ ANIMATED DEMO ============ -->
@@ -1618,21 +1619,21 @@
         <!-- Stage label -->
         <div class="demo-stage-row">
           <div class="demo-stage-label" id="demoStageLabel">Detect</div>
-          <div class="demo-stage-sub" id="demoStageSub">SentinelLayer scans for PII spans</div>
+          <div class="demo-stage-sub" id="demoStageSub">SentinelLayer scans the message for personal values</div>
         </div>
 
         <!-- USER message bubble -->
         <div class="demo-lane" data-lane="user">
           <div class="lane-marker">USER ▸ on device</div>
           <div class="demo-message" id="demoUserMsg">
-            Hi, I'm <span class="tok tok-person" data-orig="Sherwin" data-surr="Sarah Mitchell" data-type="PERSON">Sherwin</span>. My email is <span class="tok tok-email" data-orig="sjathann@asu.edu" data-surr="jdoe@example.net" data-type="email">sjathann@asu.edu</span> and my SSN is <span class="tok tok-ssn" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">544-87-2944</span>.
+            Hi, I'm <span class="tok tok-person" data-orig="Priya Raman" data-surr="Adya Nath" data-type="PERSON">Priya Raman</span>. Email me at <span class="tok tok-email" data-orig="priya.raman@northwind.io" data-surr="adya.nath@vance.io" data-type="EMAIL">priya.raman@northwind.io</span> or call <span class="tok tok-ssn" data-orig="+1 415 555 0142" data-surr="+1 213 581 8333" data-type="PHONE">+1 415 555 0142</span>.
           </div>
         </div>
 
         <!-- Wire down to LLM -->
         <div class="wire-down" id="wireToLLM">
           <div class="wire-line"><span class="wire-pulse"></span></div>
-          <div class="wire-label">surrogates only · HTTPS</div>
+          <div class="wire-label">masked text · HTTPS</div>
         </div>
 
         <!-- LLM API box -->
@@ -1666,21 +1667,21 @@
           <div class="sa-rows" id="shadowRows">
             <div class="sa-row pending" data-type="PERSON">
               <span class="sa-type">PERSON</span>
-              <span class="sa-orig">Sherwin</span>
+              <span class="sa-orig">Priya Raman</span>
               <span class="sa-arrow">↔</span>
-              <span class="sa-surr">Sarah Mitchell</span>
+              <span class="sa-surr">Adya Nath</span>
             </div>
-            <div class="sa-row pending" data-type="email">
-              <span class="sa-type">email</span>
-              <span class="sa-orig">sjathann@asu.edu</span>
+            <div class="sa-row pending" data-type="EMAIL">
+              <span class="sa-type">EMAIL</span>
+              <span class="sa-orig">priya.raman@northwind.io</span>
               <span class="sa-arrow">↔</span>
-              <span class="sa-surr">jdoe@example.net</span>
+              <span class="sa-surr">adya.nath@vance.io</span>
             </div>
-            <div class="sa-row pending" data-type="ssn">
-              <span class="sa-type">ssn</span>
-              <span class="sa-orig">544-87-2944</span>
+            <div class="sa-row pending" data-type="PHONE">
+              <span class="sa-type">PHONE</span>
+              <span class="sa-orig">+1 415 555 0142</span>
               <span class="sa-arrow">↔</span>
-              <span class="sa-surr">317-42-8806</span>
+              <span class="sa-surr">+1 213 581 8333</span>
             </div>
           </div>
         </div>
@@ -1731,7 +1732,7 @@
           <g>
             <rect x="120" y="72" width="280" height="46" fill="url(#boxneon)" stroke="#4ff0d4" stroke-width="1"/>
             <text x="260" y="92" text-anchor="middle" fill="#4ff0d4" font-family="Geist Mono" font-size="11" letter-spacing="1">[ SERVICE QUERY DETECTOR ]</text>
-            <text x="260" y="108" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="10">route: fuzz · pass · full-cascade</text>
+            <text x="260" y="108" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="10">address: shift · coarsen · replace</text>
           </g>
           <line x1="260" y1="120" x2="260" y2="142" stroke="#4ff0d4" stroke-width="1" marker-end="url(#arr)"/>
 
@@ -1739,11 +1740,11 @@
           <g>
             <rect x="60" y="146" width="400" height="116" fill="url(#boxgrad)" stroke="#2a343d"/>
             <text x="78" y="166" fill="#4ff0d4" font-family="Geist Mono" font-size="11" letter-spacing="1">SENTINELLAYER</text>
-            <text x="78" y="180" fill="#8a939d" font-family="Geist" font-size="10">three-stage detection cascade</text>
+            <text x="78" y="180" fill="#8a939d" font-family="Geist" font-size="10">detection stages · balanced preset · then structural passes</text>
 
             <rect x="80" y="194" width="115" height="50" fill="#0c1014" stroke="#2a343d"/>
             <text x="137" y="212" text-anchor="middle" fill="#e6eaef" font-family="Geist Mono" font-size="10.5">PatternScan</text>
-            <text x="137" y="226" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="9">regex</text>
+            <text x="137" y="226" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="9">regex + views</text>
             <text x="137" y="238" text-anchor="middle" fill="#c7f53d" font-family="Geist Mono" font-size="8.5">stage 1</text>
 
             <line x1="195" y1="219" x2="207" y2="219" stroke="#4ff0d4" marker-end="url(#arr)"/>
@@ -1756,8 +1757,8 @@
             <line x1="322" y1="219" x2="334" y2="219" stroke="#4ff0d4" marker-end="url(#arr)"/>
 
             <rect x="334" y="194" width="115" height="50" fill="#0c1014" stroke="#2a343d"/>
-            <text x="391.5" y="212" text-anchor="middle" fill="#e6eaef" font-family="Geist Mono" font-size="10.5">ContextGuard</text>
-            <text x="391.5" y="226" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="9">distilbert-NER</text>
+            <text x="391.5" y="212" text-anchor="middle" fill="#e6eaef" font-family="Geist Mono" font-size="10.5">PIITagger</text>
+            <text x="391.5" y="226" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="9">DeBERTa-v3-small</text>
             <text x="391.5" y="238" text-anchor="middle" fill="#c7f53d" font-family="Geist Mono" font-size="8.5">stage 3</text>
           </g>
           <line x1="260" y1="264" x2="260" y2="286" stroke="#4ff0d4" stroke-width="1" marker-end="url(#arr)"/>
@@ -1766,7 +1767,7 @@
           <g>
             <rect x="120" y="290" width="280" height="46" fill="url(#boxgrad)" stroke="#2a343d"/>
             <text x="260" y="310" text-anchor="middle" fill="#e6eaef" font-family="Geist Mono" font-size="12">MimicGen · surrogate generation</text>
-            <text x="260" y="326" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="10">Faker · type-consistent · no collisions</text>
+            <text x="260" y="326" text-anchor="middle" fill="#8a939d" font-family="Geist Mono" font-size="10">same shape · Luhn-valid · no collisions</text>
           </g>
           <line x1="260" y1="338" x2="260" y2="360" stroke="#4ff0d4" stroke-width="1" marker-end="url(#arr)"/>
 
@@ -1783,7 +1784,7 @@
           <g>
             <rect x="120" y="448" width="280" height="46" fill="url(#boxgrad)" stroke="#2a343d"/>
             <text x="260" y="468" text-anchor="middle" fill="#e6eaef" font-family="Geist Mono" font-size="12">LLM API</text>
-            <text x="260" y="484" text-anchor="middle" fill="#ff7a6b" font-family="Geist Mono" font-size="10">↳ surrogates only · never real values</text>
+            <text x="260" y="484" text-anchor="middle" fill="#ff7a6b" font-family="Geist Mono" font-size="10">↳ receives the masked text</text>
           </g>
           <line x1="260" y1="496" x2="260" y2="518" stroke="#4ff0d4" stroke-width="1" marker-end="url(#arr)"/>
 
@@ -1814,35 +1815,35 @@
             <div class="de-num">01</div>
             <div class="de-body">
               <div class="de-title">Service-query router</div>
-              <p>Light-touch path for queries that only work with location context (e.g. <em>restaurants near…</em>). Fuzzes the house number by <code>±2–8</code> instead of full anonymisation. Sensitive-topic keywords (medical, legal, shelter, immigration) force the full cascade.</p>
+              <p>With <code>address_mode="auto"</code> (the default), a question that needs a location to be answered (e.g. <em>pharmacies near…</em>) keeps the street and city and shifts the house number by <code>±1</code>. If the question is about a sensitive topic (HIV, abortion, rehab, therapy, mental health, shelter, immigration and similar), the street becomes <em>my area</em>. Every other address is replaced in full.</p>
             </div>
           </div>
           <div class="de-step">
             <div class="de-num">02</div>
             <div class="de-body">
-              <div class="de-title">SentinelLayer cascade</div>
-              <p><strong>PatternScan</strong> claims structured PII (regex + validators). <strong>EntityTrace</strong> (spaCy NER) catches names, places, orgs. <strong>ContextGuard</strong> (distilbert-NER) verifies borderline candidates. Each stage masks what it claims so downstream stages don’t double-detect.</p>
+              <div class="de-title">SentinelLayer detection</div>
+              <p><strong>PatternScan</strong> finds structured values with regex and validators. The <strong>canonicaliser</strong> also reads them when they are written in words, spelled out or disguised with look-alike characters. <strong>EntityTrace</strong> (spaCy) and <strong>PIITagger</strong> (a fine-tuned DeBERTa-v3-small) find names, organisations, places, addresses, handles and IDs. Structural passes then read CSV columns, signatures and “my name is” frames. A relation gate keeps public figures and companies you only mention.</p>
             </div>
           </div>
           <div class="de-step">
             <div class="de-num">03</div>
             <div class="de-body">
               <div class="de-title">MimicGen</div>
-              <p>Generates type-consistent surrogates with Faker — valid SSN formats, Luhn-passing credit cards, real-looking names. No collisions within a session.</p>
+              <p>Draws a surrogate of the same type and shape for each value: real-looking names, an e-mail built from the surrogate name, a phone in the same format, Luhn-passing card numbers, IDs with the same letter and digit pattern. A value gets the same surrogate every time it appears in a session, and no two values share one.</p>
             </div>
           </div>
           <div class="de-step">
             <div class="de-num">04</div>
             <div class="de-body">
               <div class="de-title">ShadowMap</div>
-              <p>Each <code>{surrogate → original}</code> pair is encrypted with <strong>AES-256-GCM</strong> using a per-conversation key derived via <strong>HKDF-SHA256</strong>. Stored on disk; unreadable without the device secret.</p>
+              <p>The <code>{surrogate → original}</code> pairs are kept in memory by default. When saved, they are encrypted with <strong>AES-256-GCM</strong> under a per-session key derived with <strong>HKDF-SHA256</strong> from a 32-byte device secret. The file cannot be read without that secret.</p>
             </div>
           </div>
           <div class="de-step">
             <div class="de-num">05</div>
             <div class="de-body">
               <div class="de-title">LLM API</div>
-              <p>Receives surrogates only over HTTPS. The provider never sees the originals — not in the prompt, not in the conversation history, not in any RAG context.</p>
+              <p>Receives the masked text over HTTPS: the prompt, the earlier turns and any RAG context, each with its detected values replaced. On real chat text 0.8% of placed values reached it, against 9.1% for GLiNER-PII and 31.6% for Presidio.</p>
             </div>
           </div>
           <div class="de-step">
@@ -1857,7 +1858,7 @@
     </div>
 
     <div class="callout">
-      <strong>Service-query intelligence.</strong> A message like <em>"restaurants near 1126 E Apache Blvd, Tempe, AZ"</em> shifts the house number by <code>±2–8</code> (max ~100 m geographic error) and keeps the city — full anonymisation would destroy the answer. Sensitive-topic keywords (medical, legal, shelter, immigration) override the lighter touch and force full anonymisation.
+      <strong>Service-query handling.</strong> In a message like <em>"restaurants near 1126 E Apache Blvd, Tempe, AZ"</em>, the house number is shifted by <code>±1</code> and the street and city are kept, because replacing the address would make the answer useless. Sensitive topics (HIV, abortion, rehab, addiction, mental health, therapy, domestic violence, shelter, immigration, self-harm and others) coarsen the street to <em>my area</em> instead. Turn the feature off with <code>service=False</code>. The benchmark redraws every address, so these kept parts are not part of its leak figures.
     </div>
   </div>
 </section>
@@ -1867,23 +1868,23 @@
   <div class="container">
     <div class="section-num">02 / DETECTION</div>
     <div class="eyebrow">SentinelLayer</div>
-    <h2 class="section-title">Three detectors. <em>Each masks what it claims.</em></h2>
+    <h2 class="section-title">Patterns, two models, structure. <em>One answer per value.</em></h2>
     <p class="section-lede">
-      Stages run sequentially. Spans claimed by an earlier stage are not re-processed downstream, so structured PII is masked before any NER model can hallucinate around it.
+      On the default <code>balanced</code> preset, the stages run in this order: PatternScan with the canonicaliser, EntityTrace, PIITagger, then the structural passes. A relation gate keeps names that are not tied to the writer, and a resolver settles each value on one type. Removing any stage raises the leak rate. Without the pattern rules it goes from 0.8% to 1.4%, without the canonicaliser to 3.9%, and without the tagger to 10.8%.
     </p>
 
     <div class="cascade">
       <div class="cascade-stage">
         <div class="cascade-num">STAGE 01</div>
         <h3 class="cascade-name">PatternScan</h3>
-        <div class="cascade-model">detection/pattern_scan.py</div>
+        <div class="cascade-model">pattern_scan.py · canonical.py</div>
         <p class="cascade-desc">
-          Regex-based structural detection with format validators. Runs first so structured PII is masked before any NER model sees it. Luhn for credit cards, ABA checksum for routing numbers, context-gated keywords for driver's licenses.
+          Regex with format validators: Luhn for cards, checksums for IBANs, VINs and routing numbers, and range checks for SSNs and ZIPs. The canonicaliser reads the same message in other written forms, such as numbers in words, “at”/“dot” e-mails, ordinal dates and look-alike or zero-width characters. A value found that way gets its surrogate written back in the same form.
         </p>
         <div class="cascade-meta">
-          <div><span>method</span><span>regex + validators</span></div>
-          <div><span>covers</span><span>SSN · email · phone · CC · DOB · IP · API keys · crypto · ABA · DL · ZIP</span></div>
-          <div><span>span policy</span><span>claim → block downstream</span></div>
+          <div><span>method</span><span>regex + validators + views</span></div>
+          <div><span>covers</span><span>email · phone · URL · IP · MAC · card · IBAN · SSN · passport · VIN · API key · crypto · DOB · age · ZIP</span></div>
+          <div><span>views</span><span>worded · spelled · dates · folded · joined</span></div>
         </div>
       </div>
 
@@ -1892,55 +1893,59 @@
         <h3 class="cascade-name">EntityTrace</h3>
         <div class="cascade-model">spaCy · en_core_web_lg</div>
         <p class="cascade-desc">
-          Named-entity recognition for unstructured PII — people, places, organisations, facilities. Returns two confidence tiers; borderline candidates are forwarded to ContextGuard. Includes an ORG→GPE reclassifier for location prepositions.
+          Named-entity recognition with spaCy. In <code>balanced</code> it reads places only, because its names cost more harmless edits than they find, so names come from the tagger. In <code>strict</code> and <code>classic</code> it reads names too and sends borderline spans to ContextGuard. The <code>fast</code> preset skips it, and the tagger reads places instead.
         </p>
         <div class="cascade-meta">
-          <div><span>confirmed</span><span style="color: var(--neon);">≥ 0.85</span></div>
-          <div><span>borderline</span><span style="color: var(--amber);">0.60 – 0.85</span></div>
-          <div><span>fallback</span><span>0.65 (CG off)</span></div>
+          <div><span>confirmed</span><span style="color: var(--neon);">≥ 0.90</span></div>
+          <div><span>borderline</span><span style="color: var(--amber);">0.70 – 0.90</span></div>
+          <div><span>fallback</span><span>0.75 (CG off)</span></div>
         </div>
       </div>
 
       <div class="cascade-stage">
         <div class="cascade-num">STAGE 03</div>
-        <h3 class="cascade-name">ContextGuard</h3>
-        <div class="cascade-model">dslim/distilbert-NER</div>
+        <h3 class="cascade-name">PIITagger</h3>
+        <div class="cascade-model">DeBERTa-v3-small · pii-tagger-dv3s-40k</div>
         <p class="cascade-desc">
-          Transformer-based verifier (~250 MB, cached locally after first run). Confirms borderline candidates from EntityTrace and independently catches anything missed. Word-piece artefact cleaning and short-token blocklist prevent the most common NER false positives.
+          A token tagger fine-tuned for personal data. It reads names, organisations, places, addresses, phones, handles, IDs and credentials, and long text is read in overlapping windows. The weights are loaded from a local folder. If they are missing, <code>mask()</code> raises <code>DetectorUnavailable</code> instead of sending the text with less protection. The <code>classic</code> preset runs without it.
         </p>
         <div class="cascade-meta">
-          <div><span>confidence</span><span style="color: var(--neon);">≥ 0.70</span></div>
-          <div><span>size</span><span>~250 MB cached</span></div>
-          <div><span>server</span><span>none — in-process</span></div>
+          <div><span>window</span><span style="color: var(--neon);">256 tokens · stride 64</span></div>
+          <div><span>weights</span><span>$SURROGATESHIELD_MODELS</span></div>
+          <div><span>server</span><span>none, in-process</span></div>
         </div>
       </div>
     </div>
 
     <!-- Post-processing passes -->
-    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Post-processing passes <span style="color: var(--muted); font-family: var(--font-mono); font-size: 12px; margin-left: 12px;">detection/logic.py</span></h3>
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Passes after the models <span style="color: var(--muted); font-family: var(--font-mono); font-size: 12px; margin-left: 12px;">detection/pipeline.py · structural.py · relation_gate.py · resolver.py</span></h3>
     <div class="table-wrap" style="margin-top: 20px;">
       <table class="data">
         <thead><tr><th style="width: 80px;">Pass</th><th>Behaviour</th></tr></thead>
         <tbody>
-          <tr><td class="mono" style="color: var(--neon);">A</td><td>Structural ORG — regex for <code>[the/a/an] &lt;name&gt; [corporation|company|corp|inc|ltd|llc…]</code>. No name lists.</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">B</td><td>Email-username reclassification — corrects <code>ORG → PERSON</code> when the entity text is a prefix of a detected email username.</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">C</td><td>PERSON component dedup — removes standalone surnames that are sub-components of already-detected full names.</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">D</td><td>Topical geo-entity filter — drops a GPE/LOC only if it appears exclusively in knowledge-query sub-clauses.</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">S</td><td>Structure-driven detection. It covers CSV columns, chat speakers, signatures, “my name is” / “lives in” frames, payees after “PAYMENT TO”, and streets written the French or Portuguese way. Each rule needs its own structural evidence, so none of them fires on a bare word.</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">A · E · H</td><td>Structural ORG (<code>&lt;name&gt; Inc / LLC / Corp…</code>), structural PERSON in all-lowercase or all-caps text, and the card brand written right before a card number.</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">F · G · B · C</td><td>Drops implausible ORGs, merges adjacent name pieces, turns an ORG that matches an e-mail username into a PERSON, and removes a surname already inside a detected full name.</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">R</td><td>Relation gate. An organisation or place is replaced only when it is tied to the writer (“I work at…”, “my son’s school…”). Public figures, public companies and places that are only the topic of a question are kept.</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">resolver</td><td>One candidate per value. Source priority is applied first, then a rule for each type conflict, then the score.</td></tr>
+          <tr><td class="mono" style="color: var(--amber);">CG</td><td>ContextGuard (<code>dslim/distilbert-NER</code>) checks borderline spaCy spans. It is off in <code>balanced</code> and <code>fast</code>, and on in <code>strict</code> and <code>classic</code>.</td></tr>
         </tbody>
       </table>
     </div>
 
     <!-- Quasi-identifier -->
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Quasi-identifier scorer <span style="color: var(--muted); font-family: var(--font-mono); font-size: 12px; margin-left: 12px;">per Sweeney (2000) k-anonymity</span></h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Surfaces combinations of non-PII attributes that statistically re-identify an individual. Warnings fire <em>before</em> the message is sent.</p>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Flags combinations of fields that together can re-identify a person. The result is logged with the detections, and the terminal app shows a warning. The scorer does not change what gets replaced.</p>
     <div class="table-wrap" style="margin-top: 20px;">
       <table class="data">
         <thead><tr><th>Combination</th><th>Risk</th><th>Source</th></tr></thead>
         <tbody>
-          <tr><td class="mono">ZIP + DOB + Gender</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">87% of US population uniquely identifiable — Sweeney 2000</td></tr>
-          <tr><td class="mono">Postcode + DOB</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">UK-locale analogue</td></tr>
-          <tr><td class="mono">Name + Employer + Location</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Professional cross-reference</td></tr>
-          <tr><td class="mono">IP + Location</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Network-level triangulation</td></tr>
+          <tr><td class="mono">ZIP + DOB + Gender</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">87% of the US population uniquely identifiable (Sweeney 2000)</td></tr>
+          <tr><td class="mono">Postcode + DOB</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">UK equivalent</td></tr>
+          <tr><td class="mono">Name + SSN · Name + DOB</td><td><span class="pill inferred">high</span></td><td style="color: var(--muted);">Direct identity pairing</td></tr>
+          <tr><td class="mono">Name + Employer + City</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Professional cross-reference</td></tr>
+          <tr><td class="mono">Email / Phone / IP + Name or Location</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Contact or network triangulation</td></tr>
+          <tr><td class="mono">DOB + Location + Employer</td><td><span class="pill ner">medium</span></td><td style="color: var(--muted);">Three-field narrowing</td></tr>
         </tbody>
       </table>
     </div>
@@ -1952,42 +1957,34 @@
   <div class="container">
     <div class="section-num">03 / COVERAGE</div>
     <div class="eyebrow">PII types detected</div>
-    <h2 class="section-title">Structured, named, and inferred — across <em>twenty-plus</em> categories.</h2>
-    <p class="section-lede">Pattern order matters. Patterns claim character spans; <code>crypto</code> and <code>us_bank_number</code> run before <code>zip_us</code> so 9-digit routing numbers and long hex strings are claimed before the ZIP pattern can fragment them.</p>
+    <h2 class="section-title">Structured, named, and written in disguise. <em>Thirteen</em> public types.</h2>
+    <p class="section-lede">Each public type groups finer internal types, for example ID covers <code>ssn</code>, <code>passport</code>, <code>iban</code>, <code>vin</code> and <code>credit_card</code>. Any type can be left alone with <code>pii_off</code>. On real chat text, SurrogateShield had the lowest or joint-lowest leak rate of every tool on 10 of the 13 types, and no leaks at all on 7 of them.</p>
 
-    <div class="table-wrap">
+    <div class="table-wrap" style="overflow-x: auto;">
       <table class="data">
         <thead>
-          <tr><th style="width: 220px;">Type</th><th>Examples</th><th style="width: 200px;">Validator</th><th style="width: 110px;">Source</th></tr>
+          <tr><th style="width: 160px;">Type</th><th>Examples</th><th style="width: 200px;">Validator</th><th style="width: 150px;">Source</th></tr>
         </thead>
         <tbody>
-          <tr><td class="mono">street address</td><td class="mono">99 Cathedral Close · 456 Innovation Plaza</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">ssn</td><td class="mono">544-87-2944</td><td class="mono" style="color: var(--dim);">format</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">email</td><td class="mono">user@example.com</td><td class="mono" style="color: var(--dim);">RFC structure</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">phone_us</td><td class="mono">+1-480-555-1234</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">phone_uk</td><td class="mono">+44 7911 123456</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">phone_intl</td><td class="mono">+49 8234 927461</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">credit_card</td><td class="mono">4111 1111 1111 1111</td><td class="mono">Luhn algorithm</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">dob</td><td class="mono">01/15/1990 · March 14 1990</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">ipv4</td><td class="mono">192.168.1.100</td><td class="mono" style="color: var(--dim);">octet bounds</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">api_key</td><td class="mono">sk-ant-… · ghp_… · AKIA… · AIzaSy…</td><td class="mono" style="color: var(--dim);">prefix match</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">gender_indicator</td><td class="mono">she/her · I am a man</td><td class="mono" style="color: var(--dim);">phrase</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">postcode_uk</td><td class="mono">SW1A 1AA</td><td class="mono" style="color: var(--dim);">format</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">zip_us</td><td class="mono">85281 · 85281-1234</td><td class="mono" style="color: var(--dim);">format</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">crypto <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono">BTC P2PKH / P2SH / Bech32 · ETH 0x…</td><td class="mono" style="color: var(--dim);">charset</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">us_bank_number <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono">021000021 · 122105155</td><td class="mono">ABA 9-digit checksum</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">us_driver_license <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono">B7654321 · F123456789012</td><td class="mono">context-gated</td><td><span class="pill regex">regex</span></td></tr>
-          <tr><td class="mono">PERSON</td><td class="mono">Sherwin Jathanna</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
-          <tr><td class="mono">GPE / LOC</td><td class="mono">geo-political / general location</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
-          <tr><td class="mono">ORG</td><td class="mono">organisation name</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
-          <tr><td class="mono">FAC</td><td class="mono">facility name</td><td class="mono" style="color: var(--dim);">model conf.</td><td><span class="pill ner">NER</span></td></tr>
-          <tr><td class="mono">implicit location</td><td class="mono">contextual inference</td><td class="mono" style="color: var(--dim);">cascade</td><td><span class="pill inferred">inferred</span></td></tr>
+          <tr><td class="mono">PERSON</td><td class="mono">Priya Raman · my coworker Dana</td><td class="mono" style="color: var(--dim);">relation gate</td><td><span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">ORG</td><td class="mono">Mercy General (when you work there)</td><td class="mono" style="color: var(--dim);">relation gate</td><td><span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">LOCATION</td><td class="mono">Tempe · “we live near Reno”</td><td class="mono" style="color: var(--dim);">relation gate</td><td><span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">ADDRESS</td><td class="mono">1847 Alder Street, Portland, OR 97214 · SW1A 1AA</td><td class="mono" style="color: var(--dim);">ZIP / postcode format</td><td><span class="pill regex">regex</span> <span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">EMAIL</td><td class="mono">priya.raman@northwind.io · priya at northwind dot io</td><td class="mono" style="color: var(--dim);">structure</td><td><span class="pill regex">regex</span></td></tr>
+          <tr><td class="mono">PHONE</td><td class="mono">+1 415 555 0142 · +44 7911 123456 · in words</td><td class="mono" style="color: var(--dim);">format</td><td><span class="pill regex">regex</span> <span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">URL</td><td class="mono">https://priyaraman.dev/notes · hostnames</td><td class="mono" style="color: var(--dim);">structure</td><td><span class="pill regex">regex</span></td></tr>
+          <tr><td class="mono">HANDLE</td><td class="mono">@priyaraman</td><td class="mono" style="color: var(--dim);">—</td><td><span class="pill regex">regex</span> <span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">ID</td><td class="mono">SSN · passport · VIN · card · IBAN · routing no. · licence · plate · crypto</td><td class="mono">Luhn · IBAN · VIN · ABA</td><td><span class="pill regex">regex</span> <span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">CREDENTIAL</td><td class="mono">sk-ant-… · ghp_… · AKIA… · passwords</td><td class="mono" style="color: var(--dim);">prefix match</td><td><span class="pill regex">regex</span> <span class="pill ner">model</span></td></tr>
+          <tr><td class="mono">NETWORK</td><td class="mono">192.168.1.100 · MAC addresses</td><td class="mono" style="color: var(--dim);">octet bounds</td><td><span class="pill regex">regex</span></td></tr>
+          <tr><td class="mono">AGE</td><td class="mono">34 years old</td><td class="mono" style="color: var(--dim);">phrase</td><td><span class="pill regex">regex</span></td></tr>
+          <tr><td class="mono">DATE_OF_BIRTH</td><td class="mono">March 14, 1991 · the 14th of March</td><td class="mono" style="color: var(--dim);">date</td><td><span class="pill regex">regex</span></td></tr>
         </tbody>
       </table>
     </div>
 
     <div class="callout">
-      <strong>ABA checksum.</strong> <code>(3·d₀ + 7·d₁ + d₂ + 3·d₃ + 7·d₄ + d₅ + 3·d₆ + 7·d₇ + d₈) mod 10 = 0</code> &nbsp;— random 9-digit numbers almost always fail this. <strong>Driver's license</strong> is context-gated; the regex requires a keyword (<code>driver's license</code>, <code>license number</code>, <code>DL</code>) in the same phrase. Only the captured license value is marked as PII — the keyword prefix remains in the sanitised text.
+      <strong>Values written in another form.</strong> The canonicaliser also reads phone numbers written in words, e-mails spelled <code>priya at northwind dot io</code>, ordinal dates (<em>the 14th of March</em>), and text with full-width, look-alike or zero-width characters. The surrogate is written back in the same form. On formats that were held out while the detector was built (phones in words and month-ordinal birth dates), SurrogateShield missed <strong>0 of 30</strong> values and GLiNER-PII missed 3 of 30.
     </div>
   </div>
 </section>
@@ -1999,83 +1996,84 @@
     <div class="eyebrow">MimicGen</div>
     <h2 class="section-title">Realistic surrogates, not <em>[PLACEHOLDER]</em> tokens.</h2>
     <p class="section-lede">
-      Every surrogate is type-consistent and unique within a session. Fake names look like names. Fake SSNs pass format checks. Fake Bitcoin addresses are valid Base58. The LLM sees a coherent message — and produces a coherent response.
+      Every surrogate has the same type and shape as the value it replaces, and stays the same for the whole session. Fake names look like names, a fake card passes Luhn, and a fake IBAN passes its checksum. The model reads a coherent message and writes a coherent reply, and that reply can be restored. Placeholder tools such as Presidio and GLiNER-PII send <code>[PERSON]</code> instead.
     </p>
 
     <div class="surrogate-grid">
       <div class="surrogate-card">
         <div class="role"><span class="tag-orig">●</span> ORIGINAL · user input</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Sherwin Jathanna</span>. My SSN is <span class="pii-orig">544-87-2944</span> and I live at <span class="pii-orig">99 Cathedral Close, Phoenix, AZ 85281</span>. Reach me at <span class="pii-orig">sjathann@asu.edu</span> or <span class="pii-orig">+1-480-555-1234</span>.
+        <div class="surrogate-body">Hi, I'm <span class="pii-orig">Priya Raman</span>. Email me at <span class="pii-orig">priya.raman@northwind.io</span> or call <span class="pii-orig">+1 415 555 0142</span>. My order <span class="pii-orig">NW-48213-K</span> hasn't arrived at <span class="pii-orig">1847 Alder Street, Portland</span>.
 
-Can you draft a resignation letter to my employer <span class="pii-orig">Northstar Robotics</span>?</div>
+Can you draft a complaint to Northwind Outfitters?</div>
       </div>
 
       <div class="surrogate-card">
-        <div class="role"><span class="tag-surr">●</span> SANITISED · sent to LLM</div>
-        <div class="surrogate-body">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span> and I live at <span class="pii-surr">789 Crescent Row, Springfield, IL 62704</span>. Reach me at <span class="pii-surr">jdoe@example.net</span> or <span class="pii-surr">+1-217-555-0142</span>.
+        <div class="role"><span class="tag-surr">●</span> MASKED · sent to LLM</div>
+        <div class="surrogate-body">Hi, I'm <span class="pii-surr">Adya Nath</span>. Email me at <span class="pii-surr">adya.nath@vance.io</span> or call <span class="pii-surr">+1 213 581 8333</span>. My order <span class="pii-surr">VW-02898-Z</span> hasn't arrived at <span class="pii-surr">6237 James Street, Olympia</span>.
 
-Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon Dynamics</span>?</div>
+Can you draft a complaint to Northwind Outfitters?</div>
       </div>
     </div>
+    <p style="margin-top: 14px; color: var(--muted); font-size: 13.5px; font-family: var(--font-mono);">Real output of the default <code>balanced</code> preset. The company is kept because you only mention it, and the complaint still goes to the right company. Surrogates are drawn at random for each session; pass <code>seed=</code> for repeatable output.</p>
 
     <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">ShadowMap — encrypted surrogate ↔ original</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px;">Persisted to <code>conversations/&lt;conv_id&gt;.shadowmap</code> as <code>nonce (12 bytes) ‖ AES-GCM ciphertext</code>. Unreadable without the device key.</p>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px;">Kept in memory by default. With <code>pii_mem</code> set to a folder (or in the CLI and the app), it is saved as <code>SSv1 ‖ nonce (12 bytes) ‖ AES-256-GCM ciphertext</code> and cannot be read without the device key.</p>
     <div class="mapping-table">
       <div class="mapping-row">
         <span class="type">PERSON</span>
-        <span class="orig">Sherwin Jathanna</span>
+        <span class="orig">Priya Raman</span>
         <span class="arrow">↔</span>
-        <span class="surr">Sarah Mitchell</span>
+        <span class="surr">Adya Nath</span>
       </div>
       <div class="mapping-row">
-        <span class="type">ssn</span>
-        <span class="orig">544-87-2944</span>
+        <span class="type">EMAIL</span>
+        <span class="orig">priya.raman@northwind.io</span>
         <span class="arrow">↔</span>
-        <span class="surr">317-42-8806</span>
+        <span class="surr">adya.nath@vance.io</span>
       </div>
       <div class="mapping-row">
-        <span class="type">address</span>
-        <span class="orig">99 Cathedral Close, Phoenix, AZ</span>
+        <span class="type">PHONE</span>
+        <span class="orig">+1 415 555 0142</span>
         <span class="arrow">↔</span>
-        <span class="surr">789 Crescent Row, Springfield, IL</span>
+        <span class="surr">+1 213 581 8333</span>
       </div>
       <div class="mapping-row">
-        <span class="type">email</span>
-        <span class="orig">sjathann@asu.edu</span>
+        <span class="type">ID</span>
+        <span class="orig">NW-48213-K</span>
         <span class="arrow">↔</span>
-        <span class="surr">jdoe@example.net</span>
+        <span class="surr">VW-02898-Z</span>
       </div>
       <div class="mapping-row">
-        <span class="type">phone_us</span>
-        <span class="orig">+1-480-555-1234</span>
+        <span class="type">ADDRESS</span>
+        <span class="orig">1847 Alder Street, Portland</span>
         <span class="arrow">↔</span>
-        <span class="surr">+1-217-555-0142</span>
+        <span class="surr">6237 James Street, Olympia</span>
       </div>
       <div class="mapping-row">
         <span class="type">ORG</span>
-        <span class="orig">Northstar Robotics</span>
+        <span class="orig">Northwind Outfitters</span>
         <span class="arrow">↔</span>
-        <span class="surr">Halcyon Dynamics</span>
+        <span class="surr">kept · only mentioned</span>
       </div>
     </div>
 
-    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Per-type surrogate templates</h3>
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">What each type's surrogate looks like</h3>
     <div class="table-wrap" style="margin-top: 20px;">
       <table class="data">
         <thead><tr><th style="width: 220px;">Entity type</th><th>Generated surrogate looks like</th></tr></thead>
         <tbody>
-          <tr><td class="mono">PERSON</td><td class="mono"><span class="pii-surr">Sarah Mitchell</span></td></tr>
-          <tr><td class="mono">email</td><td class="mono"><span class="pii-surr">jdoe@example.net</span></td></tr>
-          <tr><td class="mono">ssn</td><td class="mono"><span class="pii-surr">XXX-XX-XXXX</span> &nbsp;<span style="color: var(--dim);">— valid format</span></td></tr>
-          <tr><td class="mono">phone_us</td><td class="mono"><span class="pii-surr">+1-###-###-####</span></td></tr>
-          <tr><td class="mono">address</td><td class="mono"><span class="pii-surr">789 Crescent Row, Springfield, IL</span></td></tr>
-          <tr><td class="mono">credit_card</td><td class="mono"><span class="pii-surr">valid Luhn-format number</span></td></tr>
-          <tr><td class="mono">dob</td><td class="mono"><span class="pii-surr">MM/DD/YYYY</span> &nbsp;<span style="color: var(--dim);">— age 18–80</span></td></tr>
-          <tr><td class="mono">ip_address</td><td class="mono"><span class="pii-surr">10.x.x.x</span></td></tr>
-          <tr><td class="mono">api_key</td><td class="mono"><span class="pii-surr">sk-</span> + 32 random chars</td></tr>
-          <tr><td class="mono">crypto <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono"><span class="pii-surr">Bitcoin P2PKH — 1 + Base58 chars, 26–35 chars</span></td></tr>
-          <tr><td class="mono">us_bank_number <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono"><span class="pii-surr">valid 9-digit ABA routing number (passes checksum)</span></td></tr>
-          <tr><td class="mono">us_driver_license <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono"><span class="pii-surr">CA format — B4923817</span></td></tr>
+          <tr><td class="mono">PERSON</td><td class="mono"><span class="pii-surr">Adya Nath</span> &nbsp;<span style="color: var(--dim);">— the same person gets the same name all session</span></td></tr>
+          <tr><td class="mono">EMAIL</td><td class="mono"><span class="pii-surr">adya.nath@vance.io</span> &nbsp;<span style="color: var(--dim);">— built from the surrogate name</span></td></tr>
+          <tr><td class="mono">PHONE</td><td class="mono"><span class="pii-surr">+1 213 581 8333</span> &nbsp;<span style="color: var(--dim);">— same country code and grouping</span></td></tr>
+          <tr><td class="mono">ADDRESS</td><td class="mono"><span class="pii-surr">9351 Meyer Street, Charlottesville, TN 19093</span></td></tr>
+          <tr><td class="mono">ID · ssn</td><td class="mono"><span class="pii-surr">841-69-1543</span> &nbsp;<span style="color: var(--dim);">— valid format</span></td></tr>
+          <tr><td class="mono">ID · credit_card</td><td class="mono"><span class="pii-surr">4159 0830 1661 3181</span> &nbsp;<span style="color: var(--dim);">— passes Luhn</span></td></tr>
+          <tr><td class="mono">ID · iban</td><td class="mono"><span class="pii-surr">DE02786579754323194875</span> &nbsp;<span style="color: var(--dim);">— passes mod-97</span></td></tr>
+          <tr><td class="mono">ID · other</td><td class="mono"><span class="pii-surr">VW-02898-Z</span> &nbsp;<span style="color: var(--dim);">— same letter and digit pattern</span></td></tr>
+          <tr><td class="mono">CREDENTIAL</td><td class="mono"><span class="pii-surr">sk-ant-api03-Hw90uUn0Hb8Ej6EtDu4Tx2Du</span> &nbsp;<span style="color: var(--dim);">— prefix kept, rest random</span></td></tr>
+          <tr><td class="mono">NETWORK</td><td class="mono"><span class="pii-surr">192.168.63.243</span> &nbsp;<span style="color: var(--dim);">— same private range</span></td></tr>
+          <tr><td class="mono">URL · HANDLE</td><td class="mono"><span class="pii-surr">https://forumrao.dev/notes · @forumrao</span></td></tr>
+          <tr><td class="mono">AGE · DATE_OF_BIRTH</td><td class="mono"><span class="pii-surr">31 years old · June 26, 1991</span> &nbsp;<span style="color: var(--dim);">— same format; a birth date moves by at most two years</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -2086,68 +2084,75 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
 <section id="presidio">
   <div class="container">
     <div class="section-num">05 / COMPARISON</div>
-    <div class="eyebrow">Surrogates vs placeholders</div>
-    <h2 class="section-title">Why realistic surrogates beat <em>[ENTITY_TYPE]</em> redaction.</h2>
+    <div class="eyebrow">Head to head · six other tools</div>
+    <h2 class="section-title">Fewer leaks than every tool we tested. <em>Fewer harmless edits too.</em></h2>
     <p class="section-lede">
-      Microsoft Presidio replaces PII with placeholder tokens. SurrogateShield replaces with type-consistent fakes. On 240 real-world-style chat messages never used for tuning, SurrogateShield let <strong>21.6%</strong> of the values that had to be protected reach the provider (153 of 708); Presidio's default configuration let through <strong>47.4%</strong>. Commands and every split: <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md">bench/results</a>.
+      All tools ran on the same real ShareGPT, WildChat and oasst1 user messages, with the same scorer. The messages were sealed until the detector was final. 3,677 personal values were placed in 1,308 messages. SurrogateShield let <strong>30 of them (0.8%)</strong> reach the provider. The others let through: GLiNER-PII tuned to 0.3, 7.3%; GLiNER-PII at its default 0.5, 9.1%; Microsoft Presidio, 31.6% (with Faker, the same); Presidio with the <code>obi/deid_roberta_i2b2</code> transformer, 54.0%; LLM Guard, 56.3%. That is <strong>11× fewer leaks than GLiNER-PII and 39× fewer than Presidio</strong>. The difference from GLiNER-PII is −8.3 points, with a 95% interval of [−9.3, −7.3]. Commands and every split: <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md">bench/results</a>.
     </p>
 
     <div class="compare-grid">
       <div class="compare-col">
         <h3>SurrogateShield</h3>
         <div class="title ss">Realistic surrogates</div>
-        <div class="compare-output">Hi, I'm <span class="pii-surr">Sarah Mitchell</span>. My SSN is <span class="pii-surr">317-42-8806</span>. Can you draft a resignation letter to <span class="pii-surr">Halcyon Dynamics</span>?</div>
+        <div class="compare-output">Hi, I'm <span class="pii-surr">Adya Nath</span>. Email me at <span class="pii-surr">adya.nath@vance.io</span> or call <span class="pii-surr">+1 213 581 8333</span>. My order <span class="pii-surr">VW-02898-Z</span> hasn't arrived at <span class="pii-surr">6237 James Street, Olympia</span>. Can you draft a complaint to Northwind Outfitters?</div>
         <div class="compare-stats">
-          <div><span>Leaked, unseen chat text</span><strong>21.6%</strong></div>
-          <div><span>Spurious edits</span><strong>16.5%</strong></div>
-          <div><span>PII-free messages untouched</span><strong>54 / 77</strong></div>
-          <div><span>Synthetic test F1</span><strong>0.986</strong></div>
+          <div><span>Leaked, real chat text</span><strong>0.8%</strong></div>
+          <div><span>Prompts sent fully clean</span><strong>97.4%</strong></div>
+          <div><span>PII-free messages untouched</span><strong>88.5%</strong></div>
+          <div><span>Nemotron-PII span F1</span><strong>0.886</strong></div>
         </div>
       </div>
       <div class="compare-col">
         <h3>Microsoft Presidio</h3>
         <div class="title">Placeholder redaction</div>
-        <div class="compare-output">Hi, I'm <span class="placeholder">[PERSON]</span>. My SSN is <span class="placeholder">[US_SSN]</span>. Can you draft a resignation letter to <span class="placeholder">[ORGANIZATION]</span>?</div>
+        <div class="compare-output">Hi, I'm <span class="placeholder">[PERSON]</span>. Email me at <span class="placeholder">[EMAIL_ADDRESS]</span> or call <span class="placeholder">[PHONE_NUMBER]</span>. My order <span class="pii-orig">NW-48213-K</span> hasn't arrived at <span class="placeholder">[DATE_TIME]</span> <span class="pii-orig">Alder Street</span>, <span class="placeholder">[LOCATION]</span>. Can you draft a complaint to Northwind Outfitters?</div>
         <div class="compare-stats">
-          <div><span>Leaked, unseen chat text</span><strong>47.4%</strong></div>
-          <div><span>Spurious edits</span><strong>39.8%</strong></div>
-          <div><span>PII-free messages untouched</span><strong>18 / 77</strong></div>
-          <div><span>Synthetic test F1</span><strong>0.746</strong></div>
+          <div><span>Leaked, real chat text</span><strong>31.6%</strong></div>
+          <div><span>Prompts sent fully clean</span><strong>30.8%</strong></div>
+          <div><span>PII-free messages untouched</span><strong>59.6%</strong></div>
+          <div><span>Nemotron-PII span F1</span><strong>0.716</strong></div>
         </div>
       </div>
     </div>
+    <p style="margin-top: 14px; color: var(--muted); font-size: 13.5px; font-family: var(--font-mono);">Both outputs are real runs on the same sentence. Presidio sent the order number and the street name in plain text and read the house number as a date. GLiNER-PII at 0.5 also sent the order number in plain text. It replaced the rest with <code>[PERSON]</code>, <code>[ADDRESS]</code> and even <code>[ORGANIZATION]</code>, so the complaint can no longer name the right company.</p>
 
-    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Comparable types · both systems detect</h3>
-    <div class="table-wrap" style="margin-top: 20px;">
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Every tool · same messages, same scorer</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 760px;">Leak, clean and spurious figures are on the injected slice: 3,677 values in 1,059 prompts and conversations (1,308 messages). <em>Clean</em> means the whole prompt or conversation reached the provider with no value left. <em>Untouched</em> means PII-free natural messages left unchanged (of 2,433). <em>Odd formats</em> are 530 values written the way a regex may not expect: lower-case names, an SSN without dashes, a phone number in words, an e-mail as "name at domain dot com". Nemotron is an outside dataset of 1,000 records. Speed is the median per message on CPU. Lower is better except for clean and untouched.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
       <table class="data">
-        <thead><tr><th>Type</th><th>SurrogateShield source</th><th>Presidio source</th></tr></thead>
+        <thead><tr><th>Tool</th><th style="text-align: right;">Leaked</th><th style="text-align: right;">Clean</th><th style="text-align: right;">Spurious</th><th style="text-align: right;">Untouched</th><th style="text-align: right;">Odd-format leak</th><th style="text-align: right;">Nemotron leak</th><th style="text-align: right;">p50 ms</th></tr></thead>
         <tbody>
-          <tr><td class="mono">PERSON</td><td class="mono" style="color: var(--muted);">EntityTrace / ContextGuard</td><td class="mono" style="color: var(--muted);">Presidio NER</td></tr>
-          <tr><td class="mono">email</td><td class="mono" style="color: var(--muted);">PatternScan</td><td class="mono" style="color: var(--muted);">Presidio regex</td></tr>
-          <tr><td class="mono">phone</td><td class="mono" style="color: var(--muted);">PatternScan</td><td class="mono" style="color: var(--muted);">Presidio regex</td></tr>
-          <tr><td class="mono">ssn</td><td class="mono" style="color: var(--muted);">PatternScan</td><td class="mono" style="color: var(--muted);">Presidio regex</td></tr>
-          <tr><td class="mono">credit_card</td><td class="mono" style="color: var(--muted);">PatternScan (Luhn)</td><td class="mono" style="color: var(--muted);">Presidio regex (Luhn)</td></tr>
-          <tr><td class="mono">ip_address</td><td class="mono" style="color: var(--muted);">PatternScan</td><td class="mono" style="color: var(--muted);">Presidio regex</td></tr>
-          <tr><td class="mono">dob</td><td class="mono" style="color: var(--muted);">PatternScan</td><td class="mono" style="color: var(--muted);">Presidio DATE_TIME</td></tr>
-          <tr><td class="mono">GPE</td><td class="mono" style="color: var(--muted);">EntityTrace</td><td class="mono" style="color: var(--muted);">Presidio LOCATION</td></tr>
-          <tr><td class="mono">crypto <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono" style="color: var(--muted);">PatternScan</td><td class="mono" style="color: var(--muted);">Presidio CRYPTO</td></tr>
-          <tr><td class="mono">us_bank_number <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono" style="color: var(--muted);">PatternScan (ABA)</td><td class="mono" style="color: var(--muted);">Presidio US_BANK_NUMBER</td></tr>
-          <tr><td class="mono">us_driver_license <span class="pill new" style="margin-left: 8px;">new</span></td><td class="mono" style="color: var(--muted);">PatternScan (context-gated)</td><td class="mono" style="color: var(--muted);">Presidio US_DRIVER_LICENSE</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">SurrogateShield</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.8%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">97.4%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">13.9%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">88.5%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.2%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">14.5%</td><td class="mono" style="text-align: right; color: var(--text);">43.5</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.3</td><td class="mono" style="text-align: right; color: var(--muted);">7.3%</td><td class="mono" style="text-align: right; color: var(--muted);">79.5%</td><td class="mono" style="text-align: right; color: var(--muted);">41.3%</td><td class="mono" style="text-align: right; color: var(--muted);">20.0%</td><td class="mono" style="text-align: right; color: var(--muted);">7.5%</td><td class="mono" style="text-align: right; color: var(--muted);">22.5%</td><td class="mono" style="text-align: right; color: var(--muted);">79.9</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.5</td><td class="mono" style="text-align: right; color: var(--muted);">9.1%</td><td class="mono" style="text-align: right; color: var(--muted);">75.4%</td><td class="mono" style="text-align: right; color: var(--muted);">35.4%</td><td class="mono" style="text-align: right; color: var(--muted);">28.9%</td><td class="mono" style="text-align: right; color: var(--muted);">8.3%</td><td class="mono" style="text-align: right; color: var(--muted);">25.8%</td><td class="mono" style="text-align: right; color: var(--muted);">82.1</td></tr>
+          <tr><td class="mono">Presidio</td><td class="mono" style="text-align: right; color: var(--muted);">31.6%</td><td class="mono" style="text-align: right; color: var(--muted);">30.8%</td><td class="mono" style="text-align: right; color: var(--muted);">32.6%</td><td class="mono" style="text-align: right; color: var(--muted);">59.6%</td><td class="mono" style="text-align: right; color: var(--muted);">43.6%</td><td class="mono" style="text-align: right; color: var(--muted);">40.1%</td><td class="mono" style="text-align: right; color: var(--text);">8.2</td></tr>
+          <tr><td class="mono">Presidio + Faker</td><td class="mono" style="text-align: right; color: var(--muted);">31.6%</td><td class="mono" style="text-align: right; color: var(--muted);">30.8%</td><td class="mono" style="text-align: right; color: var(--muted);">32.6%</td><td class="mono" style="text-align: right; color: var(--muted);">59.6%</td><td class="mono" style="text-align: right; color: var(--muted);">43.6%</td><td class="mono" style="text-align: right; color: var(--muted);">40.2%</td><td class="mono" style="text-align: right; color: var(--muted);">8.4</td></tr>
+          <tr><td class="mono">Presidio + RoBERTa</td><td class="mono" style="text-align: right; color: var(--muted);">54.0%</td><td class="mono" style="text-align: right; color: var(--muted);">11.7%</td><td class="mono" style="text-align: right; color: var(--muted);">22.0%</td><td class="mono" style="text-align: right; color: var(--muted);">70.9%</td><td class="mono" style="text-align: right; color: var(--muted);">66.0%</td><td class="mono" style="text-align: right; color: var(--muted);">56.6%</td><td class="mono" style="text-align: right; color: var(--muted);">83.5</td></tr>
+          <tr><td class="mono">LLM Guard</td><td class="mono" style="text-align: right; color: var(--muted);">56.3%</td><td class="mono" style="text-align: right; color: var(--muted);">9.1%</td><td class="mono" style="text-align: right; color: var(--muted);">16.4%</td><td class="mono" style="text-align: right; color: var(--muted);">83.9%</td><td class="mono" style="text-align: right; color: var(--muted);">61.5%</td><td class="mono" style="text-align: right; color: var(--muted);">61.0%</td><td class="mono" style="text-align: right; color: var(--muted);">58.0</td></tr>
         </tbody>
       </table>
     </div>
+    <p style="margin-top: 12px; color: var(--muted); font-size: 13.5px; max-width: 760px;">SurrogateShield has the best number in every column except raw speed, where plain Presidio is faster. It is the fastest tool here that runs a transformer: 1.9× faster than GLiNER-PII, using about 970 MB less memory. Per dataset, its leak rate was 0.7% on oasst1, 0.9% on ShareGPT and 0.8% on WildChat. GLiNER-PII at 0.5 was 8.4%, 10.1% and 8.8%.</p>
 
-    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">SS-only types · Presidio does not detect</h3>
-    <div class="table-wrap" style="margin-top: 20px;">
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Leak rate by type · % of values sent in plain text</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 760px;">SurrogateShield is lowest or joint-lowest on 10 of the 13 types and leaks nothing on 7. It is behind GLiNER-PII on PERSON and LOCATION, and behind Presidio on URL.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
       <table class="data">
-        <thead><tr><th>Type</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Type <span style="color: var(--dim);">(values)</span></th><th style="text-align: right;">SS</th><th style="text-align: right;">GLiNER 0.5</th><th style="text-align: right;">GLiNER 0.3</th><th style="text-align: right;">Presidio</th><th style="text-align: right;">+ RoBERTa</th><th style="text-align: right;">LLM Guard</th></tr></thead>
         <tbody>
-          <tr><td class="mono">api_key</td><td style="color: var(--muted);">SK / Bearer / GHP / AKIA / AIzaSy prefixes</td></tr>
-          <tr><td class="mono">address</td><td style="color: var(--muted);">Structural street-address regex</td></tr>
-          <tr><td class="mono">postal_code</td><td style="color: var(--muted);">US ZIP + UK postcode</td></tr>
-          <tr><td class="mono">gender_indicator</td><td style="color: var(--muted);">Explicit gender declarations</td></tr>
-          <tr><td class="mono">ORG</td><td style="color: var(--muted);">Organisation names (NER)</td></tr>
-          <tr><td class="mono">FAC</td><td style="color: var(--muted);">Facility names (NER)</td></tr>
+          <tr><td class="mono">ADDRESS <span style="color: var(--dim);">197</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">8.6</td><td class="mono" style="text-align: right; color: var(--muted);">7.1</td><td class="mono" style="text-align: right; color: var(--muted);">97.0</td><td class="mono" style="text-align: right; color: var(--muted);">93.9</td><td class="mono" style="text-align: right; color: var(--muted);">100</td></tr>
+          <tr><td class="mono">AGE <span style="color: var(--dim);">326</span></td><td class="mono" style="text-align: right; color: var(--neon);">0.3</td><td class="mono" style="text-align: right; color: var(--muted);">0.9</td><td class="mono" style="text-align: right; color: var(--muted);">0.6</td><td class="mono" style="text-align: right; color: var(--muted);">40.8</td><td class="mono" style="text-align: right; color: var(--muted);">69.3</td><td class="mono" style="text-align: right; color: var(--muted);">100</td></tr>
+          <tr><td class="mono">CREDENTIAL <span style="color: var(--dim);">195</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">7.2</td><td class="mono" style="text-align: right; color: var(--muted);">5.1</td><td class="mono" style="text-align: right; color: var(--muted);">95.4</td><td class="mono" style="text-align: right; color: var(--muted);">96.9</td><td class="mono" style="text-align: right; color: var(--muted);">76.9</td></tr>
+          <tr><td class="mono">DATE_OF_BIRTH <span style="color: var(--dim);">190</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">6.3</td><td class="mono" style="text-align: right; color: var(--muted);">5.8</td><td class="mono" style="text-align: right; color: var(--muted);">7.9</td><td class="mono" style="text-align: right; color: var(--muted);">38.4</td><td class="mono" style="text-align: right; color: var(--muted);">100</td></tr>
+          <tr><td class="mono">EMAIL <span style="color: var(--dim);">300</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">3.0</td><td class="mono" style="text-align: right; color: var(--muted);">2.3</td><td class="mono" style="text-align: right; color: var(--muted);">8.3</td><td class="mono" style="text-align: right; color: var(--muted);">8.3</td><td class="mono" style="text-align: right; color: var(--muted);">8.3</td></tr>
+          <tr><td class="mono">HANDLE <span style="color: var(--dim);">202</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">6.9</td><td class="mono" style="text-align: right; color: var(--muted);">3.5</td><td class="mono" style="text-align: right; color: var(--muted);">93.1</td><td class="mono" style="text-align: right; color: var(--muted);">86.6</td><td class="mono" style="text-align: right; color: var(--muted);">82.7</td></tr>
+          <tr><td class="mono">ID <span style="color: var(--dim);">248</span></td><td class="mono" style="text-align: right; color: var(--neon);">1.2</td><td class="mono" style="text-align: right; color: var(--muted);">33.1</td><td class="mono" style="text-align: right; color: var(--muted);">25.4</td><td class="mono" style="text-align: right; color: var(--muted);">22.2</td><td class="mono" style="text-align: right; color: var(--muted);">22.2</td><td class="mono" style="text-align: right; color: var(--muted);">52.0</td></tr>
+          <tr><td class="mono">LOCATION <span style="color: var(--dim);">217</span></td><td class="mono" style="text-align: right; color: var(--text);">2.8</td><td class="mono" style="text-align: right; color: var(--muted);">6.5</td><td class="mono" style="text-align: right; color: var(--muted);">1.4</td><td class="mono" style="text-align: right; color: var(--muted);">15.7</td><td class="mono" style="text-align: right; color: var(--muted);">65.9</td><td class="mono" style="text-align: right; color: var(--muted);">93.1</td></tr>
+          <tr><td class="mono">NETWORK <span style="color: var(--dim);">196</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">18.4</td><td class="mono" style="text-align: right; color: var(--muted);">16.3</td><td class="mono" style="text-align: right; color: var(--muted);">0</td><td class="mono" style="text-align: right; color: var(--muted);">19.9</td><td class="mono" style="text-align: right; color: var(--muted);">19.9</td></tr>
+          <tr><td class="mono">ORG <span style="color: var(--dim);">254</span></td><td class="mono" style="text-align: right; color: var(--neon);">3.5</td><td class="mono" style="text-align: right; color: var(--muted);">8.7</td><td class="mono" style="text-align: right; color: var(--muted);">5.5</td><td class="mono" style="text-align: right; color: var(--muted);">85.4</td><td class="mono" style="text-align: right; color: var(--muted);">73.6</td><td class="mono" style="text-align: right; color: var(--muted);">91.7</td></tr>
+          <tr><td class="mono">PERSON <span style="color: var(--dim);">867</span></td><td class="mono" style="text-align: right; color: var(--text);">1.2</td><td class="mono" style="text-align: right; color: var(--muted);">0.3</td><td class="mono" style="text-align: right; color: var(--muted);">0.1</td><td class="mono" style="text-align: right; color: var(--muted);">10.6</td><td class="mono" style="text-align: right; color: var(--muted);">76.5</td><td class="mono" style="text-align: right; color: var(--muted);">21.3</td></tr>
+          <tr><td class="mono">PHONE <span style="color: var(--dim);">272</span></td><td class="mono" style="text-align: right; color: var(--neon);">0</td><td class="mono" style="text-align: right; color: var(--muted);">3.7</td><td class="mono" style="text-align: right; color: var(--muted);">3.3</td><td class="mono" style="text-align: right; color: var(--muted);">9.2</td><td class="mono" style="text-align: right; color: var(--muted);">9.2</td><td class="mono" style="text-align: right; color: var(--muted);">5.9</td></tr>
+          <tr><td class="mono">URL <span style="color: var(--dim);">213</span></td><td class="mono" style="text-align: right; color: var(--text);">0.5</td><td class="mono" style="text-align: right; color: var(--muted);">46.9</td><td class="mono" style="text-align: right; color: var(--muted);">45.1</td><td class="mono" style="text-align: right; color: var(--muted);">0</td><td class="mono" style="text-align: right; color: var(--muted);">0</td><td class="mono" style="text-align: right; color: var(--muted);">99.5</td></tr>
         </tbody>
       </table>
     </div>
@@ -2158,98 +2163,197 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
 <section id="evaluation">
   <div class="container">
     <div class="section-num">06 / EVALUATION</div>
-    <div class="eyebrow">Batch evaluation</div>
-    <h2 class="section-title">Precision, recall, F1 — and an <em>ablation study</em>.</h2>
+    <div class="eyebrow">Benchmark · real chat text</div>
+    <h2 class="section-title">Measured on real messages, <em>sealed until the end</em>.</h2>
     <p class="section-lede">
-      Pair a question file with a ground-truth answer key. The evaluator scores detection quality, per-type breakdown, ResolvePass leak rate, BERTScore utility preservation, and a per-stage contribution ablation.
+      The messages are real user turns from ShareGPT, WildChat and oasst1, held back until the detector was frozen. Personal values were placed using the halves of the word lists that were never used for building. Intervals are 95% bootstrap intervals with the conversation as the unit (2,000 resamples). Every number here can be rerun, and the commands are in <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">bench/results/README.md</a>.
     </p>
 
     <div class="metrics">
       <div class="metric">
         <div class="metric-num">M01</div>
-        <div class="metric-val">P / R / F1</div>
-        <div class="metric-label">Overall detection</div>
-        <div class="metric-sub">Surrogate detection precision, recall, F1, accuracy</div>
+        <div class="metric-val">0.8%</div>
+        <div class="metric-label">Values leaked</div>
+        <div class="metric-sub">30 of 3,677 placed values · GLiNER-PII 9.1% · Presidio 31.6%</div>
       </div>
       <div class="metric">
         <div class="metric-num">M02</div>
-        <div class="metric-val">per-type</div>
-        <div class="metric-label">Per-entity breakdown</div>
-        <div class="metric-sub">F1 / precision / recall for every PII type</div>
+        <div class="metric-val">97.4%</div>
+        <div class="metric-label">Sent fully clean</div>
+        <div class="metric-sub">1,031 of 1,059 prompts and conversations · GLiNER-PII 75.4% · Presidio 30.8%</div>
       </div>
       <div class="metric">
         <div class="metric-num">M03</div>
-        <div class="metric-val">leak rate</div>
-        <div class="metric-label">ResolvePass</div>
-        <div class="metric-sub">Fraction of responses where a surrogate was not restored</div>
+        <div class="metric-val">88.5%</div>
+        <div class="metric-label">PII-free messages untouched</div>
+        <div class="metric-sub">2,153 of 2,433 natural messages · LLM Guard 83.9% · GLiNER-PII 28.9%</div>
       </div>
       <div class="metric">
         <div class="metric-num">M04</div>
-        <div class="metric-val">sanitisation</div>
-        <div class="metric-label">Quality</div>
-        <div class="metric-sub">Fraction of questions where real PII reached the LLM</div>
+        <div class="metric-val">0.2%</div>
+        <div class="metric-label">Odd-format leak</div>
+        <div class="metric-sub">1 of 530 values in unusual formats · GLiNER-PII 8.3% · Presidio 43.6%</div>
       </div>
       <div class="metric">
         <div class="metric-num">M05</div>
-        <div class="metric-val">BERTScore</div>
-        <div class="metric-label">Utility preservation</div>
-        <div class="metric-sub">Answer vs the answer to the original (roberta-large, rescaled)</div>
+        <div class="metric-val">14.5%</div>
+        <div class="metric-label">Nemotron-PII leak</div>
+        <div class="metric-sub">Outside dataset, 4,627 values · span F1 0.886 · GLiNER-PII 25.8%</div>
       </div>
       <div class="metric">
         <div class="metric-num">M06</div>
-        <div class="metric-val">ablation</div>
-        <div class="metric-label">Per-stage F1</div>
-        <div class="metric-sub">Pattern · +EntityTrace · +ContextGuard · full cascade</div>
+        <div class="metric-val">81 / 82</div>
+        <div class="metric-label">Multi-turn restored</div>
+        <div class="metric-sub">Surrogates put back over 60 conversations · Faker 0 / 80 · GLiNER-PII 0 / 54</div>
       </div>
     </div>
 
-    <h3 style="margin-top: 72px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">BERTScore — utility preservation</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Measured with <code>roberta-large</code>, rescaled. The utility pair compares each arm's answer with the answer to the original message. Comparing sanitised input with the original favours realistic surrogates by construction, so it is not used as a utility claim. Measured on 50 synthetic questions; paired difference +0.178 (95% CI +0.116 to +0.246). Command: <code>python bench/phase8.py --sample 50 --seed 0 --attacker claude-opus-5-5 --run main --max-calls 292 --json bench/results/phase8.json</code>.</p>
+    <h3 style="margin-top: 72px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Leak rate — values sent in plain text</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">3,677 values placed in 1,308 real messages (1,059 prompts and conversations), across 13 types. Shorter is better. Command: <code>python -m bench.realdata.score --split test3 --out bench/results/realdata_test3.json</code>.</p>
     <div class="bar-chart">
       <div class="bar-row">
         <span class="label">SurrogateShield</span>
-        <div class="bar-track"><div class="bar-fill" style="width: 56.3%;"></div></div>
-        <span class="bar-val">0.563</span>
+        <div class="bar-track"><div class="bar-fill" style="width: 0.8%;"></div></div>
+        <span class="bar-val">0.8%</span>
       </div>
       <div class="bar-row">
-        <span class="label">Presidio (placeholders)</span>
-        <div class="bar-track"><div class="bar-fill alt" style="width: 38.4%;"></div></div>
-        <span class="bar-val alt">0.384</span>
+        <span class="label">GLiNER-PII @0.3</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 7.3%;"></div></div>
+        <span class="bar-val alt">7.3%</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">GLiNER-PII @0.5</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 9.1%;"></div></div>
+        <span class="bar-val alt">9.1%</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">Presidio (± Faker)</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 31.6%;"></div></div>
+        <span class="bar-val alt">31.6%</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">Presidio + RoBERTa</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 54.0%;"></div></div>
+        <span class="bar-val alt">54.0%</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">LLM Guard</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 56.3%;"></div></div>
+        <span class="bar-val alt">56.3%</span>
       </div>
     </div>
 
-    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Ablation — per-stage F1 contribution</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">The cascade is re-run with stages switched off on 1,200 synthetic dev messages, which were used for tuning. Scored on replaced spans only (span overlap); 95% intervals are a paired bootstrap over messages. Command: <code>python offline_eval.py --key experiment/synth_dev_key.json --ablation</code>.</p>
-    <div class="table-wrap" style="margin-top: 20px;">
+    <h3 style="margin-top: 72px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">BERTScore — are the answers still useful?</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">Each tool's masked version of 298 prompts was answered by <code>claude-sonnet-4-6</code>. The answer was compared with the answer to the original prompt (<code>roberta-large</code>, rescaled). SurrogateShield scored +0.077 [+0.053, +0.103] above Presidio + Faker and +0.072 [+0.046, +0.098] above GLiNER-PII. A judge model (<code>claude-opus-5-5</code>) preferred SurrogateShield's answer over Presidio + Faker's 195 times and the other way 62 times, with 39 ties: +0.449 [+0.355, +0.540]. Against GLiNER-PII it preferred SurrogateShield's answer 132 times and GLiNER-PII's 117 times, with 47 ties: +0.051 [−0.051, +0.152].</p>
+    <div class="bar-chart">
+      <div class="bar-row">
+        <span class="label">SurrogateShield</span>
+        <div class="bar-track"><div class="bar-fill" style="width: 44.2%;"></div></div>
+        <span class="bar-val">0.442</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">GLiNER-PII</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 36.9%;"></div></div>
+        <span class="bar-val alt">0.369</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">Presidio + Faker</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 36.5%;"></div></div>
+        <span class="bar-val alt">0.365</span>
+      </div>
+      <div class="bar-row">
+        <span class="label">Presidio (placeholders)</span>
+        <div class="bar-track"><div class="bar-fill alt" style="width: 35.8%;"></div></div>
+        <span class="bar-val alt">0.358</span>
+      </div>
+    </div>
+    <p style="margin-top: 16px; color: var(--muted); font-size: 14.5px; max-width: 680px;">On 150 natural prompts, most of which hold no personal data, SurrogateShield changed 23, Presidio 59 and GLiNER-PII 108. Answering the original prompt a second time scores 0.508. SurrogateShield's answers score 0.490, Presidio's 0.440 and GLiNER-PII's 0.365.</p>
+
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Multi-turn conversations</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">60 multi-turn conversations with personal values placed in them, 20 per dataset. Only SurrogateShield puts the values back in the replies, because the other tools keep no map.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
       <table class="data">
-        <thead><tr><th>Configuration</th><th style="text-align: right;">Micro F1</th><th style="text-align: right;">Change vs full (95% CI)</th></tr></thead>
+        <thead><tr><th>Tool</th><th style="text-align: right;">Values restored</th><th style="text-align: right;">Final answer correct / partly</th><th style="text-align: right;">Real value sent upstream</th></tr></thead>
         <tbody>
-          <tr>
-            <td class="mono">PatternScan only</td>
-            <td class="mono" style="text-align: right; color: var(--text);">0.842</td>
-            <td class="mono" style="text-align: right; color: var(--muted);">−0.138 [−0.149, −0.127]</td>
-          </tr>
-          <tr>
-            <td class="mono">+ EntityTrace (ContextGuard off)</td>
-            <td class="mono" style="text-align: right; color: var(--text);">0.980</td>
-            <td class="mono" style="text-align: right; color: var(--muted);">−0.001 [−0.003, +0.001]</td>
-          </tr>
-          <tr>
-            <td class="mono">All stages, post-passes off</td>
-            <td class="mono" style="text-align: right; color: var(--text);">0.968</td>
-            <td class="mono" style="text-align: right; color: var(--muted);">−0.013 [−0.016, −0.009]</td>
-          </tr>
-          <tr>
-            <td class="mono" style="color: var(--neon);">Full cascade</td>
-            <td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.981</td>
-            <td class="mono" style="text-align: right; color: var(--muted);">—</td>
-          </tr>
+          <tr><td class="mono" style="color: var(--neon);">SurrogateShield</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">81 / 82</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">32 / 18</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">5 / 150</td></tr>
+          <tr><td class="mono">GLiNER-PII</td><td class="mono" style="text-align: right; color: var(--muted);">0 / 54</td><td class="mono" style="text-align: right; color: var(--muted);">2 / 5</td><td class="mono" style="text-align: right; color: var(--muted);">30 / 150</td></tr>
+          <tr><td class="mono">Presidio + Faker</td><td class="mono" style="text-align: right; color: var(--muted);">0 / 80</td><td class="mono" style="text-align: right; color: var(--muted);">0 / 19</td><td class="mono" style="text-align: right; color: var(--muted);">78 / 150</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top: 12px; color: var(--muted); font-size: 13.5px; max-width: 680px;">The judge preferred SurrogateShield's conversations by +0.576 [+0.467, +0.685] over Presidio + Faker and +0.649 [+0.527, +0.770] over GLiNER-PII.</p>
+
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Natural messages — harmless edits</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">2,476 natural messages, 2,433 of them with nothing to protect. Every change to those is a harmless word altered for no reason. GLiNER-PII at 0.5 makes 5.7× more of these than SurrogateShield. Every SurrogateShield operating point sits below and to the left of every GLiNER-PII threshold from 0.3 to 0.9, both pooled and per dataset.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
+      <table class="data">
+        <thead><tr><th>Tool</th><th style="text-align: right;">Untouched (of 2,433)</th><th style="text-align: right;">Spurious edits / all edits</th></tr></thead>
+        <tbody>
+          <tr><td class="mono" style="color: var(--neon);">SurrogateShield</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">2,153 · 88.5%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">1,053 / 1,389</td></tr>
+          <tr><td class="mono">LLM Guard</td><td class="mono" style="text-align: right; color: var(--muted);">2,041 · 83.9%</td><td class="mono" style="text-align: right; color: var(--muted);">1,391 / 1,710</td></tr>
+          <tr><td class="mono">Presidio + RoBERTa</td><td class="mono" style="text-align: right; color: var(--muted);">1,725 · 70.9%</td><td class="mono" style="text-align: right; color: var(--muted);">2,259 / 2,749</td></tr>
+          <tr><td class="mono">Presidio</td><td class="mono" style="text-align: right; color: var(--muted);">1,450 · 59.6%</td><td class="mono" style="text-align: right; color: var(--muted);">3,438 / 4,044</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.5</td><td class="mono" style="text-align: right; color: var(--muted);">704 · 28.9%</td><td class="mono" style="text-align: right; color: var(--muted);">6,012 / 6,697</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.3</td><td class="mono" style="text-align: right; color: var(--muted);">486 · 20.0%</td><td class="mono" style="text-align: right; color: var(--muted);">7,789 / 8,496</td></tr>
         </tbody>
       </table>
     </div>
 
-    <div class="callout" style="margin-top: 28px;">
-      <strong>Note.</strong> On this split ContextGuard adds no measurable F1 (the interval includes 0) and costs about 27 ms per message. The Evaluation screen reports the same table for your own key file.
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Nemotron-PII — an outside dataset</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">1,000 records and 4,627 values from a dataset none of the tools was built on. SurrogateShield has the lowest leak rate in all four strata: 11.9%, 12.5%, 16.9% and 16.8%.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
+      <table class="data">
+        <thead><tr><th>Tool</th><th style="text-align: right;">Leaked</th><th style="text-align: right;">Span F1</th></tr></thead>
+        <tbody>
+          <tr><td class="mono" style="color: var(--neon);">SurrogateShield</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">14.5%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.886</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.3</td><td class="mono" style="text-align: right; color: var(--muted);">22.5%</td><td class="mono" style="text-align: right; color: var(--muted);">0.751</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.5</td><td class="mono" style="text-align: right; color: var(--muted);">25.8%</td><td class="mono" style="text-align: right; color: var(--muted);">0.758</td></tr>
+          <tr><td class="mono">Presidio</td><td class="mono" style="text-align: right; color: var(--muted);">40.1%</td><td class="mono" style="text-align: right; color: var(--muted);">0.716</td></tr>
+          <tr><td class="mono">Presidio + Faker</td><td class="mono" style="text-align: right; color: var(--muted);">40.2%</td><td class="mono" style="text-align: right; color: var(--muted);">0.716</td></tr>
+          <tr><td class="mono">Presidio + RoBERTa</td><td class="mono" style="text-align: right; color: var(--muted);">56.6%</td><td class="mono" style="text-align: right; color: var(--muted);">0.594</td></tr>
+          <tr><td class="mono">LLM Guard</td><td class="mono" style="text-align: right; color: var(--muted);">61.0%</td><td class="mono" style="text-align: right; color: var(--muted);">0.530</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Speed and memory</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">200 messages on a 10-CPU Mac, warm. Plain Presidio is the fastest. Among tools that run a transformer, SurrogateShield is the fastest.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
+      <table class="data">
+        <thead><tr><th>Tool</th><th style="text-align: right;">Median ms / message</th><th style="text-align: right;">Peak memory</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">Presidio</td><td class="mono" style="text-align: right; color: var(--muted);">8.2</td><td class="mono" style="text-align: right; color: var(--muted);">1,084 MB</td></tr>
+          <tr><td class="mono">Presidio + Faker</td><td class="mono" style="text-align: right; color: var(--muted);">8.4</td><td class="mono" style="text-align: right; color: var(--muted);">1,010 MB</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">SurrogateShield</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">43.5</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">1,348 MB</td></tr>
+          <tr><td class="mono">LLM Guard</td><td class="mono" style="text-align: right; color: var(--muted);">58.0</td><td class="mono" style="text-align: right; color: var(--muted);">1,565 MB</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.3</td><td class="mono" style="text-align: right; color: var(--muted);">79.9</td><td class="mono" style="text-align: right; color: var(--muted);">2,333 MB</td></tr>
+          <tr><td class="mono">GLiNER-PII @0.5</td><td class="mono" style="text-align: right; color: var(--muted);">82.1</td><td class="mono" style="text-align: right; color: var(--muted);">2,318 MB</td></tr>
+          <tr><td class="mono">Presidio + RoBERTa</td><td class="mono" style="text-align: right; color: var(--muted);">83.5</td><td class="mono" style="text-align: right; color: var(--muted);">1,611 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Presets and ablation</h3>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 680px;">The same injected slice was run with each preset, and with one part of <code>balanced</code> switched off at a time. Even with every regex broken, the leak rate stays below Presidio's 31.6%.</p>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
+      <table class="data">
+        <thead><tr><th>Configuration</th><th style="text-align: right;">Leaked</th><th style="text-align: right;">Untouched (of 2,433)</th><th style="text-align: right;">p50 ms</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">strict</td><td class="mono" style="text-align: right; color: var(--text);">0.2%</td><td class="mono" style="text-align: right; color: var(--muted);">1,264</td><td class="mono" style="text-align: right; color: var(--muted);">67.1</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">balanced (default)</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">0.8%</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">2,153</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">47.1</td></tr>
+          <tr><td class="mono">fast</td><td class="mono" style="text-align: right; color: var(--text);">0.8%</td><td class="mono" style="text-align: right; color: var(--muted);">2,147</td><td class="mono" style="text-align: right; color: var(--muted);">38.2</td></tr>
+          <tr><td class="mono">classic (no tagger weights)</td><td class="mono" style="text-align: right; color: var(--text);">2.5%</td><td class="mono" style="text-align: right; color: var(--muted);">1,885</td><td class="mono" style="text-align: right; color: var(--muted);">29.2</td></tr>
+          <tr><td class="mono">balanced, no pattern rules</td><td class="mono" style="text-align: right; color: var(--text);">1.4%</td><td class="mono" style="text-align: right; color: var(--dim);">—</td><td class="mono" style="text-align: right; color: var(--dim);">—</td></tr>
+          <tr><td class="mono">balanced, no canonicaliser</td><td class="mono" style="text-align: right; color: var(--text);">3.9%</td><td class="mono" style="text-align: right; color: var(--dim);">—</td><td class="mono" style="text-align: right; color: var(--dim);">—</td></tr>
+          <tr><td class="mono">balanced, no tagger</td><td class="mono" style="text-align: right; color: var(--text);">10.8%</td><td class="mono" style="text-align: right; color: var(--dim);">—</td><td class="mono" style="text-align: right; color: var(--dim);">—</td></tr>
+          <tr><td class="mono">balanced, no models</td><td class="mono" style="text-align: right; color: var(--text);">15.7%</td><td class="mono" style="text-align: right; color: var(--dim);">—</td><td class="mono" style="text-align: right; color: var(--dim);">—</td></tr>
+          <tr><td class="mono">balanced, every regex broken</td><td class="mono" style="text-align: right; color: var(--text);">26.1%</td><td class="mono" style="text-align: right; color: var(--dim);">—</td><td class="mono" style="text-align: right; color: var(--dim);">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" id="limitations" style="margin-top: 28px;">
+      <strong>Limitations:</strong> it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test.
     </div>
   </div>
 </section>
@@ -2261,46 +2365,46 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="eyebrow">Attacker experiment</div>
     <h2 class="section-title">Can an attacker model recover the originals?</h2>
     <p class="section-lede">
-      <code>attacker.py</code> gives a second model, different from the one that answers, the text each system sent to the provider. It is told that a filter may have replaced some values, changed parts of others or left them unchanged, and asked to estimate every original. Recovery is scored per gold value, exact or partial (same e-mail domain, area code, name token, street or city, birth year). A value an arm left in plain text counts as leaked, not recovered.
+      <code>claude-opus-5-5</code> was given the text each tool sent to the provider for 180 real prompts holding 636 placed values. It was told that a filter may have replaced some values, changed parts of others or left them alone, and asked to give back every original. A value counts as known if the tool left it in plain text or the attacker named it letter for letter. SurrogateShield let the attacker know 1.8% of the values. GLiNER-PII let it know 12.6%, Presidio 34.2% and LLM Guard 61.0%.
     </p>
 
     <div class="split">
       <div class="feature">
         <div class="num">SURROGATESHIELD</div>
-        <h3>Small details, not identities</h3>
+        <h3>The fewest values known, by far</h3>
         <ul>
-          <li>Recovered exactly: <strong style="color: var(--neon);">0</strong> of 149</li>
-          <li>Sent in plain text: <strong style="color: var(--text);">1.3%</strong> (2 of 151)</li>
-          <li>Partial detail recovered: <strong style="color: var(--text);">17.4%</strong> (26 of 149), mostly "LLP", "Pharmacy", an e-mail provider or a birth year</li>
-          <li>The name, the account and the number itself stay hidden</li>
+          <li>Known letter for letter: <strong style="color: var(--neon);">1.8%</strong> (11 of 627)</li>
+          <li>Left in plain text: <strong style="color: var(--neon);">7</strong> of 636</li>
+          <li>Recovered exactly: <strong style="color: var(--neon);">4</strong> of 620, all of them URLs</li>
+          <li>Across whole conversations: 1 of 177 recovered, 3 of 179 known</li>
         </ul>
       </div>
       <div class="feature">
-        <div class="num">PRESIDIO</div>
-        <h3>Placeholders, but more left in plain text</h3>
+        <div class="num">THE OTHER TOOLS</div>
+        <h3>Most of the loss is text left in place</h3>
         <ul>
-          <li>Recovered exactly: <strong style="color: var(--text);">0</strong> of 108</li>
-          <li>Sent in plain text: <strong style="color: var(--coral);">25.5%</strong> (37 of 145), every organisation name among them</li>
-          <li>Partial detail recovered: <strong style="color: var(--text);">4.6%</strong> (5 of 108); a placeholder keeps nothing to guess from</li>
+          <li>GLiNER-PII: <strong style="color: var(--text);">12.6%</strong> known (79 of 629), 73 left in plain text</li>
+          <li>Presidio: <strong style="color: var(--coral);">34.2%</strong> known (215 of 629), 201 left in plain text</li>
+          <li>Presidio + Faker: <strong style="color: var(--coral);">33.2%</strong> known (209 of 629)</li>
+          <li>LLM Guard: <strong style="color: var(--coral);">61.0%</strong> known (383 of 628), 364 left in plain text</li>
         </ul>
       </div>
     </div>
 
     <div class="callout" style="margin-top: 28px;">
-      <strong>How to read this.</strong> Attacker Claude Opus 5.5, responder Claude Sonnet 4.6, 50 synthetic questions, one run. Counting plain text and partial details together, 18.5% of SurrogateShield's values and 29.0% of Presidio's were exposed in some form. In 2 cases a SurrogateShield surrogate kept a real first name; that is a bug being fixed. Three invalid attacker replies are excluded. An earlier run reported 0.00% vs 1.53%; its prompt told the attacker recovery was impossible, so those figures are withdrawn. Command and details: <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md">bench/results</a>.
+      <strong>How to read this.</strong> SurrogateShield lets the attacker know 7× fewer values than GLiNER-PII and 19× fewer than Presidio. Its four exact recoveries, the fewest of all five tools, were all URLs whose surrogate changed one part of the host and kept the path. The attacker also guessed 98 parts of values that a SurrogateShield surrogate keeps on purpose: 38 e-mail domains, 19 organisation words such as "Pharmacy", 18 URL hosts, 14 address parts, 8 birth years and 1 area code. These are listed apart, not counted as recovered. Responder <code>claude-sonnet-4-6</code>, attacker <code>claude-opus-5-5</code>, one run. Command: <code>python -m bench.realdata.attacker_exact --split test3</code>, details in <a href="https://github.com/sherwinvishesh/SurrogateShield/blob/v2/bench/results/README.md">bench/results</a>.
     </div>
 
-    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Per-attempt analysis</h3>
-    <div class="table-wrap" style="margin-top: 20px;">
+    <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Per tool</h3>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
       <table class="data">
-        <thead><tr><th>Metric</th><th>Description</th></tr></thead>
+        <thead><tr><th>Tool</th><th style="text-align: right;">Left in plain text</th><th style="text-align: right;">Recovered exactly</th><th style="text-align: right;">Known letter for letter</th></tr></thead>
         <tbody>
-          <tr><td class="mono">questions_available</td><td style="color: var(--muted);">Questions with SS / Presidio data to attack</td></tr>
-          <tr><td class="mono">total_targeted</td><td style="color: var(--muted);">PII values the attacker attempted to recover</td></tr>
-          <tr><td class="mono">total_recovered</td><td style="color: var(--muted);">Attacker's guess matched the original (exact, lowercased)</td></tr>
-          <tr><td class="mono">recovery_rate</td><td style="color: var(--muted);"><code>recovered / targeted</code> — lower is better for privacy</td></tr>
-          <tr><td class="mono">recovery_rate_excl_address</td><td style="color: var(--muted);">Excludes service-query fuzzed addresses (proximity tracked separately)</td></tr>
-          <tr><td class="mono">by_type</td><td style="color: var(--muted);">Per-PII-type targeted / recovered counts</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">SurrogateShield</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">7</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">4 / 620</td><td class="mono" style="text-align: right; color: var(--neon); font-weight: 500;">11 / 627 · 1.8%</td></tr>
+          <tr><td class="mono">GLiNER-PII</td><td class="mono" style="text-align: right; color: var(--muted);">73</td><td class="mono" style="text-align: right; color: var(--muted);">6 / 556</td><td class="mono" style="text-align: right; color: var(--muted);">79 / 629 · 12.6%</td></tr>
+          <tr><td class="mono">Presidio + Faker</td><td class="mono" style="text-align: right; color: var(--muted);">201</td><td class="mono" style="text-align: right; color: var(--muted);">8 / 428</td><td class="mono" style="text-align: right; color: var(--muted);">209 / 629 · 33.2%</td></tr>
+          <tr><td class="mono">Presidio</td><td class="mono" style="text-align: right; color: var(--muted);">201</td><td class="mono" style="text-align: right; color: var(--muted);">14 / 428</td><td class="mono" style="text-align: right; color: var(--muted);">215 / 629 · 34.2%</td></tr>
+          <tr><td class="mono">LLM Guard</td><td class="mono" style="text-align: right; color: var(--muted);">364</td><td class="mono" style="text-align: right; color: var(--muted);">19 / 264</td><td class="mono" style="text-align: right; color: var(--muted);">383 / 628 · 61.0%</td></tr>
         </tbody>
       </table>
     </div>
@@ -2314,48 +2418,48 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="eyebrow">Cryptographic design</div>
     <h2 class="section-title">Local-only key material. <em>AES-256-GCM</em> on every write.</h2>
     <p class="section-lede">
-      The device secret never leaves the machine. Each conversation derives an independent key. ShadowMap files are unreadable without the device key and degrade gracefully on corruption.
+      The map from surrogates back to your values is kept on your machine. In the library it lives in memory unless you give it a directory. On disk it is sealed with a key derived from a device secret that is never sent anywhere, and a file that will not decrypt raises an error instead of quietly becoming an empty map.
     </p>
 
     <div class="split">
       <div class="feature">
         <div class="num">KEY MATERIAL</div>
-        <h3>Device secret + per-conversation derivation</h3>
+        <h3>Device secret + per-store derivation</h3>
         <ul>
-          <li>32-byte random key at <code>~/.surrogateshield/device.key</code></li>
-          <li>File permissions: <code>0o600</code> (owner read/write only)</li>
-          <li>Per-conversation key: HKDF-SHA256 with device secret as IKM and conversation ID as salt</li>
-          <li>Generated once on first launch; never transmitted</li>
+          <li>32 random bytes at <code>~/.surrogateshield/device.key</code>, created once</li>
+          <li>File mode <code>0600</code>, home directory <code>0700</code></li>
+          <li>Per-store key: HKDF-SHA256, device secret as input, store id as salt, file kind as info</li>
+          <li>If the secret cannot be saved, an error is raised rather than using a throwaway key</li>
         </ul>
       </div>
       <div class="feature">
         <div class="num">SHADOWMAP</div>
-        <h3>Encrypted surrogate ↔ original store</h3>
+        <h3>Sealed surrogate ↔ original store</h3>
         <ul>
-          <li>AES-256-GCM with a fresh 12-byte nonce per save</li>
-          <li>Format: <code>nonce (12 B) ‖ AES-GCM ciphertext</code></li>
-          <li>Location: <code>conversations/&lt;conv_id&gt;.shadowmap</code></li>
-          <li>Missing / corrupt → empty mapping, no crash</li>
+          <li>Format: <code>SSv1 ‖ nonce (12 B) ‖ AES-256-GCM</code>, fresh nonce on every save</li>
+          <li>Kind and id are bound in as associated data, so a file only opens as what it was written for</li>
+          <li>Atomic writes: temp file, fsync, rename</li>
+          <li>Undecryptable file → moved aside, <code>CorruptStoreError</code> raised</li>
         </ul>
       </div>
       <div class="feature">
         <div class="num">TRANSMISSION</div>
-        <h3>Wire-level guarantees</h3>
+        <h3>What goes over the wire</h3>
         <ul>
-          <li>Detected values are sent over HTTPS as surrogates; missed values are sent as typed</li>
-          <li>Conversation history holds the values you typed, encrypted like the ShadowMap</li>
-          <li>RAG documents anonymised through full SentinelLayer before indexing</li>
-          <li>Vector store operates exclusively on surrogates</li>
+          <li>Detected values are sent over HTTPS as surrogates</li>
+          <li>Conversation history is sealed the same way as the ShadowMap</li>
+          <li>RAG documents go through SentinelLayer before they are indexed</li>
+          <li>Missing tagger weights raise <code>DetectorUnavailable</code>; nothing is sent half-checked</li>
         </ul>
       </div>
       <div class="feature">
         <div class="num">.GITIGNORE</div>
         <h3>What is excluded by default</h3>
         <ul>
-          <li><code>*.shadowmap</code> — encrypted surrogate stores</li>
-          <li><code>conversations/</code> — chat history</li>
-          <li><code>device.key</code> — device secret</li>
+          <li><code>conversations/</code> and <code>*.shadowmap</code> — history and sealed maps</li>
+          <li><code>*.key</code>, <code>.surrogateshield/</code> — the device secret</li>
           <li><code>.env</code> — API keys</li>
+          <li>Raw benchmark data and live-run outputs</li>
         </ul>
       </div>
     </div>
@@ -2369,7 +2473,7 @@ Can you draft a resignation letter to my employer <span class="pii-surr">Halcyon
     <div class="eyebrow">Privacy-aware retrieval</div>
     <h2 class="section-title">Documents are anonymised at <em>index time</em>.</h2>
     <p class="section-lede">
-      Local RAG via ChromaDB + sentence-transformers (<code>all-MiniLM-L6-v2</code>). No server. Detected PII is replaced before a document is indexed.
+      Local RAG via ChromaDB + sentence-transformers (<code>all-MiniLM-L6-v2</code>), in process, with no server. Detected values are replaced before a document is indexed, so the index holds surrogates.
     </p>
 
     <div class="pipeline-wrap">
@@ -2401,7 +2505,7 @@ chunk @ <span class="label">RAG_CHUNK_SIZE = 512</span>
    <span class="dim">all-MiniLM-L6-v2</span>
     │
     ▼
-<span class="label">ChromaDB</span>  <span class="dim">▸ ./chroma_db (persistent)</span></pre>
+<span class="label">ChromaDB</span>  <span class="dim">▸ ~/.surrogateshield/rag</span></pre>
       </div>
       <div class="panel">
         <div class="panel-header">
@@ -2420,11 +2524,11 @@ embed ▸ ChromaDB ▸ retrieve top-3
 Prepend anonymised context
     │
     ▼
-<span class="label">LLM API</span>  ← <span class="dim">surrogates everywhere</span>
+<span class="label">LLM API</span>  ← <span class="dim">receives the masked text</span>
     │
     ▼
 <span class="label">ResolvePass</span>
-   <span class="dim">restores user PII + indexed-doc PII</span>
+   <span class="dim">restores your values + document values</span>
    <span class="dim">via rag_global ShadowMap</span>
     │
     ▼
@@ -2439,55 +2543,48 @@ Display to user</pre>
   <div class="container">
     <div class="section-num">10 / ARCHITECTURE</div>
     <div class="eyebrow">Project structure</div>
-    <h2 class="section-title">Single source of truth in <em>config.py</em>. Everything else is a module.</h2>
-    <p class="section-lede">All thresholds, model identifiers, and toggles live in one file. Detection, generation, storage, reconstruction, and chat are independent modules with narrow interfaces.</p>
+    <h2 class="section-title">One engine in <em>python-library</em>. The app and the benchmark use it.</h2>
+    <p class="section-lede">Detection, surrogates, storage and restore live once, in the package. The terminal app's modules are thin wrappers that read <code>config.py</code>, and the benchmark runs the same code against the other tools.</p>
 
     <div class="tree-wrap">
 <pre><span class="root">SurrogateShield/</span>
-├── <span class="path">main.py</span>                  <span class="comment"># CLI entry + interactive dashboard</span>
-├── <span class="path">pipeline.py</span>              <span class="comment"># End-to-end message pipeline orchestration</span>
-├── <span class="path">config.py</span>                <span class="comment"># Single source of truth — thresholds & flags</span>
-├── <span class="path">util.py</span>                  <span class="comment"># DetectedEntity, Conversation, logging</span>
-├── <span class="path">settings_manager.py</span>      <span class="comment"># ~/.surrogateshield/settings.json</span>
-├── <span class="path">evaluator.py</span>             <span class="comment"># P/R/F1 + Presidio + BERTScore + ablation</span>
-├── <span class="path">json_tester.py</span>           <span class="comment"># Batch JSON question processing</span>
-├── <span class="path">attacker.py</span>              <span class="comment"># Adversarial PII recovery experiment</span>
-├── <span class="path">run.sh</span>                   <span class="comment"># venv activation + .env loading</span>
+├── <span class="dir">python-library/</span>          <span class="comment"># The engine: pip install ./python-library</span>
+│   └── <span class="dir">surrogateshield/</span>
+│       ├── <span class="path">__init__.py</span>      <span class="comment"># config · scan · mask · unmask · forget · flush</span>
+│       ├── <span class="path">session.py</span>       <span class="comment"># Session — sync and async</span>
+│       ├── <span class="path">cli.py</span>           <span class="comment"># scan · mask · unmask · bench · doctor</span>
+│       └── <span class="dir">core/</span>
+│           ├── <span class="dir">detection/</span>   <span class="comment"># SentinelLayer</span>
+│           │   ├── <span class="path">pipeline.py</span>      <span class="comment"># stages, passes, relation gate, resolver</span>
+│           │   ├── <span class="path">config.py</span>        <span class="comment"># presets: fast · balanced · strict · classic</span>
+│           │   ├── <span class="path">pattern_scan.py</span>  <span class="comment"># PatternScan — regex + validators</span>
+│           │   ├── <span class="path">canonical.py</span>     <span class="comment"># views of spaced, spelled-out and obfuscated values</span>
+│           │   ├── <span class="path">entity_trace.py</span>  <span class="comment"># EntityTrace — spaCy en_core_web_lg</span>
+│           │   ├── <span class="path">pii_tagger.py</span>    <span class="comment"># PIITagger — DeBERTa-v3-small</span>
+│           │   ├── <span class="path">context_guard.py</span> <span class="comment"># ContextGuard — distilbert-NER</span>
+│           │   ├── <span class="path">structural.py</span>    <span class="comment"># Passes A–H and S</span>
+│           │   └── <span class="path">service_query.py</span> <span class="comment"># address shift for service queries</span>
+│           ├── <span class="dir">generation/</span>  <span class="comment"># MimicGen — same-shape surrogates, no collisions</span>
+│           ├── <span class="dir">storage/</span>     <span class="comment"># ShadowMap — AES-256-GCM</span>
+│           └── <span class="dir">reconstruction/</span> <span class="comment"># ResolvePass — exact · component · fuzzy</span>
 │
-├── <span class="dir">detection/</span>               <span class="comment"># SentinelLayer — three-stage cascade</span>
-│   ├── <span class="path">logic.py</span>             <span class="comment"># Cascade + post-processing passes A–D</span>
-│   ├── <span class="path">pattern_scan.py</span>      <span class="comment"># PatternScan — regex + validators</span>
-│   ├── <span class="path">entity_trace.py</span>      <span class="comment"># EntityTrace — spaCy en_core_web_lg</span>
-│   ├── <span class="path">context_guard.py</span>     <span class="comment"># ContextGuard — distilbert-NER</span>
-│   ├── <span class="path">service_query.py</span>     <span class="comment"># Address fuzzing for location queries</span>
-│   ├── <span class="path">quasi_identifier.py</span>  <span class="comment"># Sweeney k-anonymity risk scorer</span>
-│   └── <span class="path">geo_data.py</span>          <span class="comment"># Pass-through whitelist (US states, countries)</span>
-│
-├── <span class="dir">generation/logic.py</span>      <span class="comment"># MimicGen — Faker, no collisions</span>
-├── <span class="dir">storage/logic.py</span>         <span class="comment"># ShadowMap — AES-256-GCM</span>
-├── <span class="dir">reconstruction/logic.py</span>  <span class="comment"># ResolvePass — exact · component · fuzzy</span>
-│
-├── <span class="dir">presidio/</span>                <span class="comment"># Comparison feature (optional)</span>
-│   ├── <span class="path">engine.py</span>            <span class="comment"># Lazy singleton AnalyzerEngine</span>
-│   ├── <span class="path">detect.py</span>            <span class="comment"># detect(text) → list[PresidioEntity]</span>
-│   └── <span class="path">redact.py</span>            <span class="comment"># redact(text, entities) → [TYPE] string</span>
-│
+├── <span class="path">main.py</span>                  <span class="comment"># Terminal app: dashboard and commands</span>
+├── <span class="path">pipeline.py</span>              <span class="comment"># App message flow: mask, send, restore</span>
+├── <span class="path">config.py</span>                <span class="comment"># App settings: models, thresholds, paths</span>
+├── <span class="dir">detection/ generation/</span>   <span class="comment"># Wrappers over the package</span>
+├── <span class="dir">storage/ reconstruction/</span> <span class="comment"># Wrappers over the package</span>
 ├── <span class="dir">chatbot/</span>
-│   ├── <span class="path">chat.py</span>              <span class="comment"># Claude / Gemini / OpenAI / Ollama</span>
+│   ├── <span class="path">chat.py</span>              <span class="comment"># Claude / Gemini / OpenAI / Ollama, sealed history</span>
 │   └── <span class="path">rag.py</span>               <span class="comment"># RAGStore — Chroma + sentence-transformers</span>
+├── <span class="dir">presidio/</span>                <span class="comment"># Side-by-side comparison in the app</span>
 │
-├── <span class="dir">experiment/</span>              <span class="comment"># Batch test files</span>
-├── <span class="dir">tests/</span>                   <span class="comment"># test1–test7 — no API key needed</span>
+├── <span class="dir">bench/</span>                   <span class="comment"># The benchmark</span>
+│   ├── <span class="dir">arms/</span>                <span class="comment"># SS, GLiNER-PII, Presidio (+ Faker, RoBERTa), LLM Guard</span>
+│   ├── <span class="dir">realdata/</span>            <span class="comment"># build, inject, label, score, live runs</span>
+│   ├── <span class="path">perf_arms.py</span>         <span class="comment"># speed and memory per tool</span>
+│   └── <span class="dir">results/</span>             <span class="comment"># every committed number + README of commands</span>
 │
-├── <span class="dir">python-library/</span>          <span class="comment"># Standalone pip package — surrogateshield</span>
-│   ├── <span class="path">pyproject.toml</span>       <span class="comment"># Package metadata + dependencies</span>
-│   ├── <span class="path">README.md</span>            <span class="comment"># Full library API reference</span>
-│   └── <span class="dir">surrogateshield/</span>     <span class="comment"># Self-contained — zero imports from main app</span>
-│       ├── <span class="path">__init__.py</span>      <span class="comment"># Public API: config · scan · mask · unmask · flush</span>
-│       ├── <span class="path">_response_parser.py</span> <span class="comment"># Anthropic / OpenAI / Gemini / plain string</span>
-│       └── <span class="dir">core/</span>            <span class="comment"># detection · generation · storage · reconstruction</span>
-│
-└── <span class="dir">conversations/</span>           <span class="comment"># Runtime — .json (surrogate text) + .shadowmap</span></pre>
+└── <span class="dir">tests/</span>                   <span class="comment"># pytest, no API key needed</span></pre>
     </div>
   </div>
 </section>
@@ -2497,9 +2594,9 @@ Display to user</pre>
   <div class="container">
     <div class="section-num">11 / INSTALL</div>
     <div class="eyebrow">Quick start</div>
-    <h2 class="section-title">Up and running in under a minute.</h2>
+    <h2 class="section-title">Up and running in a few commands.</h2>
     <p class="section-lede">
-      You must activate a virtual environment before installing. Installing into the system or base conda Python is the most common cause of "package not found" errors at runtime.
+      Activate a virtual environment before installing. Installing into the system or base conda Python is the most common cause of "package not found" errors at runtime. Then run <code>surrogateshield doctor</code>: it checks that every detection stage loads before you send anything.
     </p>
 
     <div class="code-block" style="margin-top: 48px;">
@@ -2515,24 +2612,27 @@ Display to user</pre>
 <span class="prompt">$ </span>python -m venv .venv
 <span class="prompt">$ </span>source .venv/bin/activate           <span class="c"># Windows: .venv\Scripts\activate</span>
 
-<span class="c"># Install dependencies</span>
+<span class="c"># App + library (editable) + benchmark dependencies</span>
 <span class="prompt">$ </span>pip install -r requirements.txt
 
-<span class="c"># Download the spaCy model (required by EntityTrace)</span>
+<span class="c"># Library only, for your own code</span>
+<span class="prompt">$ </span>pip install ./python-library
 <span class="prompt">$ </span>python -m spacy download en_core_web_lg
 
-<span class="c"># ContextGuard's distilbert-NER (~250 MB) is downloaded</span>
-<span class="c"># automatically from HuggingFace on first use.</span>
+<span class="c"># Put the PIITagger weights where the library looks</span>
+<span class="c"># ($SURROGATESHIELD_MODELS, default ~/.cache/surrogateshield/models)</span>
+<span class="prompt">$ </span>PYTHONPATH=.:python-library python -m bench.tagger.install <span class="v">path/to/dv3s-40k</span>
 
-<span class="c"># Set your API key</span>
+<span class="c"># Check every stage</span>
+<span class="prompt">$ </span>surrogateshield doctor
+
+<span class="c"># Set your API key and launch the terminal app</span>
 <span class="prompt">$ </span>echo <span class="s">"ANTHROPIC_API_KEY=sk-ant-..."</span> &gt; .env
-
-<span class="c"># Launch</span>
 <span class="prompt">$ </span>./run.sh</pre>
     </div>
 
     <div class="callout" style="margin-top: 28px;">
-      <strong>Just want the pipeline in your own app?</strong> Skip the clone — <code>pip install surrogateshield</code> gives you the full detection and masking engine as a five-function library with no dashboard dependency. See <a href="#library" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Library</a>.
+      <strong>No tagger weights?</strong> The default preset stops with <code>DetectorUnavailable</code> rather than run without them. Use <code>preset="classic"</code>, which needs only spaCy and ContextGuard's <code>dslim/distilbert-NER</code> (downloaded from Hugging Face on first use). It leaked 2.5% on the benchmark, still far below GLiNER-PII's 9.1%. To use only the engine in your own code, see <a href="#library" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Library</a>.
     </div>
 
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Supported providers</h3>
@@ -2541,12 +2641,13 @@ Display to user</pre>
         <thead><tr><th>Provider</th><th>Model</th><th>Env var</th></tr></thead>
         <tbody>
           <tr><td>Claude <span class="pill" style="margin-left: 8px;">default</span></td><td class="mono">claude-sonnet-4-6</td><td class="mono">ANTHROPIC_API_KEY</td></tr>
-          <tr><td>Gemini</td><td class="mono">gemini-1.5-flash</td><td class="mono">GEMINI_API_KEY</td></tr>
+          <tr><td>Gemini</td><td class="mono">gemini-2.5-flash</td><td class="mono">GEMINI_API_KEY</td></tr>
           <tr><td>ChatGPT</td><td class="mono">gpt-4o-mini</td><td class="mono">OPENAI_API_KEY</td></tr>
           <tr><td>Local (Ollama)</td><td class="mono">llama3.2 (configurable)</td><td class="mono" style="color: var(--neon);">none — offline</td></tr>
         </tbody>
       </table>
     </div>
+    <p style="margin-top: 12px; color: var(--muted); font-size: 13.5px;">Each model can be changed without editing code: <code>SURROGATESHIELD_CLAUDE_MODEL</code>, <code>SURROGATESHIELD_GEMINI_MODEL</code>, <code>SURROGATESHIELD_OPENAI_MODEL</code>, <code>LOCAL_LLM_MODEL</code>.</p>
   </div>
 </section>
 
@@ -2575,15 +2676,31 @@ Display to user</pre>
 <span class="prompt">$ </span>python main.py add-doc <span class="v">path/to/document.txt</span></pre>
     </div>
 
+    <div class="code-block" style="margin-top: 20px;">
+      <div class="code-header"><span>terminal · bash</span><span>surrogateshield · library cli</span></div>
+<pre class="code-body"><span class="c"># List what would be masked (no provider call)</span>
+<span class="prompt">$ </span>surrogateshield scan <span class="s">"Call Priya on +1 415 555 0142"</span> <span class="k">--json</span>
+
+<span class="c"># Mask: prints the text to send, and the session id on stderr</span>
+<span class="prompt">$ </span>surrogateshield mask <span class="k">--preset</span> <span class="v">fast</span> &lt; prompt.txt
+
+<span class="c"># Put the originals back in the reply; --close erases the stored map</span>
+<span class="prompt">$ </span>surrogateshield unmask <span class="k">-s</span> <span class="v">&lt;session-id&gt;</span> <span class="k">--close</span> &lt; reply.txt
+
+<span class="c"># Latency on built-in samples · check models, dependencies, key storage</span>
+<span class="prompt">$ </span>surrogateshield bench
+<span class="prompt">$ </span>surrogateshield doctor <span class="k">--smoke</span></pre>
+    </div>
+
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Dashboard shortcuts</h3>
     <div class="keys">
       <div class="key-card"><span class="key">N</span><span class="key-desc"><strong>New</strong> conversation</span></div>
       <div class="key-card"><span class="key">R</span><span class="key-desc"><strong>RAG</strong> mode</span></div>
       <div class="key-card"><span class="key">P</span><span class="key-desc"><strong>PII Finder</strong> — no API</span></div>
       <div class="key-card"><span class="key">J</span><span class="key-desc"><strong>JSON Test</strong> batch</span></div>
-      <div class="key-card"><span class="key">E</span><span class="key-desc"><strong>Evaluation</strong> — P/R/F1</span></div>
+      <div class="key-card"><span class="key">E</span><span class="key-desc"><strong>Evaluation</strong> — vs a key file</span></div>
       <div class="key-card"><span class="key">A</span><span class="key-desc"><strong>Attacker</strong> experiment</span></div>
-      <div class="key-card"><span class="key">S</span><span class="key-desc"><strong>Settings</strong> — provider, view</span></div>
+      <div class="key-card"><span class="key">S</span><span class="key-desc"><strong>Settings</strong> — provider, view, Presidio</span></div>
       <div class="key-card"><span class="key">H</span><span class="key-desc"><strong>Help</strong></span></div>
       <div class="key-card"><span class="key">1–9</span><span class="key-desc">Open saved <strong>conversation</strong></span></div>
       <div class="key-card"><span class="key">D1–9</span><span class="key-desc"><strong>Delete</strong> conversation</span></div>
@@ -2597,124 +2714,136 @@ Display to user</pre>
   <div class="container">
     <div class="section-num">13 / LIBRARY</div>
     <div class="eyebrow">Standalone package</div>
-    <h2 class="section-title">The whole pipeline, in <em>pip install surrogateshield</em>.</h2>
+    <h2 class="section-title">The whole engine, in <em>pip install ./python-library</em>.</h2>
     <p class="section-lede">
-      No dashboard, no CLI — just the core detection and masking pipeline as a clean Python API. The package is self-contained: it imports nothing from the main application and carries its own copies of every detection, generation, storage, and reconstruction module. The public surface is five functions and a single import line.
+      No dashboard, just the detection and masking engine as a Python API. The package is self-contained: it imports nothing from the terminal app, which is built on top of it. Use a <code>Session</code> per conversation, or the module functions for a quick script. It is the same engine that leaked 0.8% on real chat text, against 9.1% for GLiNER-PII and 31.6% for Presidio.
     </p>
 
     <div class="code-block" style="margin-top: 48px;">
       <div class="code-header"><span>terminal · bash</span><span>install</span></div>
-<pre class="code-body"><span class="c"># Core package — spaCy model installs automatically</span>
-<span class="prompt">$ </span>pip install surrogateshield
+<pre class="code-body"><span class="c"># From the repository root</span>
+<span class="prompt">$ </span>pip install ./python-library
+<span class="prompt">$ </span>python -m spacy download en_core_web_lg
 
 <span class="c"># Optional: Rich colour tables for detected PII / surrogates</span>
-<span class="prompt">$ </span>pip install <span class="s">"surrogateshield[display]"</span></pre>
+<span class="prompt">$ </span>pip install <span class="s">"./python-library[display]"</span>
+
+<span class="c"># Check that every stage loads</span>
+<span class="prompt">$ </span>surrogateshield doctor</pre>
     </div>
 
     <div class="callout">
-      <strong>Zero manual model steps.</strong> Both the spaCy NER model (<code>en_core_web_lg</code>) and the ContextGuard transformer (<code>dslim/distilbert-NER</code>, ~250 MB) install / download automatically — spaCy with the package, distilbert on the first <code>mask()</code> call, cached thereafter.
+      <strong>Models.</strong> The default preset, <code>balanced</code>, needs spaCy's <code>en_core_web_lg</code> and the PIITagger weights in <code>$SURROGATESHIELD_MODELS</code> (default <code>~/.cache/surrogateshield/models</code>). If either is missing, <code>mask()</code> raises <code>DetectorUnavailable</code> and sends nothing. On a machine without the tagger weights, use <code>preset="classic"</code>.
     </div>
 
-    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Public API — five functions</h3>
-    <div class="table-wrap" style="margin-top: 20px;">
+    <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Public API</h3>
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
       <table class="data">
         <thead><tr><th style="width: 230px;">Function</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td class="mono" style="color: var(--neon);">shield.config(**kwargs)</td><td style="color: var(--muted);">Set thresholds, storage mode, <code>pii_off</code> list, service-query toggle, and display options</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">shield.scan(text)</td><td style="color: var(--muted);">Detect PII and return <code>{value: type}</code> — no substitution, no shadow-map update (alias: <code>shield.pii_finder</code>)</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">shield.mask(text)</td><td style="color: var(--muted);">Detect all PII, replace with surrogates, store the mapping — returns the sanitised string</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">shield.unmask(response)</td><td style="color: var(--muted);">Restore originals in an LLM response — accepts any provider object or a plain string</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">shield.flush()</td><td style="color: var(--muted);">Clear the session shadow map and generate a new session ID</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.Session(id, *, config, storage_dir, seed)</td><td style="color: var(--muted);">Masking state for one conversation. Use it as a context manager; <code>amask</code> / <code>aunmask</code> / <code>ascan</code> for asyncio</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.config(**kwargs)</td><td style="color: var(--muted);">Preset, storage, <code>pii_off</code>, address mode and display settings for new sessions and the current one</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.scan(text)</td><td style="color: var(--muted);">Detect only: a list of <code>Detection</code> (text, type, start, end, score, source, masked); <code>as_dict=True</code> for <code>{value: type}</code>. Alias <code>pii_finder</code></td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.mask(text)</td><td style="color: var(--muted);">Replace detected values with surrogates and store the mapping; returns the text to send</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.mask_result(text)</td><td style="color: var(--muted);">Like <code>mask</code>, plus the detections, the replacements, and the <code>pii_off</code> values sent as typed</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.unmask(response)</td><td style="color: var(--muted);">Restore your values in a reply: a string, or an Anthropic, OpenAI or Gemini response object</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.forget(original)</td><td style="color: var(--muted);">Erase every mapping for one value from the session</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">shield.flush()</td><td style="color: var(--muted);">End the current session: discard its mappings and its file, if any</td></tr>
         </tbody>
       </table>
     </div>
 
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Quick start — a full round-trip</h3>
     <div class="code-block" style="margin-top: 20px;">
-      <div class="code-header"><span>python · claude</span><span>mask ▸ call ▸ unmask ▸ flush</span></div>
+      <div class="code-header"><span>python · claude</span><span>mask ▸ call ▸ unmask</span></div>
 <pre class="code-body"><span class="k">import</span> anthropic
 <span class="k">import</span> surrogateshield <span class="k">as</span> shield
 
 client = anthropic.Anthropic()
-shield.config(detailed_view=<span class="p">False</span>)   <span class="c"># silent in production</span>
 
 text = (
-    <span class="s">"Hi, I'm Sarah Mitchell. My email is sarah.mitchell@gmail.com, "</span>
-    <span class="s">"my SSN is 123-45-6789, and I was born on 04/12/1990."</span>
+    <span class="s">"Hi, I'm Priya Raman. Email me at priya.raman@northwind.io or call "</span>
+    <span class="s">"+1 415 555 0142. My order NW-48213-K hasn't arrived at 1847 Alder "</span>
+    <span class="s">"Street, Portland. Can you draft a complaint to Northwind Outfitters?"</span>
 )
 
-<span class="c"># Detect every PII field, swap in realistic fakes, store the mapping</span>
-sanitized = shield.<span class="k">mask</span>(text)
-<span class="c"># → "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,</span>
-<span class="c">#    my SSN is 876-32-1045, and I was born on 09/27/1983."</span>
+<span class="k">with</span> shield.Session() <span class="k">as</span> s:
+    sanitized = s.<span class="k">mask</span>(text)
+    <span class="c"># → "Hi, I'm Adya Nath. Email me at adya.nath@vance.io or call</span>
+    <span class="c">#    +1 213 581 8333. My order VW-02898-Z hasn't arrived at 6237</span>
+    <span class="c">#    James Street, Olympia. Can you draft a complaint to Northwind</span>
+    <span class="c">#    Outfitters?"   (surrogates differ per run; pass seed= to fix them)</span>
 
-response = client.messages.create(
-    model=<span class="s">"claude-sonnet-4-6"</span>, max_tokens=<span class="v">1024</span>,
-    messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: sanitized}],
-)
+    response = client.messages.create(
+        model=<span class="s">"claude-sonnet-5-5"</span>, max_tokens=<span class="v">1024</span>,
+        messages=[{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: sanitized}],
+    )
 
-<span class="c"># unmask() takes the native SDK object directly — restores real values</span>
-<span class="k">print</span>(shield.<span class="k">unmask</span>(response))   <span class="c"># contains "Sarah Mitchell", real SSN, …</span>
-shield.<span class="k">flush</span>()                      <span class="c"># end the session</span></pre>
+    <span class="c"># unmask() takes the SDK object directly and puts your values back</span>
+    <span class="k">print</span>(s.<span class="k">unmask</span>(response))   <span class="c"># the letter is signed "Priya Raman"</span>
+<span class="c"># leaving the block discards the map</span></pre>
     </div>
-    <p style="margin-top: 14px; color: var(--muted); font-size: 13.5px;">The model never processes a single real value — yet the answer your users see contains their own data. Same flow works with OpenAI, Gemini, and local / Ollama models; <code>unmask()</code> auto-detects the response format.</p>
+    <p style="margin-top: 14px; color: var(--muted); font-size: 13.5px;">The provider receives the surrogates for every value the detector found; the answer you see has your own values back. The company you are complaining to is kept, because it is only mentioned. The same flow works with OpenAI, Gemini and local Ollama models; <code>unmask()</code> detects the response format.</p>
 
     <div class="split">
       <div class="feature">
         <div class="num">INSPECT</div>
         <h3>scan() — detect without masking</h3>
-        <p>Runs the full cascade and returns a <code>{value: type}</code> dict. Never modifies the text or the session — safe to call read-only.</p>
+        <p>Runs the full pipeline and returns each detection with its offsets, type, score and the stage that found it. It never changes the text or the session's map.</p>
         <ul>
-          <li>Returns every entity regardless of <code>pii_off</code></li>
+          <li><code>masked=False</code> marks a value kept by <code>pii_off</code></li>
           <li><code>pii_finder</code> alias for data-pipeline readability</li>
-          <li>Pre-warm models with <code>shield.scan("")</code> at startup</li>
+          <li>Pre-warm the models with <code>shield.Session().scan("warm up")</code></li>
         </ul>
       </div>
       <div class="feature">
-        <div class="num">SELECTIVE</div>
-        <h3>pii_off — detect but keep</h3>
-        <p>Pass a list of types or aliases to detect-but-not-replace — useful when a location app needs real city names but must still protect identities.</p>
+        <div class="num">PRESETS</div>
+        <h3>Pick the trade-off</h3>
+        <p><code>shield.config(detection="fast")</code>, or <code>SURROGATESHIELD_PRESET</code> in the environment. Benchmark leak and median time per message:</p>
         <ul>
-          <li><code>shield.config(pii_off=["location", "org"])</code></li>
-          <li>Aliases: <code>phone</code> · <code>name</code> · <code>location</code> · <code>bank</code> · <code>crypto</code> …</li>
-          <li>Raw type strings (<code>"email"</code>, <code>"ssn"</code>) accepted too</li>
+          <li><code>balanced</code> (default) — 0.8%, 47.1 ms</li>
+          <li><code>fast</code> — 0.8%, 38.2 ms, no spaCy</li>
+          <li><code>strict</code> — 0.2%, 67.1 ms, edits far more harmless text</li>
+          <li><code>classic</code> — 2.5%, 29.2 ms, no tagger weights needed</li>
         </ul>
       </div>
       <div class="feature">
         <div class="num">PERSISTENT</div>
         <h3>Encrypted disk shadow map</h3>
-        <p>Default is in-memory. Point <code>pii_mem</code> at a directory and the session map persists across processes, AES-256-GCM encrypted — for web servers and multi-worker deployments.</p>
+        <p>The default is in memory. Give a directory and the map persists across processes, sealed with AES-256-GCM, for web servers and multi-worker setups.</p>
         <ul>
-          <li><code>shield.config(pii_mem="/var/app/shadowmaps")</code></li>
-          <li>Per-session 32-byte key, <code>0o600</code> permissions</li>
-          <li><code>flush()</code> deletes the <code>.shadowmap</code> + <code>.key</code> files</li>
+          <li><code>shield.Session("user-42", storage_dir="/var/app/maps")</code></li>
+          <li>The same id reopens the same map</li>
+          <li>Key derived from the device secret (HKDF-SHA256), file mode <code>0600</code></li>
+          <li><code>flush()</code> or <code>close()</code> deletes the <code>.shadowmap</code> file</li>
         </ul>
       </div>
       <div class="feature">
         <div class="num">PORTABLE</div>
         <h3>Any provider, any object</h3>
-        <p><code>unmask()</code> tries Anthropic, OpenAI, and Gemini response formats automatically before falling back to <code>str(response)</code> — so plain strings from local models work too.</p>
+        <p><code>unmask()</code> reads Anthropic, OpenAI and Gemini response objects and dicts, and plain strings from local models.</p>
         <ul>
           <li>Anthropic <code>Message</code> · OpenAI <code>ChatCompletion</code> · Gemini response</li>
-          <li>Multi-turn: session map survives across turns</li>
-          <li>Same 20-type cascade as the full application</li>
+          <li>Multi-turn: the session map lives across turns</li>
+          <li>13 public types, the same pipeline as the terminal app</li>
         </ul>
       </div>
     </div>
 
     <!-- Multi-turn -->
     <h3 style="margin-top: 72px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Multi-turn conversations</h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">Keep two histories: one in surrogates for the API, one with real values for display. The session shadow map stays alive across turns, so a surrogate minted in turn 1 still resolves in turn 5 — the model never sees a real value in <em>any</em> turn.</p>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">Keep two histories: one in surrogates for the API, one with your values for display. The session map lives across turns, so a surrogate made in turn 1 still resolves in turn 5. On the benchmark's 60 conversations, SurrogateShield put back 81 of 82 values; Presidio + Faker and GLiNER-PII put back none.</p>
     <div class="code-block" style="margin-top: 20px;">
       <div class="code-header"><span>python · openai</span><span>two histories, one session</span></div>
 <pre class="code-body"><span class="k">from</span> openai <span class="k">import</span> OpenAI
 <span class="k">import</span> surrogateshield <span class="k">as</span> shield
 
 client = OpenAI()
-api_history, display_history = [], []   <span class="c"># surrogates vs real values</span>
+session = shield.Session()
+api_history, display_history = [], []   <span class="c"># surrogates vs your values</span>
 
 <span class="k">def</span> <span class="p">chat</span>(user_input):
-    sanitized = shield.<span class="k">mask</span>(user_input)
+    sanitized = session.<span class="k">mask</span>(user_input)
     api_history.append({<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: sanitized})
     display_history.append({<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: user_input})
 
@@ -2722,24 +2851,29 @@ api_history, display_history = [], []   <span class="c"># surrogates vs real val
         model=<span class="s">"gpt-4o-mini"</span>, messages=api_history,
     )
     raw = response.choices[<span class="v">0</span>].message.content   <span class="c"># surrogate text</span>
-    restored = shield.<span class="k">unmask</span>(response)            <span class="c"># real values</span>
+    restored = session.<span class="k">unmask</span>(response)          <span class="c"># your values</span>
 
     api_history.append({<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: raw})
     display_history.append({<span class="s">"role"</span>: <span class="s">"assistant"</span>, <span class="s">"content"</span>: restored})
     <span class="k">return</span> restored
 
-chat(<span class="s">"My name is John Doe and I live at 42 Baker Street, London."</span>)
+chat(<span class="s">"My name is Priya Raman and I live at 1847 Alder Street, Portland."</span>)
 <span class="k">print</span>(chat(<span class="s">"What was the address I mentioned earlier?"</span>))
-<span class="c"># → "42 Baker Street, London" restored from turn 1's shadow map</span>
-shield.<span class="k">flush</span>()</pre>
+<span class="c"># → "1847 Alder Street, Portland", restored from turn 1's map</span>
+session.<span class="k">close</span>()</pre>
     </div>
 
     <!-- Provider snippets -->
     <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">One pattern, every provider</h3>
     <div class="code-block" style="margin-top: 20px;">
-      <div class="code-header"><span>python</span><span>gemini · ollama / local</span></div>
-<pre class="code-body"><span class="c"># Google Gemini — unmask() reads response.text automatically</span>
-model = genai.GenerativeModel(<span class="s">"gemini-1.5-flash"</span>)
+      <div class="code-header"><span>python</span><span>asyncio · gemini · ollama / local</span></div>
+<pre class="code-body"><span class="c"># asyncio — the models run in a worker thread</span>
+<span class="k">async with</span> shield.Session() <span class="k">as</span> s:
+    sanitized = <span class="k">await</span> s.<span class="k">amask</span>(user_text)
+    restored = <span class="k">await</span> s.<span class="k">aunmask</span>(<span class="k">await</span> llm.achat(sanitized))
+
+<span class="c"># Google Gemini — unmask() reads response.text</span>
+model = genai.GenerativeModel(<span class="s">"gemini-2.5-flash"</span>)
 sanitized = shield.<span class="k">mask</span>(<span class="s">"My card is 4532015112830366, IP 192.168.1.100."</span>)
 <span class="k">print</span>(shield.<span class="k">unmask</span>(model.generate_content(sanitized)))
 shield.<span class="k">flush</span>()
@@ -2759,7 +2893,7 @@ shield.<span class="k">flush</span>()</pre>
         <thead><tr><th style="width: 80px;">Pass</th><th style="width: 200px;">Method</th><th>Handles</th></tr></thead>
         <tbody>
           <tr><td class="mono" style="color: var(--neon);">1</td><td class="mono">exact replacement</td><td style="color: var(--muted);">Surrogate appears verbatim in the response — the vast majority of cases</td></tr>
-          <tr><td class="mono" style="color: var(--neon);">2</td><td class="mono">component matching</td><td style="color: var(--muted);">Multi-word surrogate used partially (model wrote "Rachel" from "Rachel Torres") — scoped to unresolved surrogates only</td></tr>
+          <tr><td class="mono" style="color: var(--neon);">2</td><td class="mono">component matching</td><td style="color: var(--muted);">Multi-word surrogate used partially (the model wrote "Adya" from "Adya Nath") — scoped to unresolved surrogates only</td></tr>
           <tr><td class="mono" style="color: var(--neon);">3</td><td class="mono">fuzzy · rapidfuzz</td><td style="color: var(--muted);"><code>partial_ratio ≥ fuzzy_threshold</code> (default 85) — reformatted casing, added punctuation, minor edits</td></tr>
         </tbody>
       </table>
@@ -2767,21 +2901,25 @@ shield.<span class="k">flush</span>()</pre>
 
     <!-- config full reference -->
     <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">config() — full parameter reference</h3>
-    <div class="table-wrap" style="margin-top: 20px;">
+    <div class="table-wrap" style="margin-top: 20px; overflow-x: auto;">
       <table class="data">
         <thead><tr><th style="width: 250px;">Parameter</th><th style="width: 130px;">Default</th><th>Effect</th></tr></thead>
         <tbody>
-          <tr><td class="mono">detailed_view</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Print Rich tables after each call; set <code>False</code> for silent / production operation</td></tr>
-          <tr><td class="mono">pii_mem</td><td class="mono" style="color: var(--text);">"temp"</td><td style="color: var(--muted);"><code>"temp"</code> = in-memory; a directory path = AES-256-GCM disk persistence (must exist)</td></tr>
-          <tr><td class="mono">pii_off</td><td class="mono" style="color: var(--text);">None</td><td style="color: var(--muted);">Types detected but not replaced — aliases or raw type strings</td></tr>
-          <tr><td class="mono">service</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Minimal address fuzzing for location queries instead of full replacement</td></tr>
-          <tr><td class="mono">spacy_model</td><td class="mono" style="color: var(--text);">en_core_web_lg</td><td style="color: var(--muted);">EntityTrace NER model — swap for <code>en_core_web_sm</code> for speed over accuracy</td></tr>
-          <tr><td class="mono">context_guard_enabled</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Run the distilbert second pass — set <code>False</code> for faster, spaCy-only detection</td></tr>
-          <tr><td class="mono">entity_trace_high_threshold</td><td class="mono" style="color: var(--neon);">0.85</td><td style="color: var(--muted);">spaCy score at/above which an entity is confirmed immediately</td></tr>
-          <tr><td class="mono">entity_trace_low_threshold</td><td class="mono" style="color: var(--amber);">0.60</td><td style="color: var(--muted);">spaCy score at/above which an entity is forwarded to ContextGuard</td></tr>
-          <tr><td class="mono">context_guard_threshold</td><td class="mono" style="color: var(--neon);">0.70</td><td style="color: var(--muted);">distilbert score required to promote a borderline / new entity</td></tr>
-          <tr><td class="mono">entity_trace_fallback_threshold</td><td class="mono" style="color: var(--text);">0.65</td><td style="color: var(--muted);">Used only when ContextGuard is disabled, to promote borderline entities</td></tr>
+          <tr><td class="mono">detection</td><td class="mono" style="color: var(--neon);">None</td><td style="color: var(--muted);">A preset name (<code>"fast"</code>, <code>"balanced"</code>, <code>"strict"</code>, <code>"classic"</code>), a <code>DetectionConfig</code> or a dict. <code>None</code> = the environment's choice, else <code>balanced</code></td></tr>
+          <tr><td class="mono">detailed_view</td><td class="mono" style="color: var(--text);">False</td><td style="color: var(--muted);">Print Rich tables after each call. They show your original values, so it is off by default</td></tr>
+          <tr><td class="mono">pii_mem</td><td class="mono" style="color: var(--text);">"temp"</td><td style="color: var(--muted);"><code>"temp"</code> = in memory; an existing directory = sealed AES-256-GCM files</td></tr>
+          <tr><td class="mono">pii_off</td><td class="mono" style="color: var(--text);">[]</td><td style="color: var(--muted);">Types detected but sent as typed — aliases or raw type strings</td></tr>
+          <tr><td class="mono">service</td><td class="mono" style="color: var(--text);">True</td><td style="color: var(--muted);">Recognise service queries ("pharmacies near…"); drives <code>address_mode="auto"</code></td></tr>
+          <tr><td class="mono">address_mode</td><td class="mono" style="color: var(--neon);">"auto"</td><td style="color: var(--muted);"><code>"auto"</code>: shift in a service query, replace otherwise · <code>"shift"</code>: always shift the house number · <code>"replace"</code>: always a fake address of the same shape</td></tr>
+          <tr><td class="mono">address_shift_range</td><td class="mono" style="color: var(--text);">1</td><td style="color: var(--muted);">Largest house-number change in shift mode</td></tr>
+          <tr><td class="mono">spacy_model</td><td class="mono" style="color: var(--text);">en_core_web_lg</td><td style="color: var(--muted);">EntityTrace model</td></tr>
+          <tr><td class="mono">context_guard_enabled</td><td class="mono" style="color: var(--text);">False</td><td style="color: var(--muted);">Run distilbert-NER as well; on in <code>strict</code> and <code>classic</code></td></tr>
+          <tr><td class="mono">entity_trace_high_threshold</td><td class="mono" style="color: var(--neon);">0.90</td><td style="color: var(--muted);">spaCy type score at/above which an entity is confirmed</td></tr>
+          <tr><td class="mono">entity_trace_low_threshold</td><td class="mono" style="color: var(--amber);">0.70</td><td style="color: var(--muted);">spaCy type score at/above which an entity is borderline</td></tr>
+          <tr><td class="mono">context_guard_threshold</td><td class="mono" style="color: var(--neon);">0.70</td><td style="color: var(--muted);">distilbert score required to confirm a borderline entity</td></tr>
+          <tr><td class="mono">entity_trace_fallback_threshold</td><td class="mono" style="color: var(--text);">0.75</td><td style="color: var(--muted);">Promotes a borderline entity when ContextGuard is off</td></tr>
           <tr><td class="mono">fuzzy_threshold</td><td class="mono" style="color: var(--text);">85</td><td style="color: var(--muted);">rapidfuzz <code>partial_ratio</code> (0–100) for pass 3 of <code>unmask()</code> — below 70 not recommended</td></tr>
+          <tr><td class="mono">context_guard_model / _device</td><td class="mono" style="color: var(--text);">dslim/distilbert-NER · -1</td><td style="color: var(--muted);">ContextGuard model and device (-1 = CPU, ≥ 0 = GPU id)</td></tr>
         </tbody>
       </table>
     </div>
@@ -2801,6 +2939,7 @@ shield.<span class="k">flush</span>()</pre>
               <tr><td class="mono" style="color: var(--neon);">name / names</td><td class="mono" style="color: var(--muted);">PERSON</td></tr>
               <tr><td class="mono" style="color: var(--neon);">location</td><td class="mono" style="color: var(--muted);">GPE · LOC</td></tr>
               <tr><td class="mono" style="color: var(--neon);">org · facility</td><td class="mono" style="color: var(--muted);">ORG · FAC</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">username · password</td><td class="mono" style="color: var(--muted);">handle · credential</td></tr>
               <tr><td class="mono" style="color: var(--neon);">bank · license · crypto</td><td class="mono" style="color: var(--muted);">us_bank_number · us_driver_license · crypto</td></tr>
             </tbody>
           </table>
@@ -2809,18 +2948,19 @@ shield.<span class="k">flush</span>()</pre>
       <div class="feature">
         <div class="num">SERVICE QUERIES</div>
         <h3>Proportional address protection</h3>
-        <p>A location question like <em>"find a coffee shop near 99 Market Street"</em> would be useless with a random fake address. With <code>service=True</code> (default) the library shifts the house number by <strong>±1</strong> (~20 m) and preserves the street, city, and state verbatim.</p>
+        <p>A question like <em>"find a coffee shop near 99 Market Street"</em> would be useless with a random fake address. With <code>address_mode="auto"</code> (default), a service query keeps the street and city and shifts the house number by <strong>±1</strong>.</p>
         <ul>
-          <li>House number fuzzed, everything else kept</li>
-          <li>Sensitive topics (medical, legal, shelter, DV, rehab) force full replacement regardless</li>
-          <li><code>shield.config(service=False)</code> to always fully anonymise</li>
+          <li>House number shifted, street and city kept</li>
+          <li>Sensitive topics (HIV, abortion, rehab, therapy, shelter, immigration…) turn the street into <em>my area</em></li>
+          <li>Any other message: a full fake address of the same shape</li>
+          <li><code>shield.config(service=False)</code> or <code>address_mode="replace"</code> to always replace</li>
         </ul>
       </div>
     </div>
 
     <!-- Quasi-identifier -->
     <h3 style="margin-top: 56px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Quasi-identifier combination scoring <span style="color: var(--muted); font-family: var(--font-mono); font-size: 12px; margin-left: 12px;">Sweeney k-anonymity</span></h3>
-    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">When a combination is detected, <em>all</em> constituent fields are added to the replace set — not just the obviously-sensitive ones.</p>
+    <p style="margin-top: 8px; color: var(--muted); font-size: 14.5px; max-width: 720px;">When one of these combinations appears in a message, the match is logged and attached to the detection result as a warning. It does not change what gets replaced.</p>
     <div class="table-wrap" style="margin-top: 20px;">
       <table class="data">
         <thead><tr><th>Combination</th><th style="width: 110px;">Risk</th><th>Basis</th></tr></thead>
@@ -2844,7 +2984,7 @@ shield.<span class="k">flush</span>()</pre>
       <div class="feature" style="padding: 0;">
         <div style="padding: 22px 24px 0;">
           <div class="num">DEPENDENCIES</div>
-          <h3>Installed automatically</h3>
+          <h3>Installed with the package</h3>
         </div>
         <div class="table-wrap compact" style="margin: 16px 0 0; border-left: none; border-right: none; border-bottom: none;">
           <table class="data">
@@ -2852,8 +2992,8 @@ shield.<span class="k">flush</span>()</pre>
               <tr><td class="mono" style="color: var(--neon);">faker</td><td style="color: var(--muted);">Realistic fake values per type</td></tr>
               <tr><td class="mono" style="color: var(--neon);">cryptography</td><td style="color: var(--muted);">AES-256-GCM for the disk shadow map</td></tr>
               <tr><td class="mono" style="color: var(--neon);">rapidfuzz</td><td style="color: var(--muted);">Fuzzy reconstruction pass</td></tr>
-              <tr><td class="mono" style="color: var(--neon);">spacy + en-core-web-lg</td><td style="color: var(--muted);">Stage 2 NER (model bundled)</td></tr>
-              <tr><td class="mono" style="color: var(--neon);">transformers + torch</td><td style="color: var(--muted);">Stage 3 ContextGuard</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">spacy</td><td style="color: var(--muted);">EntityTrace; the model is a separate download</td></tr>
+              <tr><td class="mono" style="color: var(--neon);">transformers + torch</td><td style="color: var(--muted);">PIITagger and ContextGuard</td></tr>
             </tbody>
           </table>
         </div>
@@ -2862,17 +3002,17 @@ shield.<span class="k">flush</span>()</pre>
         <div class="num">TROUBLESHOOTING</div>
         <h3>Common adjustments</h3>
         <ul>
-          <li><strong>Slow first call?</strong> Models load lazily — pre-warm with <code>shield.scan("")</code> at startup</li>
-          <li><strong>Need it faster?</strong> <code>config(context_guard_enabled=False)</code> skips distilbert (spaCy-only, lower recall)</li>
+          <li><strong><code>DetectorUnavailable</code>?</strong> Run <code>surrogateshield doctor</code>; it names the missing model</li>
+          <li><strong>Slow first call?</strong> Models load lazily — pre-warm with <code>shield.Session().scan("warm up")</code></li>
+          <li><strong>Need it faster?</strong> <code>shield.config(detection="fast")</code>: same leak rate on the benchmark, no spaCy</li>
           <li><strong>Surrogate not restored?</strong> Lower <code>fuzzy_threshold</code> toward 75 to recover heavily reformatted values</li>
-          <li><strong>Noisy stdout?</strong> <code>config(detailed_view=False)</code> silences all tables</li>
-          <li>distilbert (~250 MB) downloads once to <code>~/.cache/huggingface/</code></li>
+          <li>distilbert (~250 MB) downloads once to <code>~/.cache/huggingface/</code> when ContextGuard is on</li>
         </ul>
       </div>
     </div>
 
     <div class="callout" style="margin-top: 28px;">
-      <strong>134 checks, no API key.</strong> <code>tests/test7.py</code> covers the standalone package end to end — library entities, ShadowMap memory + persistent modes, response parser, <code>pii_off</code> filtering, threshold wiring, ResolvePass, and all five public functions.
+      <strong>Tested with no API key.</strong> <code>pytest tests python-library/tests</code> covers the package end to end: detection, surrogates, ShadowMap memory and disk modes, the response parser, <code>pii_off</code>, presets, ResolvePass, the CLI and the public API.
     </div>
   </div>
 </section>
@@ -2884,7 +3024,7 @@ shield.<span class="k">flush</span>()</pre>
     <div class="eyebrow">Citation</div>
     <h2 class="section-title">Cite this work.</h2>
     <p class="section-lede">
-      SurrogateShield is described in our paper on <a href="https://arxiv.org/abs/2606.29567" target="_blank" rel="noopener" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">arXiv</a>. Pick a format and copy — BibTeX is the default.
+      The first version of SurrogateShield is described in a preprint on <a href="https://arxiv.org/abs/2606.29567" target="_blank" rel="noopener" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">arXiv</a>. The numbers on this page come from the v2 benchmark in <code>bench/results/</code>, not from the preprint. Pick a format and copy — BibTeX is the default.
     </p>
 
     <div class="cite-card" style="margin-top: 48px;">
@@ -2912,7 +3052,7 @@ shield.<span class="k">flush</span>()</pre>
   <div class="container">
     <div class="brand-block">
       <div class="brand">SurrogateShield</div>
-      <p>Privacy-preserving proxy for LLMs. Masks PII before it leaves your device. Built for research.</p>
+      <p>Privacy-preserving proxy for LLMs. Swaps personal details for realistic stand-ins before a prompt leaves your device, and puts them back in the reply.</p>
     </div>
     <div class="links">
       <div>
@@ -2923,8 +3063,8 @@ shield.<span class="k">flush</span>()</pre>
         <a href="#rag">RAG integration</a>
       </div>
       <div>
-        <h4>Research</h4>
-        <a href="#presidio">vs Presidio</a>
+        <h4>Results</h4>
+        <a href="#presidio">vs GLiNER-PII &amp; Presidio</a>
         <a href="#evaluation">Evaluation</a>
         <a href="#attacker">Attacker experiment</a>
         <a href="#security">Security model</a>
@@ -2935,11 +3075,12 @@ shield.<span class="k">flush</span>()</pre>
         <a href="#library">Python library</a>
         <a href="#cli">CLI reference</a>
         <a href="#architecture">Architecture</a>
+        <a href="docs.md">docs.md, for AI agents</a>
         <a href="#cite">Cite this work</a>
       </div>
     </div>
     <div class="colophon" style="width: 100%;">
-      <span>SurrogateShield · v1.4.0 · Apache-2.0 license</span>
+      <span>SurrogateShield · v2.1.0 · Apache-2.0 license</span>
       <span>built with python · spaCy · transformers · faker · cryptography · chromadb</span>
     </div>
   </div>
@@ -2950,7 +3091,7 @@ shield.<span class="k">flush</span>()</pre>
   const stages = [
     {
       label: "Detect",
-      sub: "SentinelLayer scans for PII spans → PatternScan, EntityTrace, ContextGuard",
+      sub: "SentinelLayer scans the message → PatternScan, EntityTrace, PIITagger, structural passes",
       indicator: 0,
       activeMsg: "user",
       apply() {
@@ -2966,7 +3107,7 @@ shield.<span class="k">flush</span>()</pre>
     },
     {
       label: "Surrogate",
-      sub: "MimicGen swaps PII for type-consistent fakes · ShadowMap commits each pair",
+      sub: "MimicGen swaps each value for a fake of the same type · ShadowMap stores each pair",
       indicator: 1,
       activeMsg: "user",
       apply() {
@@ -2985,7 +3126,7 @@ shield.<span class="k">flush</span>()</pre>
     },
     {
       label: "Send",
-      sub: "Sanitised payload travels to the LLM API · detected originals stay on the device",
+      sub: "The masked text travels to the LLM API · the detected originals stay on the device",
       indicator: 2,
       activeMsg: null,
       apply() {
@@ -2996,14 +3137,14 @@ shield.<span class="k">flush</span>()</pre>
     },
     {
       label: "Receive",
-      sub: "LLM responds — surrogates flow back through HTTPS",
+      sub: "The LLM answers in surrogates — they flow back through HTTPS",
       indicator: 3,
       activeMsg: "llm",
       apply() {
         wire("toLLM", false);
         wire("fromLLM", true);
         const llm = document.getElementById("demoLLMRecv");
-        llm.innerHTML = `Got it, <span class="tok swapped" data-orig="Sherwin" data-surr="Sarah Mitchell" data-type="PERSON">Sarah Mitchell</span> &mdash; I’ve noted your SSN <span class="tok swapped" data-orig="544-87-2944" data-surr="317-42-8806" data-type="ssn">317-42-8806</span> and will reach you at <span class="tok swapped" data-orig="sjathann@asu.edu" data-surr="jdoe@example.net" data-type="email">jdoe@example.net</span>.`;
+        llm.innerHTML = `Sorry about the order, <span class="tok swapped" data-orig="Priya Raman" data-surr="Adya Nath" data-type="PERSON">Adya Nath</span>. Here is a draft &mdash; replies go to <span class="tok swapped" data-orig="priya.raman@northwind.io" data-surr="adya.nath@vance.io" data-type="EMAIL">adya.nath@vance.io</span> or <span class="tok swapped" data-orig="+1 415 555 0142" data-surr="+1 213 581 8333" data-type="PHONE">+1 213 581 8333</span>.`;
         setUserOut(null);
       }
     },
@@ -3015,12 +3156,12 @@ shield.<span class="k">flush</span>()</pre>
       apply() {
         wire("fromLLM", false);
         const out = document.getElementById("demoUserOut");
-        out.innerHTML = `Got it, <span class="tok resolving" data-type="PERSON">Sarah Mitchell</span> &mdash; I’ve noted your SSN <span class="tok resolving" data-type="ssn">317-42-8806</span> and will reach you at <span class="tok resolving" data-type="email">jdoe@example.net</span>.`;
+        out.innerHTML = `Sorry about the order, <span class="tok resolving" data-type="PERSON">Adya Nath</span>. Here is a draft &mdash; replies go to <span class="tok resolving" data-type="EMAIL">adya.nath@vance.io</span> or <span class="tok resolving" data-type="PHONE">+1 213 581 8333</span>.`;
         const toks = qsa("#demoUserOut .tok");
         const subs = [
-          { from: "Sarah Mitchell", to: "Sherwin" },
-          { from: "317-42-8806", to: "544-87-2944" },
-          { from: "jdoe@example.net", to: "sjathann@asu.edu" }
+          { from: "Adya Nath", to: "Priya Raman" },
+          { from: "adya.nath@vance.io", to: "priya.raman@northwind.io" },
+          { from: "+1 213 581 8333", to: "+1 415 555 0142" }
         ];
         toks.forEach((t, i) => {
           setTimeout(() => {
