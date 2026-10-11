@@ -22,12 +22,12 @@ Pairwise judge (+1 when ss is preferred, −1 when the other arm is, 0 for a tie
 | all | ss vs presidio_faker | 296 | 195/62/39 | +0.449 [+0.355, +0.540] | 130/257 (50.6%, 44.5%–56.6%) | 160/256 (62.5%, 56.4%–68.2%) |
 | all | ss vs gliner_pii | 296 | 132/117/47 | +0.051 [-0.051, +0.152] | 110/249 (44.2%, 38.1%–50.4%) | 154/248 (62.1%, 55.9%–67.9%) |
 
-H7''' on E5b (lower bounds above −0.02; the verdict is the pooled group's):
+H7''' on E5b, read word by word (SS's BERTScore not below Presidio+Faker's or GLiNER-PII's, lower bound above −0.02; the judge's score beside; the result is the pooled group's, as `verdict_test3.md` reads it):
 
-- oasst1: **does not hold** (bertscore_not_below_presidio_faker yes, judge_not_below_presidio_faker yes, bertscore_not_below_gliner_pii yes, judge_not_below_gliner_pii no; strict, deciding nothing: bertscore_above_presidio_faker yes, judge_above_presidio_faker yes, bertscore_above_gliner_pii yes, judge_above_gliner_pii no)
-- sharegpt: **does not hold** (bertscore_not_below_presidio_faker yes, judge_not_below_presidio_faker yes, bertscore_not_below_gliner_pii yes, judge_not_below_gliner_pii no; strict, deciding nothing: bertscore_above_presidio_faker yes, judge_above_presidio_faker yes, bertscore_above_gliner_pii yes, judge_above_gliner_pii no)
-- wildchat: **does not hold** (bertscore_not_below_presidio_faker yes, judge_not_below_presidio_faker yes, bertscore_not_below_gliner_pii yes, judge_not_below_gliner_pii no; strict, deciding nothing: bertscore_above_presidio_faker yes, judge_above_presidio_faker yes, bertscore_above_gliner_pii no, judge_above_gliner_pii no)
-- all: **does not hold** (bertscore_not_below_presidio_faker yes, judge_not_below_presidio_faker yes, bertscore_not_below_gliner_pii yes, judge_not_below_gliner_pii no; strict, deciding nothing: bertscore_above_presidio_faker yes, judge_above_presidio_faker yes, bertscore_above_gliner_pii yes, judge_above_gliner_pii no)
+- oasst1: **holds** (BERTScore ss − presidio_faker +0.076 [+0.046, +0.108], ss − gliner_pii +0.081 [+0.039, +0.124]; judge beside +0.449 [+0.286, +0.602], -0.071 [-0.255, +0.102])
+- sharegpt: **holds** (BERTScore ss − presidio_faker +0.087 [+0.037, +0.140], ss − gliner_pii +0.103 [+0.065, +0.143]; judge beside +0.414 [+0.242, +0.586], +0.131 [-0.051, +0.313])
+- wildchat: **holds** (BERTScore ss − presidio_faker +0.068 [+0.025, +0.113], ss − gliner_pii +0.033 [-0.014, +0.077]; judge beside +0.485 [+0.333, +0.626], +0.091 [-0.081, +0.263])
+- all: **holds** (BERTScore ss − presidio_faker +0.077 [+0.053, +0.103], ss − gliner_pii +0.072 [+0.046, +0.098]; judge beside +0.449 [+0.355, +0.540], +0.051 [-0.051, +0.152])
 
 Natural slice (nothing to protect): BERTScore against the answer to the untouched prompt.
 

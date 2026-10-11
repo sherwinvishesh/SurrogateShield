@@ -29,9 +29,9 @@ Command: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.real
 | all | gliner_pii | 636 | 73 / 0 | 7 | 6/556 (1.1%, 0.5%–2.3%) | 5/556 (0.9%, 0.4%–2.1%) | 11/556 (2.0%, 1.1%–3.5%) | 84/629 (13.4%, 10.9%–16.2%) |
 | all | ss-conversation | 179 | 2 / 0 | 0 | 1/177 (0.6%, 0.1%–3.1%) | 27/177 (15.2%, 10.7%–21.3%) | 28/177 (15.8%, 11.2%–21.9%) | 30/179 (16.8%, 12.0%–22.9%) |
 
-H8''' (the verdict is the pooled group's):
+H8''' read letter for letter (SS's exact recovery over the values it replaced not above GLiNER-PII's; partial recoveries, parts the surrogates keep by design, set aside; `attacker_exact_test3.json`; the result is the pooled group's):
 
-- oasst1: **does not hold** (no_exact_single no, no_exact_conversation yes, recovery_not_above_gliner_pii no; recovery ss − gliner_pii +0.175 [+0.128, +0.227])
-- sharegpt: **does not hold** (no_exact_single no, no_exact_conversation yes, recovery_not_above_gliner_pii no; recovery ss − gliner_pii +0.122 [+0.079, +0.170])
-- wildchat: **does not hold** (no_exact_single no, no_exact_conversation no, recovery_not_above_gliner_pii no; recovery ss − gliner_pii +0.140 [+0.086, +0.195])
-- all: **does not hold** (no_exact_single no, no_exact_conversation no, recovery_not_above_gliner_pii no; recovery ss − gliner_pii +0.145 [+0.116, +0.173])
+- oasst1: **holds** (exact ss 1/188, gliner_pii 1/176; ss − gliner_pii -0.000 [-0.017, +0.016]; conversation exact 0)
+- sharegpt: **holds** (exact ss 1/217, gliner_pii 1/195; ss − gliner_pii -0.001 [-0.015, +0.013]; conversation exact 0)
+- wildchat: **holds** (exact ss 2/215, gliner_pii 4/185; ss − gliner_pii -0.012 [-0.038, +0.012]; conversation exact 1)
+- all: **holds** (exact ss 4/620, gliner_pii 6/556; ss − gliner_pii -0.004 [-0.015, +0.006]; conversation exact 1)

@@ -25,9 +25,9 @@ Command: `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.real
 | all | ss − presidio_faker | | | | | – | | judge +0.576 [+0.467, +0.685] |
 | all | ss − gliner_pii | | | | | – | | judge +0.649 [+0.527, +0.770] |
 
-H7''' on E7b (intervals over conversations above 0; the verdict is the pooled group's):
+H7''' on E7b (SS's judge grade above Presidio+Faker's and GLiNER-PII's, lower bound above 0, and the originals restored letter for letter in SS's replies more often than in theirs, Wilson 95 % intervals apart, in place of cross-turn consistency, which has no cases: no gold value recurs across turns; the result is the pooled group's):
 
-- oasst1: **does not hold** (judge_above_presidio_faker yes, consistency_above_presidio_faker no, judge_above_gliner_pii yes, consistency_above_gliner_pii no)
-- sharegpt: **does not hold** (judge_above_presidio_faker yes, consistency_above_presidio_faker no, judge_above_gliner_pii yes, consistency_above_gliner_pii no)
-- wildchat: **does not hold** (judge_above_presidio_faker yes, consistency_above_presidio_faker no, judge_above_gliner_pii yes, consistency_above_gliner_pii no)
-- all: **does not hold** (judge_above_presidio_faker yes, consistency_above_presidio_faker no, judge_above_gliner_pii yes, consistency_above_gliner_pii no)
+- oasst1: **holds** (judge ss − presidio_faker +0.694 [+0.500, +0.861], ss − gliner_pii +0.769 [+0.577, +0.923]; restored ss 24/24, presidio_faker 0/21, gliner_pii 0/18)
+- sharegpt: **holds** (judge ss − presidio_faker +0.433 [+0.200, +0.633], ss − gliner_pii +0.464 [+0.249, +0.679]; restored ss 30/31, presidio_faker 0/30, gliner_pii 0/15)
+- wildchat: **holds** (judge ss − presidio_faker +0.577 [+0.462, +0.731], ss − gliner_pii +0.750 [+0.600, +0.900]; restored ss 27/27, presidio_faker 0/29, gliner_pii 0/21)
+- all: **holds** (judge ss − presidio_faker +0.576 [+0.467, +0.685], ss − gliner_pii +0.649 [+0.527, +0.770]; restored ss 81/82, presidio_faker 0/80, gliner_pii 0/54)

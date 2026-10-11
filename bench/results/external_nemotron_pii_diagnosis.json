@@ -1,0 +1,2509 @@
+{
+ "anchor": {
+  "gliner_pii": {
+   "committed_leak": 1194,
+   "differs_on": [],
+   "recomputed_leak": 1194,
+   "reproduced": true
+  },
+  "gliner_pii_tuned": {
+   "committed_leak": 1041,
+   "differs_on": [],
+   "recomputed_leak": 1041,
+   "reproduced": true
+  },
+  "llm_guard": {
+   "committed_leak": 2820,
+   "differs_on": [],
+   "recomputed_leak": 2820,
+   "reproduced": true
+  },
+  "presidio_default": {
+   "committed_leak": 1856,
+   "differs_on": [],
+   "recomputed_leak": 1856,
+   "reproduced": true
+  },
+  "presidio_faker": {
+   "committed_leak": 1860,
+   "differs_on": [],
+   "recomputed_leak": 1860,
+   "reproduced": true
+  },
+  "presidio_transformers": {
+   "committed_leak": 2621,
+   "differs_on": [],
+   "recomputed_leak": 2621,
+   "reproduced": true
+  },
+  "ss": {
+   "committed_leak": 670,
+   "differs_on": [],
+   "recomputed_leak": 670,
+   "reproduced": true
+  }
+ },
+ "bootstrap": {
+  "ci": "percentile 2.5 / 97.5",
+  "difference": "ss \u2212 arm",
+  "resamples": 2000,
+  "seed": "derive_seed('external-diagnosis', name, arm, type)",
+  "unit": "the source's record group (uid)"
+ },
+ "by_type": {
+  "ADDRESS": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "address": 181,
+      "location": 2
+     },
+     "leak_rate": 0.0419,
+     "leaked": 7,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 7
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "address": 183,
+      "location": 2
+     },
+     "leak_rate": 0.0299,
+     "leaked": 5,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 5
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "GPE": 1,
+      "ORG": 1,
+      "address": 171,
+      "id_number": 2
+     },
+     "leak_rate": 0.0898,
+     "leaked": 15,
+     "overlapping_edit_types": {
+      "GPE": 2,
+      "address": 2
+     },
+     "reasons": {
+      "partly_covered": 3,
+      "untouched": 12
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.0054,
+      0.1016
+     ],
+     "diff": 0.0479,
+     "excludes_0": false,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      0.0127,
+      0.1105
+     ],
+     "diff": 0.0599,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 167
+  },
+  "AGE": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "age": 76
+     },
+     "leak_rate": 0.0152,
+     "leaked": 1,
+     "overlapping_edit_types": {
+      "age": 1
+     },
+     "reasons": {
+      "repeat_untouched": 1
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "age": 76
+     },
+     "leak_rate": 0.0152,
+     "leaked": 1,
+     "overlapping_edit_types": {
+      "age": 1
+     },
+     "reasons": {
+      "repeat_untouched": 1
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "age": 59
+     },
+     "leak_rate": 0.2121,
+     "leaked": 14,
+     "overlapping_edit_types": {
+      "age": 4
+     },
+     "reasons": {
+      "repeat_untouched": 4,
+      "untouched": 10
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      0.106,
+      0.3051
+     ],
+     "diff": 0.197,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      0.1025,
+      0.2942
+     ],
+     "diff": 0.197,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 66
+  },
+  "CREDENTIAL": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "address": 1,
+      "api key": 46,
+      "bank account number": 1,
+      "email": 1,
+      "health insurance id number": 1,
+      "organization": 1,
+      "password": 90,
+      "url": 1
+     },
+     "leak_rate": 0.504,
+     "leaked": 126,
+     "overlapping_edit_types": {
+      "api key": 17,
+      "ip address": 8,
+      "password": 1,
+      "person": 1,
+      "url": 15
+     },
+     "reasons": {
+      "partly_covered": 27,
+      "repeat_untouched": 1,
+      "untouched": 98
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "address": 1,
+      "api key": 51,
+      "bank account number": 2,
+      "email": 1,
+      "health insurance id number": 1,
+      "location": 1,
+      "organization": 1,
+      "password": 96,
+      "url": 1
+     },
+     "leak_rate": 0.456,
+     "leaked": 114,
+     "overlapping_edit_types": {
+      "api key": 24,
+      "ip address": 13,
+      "location": 1,
+      "password": 2,
+      "person": 1,
+      "url": 31,
+      "username": 1
+     },
+     "reasons": {
+      "partly_covered": 41,
+      "untouched": 73
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "ORG": 1,
+      "api_key": 13,
+      "credential": 115,
+      "handle": 7,
+      "id_number": 15
+     },
+     "leak_rate": 0.472,
+     "leaked": 118,
+     "overlapping_edit_types": {
+      "GPE": 9,
+      "ORG": 3,
+      "api_key": 13,
+      "credential": 22
+     },
+     "reasons": {
+      "partly_covered": 32,
+      "untouched": 86
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.0916,
+      0.0255
+     ],
+     "diff": -0.032,
+     "excludes_0": false,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.0426,
+      0.0714
+     ],
+     "diff": 0.016,
+     "excludes_0": false,
+     "resamples": 2000
+    }
+   },
+   "values": 250
+  },
+  "DATE_OF_BIRTH": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "date of birth": 181
+     },
+     "leak_rate": 0.0,
+     "leaked": 0,
+     "overlapping_edit_types": {},
+     "reasons": {}
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "date of birth": 181
+     },
+     "leak_rate": 0.0,
+     "leaked": 0,
+     "overlapping_edit_types": {},
+     "reasons": {}
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "dob": 181
+     },
+     "leak_rate": 0.0,
+     "leaked": 0,
+     "overlapping_edit_types": {},
+     "reasons": {}
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "diff": 0.0,
+     "excludes_0": false,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      0.0,
+      0.0
+     ],
+     "diff": 0.0,
+     "excludes_0": false,
+     "resamples": 2000
+    }
+   },
+   "values": 174
+  },
+  "EMAIL": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "email": 479,
+      "person": 1,
+      "url": 1
+     },
+     "leak_rate": 0.0405,
+     "leaked": 18,
+     "overlapping_edit_types": {
+      "email": 3,
+      "organization": 8,
+      "person": 8,
+      "username": 3
+     },
+     "reasons": {
+      "partly_covered": 14,
+      "repeat_untouched": 1,
+      "untouched": 3
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "email": 479,
+      "person": 1,
+      "url": 1
+     },
+     "leak_rate": 0.0405,
+     "leaked": 18,
+     "overlapping_edit_types": {
+      "email": 3,
+      "organization": 9,
+      "person": 9,
+      "username": 3
+     },
+     "reasons": {
+      "partly_covered": 14,
+      "repeat_untouched": 1,
+      "untouched": 3
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "email": 500
+     },
+     "leak_rate": 0.0113,
+     "leaked": 5,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 5
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.0488,
+      -0.012
+     ],
+     "diff": -0.0293,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.0479,
+      -0.0115
+     ],
+     "diff": -0.0293,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 444
+  },
+  "HANDLE": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "email": 1,
+      "person": 63,
+      "username": 94
+     },
+     "leak_rate": 0.0098,
+     "leaked": 1,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 1
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "email": 1,
+      "person": 63,
+      "username": 94
+     },
+     "leak_rate": 0.0098,
+     "leaked": 1,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 1
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "PERSON": 80,
+      "credential": 5,
+      "email": 1,
+      "handle": 64,
+      "hostname": 1,
+      "id_number": 1
+     },
+     "leak_rate": 0.2059,
+     "leaked": 21,
+     "overlapping_edit_types": {
+      "PERSON": 12
+     },
+     "reasons": {
+      "partly_covered": 6,
+      "untouched": 15
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      0.1176,
+      0.2778
+     ],
+     "diff": 0.1961,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      0.1143,
+      0.2772
+     ],
+     "diff": 0.1961,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 102
+  },
+  "ID": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "api key": 4,
+      "bank account number": 150,
+      "credit card number": 129,
+      "driver's license number": 49,
+      "email": 1,
+      "health insurance id number": 104,
+      "national id number": 41,
+      "password": 3,
+      "person": 3,
+      "social security number": 68,
+      "tax identification number": 11,
+      "url": 6,
+      "username": 2
+     },
+     "leak_rate": 0.5211,
+     "leaked": 567,
+     "overlapping_edit_types": {
+      "api key": 6,
+      "bank account number": 1,
+      "driver's license number": 3,
+      "health insurance id number": 3,
+      "person": 4,
+      "url": 1
+     },
+     "reasons": {
+      "repeat_untouched": 11,
+      "untouched": 556
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "api key": 6,
+      "bank account number": 159,
+      "credit card number": 129,
+      "driver's license number": 69,
+      "email": 2,
+      "health insurance id number": 112,
+      "ip address": 1,
+      "national id number": 42,
+      "password": 3,
+      "person": 18,
+      "social security number": 68,
+      "tax identification number": 11,
+      "url": 24,
+      "username": 4
+     },
+     "leak_rate": 0.4596,
+     "leaked": 500,
+     "overlapping_edit_types": {
+      "api key": 6,
+      "bank account number": 1,
+      "driver's license number": 3,
+      "health insurance id number": 4,
+      "password": 1
+     },
+     "reasons": {
+      "repeat_untouched": 9,
+      "untouched": 491
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "credential": 45,
+      "credit_card": 127,
+      "id_number": 871,
+      "license_plate": 31,
+      "phone_intl": 1,
+      "phone_us": 35,
+      "ssn": 73,
+      "us_driver_license": 14,
+      "vin": 6
+     },
+     "leak_rate": 0.0175,
+     "leaked": 19,
+     "overlapping_edit_types": {
+      "id_number": 6
+     },
+     "reasons": {
+      "partly_covered": 3,
+      "untouched": 16
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.5318,
+      -0.4754
+     ],
+     "diff": -0.5037,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.4707,
+      -0.4138
+     ],
+     "diff": -0.4421,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 1088
+  },
+  "LOCATION": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "address": 143,
+      "location": 313,
+      "organization": 32
+     },
+     "leak_rate": 0.2788,
+     "leaked": 138,
+     "overlapping_edit_types": {
+      "address": 10,
+      "location": 22,
+      "organization": 4
+     },
+     "reasons": {
+      "repeat_untouched": 27,
+      "untouched": 111
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "address": 153,
+      "location": 356,
+      "organization": 36
+     },
+     "leak_rate": 0.198,
+     "leaked": 98,
+     "overlapping_edit_types": {
+      "address": 2,
+      "location": 23,
+      "organization": 4
+     },
+     "reasons": {
+      "repeat_untouched": 20,
+      "untouched": 78
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "GPE": 410,
+      "ORG": 15,
+      "PERSON": 3,
+      "address": 115
+     },
+     "leak_rate": 0.2141,
+     "leaked": 106,
+     "overlapping_edit_types": {
+      "GPE": 7,
+      "ORG": 1,
+      "address": 8
+     },
+     "reasons": {
+      "copied": 1,
+      "partly_covered": 5,
+      "repeat_untouched": 5,
+      "untouched": 95
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.1203,
+      -0.0125
+     ],
+     "diff": -0.0646,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.0323,
+      0.0626
+     ],
+     "diff": 0.0162,
+     "excludes_0": false,
+     "resamples": 2000
+    }
+   },
+   "values": 495
+  },
+  "NETWORK": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "ip address": 100,
+      "url": 1
+     },
+     "leak_rate": 0.3178,
+     "leaked": 41,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 41
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "ip address": 104,
+      "url": 1
+     },
+     "leak_rate": 0.2868,
+     "leaked": 37,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 37
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "ip_address": 104,
+      "mac_address": 43
+     },
+     "leak_rate": 0.0078,
+     "leaked": 1,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 1
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.3741,
+      -0.2344
+     ],
+     "diff": -0.3101,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.3417,
+      -0.2093
+     ],
+     "diff": -0.2791,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 129
+  },
+  "ORG": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "organization": 486,
+      "username": 2
+     },
+     "leak_rate": 0.0113,
+     "leaked": 3,
+     "overlapping_edit_types": {
+      "organization": 2
+     },
+     "reasons": {
+      "repeat_untouched": 1,
+      "untouched": 2
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "organization": 493,
+      "username": 2
+     },
+     "leak_rate": 0.0038,
+     "leaked": 1,
+     "overlapping_edit_types": {},
+     "reasons": {
+      "untouched": 1
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "GPE": 11,
+      "ORG": 309,
+      "PERSON": 76,
+      "address": 1
+     },
+     "leak_rate": 0.1887,
+     "leaked": 50,
+     "overlapping_edit_types": {
+      "GPE": 1,
+      "ORG": 20
+     },
+     "reasons": {
+      "partly_covered": 9,
+      "repeat_untouched": 1,
+      "untouched": 40
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      0.1324,
+      0.2226
+     ],
+     "diff": 0.1774,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      0.1397,
+      0.2321
+     ],
+     "diff": 0.1849,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 265
+  },
+  "PERSON": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "email": 3,
+      "organization": 3,
+      "person": 1104,
+      "username": 2
+     },
+     "leak_rate": 0.1404,
+     "leaked": 125,
+     "overlapping_edit_types": {
+      "person": 119
+     },
+     "reasons": {
+      "repeat_untouched": 95,
+      "untouched": 30
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "email": 3,
+      "organization": 3,
+      "person": 1133,
+      "username": 2
+     },
+     "leak_rate": 0.1157,
+     "leaked": 103,
+     "overlapping_edit_types": {
+      "person": 112
+     },
+     "reasons": {
+      "repeat_untouched": 90,
+      "untouched": 13
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "GPE": 5,
+      "ORG": 18,
+      "PERSON": 1319,
+      "email": 3
+     },
+     "leak_rate": 0.0539,
+     "leaked": 48,
+     "overlapping_edit_types": {
+      "PERSON": 1
+     },
+     "reasons": {
+      "repeat_untouched": 1,
+      "untouched": 47
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.12,
+      -0.0529
+     ],
+     "diff": -0.0865,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.095,
+      -0.031
+     ],
+     "diff": -0.0618,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 890
+  },
+  "PHONE": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "phone number": 263
+     },
+     "leak_rate": 0.0408,
+     "leaked": 10,
+     "overlapping_edit_types": {
+      "phone number": 3
+     },
+     "reasons": {
+      "repeat_untouched": 3,
+      "untouched": 7
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "email": 1,
+      "phone number": 267,
+      "url": 2
+     },
+     "leak_rate": 0.0245,
+     "leaked": 6,
+     "overlapping_edit_types": {
+      "phone number": 2
+     },
+     "reasons": {
+      "repeat_untouched": 2,
+      "untouched": 4
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "id_number": 1,
+      "phone_intl": 92,
+      "phone_uk": 14,
+      "phone_us": 172
+     },
+     "leak_rate": 0.0,
+     "leaked": 0,
+     "overlapping_edit_types": {},
+     "reasons": {}
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      -0.0688,
+      -0.0164
+     ],
+     "diff": -0.0408,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      -0.0474,
+      -0.0042
+     ],
+     "diff": -0.0245,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 245
+  },
+  "URL": {
+   "arms": {
+    "gliner_pii": {
+     "edit_types_on_caught": {
+      "bank account number": 3,
+      "url": 178
+     },
+     "leak_rate": 0.5032,
+     "leaked": 157,
+     "overlapping_edit_types": {
+      "email": 1,
+      "location": 6,
+      "organization": 8,
+      "social security number": 1,
+      "url": 9,
+      "username": 3
+     },
+     "reasons": {
+      "partly_covered": 24,
+      "untouched": 133
+     }
+    },
+    "gliner_pii_tuned": {
+     "edit_types_on_caught": {
+      "bank account number": 3,
+      "url": 178
+     },
+     "leak_rate": 0.5032,
+     "leaked": 157,
+     "overlapping_edit_types": {
+      "email": 1,
+      "ip address": 1,
+      "location": 7,
+      "organization": 10,
+      "social security number": 1,
+      "url": 35,
+      "username": 3
+     },
+     "reasons": {
+      "partly_covered": 47,
+      "untouched": 110
+     }
+    },
+    "ss": {
+     "edit_types_on_caught": {
+      "url": 47
+     },
+     "leak_rate": 0.875,
+     "leaked": 273,
+     "overlapping_edit_types": {
+      "GPE": 2,
+      "email": 1,
+      "id_number": 3
+     },
+     "reasons": {
+      "partly_covered": 5,
+      "untouched": 268
+     }
+    }
+   },
+   "diff_ss_minus": {
+    "gliner_pii": {
+     "ci95": [
+      0.3149,
+      0.43
+     ],
+     "diff": 0.3718,
+     "excludes_0": true,
+     "resamples": 2000
+    },
+    "gliner_pii_tuned": {
+     "ci95": [
+      0.3099,
+      0.4312
+     ],
+     "diff": 0.3718,
+     "excludes_0": true,
+     "resamples": 2000
+    }
+   },
+   "values": 312
+  }
+ },
+ "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONPATH=.:python-library .venv/bin/python -m bench.realdata.external_diagnosis --out bench/results/external_nemotron_pii_diagnosis.json",
+ "edit_types": {
+  "gliner_pii": {
+   "address": {
+    "edits": 223,
+    "spurious": 15,
+    "spurious_rate": 0.0673
+   },
+   "age": {
+    "edits": 103,
+    "spurious": 24,
+    "spurious_rate": 0.233
+   },
+   "api key": {
+    "edits": 84,
+    "spurious": 11,
+    "spurious_rate": 0.131
+   },
+   "bank account number": {
+    "edits": 195,
+    "spurious": 9,
+    "spurious_rate": 0.0462
+   },
+   "credit card number": {
+    "edits": 136,
+    "spurious": 7,
+    "spurious_rate": 0.0515
+   },
+   "date of birth": {
+    "edits": 205,
+    "spurious": 4,
+    "spurious_rate": 0.0195
+   },
+   "driver's license number": {
+    "edits": 49,
+    "spurious": 3,
+    "spurious_rate": 0.0612
+   },
+   "email": {
+    "edits": 515,
+    "spurious": 30,
+    "spurious_rate": 0.0583
+   },
+   "health insurance id number": {
+    "edits": 111,
+    "spurious": 3,
+    "spurious_rate": 0.027
+   },
+   "iban": {
+    "edits": 2,
+    "spurious": 1,
+    "spurious_rate": 0.5
+   },
+   "ip address": {
+    "edits": 119,
+    "spurious": 9,
+    "spurious_rate": 0.0756
+   },
+   "location": {
+    "edits": 347,
+    "spurious": 52,
+    "spurious_rate": 0.1499
+   },
+   "national id number": {
+    "edits": 44,
+    "spurious": 3,
+    "spurious_rate": 0.0682
+   },
+   "organization": {
+    "edits": 1009,
+    "spurious": 419,
+    "spurious_rate": 0.4153
+   },
+   "passport number": {
+    "edits": 1,
+    "spurious": 1,
+    "spurious_rate": 1.0
+   },
+   "password": {
+    "edits": 136,
+    "spurious": 42,
+    "spurious_rate": 0.3088
+   },
+   "person": {
+    "edits": 1489,
+    "spurious": 557,
+    "spurious_rate": 0.3741
+   },
+   "phone number": {
+    "edits": 296,
+    "spurious": 11,
+    "spurious_rate": 0.0372
+   },
+   "social security number": {
+    "edits": 79,
+    "spurious": 10,
+    "spurious_rate": 0.1266
+   },
+   "tax identification number": {
+    "edits": 13,
+    "spurious": 2,
+    "spurious_rate": 0.1538
+   },
+   "url": {
+    "edits": 233,
+    "spurious": 17,
+    "spurious_rate": 0.073
+   },
+   "username": {
+    "edits": 112,
+    "spurious": 6,
+    "spurious_rate": 0.0536
+   }
+  },
+  "gliner_pii_tuned": {
+   "address": {
+    "edits": 239,
+    "spurious": 27,
+    "spurious_rate": 0.113
+   },
+   "age": {
+    "edits": 114,
+    "spurious": 33,
+    "spurious_rate": 0.2895
+   },
+   "api key": {
+    "edits": 104,
+    "spurious": 15,
+    "spurious_rate": 0.1442
+   },
+   "bank account number": {
+    "edits": 215,
+    "spurious": 15,
+    "spurious_rate": 0.0698
+   },
+   "credit card number": {
+    "edits": 139,
+    "spurious": 10,
+    "spurious_rate": 0.0719
+   },
+   "date of birth": {
+    "edits": 223,
+    "spurious": 8,
+    "spurious_rate": 0.0359
+   },
+   "driver's license number": {
+    "edits": 72,
+    "spurious": 6,
+    "spurious_rate": 0.0833
+   },
+   "email": {
+    "edits": 528,
+    "spurious": 41,
+    "spurious_rate": 0.0777
+   },
+   "health insurance id number": {
+    "edits": 121,
+    "spurious": 4,
+    "spurious_rate": 0.0331
+   },
+   "iban": {
+    "edits": 2,
+    "spurious": 1,
+    "spurious_rate": 0.5
+   },
+   "ip address": {
+    "edits": 133,
+    "spurious": 12,
+    "spurious_rate": 0.0902
+   },
+   "location": {
+    "edits": 426,
+    "spurious": 78,
+    "spurious_rate": 0.1831
+   },
+   "national id number": {
+    "edits": 46,
+    "spurious": 4,
+    "spurious_rate": 0.087
+   },
+   "organization": {
+    "edits": 1178,
+    "spurious": 564,
+    "spurious_rate": 0.4788
+   },
+   "passport number": {
+    "edits": 3,
+    "spurious": 3,
+    "spurious_rate": 1.0
+   },
+   "password": {
+    "edits": 160,
+    "spurious": 56,
+    "spurious_rate": 0.35
+   },
+   "person": {
+    "edits": 1742,
+    "spurious": 749,
+    "spurious_rate": 0.43
+   },
+   "phone number": {
+    "edits": 318,
+    "spurious": 18,
+    "spurious_rate": 0.0566
+   },
+   "social security number": {
+    "edits": 79,
+    "spurious": 10,
+    "spurious_rate": 0.1266
+   },
+   "tax identification number": {
+    "edits": 15,
+    "spurious": 4,
+    "spurious_rate": 0.2667
+   },
+   "url": {
+    "edits": 318,
+    "spurious": 37,
+    "spurious_rate": 0.1164
+   },
+   "username": {
+    "edits": 122,
+    "spurious": 12,
+    "spurious_rate": 0.0984
+   }
+  },
+  "ss": {
+   "GPE": {
+    "edits": 517,
+    "spurious": 37,
+    "spurious_rate": 0.0716
+   },
+   "ORG": {
+    "edits": 488,
+    "spurious": 112,
+    "spurious_rate": 0.2295
+   },
+   "PERSON": {
+    "edits": 1304,
+    "spurious": 196,
+    "spurious_rate": 0.1503
+   },
+   "address": {
+    "edits": 202,
+    "spurious": 2,
+    "spurious_rate": 0.0099
+   },
+   "age": {
+    "edits": 73,
+    "spurious": 10,
+    "spurious_rate": 0.137
+   },
+   "api_key": {
+    "edits": 25,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "credential": {
+    "edits": 197,
+    "spurious": 7,
+    "spurious_rate": 0.0355
+   },
+   "credit_card": {
+    "edits": 127,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "dob": {
+    "edits": 193,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "email": {
+    "edits": 503,
+    "spurious": 1,
+    "spurious_rate": 0.002
+   },
+   "gender_indicator": {
+    "edits": 10,
+    "spurious": 3,
+    "spurious_rate": 0.3
+   },
+   "handle": {
+    "edits": 77,
+    "spurious": 6,
+    "spurious_rate": 0.0779
+   },
+   "hostname": {
+    "edits": 6,
+    "spurious": 5,
+    "spurious_rate": 0.8333
+   },
+   "id_number": {
+    "edits": 1063,
+    "spurious": 49,
+    "spurious_rate": 0.0461
+   },
+   "ip_address": {
+    "edits": 105,
+    "spurious": 1,
+    "spurious_rate": 0.0095
+   },
+   "license_plate": {
+    "edits": 31,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "mac_address": {
+    "edits": 43,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "phone_intl": {
+    "edits": 100,
+    "spurious": 2,
+    "spurious_rate": 0.02
+   },
+   "phone_uk": {
+    "edits": 14,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "phone_us": {
+    "edits": 209,
+    "spurious": 2,
+    "spurious_rate": 0.0096
+   },
+   "postcode_uk": {
+    "edits": 1,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "ssn": {
+    "edits": 81,
+    "spurious": 8,
+    "spurious_rate": 0.0988
+   },
+   "url": {
+    "edits": 47,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "us_bank_number": {
+    "edits": 7,
+    "spurious": 1,
+    "spurious_rate": 0.1429
+   },
+   "us_driver_license": {
+    "edits": 14,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "vin": {
+    "edits": 6,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   },
+   "zip_us": {
+    "edits": 29,
+    "spurious": 0,
+    "spurious_rate": 0.0
+   }
+  }
+ },
+ "external": {
+  "arms": [
+   "ss",
+   "presidio_default",
+   "presidio_faker",
+   "presidio_transformers",
+   "llm_guard",
+   "gliner_pii",
+   "gliner_pii_tuned"
+  ],
+  "records": 1000,
+  "result_file": "bench/results/external_nemotron_pii.json",
+  "run": {
+   "commit": "73098e3fabbeaa248105b9e32998f2984644d190",
+   "modified": []
+  },
+  "sha256": "02374546605a748a78116e26bac3e157da504e74a7a0a0a05defb2962640d7d5"
+ },
+ "git": {
+  "commit": "88d6ccd86f428828ab5d78edb58944024b55eca0",
+  "modified": [
+   "bench/realdata/label.py"
+  ]
+ },
+ "leak_rule": "An occurrence leaks when a letter or digit of it lies outside every edit, or when an overlapping replacement contains the value (4+ characters). Reasons are per value: partly_covered > copied > untouched (no edit overlapped any occurrence) > repeat_untouched (one occurrence replaced, another whole-word occurrence of the same value left)",
+ "made": "2026-10-09",
+ "role": "diagnosis of a secondary check; changes no rule or result",
+ "shapes": {
+  "ADDRESS": {
+   "comma_inside": {
+    "false": {
+     "gliner_pii": 5,
+     "gliner_pii_tuned": 3,
+     "n": 138,
+     "ss": 11
+    },
+    "true": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 2,
+     "n": 29,
+     "ss": 4
+    }
+   },
+   "has_digit": {
+    "true": {
+     "gliner_pii": 7,
+     "gliner_pii_tuned": 5,
+     "n": 167,
+     "ss": 15
+    }
+   },
+   "labelled_field": {
+    "false": {
+     "gliner_pii": 5,
+     "gliner_pii_tuned": 4,
+     "n": 123,
+     "ss": 15
+    },
+    "true": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 1,
+     "n": 44
+    }
+   },
+   "newline_inside": {
+    "false": {
+     "gliner_pii": 7,
+     "gliner_pii_tuned": 5,
+     "n": 167,
+     "ss": 15
+    }
+   },
+   "non_ascii": {
+    "false": {
+     "gliner_pii": 7,
+     "gliner_pii_tuned": 5,
+     "n": 167,
+     "ss": 15
+    }
+   },
+   "occurrences": {
+    "<=1": {
+     "gliner_pii": 6,
+     "gliner_pii_tuned": 4,
+     "n": 146,
+     "ss": 13
+    },
+    ">1": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 21,
+     "ss": 2
+    }
+   },
+   "starts_with_digit": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 3,
+     "n": 63,
+     "ss": 14
+    },
+    "true": {
+     "gliner_pii": 4,
+     "gliner_pii_tuned": 2,
+     "n": 104,
+     "ss": 1
+    }
+   },
+   "stratum": {
+    "intl-structured": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 2,
+     "n": 46,
+     "ss": 6
+    },
+    "intl-unstructured": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 36,
+     "ss": 8
+    },
+    "us-structured": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 51
+    },
+    "us-unstructured": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 34,
+     "ss": 1
+    }
+   },
+   "tokens": {
+    "<=3": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 1,
+     "n": 91,
+     "ss": 9
+    },
+    "<=5": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 2,
+     "n": 68,
+     "ss": 4
+    },
+    ">5": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 2,
+     "n": 8,
+     "ss": 2
+    }
+   },
+   "unit": {
+    "false": {
+     "gliner_pii": 5,
+     "gliner_pii_tuned": 3,
+     "n": 154,
+     "ss": 11
+    },
+    "true": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 2,
+     "n": 13,
+     "ss": 4
+    }
+   }
+  },
+  "AGE": {
+   "age_word_sep": {
+    "colon": {
+     "n": 18,
+     "ss": 7
+    },
+    "no age word": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 36,
+     "ss": 6
+    },
+    "space": {
+     "n": 12,
+     "ss": 1
+    }
+   },
+   "digits_only": {
+    "true": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 66,
+     "ss": 14
+    }
+   },
+   "emphasis_between": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 59,
+     "ss": 7
+    },
+    "true": {
+     "n": 7,
+     "ss": 7
+    }
+   },
+   "labelled_field": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 54,
+     "ss": 13
+    },
+    "true": {
+     "n": 12,
+     "ss": 1
+    }
+   },
+   "length": {
+    "<=2": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 66,
+     "ss": 14
+    }
+   },
+   "occurrences": {
+    "<=1": {
+     "n": 58,
+     "ss": 9
+    },
+    ">1": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 8,
+     "ss": 5
+    }
+   },
+   "stratum": {
+    "intl-structured": {
+     "n": 11,
+     "ss": 4
+    },
+    "intl-unstructured": {
+     "n": 13,
+     "ss": 2
+    },
+    "us-structured": {
+     "n": 21,
+     "ss": 7
+    },
+    "us-unstructured": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 21,
+     "ss": 1
+    }
+   },
+   "unit_inside": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 66,
+     "ss": 14
+    }
+   },
+   "years_after": {
+    "false": {
+     "n": 37,
+     "ss": 11
+    },
+    "true": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 29,
+     "ss": 3
+    }
+   },
+   "years_of_age_after": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 65,
+     "ss": 13
+    },
+    "true": {
+     "n": 1,
+     "ss": 1
+    }
+   }
+  },
+  "HANDLE": {
+   "all_lower": {
+    "false": {
+     "n": 30,
+     "ss": 2
+    },
+    "true": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 72,
+     "ss": 19
+    }
+   },
+   "at_prefixed": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 102,
+     "ss": 21
+    }
+   },
+   "has_digit": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 66,
+     "ss": 14
+    },
+    "true": {
+     "n": 36,
+     "ss": 7
+    }
+   },
+   "has_separator": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 50,
+     "ss": 7
+    },
+    "true": {
+     "n": 52,
+     "ss": 14
+    }
+   },
+   "has_space": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 102,
+     "ss": 21
+    }
+   },
+   "has_upper": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 72,
+     "ss": 19
+    },
+    "true": {
+     "n": 30,
+     "ss": 2
+    }
+   },
+   "labelled_field": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 88,
+     "ss": 21
+    },
+    "true": {
+     "n": 14
+    }
+   },
+   "length": {
+    "<=10": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 24,
+     "ss": 8
+    },
+    "<=6": {
+     "n": 13,
+     "ss": 2
+    },
+    ">10": {
+     "n": 65,
+     "ss": 11
+    }
+   },
+   "occurrences": {
+    "<=1": {
+     "n": 83,
+     "ss": 19
+    },
+    ">1": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 19,
+     "ss": 2
+    }
+   },
+   "stratum": {
+    "intl-structured": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 20,
+     "ss": 3
+    },
+    "intl-unstructured": {
+     "n": 31,
+     "ss": 6
+    },
+    "us-structured": {
+     "n": 21,
+     "ss": 6
+    },
+    "us-unstructured": {
+     "n": 30,
+     "ss": 6
+    }
+   }
+  },
+  "ORG": {
+   "all_caps_token": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 262,
+     "ss": 49
+    },
+    "true": {
+     "n": 3,
+     "ss": 1
+    }
+   },
+   "ampersand": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 241,
+     "ss": 46
+    },
+    "true": {
+     "n": 24,
+     "ss": 4
+    }
+   },
+   "has_digit": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 265,
+     "ss": 50
+    }
+   },
+   "labelled_field": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 258,
+     "ss": 49
+    },
+    "true": {
+     "n": 7,
+     "ss": 1
+    }
+   },
+   "legal_suffix": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 131,
+     "ss": 38
+    },
+    "true": {
+     "n": 134,
+     "ss": 12
+    }
+   },
+   "occurrences": {
+    "<=1": {
+     "gliner_pii": 2,
+     "gliner_pii_tuned": 1,
+     "n": 155,
+     "ss": 19
+    },
+    ">1": {
+     "gliner_pii": 1,
+     "n": 110,
+     "ss": 31
+    }
+   },
+   "possessive_or_apostrophe": {
+    "false": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 265,
+     "ss": 50
+    }
+   },
+   "stratum": {
+    "intl-structured": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 60,
+     "ss": 11
+    },
+    "intl-unstructured": {
+     "n": 72,
+     "ss": 10
+    },
+    "us-structured": {
+     "gliner_pii": 2,
+     "n": 59,
+     "ss": 13
+    },
+    "us-unstructured": {
+     "n": 74,
+     "ss": 16
+    }
+   },
+   "words": {
+    "<=1": {
+     "gliner_pii": 3,
+     "gliner_pii_tuned": 1,
+     "n": 57,
+     "ss": 25
+    },
+    "<=2": {
+     "n": 107,
+     "ss": 12
+    },
+    "<=3": {
+     "n": 79,
+     "ss": 7
+    },
+    ">3": {
+     "n": 22,
+     "ss": 6
+    }
+   }
+  },
+  "URL": {
+   "has_digit_in_host": {
+    "false": {
+     "gliner_pii": 127,
+     "gliner_pii_tuned": 127,
+     "n": 282,
+     "ss": 243
+    },
+    "true": {
+     "gliner_pii": 30,
+     "gliner_pii_tuned": 30,
+     "n": 30,
+     "ss": 30
+    }
+   },
+   "host_labels": {
+    "<=2": {
+     "gliner_pii": 84,
+     "gliner_pii_tuned": 84,
+     "n": 201,
+     "ss": 168
+    },
+    "<=3": {
+     "gliner_pii": 37,
+     "gliner_pii_tuned": 37,
+     "n": 74,
+     "ss": 68
+    },
+    ">3": {
+     "gliner_pii": 36,
+     "gliner_pii_tuned": 36,
+     "n": 37,
+     "ss": 37
+    }
+   },
+   "ip_host": {
+    "false": {
+     "gliner_pii": 127,
+     "gliner_pii_tuned": 127,
+     "n": 282,
+     "ss": 243
+    },
+    "true": {
+     "gliner_pii": 30,
+     "gliner_pii_tuned": 30,
+     "n": 30,
+     "ss": 30
+    }
+   },
+   "labelled_field": {
+    "false": {
+     "gliner_pii": 141,
+     "gliner_pii_tuned": 141,
+     "n": 282,
+     "ss": 244
+    },
+    "true": {
+     "gliner_pii": 16,
+     "gliner_pii_tuned": 16,
+     "n": 30,
+     "ss": 29
+    }
+   },
+   "occurrences": {
+    "<=1": {
+     "gliner_pii": 141,
+     "gliner_pii_tuned": 141,
+     "n": 279,
+     "ss": 247
+    },
+    ">1": {
+     "gliner_pii": 16,
+     "gliner_pii_tuned": 16,
+     "n": 33,
+     "ss": 26
+    }
+   },
+   "path": {
+    "false": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 64,
+     "ss": 46
+    },
+    "true": {
+     "gliner_pii": 156,
+     "gliner_pii_tuned": 156,
+     "n": 248,
+     "ss": 227
+    }
+   },
+   "port": {
+    "false": {
+     "gliner_pii": 121,
+     "gliner_pii_tuned": 121,
+     "n": 267,
+     "ss": 232
+    },
+    "true": {
+     "gliner_pii": 36,
+     "gliner_pii_tuned": 36,
+     "n": 45,
+     "ss": 41
+    }
+   },
+   "scheme": {
+    "true": {
+     "gliner_pii": 157,
+     "gliner_pii_tuned": 157,
+     "n": 312,
+     "ss": 273
+    }
+   },
+   "stratum": {
+    "intl-structured": {
+     "gliner_pii": 39,
+     "gliner_pii_tuned": 39,
+     "n": 70,
+     "ss": 65
+    },
+    "intl-unstructured": {
+     "gliner_pii": 31,
+     "gliner_pii_tuned": 31,
+     "n": 68,
+     "ss": 57
+    },
+    "us-structured": {
+     "gliner_pii": 36,
+     "gliner_pii_tuned": 36,
+     "n": 77,
+     "ss": 64
+    },
+    "us-unstructured": {
+     "gliner_pii": 51,
+     "gliner_pii_tuned": 51,
+     "n": 97,
+     "ss": 87
+    }
+   },
+   "tld": {
+    "au": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 1,
+     "ss": 1
+    },
+    "com": {
+     "gliner_pii": 110,
+     "gliner_pii_tuned": 110,
+     "n": 229,
+     "ss": 200
+    },
+    "gov": {
+     "gliner_pii": 9,
+     "gliner_pii_tuned": 9,
+     "n": 26,
+     "ss": 22
+    },
+    "io": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 2,
+     "ss": 1
+    },
+    "ip": {
+     "gliner_pii": 30,
+     "gliner_pii_tuned": 30,
+     "n": 30,
+     "ss": 30
+    },
+    "net": {
+     "n": 1,
+     "ss": 1
+    },
+    "org": {
+     "gliner_pii": 6,
+     "gliner_pii_tuned": 6,
+     "n": 23,
+     "ss": 18
+    }
+   },
+   "www": {
+    "false": {
+     "gliner_pii": 156,
+     "gliner_pii_tuned": 156,
+     "n": 310,
+     "ss": 271
+    },
+    "true": {
+     "gliner_pii": 1,
+     "gliner_pii_tuned": 1,
+     "n": 2,
+     "ss": 2
+    }
+   }
+  }
+ },
+ "spans": {
+  "gliner_pii": {
+   "detection_config_hash": null,
+   "file": "bench/realdata/build/spans/gliner_pii/external-nemotron_pii.jsonl",
+   "sha256": "541fb8591034bd2ac8e175d1b0609eb9c83e01319bf712cd999714a19adf409c",
+   "source": "private"
+  },
+  "gliner_pii_tuned": {
+   "detection_config_hash": null,
+   "file": "bench/realdata/build/spans/gliner_pii_tuned/external-nemotron_pii.jsonl",
+   "sha256": "9fe7f5d8d0be015d357b0a52ad15d9cf86e483dbb68878bc4d1e7f654a0f1c75",
+   "source": "private"
+  },
+  "llm_guard": {
+   "detection_config_hash": null,
+   "file": "bench/realdata/build/spans/llm_guard/external-nemotron_pii.jsonl",
+   "sha256": "6171f1d6eb943198544dd67f3d1259025bce8431bca7a46eb14c801fdb124a78",
+   "source": "private"
+  },
+  "presidio_default": {
+   "detection_config_hash": null,
+   "file": "bench/realdata/build/spans/presidio_default/external-nemotron_pii.jsonl",
+   "sha256": "8c14e47ef31cd0c6e4210896ac10a721141d6a7eeaba0cffbbfe3af307b5e39a",
+   "source": "private"
+  },
+  "presidio_faker": {
+   "detection_config_hash": null,
+   "file": "bench/realdata/build/spans/presidio_faker/external-nemotron_pii.jsonl",
+   "sha256": "bd7893e9142ac571e8f359cb6c3f53589b0c41dcead18a097332d2ae7f38463a",
+   "source": "private"
+  },
+  "presidio_transformers": {
+   "detection_config_hash": null,
+   "file": "bench/realdata/build/spans/presidio_transformers/external-nemotron_pii.jsonl",
+   "sha256": "b347c9d513ea68fd7d0c74a52ea1f4331d96f9d4225e2b33f555e4ea172f0c2d",
+   "source": "private"
+  },
+  "ss": {
+   "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+   "file": "bench/realdata/build/spans/ss/external-nemotron_pii.jsonl",
+   "sha256": "f21d6a068194c65db92f0417a4c04c6beac747cc62bf10fa309ebe357579e297",
+   "source": "private"
+  }
+ },
+ "strata": {
+  "ADDRESS": {
+   "intl-structured": {
+    "gliner_pii": 2,
+    "gliner_pii_tuned": 2,
+    "n": 46,
+    "ss": 6
+   },
+   "intl-unstructured": {
+    "gliner_pii": 1,
+    "gliner_pii_tuned": 1,
+    "n": 36,
+    "ss": 8
+   },
+   "us-structured": {
+    "gliner_pii": 3,
+    "gliner_pii_tuned": 1,
+    "n": 51
+   },
+   "us-unstructured": {
+    "gliner_pii": 1,
+    "gliner_pii_tuned": 1,
+    "n": 34,
+    "ss": 1
+   }
+  },
+  "AGE": {
+   "intl-structured": {
+    "n": 11,
+    "ss": 4
+   },
+   "intl-unstructured": {
+    "n": 13,
+    "ss": 2
+   },
+   "us-structured": {
+    "n": 21,
+    "ss": 7
+   },
+   "us-unstructured": {
+    "gliner_pii": 1,
+    "gliner_pii_tuned": 1,
+    "n": 21,
+    "ss": 1
+   }
+  },
+  "CREDENTIAL": {
+   "intl-structured": {
+    "gliner_pii": 27,
+    "gliner_pii_tuned": 25,
+    "n": 51,
+    "ss": 25
+   },
+   "intl-unstructured": {
+    "gliner_pii": 31,
+    "gliner_pii_tuned": 29,
+    "n": 72,
+    "ss": 33
+   },
+   "us-structured": {
+    "gliner_pii": 43,
+    "gliner_pii_tuned": 39,
+    "n": 65,
+    "ss": 36
+   },
+   "us-unstructured": {
+    "gliner_pii": 25,
+    "gliner_pii_tuned": 21,
+    "n": 62,
+    "ss": 24
+   }
+  },
+  "DATE_OF_BIRTH": {
+   "intl-structured": {
+    "n": 54
+   },
+   "intl-unstructured": {
+    "n": 46
+   },
+   "us-structured": {
+    "n": 34
+   },
+   "us-unstructured": {
+    "n": 40
+   }
+  },
+  "EMAIL": {
+   "intl-structured": {
+    "gliner_pii": 8,
+    "gliner_pii_tuned": 8,
+    "n": 136,
+    "ss": 2
+   },
+   "intl-unstructured": {
+    "gliner_pii": 5,
+    "gliner_pii_tuned": 5,
+    "n": 139,
+    "ss": 2
+   },
+   "us-structured": {
+    "gliner_pii": 3,
+    "gliner_pii_tuned": 3,
+    "n": 78,
+    "ss": 1
+   },
+   "us-unstructured": {
+    "gliner_pii": 2,
+    "gliner_pii_tuned": 2,
+    "n": 91
+   }
+  },
+  "HANDLE": {
+   "intl-structured": {
+    "gliner_pii": 1,
+    "gliner_pii_tuned": 1,
+    "n": 20,
+    "ss": 3
+   },
+   "intl-unstructured": {
+    "n": 31,
+    "ss": 6
+   },
+   "us-structured": {
+    "n": 21,
+    "ss": 6
+   },
+   "us-unstructured": {
+    "n": 30,
+    "ss": 6
+   }
+  },
+  "ID": {
+   "intl-structured": {
+    "gliner_pii": 132,
+    "gliner_pii_tuned": 119,
+    "n": 278,
+    "ss": 7
+   },
+   "intl-unstructured": {
+    "gliner_pii": 132,
+    "gliner_pii_tuned": 114,
+    "n": 250,
+    "ss": 4
+   },
+   "us-structured": {
+    "gliner_pii": 167,
+    "gliner_pii_tuned": 141,
+    "n": 294,
+    "ss": 8
+   },
+   "us-unstructured": {
+    "gliner_pii": 136,
+    "gliner_pii_tuned": 126,
+    "n": 266
+   }
+  },
+  "LOCATION": {
+   "intl-structured": {
+    "gliner_pii": 45,
+    "gliner_pii_tuned": 33,
+    "n": 120,
+    "ss": 10
+   },
+   "intl-unstructured": {
+    "gliner_pii": 18,
+    "gliner_pii_tuned": 13,
+    "n": 114,
+    "ss": 8
+   },
+   "us-structured": {
+    "gliner_pii": 59,
+    "gliner_pii_tuned": 42,
+    "n": 151,
+    "ss": 54
+   },
+   "us-unstructured": {
+    "gliner_pii": 16,
+    "gliner_pii_tuned": 10,
+    "n": 110,
+    "ss": 34
+   }
+  },
+  "NETWORK": {
+   "intl-structured": {
+    "gliner_pii": 10,
+    "gliner_pii_tuned": 9,
+    "n": 29
+   },
+   "intl-unstructured": {
+    "gliner_pii": 12,
+    "gliner_pii_tuned": 11,
+    "n": 42,
+    "ss": 1
+   },
+   "us-structured": {
+    "gliner_pii": 12,
+    "gliner_pii_tuned": 11,
+    "n": 29
+   },
+   "us-unstructured": {
+    "gliner_pii": 7,
+    "gliner_pii_tuned": 6,
+    "n": 29
+   }
+  },
+  "ORG": {
+   "intl-structured": {
+    "gliner_pii": 1,
+    "gliner_pii_tuned": 1,
+    "n": 60,
+    "ss": 11
+   },
+   "intl-unstructured": {
+    "n": 72,
+    "ss": 10
+   },
+   "us-structured": {
+    "gliner_pii": 2,
+    "n": 59,
+    "ss": 13
+   },
+   "us-unstructured": {
+    "n": 74,
+    "ss": 16
+   }
+  },
+  "PERSON": {
+   "intl-structured": {
+    "gliner_pii": 46,
+    "gliner_pii_tuned": 34,
+    "n": 246,
+    "ss": 9
+   },
+   "intl-unstructured": {
+    "gliner_pii": 21,
+    "gliner_pii_tuned": 20,
+    "n": 210,
+    "ss": 13
+   },
+   "us-structured": {
+    "gliner_pii": 35,
+    "gliner_pii_tuned": 28,
+    "n": 214,
+    "ss": 6
+   },
+   "us-unstructured": {
+    "gliner_pii": 23,
+    "gliner_pii_tuned": 21,
+    "n": 220,
+    "ss": 20
+   }
+  },
+  "PHONE": {
+   "intl-structured": {
+    "gliner_pii": 5,
+    "gliner_pii_tuned": 3,
+    "n": 76
+   },
+   "intl-unstructured": {
+    "n": 58
+   },
+   "us-structured": {
+    "gliner_pii": 4,
+    "gliner_pii_tuned": 2,
+    "n": 57
+   },
+   "us-unstructured": {
+    "gliner_pii": 1,
+    "gliner_pii_tuned": 1,
+    "n": 54
+   }
+  },
+  "URL": {
+   "intl-structured": {
+    "gliner_pii": 39,
+    "gliner_pii_tuned": 39,
+    "n": 70,
+    "ss": 65
+   },
+   "intl-unstructured": {
+    "gliner_pii": 31,
+    "gliner_pii_tuned": 31,
+    "n": 68,
+    "ss": 57
+   },
+   "us-structured": {
+    "gliner_pii": 36,
+    "gliner_pii_tuned": 36,
+    "n": 77,
+    "ss": 64
+   },
+   "us-unstructured": {
+    "gliner_pii": 51,
+    "gliner_pii_tuned": 51,
+    "n": 97,
+    "ss": 87
+   }
+  }
+ },
+ "types": [
+  "ADDRESS",
+  "AGE",
+  "CREDENTIAL",
+  "DATE_OF_BIRTH",
+  "EMAIL",
+  "HANDLE",
+  "ID",
+  "LOCATION",
+  "NETWORK",
+  "ORG",
+  "PERSON",
+  "PHONE",
+  "URL"
+ ],
+ "url_finder": {
+  "found_opaque": {
+   "leaked_by_ss": 253,
+   "n": 253
+  },
+  "found_personal": {
+   "leaked_by_ss": 0,
+   "n": 39
+  },
+  "not_found": {
+   "leaked_by_ss": 20,
+   "n": 20
+  },
+  "rule": "the frozen rule (audit I1, I8): a URL gets a surrogate only when it points to a person (a profile on a social or code host, a personal domain or TLD, a shared document, a page under /team/ or /people/, or a site introduced as the user's own); every other URL is opaque, left as it is, and no pattern or NER stage matches inside it"
+ },
+ "worse_than_gliner_pii": [
+  "ADDRESS",
+  "AGE",
+  "HANDLE",
+  "ORG",
+  "URL"
+ ]
+}

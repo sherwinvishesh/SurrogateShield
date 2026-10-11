@@ -3,16 +3,8 @@
  "freeze_file": "bench/realdata/test3/FREEZE.json",
  "freeze_sha256": "31d87c099d6ca5198a42430bfa9a6471154aaa218ee05c7949cb17c512016fff",
  "git": {
-  "commit": "04540fe3ad7ade0335eeb49ea94a0d9d91fa6fa2",
+  "commit": "c98579820508929117786510bbffafca80463089",
   "modified": []
- },
- "go_parts": {
-  "H1'''": true,
-  "H2'''": true,
-  "H3'''": true,
-  "H5'''": true,
-  "H6'''": true,
-  "H8'''": null
  },
  "hypotheses": {
   "H1'''": {
@@ -964,12 +956,197 @@
    }
   },
   "H7'''": {
-   "holds": null,
-   "status": "utility or multiturn not run"
+   "e5b": {
+    "bertscore_not_below_gliner_pii": true,
+    "bertscore_not_below_presidio_faker": true,
+    "bertscore_ss-gliner_pii": {
+     "ci95": [
+      0.0462,
+      0.0981
+     ],
+     "diff": 0.0725
+    },
+    "bertscore_ss-presidio_faker": {
+     "ci95": [
+      0.0535,
+      0.1027
+     ],
+     "diff": 0.077
+    },
+    "holds": true,
+    "judge_beside": {
+     "gliner_pii": {
+      "ci95": [
+       -0.0507,
+       0.1521
+      ],
+      "diff": 0.0507
+     },
+     "presidio_faker": {
+      "ci95": [
+       0.3547,
+       0.5405
+      ],
+      "diff": 0.4493
+     }
+    }
+   },
+   "e7b": {
+    "consistency_beside": "no gold value recurs across turns",
+    "holds": true,
+    "judge_above_gliner_pii": true,
+    "judge_above_presidio_faker": true,
+    "judge_ss-gliner_pii": {
+     "ci95": [
+      0.527,
+      0.7703
+     ],
+     "diff": 0.6486
+    },
+    "judge_ss-presidio_faker": {
+     "ci95": [
+      0.4674,
+      0.6848
+     ],
+     "diff": 0.5761
+    },
+    "restored_above_gliner_pii": true,
+    "restored_above_presidio_faker": true,
+    "restored_gliner_pii": {
+     "k": 0,
+     "n": 54,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.0664
+     ]
+    },
+    "restored_presidio_faker": {
+     "k": 0,
+     "n": 80,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.0458
+     ]
+    },
+    "restored_ss": {
+     "k": 81,
+     "n": 82,
+     "rate": 0.9878,
+     "wilson95": [
+      0.9341,
+      0.9978
+     ]
+    }
+   },
+   "holds": true,
+   "per_dataset": {
+    "oasst1": true,
+    "sharegpt": true,
+    "wildchat": true
+   },
+   "requirement": "E5b read word by word: SS's BERTScore not below Presidio+Faker's or GLiNER-PII's (lower bound above \u22120.02), the judge's score beside; E7b: the judge's grade of SS above both (lower bound above 0) and the originals restored letter for letter in SS's replies more often than in theirs (Wilson 95 % intervals apart), in place of cross-turn consistency, which no sampled conversation can measure (no gold value recurs across turns)"
   },
   "H8'''": {
-   "holds": null,
-   "status": "not run"
+   "beside_every_baseline": {
+    "gliner_pii": {
+     "exact": {
+      "k": 6,
+      "n": 556,
+      "rate": 0.0108,
+      "wilson95": [
+       0.005,
+       0.0233
+      ]
+     },
+     "ss_not_above": true
+    },
+    "llm_guard": {
+     "exact": {
+      "k": 19,
+      "n": 264,
+      "rate": 0.072,
+      "wilson95": [
+       0.0466,
+       0.1097
+      ]
+     },
+     "ss_not_above": true
+    },
+    "presidio_default": {
+     "exact": {
+      "k": 14,
+      "n": 428,
+      "rate": 0.0327,
+      "wilson95": [
+       0.0196,
+       0.0542
+      ]
+     },
+     "ss_not_above": true
+    },
+    "presidio_faker": {
+     "exact": {
+      "k": 8,
+      "n": 428,
+      "rate": 0.0187,
+      "wilson95": [
+       0.0095,
+       0.0364
+      ]
+     },
+     "ss_not_above": true
+    }
+   },
+   "conversation_exact": {
+    "k": 1,
+    "n": 177,
+    "rate": 0.0056,
+    "wilson95": [
+     0.001,
+     0.0313
+    ]
+   },
+   "exact": {
+    "gliner_pii": {
+     "k": 6,
+     "n": 556,
+     "rate": 0.0108,
+     "wilson95": [
+      0.005,
+      0.0233
+     ]
+    },
+    "ss": {
+     "k": 4,
+     "n": 620,
+     "rate": 0.0065,
+     "wilson95": [
+      0.0025,
+      0.0165
+     ]
+    },
+    "ss-gliner_pii": {
+     "ci95": [
+      -0.0148,
+      0.0064
+     ],
+     "diff": -0.0043,
+     "excludes_0": false,
+     "messages": 178,
+     "resamples": 2000
+    }
+   },
+   "holds": true,
+   "partial_set_aside": 98,
+   "per_dataset": {
+    "oasst1": true,
+    "sharegpt": true,
+    "wildchat": true
+   },
+   "requirement": "letter for letter: SS's exact recovery over the values it replaced not above GLiNER-PII's (pooled, point estimates; attacker_exact_test3.json); partial recoveries, parts the surrogates keep by design, counted beside",
+   "ss_lowest_exact_of_all_arms": true
   },
   "H9'''": {
    "a": true,
@@ -1175,8 +1352,33 @@
    }
   }
  },
+ "hypotheses_file": {
+  "file": "bench/realdata/HYPOTHESES_TEST3.md",
+  "sha256": "bd43f11d9b827ea05d2b9c0833d1e460127eb66764b02c3e99ccef90d7202c8a"
+ },
+ "hypothesis_results": {
+  "H1'''": true,
+  "H10'''": true,
+  "H2'''": true,
+  "H3'''": true,
+  "H4'''": true,
+  "H5'''": true,
+  "H6'''": true,
+  "H7'''": true,
+  "H8'''": true,
+  "H9'''": true
+ },
  "inputs": {
-  "attacker": null,
+  "attacker": {
+   "commit": "d777625e9907b53d89de5d11e775b0635dc36093",
+   "file": "bench/results/attacker_realdata_test3.json",
+   "sha256": "e9519ee3d5aee41c05f376b28fcf9af0ed10b670929b0ce3659ebc603433616e"
+  },
+  "attacker_exact": {
+   "commit": "c98579820508929117786510bbffafca80463089",
+   "file": "bench/results/attacker_exact_test3.json",
+   "sha256": "56708d438542a809bfc1d9285576ae6558943ae7350db80ee302e37b29fafac4"
+  },
   "components": {
    "commit": "702001f5229fa041f7db58b8190fc05f661ae93c",
    "file": "bench/results/realdata_components_test3.json",
@@ -1192,25 +1394,23 @@
    "file": "bench/results/external_nemotron_pii.json",
    "sha256": "02374546605a748a78116e26bac3e157da504e74a7a0a0a05defb2962640d7d5"
   },
-  "multiturn": null,
+  "multiturn": {
+   "commit": "3fa246c52302662a116b814d9a8ed0f835bf10ce",
+   "file": "bench/results/multiturn_realdata_test3.json",
+   "sha256": "7bd9c04f6c28439ef5056c76f52d0f9aa78b5b805abaede11d61cc13fdc48c78"
+  },
   "perf": {
    "commit": "b173311badad27998bd1aef4df62764d93118515",
    "file": "bench/results/perf_arms_v4.json",
    "sha256": "9d0bedd15ce897a806e1fbf29390881df3b5cb305ce0370fff31c34ee2d0d4ec"
   },
-  "utility": null
+  "utility": {
+   "commit": "cb2b83353ebdc9d08e0c51eecb0875016bc74674",
+   "file": "bench/results/utility_realdata_test3.json",
+   "sha256": "69a71cefe58b236c741c59da61b6f6aca4df85e08ff3d9938ad603554c709cb2"
+  }
  },
- "missing": [
-  "H8'''"
- ],
- "not_run": [
-  "H7'''",
-  "H8'''"
- ],
- "prereg": {
-  "file": "bench/realdata/HYPOTHESES_TEST3.md",
-  "sha256": "bd43f11d9b827ea05d2b9c0833d1e460127eb66764b02c3e99ccef90d7202c8a"
- },
- "split": "test3",
- "verdict": "incomplete"
+ "not_held": [],
+ "not_run": [],
+ "split": "test3"
 }
