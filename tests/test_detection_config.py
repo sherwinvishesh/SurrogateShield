@@ -24,11 +24,24 @@ ROOT = Path(__file__).resolve().parent.parent
 # the tagger joined balanced, ContextGuard left it, spaCy reads places only;
 # then the tagger became deberta-v3-small (bench/results/tagger_selection.json),
 # and balanced moved to the operating curve's op4 point (benchmark() was
-# 82c6c21dcc740c1a, now bench/realdata/configs/curve/op3.json).
-BALANCED_HASH = "9470f9336d853f67"
-BENCHMARK_HASH = "a1abaa92142b0db9"
+# 82c6c21dcc740c1a, now bench/realdata/configs/curve/op3.json). 2026-10-12:
+# entity_trace gained options.ensemble (spaCy's PERSON stands in, tied, where
+# no stage named anyone); the config scored on test-2 and test-3 is the
+# benchmark without that option (TEST3_BENCHMARK_HASH).
+BALANCED_HASH = "1277eddc6c55a0f7"
+BENCHMARK_HASH = "19baf5415a894c80"
+TEST3_BENCHMARK_HASH = "a1abaa92142b0db9"
 # the benchmark before the tagger (v2), which bench/tagger/configs/ss-v2.json restores
 V2_BENCHMARK_HASH = "8e463c3c6b7562fd"
+
+
+def _without_ensemble(d):
+    """*d* (a config dict) with entity_trace's ``ensemble`` option removed:
+    the stages as they were before 2026-10-12."""
+    for s in d["detectors"]:
+        if s["name"] == "entity_trace":
+            s.get("options", {}).pop("ensemble", None)
+    return d
 
 NO_MODELS = dict(use_entity_trace=False, use_context_guard=False, use_tagger=False)
 TEXT = ("Mail jane.roe@example.org or call +44 20 7946 0958; "
@@ -42,11 +55,14 @@ def test_shipped_hashes_are_pinned():
     assert C.benchmark().config_hash()[:16] == BENCHMARK_HASH
 
 
-def test_benchmark_hash_is_the_one_scored_on_test2():
-    doc = ROOT / "bench" / "results" / "realdata_test2.json"
-    if not doc.exists():
-        pytest.skip("test-2 not scored yet")
-    assert json.loads(doc.read_text())["config_hashes"]["ss"] == C.benchmark().config_hash()
+def test_benchmark_without_the_ensemble_option_is_the_one_scored_on_test2_and_test3():
+    before = C.DetectionConfig.from_dict(_without_ensemble(C.benchmark().to_dict()))
+    assert before.config_hash()[:16] == TEST3_BENCHMARK_HASH
+    for name in ("realdata_test2.json", "realdata_test3.json"):
+        doc = ROOT / "bench" / "results" / name
+        if not doc.exists():
+            pytest.skip(f"{name} not scored yet")
+        assert json.loads(doc.read_text())["config_hashes"]["ss"] == before.config_hash()
 
 
 def test_default_is_config_py_and_benchmark_only_pins_the_address_mode():
@@ -98,8 +114,9 @@ def test_balanced_runs_the_tagger_pinned_by_its_weights():
     from surrogateshield.core.detection import pii_tagger
     cfg = C.preset("balanced")
     st = cfg.stage("pii_tagger")
-    assert st.enabled and st.model == C.PII_TAGGER_MODEL and "/" not in st.model     # a folder name
+    assert st.enabled and st.model == C.PII_TAGGER_MODEL and "/" not in st.model     # a name, not a path
     assert pii_tagger._PIN.fullmatch(st.revision) and st.revision == C.PII_TAGGER_REVISION
+    assert pii_tagger.hub_source(st.model) == (C.PII_TAGGER_HUB, C.PII_TAGGER_HUB_COMMIT)    # downloaded from
     assert C.MODEL_LICENCES[st.model] in ("MIT", "Apache-2.0", "BSD-3-Clause")
     assert dict(st.thresholds) == C.PII_TAGGER_THRESHOLDS and st.options["gate_above"] == C.PII_TAGGER_GATE_ABOVE
     assert not cfg.enabled("context_guard") and cfg.enabled("entity_trace")
@@ -112,12 +129,28 @@ def test_balanced_runs_the_tagger_pinned_by_its_weights():
     assert all(on.allows("context_guard", t) for t in ("PERSON", "ORG", "LOCATION"))
 
 
+def test_flat_tagger_settings_choose_its_model_revision_and_device():
+    base = C.preset("balanced")
+    assert C.from_settings(base, tagger_model=C.PII_TAGGER_MODEL) == base
+    st = C.from_settings(base, tagger_device="mps").stage("pii_tagger")
+    assert (st.model, st.revision, st.options["device"]) == (C.PII_TAGGER_MODEL, C.PII_TAGGER_REVISION, "mps")
+    assert st.options["gate_above"] == C.PII_TAGGER_GATE_ABOVE                      # options merge
+    assert C.from_settings(base, tagger_device=1).stage("pii_tagger").options["device"] == "cuda:1"
+    assert C.from_settings(base, tagger_device=-1).stage("pii_tagger").options["device"] == "cpu"
+    other = C.from_settings(base, tagger_model="org/tagger").stage("pii_tagger")
+    assert other.model == "org/tagger" and other.revision is None                  # the default's pin is dropped
+    assert other.thresholds == base.stage("pii_tagger").thresholds
+    mine = C.from_settings(base, tagger_model="/models/mine", tagger_revision="sha256:" + "a" * 64)
+    assert mine.stage("pii_tagger").revision == "sha256:" + "a" * 64
+    assert not C.from_settings(base, use_tagger=False).enabled("pii_tagger")
+
+
 def test_ss_v2_config_is_the_benchmark_before_the_tagger():
     import dataclasses
     v2 = C.from_partial(json.loads((ROOT / "bench" / "tagger" / "configs" / "ss-v2.json").read_text()),
                         C.benchmark())
     assert not v2.enabled("pii_tagger")
-    d = v2.to_dict()
+    d = _without_ensemble(v2.to_dict())
     d["detectors"] = [C.Stage("pii_tagger", enabled=False).to_dict() if s["name"] == "pii_tagger" else s
                       for s in d["detectors"]]
     assert C.DetectionConfig.from_dict(d).config_hash()[:16] == V2_BENCHMARK_HASH
@@ -161,6 +194,11 @@ def test_hash_ignores_key_order_but_not_values():
     (lambda c: c.with_stage("context_guard", options={"labels": {"FIRSTNAME": "NAME"}}), "unknown type"),
     (lambda c: c.with_stage("pii_tagger", options={"gate_above": 1.5}), "gate_above"),
     (lambda c: c.with_stage("pii_tagger", options={"gate_above": True}), "gate_above"),
+    (lambda c: c.with_stage("entity_trace", options={"ensemble": {"PERSON": 1.5}}), "ensemble"),
+    (lambda c: c.with_stage("entity_trace", options={"ensemble": {"PERSON": True}}), "ensemble"),
+    (lambda c: c.with_stage("entity_trace", options={"ensemble": {"NOPE": 0.5}}), "ensemble"),
+    (lambda c: c.with_stage("entity_trace", options={"ensemble": ["PERSON"]}), "ensemble"),
+    (lambda c: c.with_stage("pii_tagger", options={"ensemble": {"PERSON": 0.5}}), "ensemble"),
 ])
 def test_invalid_configs_are_refused(change, match):
     with pytest.raises((ValueError, TypeError), match=match):

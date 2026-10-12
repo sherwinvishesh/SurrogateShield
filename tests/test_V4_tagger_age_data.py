@@ -63,7 +63,7 @@ def test_no_template_is_a_probe_template_or_shares_four_words_with_one():
 # ── the "age" layout ─────────────────────────────────────────────────────────
 
 def test_the_layout_is_built_deterministically_and_every_form_appears(ages):
-    assert D.VERSION == 2 and D.LAYOUTS["age"] > 0
+    assert D.VERSION == 3 and D.LAYOUTS["age"] > 0
     assert D.data_hash(_built("age", 240, 4243)) == D.data_hash(ages)
     assert {r["meta"]["age_form"] for r in ages} == set(D.AGE_LAYOUTS)
 

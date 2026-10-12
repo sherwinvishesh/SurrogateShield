@@ -15,6 +15,11 @@ or a user. Three kinds of text:
   layouts Phase 3 placed values in (intro, inline); ``OTHER_PERSON`` for a
   private third party (a colleague, a child), still PERSON.
 - Field names for forms, JSON / YAML / ``.env`` blocks and signatures.
+- ``CUE_*`` (data VERSION 3): a name without a cue, as real messages carry
+  one (a sentence's start, a possessive, a lower-case label, an aside, a bare
+  sign-off, a title with or without a space, a pair, a list); and
+  ``FICTION_BODIES`` / ``ESSAY_BODIES``, the same shapes where the name is a
+  character's, an author's or a public figure's (label O).
 
 The values themselves never come from here: ``data.py`` draws them from the
 training half of the identity pools (``identities.identity(pool="train")``).
@@ -409,6 +414,10 @@ OWN: Dict[str, List[str]] = {
         "My password is {v}.", "The API key I'm using is {v}.", "Here's the token: {v}", "password: {v}",
         "I set the secret to {v}.", "The key is {v} but it says invalid.", "Login with {v}.",
         "my pass is {v}", "Use this token: {v}", "The admin password is {v}.", "secret={v}",
+        "Authorization: Bearer {v}", "curl -H 'Authorization: Bearer {v}' https://api.example.com/v1/me",
+        "export OPENAI_API_KEY={v}", "DATABASE_URL=postgres://app:{v}@db.internal:5432/app", "mysql -u root -p{v}",
+        "the login is admin / {v}", "-H \"X-Api-Key: {v}\"", "smtp pass {v}", "SMTP_PASSWORD={v}",
+        "api_key={v}", "headers = {'Authorization': 'Bearer {v}'}", "ssh root@host, pw {v}",
     ],
 }
 
@@ -533,4 +542,177 @@ AGE_NEAR = [
     "Gate {NUM}, platform {k}", "Week {NUM}, day {k}", "Total items, {k}", "{PLACE} {NUM}, {PLACE} {k}",
     "Chapter {NUM}, page {k}", "{LIB} {VERSION}, {k} open issues", "{BRAND} Pro, {k} GB", "Bus {NUM}, stop {k}",
     "Table {NUM}, {k} guests", "Order {NUM}, {k} items", "{FICTION}, chapter {k}",
+]
+
+# ── names without a cue (data VERSION 3) ─────────────────────────────────────
+# Real messages carry a name with no "my name is": at a sentence's start, as
+# a possessive, after a lower-case label, in an aside, alone under a blank
+# line as a sign-off, after a title with or without a space, two on a line, a
+# list. Slots: {v} / {v2} / {v3} full names, {first} / {last} / {first2}
+# their parts, {X} a title and a surname ("Mr.Okafor", "Dr. Okafor"; the span
+# holds the title), {job} a job title (O), {tail} a value line under a bare
+# sign-off (a phone, an email, or a job). Every name is a PERSON.
+CUE_START = [
+    "{v} will be joining the call on Monday, can you draft the invite?",
+    "{v} asked me to send you the figures before the meeting.",
+    "{v} is my manager and wants this by Friday.",
+    "{v} from HR sent me this form and I don't understand question 4.",
+    "{v} here, following up on my question from yesterday.",
+    "{v} needs the letter translated by Thursday.",
+    "{v} recommended you, so here goes.",
+    "{v} left this voicemail and I can't make out the second half.",
+    "{v} and I are splitting the rent; how do we word the agreement?",
+    "{v} is the landlord; he wants the deposit paid to a new account.",
+    "{v} got the job! Help me write a congratulations note.",
+    "{v} has asked for a reference and I need to keep it short.",
+    "{v} will pick up the parcel; what should the note say?",
+    "{v} is the patient; the appointment is at 9.",
+    "{v} wrote this and asked me to check it.",
+    "{v} again. Did you get my last message?",
+    "{v} (that's my wife) wants a second opinion on this.",
+    "{v} is coming to dinner on Saturday and is allergic to nuts.",
+    "{v} says the invoice was paid on the 3rd.",
+    "{v} is the name on the lease, not mine.",
+]
+CUE_POSSESSIVE = [
+    "{v}'s contract ends next month and I need to write the renewal.",
+    "I'm reviewing {v}'s application; is this cover letter any good?",
+    "This is {v}'s laptop, I'm borrowing it for the day.",
+    "Can you check {v}'s essay for grammar?",
+    "{v}'s flight lands at nine; draft a message for the driver.",
+    "We're planning {v}'s leaving do.",
+    "{v}'s invoice is still unpaid.",
+    "I found {v}'s phone on the bus. How do I return it?",
+    "Fix the spelling in {v}'s bio below.",
+    "{v}'s results came back and the doctor wants a follow-up.",
+    "It's {v}'s birthday on Sunday; ideas for a card?",
+    "Please summarise {v}'s notes from the meeting.",
+    "{v}'s account was charged twice.",
+    "I'm {v}'s carer and need to explain the medication schedule.",
+    "{v}'s visa interview is next week.",
+    "Our neighbour {v}'s fence fell onto our drive.",
+]
+CUE_LABEL = [
+    "the tenant in question: {v}", "for the attention of: {v}", "Attn: {v}", "applicant - {v}", "re: {v}",
+    "regarding: {v}", "candidate: {v}", "requested by {v}", "prepared for {v}", "name on the booking: {v}",
+    "person to contact: {v}", "sender: {v}", "cc: {v}", "to: {v}", "Attention: {v}", "FAO {v}", "c/o {v}",
+    "on behalf of {v}", "signed, {v}", "yours, {v}", "account holder: {v}", "the name on the card is {v}",
+    "driver: {v}", "patient name {v}", "submitted by {v}", "written by {v}", "owner {v}", "guest: {v}",
+    "for {v}", "attendee {v}", "with {v}", "ref. {v}", "contact person {v}", "the other party is {v}",
+    "for the file of {v}", "booking under {v}", "collected by {v}", "insured: {v}", "student {v}",
+]
+CUE_ASIDE = [
+    "(this is {v} btw)", "(it's me, {v})", "({v} speaking)", "(from {v})", "({v}, the one who emailed yesterday)",
+    "[{v}]", "(signed {v})", "it's {v} again", "{v} again,", "- {v}", "({v})", "— {v}", "this is {v},",
+    "me = {v}", "{v}, here", "({v}, flat 4)", "{v} speaking.", "(sent by {v})",
+]
+# a name alone under a blank line, with no sign-off phrase
+CUE_BARE = ["{v}", "{v}", "{v}", "{v}", "- {v}", "~ {v}", "–{v}", "{v}\nSent from my phone", "{v}\nSent from my iPhone",
+            "{v}\n{job}", "{v} | {job}", "{v}\n{tail}", "{v}\n{tail}", "{v}, {job}", "{v}.", "{v} x", "{v} :)"]
+JOBS = ["Project Manager", "Office Manager", "Senior Analyst", "Teacher", "Account Executive", "Nurse",
+        "Freelance Designer", "PhD student", "Owner", "Sales", "Customer Success", "Operations", "Head of Finance",
+        "Parent governor", "Landlord", "Volunteer coordinator", "Student", "Driver", "Site manager", "Receptionist"]
+TITLES = ["Mr.", "Mr.", "Mr", "Mrs.", "Mrs", "Ms.", "Ms", "Dr.", "Dr", "Prof.", "Mx.", "Miss", "Herr", "Mme", "Sr."]
+CUE_TITLE = [
+    "Please address it to {X}.", "{X} will sign on my behalf.", "I'm {X}, the landlord.", "{X} is my GP.",
+    "Dear {X},", "my teacher {X} said", "ask for {X} at reception", "this is {X} from the clinic",
+    "{X} and I spoke on Tuesday.", "The letter is for {X}.", "{X} here.", "Regards, {X}", "{X} (me) and",
+    "Can you reply to {X} for me?", "{X} asked for the report.", "We met {X} at the open day.",
+    "cc {X}", "{X} is the one who complained.", "Thanks, {X}", "Say it's from {X}.", "I am {X}.",
+    "{X} - that's me - and", "the account is in the name of {X}", "{X} (my husband) and I",
+]
+# two people on one line: a couple, co-signers, a child and a parent
+CUE_PAIR = ["{v} & {v2}", "{v} and {v2}", "{v} & {X}", "{first} & {X}", "{first} and {X}", "{v}, {v2} and family",
+            "{v} + {v2}", "{v}/{v2}", "{v} and {first2}", "{first} & {first2} {last}", "{first} & {X}",
+            "{v} and {v2} (parents)"]
+CUE_LIST = [
+    "Attendees:\n- {v}\n- {v2}\n- {v3}", "Guests: {v}, {v2} and {v3}", "Team:\n{v}\n{v2}", "Invited: {v}; {v2}",
+    "Participants\n1. {v}\n2. {v2}\n3. {v3}", "Cc: {v}, {v2}", "Players: {v}, {v2}, {v3}",
+    "People in the group chat: {v}, {v2}, {v3}", "witnesses: {v} and {v2}", "The tenants are {v} and {v2}.",
+    "Speakers:\n* {v}\n* {v2}", "Names for the badges: {v}, {v2}, {v3}", "Travellers: {v}, {v2}",
+    "Emergency contacts: {v} / {v2}",
+]
+CUE_MDFIELD = ["**Full name**: {v}", "**Name**: {v}", "*Name* - {v}", "__Name__: {v}", "**Applicant** {v}",
+               "Name — {v}", "NAME {v}", "Name {v}", "**Name:**{v}", "`name`: {v}", "Name:{v}", "name = {v}",
+               "**Patient**: {v}", "**Contact** – {v}", "**Full Name**: {v}", "_Name_: {v}"]
+
+# ── fiction, essays, citations: names that are no one's (label O) ────────────
+# Scripts and stories with a cue-free character's name ({FICTION2} a first
+# and last name, {SPEAKER} an ALL-CAPS speaker label), authors in citations
+# ({SURNAME}, {INITIAL}), institutions named after places, public figures as
+# topics, third-person ages in a plot. The tagger learns the register, not
+# the shape of the name.
+FICTION_BODIES = [
+    "Write the next scene. {FICTION2} walked into the kitchen and found the letter on the table.",
+    "{FICTION2}: Where were you last night?\n{FICTION2}: Out. Why do you care?\n{FICTION2}: Because the car was gone.\n\nContinue this dialogue for another ten lines.",
+    "INT. KITCHEN - NIGHT\n\n{SPEAKER}\n(quietly)\nI never meant for any of this.\n\n{SPEAKER}\nThen why did you sign it?\n\nWrite the next page of this screenplay.",
+    "{SPEAKER}: (laughing) You can't be serious.\n{SPEAKER}: Dead serious. Pack your things.\n\nMake this exchange funnier.",
+    "{FICTION2}'s hands were shaking as she opened the envelope. Continue the story in the same voice.",
+    "In my novel, {FICTION2} is a retired detective and {FICTION2} is her estranged brother. Suggest a plot twist.",
+    "Chapter 3\n\n{FICTION2} had never liked the sea. Describe the storm from his point of view.",
+    "Narrator: The town had one road in and one road out.\n{FICTION}: And we're taking it.\n\nWrite the next exchange.",
+    "Rewrite this with more tension: {FICTION2} stood at the door. {FICTION} did not look up.",
+    "Characters: {FICTION2} (the mayor), {FICTION2} (her rival), {FICTION} (a journalist). Write the opening scene.",
+    "Give me a character sheet for {FICTION2}, a rogue in a D&D campaign.",
+    "Write a fan fiction where {FICTION2} and {FICTION2} get stuck in an elevator.",
+    "{FICTION2} will be joining the crew in episode four. Draft his first lines.",
+    "The protagonist, {FICTION2}, wakes up with no memory. Outline three acts.",
+    "{FICTION2} (V.O.): I should have left when I had the chance.\n\nContinue the voiceover.",
+    "{SPEAKER}\n(to {FICTION})\nYou knew. You knew the whole time.\n\n{SPEAKER}\nI suspected.\n\nAdd stage directions.",
+    "Scene 2. {FICTION2} enters, soaked. {FICTION2} is at the piano.\n{FICTION}: You're late.\n{FICTION}: The bridge was out.\n\nKeep going in this style.",
+    "My D&D party: {FICTION2} the paladin, {FICTION2} the warlock and {FICTION} the bard. Write their tavern intro.",
+    "Write a monologue for {FICTION2}, a lighthouse keeper who has not spoken to anyone in a year.",
+    "{FICTION2} looked at {FICTION2} and said nothing. Make this paragraph sadder.",
+    "Give {FICTION2} a backstory. She's the antagonist of a YA fantasy.",
+    "Story prompt: {FICTION2}, 34, a courier, finds a parcel addressed to herself.",
+    "Can you write the obituary of a fictional character, {FICTION2}, who died at 85 in the last chapter?",
+    "Lyrics draft: {FICTION} waits by the river, {FICTION} never comes. Suggest a second verse.",
+    "{SPEAKER}: Objection!\n{SPEAKER}: Overruled. Continue, counsellor.\n\nWrite the cross-examination.",
+    "Mr. {SURNAME} is the villain of my screenplay. Give him a monologue.",
+    "Mrs. {SURNAME} runs the boarding house in my story. Describe her kitchen.",
+    "Dr. {SURNAME} has just discovered the formula. Write the scene where she tells {FICTION2}.",
+    "Captain {SURNAME} turned the ship around. Continue in the style of a sea novel.",
+    "In the poem, {FICTION2} is both the lover and the sea. Explain the metaphor.",
+    "Write a short story where {FICTION2} meets her younger self.",
+    "The comic's hero, {FICTION2}, loses his powers in issue 12. Pitch issue 13.",
+    "Hamlet: To be or not to be.\n{FICTION2}: Definitely be.\n\nContinue this parody.",
+    "{SPEAKER} (CONT'D)\nAnd another thing. Nobody leaves this room.\n\n{SPEAKER}\n(standing)\nWatch me.\n\nFinish the scene.",
+    "Act II, scene 1. {FICTION2} and {FICTION2} are alone on stage. Write forty lines of blank verse.",
+    "{FICTION2} - the detective\n{FICTION2} - the widow\n{FICTION2} - the butler\n\nWrite a whodunit outline with these three.",
+    "Fan theory: {FICTION2} was dead the whole time. Argue for and against.",
+    "Episode 4 recap: {FICTION2} betrays the crew, {FICTION2} escapes. Write the cold open of episode 5.",
+    "{FICTION2}, {FICTION2} and {FICTION2} are the three sisters in my play. Give each a distinct voice.",
+    "Text message from {FICTION2} to {FICTION2}, in the story: 'don't come home tonight'. Write her reply.",
+]
+ESSAY_BODIES = [
+    "According to {SURNAME} and {SURNAME} ({YEAR}), remote work raises output by {NUM}%. Is that study credible?",
+    "{SURNAME} et al. ({YEAR}) argue that sleep debt is cumulative. Summarise their position.",
+    "Cite this properly: {SURNAME}, {INITIAL}. ({YEAR}). The economics of attention. Journal of Behavioural Science, {NUM}({NUM}).",
+    "I'm writing about the {PUBLIC} era for an essay. How did {PUBLIC}'s trade policy differ from the previous one?",
+    "{PUBLIC}'s approach to leadership is often contrasted with {PUBLIC}'s. Write two paragraphs on that.",
+    "The University of {PLACE} and the {PLACE} Institute of Technology both offer this course. Which is better for robotics?",
+    "A {NUM}-year-old boy in the story finds a map. Is that too young for the plot to work?",
+    "The novel follows a {NUM}-year-old widow in {PLACE}. Write the blurb.",
+    "In {YEAR}, {PUBLIC} wrote that the state should wither away. Who was she responding to?",
+    "References\n\n{SURNAME}, {INITIAL}. & {SURNAME}, {INITIAL}. ({YEAR}). Title of the book. Publisher.\n{SURNAME}, {INITIAL}. ({YEAR}). Title of the article. Journal, {NUM}({NUM}).\n\nFormat these in APA.",
+    "Bank of {PLACE} reported {MONEY} in losses in {YEAR}. Explain what happened.",
+    "({SURNAME}, {YEAR}, p. {NUM}) - is this the right way to cite a page in Harvard style?",
+    "The {SURNAME} report ({YEAR}) recommended three reforms. List them.",
+    "Compare {SURNAME}'s theory of motivation with {SURNAME}'s. Keep it to 300 words.",
+    "Who was {PUBLIC}'s main rival, and did they ever meet?",
+    "Discuss the {SURNAME} v. {SURNAME} ruling of {YEAR} and its impact on privacy law.",
+    "The study followed {NUM} children aged 8 to 12 in {PLACE}. What's wrong with its sampling?",
+    "A 5-year-old and a 7-year-old share a room in the book. Is that realistic for the period?",
+    "{PUBLIC} was {NUM} when she published her first paper. Write a timeline of her career.",
+    "Credits: directed by {FICTION2}, written by {FICTION2}, music by {FICTION2}. Format this as an end-credits roll.",
+    "Edit my literature review: {SURNAME} ({YEAR}) found X, while {SURNAME} and {SURNAME} ({YEAR}) found Y.",
+    "The firm {SURNAME} & {SURNAME} LLP advised on the deal. What does an LLP mean?",
+    "Judge {SURNAME} dismissed the case in {YEAR}. Explain the reasoning in plain English.",
+    "Professor {SURNAME}'s lecture on {ACRO} was confusing. Can you explain the basics?",
+    "The {SURNAME} family in the TV series owns the vineyard. Who inherits it in season 3?",
+    "A 72-year-old man in the case study has a persistent cough. What would a GP consider first?",
+    "My essay is on {PUBLIC}. She was born in {YEAR}; what were the key events of her twenties?",
+    "{SURNAME} ({YEAR}, p. {NUM}) calls this 'the paradox of choice'. Is that a fair reading?",
+    "The {PLACE} School of Economics published a paper by {SURNAME} and {SURNAME}. Summarise it.",
+    "Cast: {FICTION2} as the king, {FICTION2} as the fool. Write the playbill blurb.",
 ]

@@ -58,8 +58,9 @@ def print_help(console: Console) -> None:
     console.print()
     stages = [
         ("PatternScan",    "Regex — SSNs, emails, phones, credit cards, API keys"),
-        ("EntityTrace",    "spaCy NER — names, places, organisations"),
-        ("ContextGuard",   "DistilBERT NER — borderline / ambiguous entities"),
+        ("EntityTrace",    "spaCy NER — places (names too in the classic preset)"),
+        ("ContextGuard",   "DistilBERT NER — off by default; on in strict and classic"),
+        ("PIITagger",      "DeBERTa tagger — names, organisations, places; from Hugging Face"),
         ("MimicGen",       "Generates realistic fake values via Faker"),
         ("ShadowMap",      "AES-256-GCM encrypted surrogate map — stays on device"),
         ("LLM API",        "Receives surrogates for every detected value"),
@@ -89,7 +90,7 @@ def print_help(console: Console) -> None:
     # ── PII types ─────────────────────────────────────────────────────────────
     console.print(Rule("[bold blue]PII Types Detected[/bold blue]", style="blue"))
     console.print()
-    console.print(f"  [white]NER (spaCy / DistilBERT)[/white]   [dim]{NER_TYPES}[/dim]")
+    console.print(f"  [white]NER (PIITagger / spaCy)  [/white]   [dim]{NER_TYPES}[/dim]")
     console.print(f"  [white]Pattern and structural   [/white]   [dim]{PATTERN_TYPES}[/dim]")
     console.print()
 

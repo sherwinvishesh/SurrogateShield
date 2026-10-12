@@ -59,6 +59,9 @@ _ANCHOR_TYPES = frozenset({
     "credit_card", "us_driver_license", "passport", "id_number",
     "us_bank_number", "iban", "handle", "url", "age", "credential", "PERSON",
 })
+# Those that tie a name to a private person on their own (another name, an
+# age or a link do not).
+_STRONG_ANCHOR_TYPES = _ANCHOR_TYPES - {"PERSON", "age", "url"}
 
 # ── junk ─────────────────────────────────────────────────────────────────────
 
@@ -443,12 +446,52 @@ def is_junk(ent: DetectedEntity, text: str = "") -> bool:
         return True                         # "Chase Alert: verify …"
     if ent.type != "PERSON" and _MODEL.search(core):
         return True
+    if ent.type in ("GPE", "LOC", "LOCATION") and text and (
+            core[-1:] in "+#" or _VERSION_AFTER.match(text, ent.end)):
+        return True                         # "C++", "Visual Studio 2.0": a product
+    if ent.type in ("PERSON", "ORG") and text and _citation(ent, text):
+        return True                         # "(Okafor & Ruiz, 2019, p. 4)", "Okafor, A. (2019)."
+    if ent.type in ("PERSON", "ORG") and text and (
+            "™" in core or "®" in core or text[ent.end:ent.end + 1] in ("™", "®")):
+        return True                         # a product mark
+    if (ent.type == "PERSON" and ent.source == "pii_tagger" and len(words) == 1 and ent.score < 0.9 and text
+            and ((core.isupper() and sum(c.isalpha() for c in core) > 3 and not _shouting(text))
+                 or (core.islower() and text != text.lower()))
+            and not _TITLE_BEFORE_NAME.search(text[max(0, ent.start - 30):ent.start])
+            and not _PERSONAL_BEFORE_PERSON.search(text[max(0, ent.start - 40):ent.start])
+            and not _PERSON_BEFORE.search(text[max(0, ent.start - 40):ent.start])
+            and text[ent.end:ent.end + 2] not in ("'s", "’s")):
+        return True                         # "SELECT", "whatever": a lone word the tagger is unsure of
     if _ACRONYM.match(core) and not (text and _shouting(text)):
         letters = sum(c.isalpha() for c in core)
         if ent.type == "PERSON" and letters > 3:
             return False                    # "NOOR" in caps is still a name
         return not (ent.type in ("GPE", "LOC") and core in US_STATE_ABBREVS)
     return False
+
+
+_VERSION_AFTER = re.compile(r"[ \t]+v?\d+\.\d")
+_TITLE_BEFORE_NAME = re.compile(
+    r"(?i)\b(?:mr|mrs|ms|mx|dr|prof|sir|lord|lady|king|queen|prince|princess|saint|st)\.?\s*$")
+
+# An author-year citation names a published work, not a person in the
+# message: in text "(Okafor & Ruiz, 2019, p. 4)", "(see Okafor et al., 2019)",
+# "Okafor and Ruiz (2019) argue"; in a reference list "Okafor, A. (2019)."
+_CITE_IN_TEXT = re.compile(r"(?:\s+et\s+al\.?)?,?\s*(?:1[89]|20)\d\d[a-z]?\s*[,;:)\]]")
+_CITE_OPEN = re.compile(r"(?:[(\[]\s*(?:see\s+(?:also\s+)?|e\.g\.,?\s*|cf\.\s*|in\s+)?|;\s*)$", re.IGNORECASE)
+_CITE_VERB = re.compile(r"\s*\((?:1[89]|20)\d\d[a-z]?\)\s+[a-z]")
+_CITE_REF = re.compile(r"\.?\s*\((?:1[89]|20)\d\d[a-z]?\)\s*[.:]")
+_CITE_AUTHOR = re.compile(r",\s*[A-Z]\.?$|\.$")
+
+
+def _citation(ent: DetectedEntity, text: str) -> bool:
+    after = text[ent.end:ent.end + 24]
+    if _CITE_IN_TEXT.match(after):
+        return bool(_CITE_OPEN.search(text[max(0, ent.start - 16):ent.start])) or "et al" in after[:12]
+    if _CITE_VERB.match(after):
+        return True
+    # a reference-list entry: the span ends on an initial ("Okafor, A")
+    return bool(_CITE_REF.match(after) and _CITE_AUTHOR.search(ent.text.rstrip()))
 
 
 # A span that opens with a question word is a question, not a name or org.
@@ -556,6 +599,10 @@ _PERSON_AFTER = re.compile(
 )
 
 
+# "my name is hunter", "her name's Joy": the word is said to be a name
+_NAME_IS_BEFORE = re.compile(r"(?i)\bname(?:\s+is|\s+was|'s|’s|\s*:)\s*$")
+
+
 _LIST_BEFORE = re.compile(r"(?:[A-Z][\w'\-]*\s*(?:,\s*(?:and\s+|&\s+|or\s+)?|\s+(?:and|&|or)\s+))+$")
 _LIST_AFTER = re.compile(r"(?:\s*(?:,\s*(?:and\s+|&\s+|or\s+)?|\s+(?:and|&|or)\s+)[A-Z][\w'\-]*)+")
 
@@ -589,7 +636,7 @@ def is_word_name(ent: DetectedEntity, text: str) -> bool:
     if trail:
         after = after[trail.end():]
     personal = (_PERSONAL_BEFORE_PERSON.search(before) or _PERSON_BEFORE.search(before)
-                or _PERSON_AFTER.match(after)
+                or _PERSON_AFTER.match(after) or _NAME_IS_BEFORE.search(before)
                 or re.search(rf"(?i)\b{_KIN_WORDS}\s+$", before))
     return not personal
 
@@ -787,6 +834,74 @@ def is_tied(ent: DetectedEntity, text: str, persons: List[DetectedEntity],
     return _in_signature_or_header(text, ent, persons)
 
 
+# ── an impersonal text ───────────────────────────────────────────────────────
+# An essay, an article, a summary of sixty words or more in which no one
+# writes as "I" or to "you": the people it names are its subjects, not the
+# writer or anyone the writer knows. A name in it with no identifier within
+# reach is a reference, not a person to protect. A line of up to three
+# title-cased words ("Mara Okafor", "By Mara Okafor") may be a byline and
+# is left alone. A message in none of the languages read here (or in code,
+# or in another script) is never impersonal.
+
+_FIRST_PERSON = re.compile(r"(?i)(?<![\w'’])(?:i|i'm|i’m|im|me|my|mine|myself|we|we're|we’re|our|us)(?![\w'’])")
+_SECOND_PERSON = re.compile(r"(?i)(?<![\w'’])(?:you|you're|you’re|your|yours|u|ur)(?![\w'’])")
+_PERSONAL_WORDS = {
+    "de": frozenset("ich mich mir mein meine meinen meinem meiner meines wir uns unser unsere unseren unserem "
+                    "unserer du dich dir dein deine deinen deinem deiner ihr euch euer eure sie ihnen ihre".split()),
+    "fr": frozenset("je j me m moi mon ma mes nous notre nos tu te t toi ton ta tes vous votre vos".split()),
+    "es": frozenset("yo me mi mis mí conmigo nosotros nosotras nos nuestro nuestra nuestros nuestras tú te ti tu "
+                    "tus usted ustedes vosotros vosotras os vuestro vuestra vuestros vuestras contigo".split()),
+    "it": frozenset("io me mi mio mia miei mie noi ci nostro nostra nostri nostre tu te ti tuo tua tuoi tue voi vi "
+                    "vostro vostra vostri vostre lei".split()),
+    "pt": frozenset("eu me mim meu minha meus minhas comigo nós nos nosso nossa nossos nossas tu te ti teu tua teus "
+                    "tuas você vocês vós vos vosso vossa vossos vossas contigo".split()),
+    "nl": frozenset("ik me mij mijn m'n wij we ons onze jij je jou jouw u uw jullie".split()),
+}
+_IMPERSONAL_MIN_WORDS = 60
+_IMPERSONAL_MIN_STOPS = 5
+
+
+@lru_cache(maxsize=256)
+def _impersonal(text: str) -> bool:
+    if len(text.split()) < _IMPERSONAL_MIN_WORDS:
+        return False
+    if _FIRST_PERSON.search(text) or _SECOND_PERSON.search(text):
+        return False
+    words = re.findall(r"[^\W\d_]+", text.lower())
+    lang = message_language(text)
+    if lang is None:
+        return sum(w in _stop_words()["en"] for w in words) >= _IMPERSONAL_MIN_STOPS
+    return not any(w in _PERSONAL_WORDS[lang] for w in words)
+
+
+def _heading_line(ent: DetectedEntity, text: str) -> bool:
+    """*ent* stands on a line of at most three title-cased words that ends
+    in no punctuation: a heading or a byline."""
+    s = text.rfind("\n", 0, ent.start) + 1
+    e = text.find("\n", ent.end)
+    line = text[s:len(text) if e < 0 else e].strip()
+    return len(line.split()) <= 3 and line == line.title() and not line.endswith((".", ",", "?"))
+
+
+def _public_surnames(text: str, ents: Iterable[DetectedEntity]) -> frozenset:
+    """The family-name words of the public figures named in full in *text*
+    ("obama" after "Barack Obama"): a lone "Obama" later is the same person."""
+    out = set()
+    for e in ents:
+        if e.type != "PERSON":
+            continue
+        core = _core(e.text)
+        if " " in core and is_public_person(e, text):
+            out.update(w for w in core.lower().split()[1:] if len(w) >= 3 and w not in NOT_NAMES)
+    return frozenset(out)
+
+
+def _public_surname(ent: DetectedEntity, text: str, surnames: frozenset) -> bool:
+    core = _core(ent.text)
+    return (bool(surnames) and " " not in core and core.lower() in surnames
+            and not _PERSONAL_BEFORE_PERSON.search(text[max(0, ent.start - 40):ent.start]))
+
+
 # ── the pass ─────────────────────────────────────────────────────────────────
 
 def gate(
@@ -799,8 +914,8 @@ def gate(
     """Split *entities* into (kept, dropped). *context* are other entities of
     the same message (used for anchoring and person links, never dropped).
     *reasons*, if given, receives ``id(entity) -> rule`` for every drop
-    (``junk``, ``public_person``, ``word_name``, ``public_org``,
-    ``common_noun``, ``untied``); it changes nothing else. *vouched*: those
+    (``junk``, ``public_person``, ``word_name``, ``impersonal``,
+    ``public_org``, ``common_noun``, ``untied``); it changes nothing else. *vouched*: those
     of *entities* a detector is sure are the writer's (a stage's
     ``gate_above``): a place or an organisation among them counts as tied,
     and still faces every other rule."""
@@ -815,23 +930,41 @@ def gate(
             reasons[id(e)] = rule
         return False
 
-    # 1–2: junk and public people first — they never anchor anything
+    # 1–2: junk and public people first — they never anchor anything; nor
+    # does a name in an impersonal text with no identifier near it
+    strong = [e for e in entities + context if e.type in _STRONG_ANCHOR_TYPES]
+    surnames = _public_surnames(text, entities + context)
+    impersonal = _impersonal(text)
     first = []
     for e in entities:
         if e.type not in GATED_TYPES:
             first.append(e)
         elif is_junk(e, text):
             _drop(e, "junk")
-        elif e.type == "PERSON" and is_public_person(e, text):
+        elif e.type == "PERSON" and (is_public_person(e, text) or _public_surname(e, text, surnames)):
             _drop(e, "public_person")
         elif e.type == "PERSON" and is_word_name(e, text):
             _drop(e, "word_name")
+        elif (e.type == "PERSON" and impersonal and not _heading_line(e, text)
+              and not _anchor_near(e, text, strong)):
+            _drop(e, "impersonal")
         else:
             first.append(e)
 
+    # nor is a place or an organisation in an impersonal text anyone's (an
+    # essay's cities, a company profile's address) unless an identifier or a
+    # name that survived stands near it; a legal form or a vouching detector
+    # does not rescue it there
+    if impersonal:
+        near = strong + [e for e in first + context if e.type == "PERSON"]
+        for e in [e for e in first if e.type in _PLACE_ORG]:
+            if not _heading_line(e, text) and not _anchor_near(e, text, near):
+                first.remove(e)
+                _drop(e, "impersonal")
+
     survivors = first + [c for c in context if c not in entities]
     persons = [e for e in survivors if e.type == "PERSON"]
-    anchored = any(e.type in _ANCHOR_TYPES for e in survivors)
+    anchors = [e for e in survivors if e.type in _ANCHOR_TYPES]
 
     # ties propagate: "Tariq Mansoor representing Aramco out of Flagstaff",
     # "a manager at Dangote Group in Burlington"
@@ -859,8 +992,215 @@ def gate(
             _drop(e, "public_org")
         elif is_common_noun(e, text):
             _drop(e, "common_noun")
-        elif anchored or id(e) in sure:
+        elif id(e) in sure or _anchor_near(e, text, anchors):
             kept.append(e)
         else:
             _drop(e, "untied")
     return kept, dropped
+
+
+# An identifier elsewhere in the message is no evidence that a place or an
+# organisation is the writer's: an essay naming cities, signed at the end; a
+# story with a phone number in its first line. An untied one is kept for an
+# identifier within _ANCHOR_REACH characters, or a name within it in the same
+# paragraph (within _NAME_REACH_ACROSS across a blank line: a sign-off).
+_ANCHOR_REACH = 200
+_NAME_REACH_ACROSS = 80
+_PARAGRAPH_BREAK = re.compile(r"\n[ \t]*\r?\n")
+
+
+def _anchor_near(ent: DetectedEntity, text: str, anchors: Iterable[DetectedEntity]) -> bool:
+    for a in anchors:
+        if a is ent:
+            continue
+        if a.start >= ent.end:
+            gap = text[ent.end:a.start]
+        elif a.end <= ent.start:
+            gap = text[a.end:ent.start]
+        else:
+            return True                     # nested or overlapping
+        if len(gap) > _ANCHOR_REACH:
+            continue
+        if a.type != "PERSON" or len(gap) <= _NAME_REACH_ACROSS or not _PARAGRAPH_BREAK.search(gap):
+            return True
+    return False
+
+
+# ── frames that name no one the writer knows ─────────────────────────────────
+# Read after every stage, on whatever found the name: an image prompt, a
+# text with numbered footnotes, a citation, a name the prompt gives the
+# assistant, a lower-case phrase the tagger read as a name, and a place or
+# an organisation in an impersonal stretch of a longer English text. Each
+# needs no personal cue around the span, no tie for a place or an
+# organisation, and no identifier within reach. A place only spaCy read
+# needs no identifier test (below).
+_IMG_MARK = re.compile(r"::\s?-?\d|(?<![\w-])--(?:ar|v|q|niji|stylize|s|chaos|seed|no|style|iw|tile)\b"
+                       r"|/imagine\b", re.I)
+_FOOTNOTE = re.compile(r"\[\d{1,3}\]")
+_CITE_AFTER = re.compile(
+    r"^(?:\s*(?:&|and)\s+[A-Z][\w'’\-]+(?:\s+et\s+al\.?)?,?\s*\(?\d{4}[a-z]?\)?"
+    r"|,?\s*\(\d{4}[a-z]?\)|,\s*\d{4}[a-z]?\)|\s+et\s+al\b)")
+_CITE_BEFORE = re.compile(r"[A-Z][\w'’\-]+,?\s+(?:&|and)\s+$")
+_LABEL_BEFORE = re.compile(
+    r"(?i)(?:name|full\s*name|first\s*name|last\s*name|surname|author|user(?:name)?|contact"
+    r"|patient|client|employee|student|customer|from|to|by|signed|cc|attn|owner|assignee"
+    r"|reporter|requester|recipient|sender|tenant|applicant|candidate)\s*[\"']?\s*[:=]\s*[\"']?\s*$")
+_INTRO_BEFORE = re.compile(r"(?i)\b(?:i'?m|i\s+am|im|my\s+name\s+is|name'?s|name\s+is|this\s+is|it'?s"
+                           r"|call\s+me|named|called)\s+$")
+# "Company: …", "| City: …" before the span on its line; "city: …" opening
+# the next line: a form, whatever the case
+_FIELD_BEFORE = re.compile(r"(?:^|[|;\t])[ \t]*[-*•#>]*[ \t]*[A-Za-z][\w ./()&-]{0,30}:[ \t]*[\"']?[ \t]*$")
+_FIELD_NEXT = re.compile(r"^[ \t]*[-*•]?[ \t]*[A-Za-z][\w ]{0,20}:[ \t]*\S")
+# a résumé's dates: "2019 – present", "2015 to 2018"
+_DATE_RANGE = re.compile(r"(?i)\b(?:19|20)\d\d\s*(?:-|–|—|to|until)\s*(?:(?:19|20)\d\d|present|current|now|today)\b")
+_NON_LATIN = re.compile(r"[^\x00-ɏḀ-ỿ -⁯₠-⃏℀-⅏]")
+_SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+|\n+")
+_FRAME_TYPES = _PLACE_ORG | {"PERSON"}
+# "You are Mira Vale, a travel guide …", "your name will be 'Juno'": a name
+# the prompt gives the assistant, unless the rest of its sentence says "I"
+_PERSONA_YOU = re.compile(r"(?i)\byou\s+are(?:\s+now)?\s*[\"'“‘]?\s*$")
+_PERSONA_ROLE = re.compile(r"(?i)^[\"'”’]?\s*(?:,\s*|\s+)(?:a|an|the)\s")
+_PERSONA_NAME = re.compile(r"(?i)\byour\s+name\s+(?:will|shall)\s+be\s*[\"'“‘]?\s*$")
+# A place only spaCy read (the tagger passed it over), with no cue and no
+# tie, is the writer's only in a sentence that says "I" or "we", on a form
+# line or in a table, or in a sign-off or a contact block: a name or an
+# identifier later on its line or on the next three lines, a name just
+# before it on its line ("Ana Ruiz, Leeds"), or a short line under a contact
+# line. An identifier elsewhere is no evidence: a prompt with an address in
+# its first line asks about Lisbon like any other.
+_SPACY_PLACE = frozenset({"GPE", "LOC", "FAC"})
+_CONTACT_TYPES = _STRONG_ANCHOR_TYPES | {"PERSON", "url"}
+_SIGNOFF_LINES = 3
+
+
+def _persona(text: str, ent: DetectedEntity) -> bool:
+    before = text[max(0, ent.start - 60):ent.start]
+    rest = re.split(r"[.!?\n]", text[ent.end:ent.end + 120], maxsplit=1)[0]
+    if _FIRST_PERSON.search(rest):
+        return False
+    return bool((_PERSONA_YOU.search(before) and _PERSONA_ROLE.match(text[ent.end:ent.end + 12]))
+                or _PERSONA_NAME.search(before))
+
+
+def _writers_place(ent: DetectedEntity, text: str, every: Iterable[DetectedEntity]) -> bool:
+    ls, le = _line_bounds(text, ent.start)
+    if _FIELD_BEFORE.search(text[ls:ent.start]) or "|" in text[ls:le]:
+        return True
+    s0 = max(text.rfind(c, 0, ent.start) for c in ".!?\n") + 1
+    s1 = min([i for i in (text.find(c, ent.end) for c in ".!?\n") if i >= 0] or [len(text)])
+    if _FIRST_PERSON.search(text[s0:s1]):
+        return True
+    stop = le
+    for _ in range(_SIGNOFF_LINES):
+        nxt = text.find("\n", stop + 1)
+        stop = len(text) if nxt < 0 else nxt
+        if nxt < 0:
+            break
+    above = ls
+    for _ in range(2):
+        if above == 0:
+            break
+        above = text.rfind("\n", 0, above - 1) + 1
+    short = len(text[ls:le].split()) <= 8
+    for c in every:
+        if c is ent or c.type not in _CONTACT_TYPES:
+            continue
+        if ent.end <= c.start < stop:
+            return True
+        if c.type == "PERSON" and ls <= c.start and c.end <= ent.start and ent.start - c.end <= 4:
+            return True
+        if short and above <= c.start < ls:
+            return True
+    return False
+
+
+def _personal_cue(text: str, start: int, end: int) -> bool:
+    before, after = text[max(0, start - 40):start], text[end:end + 80]
+    return bool(_PERSON_BEFORE.search(before) or _PERSONAL_BEFORE_PERSON.search(before)
+                or _PERSON_AFTER.match(after) or after.startswith(("'s ", "’s ")))
+
+
+def _sentences(text: str) -> List[Tuple[int, int]]:
+    out, pos = [], 0
+    for m in _SENTENCE_BREAK.finditer(text):
+        out.append((pos, m.start()))
+        pos = m.end()
+    out.append((pos, len(text)))
+    return [(s, e) for s, e in out if e > s]
+
+
+def frame_drops(text: str, entities: Iterable[DetectedEntity],
+                context: Iterable[DetectedEntity] = ()) -> List[Tuple[DetectedEntity, str]]:
+    """``(entity, rule)`` for each of *entities* a frame says is no one the
+    writer knows: ``image_prompt`` (a message with two image-prompt marks or
+    more: "::2" weights, "--ar 16:9", "/imagine"), ``footnoted`` (a text
+    with two "[1]" footnote marks or more), ``citation`` ("Okafor & Lind,
+    2019)", "Brandt et al."), ``persona`` (a name the prompt gives the
+    assistant: "you are X, a …", "your name will be X"), ``untied_place``
+    (a place only spaCy read, in a sentence that says no "I" or "we",
+    outside a form, a table, a sign-off or a contact block, with or without
+    an identifier near), ``lowercase_phrase`` (a lower-case phrase of
+    two words or more the tagger read as a name, in a text that is not all
+    lower case, neither alone on its line nor in a form), ``impersonal_span``
+    (a place or an organisation in an English text of sixty words or more
+    whose sentence and the sentences either side of it say no "I" or "you",
+    outside a form line or a résumé). *context*: the message's other
+    entities (identifiers and names that anchor, never dropped)."""
+    entities = list(entities)
+    if not any(e.type in _FRAME_TYPES for e in entities):
+        return []
+    every = entities + [c for c in context if c not in entities]
+    strong = [e for e in every if e.type in _STRONG_ANCHOR_TYPES]
+    persons = [e for e in every if e.type == "PERSON"]
+    img_msg = len(_IMG_MARK.findall(text)) >= 2
+    footnoted = len(_FOOTNOTE.findall(text)) >= 2
+    long_en = (len(text.split()) >= 60 and message_language(text) is None
+               and not _DATE_RANGE.search(text))
+    sents = _sentences(text) if long_en else []
+    out = []
+    for e in entities:
+        if e.type not in _FRAME_TYPES or _personal_cue(text, e.start, e.end):
+            continue
+        if e.type != "PERSON" and is_tied(e, text, persons, every):
+            continue
+        if e.type in _SPACY_PLACE and e.source == "ner" and not _writers_place(e, text, every):
+            out.append((e, "untied_place"))
+            continue
+        if _anchor_near(e, text, strong):
+            continue
+        ls = text.rfind("\n", 0, e.start) + 1
+        le = text.find("\n", e.end)
+        le = len(text) if le < 0 else le
+        line, before, after = text[ls:le], text[max(0, e.start - 60):e.start], text[e.end:e.end + 60]
+        rule = None
+        if img_msg:
+            rule = "image_prompt"
+        elif footnoted:
+            rule = "footnoted"
+        elif e.type == "PERSON" and (_CITE_AFTER.match(after) or (
+                _CITE_BEFORE.search(before) and re.match(r"^,?\s*\(?\d{4}", after))):
+            rule = "citation"
+        elif e.type == "PERSON" and _persona(text, e):
+            rule = "persona"
+        elif (e.type == "PERSON" and e.source == "pii_tagger" and len(e.text.split()) >= 2
+              and e.text.islower() and text != text.lower()
+              and not _LABEL_BEFORE.search(before) and not _INTRO_BEFORE.search(before)
+              and not _FIELD_BEFORE.search(text[ls:e.start])):
+            alone = (re.sub(r"[\W_]+", " ", line).strip().lower()
+                     == re.sub(r"[\W_]+", " ", e.text).strip().lower())
+            nl = text.find("\n", le + 1)
+            nxt = text[le + 1:nl if nl >= 0 else len(text)] if le < len(text) else ""
+            if not alone and not _FIELD_NEXT.match(nxt):
+                rule = "lowercase_phrase"
+        elif (long_en and e.type in _PLACE_ORG and not _heading_line(e, text) and "|" not in line
+              and not _FIELD_BEFORE.search(text[ls:e.start])):
+            si = next((i for i, (s, t) in enumerate(sents) if s <= e.start < t), None)
+            if si is not None:
+                lo, hi = max(0, si - 1), min(len(sents), si + 2)
+                win = text[sents[lo][0]:sents[hi - 1][1]]
+                if not (_FIRST_PERSON.search(win) or _SECOND_PERSON.search(win)
+                        or _NON_LATIN.search(win)):
+                    rule = "impersonal_span"
+        if rule:
+            out.append((e, rule))
+    return out

@@ -8,7 +8,7 @@ start from. It holds no PII; per-conversation state is in ``session.py``.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 
 @dataclass
@@ -35,6 +35,14 @@ class Config:
     # ── ContextGuard model (v2: configurable, was hard-coded) ────────────
     context_guard_model: str = "dslim/distilbert-NER"
     context_guard_device: int = -1
+    # ── PII tagger model ─────────────────────────────────────────────────
+    # A folder (or a folder name under $SURROGATESHIELD_MODELS) or a Hugging
+    # Face hub id. The default is downloaded once from
+    # huggingface.co/sherwinvishesh/surrogateshield-pii-tagger, pinned by the
+    # SHA-256 of its weights (core/detection/config.py).
+    tagger_model: str = "pii-tagger-dv3s-40k"
+    tagger_revision: Optional[str] = "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173"
+    tagger_device: Union[int, str] = -1
     # ── Detection config (V3 §3.6) ───────────────────────────────────────
     # A DetectionConfig (stages, models, thresholds, type routing, per-type
     # actions, gate). None: the preset or file the environment names
@@ -47,6 +55,7 @@ class Config:
 _FLAT_DETECTION = ("spacy_model", "context_guard_enabled", "entity_trace_high_threshold",
                    "entity_trace_low_threshold", "context_guard_threshold",
                    "entity_trace_fallback_threshold", "context_guard_model", "context_guard_device",
+                   "tagger_model", "tagger_revision", "tagger_device",
                    "address_mode", "address_shift_range", "service")
 
 

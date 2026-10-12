@@ -8,7 +8,7 @@
 nothing untracked under ``python-library/`` or ``bench/``), the library code
 stamp, the default detector (``benchmark()``: its config hash and the config
 itself), every model it loads with its revision and licence (the tagger's
-installed weights checked against their pin), the hypotheses file's hash, the
+weights checked against their pin), the hypotheses file's hash, the
 committed config files the test-2 runs read (E9 and E10), the external
 benchmark's sample descriptions and the frozen baseline choice
 (``gliner_pii_tuned``). It refuses to overwrite an existing
@@ -59,8 +59,8 @@ def external_samples(external: Optional[Path] = None) -> Dict[str, str]:
 
 
 def models(cfg) -> List[dict]:
-    """The models the enabled stages load; a local tagger folder is checked
-    against its pinned weights."""
+    """The models the enabled stages load; the tagger's weights (a local
+    folder, or its Hugging Face download) are checked against their pin."""
     from surrogateshield.core.detection import config as C
     from surrogateshield.core.detection import pii_tagger as T
     out = []
@@ -68,12 +68,11 @@ def models(cfg) -> List[dict]:
         if not (s.enabled and s.model):
             continue
         row = {"stage": s.name, "model": s.model, "revision": s.revision, "licence": C.MODEL_LICENCES.get(s.model)}
-        local = T.local_dir(s.model) if s.name == "pii_tagger" else None
         if s.name == "pii_tagger":
-            if not local:
-                raise SystemExit(f"the tagger {s.model!r} is not installed under {T.models_dir()}")
-            T.check_pin(local, s.revision)
-            row["weights_sha256_checked"] = T.weights_sha256(local)
+            if "/" not in s.model and not (T.local_dir(s.model) or T.hub_source(s.model)):
+                raise SystemExit(f"the tagger {s.model!r} is not installed under {T.models_dir()} "
+                                 "and has no Hugging Face source")
+            row["weights_sha256_checked"] = T.weights_sha256(T.model_path(s.model, s.revision))
         out.append(row)
     return out
 

@@ -7,8 +7,11 @@ surrogateshield/cli.py — the ``surrogateshield`` command.
     surrogateshield bench                        mask latency, p50 / p95
     surrogateshield doctor                       check models, storage, keys;
                                                  print the detection config
+    surrogateshield download                     fetch the models now (the PII
+                                                 tagger from Hugging Face), so
+                                                 later runs need no network
 
-``--preset NAME`` (fast / balanced / strict) or ``--detection-config FILE``
+``--preset NAME`` (fast / balanced / strict / classic) or ``--detection-config FILE``
 (a DetectionConfig as JSON, partial or whole) choose the detection config;
 ``SURROGATESHIELD_PRESET`` / ``SURROGATESHIELD_DETECTION_CONFIG`` do the same
 from the environment. See CONFIGURATION.md.
@@ -242,31 +245,33 @@ def _check_models(det) -> List[tuple]:
 
 
 def _check_tagger(st, licences) -> tuple:
-    """The tagger's weights: a local folder whose weights match the pin, or
-    a hub id in the local cache; not loaded (``--cold-start`` times that)."""
+    """The tagger's weights: a local folder, or a download in the Hugging
+    Face cache, that matches the pin; not loaded (``--cold-start`` times
+    that) and not downloaded (``download`` does that)."""
     from .core.detection import pii_tagger
     from .core.errors import DetectorUnavailable
     name = f"PIITagger model {st.model}"
     if not st.model:
         return (name, False, True, "the pii_tagger stage names no model")
     licence = f"licence {licences.get(st.model, 'not recorded')}"
-    local = pii_tagger.local_dir(st.model)
-    if local:
-        try:
-            pii_tagger.check_pin(local, st.revision)
-        except DetectorUnavailable as exc:
-            return (name, False, True, str(exc))
-        return (name, True, True, f"{local}, " + (f"weights {st.revision[:19]}…, " if st.revision else "") + licence)
-    if "/" not in st.model:
+    local, source = pii_tagger.local_dir(st.model), pii_tagger.hub_source(st.model)
+    if not (local or source or "/" in st.model):
         return (name, False, True, f"no folder of that name under {pii_tagger.models_dir()} "
-                                   f"(${pii_tagger.MODELS_ENV}); python -m bench.tagger.install puts it there, "
-                                   "or --preset classic runs without it")
+                                   f"(${pii_tagger.MODELS_ENV}) and no Hugging Face source; name a folder "
+                                   "or a hub id, or --preset classic runs without it")
+    repo, rev = source or (st.model, None if (st.revision or "").startswith("sha256:") else st.revision)
     try:
-        from huggingface_hub import try_to_load_from_cache
-        ok = isinstance(try_to_load_from_cache(st.model, "config.json", revision=st.revision), str)
-    except ImportError as exc:
+        if not pii_tagger.cached_path(st.model, st.revision):
+            offline = pii_tagger._offline()
+            return (name, False, offline, f"not downloaded yet: the first scan downloads it from "
+                                          f"huggingface.co/{repo}" + (", but HF_HUB_OFFLINE is set" if offline
+                                                                     else "; 'surrogateshield download' does it now"))
+        path = pii_tagger.model_path(st.model, st.revision, download=False)
+    except DetectorUnavailable as exc:
         return (name, False, True, str(exc))
-    return (name, ok, True, licence if ok else "not in the local Hugging Face cache at this revision")
+    where = path if local else f"huggingface.co/{repo}" + (f"@{rev[:12]}" if rev else "") + ", cached"
+    pinned = (st.revision or "").startswith("sha256:")
+    return (name, True, True, f"{where}, " + (f"weights {st.revision[:19]}…, " if pinned else "") + licence)
 
 
 def _cold_start(det) -> List[tuple]:
@@ -378,6 +383,45 @@ def cmd_doctor(args, out) -> int:
     return EXIT_FAIL if failed else EXIT_OK
 
 
+def cmd_download(args, out) -> int:
+    """Fetch the models the detection config loads (``--all``: those of the
+    stages that are off too), so later runs make no network request."""
+    import os
+    from ._state import effective_detection
+    from .core.detection import context_guard, pii_tagger
+    from .core.errors import DetectorUnavailable
+    try:
+        det = effective_detection(_config(args))
+    except (ValueError, TypeError) as exc:
+        out.write(f"[FAIL] detection config — {exc}\n")
+        return EXIT_FAIL
+    rows = []
+    tg, cg, et = det.stage("pii_tagger"), det.stage("context_guard"), det.stage("entity_trace")
+    if tg.model and (tg.enabled or args.all):
+        try:
+            rows.append((f"PIITagger model {tg.model}", True, pii_tagger.model_path(tg.model, tg.revision)))
+        except DetectorUnavailable as exc:
+            rows.append((f"PIITagger model {tg.model}", False, str(exc)))
+    if cg.model and (cg.enabled or args.all):
+        try:
+            path = context_guard._local_model(cg.model, cg.revision)
+            ok = os.path.isdir(path)
+            rows.append((f"ContextGuard model {cg.model}", ok, path if ok else "not downloaded: HF_HUB_OFFLINE is set"))
+        except Exception as exc:     # noqa: BLE001 - reported, the row fails
+            rows.append((f"ContextGuard model {cg.model}", False, str(exc)))
+    if et.model and (et.enabled or args.all):
+        try:
+            import spacy
+            ok = spacy.util.is_package(et.model)
+        except ImportError:
+            ok = False
+        rows.append((f"spaCy model {et.model}", ok, "installed" if ok else
+                     f"not installed; it is a pip package: python -m spacy download {et.model}"))
+    for name, ok, note in rows:
+        out.write(f"[{'ok' if ok else 'FAIL':>4}] {name} — {note}\n")
+    return EXIT_OK if all(ok for _, ok, _ in rows) else EXIT_FAIL
+
+
 # ── entry point ──────────────────────────────────────────────────────────────
 
 def build_parser() -> argparse.ArgumentParser:
@@ -392,7 +436,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="skip the distilbert-NER stage (faster, lower recall)")
         sp.add_argument("--pii-off", nargs="*", metavar="TYPE",
                         help="types to send as is (e.g. phone email)")
-        sp.add_argument("--preset", choices=("fast", "balanced", "strict"),
+        sp.add_argument("--preset", choices=("fast", "balanced", "strict", "classic"),
                         help="detection preset (default: balanced, or $SURROGATESHIELD_PRESET)")
         sp.add_argument("--detection-config", metavar="FILE",
                         help="a DetectionConfig as JSON (partial or whole), see CONFIGURATION.md")
@@ -431,6 +475,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--cold-start", action="store_true", help="also load each model and time it")
     sp.add_argument("--show-config", action="store_true", help="print the whole detection config as JSON")
     sp.set_defaults(func=cmd_doctor)
+
+    sp = sub.add_parser("download", help="fetch the models now (the PII tagger from Hugging Face)")
+    common(sp, text=False)
+    sp.add_argument("--all", action="store_true", help="also the models of stages that are off (ContextGuard)")
+    sp.set_defaults(func=cmd_download)
     return p
 
 

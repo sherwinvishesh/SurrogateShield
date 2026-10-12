@@ -174,7 +174,11 @@ class Session:
                 result = MaskResult(text, tuple(detections), {}, is_svc)
             else:
                 result = self._substitute(text, is_svc, address_mode, detections, masked, det)
-            self._last_surrogates = frozenset(result.replacements.values())
+            # this turn's surrogates: the ones issued now and the earlier ones
+            # the message quoted back (detection left them alone; the answer
+            # restores them like any other, they are not the user's words)
+            self._last_surrogates = frozenset(result.replacements.values()) | frozenset(
+                s for s in quoted_back(self._shadow.get_all()) if s in result.text)
             self._last_sent = result.text
         if c.detailed_view:
             _display.show_mask_results(result)

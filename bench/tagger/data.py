@@ -27,6 +27,18 @@ templates (``bank.AGE_*``) are worded apart from the AGE probe's
 (tests/test_V4_tagger_age_data.py). It also trims spaces off address parts.
 The V4 model trains on ``train-40k-v4.jsonl`` / ``val-2k-v4.jsonl``; the
 VERSION 1 files stay as the record of ``pii-tagger-dv3s-40k``.
+
+VERSION 3 (campaign phase 2, E6) answers what the real messages showed: most
+missed names carry no cue ("Ana Ruiz will be joining the call", "Mr.Okafor",
+a bare sign-off under a blank line), and most spurious names are a
+character's, an author's or a public figure's. The "cuefree" layout
+(``bank.CUE_*``, ``CUE_LAYOUTS``) places names without a cue; the title of a
+titled name belongs to the span. Fiction and essay bodies
+(``bank.FICTION_BODIES`` / ``ESSAY_BODIES``, slots ``{FICTION2}`` a
+character's full name, ``{SPEAKER}`` an ALL-CAPS speaker label,
+``{SURNAME}`` / ``{INITIAL}`` an author) carry the same shapes with label O,
+and the negatives augmentation rises to .35. ``build`` keeps one copy of a
+text. Trains ``train-40k-v5.jsonl`` / ``val-2k-v5.jsonl``.
 """
 
 from __future__ import annotations
@@ -55,17 +67,25 @@ LABELS = ("O",) + tuple(f"{p}-{t}" for t in TAGS for p in ("B", "I"))
 HELD_OUT = (("PHONE", "words"), ("DATE_OF_BIRTH", "month-ordinal"))
 BUILD = ROOT / "bench" / "tagger" / "build"
 PUBLIC_PEOPLE = ROOT / "python-library" / "surrogateshield" / "core" / "detection" / "public_people.txt"
-VERSION = 2                         # 2: ages of named people (V4 §3.1 D: the "age" layout, AGE in signatures)
+VERSION = 3                         # 2: ages of named people (V4 §3.1 D); 3: cue-free names, fiction and essay negatives (E6)
 
-LAYOUTS = {"intro": .24, "inline": .18, "signature": .14, "form": .14, "json": .07, "env": .06, "table": .04,
-           "story": .03, "none": .24, "age": .05}
+LAYOUTS = {"intro": .20, "inline": .16, "signature": .14, "form": .14, "json": .07, "env": .06, "table": .04,
+           "story": .03, "none": .22, "age": .05, "cuefree": .08}
 # the "age" layout's forms (bank.AGE_*): a name and an age closing a sign-off, a labelled line, mid-sentence, ...
 AGE_LAYOUTS = {"signoff": .24, "line": .16, "mid": .14, "bracket": .14, "reddit": .12, "from": .08, "worded": .07,
                "form": .05}
 AGE_NEAR = .4        # share of "age" messages with a same-shape line whose number is not an age
+# the "cuefree" layout's forms (bank.CUE_*): a sentence's start, a possessive, a lower-case label, an aside, a
+# bare sign-off, a title and a surname, two names on a line, "john Smith", a three-word name, a list, a Markdown field
+CUE_LAYOUTS = {"start": .15, "possessive": .12, "label": .13, "aside": .08, "bare": .16, "title": .12, "pair": .06,
+               "lowerfirst": .04, "three": .05, "list": .04, "mdfield": .05}
+# how often a fiction or an essay body carries a message of these tasks (the rest of the bodies as before)
+FICTION_TASKS = {"writing": .30, "roleplay": .35, "other": .08}
+ESSAY_TASKS = {"qa": .18, "writing": .12, "business": .08, "advice": .05}
+NEG_POOLS = (("plain", .50), ("fiction", .30), ("essay", .20))     # a negatives-only body, by pool
 # fraction of messages each augmentation is applied to
 AUG = {"lower": .07, "upper": .02, "nospace": .06, "typos": .15, "markdown": .06, "linebreak": .05,
-       "negatives": .30, "third_party": .20, "greeting": .45, "closing": .35}
+       "negatives": .35, "third_party": .20, "greeting": .45, "closing": .35}
 SHIFT = .30          # identities drawn with shift formats (as Phase 3's format-shift prompts)
 
 
@@ -200,7 +220,8 @@ def fiction_names() -> Tuple[str, ...]:
     return tuple(sorted(seen))
 
 
-SLOT = re.compile(r"\{(PUBLIC|BRAND|PLACE|FICTION|IDENT|LIB|ACRO|NUM|YEAR|DATE|MONEY|VERSION|LANG|MONTH)\}")
+SLOT = re.compile(r"\{(PUBLIC|BRAND|PLACE|FICTION|FICTION2|SPEAKER|SURNAME|INITIAL|IDENT|LIB|ACRO|NUM|YEAR|DATE|MONEY|"
+                  r"VERSION|LANG|MONTH)\}")
 
 
 def negative(rng: random.Random, slot: str) -> str:
@@ -213,6 +234,16 @@ def negative(rng: random.Random, slot: str) -> str:
     if slot == "FICTION":
         name = rng.choice(fiction_names())
         return rng.choice((name, name, name, f"Captain {name}", f"Lady {name}", f"Sir {name}", f"Dr. {name}"))
+    if slot == "FICTION2":                       # a character's full name, a new training-half person
+        c = ids.Ctx(rng, False, "train")
+        return f"{c.first} {c.last}"
+    if slot == "SPEAKER":                        # a screenplay's speaker label
+        c = ids.Ctx(rng, False, "train")
+        return (c.first if rng.random() < .7 else f"{c.first} {c.last}").upper()
+    if slot == "SURNAME":                        # an author, a judge, a firm
+        return ids.Ctx(rng, False, "train").last
+    if slot == "INITIAL":
+        return rng.choice("ABCDEFGHJKLMNPRSTW")
     if slot == "IDENT":
         return rng.choice(bank.IDENTS)
     if slot == "LIB":
@@ -512,6 +543,82 @@ def age_near(rng: random.Random) -> Tuple[List[Piece], List[str]]:
     return pieces, sorted(p.pool_tokens) if "{n}" in t else []
 
 
+# ── names without a cue (VERSION 3) ──────────────────────────────────────────
+
+_CUE_SLOT = re.compile(r"(\{(?:v|v2|v3|X|first|last|first2|job|tail)\})")
+
+
+def titled(rng: random.Random, last: str) -> str:
+    """A title and a surname; no space after a dotted title half the time ("Mr.Okafor")."""
+    title = rng.choice(bank.TITLES)
+    join = rng.choice(("", " ")) if title.endswith(".") else " "
+    return f"{title}{join}{last}"
+
+
+def cuefree_block(rng: random.Random, values: List[dict], country: str) -> Tuple[List[Piece], List[str], str, str]:
+    """One cue-free name placement (``CUE_LAYOUTS``): its pieces, the pool
+    tokens of its names, the form, and where it goes ("head", "tail" or
+    "ending", under a blank line). Names are new training-half people
+    (``identities.Ctx(pool="train")``); a bare sign-off may take a PHONE or
+    EMAIL value out of *values* for the line under the name."""
+    kind = rng.choices(list(CUE_LAYOUTS), weights=list(CUE_LAYOUTS.values()))[0]
+    people = [ids.Ctx(rng, False, "train") for _ in range(3)]
+    full = [f"{p.first} {p.last}" for p in people]
+    if kind == "lowerfirst":
+        full[0] = f"{people[0].first.lower()} {people[0].last}"
+    elif kind == "three":
+        full[0] = f"{people[0].first} {people[1].first} {people[0].last}"
+    table = {"start": (bank.CUE_START, ("head",)), "possessive": (bank.CUE_POSSESSIVE, ("head", "tail")),
+             "label": (bank.CUE_LABEL, ("head", "tail", "ending")), "aside": (bank.CUE_ASIDE, ("head", "tail")),
+             "bare": (bank.CUE_BARE, ("ending",)), "title": (bank.CUE_TITLE, ("head", "tail")),
+             "pair": (bank.CUE_PAIR, ("ending", "ending", "head")), "list": (bank.CUE_LIST, ("head", "tail")),
+             "mdfield": (bank.CUE_MDFIELD, ("head", "tail")),
+             "lowerfirst": (bank.CUE_START + bank.CUE_LABEL + bank.CUE_BARE, ("head", "tail", "ending")),
+             "three": (bank.CUE_START + bank.CUE_LABEL + bank.CUE_BARE + bank.CUE_MDFIELD, ("head", "tail", "ending"))}
+    templates, wheres = table[kind]
+    t = rng.choice(templates)
+    where = rng.choice(wheres)
+    if "{tail}" in t and where != "ending" or (kind in ("lowerfirst", "three") and t in bank.CUE_BARE):
+        where = "ending"
+    x_person = 0 if "{first}" in t or "{v}" not in t else 1       # a couple shares a surname; else another person
+    used = {0}
+    out: List[Piece] = []
+    for part in _CUE_SLOT.split(t):
+        if not part:
+            continue
+        key = part[1:-1] if part.startswith("{") and part.endswith("}") else None
+        if key is None:
+            out.append(Piece(part))
+        elif key in ("v", "v2", "v3"):
+            i = {"v": 0, "v2": 1, "v3": 2}[key]
+            used.add(i)
+            out.append(Piece(full[i], "PERSON", "v"))
+        elif key == "X":
+            used.add(x_person)
+            out.append(Piece(titled(rng, people[x_person].last), "PERSON", "v"))
+        elif key in ("first", "last"):
+            out.append(Piece(getattr(people[0], key), "PERSON", "v"))
+        elif key == "first2":
+            used.add(1)
+            out.append(Piece(people[1].first, "PERSON", "v"))
+        elif key == "job":
+            out.append(Piece(rng.choice(bank.JOBS)))
+        else:                                                      # {tail}: a value line under the name
+            line = [v for v in values if v["type"] in ("PHONE", "EMAIL")]
+            if line and rng.random() < .7:
+                v = rng.choice(line)
+                values.remove(v)
+                out += [Piece(rng.choice(("", "", "Tel: ", "M: ", "E: ")))] + value_pieces(v, country)
+            else:
+                out.append(Piece(rng.choice(bank.JOBS)))
+    if where == "ending" and kind == "pair" and rng.random() < .4:
+        out = [Piece(rng.choice(bank.SIGN_OFFS) + "\n")] + out
+    if kind == "three":
+        used.add(1)
+    toks = sorted({tok for i in used for tok in people[i].pool_tokens})
+    return out, toks, kind, where
+
+
 # ── one message ──────────────────────────────────────────────────────────────
 
 def choose_types(rng: random.Random, task: str) -> List[str]:
@@ -524,9 +631,20 @@ def choose_types(rng: random.Random, task: str) -> List[str]:
     return chosen[:rng.choice((1, 1, 2, 2, 3, 3, 4, 5))] or [rng.choice(TYPES)]
 
 
+def negative_body(rng: random.Random) -> List[Piece]:
+    """A body that is only negatives (``NEG_POOLS``): plain, a story or script, an essay."""
+    pool = rng.choices([p for p, _w in NEG_POOLS], weights=[w for _p, w in NEG_POOLS])[0]
+    table = {"plain": bank.NEGATIVE_ONLY, "fiction": bank.FICTION_BODIES, "essay": bank.ESSAY_BODIES}
+    return fill(rng, rng.choice(table[pool]))
+
+
 def body(rng: random.Random, task: str, negatives_only: bool = False) -> List[Piece]:
     if negatives_only and rng.random() < .5:
-        return fill(rng, rng.choice(bank.NEGATIVE_ONLY))
+        return negative_body(rng)
+    if rng.random() < FICTION_TASKS.get(task, 0):
+        return fill(rng, rng.choice(bank.FICTION_BODIES))
+    if rng.random() < ESSAY_TASKS.get(task, 0):
+        return fill(rng, rng.choice(bank.ESSAY_BODIES))
     return fill(rng, rng.choice(bank.BODIES[task]))
 
 
@@ -537,16 +655,20 @@ def message(rng: random.Random, i: int) -> dict:
     pool_tokens: set = set()
     values: List[dict] = []
     country = "US"
+    more_values: List[List[str]] = []  # (type, fmt) of the values an "age" or "cuefree" block adds
     if layout not in ("none", "age") or (layout == "age" and rng.random() < .5):
         types = choose_types(rng, task)
         if layout == "env":
             types = [t for t in types if t in bank.ENV_KEYS] or ["CREDENTIAL"]
-        ident = draw_identity(rng, types, task)
-        values = list(ident["values"])
-        country = ident["country"]
-        pool_tokens.update(ident["pool_tokens"])
-        rng.shuffle(values)
-    main = body(rng, task, negatives_only=not values)
+        if layout == "cuefree":                   # the block brings the names; the identity the rest
+            types = [t for t in types if t != "PERSON"]
+        if types:
+            ident = draw_identity(rng, types, task)
+            values = list(ident["values"])
+            country = ident["country"]
+            pool_tokens.update(ident["pool_tokens"])
+            rng.shuffle(values)
+    main = body(rng, task, negatives_only=not values and layout != "cuefree")
     head: List[Piece] = []
     tail: List[Piece] = []
     ending: List[Piece] = []          # an "age" sign-off or line that closes the message
@@ -582,10 +704,25 @@ def message(rng: random.Random, i: int) -> dict:
             head += block + [Piece("\n\n")]
         else:
             tail += [Piece(rng.choice(("\n\n", "\n", "\n\n")))] + block
+    elif layout == "cuefree":
+        block, toks, kind, where = cuefree_block(rng, values, country)   # may take a PHONE / EMAIL for its tail
+        pool_tokens.update(toks)
+        extra = {"cue_form": kind}
+        more_values = [["PERSON", f"cue-{kind}"] for p in block if p.tag == "PERSON"]
+        more_values += [[p.tag, "cue-tail"] for p in block if p.tag and p.tag != "PERSON"]
+        for v in values:
+            head += closed_sentence(rng, v, country) + [Piece(" ")]
+        if where == "head":
+            head = block + [Piece(rng.choice(("\n", "\n\n", " ", " ")) if kind in ("list", "mdfield", "label") else sep(rng))] + head
+        elif where == "tail":
+            tail += [Piece(sep(rng))] + block
+        else:
+            ending = [Piece(rng.choice(("\n\n", "\n\n", "\n")))] + block
     elif layout == "age":
         block, toks, ages, kind = age_block(rng)
         pool_tokens.update(toks)
-        extra = {"age_form": kind, "age_values": [["AGE", a["fmt"]] for a in ages]}
+        extra = {"age_form": kind}
+        more_values = [["AGE", a["fmt"]] for a in ages]
         if kind == "signoff":
             values = [v for v in values if v["type"] != "PERSON"]
         for v in values:
@@ -614,7 +751,7 @@ def message(rng: random.Random, i: int) -> dict:
             tail += [Piece(sep(rng))] + piece
         aug.append("third_party")
     if rng.random() < AUG["negatives"]:
-        neg = fill(rng, rng.choice(bank.NEGATIVE_ONLY))
+        neg = negative_body(rng)
         if rng.random() < .5:
             tail += [Piece(sep(rng))] + neg
         else:
@@ -629,7 +766,7 @@ def message(rng: random.Random, i: int) -> dict:
     text, spans = _strip(text, spans)
     return {"id": f"tg-{i:06d}", "text": text, "spans": spans,
             "meta": {"task": task, "layout": layout, "aug": aug, "country": country,
-                     "values": [[v["type"], v["fmt"]] for v in values] + extra.pop("age_values", []),
+                     "values": [[v["type"], v["fmt"]] for v in values] + more_values,
                      "pool_tokens": sorted(pool_tokens), **extra}}
 
 
@@ -707,8 +844,17 @@ def augment(rng: random.Random, pieces: List[Piece], aug: List[str]) -> List[Pie
 # ── corpus ───────────────────────────────────────────────────────────────────
 
 def build(n: int, seed: int) -> List[dict]:
+    """*n* messages from *seed*, no text twice (a duplicate is drawn again)."""
     rng = random.Random(seed)
-    return [message(rng, i) for i in range(n)]
+    out: List[dict] = []
+    seen: set = set()
+    while len(out) < n:
+        m = message(rng, len(out))
+        if m["text"] in seen:
+            continue
+        seen.add(m["text"])
+        out.append(m)
+    return out
 
 
 def data_hash(rows: Iterable[dict]) -> str:

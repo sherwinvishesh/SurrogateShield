@@ -119,13 +119,63 @@ def test_J13_doctor_checks_the_taggers_folder_and_pin(tmp_path, monkeypatch):
     monkeypatch.setenv(pii_tagger.MODELS_ENV, str(tmp_path))
     st = dconfig.Stage("pii_tagger", model="pii-tagger-x", revision="sha256:" + hashlib.sha256(b"w").hexdigest())
     _name, ok, required, note = cli._check_tagger(st, {"pii-tagger-x": "MIT"})
-    assert not ok and required and "bench.tagger.install" in note and "--preset classic" in note
+    assert not ok and required and "no Hugging Face source" in note and "--preset classic" in note
     (tmp_path / "pii-tagger-x").mkdir()
     (tmp_path / "pii-tagger-x" / "model.safetensors").write_bytes(b"w")
     _name, ok, _req, note = cli._check_tagger(st, {"pii-tagger-x": "MIT"})
     assert ok and note.endswith("licence MIT")
     (tmp_path / "pii-tagger-x" / "model.safetensors").write_bytes(b"x")
     assert not cli._check_tagger(st, {})[1]
+
+
+def test_J13_doctor_checks_a_tagger_from_hugging_face(tmp_path, monkeypatch):
+    import hashlib
+    from surrogateshield.core.detection import config as dconfig, pii_tagger
+    snap, cached = tmp_path / "snapshot", [False]
+    snap.mkdir()
+    (snap / "model.safetensors").write_bytes(b"w")
+
+    def fake(repo, revision=None, local_files_only=False):
+        if local_files_only and not cached[0]:
+            raise FileNotFoundError(repo)
+        return str(snap)
+    monkeypatch.setattr("huggingface_hub.snapshot_download", fake)
+    monkeypatch.setenv(pii_tagger.MODELS_ENV, str(tmp_path / "models"))
+    monkeypatch.setitem(dconfig.TAGGER_HUB_SOURCES, "pii-tagger-x", ("org/tagger", "c" * 40))
+    monkeypatch.delenv("HF_HUB_OFFLINE", raising=False)
+    st = dconfig.Stage("pii_tagger", model="pii-tagger-x", revision="sha256:" + hashlib.sha256(b"w").hexdigest())
+    _name, ok, required, note = cli._check_tagger(st, {})
+    assert not ok and not required and "huggingface.co/org/tagger" in note and "surrogateshield download" in note
+    monkeypatch.setenv("HF_HUB_OFFLINE", "1")
+    assert cli._check_tagger(st, {})[1:3] == (False, True)                 # offline: it cannot be fetched
+    cached[0] = True
+    _name, ok, _req, note = cli._check_tagger(st, {"pii-tagger-x": "MIT"})
+    assert ok and note.startswith("huggingface.co/org/tagger@cccccccccccc, cached") and note.endswith("licence MIT")
+    (snap / "model.safetensors").write_bytes(b"x")
+    assert not cli._check_tagger(st, {})[1]                                 # not the pinned weights
+
+
+def test_J13_download_fetches_the_configs_models(monkeypatch):
+    from surrogateshield.core.detection import config as dconfig, pii_tagger
+    fetched = []
+    monkeypatch.setattr(pii_tagger, "model_path", lambda m, r=None, download=True: fetched.append(m) or "/cache/" + m)
+    monkeypatch.setattr(context_guard, "_local_model", lambda m, r=None: fetched.append(m) or "/nowhere/" + m)
+    monkeypatch.setattr("spacy.util.is_package", lambda name: True)
+    rc, out = run("download")
+    assert fetched == [dconfig.PII_TAGGER_MODEL] and "[  ok] PIITagger model" in out and "/cache/" in out
+    assert "[  ok] spaCy model en_core_web_lg" in out and "ContextGuard" not in out and rc == 0
+    fetched.clear()
+    rc, out = run("download", "--all")
+    assert len(fetched) == 2 and "[FAIL] ContextGuard model" in out and rc == 1   # /nowhere is not a folder
+    fetched.clear()
+    rc, out = run("download", "--preset", "classic")                 # ContextGuard on, no tagger
+    assert fetched == ["dslim/distilbert-NER"] and "PIITagger" not in out
+
+    def offline(m, r=None, download=True):
+        raise DetectorUnavailable("not downloaded yet and HF_HUB_OFFLINE is set")
+    monkeypatch.setattr(pii_tagger, "model_path", offline)
+    rc, out = run("download")
+    assert rc == 1 and "[FAIL] PIITagger model" in out and "HF_HUB_OFFLINE" in out
 
 
 def test_J13_doctor_prints_the_detection_config(monkeypatch, tmp_path):

@@ -23,7 +23,7 @@ from functools import lru_cache
 from typing import Callable, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity
-from . import pattern_scan
+from . import pattern_scan, relation_gate
 from .geo_data import MAJOR_CITIES, US_STATES
 from .public_names import NOT_NAMES, PUBLIC_ORGS, PUBLIC_PEOPLE
 
@@ -103,21 +103,39 @@ hall wood stone hill lane rich penny sky star gay page ward bell rich
 """.split())
 
 
+_TITLE_WORD = re.compile(r"(?i)(?:mr|mrs|ms|mx|miss|dr|prof|sir|rev|fr|sr|sra|srta|herr|frau|mme|mlle|dott)\.?")
+# a title right before a name's later part: "Ms Reyes", "Dr. Reyes", "Herr Reyes"
+_TITLE_BEFORE = re.compile(
+    r"(?i)(?<![\w'’])(?:mr|mrs|ms|mx|miss|dr|prof|professor|sir|dame|lord|lady|rev|reverend|fr|father"
+    r"|sr|sra|srta|herr|frau|mme|mlle|madame|monsieur|signora?|sig|dott|capt|captain|sgt|lt|col|gen"
+    r"|coach|judge|senator|sen|rep|gov|governor|mayor|pastor|rabbi|imam|sheikh|officer|detective|det"
+    r"|nurse|uncle|aunt|auntie|grandma|grandpa|nana|mevrouw|meneer|dhr)\.?[ \t]+$")
+
+
 def _components(text: str, ents: Sequence[DetectedEntity]):
     persons = [e for e in ents if e.type == "PERSON"]
     added: List[DetectedEntity] = []
     seen: Set[Tuple[str, bool]] = set()
+    fiction = _fiction_labels(text) if persons else set()     # a character's name: see _speakers
+    common = _common_words() if persons else frozenset()
     for p in persons:
         toks = re.findall(r"[^\W\d_][\w'’\-]*", p.text)
         if len(toks) < 2:
             continue
         lower = p.text.islower()
-        for tok in toks:
+        # the name's parts: not its particles ("van der"), not a title
+        parts = [t for t in toks if len(t) >= 3 and not re.fullmatch(_PARTICLES, t.lower())
+                 and not _TITLE_WORD.fullmatch(t)]
+        for i, tok in enumerate(parts):
             key = tok.lower()
             # "JAVIER MONTOYA" must not hide the "Javier" of a later
             # "Javier Montoya": seen is keyed on the exact token
-            if (len(tok) < 3 or (tok, lower) in seen or key in _AMBIGUOUS_COMPONENTS
-                    or key in NOT_NAMES or re.fullmatch(_PARTICLES, key)):
+            if ((tok, lower) in seen or key in _AMBIGUOUS_COMPONENTS
+                    or key in NOT_NAMES or tok.casefold() in fiction):
+                continue
+            # a lower-case name's parts stand alone only when long enough and
+            # no ordinary word: "hannah" of "hannah reyes", not "will" or "rose"
+            if lower and (len(tok) < 4 or key in common):
                 continue
             seen.add((tok, lower))
             # an all-caps or lower-case name also finds its title-case form
@@ -125,14 +143,19 @@ def _components(text: str, ents: Sequence[DetectedEntity]):
             for m in re.finditer(r"(?<![\w@.\-])" + re.escape(tok) + r"(?![\w@\-]|\.\w)", text, flags):
                 if not lower and not m.group(0)[:1].isupper():
                     continue
+                # the first part names the person again on its own ("Hannah");
+                # a later part does so after a title ("Ms Reyes") or with its
+                # particles ("van der Merwe") — alone it is as often the
+                # family, a place or a word
                 start = m.start()
                 # "van der Merwe" from "Pieter van der Merwe": the particles
                 # the name carries come along
                 own = re.search(r"(?i)((?:\b(?:" + _PARTICLES + r")\s+)+)" + re.escape(tok) + r"\b", p.text)
-                if own:
-                    pm = re.search(r"(?i)(?:\b(?:" + _PARTICLES + r")\s+)+$", text[max(0, start - 30):start])
-                    if pm:
-                        start -= len(pm.group())
+                pm = own and re.search(r"(?i)(?:\b(?:" + _PARTICLES + r")\s+)+$", text[max(0, start - 30):start])
+                if pm:
+                    start -= len(pm.group())
+                elif i > 0 and not _TITLE_BEFORE.search(text[max(0, m.start() - 16):m.start()]):
+                    continue
                 if _overlaps(start, m.end(), list(ents) + added):
                     if start == m.start() or _overlaps(m.start(), m.end(), list(ents) + added):
                         continue
@@ -147,8 +170,30 @@ _ANGLE_EMAIL = re.compile(r"\s*<([^@\s<>]+)@[^\s<>]+>")
 _GREETING = re.compile(
     r"(?m)(?:^|(?<=[.!?]\s))[ \t]*(?:Hi|Hello|Hey|Dear|Hallo|Hej|Hoi|Bonjour|Hola|Ciao|Olá|Oi)"
     r"[ \t]+([A-ZÀ-ÖØ-Þ][^\W\d_][\w'’\-]*)(?=[ \t]*[,!:\n])")
-_NOT_GREETED = frozenset("all team everyone everybody there sir madam folks guys "
-                         "friends again world support hr admin".split())
+_NOT_GREETED = frozenset("""
+all team everyone everybody there sir madam folks guys friends again world support hr admin
+chatgpt gpt chat bard claude gemini copilot bing assistant bot ai siri alexa llama openai
+manager members member company partner partners student students teacher professor advisor
+faculty reader readers parent parents customer customers colleague colleagues committee
+recruiter recruiters employer employers director directors principal doctor officer applicant
+applicants candidate candidates hiring admissions department staff management valued user users
+viewer viewers subscriber subscribers client clients buyer seller host hosts guest guests
+participant participants residents neighbor neighbors neighbour neighbours tenant tenants
+landlord owner owners editor editors reviewer reviewers author authors moderator moderators
+community family mom dad mother father son daughter brother sister grandma grandpa uncle aunt
+cousin friend boss coach mentor mentors sponsor investor investors shareholders voter voters
+citizens graduates alumni employee employees diary future self younger stranger whoever whom
+beloved lovely sweet lord god universe santa prospective potential esteemed respected honorable
+honourable concerned interested fellow sirs madams ladies gentlemen gentleman lady organizer
+organizers organiser organisers panel jury judge judges board council coordinator coordinators
+supervisor supervisors instructor instructors tutor tutors headmaster headmistress chairman
+chairperson chair president secretary treasurer minister senator governor mayor ambassador
+attorney counsel lawyer agent agents representative representatives vendor vendors supplier
+suppliers contractor contractors
+""".split())      # "Dear Hiring Manager", "Hi Team", "Dear Diary": an addressee, not a name
+# "ChatGPT", "GPT4": a compound or a version, not a given name ("McKenna" and
+# "DeAndre" have one lower-case letter before the inner capital)
+_NOT_A_GIVEN_NAME = re.compile(r"[a-z]{3}[A-Z]|\d")
 
 
 def _fold(s: str) -> str:
@@ -173,7 +218,7 @@ def _display_names(text: str, ents: Sequence[DetectedEntity]):
             added.append(_ent(text, e.start, e.end, "PERSON", 0.9))
     for m in _GREETING.finditer(text):
         name = m.group(1)
-        if name.lower() in _NOT_GREETED or name.lower() in NOT_NAMES:
+        if name.lower() in _NOT_GREETED or name.lower() in NOT_NAMES or _NOT_A_GIVEN_NAME.search(name):
             continue
         s, t = m.start(1), m.end(1)
         over = [x for x in ents if x.start < t and s < x.end]
@@ -187,8 +232,9 @@ def _display_names(text: str, ents: Sequence[DetectedEntity]):
 # ── 3c. named institutions ───────────────────────────────────────────────────
 
 _CAP_W = r"[A-ZÀ-ÝČŠŽ][^\W\d_][\w'’\-]*"
-_INST_PART = r"(?:(?:de|del|da|do|dos|das|di|du|des|de\s+la|der|des|von)\s+)?"
-# "Clinique Saint-Vincent", "Escola Básica de Alvalade", "Université Laval"
+_INST_PART = r"(?:(?:de|del|da|do|dos|das|di|du|des|de\s+la|der|des|von)[ \t]+)?"
+# "Clinique Saint-Vincent", "Escola Básica de Alvalade", "Université Laval";
+# a name stays on its line ("School: Riverside College\nPhone: …")
 _INSTITUTION = re.compile(
     r"\b(?:Clinique|H[ôo]pital|Centre\s+[Hh]ospitalier|[ÉE]cole|Escola|Lyc[ée]e|Coll[èe]ge"
     r"|Universit[ée]|Universidad|Universidade|Universit[äa]t|Universit[àa]|Hospital|Cl[íi]nica"
@@ -197,11 +243,11 @@ _INSTITUTION = re.compile(
     r"|Farmacia|Parrocchia|Poliambulatorio|Ambulatorio|Pharmacie|Parroquia|Paróquia|Praxis"
     r"|(?-i:(?<=\b[a-zà-ÿ]{2} )|(?<=\b[a-zà-ÿ]{3} )|(?<=\b[a-zà-ÿ]{4} )|(?<=\bl['’]))"
     r"(?:coll[èe]ge|[ée]cole|lyc[ée]e|scuola|escola|colegio|liceo|clinique|cl[íi]nica|universit[àée]))"
-    r"(?:\s+(?:B[áa]sica|Secund[áa]ria|Primaria|Prim[áa]ria|Primaire|[ÉE]l[ée]mentaire|Elementare"
+    r"(?:[ \t]+(?:B[áa]sica|Secund[áa]ria|Primaria|Prim[áa]ria|Primaire|[ÉE]l[ée]mentaire|Elementare"
     r"|Superior|Municipal|Nacional|Estadual|Statale|Priv[ée]e?|Saint|Sainte|Santa|San|São"
     r"|b[áa]sica|secund[áa]ria|primaria|prim[áa]ria|primaire|[ée]l[ée]mentaire|elementare|media"
     r"|secondaria|statale|privada|privata|priv[ée]e?))?"
-    r"\s+" + _INST_PART + _CAP_W + r"(?:[ \t]+" + _INST_PART + _CAP_W + r"){0,3}"
+    r"[ \t]+" + _INST_PART + _CAP_W + r"(?:[ \t]+" + _INST_PART + _CAP_W + r"){0,3}"
 )
 _INSTITUTION_LOWER = re.compile(
     r"\b(?:universit[ée]|universidad|universidade|universit[äa]t|clinique|escola|[ée]cole|lyc[ée]e)"
@@ -215,9 +261,9 @@ _EN_LOWER_INSTITUTION = re.compile(
     r"|pediatrics|paediatrics|dental))\b"
 )
 _EN_INSTITUTION = re.compile(
-    r"\b((?:St\.?|Saint|Our\s+Lady\s+of)\s+[A-Z][a-z]+(?:['’]s)?"
-    r"|[A-Z][a-z'’]+(?:\s+[A-Z][a-z'’]+){0,2}|[A-Z]{3,}(?:\s+[A-Z]{3,}){0,2})"
-    r"\s+(?:Parish|Church|Cathedral|Chapel|Practice|Surgery|Pharmacy|Pediatrics|Paediatrics"
+    r"\b((?:St\.?|Saint|Our\s+Lady\s+of)[ \t]+[A-Z][a-z]+(?:['’]s)?"
+    r"|[A-Z][a-z'’]+(?:[ \t]+[A-Z][a-z'’]+){0,2}|[A-Z]{3,}(?:[ \t]+[A-Z]{3,}){0,2})"
+    r"[ \t]+(?:Parish|Church|Cathedral|Chapel|Practice|Surgery|Pharmacy|Pediatrics|Paediatrics"
     r"|Dental(?:\s+(?:Clinic|Practice|Care|Group|Surgery))?|Medical\s+(?:Practice|Group|Cent(?:er|re))"
     r"|Family\s+(?:Practice|Medicine)|Health\s+Cent(?:er|re)|Primary\s+School|Elementary(?:\s+School)?"
     r"|High\s+School|Academy|PARISH|CHURCH|PRACTICE|PHARMACY|DENTAL|CLINIC)\b")
@@ -384,6 +430,7 @@ _NOT_SPEAKERS = frozenset("""
 me you user assistant system bot ai q a note subject from to date re cc bcc sent tip
 warning error info debug step example answer question input output customer agent
 support admin moderator mod host guest server client http https ps edit update
+url link src source image img video file path ref
 """.split())
 
 
@@ -481,6 +528,8 @@ def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
         single = len(run) == 1
         if single and (_fold(run[0].group()) not in lone or run[0].group().lower() in _NOT_NICKNAMES):
             continue
+        if _code_occurrence(text, s, e):
+            continue                            # "app.tariq.name;": the identifier
         over = [x for x in list(ents) + added if x.start < e and s < x.end]
         if not over:
             added.append(_ent(text, s, e, "PERSON", 0.9))
@@ -492,21 +541,151 @@ def _local_part_names(text: str, ents: Sequence[DetectedEntity]):
     return added, removed
 
 
+# "top: 0", "opacity: 100%;", "URL: https://…": a style, a value or a label
+# line, not a speaker's turn
+_VALUE_REST = re.compile(r"(?:https?://|www\.)\S+|[-+]?\d[\d.]*(?:px|em|rem|pt|vh|vw|ms|s|%)?")
+
+
+def _code_line(rest: str) -> bool:
+    rest = rest.strip()
+    return (rest.endswith((";", "{", "}", ","))
+            or rest.startswith(("[", "{")) and not _ATTACHMENT.match(rest)
+            or bool(_VALUE_REST.fullmatch(rest)))
+
+
+def _code_occurrence(text: str, s: int, e: int) -> bool:
+    """``text[s:e]`` stands in code rather than in words: on a line that ends
+    like a statement or a tag, a lone identifier line of an object literal,
+    or joined to a member access, a call, an assignment or an index
+    ("user.tariq.name;", "tariq(", "{tariq}", "$tariq")."""
+    ls = text.rfind("\n", 0, s) + 1
+    le = text.find("\n", e)
+    line = text[ls:le if le >= 0 else len(text)].strip()
+    if line.endswith((";", "{", "}", ");", "),", ">")):
+        return True
+    if line.endswith(",") and " " not in line:
+        return True
+    if re.match(r"\.\w|\(|=(?!=)|\[|::", text[e:e + 2]):
+        return True
+    return text[max(0, s - 1):s] in (".", "$", "{")
+
+
+# A screenplay or a story's dialogue, not a pasted chat: speaker labels in
+# capitals ("MARA:"), turns that open on a quotation mark or a stage
+# direction, stage-direction lines, or narrative lines between the turns
+# that mention the characters. Its "speakers" are characters, no one's name.
+_STAGE_LINE = re.compile(r"^[ \t]*[\(\[\*][^\n]{3,}[\)\]\*][ \t]*$", re.MULTILINE)
+_SELF_LABELS = frozenset({"me", "myself", "you"})
+_ATTACHMENT = re.compile(r"(?i)^[\[(<]\s*(?:image|photo|picture|video|sticker|gif|media|attachment|file"
+                         r"|voice|audio|document|link|emoji|contact|location)\b")
+# A character may be labelled by two words ("Lady Okafor:", "Old Man:") or
+# be unknown ("???:"); a chat's speaker (``_SPEAKER``) is one word.
+_FICTION_SPEAKER = re.compile(
+    r"^[ \t]*(?:\[[^\]\n]{4,40}\]|\d{1,2}[:.]\d{2}(?:\s*[AaPp][Mm])?\s*[-–]?)?[ \t]*"
+    r"([^\W\d_][\w.\-]{1,29}(?:[ \t][A-ZÀ-Ý][\w.\-]{1,29})?|\?{2,3}):[ \t]",
+    re.MULTILINE,
+)
+
+
+def _fiction_labels(text: str) -> Set[str]:
+    """The casefolded speaker labels of *text* when it is shaped like fiction
+    (see above); empty for a chat transcript or anything else. A timestamped
+    turn or a self label ("me:", "you:") is a transcript whatever else."""
+    hits = list(_FICTION_SPEAKER.finditer(text))
+    if len(hits) < 2:
+        return set()
+    if any(m.group(0).lstrip()[:1] in "[0123456789" for m in hits):
+        return set()
+    if any(m.group(1).casefold() in _SELF_LABELS for m in hits):
+        return set()
+    hits = [m for m in hits if m.group(1).lower() not in _NOT_SPEAKERS and m.group(1).lower() not in NOT_NAMES]
+    n = len(hits)
+    if n < 2:
+        return set()
+    labels = [m.group(1) for m in hits]
+    folded = {l.casefold() for l in labels}
+    caps = sum(1 for l in labels if len(l) >= 3 and l.isupper())
+    rests = [text[m.end():text.find("\n", m.end()) % (len(text) + 1)].lstrip() for m in hits]
+    quoted = sum(1 for r in rests if r[:1] in "\"“«'‘")
+    direction = sum(1 for r in rests if r[:1] in "([*" and not _ATTACHMENT.match(r))
+    if (caps * 2 >= n or quoted >= 2 and quoted * 10 >= 3 * n
+            or direction >= 2 and direction * 5 >= n or len(_STAGE_LINE.findall(text)) >= 2):
+        return folded
+    # narrative between the turns: lines of eight words or more that are no
+    # turn or direction — two that name a character, or three in all (a
+    # chat's turn wrapping onto a second line is one)
+    prose = named = 0
+    for line in text[hits[0].start():hits[-1].end()].split("\n"):
+        if len(line.split()) >= 8 and not _FICTION_SPEAKER.match(line + " \n") and line.lstrip()[:1] not in "([*":
+            prose += 1
+            named += any(w.casefold() in folded for w in re.findall(r"[^\W\d_][\w'’\-]*", line))
+    return folded if named >= 2 or prose >= 3 else set()
+
+
+# A narrated story: speech in quotes, a speech verb beside it, nobody
+# speaking as themselves outside the quotes.
+_QUOTE_RUN = re.compile(r"[\"“]([^\"”\n]{3,}?)[\"”]")
+_SPEECH_VERB = re.compile(
+    r"(?i)\b(?:said|says|asked|asks|replied|replies|whispered|shouted|muttered|answered"
+    r"|exclaimed|cried|sighed|laughed|murmured|yelled|added|continued|snapped|grinned)\b"
+)
+_NARRATIVE_MIN_QUOTES = 3
+_NARRATIVE_MIN_VERBS = 2
+_NARRATIVE_VERB_REACH = 12
+
+
+def _narrative(text: str) -> bool:
+    """*text* is a narrated story: three or more quoted runs, a speech verb
+    within twelve characters of two of them, and no first person outside
+    the quotes. A chat with quoted turns has no speech verbs; a message
+    quoting a document has no first person inside the quotes but has one
+    outside; a story told in the first person is the writer's own."""
+    runs = list(_QUOTE_RUN.finditer(text))
+    if len(runs) < _NARRATIVE_MIN_QUOTES:
+        return False
+    verbs = 0
+    for m in runs:
+        around = (text[max(0, m.start() - _NARRATIVE_VERB_REACH):m.start()] + " "
+                  + text[m.end():m.end() + _NARRATIVE_VERB_REACH])
+        verbs += bool(_SPEECH_VERB.search(around))
+    if verbs < _NARRATIVE_MIN_VERBS:
+        return False
+    return not relation_gate._FIRST_PERSON.search(_QUOTE_RUN.sub(" ", text))
+
+
 def _speakers(text: str, ents: Sequence[DetectedEntity]):
     hits = list(_SPEAKER.finditer(text))
     if len(hits) < 2:
         return [], []
+    fiction = _fiction_labels(text)
+    if fiction:
+        # a character's name is no one's: what a model found of it goes too
+        return [], [e for e in ents if e.type == "PERSON" and e.source != "pattern"
+                    and e.text.casefold() in fiction]
     # A transcript, not a form: a speaker is timestamped or speaks twice
-    # ("NAME: …\nDOB: …" labels each occur once).
+    # ("NAME: …\nDOB: …" labels each occur once), and at least once in
+    # words: style, value and label lines ("top: 0;", "URL: https://…")
+    # are evidence only for a name that also speaks plainly.
     stamped = {m.group(1) for m in hits if m.group(0).lstrip()[:1] in "[0123456789"}
     counts: dict = {}
+    plain: Set[str] = set()
+    code = 0
     for m in hits:
         counts[m.group(1)] = counts.get(m.group(1), 0) + 1
-    names = {n for n in counts if (n in stamped or counts[n] >= 2)
+        if (_code_line(text[m.end():text.find("\n", m.end()) % (len(text) + 1)])
+                or _code_occurrence(text, m.start(1), m.end(1))):
+            code += 1
+        else:
+            plain.add(m.group(1))
+    if code * 2 >= len(hits):
+        return [], []                       # a stylesheet or an object literal, not a transcript
+    names = {n for n in counts if (n in stamped or counts[n] >= 2) and n in plain
              and n.lower() not in _NOT_SPEAKERS and n.lower() not in NOT_NAMES}
     added: List[DetectedEntity] = []
     for name in names:
         for m in re.finditer(r"(?<![\w@])" + re.escape(name) + r"(?!\w)", text):
+            if _code_occurrence(text, m.start(), m.end()):
+                continue                        # "const tia = …": the identifier, not the speaker
             if not _overlaps(m.start(), m.end(), list(ents) + added):
                 added.append(_ent(text, m.start(), m.end(), "PERSON", 0.9))
     return added, []
@@ -518,7 +697,10 @@ _VERBS = (r"text|texted|call|called|email|emailed|ask|asked|tell|told|ping|pinge
           r"|message|messaged|thank|thanked|thanking|remind|reminded|cc|invite|invited|meet|met"
           r"|loop\s+in|introduce")
 _VERB_NAME = re.compile(
-    r"(?:\b(?:DM|dm|" + _VERBS + r")"
+    # not a story's quotation attribution ('"Where?" asked Mariam') nor its
+    # third-person narration ("she told Mariam"): the writer's own verb
+    r"(?:(?<![\"”’'])(?<![\"”’'][ \t])(?<![Hh]e )(?<![Ss]he )(?<![Tt]hey )(?<![Ii]t )(?<![Ww]ho )"
+    r"\b(?:DM|dm|" + _VERBS + r")"
     # sentence-initial imperative: "Ping Kev about it." — not a title-case
     # heading ("Email Address", "Call Center"), see _NOT_NICKNAMES
     r"|(?:^|(?<=[.!?\n])[ \t]*)(?:" + "|".join(
@@ -782,8 +964,10 @@ _AFFIL_NAME = _CAP_W + r"(?:[ \t]+(?:(?:&|y|e|et|und|en|de|del|di|da|do|du|van)[
 _AFFIL = re.compile(_AFFIL_VERB + r"(" + _AFFIL_NAME + r")")
 
 # "<Name> tiene 25 años", "Noa a 71 ans", "Jonas ist 41 Jahre alt"
+# the name keeps its case under the verbs' re.I: "Someone is a 23 year old"
+# is not "<Someone is> a 23 year old" (French "a")
 _NAME_AGE = re.compile(
-    r"(?<![\w@#./-])(" + _CAP_W + r"(?:[ \t]+" + _CAP_W + r")?)[ \t]+"
+    r"(?<![\w@#./-])((?-i:" + _CAP_W + r"(?:[ \t]+" + _CAP_W + r")?))[ \t]+"
     r"(?:tiene|tenía|tem|tinha|a|avait|ha|aveva|hat|hatte|ist|heeft|is|was|turned|turns)"
     r"[ \t]+\d{1,3}[ \t]+(?:años|anos|ans|anni|jahre|jaar|years?[ \t]+old)\b", re.I)
 _NAME_AGE_STOP = frozenset("""

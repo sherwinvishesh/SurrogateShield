@@ -228,8 +228,24 @@ def _zip_validator(m: "re.Match") -> bool:
     return "-" in m.group()
 
 
+# a hex dump or a numeric table: tokens that mix digits and hex letters on
+# the line ("0a1f 4e20 0161 4960123 3b2c") are data, not a phone number
+_HEX_TOKEN = re.compile(r"(?<!\w)(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{2,8}(?!\w)", re.IGNORECASE)
+
+
+def _hex_dump_line(m: "re.Match") -> bool:
+    s = m.string
+    ls = s.rfind("\n", 0, m.start()) + 1
+    le = s.find("\n", m.end())
+    line = s[ls:m.start()] + " " + s[m.end():len(s) if le < 0 else le]
+    if len(_HEX_TOKEN.findall(line)) >= 2:
+        return True
+    prev = s[s.rfind("\n", 0, max(0, ls - 1)) + 1:ls]
+    return len(_HEX_TOKEN.findall(prev + " " + line)) >= 3
+
+
 def _phone_validator(m: "re.Match") -> bool:
-    return not _NEG_NUM_CONTEXT.search(_before(m, 30))
+    return not _NEG_NUM_CONTEXT.search(_before(m, 30)) and not _hex_dump_line(m)
 
 
 def _card_validator(m: "re.Match") -> bool:
@@ -290,7 +306,12 @@ _NOT_BIRTH_DATE = re.compile(
 # lease ends and log timestamps are recent or future and stay in the text;
 # an old date in personal prose is still masked (fail closed).
 _DOB_MIN_AGE_WITHOUT_CUE = 5
-_THIS_YEAR = datetime.date.today().year
+
+
+def _this_year() -> int:
+    """The current year, read at call time (a seam: tests set it; a process
+    that runs across a new year follows the calendar)."""
+    return datetime.date.today().year
 
 
 def _date_year(s: str) -> Optional[int]:
@@ -301,7 +322,7 @@ def _date_year(s: str) -> Optional[int]:
     m = re.search(r"(?:'|[/\-.])(\d{2})$", s.strip())
     if m:
         yy = int(m.group(1))
-        return 2000 + yy if yy <= _THIS_YEAR % 100 else 1900 + yy
+        return 2000 + yy if yy <= _this_year() % 100 else 1900 + yy
     return None
 
 
@@ -325,7 +346,7 @@ def _dob_validator(m: "re.Match") -> bool:
     if _NOT_BIRTH_DATE.search(_before(m, 40)):
         return False              # "Date of entry: 04/12/2019", "what day of the week was …"
     year = _date_year(s)
-    return year is not None and year <= _THIS_YEAR - _DOB_MIN_AGE_WITHOUT_CUE
+    return year is not None and year <= _this_year() - _DOB_MIN_AGE_WITHOUT_CUE
 
 
 def _ipv4_validator(m: "re.Match") -> bool:
@@ -372,11 +393,70 @@ def _value_group(m: "re.Match"):
     return None
 
 
+# ── whose age ────────────────────────────────────────────────────────────────
+# The sentence a match sits in: a full stop ends it unless it closes an
+# initial or a title ("I'm Ana M. Ruiz, a 34-year-old vet" is one sentence).
+_SENTENCE_END = re.compile(
+    r"(?<!\b[A-Z])(?<!\bMr)(?<!\bMs)(?<!\bDr)(?<!\bMrs)(?<!\bSt)(?<!\bJr)(?<!\bSr)[.!?](?=\s)|[\n\r]")
+# the writer or their own people: "I'm 34 years old", "my daughter is 9
+# years old", "you're 25 years old"
+_AGE_TIE = re.compile(
+    r"(?i)(?<![\w'’])(?:i|i['’]?m|im|i['’]?ve|i['’]?d|i['’]?ll|me|my|mine|myself|we|we['’]?re|our|ours"
+    r"|us|ourselves|you|you['’]?re|your|yours|yourself|u|ur)(?![\w'’])")
+# ... or a profile line: the age opens it, or follows a word or three of its
+# own ("Female, 34 years old, non-smoker") — not a sentence about someone
+_LINE_HEAD = re.compile(
+    r"(?i)[ \t]*(?:[-*•>]+[ \t]*)?(?:(?!(?:a|an|the|this|that|his|her|their|its|is|was|are|were|be"
+    r"|been|being|has|had|have|at|of|for|to|in|on|with|about)\b)[\w/&'’\-]+[,:;|]?[ \t]*){0,3}")
+# "9- to 12-year-old students", "25–30 years old": a range
+_AGE_RANGE_BEFORE = re.compile(r"\d{1,3}[ \t]*(?:[-–][ \t]*)?(?:to|through|thru|[-–])[ \t]*$")
+# "the retirement age is 65", "the legal drinking age": nobody's
+_AGE_GENERIC_BEFORE = re.compile(
+    r"(?i)\b(?:retirement|legal|minimum|maximum|min|max|average|avg|median|mean|drinking|voting"
+    r"|pension|school|starting|typical|normal|recommended|target|cutoff|cut-off|limit|population"
+    r"|sample|gestational|onset|eligibility|consent|marriage|working|reading|mental)[ \t]+$")
+# "first published in 1999, aged 23": a biography's
+_YEAR_BEFORE = re.compile(r"\b(?:1[89]|20)\d\d\b[^\n]{0,12}$")
+
+
+def _sentence_before(text: str, pos: int) -> str:
+    lo = max(0, pos - 200)
+    cut = lo
+    for m in _SENTENCE_END.finditer(text, lo, pos):
+        cut = m.end()
+    return text[cut:pos]
+
+
+def _own_age(m: "re.Match") -> bool:
+    """"N years old" is the writer's age, or their people's, with a first-
+    or second-person word in its sentence or at the head of a profile line;
+    "a 12-year-old student", "her 9-year-old son", "the children are 9 years
+    old" are someone else's, and "9- to 12-year-old" a range."""
+    text, start = m.string, m.start()
+    if _AGE_RANGE_BEFORE.search(text[max(0, start - 24):start]):
+        return False
+    if _AGE_TIE.search(_sentence_before(text, start)):
+        return True
+    ls = text.rfind("\n", 0, start) + 1
+    return _LINE_HEAD.fullmatch(text, ls, start) is not None
+
+
 def _age_validator(m: "re.Match") -> bool:
     digits = re.findall(r"\d+", m.group(_value_group(m)))
     if not digits or not (0 < int(digits[0]) <= 120):
         return False
-    return not _NOT_AGE_AFTER.match(_after(m, 12))
+    if _NOT_AGE_AFTER.match(_after(m, 12)):
+        return False
+    if m.re is _AGE_YEARS_OLD:
+        return _own_age(m)
+    if m.re is _AGE_LABEL:
+        before = _before(m, 24)
+        if _AGE_GENERIC_BEFORE.search(before):
+            return False
+        if (m.group("v")[:3].lower() == "age" and _YEAR_BEFORE.search(before)
+                and not _AGE_TIE.search(_sentence_before(m.string, m.start()))):
+            return False
+    return True
 
 
 # The shape of an age a model reads (V4 §3.3: the tagger's AGE candidates
@@ -430,15 +510,26 @@ _HANDLE_STOP = frozenset({
 }) | _SYSTEM_ACCOUNTS
 
 
+def _in_block_comment(s: str, pos: int) -> bool:
+    """*pos* lies inside a ``/* … */`` block opened at the start of a line
+    (a doc comment), not after a glob such as ``src/*``."""
+    open_ = s.rfind("/*", 0, pos)
+    if open_ < 0 or s.find("*/", open_, pos) >= 0:
+        return False
+    return s[s.rfind("\n", 0, open_) + 1:open_].strip() == ""
+
+
 def _at_handle_validator(m: "re.Match") -> bool:
     v = m.group("v")[1:]
     if v.lower() in _NOT_HANDLE:
         return False
-    if _after(m, 1) == "(":
-        return False                      # "@app.route(" — a decorator call
+    if _after(m, 1) in ("(", "[", "="):
+        return False                      # "@app.route(", '@click="…"' — code
     line_start = m.string.rfind("\n", 0, m.start()) + 1
     line_end = m.string.find("\n", m.end())
     line = m.string[line_start:line_end if line_end >= 0 else None].strip()
+    if line.startswith(("*", "/*")) and _in_block_comment(m.string, m.start()):
+        return False                      # " * @phone …" — a doc-comment tag
     return line != m.group("v")           # "@dataclass" alone on its line
 
 
@@ -455,6 +546,11 @@ def _keyword_handle_validator(m: "re.Match") -> bool:
     v = m.group("v")
     if v.lower() in _HANDLE_STOP:
         return False
+    if m.string[m.start():m.start("v")][-1:].isalpha():
+        return False                      # "snapshot_id": the word runs on past the keyword
+    after = m.string[m.end():m.end() + 2]
+    if after.startswith(("(", "[")) or (after[:1] == "=" and after[1:2] != "="):
+        return False                      # 'username = profile[…]', 'alias gst=…' — code
     # a plain lowercase word is a handle only behind an explicit username label
     distinctive = (any(c.isdigit() or c in "._-" for c in v)
                    or (v[:1].islower() and any(c.isupper() for c in v[1:]))
@@ -616,6 +712,47 @@ _SECRET_PARAM = re.compile(
 )
 
 
+# A database or server URL: "postgresql://app:Kq7…@db-7.prod.corp.net:5432/app".
+# The scheme list keeps a web link out; the URL pattern above never matches
+# after "@", so without this the host and the password go out as typed.
+_CONN_URL = re.compile(
+    r"(?i)\b(?:jdbc:)?(?:postgres(?:ql)?|mysql|mariadb|mongodb(?:\+srv)?|rediss?|amqps?|mssql"
+    r"|sqlserver|cockroachdb|clickhouse|ssh|sftp|ftps?|smb|ldaps?|mqtts?)://"
+    r"(?:(?P<user>[^\s:@/]{0,64})(?::(?P<pw>[^\s@/]{1,128}))?@)?"
+    r"(?P<host>[A-Za-z0-9][A-Za-z0-9-]{0,62}(?:\.[A-Za-z0-9-]{1,63})*)"
+    r"(?::\d{1,5})?(?:[/?;][^\s<>()\[\]{}\"'`|,]*)?"
+)
+# a password in a tutorial or a redacted one: "…", "****", "<password>",
+# "${DB_PASS}", "password", "root"
+_CONN_PW_PLACEHOLDER = re.compile(
+    r"(?i)^(?:[.*x•_-]+|<[^>]*>|\[[^\]]*\]|\{\{.*\}\}|%[^%]*%|\$.*"
+    r"|(?:your|my|db|the)?_?(?:password|passwd|pass|pwd|secret)(?:_?here)?"
+    r"|changeme|postgres|root|admin|test|example|guest|user|mysql|redis)$"
+)
+# a host that names no one's server: the machine itself, a tutorial domain,
+# a placeholder ("your-host", "HOSTNAME")
+_CONN_HOST_PUBLIC = re.compile(
+    r"(?i)^(?:localhost|[\d.]+)$|(?:^|\.)(?:example|test|invalid|localhost)(?:\.[a-z]+)?$"
+    r"|(?:^|[.-])(?:your|my|db-?host|hostname|server-?name)(?:[.-]|$)"
+)
+
+
+def _conn_password(pw: str) -> bool:
+    """A password typed into a connection URL, not a placeholder."""
+    return (len(pw) >= 4 and not _CONN_PW_PLACEHOLDER.match(pw)
+            and not _CODE_REFERENCE.match(pw) and len(set(pw.lower())) > 1)
+
+
+def _conn_host(host: str) -> bool:
+    """A deployment's own host: three labels or more with a digit in a label
+    before the domain ("cluster7.ab1cd.mongodb.net"), or four labels or more
+    ("db.billing.prod.acme.io"). "smtp.gmail.com" or "db" alone names no one."""
+    labels = host.split(".")
+    if len(labels) < 3 or _CONN_HOST_PUBLIC.search(host):
+        return False
+    return len(labels) >= 4 or any(c.isdigit() for c in "".join(labels[:-2]))
+
+
 def _split_url(url: str):
     """(host, path) of a URL with or without a scheme; host is lowercased
     without "www."."""
@@ -652,6 +789,41 @@ def _is_personal_url(url: str, before: str) -> bool:
     return bool(_PERSONAL_URL_CONTEXT.search(before))
 
 
+_EXPR_OPEN = ("{{", "${", "('", '("', "{'", '{"', "['", '["')
+_EXPR_CLOSE = ("}}", "')", '")')
+
+
+def _in_expression(text: str, s: int, e: int) -> bool:
+    """A bare host inside a template or a call argument (``${user.name}``,
+    ``{{ item.info }}``, ``$t('menu.home.link')``, ``title={user.name}``)
+    is a property path, not a domain."""
+    pre = text[max(0, s - 4):s].rstrip()
+    post = text[e:e + 4].lstrip()
+    return (pre.endswith(_EXPR_OPEN) or post.startswith(_EXPR_CLOSE)
+            or (pre.endswith("{") and post.startswith("}")))
+
+
+# A contact strip: fields split by " | " or " · " on one line, as in a
+# signature ("Policy: QXR-381205774 | https://…"). A URL there sits beside
+# an e-mail, a phone number or a labelled value with six digits in a row,
+# and is the writer's own (or their employer's) contact, not a page they
+# cite. A Markdown table row is no strip ("| 2024-01-15 | https://… |").
+_STRIP_SEP = re.compile(r"[ \t][|·•][ \t]")
+_STRIP_FIELD = re.compile(r"[\w.+\-]+@[\w\-]+\.[A-Za-z]|\+\d[\d \-().]{6,}\d"
+                          r"|(?<!\d)\(?\d{3}\)?[ .\-]\d{3}[ .\-]\d{4}(?!\d)"
+                          r"|^\s*[A-Za-z][\w ./&\-]{0,30}:\s*\S*\d{6}")
+
+
+def _on_contact_strip(text: str, s: int, e: int) -> bool:
+    ls = text.rfind("\n", 0, s) + 1
+    le = text.find("\n", e)
+    le = len(text) if le < 0 else le
+    if text[ls:s].lstrip().startswith("|") or not _STRIP_SEP.search(text, ls, le):
+        return False
+    fields = _STRIP_SEP.split(text[ls:s]) + _STRIP_SEP.split(text[e:le])
+    return any(_STRIP_FIELD.search(f) for f in fields if f.strip() and not _URL_RE.search(f))
+
+
 def find_urls(text: str) -> List[tuple]:
     """``(start, end, personal)`` for every URL or bare domain in *text*.
 
@@ -660,13 +832,18 @@ def find_urls(text: str) -> List[tuple]:
     "anakovac.dev" beside "Ana Kovač", a page under /team/ or /people/) are
     PII and get a surrogate. Every other URL is opaque: no pattern or NER
     stage may match inside it, so "api.example.com/v1?key=…" never yields a phone number and
-    "github.com/Microsoft" never yields an ORG (audit I1, I8)."""
+    "github.com/Microsoft" never yields an ORG (audit I1, I8). A scheme-less,
+    path-less host inside a template expression is no URL at all."""
     found = [m for m in _URL_RE.finditer(text) if "." in m.group()]
     names = None
     out = []
     for m in found:
         url = m.group()
-        personal = _is_personal_url(url, text[max(0, m.start() - 60):m.start()])
+        if (not url.lower().startswith(("http", "www.")) and "/" not in url
+                and _in_expression(text, m.start(), m.end())):
+            continue
+        personal = (_is_personal_url(url, text[max(0, m.start() - 60):m.start()])
+                    or _on_contact_strip(text, m.start(), m.end()))
         if not personal:
             label = _host_label(_split_url(url)[0])
             if len(label) >= 6:
@@ -858,22 +1035,37 @@ def _table_age_cells(text: str):
                         yield s, s + len(v)
                 break
 
+# "34 years old", "a 41 year old", "34yo", "34 y/o" — the writer's or their
+# own people's, see _own_age
+_AGE_YEARS_OLD = re.compile(
+    r"\b(?P<v>\d{1,3}[\s\-]*(?:(?:years?|yrs?)[\s\-]*old|yo|y/o|y\.o\.)(?![\w/]))",
+    re.IGNORECASE,
+)
+# "turned 7", "aged 34", "age: 34", "turning 40"; the label may carry
+# Markdown emphasis on either side of the separator ("**Age:** 34",
+# "**Age**: 34") and the colon may sit tight ("Age:34"); not "max-age=60"
+_AGE_LABEL = re.compile(
+    r"(?<![\w\-])(?P<v>(?:age[ds]?|turn(?:ed|s|ing)?)[*_]{0,2}"
+    r"(?:\s*(?:is|was|are|:|=|-|–|—)[*_]{0,2}\s*|\s+)\d{1,3})\b",
+    re.IGNORECASE,
+)
+
 _AGE_PATTERNS = [
-    # "34 years old", "a 41 year old", "34yo", "34 y/o"
-    re.compile(
-        r"\b(?P<v>\d{1,3}[\s\-]*(?:(?:years?|yrs?)[\s\-]*old|yo|y/o|y\.o\.)(?![\w/]))",
-        re.IGNORECASE,
-    ),
-    re.compile(r"(?<!\d)(?P<v>\d{1,3}\s*(?:años|ans|jahre\s+alt|anos|岁|歳|साल))",
+    _AGE_YEARS_OLD,
+    # not "%20Ansel" (URL-encoded) nor "20 ansible": the unit ends the word
+    re.compile(r"(?<![\d%])(?P<v>\d{1,3}\s*(?:años|ans|jahre\s+alt|anos|岁|歲|歳|साल))(?![^\W\d_])",
                re.IGNORECASE),
     # a JSON or YAML key: '"age": "34"', "'edad': 34"
     re.compile(
         r"(?i)[\"'](?:age|age_years|edad|alter|âge|idade|età|leeftijd|ålder)[\"']\s*[:=]\s*[\"']?"
         r"(?P<v>\d{1,3})[\"']?(?=\s*(?:[,}\]\n]|$))"
     ),
-    # "turned 7", "aged 34", "age: 34", "turning 40"
+    _AGE_LABEL,
+    # the same label in another language, behind a separator: "Edad: 34",
+    # "**Idade:** 41", "Âge : 29"
     re.compile(
-        r"\b(?P<v>(?:age[ds]?|turn(?:ed|s|ing)?)(?:\s*(?:is|was|are|:|=|-|–|—))?\s+\d{1,3})\b",
+        r"(?<![\w\-])(?P<v>(?:edad|alter|âge|idade|età|leeftijd|ålder)[*_]{0,2}"
+        r"\s*[:=][*_]{0,2}\s*\d{1,3})(?![\d%])",
         re.IGNORECASE,
     ),
     # "I'm 29", "they're 5", "my grandma Evelyn is 89"
@@ -1458,14 +1650,18 @@ _PATTERNS: list = [
     ),
 
     # ── National-format phone behind a phone word ("teléfono 612 345 678",
-    # "फ़ोन नंबर 98765 43210") — no country code, so it needs the label.
+    # "फ़ोन नंबर 98765 43210", "телефон: 912 34 56 78") — no country code,
+    # so it needs the label.
     (
         "phone_intl",
         re.compile(
             r"(?:phone|\bph\b|\btel\b|tel[ée]fono|telefon|mobile|\bmob\b|cell(?:ular)?"
             r"|celular|m[óo]vil|handy|whats\s?app|call|text|contact|portable|ported"
             r"|\b(?:my|his|her|their|our)\s+number(?!\s+of\b)"
-            r"|फ़ोन|फोन|电话|手机|携帯|전화)"
+            r"|फ़ोन|फोन|电话|電話|手机|手機|携帯|전화"
+            # Russian, Ukrainian, Greek, Arabic, Persian, Hebrew, Thai, Vietnamese, Indonesian
+            r"|телефон|\bтел\b|мобильн|сотов|τηλέφωνο|\bτηλ\b|κινητό|هاتف|جوال|تلفن|موبایل"
+            r"|טלפון|נייד|โทร|đi[ệe]n\s+tho[ạa]i|\bs[đd]t\b|telepon|\btelp\b)"
             r"[^\n\d+@]{0,25}?(?P<v>\+?\d{2,5}(?:[\s.\-]\d{2,5}){1,4}|\d{8,13})"
             r"(?![0-9A-Za-z])",
             re.IGNORECASE,
@@ -1758,6 +1954,23 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
             if _span_free(us + m.start(), us + m.end()):
                 _claim("email", us + m.start(), us + m.end())
         occupied_spans.append((us, ue))
+
+    # ── Connection URLs: the password and a deployment's host get a
+    # surrogate; the rest of the URL is opaque like any other URL, except an
+    # IP host, which the IP pattern reads.
+    for m in _CONN_URL.finditer(text):
+        if not _span_free(m.start(), m.end()):
+            continue
+        pw, host = m.group("pw"), m.group("host")
+        if pw and _conn_password(pw) and not _should_skip(pw):
+            _claim("credential", *m.span("pw"))
+        if _conn_host(host) and not _should_skip(host):
+            _claim("hostname", *m.span("host"))
+        hs, he = m.span("host")
+        occupied_spans.append((m.start(), hs))
+        occupied_spans.append((he, m.end()))
+        if not re.fullmatch(r"[\d.]+|[\da-fA-F:]+", host):
+            occupied_spans.append((hs, he))     # an IP host is left to the IP pattern
 
     # ── Street addresses next: the canonical parser claims the FULL span
     # (street + unit + city + state + ZIP) as one entity; the assembler adds

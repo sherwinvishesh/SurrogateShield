@@ -11,11 +11,18 @@ only, and it is configured like any stage::
           window=256, stride=64, thresholds={"PERSON": 0.6},
           options={"device": "cpu", "batch": 8})
 
-*model* is a hub id (pinned by commit, as the other models), a local folder,
-or the name of a folder under ``$SURROGATESHIELD_MODELS`` (default
-``~/.cache/surrogateshield/models``). A local model's *revision* is
-``sha256:<hex>`` of its weights file, checked at load, so a config names the
-exact weights without naming a machine's paths.
+*model* is a local folder, the name of a folder under
+``$SURROGATESHIELD_MODELS`` (default ``~/.cache/surrogateshield/models``),
+or a Hugging Face hub id. A *revision* ``sha256:<hex>`` pins the weights
+file, checked at load, so a config names the exact weights without naming a
+machine's paths; any other revision of a hub id is a commit or branch.
+
+The default tagger, ``pii-tagger-dv3s-40k``, is such a name. When no folder
+of that name is installed it is downloaded once from the Hugging Face Hub
+(``config.TAGGER_HUB_SOURCES``: ``sherwinvishesh/surrogateshield-pii-tagger``
+at a fixed commit) into the Hugging Face cache, and its weights are checked
+against the pin. A cached download is loaded without a network request;
+with ``HF_HUB_OFFLINE`` set a missing one fails closed.
 
 The model's labels are BIO tags over the protect types, with ADDRESS split
 into STREET / CITY / REGION / POSTCODE. Adjacent address parts are joined
@@ -39,7 +46,6 @@ import threading
 from typing import Dict, List, Optional, Sequence, Tuple
 
 from ..errors import DetectorUnavailable
-from .context_guard import _local_model
 from .plugins import Candidate
 
 logger = logging.getLogger(__name__)
@@ -56,6 +62,8 @@ _OPENERS = {"(": ")", "[": "]", "{": "}", "<": ">"}
 _CLOSERS = {v: k for k, v in _OPENERS.items()}
 _QUOTES = "\"'`“”‘’"
 _WRAP = _QUOTES + "*_"
+# full-width clause punctuation; not brackets ("华为技术（深圳）有限公司" is one name)
+_CJK_BREAK = re.compile(r"[，、。；：！？]")
 # a value that ends in an abbreviation keeps its period ("S.A.R.L.", "Ltd.", "Jr.")
 _ABBREV = re.compile(r"(?i)(?:(?<![^\W\d_])[^\W\d_]\.\s?){2,}$|\b(?:inc|ltd|co|corp|jr|sr|bros|pty|ltda|cía|cia|"
                      r"st|plc|gmbh|llc|lda|ag|nv|bv|sa|sl|srl|spa|kk|com)\.$")
@@ -63,7 +71,7 @@ _ABBREV = re.compile(r"(?i)(?:(?<![^\W\d_])[^\W\d_]\.\s?){2,}$|\b(?:inc|ltd|co|c
 _models: Dict[tuple, object] = {}
 _lock = threading.Lock()
 
-# Weights that are not on a hub sit under one directory, one folder per model,
+# Locally installed weights sit under one directory, one folder per model,
 # and a stage names its folder; the revision pins the weights file by hash.
 MODELS_ENV = "SURROGATESHIELD_MODELS"
 DEFAULT_MODELS_DIR = os.path.join("~", ".cache", "surrogateshield", "models")
@@ -100,8 +108,8 @@ def weights_sha256(path: str) -> str:
 
 
 def check_pin(path: str, revision: Optional[str]) -> None:
-    """A local model's revision, when given, is ``sha256:<hex>`` of its
-    weights file, and the file must match it."""
+    """A pinned model's revision is ``sha256:<hex>`` of its weights file,
+    and the file must match it; no revision checks nothing."""
     if not revision:
         return
     m = _PIN.fullmatch(revision)
@@ -114,19 +122,89 @@ def check_pin(path: str, revision: Optional[str]) -> None:
                                   f"(sha256 {found[:12]}…, pinned {m.group(1)[:12]}…)")
 
 
+def hub_source(model: str) -> Optional[Tuple[str, str]]:
+    """The Hugging Face repo and commit a named tagger is downloaded from
+    when no folder of that name is installed (``config.TAGGER_HUB_SOURCES``)."""
+    from .config import TAGGER_HUB_SOURCES
+    return TAGGER_HUB_SOURCES.get(model)
+
+
+def _hub(model: str, revision: Optional[str]) -> Tuple[str, Optional[str], bool]:
+    """``(repo, hub revision, weights checked)`` for a model that is not a
+    local folder; a name that is neither a source nor a hub id fails."""
+    source = hub_source(model)
+    if source:
+        return source[0], source[1], True
+    if "/" not in model or model.count("/") > 1 or os.path.isabs(model) or model.startswith((".", "~")):
+        raise DetectorUnavailable(
+            f"PIITagger: no model folder {model!r} (looked under {models_dir()}, ${MODELS_ENV}), and it is "
+            "not a Hugging Face model id. Name a folder that holds a trained tagger or a hub id, or use the "
+            "'classic' detection preset (spaCy and ContextGuard read names; no tagger).")
+    pinned = bool(revision and _PIN.fullmatch(revision))
+    return model, None if pinned else revision, pinned
+
+
+def _offline() -> bool:
+    return os.environ.get("HF_HUB_OFFLINE", "").lower() in ("1", "true", "yes", "on")
+
+
+def cached_path(model: str, revision: Optional[str] = None) -> Optional[str]:
+    """*model*'s folder on disk, without a network request: a local folder,
+    or a complete download in the Hugging Face cache; None when it is not
+    there yet. The weights are not checked here (``model_path`` does)."""
+    local = local_dir(model)
+    if local:
+        return local
+    repo, rev, _checked = _hub(model, revision)
+    try:
+        from huggingface_hub import snapshot_download
+        path = snapshot_download(repo, revision=rev, local_files_only=True)
+    except (ImportError, OSError, ValueError):     # not cached: LocalEntryNotFoundError
+        return None
+    return path if any(os.path.isfile(os.path.join(path, w)) for w in WEIGHTS_FILES) else None
+
+
+def model_path(model: str, revision: Optional[str] = None, download: bool = True) -> str:
+    """*model* as a folder on disk, its weights checked against a
+    ``sha256:`` pin: a local folder, else the Hugging Face cache. A model
+    that is not cached yet is downloaded once, unless *download* is False
+    or ``HF_HUB_OFFLINE`` is set (then it fails closed)."""
+    local = local_dir(model)
+    if local:
+        check_pin(local, revision)
+        return local
+    repo, rev, checked = _hub(model, revision)
+    where = repo + (f"@{rev[:12]}" if rev else "")
+    path = cached_path(model, revision)
+    if path is None:
+        if not download or _offline():
+            raise DetectorUnavailable(
+                f"PIITagger: {where} is not downloaded yet" + (" and HF_HUB_OFFLINE is set" if _offline() else "")
+                + ". Run 'surrogateshield download' once with network access, or use the 'classic' "
+                "detection preset.")
+        try:
+            from huggingface_hub import snapshot_download
+        except ImportError as exc:
+            raise DetectorUnavailable(
+                "PIITagger downloads its model with huggingface_hub, which is not installed. Run: pip install "
+                "huggingface_hub, or use the 'classic' detection preset.") from exc
+        logger.warning(f"[PIITagger] downloading {where} from the Hugging Face Hub (once; cached after)")
+        try:
+            path = snapshot_download(repo, revision=rev)
+        except Exception as exc:     # noqa: BLE001 - any failed download fails closed
+            raise DetectorUnavailable(
+                f"PIITagger could not download {where} from the Hugging Face Hub ({exc}). Try again with "
+                "network access, or use the 'classic' detection preset.") from exc
+    if checked:
+        check_pin(path, revision)
+    return path
+
+
 class TaggerModel:
     """A tokenizer and encoder, loaded once per (model, revision, device)."""
 
     def __init__(self, model: str, revision: Optional[str] = None, device: str = "cpu"):
-        local = local_dir(model)                    # found and pinned before torch is imported
-        if local:
-            check_pin(local, revision)
-        elif "/" not in model and os.sep not in model:      # a folder name, not a hub id
-            raise DetectorUnavailable(
-                f"PIITagger: no model folder {model!r} under {models_dir()} (${MODELS_ENV}). Copy the "
-                f"trained tagger there (python -m bench.tagger.install), point ${MODELS_ENV} at the "
-                "folder that holds it, or use the 'classic' detection preset (spaCy and "
-                "ContextGuard read names; no tagger).")
+        path = model_path(model, revision)          # found or downloaded, and pinned, before torch is imported
         try:
             import torch
             from transformers import AutoModelForTokenClassification, AutoTokenizer
@@ -135,18 +213,12 @@ class TaggerModel:
                 "PIITagger needs transformers and torch, which are not installed. Run: pip install "
                 "transformers torch, or use the 'classic' detection preset.") from exc
         try:
-            if local:
-                path, hub_revision = local, None
-            else:
-                path = _local_model(model, revision)
-                hub_revision = revision if path == model else None
-            self.tokenizer = AutoTokenizer.from_pretrained(path, revision=hub_revision)
-            self.model = AutoModelForTokenClassification.from_pretrained(
-                path, revision=hub_revision, dtype=torch.float32)
+            self.tokenizer = AutoTokenizer.from_pretrained(path)
+            self.model = AutoModelForTokenClassification.from_pretrained(path, dtype=torch.float32)
         except (OSError, ValueError) as exc:
             raise DetectorUnavailable(
-                f"PIITagger could not load {model!r} ({exc}). Download it once with network access "
-                "(HF_HUB_OFFLINE unset), or switch the pii_tagger stage off.") from exc
+                f"PIITagger could not load {model!r} from {path} ({exc}). The folder needs the tokenizer "
+                "and config.json next to the weights; or use the 'classic' detection preset.") from exc
         self._setup(torch, device, model)
         self.model.eval()
         logger.info(f"[PIITagger] loaded {model} ({len(self.labels)} labels, device={device})")
@@ -279,6 +351,12 @@ def decode(text: str, tokens: Sequence[Tuple[int, int, Sequence[float]]], labels
     found = []
     for s, e, tag, scores in spans:
         s, e = _trim(text, s, e, tag)
+        if tag in ("PERSON", "ORG"):
+            # a word piece runs over full-width punctuation ("Ilse K. Varga，34"):
+            # no name holds one, so the name ends there
+            cut = _CJK_BREAK.search(text, s, e)
+            if cut and cut.start() > s:
+                s, e = _trim(text, s, cut.start(), tag)
         if e > s:
             found.append((s, e, tag, sum(scores) / len(scores), len(scores)))
     return _join_address(text, found) if merge_address else \
@@ -330,14 +408,27 @@ class PIITagger:
         self.batch = int(opts.get("batch", 8))
         self.merge_address = bool(opts.get("merge_address", True))
 
+    def _probs(self, texts: Sequence[str]) -> List[List[Tuple[int, int, List[float]]]]:
+        """The model's token probabilities; a model that fails on an input
+        fails closed, like the other stages (audit I17): nothing about the
+        text is in the message."""
+        try:
+            return self.model.token_probs(list(texts), self.window, self.stride, self.batch)
+        except DetectorUnavailable:
+            raise
+        except Exception as exc:     # noqa: BLE001 - any runtime failure of the model fails closed
+            raise DetectorUnavailable(
+                f"PIITagger failed on this input ({type(exc).__name__}: {exc}); the text was not masked. "
+                "Retry, or use the 'classic' detection preset.") from exc
+
     def detect(self, text: str, view=None) -> List[Candidate]:
         if not text.strip():
             return []
-        tokens = self.model.token_probs([text], self.window, self.stride, self.batch)[0]
+        tokens = self._probs([text])[0]
         return decode(text, tokens, self.model.labels, self.merge_address)
 
     def detect_many(self, texts: Sequence[str]) -> List[List[Candidate]]:
-        all_tokens = self.model.token_probs(list(texts), self.window, self.stride, self.batch)
+        all_tokens = self._probs(texts)
         return [decode(t, toks, self.model.labels, self.merge_address) for t, toks in zip(texts, all_tokens)]
 
 

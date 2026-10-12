@@ -25,11 +25,17 @@ Public API
 
 from __future__ import annotations
 
+import logging
 import os
 import warnings
 from typing import Dict, List, Union
 
-from ._state import Config, cfg
+# A library logs to its own logger and installs no handler of its own: the
+# application decides where (and whether) its warnings go. Without this,
+# Python's last-resort handler prints them to stderr.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+from ._state import Config, cfg  # noqa: E402
 from .core.detection.config import DetectionConfig, from_partial, preset
 from .core.detection.plugins import Candidate, register_detector
 from .core.errors import DetectorUnavailable
@@ -42,7 +48,7 @@ from .session import (
     use_session,
 )
 
-__version__ = "2.1.0"   # keep equal to pyproject.toml (tests/test_public_api.py)
+__version__ = "1.9.0"   # keep equal to pyproject.toml (tests/test_public_api.py)
 
 __all__ = [
     "config", "scan", "pii_finder", "mask", "mask_result", "unmask", "forget", "flush",
@@ -127,6 +133,18 @@ def _validate_config(**kwargs) -> None:
             f"got {kwargs['context_guard_device']!r}"
         )
 
+    if not isinstance(kwargs["tagger_model"], str) or not kwargs["tagger_model"].strip():
+        raise ValueError(f"tagger_model must be a non-empty string, got {kwargs['tagger_model']!r}")
+    revision = kwargs["tagger_revision"]
+    if revision is not None and (not isinstance(revision, str) or not revision.strip()):
+        raise ValueError(f"tagger_revision must be None or a non-empty string, got {revision!r}")
+    device = kwargs["tagger_device"]
+    if isinstance(device, bool) or not (isinstance(device, int) or (isinstance(device, str) and device.strip())):
+        raise ValueError(
+            f"tagger_device must be an integer (-1 = CPU, >=0 = GPU id) or a torch device "
+            f"string (\"mps\", \"cuda:1\"), got {device!r}"
+        )
+
     for item in kwargs["pii_off"]:
         if not isinstance(item, str) or item.lower() not in _VALID_PII_OFF:
             raise ValueError(
@@ -166,6 +184,9 @@ def config(
     verify_addresses=_UNSET,
     context_guard_model=_UNSET,
     context_guard_device=_UNSET,
+    tagger_model=_UNSET,
+    tagger_revision=_UNSET,
+    tagger_device=_UNSET,
     detection=_UNSET,
 ) -> Config:
     """
@@ -215,8 +236,18 @@ def config(
                                         the output (audit F3).
         context_guard_model:            HuggingFace model for ContextGuard.
         context_guard_device:           Device for ContextGuard (-1 = CPU, >= 0 = GPU id).
+        tagger_model:                   The PII tagger: a folder, a folder name under
+                                        $SURROGATESHIELD_MODELS, or a Hugging Face hub id.
+                                        The default, "pii-tagger-dv3s-40k", is downloaded
+                                        once from huggingface.co/sherwinvishesh/
+                                        surrogateshield-pii-tagger.
+        tagger_revision:                "sha256:<hex>" of the weights file (checked at
+                                        load), or a hub commit / branch; None pins
+                                        nothing. A new tagger_model drops the default's.
+        tagger_device:                  Device for the tagger: -1 = CPU, >= 0 = GPU id,
+                                        or a torch device string ("mps", "cuda:1").
         detection:                      The detection config: a preset name ("fast",
-                                        "balanced", "strict"), a DetectionConfig, a
+                                        "balanced", "strict", "classic"), a DetectionConfig, a
                                         dict of one (DetectionConfig.to_dict()), or
                                         None for the environment's / "balanced".
                                         The flat settings above that differ from

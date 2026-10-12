@@ -169,15 +169,22 @@ CONTEXT_GUARD_REVISION = "dfa2838a127384aabb82ed7719e16dab84c42a2a"
 # The project's tagger (bench/tagger/, V3 §3.3), fine-tuned from
 # microsoft/deberta-v3-small (MIT) on generated text only, chosen over
 # deberta-v3-xsmall and ModernBERT-base by the rule in bench/tagger/select.py
-# (bench/results/tagger_selection.json). Its weights are
-# not on a hub: the stage names a folder under $SURROGATESHIELD_MODELS
-# (default ~/.cache/surrogateshield/models; ``python -m bench.tagger.install``
-# puts it there) and pins the weights file by its SHA-256.
+# (bench/results/tagger_selection.json). The stage names it and pins its
+# weights file by SHA-256, so the config (and its hash) is the same wherever
+# the weights come from: a folder of that name under $SURROGATESHIELD_MODELS
+# (default ~/.cache/surrogateshield/models) when there is one, else the
+# Hugging Face Hub, downloaded once at the commit that holds these weights.
 PII_TAGGER_MODEL = "pii-tagger-dv3s-40k"
 PII_TAGGER_REVISION = "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173"
+PII_TAGGER_HUB = "sherwinvishesh/surrogateshield-pii-tagger"
+PII_TAGGER_HUB_COMMIT = "c51cc8e09bd6410503c2e004f44af2b206a1670e"
+# Where a named tagger that is not installed locally is downloaded from:
+# a hub repo and a commit (pii_tagger.model_path checks the weights' hash).
+TAGGER_HUB_SOURCES = {PII_TAGGER_MODEL: (PII_TAGGER_HUB, PII_TAGGER_HUB_COMMIT)}
 # Their licences, as recorded (doctor prints them; a spaCy package's own
 # meta.json wins when it is installed). Permissive only (V3 §0).
-MODEL_LICENCES = {SPACY_MODEL: "MIT", CONTEXT_GUARD_MODEL: "Apache-2.0", PII_TAGGER_MODEL: "MIT"}
+MODEL_LICENCES = {SPACY_MODEL: "MIT", CONTEXT_GUARD_MODEL: "Apache-2.0", PII_TAGGER_MODEL: "MIT",
+                  PII_TAGGER_HUB: "MIT"}
 
 # The tagger's lowest kept score per type, as first chosen on dev-large's
 # calib half (bench/tagger/configs/sel3ga9-spacyloc.json): names and places
@@ -201,6 +208,16 @@ PII_TAGGER_THRESHOLDS = {"PERSON": 0.7, "ORG": 0.7, "LOCATION": 0.7, "PHONE": 0.
                          "ADDRESS": 0.9, "HANDLE": 0.95, "CREDENTIAL": 0.97}
 PII_TAGGER_GATE_ABOVE = 0.97
 ENTITY_TRACE_THRESHOLDS = {"high": 0.90, "low": 0.70, "fallback": 0.75}
+# ``options.ensemble`` of entity_trace: per public type, the score from which
+# a spaCy reading of a type the stage may not report on its own (PERSON is
+# the tagger's) stands in on a message where no stage reports that type at
+# all. A PERSON stands in only when it reads as a person's name: a personal
+# cue, a possessive or a title at it, at most two such names in the message,
+# not in a fiction frame, not an addressee (pipeline._tied_fallback). spaCy
+# scores PERSON 0.88. Most natural names the tagger misses are plain
+# well-formed names it never proposes; this reads them back. ``{}`` turns it
+# off.
+ENTITY_TRACE_ENSEMBLE = {"PERSON": 0.88}
 
 
 def _default_stages() -> Tuple[Stage, ...]:
@@ -209,7 +226,7 @@ def _default_stages() -> Tuple[Stage, ...]:
         Stage("pattern_scan"),
         Stage("canonicaliser", options={"views": list(DEFAULT_VIEWS)}),
         Stage("entity_trace", model=SPACY_MODEL, revision=SPACY_REVISION,
-              thresholds=dict(ENTITY_TRACE_THRESHOLDS)),
+              thresholds=dict(ENTITY_TRACE_THRESHOLDS), options={"ensemble": dict(ENTITY_TRACE_ENSEMBLE)}),
         Stage("context_guard", enabled=False, model=CONTEXT_GUARD_MODEL, revision=CONTEXT_GUARD_REVISION,
               thresholds={"accept": 0.70}),
         Stage("pii_tagger", model=PII_TAGGER_MODEL, revision=PII_TAGGER_REVISION,
@@ -462,6 +479,15 @@ class DetectionConfig:
             if above is not None and (isinstance(above, bool) or not isinstance(above, (int, float))
                                       or not 0 <= above <= 1):
                 raise ValueError(f"stage {s.name!r}: option 'gate_above' must be a score in [0, 1]")
+            ensemble = s.options.get("ensemble")
+            if ensemble is not None:
+                if s.name != "entity_trace":
+                    raise ValueError(f"stage {s.name!r}: option 'ensemble' belongs to entity_trace")
+                if not isinstance(ensemble, Mapping) or not all(
+                        isinstance(k, str) and (k in ALL_TYPES or k in _PUBLIC_OF)
+                        and isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 1
+                        for k, v in ensemble.items()):
+                    raise ValueError("entity_trace: option 'ensemble' must map a type to a score in [0, 1]")
             labels = s.options.get("labels") if s.name == "context_guard" else None
             if labels is not None:
                 if not isinstance(labels, Mapping) or not labels or not all(
@@ -626,11 +652,15 @@ def from_settings(base: Optional[DetectionConfig] = None, **settings) -> Detecti
     ``Config`` / ``config.py`` applied: ``spacy_model``,
     ``context_guard_enabled``, ``use_context_guard``, ``use_entity_trace``,
     ``use_tagger``, ``use_post_passes``, ``canonical_views``, the four thresholds,
-    ``context_guard_model`` / ``_device``, ``address_mode``,
-    ``address_shift_range``, ``service``."""
+    ``context_guard_model`` / ``_device``, ``tagger_model`` / ``_revision`` /
+    ``_device``, ``address_mode``, ``address_shift_range``, ``service``.
+
+    A new model keeps the stage's revision only if it is the stage's model;
+    ``tagger_device`` is ``-1`` (CPU), a GPU index, or a torch device string
+    (``"mps"``, ``"cuda:1"``)."""
     cfg = base if base is not None else preset("balanced")
     s = dict(settings)
-    et, cg = {}, {}
+    et, cg, tg = {}, {}, {}
     if "spacy_model" in s:
         m = s.pop("spacy_model")
         et.update(model=m, revision=cfg.stage("entity_trace").revision if m == cfg.stage("entity_trace").model else None)
@@ -658,7 +688,17 @@ def from_settings(base: Optional[DetectionConfig] = None, **settings) -> Detecti
     if cg:
         cfg = cfg.with_stage("context_guard", **cg)
     if "use_tagger" in s:
-        cfg = cfg.with_stage("pii_tagger", enabled=bool(s.pop("use_tagger")))
+        tg["enabled"] = bool(s.pop("use_tagger"))
+    if "tagger_model" in s:
+        m = s.pop("tagger_model")
+        tg.update(model=m, revision=cfg.stage("pii_tagger").revision if m == cfg.stage("pii_tagger").model else None)
+    if "tagger_revision" in s:
+        tg["revision"] = s.pop("tagger_revision")
+    if "tagger_device" in s:
+        d = s.pop("tagger_device")
+        tg["options"] = {"device": d if isinstance(d, str) else ("cpu" if d < 0 else f"cuda:{d}")}
+    if tg:
+        cfg = cfg.with_stage("pii_tagger", **tg)
     if "use_post_passes" in s:
         cfg = cfg.with_stage("structural", enabled=bool(s.pop("use_post_passes")))
     if "canonical_views" in s:

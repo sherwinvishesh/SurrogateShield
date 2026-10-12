@@ -663,9 +663,10 @@ class MimicGen:
             if shifted is not None:
                 self.used_surrogates.add(shifted)
                 return shifted
+            # counts only: the original address never reaches a log (audit H)
             logger.warning(
-                "[MimicGen] shift collision exhausted for %r — falling back to replace",
-                entity.text if entity else "?",
+                "[MimicGen] shift collision exhausted for a %d-character address — falling back to replace",
+                len(entity.text) if entity else 0,
             )
 
         if parsed is not None:
@@ -1064,7 +1065,14 @@ class MimicGen:
 
     def _gen_hostname_like(self, original: str) -> str:
         """"Galaxy-S23-Ritika" -> "Galaxy-S23-Priya": the owner's name part
-        becomes the surrogate of that name; the device words stay."""
+        becomes the surrogate of that name; the device words stay. A server's
+        host ("db-7.billing.acme.io") keeps its domain ("acme.io", the
+        provider's or a shared one) and every label before it takes a new
+        one of the same shape: the deployment's own names go."""
+        if "." in original:
+            labels = original.split(".")
+            keep = 3 if len(labels) >= 4 and labels[-2].lower() in ("co", "com", "org", "net", "ac") else 2
+            return ".".join([self._shape_like(lb) for lb in labels[:-keep]] + labels[-keep:])
         from ..detection.structural import _DEVICE_WORDS
         parts = re.split(r"([-_'’]s?[-_ ]?|[-_ ])", original)
         out = []

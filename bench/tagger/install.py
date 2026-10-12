@@ -1,4 +1,4 @@
-"""Put a trained tagger where the library finds it (V3 §3.3; weights stay local).
+"""Put a trained tagger where the library finds it (V3 §3.3).
 
     PYTHONPATH=.:python-library .venv/bin/python -m bench.tagger.install bench/tagger/build/models/dv3s-40k
 
@@ -7,6 +7,10 @@ The folder is copied to ``$SURROGATESHIELD_MODELS/<name>`` (default
 default config's ``PII_TAGGER_MODEL`` and the weights must be the ones it
 pins (``PII_TAGGER_REVISION``); with ``--name`` any model goes in under that
 name, and the ``sha256:`` revision a config pins it with is printed.
+
+The default tagger needs no install: without a folder of its name the
+library downloads it once from the Hugging Face Hub (``PII_TAGGER_HUB``).
+This is for a tagger trained here, or a local copy of the default.
 """
 
 from __future__ import annotations

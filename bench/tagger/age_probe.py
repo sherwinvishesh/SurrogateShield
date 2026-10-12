@@ -208,10 +208,7 @@ def tagger_part(msgs: Sequence[dict], device: str, batch: int, reuse: bool, log=
     from surrogateshield.core.detection import config as C
     from surrogateshield.core.detection import pii_tagger as T
     stage = next(s for s in C.benchmark().detectors if s.name == "pii_tagger")
-    local = T.local_dir(stage.model)
-    if not local:
-        raise SystemExit(f"the tagger {stage.model!r} is not installed")
-    T.check_pin(local, stage.revision)
+    local = T.model_path(stage.model, stage.revision)          # installed, or downloaded once; pin checked
     units = [{"mid": m["id"], "gold": {"text": m["text"]}} for m in msgs]
     cands = E.candidates(Path(local), f"age-probe-{messages_sha(msgs)[:12]}", {"probe": units}, device, batch,
                          reuse, log)["probe"]

@@ -47,6 +47,7 @@ from . import canonical, pattern_scan, entity_trace, context_guard, relation_gat
 from . import config as dconfig
 from . import org_assembly, plugins, resolver
 from .resolver import stage_of
+from .geo_data import COUNTRIES, MAJOR_CITIES, MAJOR_COUNTRIES, REGIONS, US_STATES
 from .quasi_identifier import score as qi_score
 
 logger = logging.getLogger(__name__)
@@ -103,12 +104,36 @@ _STRUCTURAL_ORG_PATTERN = re.compile(
 # Consulting", "Meridian Capital Group") — no article needed; the case
 # pattern plus the suffix word IS the evidence.  Span includes the suffix.
 _SUFFIXED_ORG_PATTERN = re.compile(
-    r"\b((?:[A-Z][A-Za-z&'’.\-]+\s+){1,4}"
+    r"\b((?:[A-Z][A-Za-z&'’.\-]+[ \t]+){1,4}"
     r"(?:Consulting|Group|Holdings|Corporation|Company|Corp|Inc|Ltd|LLC"
     r"|Associates|Partners|Ventures|Solutions|Enterprises|Industries"
     r"|Capital|Bank|University|College|Hospital|Institute|Labs"
     r"|Technologies|Systems|Foundation|Agency)\b\.?)"
 )
+
+
+# a quoted title ('"The Future of Work: Emerging Technologies and Us"') lists
+# a work, not a company: a run of four or more words in quotes on one line,
+# the words around the hit nearly all capitalised or title stop-words
+_TITLE_STOP = frozenset("a an the of and or for to in on at by with from vs versus into".split())
+_QUOTE_OPEN = "\"“«"
+_QUOTE_CLOSE = "\"”»"
+
+
+def _quoted_title(text: str, s: int, e: int) -> bool:
+    ls = text.rfind("\n", 0, s) + 1
+    le = text.find("\n", e)
+    line = text[ls:len(text) if le < 0 else le]
+    rs, re_ = s - ls, e - ls
+    q1 = max(line.rfind(ch, 0, rs) for ch in _QUOTE_OPEN)
+    ends = [i for i in (line.find(ch, re_) for ch in _QUOTE_CLOSE) if i >= 0]
+    if q1 < 0 or not ends:
+        return False
+    rest = re.findall(r"[^\W\d_][\w'’\-]*", line[q1 + 1:rs] + " " + line[re_:min(ends)])
+    if len(rest) < 2:
+        return False
+    cased = sum(1 for w in rest if w[:1].isupper() and len(w) >= 2 or w.lower() in _TITLE_STOP)
+    return cased * 4 >= 3 * len(rest)
 
 
 # words that are never part of a company name found by its suffix
@@ -150,6 +175,8 @@ def _detect_structural_orgs(
             if (pattern is _STRUCTURAL_ORG_PATTERN and not lower_writer
                     and not any(w[:1].isupper() for w in words)):
                 continue                    # "a clothing company", "the insurance firm"
+            if _quoted_title(text, name_start, name_end):
+                continue                    # '"The Future of Work: Emerging Technologies and Us"'
 
             # Skip if overlaps with an already-detected entity
             if any(not (name_end <= os or name_start >= oe) for os, oe in occupied):
@@ -319,6 +346,9 @@ _TITLE_FRAME = re.compile(
     r"\b(?:mr|mrs|ms|mx|dr|prof)\.?\s+((?-i:[a-z])[a-z'’\-]{2,})\b",
     re.IGNORECASE,
 )
+# a title glued to a capitalised surname ("Mr.Okafor", "Dr.Ruiz & Mrs.Ruiz"):
+# NER reads it as one odd token and the tagger has not seen the shape
+_TITLE_GLUED = re.compile(r"\b(?:Mr|Mrs|Ms|Mx|Dr|Prof|Miss)\.([A-ZÀ-Ý][a-zà-ÿ\-]{2,})\b")
 
 # E5: login/username frames in logs ("user asmith connected").  Prose like
 # "failed login attempts from …" or "a user who declared …" must never
@@ -386,6 +416,225 @@ def _trim_trailing_stopwords(tokens: List[str]) -> List[str]:
 def _name_case_marked(tokens: List[str]) -> bool:
     """ALL-CAPS or Every-Word-Capitalized — how forms case-mark names."""
     return all(t[0].isupper() for t in tokens if t[0].isalpha())
+
+
+def _code_field(text: str, m: "re.Match") -> bool:
+    """``user.name = "x"``, ``->name``, ``$name = 'x'``: a member, a pointer
+    or a variable being assigned, not a form's field (``name: "x"`` in JSON
+    or YAML still is one)."""
+    if text[m.start() - 1:m.start()] in (".", ":", ">", "$"):
+        return True
+    return "=" in text[m.start():m.start(1)] and m.group(1).lstrip()[:1] in "\"'`"
+
+
+# ── the ensemble fallback (entity_trace ``options.ensemble``) ────────────────
+# The tagger misses a natural name mostly by never proposing it: a plain,
+# well-formed name in running text. spaCy reads those; it also reads
+# characters, headings, products and addressees as PERSON, so its reading
+# stands in only where no stage named anyone and the name is tied to a
+# person the message talks about.
+_FALLBACK_GREETING = re.compile(r"(?i)\b(?:dear|hi|hello|hey)\s*,?\s*$")
+_FALLBACK_TITLE = re.compile(r"(?i)\b(?:mr|mrs|ms|mx|dr|prof|sir|lord|lady)\.?\s*$")
+_FALLBACK_MAX_PERSONS = 3
+# "…, who works with me", "Tomasz and his wife": the name goes on as a person
+_FALLBACK_WHO = re.compile(r"(?i)^(?:,\s+who\b|\s+(?:and|&)\s+(?:his|her|their)\b)")
+# a dash that opens the line: a sign-off ("— Wen Jiahui") only when the name
+# ends the line; "- REVIEW the logs" is a bullet
+_FALLBACK_DASH = re.compile(r"(?:^|\n)\s*[-–—~]\s*$")
+# "our Mission", "my Mac": a single word right after a possessive is a thing
+_FALLBACK_POSSESSIVE = re.compile(r"(?i)\b(?:my|our|your|their|his|her|its)[ \t]+$")
+
+
+def _tied_fallback(text: str, cands: Sequence[DetectedEntity]) -> List[DetectedEntity]:
+    """The *cands* that may stand in: every type but PERSON as given; a
+    PERSON only when every word of it is capitalised, it carries no legal
+    form ("Okafor LLC" is a company), the message holds at most three PERSON
+    candidates and no fiction labels, it is not the addressee after a
+    greeting, and a personal cue stands before it ("tell", "from", "my
+    sister"), a personal continuation after it ("said", "'s mom", "is my",
+    ", who"), a title ("Dr"), or — for a full name only — a bare possessive.
+    A single word under a bare possessive is an eponym or a holiday more
+    often than a person ("Newton's law", "Valentine's day"), and a single
+    word right after "my", "our", ... a thing ("our Mission"). A dash that
+    opens the line counts only when the name ends it (a sign-off)."""
+    persons = [e for e in cands if e.type == "PERSON"]
+    out = [e for e in cands if e.type != "PERSON"]
+    if not persons or len(persons) > _FALLBACK_MAX_PERSONS or structural._fiction_labels(text):
+        return out
+    rg = relation_gate
+    for e in persons:
+        words = e.text.split()
+        if not words or not all(w[:1].isupper() for w in words):
+            continue
+        if rg._LEGAL_SUFFIX.search(e.text.strip()):
+            continue
+        before, after = text[max(0, e.start - 40):e.start], text[e.end:e.end + 80]
+        if _FALLBACK_GREETING.search(before):
+            continue
+        if len(words) == 1 and _FALLBACK_POSSESSIVE.search(before):
+            continue
+        cue_before = rg._PERSON_BEFORE.search(before)
+        if cue_before and _FALLBACK_DASH.search(before) and re.search(
+                r"\w", text[e.end:].split("\n", 1)[0]):
+            cue_before = None
+        if (cue_before or rg._PERSONAL_BEFORE_PERSON.search(before)
+                or rg._PERSON_AFTER.match(after) or _FALLBACK_TITLE.search(before)
+                or (len(words) >= 2 and after.startswith(("'s", "’s")))
+                or _FALLBACK_WHO.match(after)):
+            out.append(e)
+    return out
+
+
+# ── misreads: a span whose own words say it is no name, age or secret ──────
+# Read after every stage, on whatever found the span, before its tie to a
+# person is weighed: a product before its version number, a school subject,
+# a placeholder company, an organisation a writer only describes, a slug in
+# a config, a sentence read as a password, a common word in lower case, a
+# place in a long list, and ages that are differences, puzzles, ranges or
+# an audience.
+_NAME_TYPES = frozenset({"PERSON", "ORG", "GPE", "LOC", "FAC"})
+_MISREAD_PLACES = frozenset({"GPE", "LOC", "FAC"})
+# "Unreal Engine 5.x", "Ubuntu 22.04": a product's version
+_VERSION_AFTER = re.compile(r"^[ \t]+v?\d+(?:\.(?:\d+|x|X))+\b")
+# "studying Physics", "a degree in Economics": a subject
+_SUBJECT_BEFORE = re.compile(
+    r"(?i)\b(?:studying|study|studied|learning|learn|learned|learnt|teaching|majoring\s+in|major\s+in"
+    r"|degree\s+in)[ \t]+$")
+# "XYZ Corp", "Acme Inc.": the textbook's company
+_PLACEHOLDER_ORG = re.compile(r"^(?:ABC|XYZ|XXX|ACME|Acme|Contoso|Fabrikam|Initech|Foo|FooBar)\b")
+# "a Swiss pharmaceutical company": a kind of company, not one
+_INDEFINITE_BEFORE = re.compile(r"(?i)\b(?:a|an)[ \t]+$")
+_ORG_KIND_AFTER = re.compile(
+    r"(?i)^\s+(?:corporation|company|corp|inc|ltd|llc|group|firm|enterprise|organi[sz]ation|associates"
+    r"|holdings|ventures|solutions)\b")
+# "the name of the hotel is …": a thing's name (a person's noun keeps it)
+_NAME_OF_THING = re.compile(
+    r"(?i)\bthe\s+name\s+of\s+(?:the|my|our|his|her|their|this|a|an)\s+([a-z]+)\s+(?:is|was|will\s+be)"
+    r"\s*[\"'“‘]?\s*$")
+_PERSON_NOUNS = frozenset("""child kid son daughter wife husband partner friend teacher boss doctor person guy
+girl boy man woman baby mother father mom dad brother sister uncle aunt cousin grandmother grandfather grandma
+grandpa nephew niece student professor manager colleague coworker neighbor neighbour lawyer client customer
+patient owner author user employee tenant landlord girlfriend boyfriend fiance fiancee spouse ceo founder""".split())
+# "web-app-v2-prod": a resource's name; a secret's cue on its line keeps it
+_SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+){2,}$")
+_SECRET_CUE = re.compile(r"(?i)pass|pwd|secret|token|key|auth|cred|pin\b|login|api|seed|phrase|mnemonic|recovery")
+# a delimited cell ("leah,okonkwo,85251"): a column's value, whatever its case
+_CELL_BEFORE = re.compile(r"[,;|\t][ \t]*$")
+_CELL_AFTER = re.compile(r"[ \t]*[,;|\t]")
+# a list of four capitalised items or more ("Spain, Italy, Greece and Malta")
+_LIST_ITEM = r"[A-Z][\w'’.\-]*(?:[ \t]+[A-Z][\w'’.\-]*){0,3}"
+_LIST_SEP = r"(?:[ \t]*,[ \t]*(?:and[ \t]+|or[ \t]+)?|[ \t]+(?:and|or)[ \t]+)"
+_NAME_LIST = re.compile(rf"{_LIST_ITEM}(?:{_LIST_SEP}{_LIST_ITEM}){{3,}}")
+# ages: "9 years older", "how old am I?", "ages 11 to 14", "explain it to a five year old"
+_AGE_DIFFERENCE_AFTER = re.compile(r"(?i)^[ \t]*(?:older|younger)\b")
+_HOW_OLD = re.compile(r"(?i)\bhow\s+old\s+(?:am|is|are|was|were|will|would)\b")
+_AGES_WORD = re.compile(r"(?i)\bages\b")
+_AGE_RANGE_AFTER = re.compile(r"(?i)^[ \t]*(?:to|-|–|—|through|and)[ \t]*\d")
+_AGE_AUDIENCE_BEFORE = re.compile(
+    r"(?i)(?:\b(?:to|for)\s+an?\s*$|\blike\s+(?:i['’]?m|i\s+am|you['’]?re|you\s+are)\s+(?:an?\s+)?$)")
+# "Canada", "the United States", "Ohio", "Southeast Asia": a place too large to identify anyone;
+# a city ("New York", "Singapore") stays one; a place that is also a given name ("Georgia",
+# "Jordan") only after "in", "from", "to", ...
+_NATIONS = (COUNTRIES | MAJOR_COUNTRIES | US_STATES | REGIONS) - MAJOR_CITIES
+_NATION_GIVEN_NAMES = frozenset({"america", "asia", "chad", "florida", "georgia", "india", "indiana", "israel",
+                                 "jordan", "kenya", "montana", "nevada", "virginia"})
+_PLACE_PREP_BEFORE = re.compile(
+    r"(?i)\b(?:in|from|to|of|across|near|around|throughout|outside|inside|within|visit|visiting|visited"
+    r"|leave|leaving|left)[ \t]+(?:the[ \t]+)?$")
+
+
+def _is_nation(text: str, before: str = "") -> bool:
+    cf = re.sub(r"(?:['’]s)$", "", text.strip()).casefold()
+    cf = re.sub(r"^the\s+", "", cf)
+    if cf in _NATION_GIVEN_NAMES:
+        return _PLACE_PREP_BEFORE.search(before) is not None
+    return cf in _NATIONS
+
+
+def _misreads(text: str, entities: Sequence[DetectedEntity]) -> List[Tuple[DetectedEntity, str]]:
+    """``(entity, rule)`` for each of *entities* its own words read as no
+    name, age or secret: ``version`` (a name before a version number),
+    ``subject`` (a name after "studying", "a degree in"), ``placeholder``
+    (an organisation named ABC, XYZ, Acme, Contoso, ...), ``kind_of_org``
+    (a pattern's organisation after "a"/"an" and before "company", "firm",
+    ...), ``thing_name`` (a person's name for "the name of the <thing> is",
+    the thing no person), ``slug`` (a tagger's credential or ID that is a
+    lower-case kebab slug, no secret's cue on its line), ``sentence_secret``
+    (a credential of six words or more, not all lower-case words, no
+    secret's cue on its line or the line before), ``lowercase_word`` (a
+    single lower-case word read as a name by the structural pass, in a
+    text that capitalises, outside a form, a label, an introduction or a
+    delimited cell),
+    ``place_list`` (a place only spaCy read, in a list of four capitalised
+    items or more with no digit, outside a form), ``nation`` (a place that
+    is a country, a US state or a larger region), ``age_difference``,
+    ``age_puzzle`` (a message asking "how old am I", no identifier near),
+    ``age_range`` ("ages 11 to 14") and ``age_audience`` ("to a five year
+    old")."""
+    entities = list(entities)
+    if not entities:
+        return []
+    strong = [e for e in entities if e.type in relation_gate._STRONG_ANCHOR_TYPES]
+    lower_writer = None
+    how_old = _HOW_OLD.search(text) is not None
+    out = []
+    for e in entities:
+        ls = text.rfind("\n", 0, e.start) + 1
+        le = text.find("\n", e.end)
+        le = len(text) if le < 0 else le
+        before, after = text[max(0, e.start - 60):e.start], text[e.end:e.end + 40]
+        field = bool(relation_gate._FIELD_BEFORE.search(text[ls:e.start]))
+        rule = None
+        if e.type in _NAME_TYPES:
+            if _VERSION_AFTER.match(after):
+                rule = "version"
+            elif _SUBJECT_BEFORE.search(before):
+                rule = "subject"
+            elif e.type == "ORG" and _PLACEHOLDER_ORG.match(e.text):
+                rule = "placeholder"
+            elif (e.type == "ORG" and e.source == "pattern" and _INDEFINITE_BEFORE.search(before)
+                  and _ORG_KIND_AFTER.match(text[e.end:e.end + 20])):
+                rule = "kind_of_org"
+            elif e.type == "PERSON":
+                m = _NAME_OF_THING.search(before)
+                if m and m.group(1).lower() not in _PERSON_NOUNS:
+                    rule = "thing_name"
+                elif (e.source == "structural" and len(e.text.split()) == 1 and not any(c.isupper() for c in e.text)
+                      and not field and not relation_gate._LABEL_BEFORE.search(before)
+                      and not relation_gate._INTRO_BEFORE.search(before)
+                      and not _CELL_BEFORE.search(text[ls:e.start]) and not _CELL_AFTER.match(text, e.end)):
+                    if lower_writer is None:
+                        lower_writer = _writes_lowercase(text)
+                    if not lower_writer:
+                        rule = "lowercase_word"
+            elif e.type in ("GPE", "LOC") and _is_nation(e.text, before):
+                rule = "nation"
+            elif e.type in _MISREAD_PLACES and e.source == "ner" and not field:
+                line = text[ls:le]
+                if any(m.start() <= e.start - ls and e.end - ls <= m.end() and not re.search(r"\d", m.group())
+                       for m in _NAME_LIST.finditer(line)):
+                    rule = "place_list"
+        elif e.type in ("credential", "id_number"):
+            if (e.source == "pii_tagger" and _SLUG.match(e.text) and re.search(r"[g-z]", e.text)
+                    and not _SECRET_CUE.search(text[ls:e.start])):
+                rule = "slug"
+            elif e.type == "credential" and len(e.text.split()) >= 6:
+                prev = text[text.rfind("\n", 0, max(0, ls - 1)) + 1:e.start]
+                if not _SECRET_CUE.search(prev) and not re.fullmatch(r"[a-z]+(?:\s+[a-z]+)+", e.text):
+                    rule = "sentence_secret"
+        elif e.type == "age":
+            if _AGE_DIFFERENCE_AFTER.match(after):
+                rule = "age_difference"
+            elif (_AGES_WORD.search(e.text) or _AGES_WORD.search(before[-12:])) and _AGE_RANGE_AFTER.match(after):
+                rule = "age_range"
+            elif _AGE_AUDIENCE_BEFORE.search(before):
+                rule = "age_audience"
+            elif how_old and not field and not relation_gate._anchor_near(
+                    e, text, [x for x in strong if x is not e]):
+                rule = "age_puzzle"
+        if rule:
+            out.append((e, rule))
+    return out
 
 
 def _form_label_candidate(raw: str, require_case: bool) -> Optional[str]:
@@ -501,6 +750,8 @@ def _detect_structural_persons(
 
     for i, (label_re, require_case) in enumerate(_FORM_LABEL_PATTERNS):
         for m in label_re.finditer(text):
+            if i == 0 and _code_field(text, m):
+                continue
             cand = _form_label_candidate(m.group(1), require_case=require_case)
             if cand:
                 start = m.start(1) + m.group(1).find(cand.split()[0])
@@ -512,6 +763,11 @@ def _detect_structural_persons(
                     strong.add((start, start + len(cand)))
 
     for m in _TITLE_FRAME.finditer(text):
+        tok = m.group(1)
+        if _person_tokens_ok([tok]) and not _verbish(tok):
+            candidates.append((m.start(1), m.end(1), tok))
+
+    for m in _TITLE_GLUED.finditer(text):
         tok = m.group(1)
         if _person_tokens_ok([tok]) and not _verbish(tok):
             candidates.append((m.start(1), m.end(1), tok))
@@ -731,6 +987,19 @@ def _person_gap(gap: str) -> bool:
     return bool(_PERSON_GAP.fullmatch(gap)) and (gap[1].isupper() or not gap.endswith(". "))
 
 
+# A span that is an initial or initials, with or without the last period
+# ("J", "J.", "A.A", "A.A."); its period may have been trimmed into the gap
+_INITIALS_SPAN = re.compile(r"(?:[^\W\d_]\.)*[^\W\d_]\.?")
+_INITIAL_GAP = re.compile(r"\.?[ \t]")
+
+
+def _initials_gap(prev: DetectedEntity, gap: str) -> bool:
+    """"J" + ". " + "Rowe": an initial read as its own PERSON, its period
+    left in the gap before the surname."""
+    return (bool(_INITIALS_SPAN.fullmatch(prev.text)) and prev.text[0].isupper()
+            and bool(_INITIAL_GAP.fullmatch(gap)))
+
+
 def _merge_adjacent_persons(
     entities: List[DetectedEntity],
     text: str,
@@ -749,6 +1018,7 @@ def _merge_adjacent_persons(
     merged: List[DetectedEntity] = []
     for ent in persons:
         if merged and (_person_gap(text[merged[-1].end:ent.start])
+                       or _initials_gap(merged[-1], text[merged[-1].end:ent.start])
                        or merged[-1].start < ent.start < merged[-1].end < ent.end):
             prev = merged[-1]               # adjacent, or overlapping
             merged[-1] = DetectedEntity(
@@ -795,6 +1065,8 @@ _VALUE_END = re.compile(r"^[ \t]*(?:[\"'\n\t)\]|;]|$)")
 _GIVEN_AFTER = re.compile(rf",[ \t]((?:{_WORD}[ \t])?{_WORD})(?=[ \t]*(?:[\"'\n\t)\]|;]|$))")
 # A capital initial ending a span ("Suzana H." + " Peharda")
 _CAP_INITIAL = re.compile(r"[^\W\d_]\.")
+# Initials right before a span ("A.A. " + "Rowe", "J. " + "Rowe", "J. K. " + "Rowe")
+_INITIALS_BEFORE = re.compile(r"(?<![\w'’\-.])((?:[^\W\d_]\.[ \t]?){1,3})$")
 
 
 def _name_like(tok: str) -> bool:
@@ -834,6 +1106,12 @@ def _complete_person_spans(
         for _ in range(3):
             grown = False
             toks = text[start:end].split()
+            m = _INITIALS_BEFORE.search(text[max(0, start - 12):start])
+            if (m and m.group(1)[-1] in " \t" and text[start:start + 1].isupper()
+                    and all(ch.isupper() for ch in m.group(1) if ch.isalpha())):
+                a = start - len(m.group(1))
+                if free(a, start):
+                    start, grown = a, True          # "A.A. " + "Rowe"
             m = _GIVEN_PARTICLES_BEFORE.search(text[max(0, start - 60):start])
             if m and (m.group(1) or m.group(2)):
                 given, parts = m.group(1), m.group(2)
@@ -1340,7 +1618,8 @@ def run_cascade(
     Args:
         text:                   Raw user message.
         config:                 The DetectionConfig (detection/config.py).
-        skip_values:            Surrogate strings to skip in PatternScan.
+        skip_values:            Surrogates quoted back from earlier answers:
+                                no stage reports them, nor anything inside them.
         skip_location_entities: Suppress ALL geo entities (service-query mode).
         timings:                If given, filled with wall-clock milliseconds
                                 of THIS pass: pattern_scan_ms, entity_trace_ms,
@@ -1448,6 +1727,13 @@ def run_cascade(
 
     # ── Stage 2: EntityTrace ──────────────────────────────────────────────────
     logger.info("[SentinelLayer] Stage 2: EntityTrace")
+    # "ensemble": per public type, the score from which EntityTrace's reading
+    # of a type it may not report on its own is kept aside, for a message
+    # where no stage reports that type at all (taken in below, after the
+    # plugins; a PERSON only when it reads as a person's name).
+    ensemble = {dconfig.public_type(t): float(v)
+                for t, v in (et_stage.options.get("ensemble") or {}).items()}
+    ner_fallback: List[DetectedEntity] = []
     if use_entity_trace:
         _t_et = _clock()
         ner_confirmed, ner_borderline = entity_trace.trace(
@@ -1458,6 +1744,11 @@ def run_cascade(
             low_threshold=et_th.get("low", 0.60),
         )
         _over_budget(config, "entity_trace", (_clock() - _t_et) * 1000, timings)
+        if ensemble:
+            ner_fallback = [e for e in ner_confirmed + ner_borderline
+                            if dconfig.public_type(e.type) in ensemble
+                            and e.score >= ensemble[dconfig.public_type(e.type)]
+                            and not config.allows("entity_trace", e.type)]
         ner_confirmed = _routed(config, ner_confirmed, "entity_trace")
         ner_borderline = _routed(config, ner_borderline, "entity_trace")
     else:
@@ -1534,6 +1825,22 @@ def run_cascade(
         needs_confirmation[:] = [x for x in needs_confirmation if not _inside_view(x)]
     _lap("context_guard_ms")
     _mark("context_guard")
+
+    # ── Ensemble fallback: on a message where no stage named a type at all,
+    # EntityTrace's reading of it (kept aside in Stage 2) stands in, a PERSON
+    # only when it reads as a person's name (_tied_fallback). The relation
+    # gate and every later pass read it like any model span.
+    if ner_fallback:
+        present = {dconfig.public_type(e.type) for e in confirmed}
+        taken = [e for e in ner_fallback if dconfig.public_type(e.type) not in present
+                 and not any(e.overlaps(x) for x in confirmed)]
+        if skip_location_entities:
+            taken = [e for e in taken if e.type not in _GEO_TYPES]
+        taken = _tied_fallback(text, taken)
+        if taken:
+            logger.info(f"[SentinelLayer] Ensemble: +{len(taken)} EntityTrace span(s) stand in")
+            confirmed.extend(taken)
+    _mark("ensemble")
 
     # A model span may run across a line break and come back with the break
     # normalised to a space ("University of Leicester\nORCID"): its text no
@@ -1693,12 +2000,73 @@ def run_cascade(
             confirmed          = [e for e in confirmed          if id(e) not in gone]
             needs_confirmation = [e for e in needs_confirmation if id(e) not in gone]
         added = _routed(config, added, "structural")
+        if added and relation_gate._impersonal(text):
+            # A place or an organisation a frame rule found in an impersonal
+            # text ("located in X" in a company profile) is no one's unless
+            # an identifier stands near it: the gate's rule, after the gate.
+            near = [e for e in list(confirmed) + list(needs_confirmation) + added
+                    if e.type in relation_gate._STRONG_ANCHOR_TYPES or e.type == "PERSON"]
+            impersonal = [e for e in added if e.type in relation_gate._PLACE_ORG
+                          and not relation_gate._heading_line(e, text)
+                          and not relation_gate._anchor_near(e, text, near)]
+            if impersonal:
+                for e in impersonal:
+                    skip_reasons[(e.start, e.end)] = "impersonal"
+                all_skipped = list(all_skipped) + impersonal
+                added = [e for e in added if e not in impersonal]
         if added:
             added = _outside_opaque(added, opaque) if opaque else added
             needs_confirmation = [e for e in needs_confirmation if not any(
                 a.start < e.end and e.start < a.end for a in added)]
             confirmed = list(confirmed) + added
             logger.info(f"[SentinelLayer] Pass S: +{len(added)} structural entit(ies)")
+        # In fiction (a screenplay, a story's dialogue, a narrated story with
+        # quoted speech) a name is a character's, whoever found it, unless
+        # an identifier of a real person stands next to it (a signature
+        # under the piece).
+        frame = ("fiction" if structural._fiction_labels(text)
+                 else "narrative" if structural._narrative(text) else None)
+        if frame:
+            strong = [e for e in list(confirmed) + list(needs_confirmation)
+                      if e.type in relation_gate._STRONG_ANCHOR_TYPES]
+            fictional: List[DetectedEntity] = []
+            for bucket in ("confirmed", "needs_confirmation"):
+                ents = confirmed if bucket == "confirmed" else needs_confirmation
+                keep = []
+                for e in ents:
+                    if e.type == "PERSON" and not relation_gate._anchor_near(e, text, strong):
+                        fictional.append(e)
+                        skip_reasons[(e.start, e.end)] = frame
+                    else:
+                        keep.append(e)
+                if bucket == "confirmed":
+                    confirmed = keep
+                else:
+                    needs_confirmation = keep
+            if fictional:
+                all_skipped = list(all_skipped) + fictional
+        # Frames that name no one the writer knows (an image prompt, a
+        # footnoted text, a citation, a name given to the assistant, a
+        # lower-case phrase, an impersonal stretch of a long text, a place
+        # only spaCy read outside a sign-off), read on what every stage found.
+        framed = relation_gate.frame_drops(text, list(confirmed) + list(needs_confirmation))
+        if framed:
+            gone = {id(e) for e, _ in framed}
+            for e, rule in framed:
+                skip_reasons[(e.start, e.end)] = rule
+            confirmed          = [e for e in confirmed          if id(e) not in gone]
+            needs_confirmation = [e for e in needs_confirmation if id(e) not in gone]
+            all_skipped = list(all_skipped) + [e for e, _ in framed]
+        # Spans whose own words say they are no name, age or secret (a
+        # product's version, a subject, a placeholder company, a slug, ...).
+        misread = _misreads(text, list(confirmed) + list(needs_confirmation))
+        if misread:
+            gone = {id(e) for e, _ in misread}
+            for e, rule in misread:
+                skip_reasons[(e.start, e.end)] = rule
+            confirmed          = [e for e in confirmed          if id(e) not in gone]
+            needs_confirmation = [e for e in needs_confirmation if id(e) not in gone]
+            all_skipped = list(all_skipped) + [e for e, _ in misread]
     _mark("structural")
 
     # ── Pass G: a gender term that agrees with a named person (D1) ─────────
@@ -1715,6 +2083,19 @@ def run_cascade(
 
     confirmed = _cut_partial_overlaps(confirmed, text, config)
     _mark("partial_overlaps")
+
+    # ── Surrogates quoted back are not PII (any stage, not only PatternScan):
+    # a later message that repeats "Ridhi Nagarajan" or the surrogate address
+    # of an earlier answer gets no surrogate of a surrogate, and a part of
+    # one ("Colchester" inside the surrogate address) is not a place of its own.
+    if skip_values:
+        confirmed, quoted = _drop_quoted_back(confirmed, text, skip_values)
+        needs_confirmation, _ = _drop_quoted_back(needs_confirmation, text, skip_values)
+        for e in quoted:
+            skip_reasons[(e.start, e.end)] = "quoted_back"
+        if quoted:
+            all_skipped = list(all_skipped) + quoted
+    _mark("quoted_back")
 
     # ── Quasi-identifier combination scoring ──────────────────────────────────
     confirmed = _TaggedList(confirmed)  # wrap to allow attribute assignment
@@ -1750,6 +2131,25 @@ def run_cascade(
         f"needs_confirmation={len(needs_confirmation)}"
     )
     return confirmed, needs_confirmation
+
+
+def _drop_quoted_back(entities: List[DetectedEntity], text: str, skip_values: Set[str]):
+    """``(kept, dropped)``: an entity whose span lies inside an occurrence of
+    a quoted-back surrogate is dropped, whatever stage found it."""
+    spans = []
+    for value in skip_values:
+        if not value:
+            continue
+        at = text.find(value)
+        while at >= 0:
+            spans.append((at, at + len(value)))
+            at = text.find(value, at + 1)
+    if not spans:
+        return entities, []
+    kept, dropped = [], []
+    for e in entities:
+        (dropped if any(s <= e.start and e.end <= t for s, t in spans) else kept).append(e)
+    return kept, dropped
 
 
 def _anchor_to_lines(entities: List[DetectedEntity], text: str) -> List[DetectedEntity]:

@@ -32,6 +32,7 @@ from typing import Dict, List, Sequence, Tuple
 
 from bench.realdata.common import ROOT, read_jsonl
 from surrogateshield.core.detection import pii_tagger as T
+from surrogateshield.core.detection.context_guard import _local_model
 
 # encoder name -> (hub id, pinned revision, licence); all cached in Phase 0
 ENCODERS = {
@@ -191,7 +192,7 @@ def train(a) -> dict:
     random.seed(a.seed)
     torch.manual_seed(a.seed)
     device = pick_device(a.device)
-    path = T._local_model(hub, rev)
+    path = _local_model(hub, rev)
     tok = AutoTokenizer.from_pretrained(path)
     model = AutoModelForTokenClassification.from_pretrained(
         path, num_labels=len(T.LABELS), id2label=dict(enumerate(T.LABELS)), label2id=LABEL2ID,

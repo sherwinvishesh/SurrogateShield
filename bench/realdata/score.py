@@ -610,9 +610,9 @@ def score_external(name: str, arms: Sequence[str] = ARMS, reuse: bool = False, o
     h10_name = f"H10{PRIMES[collection]}"
     if loaded is None:
         from bench.realdata import external
-        if name != external.NAME:
-            raise SystemExit(f"no external benchmark {name!r} (built: {external.NAME})")
-        loaded = external.load()
+        if name not in external.SAMPLES:
+            raise SystemExit(f"no external benchmark {name!r} (known: {', '.join(sorted(external.SAMPLES))})")
+        loaded = external.load(name=name)
     units, src, input_sha = loaded["units"], loaded["src"], loaded["input_sha"]
     from bench.arms.run import PRIVATE
     scores, config_hashes = {}, {}

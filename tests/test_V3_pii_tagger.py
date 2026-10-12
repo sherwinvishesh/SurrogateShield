@@ -244,6 +244,88 @@ def test_a_named_model_that_is_not_installed_fails_closed_before_torch(tmp_path,
         T.TaggerModel("pii-tagger-x", "sha256:" + "0" * 64)
 
 
+def _fake_hub(monkeypatch, folder, cached):
+    """``snapshot_download`` that finds *folder* in the cache once ``cached[0]`` is True."""
+    calls = []
+
+    def fake(repo, revision=None, local_files_only=False):
+        calls.append((repo, revision, local_files_only))
+        if local_files_only and not cached[0]:
+            raise FileNotFoundError(repo)                        # as LocalEntryNotFoundError
+        cached[0] = True
+        return str(folder)
+    monkeypatch.setattr("huggingface_hub.snapshot_download", fake)
+    return calls
+
+
+def test_the_default_tagger_comes_from_its_hugging_face_commit():
+    import re
+    from surrogateshield.core.detection import config as C
+    assert C.PII_TAGGER_HUB == "sherwinvishesh/surrogateshield-pii-tagger"
+    assert T.hub_source(C.PII_TAGGER_MODEL) == (C.PII_TAGGER_HUB, C.PII_TAGGER_HUB_COMMIT)
+    assert re.fullmatch(r"[0-9a-f]{40}", C.PII_TAGGER_HUB_COMMIT) and T._PIN.fullmatch(C.PII_TAGGER_REVISION)
+    assert C.MODEL_LICENCES[C.PII_TAGGER_HUB] == C.MODEL_LICENCES[C.PII_TAGGER_MODEL] == "MIT"
+
+
+def test_a_named_tagger_that_is_not_installed_is_downloaded_once_and_checked(tmp_path, monkeypatch):
+    import hashlib
+    from surrogateshield.core.detection import config as C
+    snap = tmp_path / "snapshot"
+    snap.mkdir()
+    pin = "sha256:" + hashlib.sha256(b"weights").hexdigest()
+    monkeypatch.setenv(T.MODELS_ENV, str(tmp_path / "models"))                  # nothing installed
+    monkeypatch.setitem(C.TAGGER_HUB_SOURCES, "pii-tagger-x", ("org/tagger", "c" * 40))
+    monkeypatch.delenv("HF_HUB_OFFLINE", raising=False)
+    calls = _fake_hub(monkeypatch, snap, [True])
+    assert T.cached_path("pii-tagger-x", pin) is None                           # a snapshot without weights
+    (snap / "model.safetensors").write_bytes(b"weights")
+    calls = _fake_hub(monkeypatch, snap, [False])
+    assert T.cached_path("pii-tagger-x", pin) is None
+    with pytest.raises(DetectorUnavailable, match="not downloaded yet.*surrogateshield download"):
+        T.model_path("pii-tagger-x", pin, download=False)
+    monkeypatch.setenv("HF_HUB_OFFLINE", "1")
+    with pytest.raises(DetectorUnavailable, match="HF_HUB_OFFLINE is set"):
+        T.model_path("pii-tagger-x", pin)
+    monkeypatch.delenv("HF_HUB_OFFLINE")
+    calls.clear()
+    assert T.model_path("pii-tagger-x", pin) == str(snap)
+    assert calls == [("org/tagger", "c" * 40, True), ("org/tagger", "c" * 40, False)]     # cache first, then once
+    calls.clear()
+    assert T.model_path("pii-tagger-x", pin) == str(snap) and calls == [("org/tagger", "c" * 40, True)]
+    with pytest.raises(DetectorUnavailable, match="not the pinned"):
+        T.model_path("pii-tagger-x", "sha256:" + "0" * 64)
+    installed = tmp_path / "models" / "pii-tagger-x"                           # an installed folder wins
+    installed.mkdir(parents=True)
+    (installed / "model.safetensors").write_bytes(b"weights")
+    calls.clear()
+    assert T.model_path("pii-tagger-x", pin) == str(installed) and calls == []
+
+
+def test_a_hub_id_loads_at_its_commit_or_is_checked_by_its_weights(tmp_path, monkeypatch):
+    import hashlib
+    snap = tmp_path / "snapshot"
+    snap.mkdir()
+    (snap / "model.safetensors").write_bytes(b"w")
+    calls = _fake_hub(monkeypatch, snap, [True])
+    assert T.model_path("org/tagger", "abc123") == str(snap) and calls[-1] == ("org/tagger", "abc123", True)
+    pin = "sha256:" + hashlib.sha256(b"w").hexdigest()
+    assert T.model_path("org/tagger", pin) == str(snap) and calls[-1] == ("org/tagger", None, True)
+    with pytest.raises(DetectorUnavailable, match="not the pinned"):
+        T.model_path("org/tagger", "sha256:" + "0" * 64)
+    for missing in (str(tmp_path / "nowhere"), "./nowhere", "a/b/c"):
+        with pytest.raises(DetectorUnavailable, match="no model folder"):
+            T.model_path(missing)
+
+
+def test_a_download_that_fails_fails_closed(tmp_path, monkeypatch):
+    def fake(repo, revision=None, local_files_only=False):
+        raise FileNotFoundError(repo) if local_files_only else RuntimeError("connection refused")
+    monkeypatch.setattr("huggingface_hub.snapshot_download", fake)
+    monkeypatch.delenv("HF_HUB_OFFLINE", raising=False)
+    with pytest.raises(DetectorUnavailable, match="could not download org/tagger.*connection refused"):
+        T.model_path("org/tagger")
+
+
 def test_install_copies_a_model_under_its_name_and_checks_the_pin(tmp_path, monkeypatch):
     import hashlib
     from bench.tagger import install as I
@@ -361,14 +443,13 @@ def test_acceptance_pools_the_splits_before_the_bounds():
     assert pooled["ss_tagger"]["leak"]["rate"] == 0.01 and E.acceptance(pooled)["ok"]
 
 
-@pytest.mark.heavy                      # loads the shipped tagger (local weights only; skipped when not installed)
+@pytest.mark.heavy                      # loads the shipped tagger (installed or downloaded; skipped otherwise)
 def test_the_shipped_tagger_loads_with_its_pinned_weights_and_finds_pii():
     from surrogateshield.core.detection import config as C
     stage = next(s for s in C.benchmark().detectors if s.name == "pii_tagger")
-    folder = T.local_dir(stage.model)
-    if not folder:
-        pytest.skip(f"{stage.model} is not installed under {T.models_dir()}")
-    T.check_pin(folder, stage.revision)
+    if not T.cached_path(stage.model, stage.revision):
+        pytest.skip(f"{stage.model} is neither under {T.models_dir()} nor downloaded ('surrogateshield download')")
+    T.model_path(stage.model, stage.revision, download=False)                  # the pin is checked
     text = "Hi, I'm Priya Raman, write to priya.raman@example.org; I live at 42 Wren Lane, Leeds LS6 2AB and I'm 34."
     found = {(text[c.start:c.end], c.type) for c in T.PIITagger(stage).detect(text)}
     assert {("Priya Raman", "PERSON"), ("priya.raman@example.org", "EMAIL"),

@@ -34,6 +34,13 @@ value.
 nemotron_pii.json`` (source pin, label map, per-record ids and text hashes,
 counts; no text) and the private arm input. ``load`` rebuilds the units from
 the raw file and refuses any hash that moved.
+
+A second draw (``--name nemotron_pii_2``, test-4 option E) is the same build
+under another name: the name changes the seed, the ids are
+``ext-nemotron2-NNNN``, and every uid of the first sample is excluded, so the
+two draws share no record group. ``--check --name nemotron_pii_2`` counts the
+records left per stratum (key columns only, no text) before anything is
+drawn. Each sample is drawn once and scored once, at a freeze.
 """
 
 from __future__ import annotations
@@ -44,7 +51,7 @@ import json
 import random
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, FrozenSet, List, Optional, Tuple
 
 from bench import realworld as rw
 from bench.realdata.common import BUILD, RAW, RD, derive_seed, file_sha256, sha256, write_jsonl
@@ -58,6 +65,39 @@ FROZEN = RD / "external" / f"{NAME}.json"
 INPUT = BUILD / "external" / NAME / "input.jsonl"
 PER_STRATUM = 250
 ID_PREFIX = "ext-nemotron"
+# Every sample drawn from the same parquet: its id prefix and the samples whose
+# uids it must not reuse. The name is part of the seed, so a new name is a new draw.
+SAMPLES: Dict[str, dict] = {
+    NAME: {"id_prefix": ID_PREFIX, "exclude": ()},
+    "nemotron_pii_2": {"id_prefix": "ext-nemotron2", "exclude": (NAME,)},
+}
+
+
+def frozen_path(name: str = NAME) -> Path:
+    return RD / "external" / f"{name}.json"
+
+
+def input_path(name: str = NAME) -> Path:
+    return BUILD / "external" / name / "input.jsonl"
+
+
+def _sample_of(name: str) -> dict:
+    if name not in SAMPLES:
+        raise SystemExit(f"no external sample {name!r} (known: {', '.join(sorted(SAMPLES))})")
+    return SAMPLES[name]
+
+
+def excluded_uids(name: str = NAME, others: Optional[Dict[str, Path]] = None) -> FrozenSet[str]:
+    """The uids of every sample *name* excludes, read from their committed
+    descriptions (ids only); *others* maps a sample name to its description
+    path (default: ``frozen_path``)."""
+    uids = set()
+    for other in _sample_of(name)["exclude"]:
+        path = (others or {}).get(other, frozen_path(other))
+        if not path.exists():
+            raise SystemExit(f"{name} excludes {other}, whose description {path.name} does not exist")
+        uids |= {r["uid"] for r in json.loads(path.read_text())["records"]}
+    return frozenset(uids)
 
 _P, _S, _O = "protect", "sensitive", "optional"
 LABEL_MAP: Dict[str, Tuple[str, Optional[str]]] = {
@@ -129,28 +169,33 @@ def gold(text: str, spans, dropped: Counter, merged: Counter) -> Dict[str, List[
     return out
 
 
-def sample(rows: Dict[tuple, dict], per_stratum: int = PER_STRATUM) -> List[tuple]:
+def sample(rows: Dict[tuple, dict], per_stratum: int = PER_STRATUM, name: str = NAME,
+           exclude: FrozenSet[str] = frozenset()) -> List[tuple]:
+    """``per_stratum`` keys from each stratum, drawn with the seed of *name*
+    from the sorted keys whose uid is not in *exclude*."""
     by: Dict[str, List[tuple]] = defaultdict(list)
     for key, r in rows.items():
-        by[stratum(r)].append(key)
+        if key[0] not in exclude:
+            by[stratum(r)].append(key)
     keys = []
     for s in sorted(by):
         pool = sorted(by[s])
-        keys += sorted(random.Random(derive_seed("external", NAME, s)).sample(pool, min(per_stratum, len(pool))))
+        keys += sorted(random.Random(derive_seed("external", name, s)).sample(pool, min(per_stratum, len(pool))))
     return keys
 
 
-def units_of(rows: Dict[tuple, dict], keys: List[tuple]) -> Tuple[List[dict], Counter, Counter]:
+def units_of(rows: Dict[tuple, dict], keys: List[tuple],
+             id_prefix: str = ID_PREFIX) -> Tuple[List[dict], Counter, Counter]:
     dropped, merged, units = Counter(), Counter(), []
     for i, key in enumerate(keys, 1):
         r = rows[key]
         spans = ast.literal_eval(r["spans"]) if isinstance(r["spans"], str) else r["spans"]
-        mid = f"{ID_PREFIX}-{i:04d}"
+        mid = f"{id_prefix}-{i:04d}"
         g = {"id": mid, "text": r["text"], "service_query": False, "category": "external", "lang": "en",
              **gold(r["text"], spans, dropped, merged)}
         units.append({"mid": mid, "conv": f"nemotron-{r['uid']}", "dataset": stratum(r), "task": r["domain"],
                       "slices": ("external",), "turn": 0, "gold": g})
-    errors = rw.lint([u["gold"] for u in units], rw.id_pattern(ID_PREFIX))
+    errors = rw.lint([u["gold"] for u in units], rw.id_pattern(id_prefix))
     if errors:
         raise SystemExit(f"{len(errors)} lint errors in the external units, first {errors[:3]}")
     return units, dropped, merged
@@ -161,39 +206,54 @@ def write_input(units: List[dict], path: Path = INPUT) -> str:
     return file_sha256(path)
 
 
-def build(parquet: Path = PARQUET, frozen: Path = FROZEN, src: Path = INPUT, per_stratum: int = PER_STRATUM,
-          sha: Optional[str] = SOURCE["sha256"]) -> dict:
+def build(parquet: Path = PARQUET, frozen: Optional[Path] = None, src: Optional[Path] = None,
+          per_stratum: int = PER_STRATUM, sha: Optional[str] = SOURCE["sha256"], name: str = NAME,
+          others: Optional[Dict[str, Path]] = None) -> dict:
+    spec = _sample_of(name)
+    frozen, src = frozen or frozen_path(name), src or input_path(name)
     if frozen.exists():
         raise SystemExit(f"{frozen.name} exists: the external sample is drawn once")
+    exclude = excluded_uids(name, others)
     rows = read_raw(parquet, sha)
-    keys = sample(rows, per_stratum)
-    units, dropped, merged = units_of(rows, keys)
-    counts = {name: dict(sorted(Counter(x.get("type") or "-" for u in units for x in u["gold"][name]).items()))
-              for name in ("protect", "sensitive", "optional")}
-    doc = {"name": NAME, "source": SOURCE, "per_stratum": per_stratum,
-           "seed": f"derive_seed('external', '{NAME}', stratum)", "label_map": {k: list(v) for k, v in sorted(LABEL_MAP.items())},
+    keys = sample(rows, per_stratum, name, exclude)
+    if any(k[0] in exclude for k in keys):                      # by construction; checked anyway
+        raise SystemExit(f"{name}: the draw reuses a uid of {', '.join(spec['exclude'])}")
+    units, dropped, merged = units_of(rows, keys, spec["id_prefix"])
+    counts = {lst: dict(sorted(Counter(x.get("type") or "-" for u in units for x in u["gold"][lst]).items()))
+              for lst in ("protect", "sensitive", "optional")}
+    doc = {"name": name, "source": SOURCE, "per_stratum": per_stratum,
+           "seed": f"derive_seed('external', '{name}', stratum)", "label_map": {k: list(v) for k, v in sorted(LABEL_MAP.items())},
            "strata": dict(sorted(Counter(u["dataset"] for u in units).items())),
            "records": [{"mid": u["mid"], "uid": k[0], "locale": k[1], "stratum": u["dataset"],
                         "text_sha256": sha256(u["gold"]["text"])} for u, k in zip(units, keys)],
            "values": counts, "dropped_not_whole_word": dict(sorted(dropped.items())),
            "merged_duplicate_values": dict(sorted(merged.items())), "arm_input_sha256": write_input(units, src)}
+    if spec["exclude"]:
+        doc["excluded"] = {"samples": list(spec["exclude"]), "uids": len(exclude)}
     frozen.parent.mkdir(parents=True, exist_ok=True)
     frozen.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n")
     return doc
 
 
-def load(parquet: Path = PARQUET, frozen: Path = FROZEN, src: Path = INPUT,
-         sha: Optional[str] = SOURCE["sha256"]) -> dict:
+def load(parquet: Path = PARQUET, frozen: Optional[Path] = None, src: Optional[Path] = None,
+         sha: Optional[str] = SOURCE["sha256"], name: str = NAME, others: Optional[Dict[str, Path]] = None) -> dict:
     """``{units, src, input_sha, corpus}`` rebuilt from the raw file, refusing
-    any record or input whose hash moved from the committed description."""
+    any record or input whose hash moved from the committed description, and
+    any record that reuses a uid of a sample *name* excludes."""
+    spec = _sample_of(name)
+    frozen, src = frozen or frozen_path(name), src or input_path(name)
     if not frozen.exists():
         raise SystemExit(f"{frozen.name} does not exist: build the sample first (--build)")
     doc = json.loads(frozen.read_text())
     if doc["label_map"] != {k: list(v) for k, v in sorted(LABEL_MAP.items())}:
         raise SystemExit("LABEL_MAP differs from the one the sample was built with")
+    exclude = excluded_uids(name, others)
+    shared = sorted({r["uid"] for r in doc["records"]} & exclude)
+    if shared:
+        raise SystemExit(f"{name}: {len(shared)} record groups also belong to {', '.join(spec['exclude'])}")
     rows = read_raw(parquet, sha)
     keys = [(r["uid"], r["locale"]) for r in doc["records"]]
-    units, _d, _m = units_of(rows, keys)
+    units, _d, _m = units_of(rows, keys, spec["id_prefix"])
     for u, r in zip(units, doc["records"]):
         if u["mid"] != r["mid"] or sha256(u["gold"]["text"]) != r["text_sha256"]:
             raise SystemExit(f"{r['mid']}: its text differs from the committed hash")
@@ -207,12 +267,38 @@ def load(parquet: Path = PARQUET, frozen: Path = FROZEN, src: Path = INPUT,
             "description": doc}
 
 
+def available(name: str = NAME, parquet: Path = PARQUET, sha: Optional[str] = SOURCE["sha256"],
+              others: Optional[Dict[str, Path]] = None, per_stratum: int = PER_STRATUM) -> dict:
+    """Records left per stratum for *name* once its excluded uids are removed,
+    read from the key columns only (no text, no spans)."""
+    exclude = excluded_uids(name, others)
+    if not parquet.exists():
+        raise SystemExit(f"{parquet} is missing: it was downloaded in Phase 0 ({SOURCE['repo']}@{SOURCE['revision'][:12]})")
+    if sha and file_sha256(parquet) != sha:
+        raise SystemExit(f"{parquet.name}: SHA-256 differs from the pinned download")
+    import pandas as pd
+    df = pd.read_parquet(parquet, columns=["uid", "locale", "document_format"])
+    left = Counter(f"{loc}-{fmt}" for uid, loc, fmt in zip(df["uid"], df["locale"], df["document_format"])
+                   if uid not in exclude)
+    strata = dict(sorted(left.items()))
+    return {"name": name, "records": int(len(df)), "excluded_uids": len(exclude), "left": strata,
+            "per_stratum": per_stratum, "enough": bool(strata) and min(strata.values()) >= per_stratum}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--build", action="store_true", required=True)
-    ap.parse_args(argv)
-    doc = build()
-    print(f"{NAME}: {len(doc['records'])} records {doc['strata']}; protect {doc['values']['protect']}; "
+    what = ap.add_mutually_exclusive_group(required=True)
+    what.add_argument("--build", action="store_true", help="draw the sample once and write its description")
+    what.add_argument("--check", action="store_true", help="count the records left per stratum; draw nothing")
+    ap.add_argument("--name", choices=sorted(SAMPLES), default=NAME)
+    args = ap.parse_args(argv)
+    if args.check:
+        a = available(args.name)
+        print(f"{a['name']}: {a['records']} records, {a['excluded_uids']} uids excluded; left per stratum {a['left']}; "
+              f"{'enough' if a['enough'] else 'NOT enough'} for {a['per_stratum']} each")
+        return 0 if a["enough"] else 1
+    doc = build(name=args.name)
+    print(f"{args.name}: {len(doc['records'])} records {doc['strata']}; protect {doc['values']['protect']}; "
           f"dropped {sum(doc['dropped_not_whole_word'].values())}, merged {sum(doc['merged_duplicate_values'].values())}")
     return 0
 

@@ -23,6 +23,8 @@ def test_library_defaults():
     assert cfg.context_guard_enabled is False      # V3: the tagger reads names; ContextGuard is opt-in
     assert cfg.context_guard_model == "dslim/distilbert-NER"
     assert cfg.context_guard_device == -1
+    from surrogateshield.core.detection import config as C
+    assert (cfg.tagger_model, cfg.tagger_revision, cfg.tagger_device) == (C.PII_TAGGER_MODEL, C.PII_TAGGER_REVISION, -1)
     assert cfg.entity_trace_high_threshold == 0.90     # balanced's spaCy type gates
     assert cfg.entity_trace_low_threshold == 0.70
     assert cfg.context_guard_threshold == 0.70
@@ -38,7 +40,7 @@ def test_root_config_defaults_and_validation():
     assert root_config.ADDRESS_SHIFT_RANGE == 1
     assert root_config.FUZZY_MATCH_THRESHOLD == 85
     assert root_config.CONTEXT_GUARD_DEVICE == -1
-    assert root_config.VERSION == "2.1.0"
+    assert root_config.VERSION == "1.9.0"
     root_config.validate_config()  # must not raise on shipped defaults
 
 
@@ -60,6 +62,21 @@ def test_custom_values_accepted():
     assert cfg.pii_off == ["phone", "name", "location"]
     assert cfg.context_guard_model == "dslim/bert-base-NER"
     assert cfg.context_guard_device == 0
+
+
+def test_tagger_settings_reach_the_detection_config():
+    from surrogateshield._state import Config, effective_detection
+    from surrogateshield.core.detection import config as C
+    d = Config()
+    try:
+        ss.config(tagger_model="org/tagger", tagger_device="mps")
+        st = effective_detection(cfg).stage("pii_tagger")
+        assert (st.model, st.revision, st.options["device"]) == ("org/tagger", None, "mps")
+        ss.config(tagger_model=d.tagger_model, tagger_revision="sha256:" + "a" * 64, tagger_device=0)
+        st = effective_detection(cfg).stage("pii_tagger")
+        assert (st.model, st.revision, st.options["device"]) == (C.PII_TAGGER_MODEL, "sha256:" + "a" * 64, "cuda:0")
+    finally:
+        ss.config(tagger_model=d.tagger_model, tagger_revision=d.tagger_revision, tagger_device=d.tagger_device)
 
 
 @pytest.mark.parametrize("mode", ["shift", "replace", "auto"])
@@ -86,6 +103,10 @@ def test_all_address_modes_accepted(mode):
     (dict(spacy_model=""), "spacy_model"),
     (dict(context_guard_model="  "), "context_guard_model"),
     (dict(context_guard_device="gpu"), "context_guard_device"),
+    (dict(tagger_model=""), "tagger_model"),
+    (dict(tagger_revision=""), "tagger_revision"),
+    (dict(tagger_device=True), "tagger_device"),
+    (dict(tagger_device=" "), "tagger_device"),
     (dict(pii_off=["nonsense_type"]), "pii_off"),
     (dict(pii_mem="/definitely/not/a/real/dir"), "pii_mem"),
 ])
