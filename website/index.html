@@ -1548,7 +1548,7 @@
 
       ◆  ────────────────────────────────────  ◆</pre>
       <div class="hero-meta">
-        <span>v / <strong>2.1.0</strong></span>
+        <span>v / <strong>1.9.0</strong></span>
         <span>build / <strong>2026.10</strong></span>
         <span>python / <strong>≥ 3.9</strong></span>
         <span>pip / <strong style="color: var(--neon);">./python-library</strong></span>
@@ -1907,11 +1907,11 @@
         <h3 class="cascade-name">PIITagger</h3>
         <div class="cascade-model">DeBERTa-v3-small · pii-tagger-dv3s-40k</div>
         <p class="cascade-desc">
-          A token tagger fine-tuned for personal data. It reads names, organisations, places, addresses, phones, handles, IDs and credentials, and long text is read in overlapping windows. The weights are loaded from a local folder. If they are missing, <code>mask()</code> raises <code>DetectorUnavailable</code> instead of sending the text with less protection. The <code>classic</code> preset runs without it.
+          A token tagger fine-tuned for personal data. It reads names, organisations, places, addresses, phones, handles, IDs and credentials, and long text is read in overlapping windows. The weights (~565 MB) are on <a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Hugging Face</a>: they download once, at a fixed commit, must match their SHA-256 pin, and then load from the local cache with no network. If they cannot be fetched, <code>mask()</code> raises <code>DetectorUnavailable</code> instead of sending the text with less protection. The <code>classic</code> preset runs without it.
         </p>
         <div class="cascade-meta">
           <div><span>window</span><span style="color: var(--neon);">256 tokens · stride 64</span></div>
-          <div><span>weights</span><span>$SURROGATESHIELD_MODELS</span></div>
+          <div><span>weights</span><span>Hugging Face · sha256-pinned</span></div>
           <div><span>server</span><span>none, in-process</span></div>
         </div>
       </div>
@@ -2552,7 +2552,7 @@ Display to user</pre>
 │   └── <span class="dir">surrogateshield/</span>
 │       ├── <span class="path">__init__.py</span>      <span class="comment"># config · scan · mask · unmask · forget · flush</span>
 │       ├── <span class="path">session.py</span>       <span class="comment"># Session — sync and async</span>
-│       ├── <span class="path">cli.py</span>           <span class="comment"># scan · mask · unmask · bench · doctor</span>
+│       ├── <span class="path">cli.py</span>           <span class="comment"># scan · mask · unmask · bench · doctor · download</span>
 │       └── <span class="dir">core/</span>
 │           ├── <span class="dir">detection/</span>   <span class="comment"># SentinelLayer</span>
 │           │   ├── <span class="path">pipeline.py</span>      <span class="comment"># stages, passes, relation gate, resolver</span>
@@ -2619,9 +2619,9 @@ Display to user</pre>
 <span class="prompt">$ </span>pip install ./python-library
 <span class="prompt">$ </span>python -m spacy download en_core_web_lg
 
-<span class="c"># Put the PIITagger weights where the library looks</span>
-<span class="c"># ($SURROGATESHIELD_MODELS, default ~/.cache/surrogateshield/models)</span>
-<span class="prompt">$ </span>PYTHONPATH=.:python-library python -m bench.tagger.install <span class="v">path/to/dv3s-40k</span>
+<span class="c"># Fetch the PIITagger weights now (~565 MB, Hugging Face);</span>
+<span class="c"># otherwise the first scan downloads them once</span>
+<span class="prompt">$ </span>surrogateshield download
 
 <span class="c"># Check every stage</span>
 <span class="prompt">$ </span>surrogateshield doctor
@@ -2632,7 +2632,7 @@ Display to user</pre>
     </div>
 
     <div class="callout" style="margin-top: 28px;">
-      <strong>No tagger weights?</strong> The default preset stops with <code>DetectorUnavailable</code> rather than run without them. Use <code>preset="classic"</code>, which needs only spaCy and ContextGuard's <code>dslim/distilbert-NER</code> (downloaded from Hugging Face on first use). It leaked 2.5% on the benchmark, still far below GLiNER-PII's 9.1%. To use only the engine in your own code, see <a href="#library" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Library</a>.
+      <strong>No tagger weights?</strong> The default preset downloads them from Hugging Face once; if it cannot (no network, or <code>HF_HUB_OFFLINE</code> with nothing cached), it stops with <code>DetectorUnavailable</code> rather than run without them. Use <code>preset="classic"</code>, which needs only spaCy and ContextGuard's <code>dslim/distilbert-NER</code> (downloaded from Hugging Face on first use). It leaked 2.5% on the benchmark, still far below GLiNER-PII's 9.1%. To use only the engine in your own code, see <a href="#library" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">Library</a>.
     </div>
 
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Supported providers</h3>
@@ -2728,12 +2728,15 @@ Display to user</pre>
 <span class="c"># Optional: Rich colour tables for detected PII / surrogates</span>
 <span class="prompt">$ </span>pip install <span class="s">"./python-library[display]"</span>
 
+<span class="c"># Optional: fetch the PIITagger weights now (else on first use)</span>
+<span class="prompt">$ </span>surrogateshield download
+
 <span class="c"># Check that every stage loads</span>
 <span class="prompt">$ </span>surrogateshield doctor</pre>
     </div>
 
     <div class="callout">
-      <strong>Models.</strong> The default preset, <code>balanced</code>, needs spaCy's <code>en_core_web_lg</code> and the PIITagger weights in <code>$SURROGATESHIELD_MODELS</code> (default <code>~/.cache/surrogateshield/models</code>). If either is missing, <code>mask()</code> raises <code>DetectorUnavailable</code> and sends nothing. On a machine without the tagger weights, use <code>preset="classic"</code>.
+      <strong>Models.</strong> The default preset, <code>balanced</code>, needs spaCy's <code>en_core_web_lg</code> and the PIITagger weights, <a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger" style="color: var(--neon); border-bottom: 1px dashed var(--neon-dim);">sherwinvishesh/surrogateshield-pii-tagger</a> on Hugging Face (~565 MB, MIT). The weights download once on first use, or with <code>surrogateshield download</code>, and are checked against their SHA-256 pin; a folder of the same name under <code>$SURROGATESHIELD_MODELS</code> is used instead when there is one. If either model is missing or cannot be fetched, <code>mask()</code> raises <code>DetectorUnavailable</code> and sends nothing. On a machine without the tagger weights, use <code>preset="classic"</code>.
     </div>
 
     <h3 style="margin-top: 64px; font-size: 18px; font-weight: 500; letter-spacing: -0.01em;">Public API</h3>
@@ -2920,6 +2923,7 @@ shield.<span class="k">flush</span>()</pre>
           <tr><td class="mono">entity_trace_fallback_threshold</td><td class="mono" style="color: var(--text);">0.75</td><td style="color: var(--muted);">Promotes a borderline entity when ContextGuard is off</td></tr>
           <tr><td class="mono">fuzzy_threshold</td><td class="mono" style="color: var(--text);">85</td><td style="color: var(--muted);">rapidfuzz <code>partial_ratio</code> (0–100) for pass 3 of <code>unmask()</code> — below 70 not recommended</td></tr>
           <tr><td class="mono">context_guard_model / _device</td><td class="mono" style="color: var(--text);">dslim/distilbert-NER · -1</td><td style="color: var(--muted);">ContextGuard model and device (-1 = CPU, ≥ 0 = GPU id)</td></tr>
+          <tr><td class="mono">tagger_model / _revision / _device</td><td class="mono" style="color: var(--text);">pii-tagger-dv3s-40k · sha256:f9e58… · -1</td><td style="color: var(--muted);">PIITagger: a name, local folder or Hugging Face id; a <code>sha256:</code> pin or a commit; CPU, GPU id or <code>"mps"</code></td></tr>
         </tbody>
       </table>
     </div>
@@ -3080,7 +3084,7 @@ shield.<span class="k">flush</span>()</pre>
       </div>
     </div>
     <div class="colophon" style="width: 100%;">
-      <span>SurrogateShield · v2.1.0 · Apache-2.0 license</span>
+      <span>SurrogateShield · v1.9.0 · Apache-2.0 license</span>
       <span>built with python · spaCy · transformers · faker · cryptography · chromadb</span>
     </div>
   </div>

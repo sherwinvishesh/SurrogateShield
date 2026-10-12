@@ -77,7 +77,7 @@ Display to user
 
 ## Features
 
-- **Layered PII detection**: regex patterns on the text and on rewritten views of it → a DeBERTa PII tagger for names, organisations and places → spaCy for places, with distilbert-NER as an optional extra pass; presets `balanced`, `strict`, `fast` and `classic`
+- **Layered PII detection**: regex patterns on the text and on rewritten views of it → a DeBERTa PII tagger for names, organisations and places → spaCy for places (and for a name only where no stage named anyone), with distilbert-NER as an optional extra pass; presets `balanced`, `strict`, `fast` and `classic`
 - **Realistic surrogate generation**: fake names look like names, fake SSNs pass format checks, fake Bitcoin addresses match Base58 format
 - **AES-256-GCM encrypted ShadowMap**: surrogate-to-original mappings never stored in plaintext
 - **Multi-provider support**: Claude, Gemini, ChatGPT, or fully offline via Ollama
@@ -99,7 +99,7 @@ Display to user
 
 The stages run in sequence: PatternScan, the canonicaliser (the same patterns on rewritten views such as "priya dot raman at gmail dot com"), EntityTrace, ContextGuard and the PII tagger, then the structural passes, a relation gate and a resolver. Each stage reads the text with what earlier stages found masked out, so no two stages fight over the same value. Which stages run is set by the detection preset: `balanced` (default), `strict`, `fast` or `classic` (see [`CONFIGURATION.md`](CONFIGURATION.md)). The code lives in `python-library/surrogateshield/core/`; the top-level `detection/`, `generation/`, `storage/` and `reconstruction/` modules are aliases of it, or thin wrappers that apply `config.py`.
 
-In `balanced`, the PII tagger (a DeBERTa-v3-small token classifier, weights in `$SURROGATESHIELD_MODELS`) reads names, organisations and places and adds to the patterns on phones, IDs, addresses, handles and credentials; spaCy reads places only; ContextGuard is off. On a machine without the tagger's weights, use the `classic` preset.
+In `balanced`, the PII tagger (a DeBERTa-v3-small token classifier, [`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger) on Hugging Face) reads names, organisations and places and adds to the patterns on phones, IDs, addresses, handles and credentials; spaCy reads places, and its names stand in only where no stage named anyone and the name is tied to a person; ContextGuard is off. Its weights (~565 MB) download once on first use, at a fixed commit, and are checked against their SHA-256 pin. On a machine that cannot fetch them, use the `classic` preset.
 
 #### PatternScan (`detection/pattern_scan.py`)
 
@@ -132,7 +132,7 @@ Pattern order matters; patterns claim character spans; later patterns cannot ove
 
 #### EntityTrace (`detection/entity_trace.py`)
 
-spaCy `en_core_web_lg` NER. Extracts `PERSON`, `GPE`, `LOC`, `ORG`, and `FAC` entities; in the default preset it is used for places only. Returns two tiers:
+spaCy `en_core_web_lg` NER. Extracts `PERSON`, `GPE`, `LOC`, `ORG`, and `FAC` entities; in the default preset it is used for places, and for names only as the ensemble fallback (a name tied to a person, in a message where no stage named anyone). Returns two tiers:
 
 - **Confirmed**: score ≥ 0.90 (promoted immediately)
 - **Borderline**: score 0.70–0.90 (passed to ContextGuard when it is on, otherwise kept at ≥ 0.75)
@@ -343,8 +343,9 @@ pip install -r requirements.txt
 # Also required by the Presidio comparison panel if you enable it.
 python -m spacy download en_core_web_lg
 
-# The PII tagger (default preset) reads its weights from
-# $SURROGATESHIELD_MODELS (default ~/.cache/surrogateshield/models).
+# The PII tagger (default preset) downloads once from Hugging Face
+# (sherwinvishesh/surrogateshield-pii-tagger, ~565 MB) on first use;
+# `surrogateshield download` fetches it now instead.
 # ContextGuard (dslim/distilbert-NER, ~250 MB) is off by default; it
 # downloads from HuggingFace Hub on first use only if you turn it on.
 
@@ -414,9 +415,15 @@ presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
 > the optional Presidio comparison panel. One download covers both:
 > `python -m spacy download en_core_web_lg`.
 >
-> **PII tagger weights:** read from `$SURROGATESHIELD_MODELS` (default
-> `~/.cache/surrogateshield/models`). Without them the default preset raises
-> `DetectorUnavailable`; the `classic` preset runs without them.
+> **PII tagger weights:** downloaded once from Hugging Face,
+> [`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger) (~565 MB, MIT), at a
+> fixed commit, then checked against their SHA-256 pin and read from the local
+> cache with no network. `surrogateshield download` fetches them ahead of time.
+> A folder of the same name under `$SURROGATESHIELD_MODELS` (default
+> `~/.cache/surrogateshield/models`) is used instead when there is one. If they
+> cannot be fetched (or `HF_HUB_OFFLINE` is set and they are not cached) the
+> default preset raises `DetectorUnavailable`; the `classic` preset runs
+> without them.
 >
 > **ContextGuard model:** `dslim/distilbert-NER` (~250 MB) is off by default
 > and is downloaded from HuggingFace Hub on first use only when it is turned on.
@@ -872,7 +879,7 @@ library's public API. No test needs an API key; provider clients are fakes.
 
 ## Python Library
 
-SurrogateShield is also available as a standalone pip package (version 2.1.0); no dashboard, no CLI, just the core detection and masking pipeline as a clean Python API. The package is self-contained: it does not import from the main application, and the application is built on it.
+SurrogateShield is also available as a standalone pip package (version 1.9.0); no dashboard, no CLI, just the core detection and masking pipeline as a clean Python API. The package is self-contained: it does not import from the main application, and the application is built on it.
 
 Install it from the repository root, then the spaCy model:
 
@@ -881,7 +888,7 @@ pip install ./python-library
 python -m spacy download en_core_web_lg
 ```
 
-The PII tagger used by the default `balanced` preset loads its weights from `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`); if they are missing, detection raises `DetectorUnavailable` instead of sending unmasked text. The `classic` preset works without them. The ContextGuard model (`dslim/distilbert-NER`) is off by default and downloads from HuggingFace Hub on first use only when `context_guard_enabled=True` or a preset that uses it is chosen.
+The PII tagger used by the default `balanced` preset is downloaded once from Hugging Face ([`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger), ~565 MB) the first time it is needed, or ahead of time with `surrogateshield download`; its weights are checked against their SHA-256 pin, and later runs read the local cache with no network. If they cannot be fetched, detection raises `DetectorUnavailable` instead of sending unmasked text. The `classic` preset works without them. The ContextGuard model (`dslim/distilbert-NER`) is off by default and downloads from HuggingFace Hub on first use only when `context_guard_enabled=True` or a preset that uses it is chosen.
 
 
 ### Quick start

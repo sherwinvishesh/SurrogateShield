@@ -24,9 +24,9 @@ SurrogateShield runs a layered detection pipeline on every piece of text before 
 
 **PatternScan and the canonicaliser** use regular expressions to detect structurally identifiable PII: email addresses, phone numbers, SSNs and other IDs, credit card numbers, street addresses, IP addresses, URLs, handles, API keys and other credentials, dates, ages, postal codes, and cryptocurrency wallet addresses. The canonicaliser rewrites the text into extra views first ("priya dot raman at northwind dot io", spelled-out digits, full-width characters) so the same patterns also find values written the way people speak them. Pattern matching is done first so that these spans are masked before the models see the text.
 
-**The PII tagger** (a DeBERTa-v3-small token classifier) reads names, organisations and places, and adds to the patterns on phones, IDs, addresses, handles and credentials. Its weights are loaded from `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`).
+**The PII tagger** (a DeBERTa-v3-small token classifier) reads names, organisations and places, and adds to the patterns on phones, IDs, addresses, handles and credentials. It lives on Hugging Face as [`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger) (MIT, ~565 MB): the first time it is needed it downloads once, at a fixed commit, and its weights are checked against the SHA-256 pin in the detection config.
 
-**EntityTrace** loads a spaCy NER model (en_core_web_lg by default). In the `balanced` preset it reads places only; in `classic` it also reads names and organisations. It skips any span already found by PatternScan.
+**EntityTrace** loads a spaCy NER model (en_core_web_lg by default). In the `balanced` preset it reads places, and its names stand in only where no stage named anyone and the name is tied to a person (`options.ensemble`); in `classic` it reads names and organisations outright. It skips any span already found by PatternScan.
 
 **ContextGuard** runs a HuggingFace transformer model (dslim/distilbert-NER, ~250 MB) as an extra pass. It is off by default and is used by the `strict` and `classic` presets.
 
@@ -48,7 +48,7 @@ The original → surrogate mapping is inverted (surrogate → original) and stor
 
 ## Installation
 
-This README describes version 2.1.0. Install it from the repository root:
+This README describes version 1.9.0. Install it from the repository root:
 
 ```bash
 pip install ./python-library
@@ -74,7 +74,13 @@ If you want the Rich terminal output (colour tables showing detected PII and sur
 pip install "./python-library[display]"
 ```
 
-The PII tagger used by the default `balanced` preset reads its weights from `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`). Without them, `mask()` raises `DetectorUnavailable`; the `classic` preset (`shield.config(detection="classic")`) works without them.
+The PII tagger used by the default `balanced` preset downloads once from Hugging Face ([`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger), ~565 MB) on the first `mask()` or `scan()`, into the Hugging Face cache (`~/.cache/huggingface/hub`). To fetch it now instead, for example before going offline or in a container build:
+
+```bash
+surrogateshield download
+```
+
+Its weights are checked against their SHA-256 pin, and later runs read the cache with no network. A folder of the same name under `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`) is used instead when there is one. If the weights cannot be fetched (or `HF_HUB_OFFLINE=1` is set and they are not cached), `mask()` raises `DetectorUnavailable`; the `classic` preset (`shield.config(detection="classic")`) works without them.
 
 The HuggingFace ContextGuard model (dslim/distilbert-NER, ~250 MB) is off by default. It is downloaded on first use only when `context_guard_enabled=True` (or a preset that uses it) is set, and cached by the transformers library in your local HuggingFace cache directory. Offline without that cache, `mask()` then raises `DetectorUnavailable`.
 
@@ -90,6 +96,7 @@ Installing the package also installs the following:
 | `rapidfuzz` | Fuzzy string matching in the reconstruction pass |
 | `spacy` | Named-entity recognition (EntityTrace) |
 | `transformers` | The PII tagger and the optional ContextGuard pass |
+| `huggingface_hub` | Downloads the PII tagger once, at its pinned commit |
 | `torch` | Required backend for the transformers pipeline |
 
 The spaCy model `en_core_web_lg` is installed separately with `python -m spacy download en_core_web_lg`. Rich is optional (`pip install "./python-library[display]"`) and only affects terminal output formatting.
@@ -531,8 +538,9 @@ shield.config(
 
     spacy_model="en_core_web_lg",
     # The spaCy model EntityTrace loads. In the default detection config
-    # ("balanced") spaCy reads places only; the PII tagger reads names and
-    # organisations. Install it once with python -m spacy download en_core_web_lg.
+    # ("balanced") spaCy reads places, and stands in on a name only where no
+    # stage named anyone; the PII tagger reads names and organisations.
+    # Install it once with python -m spacy download en_core_web_lg.
 
     context_guard_enabled=False,
     # ContextGuard, a second NER pass with dslim/distilbert-NER (~250 MB),
@@ -577,6 +585,21 @@ shield.config(
 
     context_guard_device=-1,
     # Device for ContextGuard inference: -1 = CPU (default), 0+ = GPU id.
+
+    tagger_model="pii-tagger-dv3s-40k",
+    # The PII tagger: its name (a folder under $SURROGATESHIELD_MODELS, else
+    # downloaded from sherwinvishesh/surrogateshield-pii-tagger), a local
+    # folder holding a trained token classifier, or another Hugging Face
+    # model id ("org/name"). A model other than the default drops its pin.
+
+    tagger_revision="sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    # "sha256:<hex>" checks the weights file against that digest; any other
+    # value is a Hugging Face commit or branch to load; None loads the
+    # model's default branch unchecked.
+
+    tagger_device=-1,
+    # Device for the tagger: -1 = CPU (default), 0+ = GPU id, or a torch
+    # device string ("mps", "cuda:1").
 
     detection=None,
     # The detection config: a preset name ("balanced", "fast", "strict",
@@ -632,6 +655,10 @@ Ends the current session: clears its shadow map (and deletes its file in persist
 **Limitations:** it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test. Every number, with its command, is in [`bench/results/README.md`](../bench/results/README.md).
 
 ## Troubleshooting
+
+**PII tagger download on first run**
+
+The first `mask()` or `scan()` with the default preset downloads the tagger (~565 MB) from Hugging Face and logs one line saying so. It is cached in `~/.cache/huggingface/hub` and checked against its pin; later runs read it from there with no network. `surrogateshield download` does this ahead of time, and `surrogateshield doctor` reports whether it is cached. Behind a proxy or mirror, the usual `HF_ENDPOINT` and `HF_HOME` variables apply.
 
 **ContextGuard model download on first run**
 

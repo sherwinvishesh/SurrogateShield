@@ -477,7 +477,7 @@
     <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
       <li>Python 3.9 or newer (the test matrix covers 3.9 and 3.13)</li>
       <li>pip and a virtual environment</li>
-      <li>A few GB of disk for torch, transformers and the spaCy model <code>en_core_web_lg</code></li>
+      <li>A few GB of disk for torch, transformers, the spaCy model <code>en_core_web_lg</code> and the PII tagger (about 565 MB)</li>
       <li>About 1.4 GB of RAM while the default preset runs (measured RSS 1,348 MB)</li>
       <li>No GPU. Everything runs on the CPU; a GPU index can be set per stage with <code>device</code></li>
       <li>An API key for the provider you chat with (dashboard only). The library never calls an LLM provider itself</li>
@@ -522,9 +522,9 @@ python -m venv .venv
       <div class="step">
         <div class="step-num"><div class="num">4</div><div class="line"></div></div>
         <div class="step-body">
-          <h3>Install the PII tagger's weights</h3>
-          <pre><code>PYTHONPATH=.:python-library python -m bench.tagger.install bench/tagger/build/models/dv3s-40k</code></pre>
-          <p>The default preset uses a DeBERTa-v3-small token classifier, <code>pii-tagger-dv3s-40k</code>. Its weights are not downloaded from anywhere: they are a local folder. The command copies the folder to <code>$SURROGATESHIELD_MODELS/pii-tagger-dv3s-40k</code> (default <code>~/.cache/surrogateshield/models</code>), checks the weights against the SHA-256 pin <code>f9e5821151ac…</code> and prints the revision. If you do not have the weights, use the <code>classic</code> preset (step 6).</p>
+          <h3>Fetch the PII tagger (optional)</h3>
+          <pre><code>surrogateshield download</code></pre>
+          <p>The default preset uses a DeBERTa-v3-small token classifier, <code>pii-tagger-dv3s-40k</code>, published on Hugging Face as <a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger">sherwinvishesh/surrogateshield-pii-tagger</a> (MIT, about 565 MB). Without this step the first scan downloads it once; the command does it now. It is fetched at commit <code>c51cc8e09bd6</code>, checked against the SHA-256 pin <code>f9e5821151ac…</code>, and kept in the Hugging Face cache, so later runs make no network request. A folder of the same name under <code>$SURROGATESHIELD_MODELS</code> (default <code>~/.cache/surrogateshield/models</code>) is used instead when there is one. If you cannot fetch the weights, use the <code>classic</code> preset (step 6).</p>
         </div>
       </div>
       <div class="step">
@@ -541,7 +541,7 @@ chmod 600 .env</code></pre>
         <div class="step-body">
           <h3>Check the install</h3>
           <pre><code>surrogateshield doctor --smoke</code></pre>
-          <p><code>doctor</code> prints the active preset and its hash, each stage with its model and thresholds, and one <code>[  ok]</code> / <code>[warn]</code> / <code>[FAIL]</code> row per check: Python version, required packages, the spaCy model and licence, the ContextGuard cache, the tagger folder and pin, and the permissions of <code>~/.surrogateshield</code> (0700) and <code>device.key</code> (0600). <code>--smoke</code> masks a sample e-mail and SSN. Without the tagger folder the tagger row is <code>[FAIL]</code>. Then either install the weights or run with <code>SURROGATESHIELD_PRESET=classic</code>, which needs only spaCy and distilbert-NER.</p>
+          <p><code>doctor</code> prints the active preset and its hash, each stage with its model and thresholds, and one <code>[  ok]</code> / <code>[warn]</code> / <code>[FAIL]</code> row per check: Python version, required packages, the spaCy model and licence, the ContextGuard cache, the tagger's download or folder and its pin, and the permissions of <code>~/.surrogateshield</code> (0700) and <code>device.key</code> (0600). <code>--smoke</code> masks a sample e-mail and SSN. Before the tagger is downloaded its row is <code>[warn]</code> (the first scan fetches it); with <code>HF_HUB_OFFLINE=1</code> set, or weights that do not match the pin, it is <code>[FAIL]</code>. Then either run <code>surrogateshield download</code> while online or run with <code>SURROGATESHIELD_PRESET=classic</code>, which needs only spaCy and distilbert-NER.</p>
         </div>
       </div>
       <div class="step">
@@ -559,25 +559,26 @@ pip install ollama                            # local models through Ollama</cod
     <h3>Install only the library</h3>
     <pre><code>pip install ./python-library
 python -m spacy download en_core_web_lg
-PYTHONPATH=.:python-library python -m bench.tagger.install bench/tagger/build/models/dv3s-40k
+surrogateshield download        # optional: the PII tagger now, else on first use
 surrogateshield doctor</code></pre>
-    <p>The library is installed from the repository folder. Its <code>pyproject.toml</code> pulls in faker, cryptography, rapidfuzz, spaCy, transformers and torch. The extra <code>pip install "./python-library[display]"</code> adds <code>rich</code>. See <a href="#library-install">Library Installation</a>.</p>
+    <p>The library is installed from the repository folder. Its <code>pyproject.toml</code> pulls in faker, cryptography, rapidfuzz, spaCy, transformers, huggingface_hub and torch. The extra <code>pip install "./python-library[display]"</code> adds <code>rich</code>. See <a href="#library-install">Library Installation</a>.</p>
 
     <h3>ContextGuard model</h3>
-    <p>ContextGuard (<code>dslim/distilbert-NER</code>, revision <code>dfa2838a…</code>, about 250 MB) is <strong>off</strong> in the default preset. It is used by <code>strict</code> and <code>classic</code>, or when you set <code>context_guard_enabled=True</code>. It is loaded from the Hugging Face cache at its pinned revision. If it is not cached, it is downloaded the first time a stage needs it, unless <code>HF_HUB_OFFLINE=1</code> is set. In that case detection fails closed with <code>DetectorUnavailable</code>. To fetch it ahead of time, run one scan with it switched on while online, for example <code>surrogateshield scan --preset strict "warm up"</code>.</p>
+    <p>ContextGuard (<code>dslim/distilbert-NER</code>, revision <code>dfa2838a…</code>, about 250 MB) is <strong>off</strong> in the default preset. It is used by <code>strict</code> and <code>classic</code>, or when you set <code>context_guard_enabled=True</code>. It is loaded from the Hugging Face cache at its pinned revision. If it is not cached, it is downloaded the first time a stage needs it, unless <code>HF_HUB_OFFLINE=1</code> is set. In that case detection fails closed with <code>DetectorUnavailable</code>. To fetch it ahead of time, run <code>surrogateshield download --preset strict</code> (or <code>download --all</code>) while online.</p>
 
     <h3>Full dependency list</h3>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Package</th><th>Version</th><th>Needed by</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td>surrogateshield</td><td>2.1.0 (editable)</td><td>both</td><td>The library: detection, surrogates, storage, restore</td></tr>
+          <tr><td>surrogateshield</td><td>1.9.0 (editable)</td><td>both</td><td>The library: detection, surrogates, storage, restore</td></tr>
           <tr><td>faker</td><td>≥24</td><td>library</td><td>Locale-aware fallbacks for surrogate values</td></tr>
           <tr><td>cryptography</td><td>≥42</td><td>library</td><td>AES-256-GCM and HKDF-SHA256 for the ShadowMap and transcripts</td></tr>
           <tr><td>rapidfuzz</td><td>≥3.6</td><td>library</td><td>Fuzzy matching in ResolvePass</td></tr>
           <tr><td>spacy</td><td>≥3.7 (app pins &lt;3.9)</td><td>library</td><td>EntityTrace NER</td></tr>
           <tr><td>en_core_web_lg</td><td>3.8.0</td><td>library</td><td>The spaCy model (MIT)</td></tr>
           <tr><td>transformers</td><td>≥4.40</td><td>library</td><td>PII tagger and ContextGuard</td></tr>
+          <tr><td>huggingface_hub</td><td>≥0.23</td><td>library</td><td>Downloads the PII tagger at its pinned commit, and ContextGuard</td></tr>
           <tr><td>torch</td><td>≥2.0</td><td>library</td><td>Inference for both transformer stages</td></tr>
           <tr><td>rich</td><td>≥13.7</td><td>app, library extra <code>display</code></td><td>Terminal UI and tables</td></tr>
           <tr><td>typer</td><td>≥0.12</td><td>app</td><td>The <code>main.py</code> command line</td></tr>
@@ -630,8 +631,8 @@ surrogateshield doctor</code></pre>
           <tr><td><code>SURROGATESHIELD_PRESET</code></td><td>unset (<code>balanced</code>)</td><td><code>fast</code>, <code>balanced</code>, <code>strict</code> or <code>classic</code>. It applies when no detection config is set in code. When it is set, the dashboard uses it instead of the detection values in <code>config.py</code></td></tr>
           <tr><td><code>SURROGATESHIELD_DETECTION_CONFIG</code></td><td>unset</td><td>Path to a JSON detection config, partial or whole. It is merged onto the preset. See <a href="#detection-config">DetectionConfig</a></td></tr>
           <tr><td><code>SURROGATESHIELD_HOME</code></td><td><code>~/.surrogateshield</code></td><td>Holds <code>device.key</code>, <code>sessions/</code> (CLI maps), <code>conversations/</code>, <code>settings.json</code> and <code>rag/</code>. It is created with mode 0700</td></tr>
-          <tr><td><code>SURROGATESHIELD_MODELS</code></td><td><code>~/.cache/surrogateshield/models</code></td><td>Where the PII tagger's folder is looked up</td></tr>
-          <tr><td><code>HF_HUB_OFFLINE</code></td><td>unset</td><td>When it is <code>1</code>, ContextGuard never downloads. An uncached model then fails closed</td></tr>
+          <tr><td><code>SURROGATESHIELD_MODELS</code></td><td><code>~/.cache/surrogateshield/models</code></td><td>Where a local PII tagger folder is looked up first; without one the tagger comes from Hugging Face</td></tr>
+          <tr><td><code>HF_HUB_OFFLINE</code></td><td>unset</td><td>When it is <code>1</code>, neither the PII tagger nor ContextGuard downloads. An uncached model then fails closed</td></tr>
           <tr><td><code>TRANSFORMERS_OFFLINE</code></td><td>unset</td><td>Set by <code>offline_eval.py</code> and the benchmark arms, together with <code>HF_HUB_OFFLINE</code></td></tr>
           <tr><td><code>HF_HOME</code> / <code>HF_HUB_CACHE</code></td><td>Hugging Face defaults</td><td>Where cached transformer models live</td></tr>
           <tr><td><code>PYTHONHASHSEED</code></td><td>—</td><td>The live benchmark scripts set it to <code>0</code> and re-exec themselves so runs repeat</td></tr>
@@ -1015,7 +1016,7 @@ I'll call Priya Raman at +1 415 555 0142.</code></pre>
       <table>
         <thead><tr><th>Arm</th><th>What runs</th><th>Replacement</th><th>Settings</th></tr></thead>
         <tbody>
-          <tr><td>SurrogateShield</td><td>This library, <code>benchmark()</code> config (balanced with every address replaced, hash <code>a1abaa92142b0db9</code>)</td><td>Realistic surrogates, restored afterwards</td><td>Defaults</td></tr>
+          <tr><td>SurrogateShield</td><td>This library, <code>benchmark()</code> config (balanced with every address replaced, hash <code>a1abaa92142b0db9</code> as measured; <code>19baf5415a894c80</code> since the ensemble fallback)</td><td>Realistic surrogates, restored afterwards</td><td>Defaults</td></tr>
           <tr><td>GLiNER-PII @0.5</td><td><code>urchade/gliner_multi_pii-v1</code> (Apache-2.0), gliner 0.2.29, zero-shot NER with the model card's labels</td><td><code>[LABEL]</code></td><td>Threshold 0.5 (the model card's); 200-word windows, 30-word overlap</td></tr>
           <tr><td>GLiNER-PII @0.3</td><td>The same model at its best development setting</td><td><code>[LABEL]</code></td><td>Threshold 0.3, chosen by a sweep of 0.3–0.6 × two label sets on the dev split before test-2 was opened, so it is the tool's tuned best</td></tr>
           <tr><td>Presidio</td><td>Presidio as shipped, default recognisers, spaCy <code>en_core_web_lg</code></td><td><code>[ENTITY_TYPE]</code></td><td>Score threshold 0.4; overlaps go to the longest span, then the highest score</td></tr>
@@ -1105,7 +1106,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.arms.run --nat
           <div class="stage-name">EntityTrace</div>
           <div class="stage-model">detection/entity_trace.py · spaCy en_core_web_lg 3.8.0</div>
         </div>
-        <div class="stage-desc">spaCy named-entity recognition for PERSON, ORG, GPE, LOC and FAC. In the default preset it is used for places only. It runs on the text with every pattern hit masked out.</div>
+        <div class="stage-desc">spaCy named-entity recognition for PERSON, ORG, GPE, LOC and FAC. In the default preset it is used for places; a name of its stands in only through the ensemble fallback (<code>options.ensemble</code>, PERSON from 0.88), in a message where no stage named anyone and the name is tied to a person. It runs on the text with every pattern hit masked out.</div>
       </div>
       <div class="pipeline-stage">
         <div>
@@ -1187,13 +1188,14 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.arms.run --nat
           <tr><td>8</td><td>Opaque filter</td><td>Drops entities that overlap an opaque URL</td></tr>
           <tr><td>9</td><td>Pass D</td><td>GPE and LOC only, skipped in a service query: drops places that only appear in a question's sub-clause, and lower-case places mid-sentence unless the writer writes in lower case; a place anchored to the writer is kept</td></tr>
           <tr><td>10</td><td>Sentence frame</td><td>Model PERSONs are trimmed to the name itself (<code>trim_person</code>); one left empty is dropped (reason <code>sentence_frame</code>)</td></tr>
-          <tr><td>11</td><td>Pass R: relation gate</td><td>Model-stage entities and every PERSON go through the gate, unless their type is bypassed. Private persons stay; places and organisations not tied to a person are dropped (reason <code>not_tied_to_person</code>)</td></tr>
-          <tr><td>12</td><td>Pass S: structural rules</td><td>When the structural stage is on: adds and removes spans from layout (<code>structural.py</code>); its spans are routed and opaque-filtered like the rest</td></tr>
+          <tr><td>11</td><td>Pass R: relation gate</td><td>Model-stage entities and every PERSON go through the gate, unless their type is bypassed. Private persons stay; places and organisations not tied to a person are dropped (reason <code>not_tied_to_person</code>); so is a name in impersonal text, sixty words or more with no first or second person and no identifier within reach, and a place or an organisation there with no identifier or surviving name near it (reason <code>impersonal</code>)</td></tr>
+          <tr><td>12</td><td>Pass S: structural rules</td><td>When the structural stage is on: adds and removes spans from layout (<code>structural.py</code>); its spans are routed and opaque-filtered like the rest. In a fiction-shaped exchange (labelled turns, stage directions) or a narrated story (quoted speech beside speech verbs, no first person outside the quotes) a name with no identifier near it is then dropped (reason <code>fiction</code> or <code>narrative</code>); a place a frame rule found in impersonal text is dropped the same way (reason <code>impersonal</code>)</td></tr>
           <tr><td>13</td><td>Gender pass</td><td>A gender word that matches a named person is left as written (reason <code>gender_follows_name</code>); other gender words are masked</td></tr>
           <tr><td>14</td><td>Overlap cut</td><td>Partial overlaps go to the better source rank, then the longer span, then the earlier one</td></tr>
-          <tr><td>15</td><td>Quasi-identifier scoring</td><td>Logs risky combinations (see <a href="#quasi-identifier">Quasi-identifiers</a>)</td></tr>
-          <tr><td>16</td><td><code>pii_off</code> and <code>keep</code></td><td>Marks those types as not masked</td></tr>
-          <tr><td>17</td><td>Return</td><td><code>(confirmed, needs_confirmation)</code></td></tr>
+          <tr><td>15</td><td>Quoted-back surrogates</td><td>A surrogate from an earlier message of the session, or anything inside one, is not PII whichever stage found it (reason <code>quoted_back</code>), so a message that quotes an answer back gets no surrogate of a surrogate</td></tr>
+          <tr><td>16</td><td>Quasi-identifier scoring</td><td>Logs risky combinations (see <a href="#quasi-identifier">Quasi-identifiers</a>)</td></tr>
+          <tr><td>17</td><td><code>pii_off</code> and <code>keep</code></td><td>Marks those types as not masked</td></tr>
+          <tr><td>18</td><td>Return</td><td><code>(confirmed, needs_confirmation)</code></td></tr>
         </tbody>
       </table>
     </div>
@@ -1283,7 +1285,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.arms.run --nat
         </tbody>
       </table>
     </div>
-    <p>A model's guess at a phone number or an ID is ignored unless the type routes it, so a model cannot turn an order number into an "ID". On the development data, spaCy's names and organisations added far more harmless edits than leaks caught, so <code>balanced</code> uses spaCy for places only. <code>strict</code> and <code>classic</code> let every stage report PERSON, ORG and LOCATION.</p>
+    <p>A model's guess at a phone number or an ID is ignored unless the type routes it, so a model cannot turn an order number into an "ID". On the development data, spaCy's names and organisations added far more harmless edits than leaks caught, so <code>balanced</code> uses spaCy for places only, and lets a spaCy name stand in just where no stage named anyone and the name is tied to a person (the ensemble fallback, <code>options.ensemble</code>). <code>strict</code> and <code>classic</code> let every stage report PERSON, ORG and LOCATION.</p>
   </section>
 
   <!-- ============================================================ -->
@@ -1433,14 +1435,15 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.arms.run --nat
         <tbody>
           <tr><td>Name</td><td><code>pii-tagger-dv3s-40k</code></td></tr>
           <tr><td>Revision</td><td><code>sha256:f9e5821151ac…</code> (the SHA-256 of the weights file); other weights under the same name fail closed</td></tr>
-          <tr><td>Location</td><td><code>$SURROGATESHIELD_MODELS/pii-tagger-dv3s-40k</code>, default <code>~/.cache/surrogateshield/models</code>; <code>model</code> may also be a path</td></tr>
+          <tr><td>Source</td><td><a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger">sherwinvishesh/surrogateshield-pii-tagger</a> on Hugging Face, commit <code>c51cc8e09bd6</code> (MIT, about 565 MB). Downloaded once on first use or by <code>surrogateshield download</code>, then read from the Hugging Face cache with no network</td></tr>
+          <tr><td>Local copy</td><td>A folder <code>$SURROGATESHIELD_MODELS/pii-tagger-dv3s-40k</code> (default <code>~/.cache/surrogateshield/models</code>) is used instead when there is one; <code>model</code> may also be a path or another hub id</td></tr>
           <tr><td>Weights file</td><td><code>model.safetensors</code> or <code>pytorch_model.bin</code></td></tr>
           <tr><td>Tags (BIO)</td><td>PERSON, ORG, STREET, CITY, REGION, POSTCODE, LOCATION, AGE, DATE_OF_BIRTH, EMAIL, PHONE, HANDLE, URL, NETWORK, ID, CREDENTIAL</td></tr>
           <tr><td>Address parts</td><td>STREET, CITY, REGION and POSTCODE next to each other merge into one ADDRESS (<code>merge_address</code>). A lone CITY becomes LOCATION; a lone REGION is dropped</td></tr>
           <tr><td>Windowing</td><td>256-token windows with stride 64. Each token takes its label from the window in which it sits most centrally</td></tr>
           <tr><td>Score</td><td>The mean B/I probability over the span</td></tr>
           <tr><td>Options</td><td><code>device</code>, <code>batch</code> (8), <code>merge_address</code> (true), <code>gate_above</code></td></tr>
-          <tr><td>Install</td><td><code>PYTHONPATH=.:python-library python -m bench.tagger.install bench/tagger/build/models/dv3s-40k [--name N]</code></td></tr>
+          <tr><td>Install a trained tagger</td><td><code>PYTHONPATH=.:python-library python -m bench.tagger.install bench/tagger/build/models/dv3s-40k [--name N]</code> (only for a model trained in <code>bench/tagger/</code>; the default needs no install)</td></tr>
         </tbody>
       </table>
     </div>
@@ -1562,7 +1565,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.arms.run --nat
           <tr><td>spaCy is not installed, or <code>en_core_web_lg</code> is missing</td><td><code>pip install spacy</code>; <code>python -m spacy download en_core_web_lg</code></td></tr>
           <tr><td>spaCy failed on this input</td><td>Report the input; switch the stage off with <code>with_stage("entity_trace", enabled=False)</code> to continue</td></tr>
           <tr><td>transformers or torch missing; ContextGuard cannot load or is not cached while offline</td><td><code>pip install transformers torch</code>; run once online, or turn ContextGuard off</td></tr>
-          <tr><td>The tagger folder, weights file or SHA-256 pin is missing or wrong</td><td>Run <code>bench.tagger.install</code>, or use the <code>classic</code> preset</td></tr>
+          <tr><td>The tagger is not downloaded while offline, the download failed, or the weights do not match the SHA-256 pin</td><td>Run <code>surrogateshield download</code> while online, or use the <code>classic</code> preset</td></tr>
           <tr><td>A config lists a plugin that is not registered</td><td>Call <code>register_detector()</code> before the first scan, or install the package with the entry point</td></tr>
         </tbody>
       </table>
@@ -2321,7 +2324,7 @@ python offline_eval.py --key experiment/test_key.json --lint-key</code></pre>
           <tr><td><code>RAG_COLLECTION_NAME</code> / <code>RAG_DIR</code></td><td><code>surrogateshield_rag</code> / <code>None</code></td><td>ChromaDB collection; <code>None</code> = <code>~/.surrogateshield/rag</code></td></tr>
           <tr><td><code>SHADOWMAP_DIR</code> / <code>DEVICE_KEY_PATH</code></td><td><code>None</code></td><td><code>None</code> = under <code>~/.surrogateshield</code></td></tr>
           <tr><td><code>ALLOW_EPHEMERAL_KEY</code></td><td><code>False</code></td><td>When the device key cannot be written, use a temporary in-memory key instead of stopping (maps then cannot be reopened)</td></tr>
-          <tr><td><code>VERSION</code></td><td>2.1.0</td><td>Shown on the dashboard</td></tr>
+          <tr><td><code>VERSION</code></td><td>1.9.0</td><td>Shown on the dashboard</td></tr>
         </tbody>
       </table>
     </div>
@@ -2338,10 +2341,10 @@ python offline_eval.py --key experiment/test_key.json --lint-key</code></pre>
       <table>
         <thead><tr><th>Preset</th><th>What runs</th><th>Leaked on test-3</th><th>Natural messages untouched (of 2,433)</th><th>Hash</th></tr></thead>
         <tbody>
-          <tr><td><code>balanced</code> <span class="tag new">default</span></td><td>PatternScan, canonicaliser, PII tagger (names, organisations, places from 0.7), spaCy for places only, structural passes. ContextGuard off</td><td>0.8% (30)</td><td>2,153</td><td><code>9470f9336d853f67</code></td></tr>
+          <tr><td><code>balanced</code> <span class="tag new">default</span></td><td>PatternScan, canonicaliser, PII tagger (names, organisations, places from 0.7), spaCy for places and as a name fallback where no stage named anyone, structural passes. ContextGuard off</td><td>0.8% (30)</td><td>2,153</td><td><code>1277eddc6c55a0f7</code></td></tr>
           <tr><td><code>strict</code></td><td>Every stage on, spaCy and ContextGuard back on names with lower thresholds, the tagger from 0.3, every type past the relation gate</td><td>0.2% (8)</td><td>1,264</td><td><code>d3afc88e9e1c94c5</code></td></tr>
           <tr><td><code>fast</code></td><td>No spaCy; the tagger reads places too, from 0.4</td><td>0.8% (28)</td><td>2,147</td><td><code>2c41977891a20c88</code></td></tr>
-          <tr><td><code>classic</code></td><td>No tagger; spaCy and ContextGuard read names, organisations and places. For a machine without the tagger's weights</td><td>2.5% (91)</td><td>1,885</td><td><code>6e5419989f2b9a70</code></td></tr>
+          <tr><td><code>classic</code></td><td>No tagger; spaCy and ContextGuard read names, organisations and places. For a machine that cannot fetch the tagger's weights</td><td>2.5% (91)</td><td>1,885</td><td><code>6e5419989f2b9a70</code></td></tr>
         </tbody>
       </table>
     </div>
@@ -2353,14 +2356,14 @@ export SURROGATESHIELD_PRESET=fast
 export SURROGATESHIELD_DETECTION_CONFIG=/path/det.json   # JSON merged onto the preset
 
 # CLI
-surrogateshield scan --preset strict "..."               # fast, balanced or strict; also on mask, unmask, bench, doctor
+surrogateshield scan --preset strict "..."               # fast, balanced, strict or classic; also on mask, unmask, bench, doctor, download
 
 # see the config in effect
 surrogateshield doctor --show-config</code></pre>
-    <p>The test-3 columns were measured with every address replaced, as <code>benchmark()</code> does, so those runs carry their own hashes (the <code>balanced</code> run's is <code>a1abaa92142b0db9</code>); the Hash column is the preset as shipped.</p>
+    <p>The test-3 columns were measured with every address replaced, as <code>benchmark()</code> does, so those runs carry their own hashes (the <code>balanced</code> run's is <code>a1abaa92142b0db9</code>; <code>benchmark()</code> gives <code>19baf5415a894c80</code> since the ensemble fallback, added after test-3); the Hash column is the preset as shipped.</p>
     <p>Five ablation configs are also built in, each with one part of <code>balanced</code> switched off, for experiments: <code>no_tagger</code> (<code>798d34bb643dc2dc</code>), <code>no_canonicaliser</code> (<code>8eea8f77acd7b97a</code>), <code>no_gate</code> (<code>8a36546801cf1dc4</code>), <code>no_models</code> (<code>67fa4d27a25d2aef</code>), <code>no_structural</code> (<code>4ac83b16fbb5307d</code>). <code>preset()</code> and <code>SURROGATESHIELD_PRESET</code> accept these names too. The benchmark itself used <code>benchmark()</code>: <code>balanced</code> with every address replaced.</p>
     <div class="callout tip">
-      <strong>Which preset?</strong> Keep <code>balanced</code>. Use <code>strict</code> when replacing too much is fine and missing anything is not; <code>fast</code> to skip loading spaCy; <code>classic</code> only without the tagger's weights. The CLI's <code>--preset</code> takes <code>fast</code>, <code>balanced</code> and <code>strict</code>; choose <code>classic</code> through <code>SURROGATESHIELD_PRESET</code> or the library.
+      <strong>Which preset?</strong> Keep <code>balanced</code>. Use <code>strict</code> when replacing too much is fine and missing anything is not; <code>fast</code> to skip loading spaCy; <code>classic</code> only where the tagger's weights cannot be fetched from Hugging Face. The CLI's <code>--preset</code>, <code>SURROGATESHIELD_PRESET</code> and the library all accept the four names.
     </div>
   </section>
 
@@ -2399,7 +2402,7 @@ surrogateshield doctor --show-config</code></pre>
           <tr><td><code>thresholds</code></td><td>The stage's own keys (<code>entity_trace</code>: <code>high</code>, <code>low</code>, <code>fallback</code>; <code>context_guard</code>: <code>accept</code>) and, per public type, the lowest score kept. All in 0–1</td></tr>
           <tr><td><code>window</code>, <code>stride</code></td><td>Positive ints for windowed models</td></tr>
           <tr><td><code>max_latency_ms</code></td><td>A stage that runs longer is logged and reported as <code>&lt;stage&gt;_over_budget_ms</code>; its findings are kept</td></tr>
-          <tr><td><code>options</code></td><td>Stage options, e.g. <code>{"views": [...]}</code> for the canonicaliser, <code>{"gate_above": 0.97}</code> for the tagger, <code>{"labels": {...}}</code> for ContextGuard</td></tr>
+          <tr><td><code>options</code></td><td>Stage options, e.g. <code>{"views": [...]}</code> for the canonicaliser, <code>{"gate_above": 0.97}</code> for the tagger, <code>{"labels": {...}}</code> for ContextGuard, <code>{"ensemble": {"PERSON": 0.88}}</code> for EntityTrace (the name fallback; <code>{}</code> turns it off)</td></tr>
         </tbody>
       </table>
     </div>
@@ -2484,7 +2487,7 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
   <!-- ============================================================ -->
   <section class="doc-section" id="library-install">
     <h2>Library Installation</h2>
-    <p>The Python library is the <code>surrogateshield</code> package in the repository's <code>python-library/</code> folder: version <code>2.1.0</code>, Apache-2.0, Python 3.9 or later. It runs entirely in your process. Detection needs model files on the machine: the spaCy model and the PII tagger's weights for the default preset, and distilbert-NER only when ContextGuard is switched on.</p>
+    <p>The Python library is the <code>surrogateshield</code> package in the repository's <code>python-library/</code> folder: version <code>1.9.0</code>, Apache-2.0, Python 3.9 or later. It runs entirely in your process. Detection needs model files on the machine: the spaCy model and the PII tagger's weights for the default preset (the tagger downloads itself from Hugging Face once), and distilbert-NER only when ContextGuard is switched on.</p>
 
     <div class="steps">
       <div class="step">
@@ -2508,9 +2511,9 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
       <div class="step">
         <div class="step-num"><div class="num">3</div><div class="line"></div></div>
         <div class="step-body">
-          <h3>Install the PII tagger's weights</h3>
-          <pre><code>PYTHONPATH=.:python-library python -m bench.tagger.install bench/tagger/build/models/dv3s-40k</code></pre>
-          <p>Run it from the repository root. It copies the trained tagger to <code>$SURROGATESHIELD_MODELS/pii-tagger-dv3s-40k</code> (default <code>~/.cache/surrogateshield/models</code>). The default preset pins the weights by SHA-256 (<code>sha256:f9e5821151ac…</code>) and checks them every time it loads them: a folder with other weights raises <code>DetectorUnavailable</code> and nothing is masked.</p>
+          <h3>Fetch the PII tagger (optional)</h3>
+          <pre><code>surrogateshield download</code></pre>
+          <p>The tagger is on Hugging Face: <a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger">sherwinvishesh/surrogateshield-pii-tagger</a> (MIT, about 565 MB). Without this step the first <code>mask()</code> or <code>scan()</code> downloads it once and logs a line saying so; the command does it now, for example in a container build or before going offline. It is fetched at commit <code>c51cc8e09bd6</code> into the Hugging Face cache (<code>~/.cache/huggingface/hub</code>) and later runs read it from there with no network. The default preset pins the weights by SHA-256 (<code>sha256:f9e5821151ac…</code>) and checks them every time it loads them: other weights raise <code>DetectorUnavailable</code> and nothing is masked. A folder of the same name under <code>$SURROGATESHIELD_MODELS</code> (default <code>~/.cache/surrogateshield/models</code>) is used instead when there is one, and is checked the same way.</p>
         </div>
       </div>
       <div class="step">
@@ -2519,7 +2522,7 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
           <h3>Check the install</h3>
           <pre><code>surrogateshield doctor --smoke</code></pre>
           <p>Every row should read <code>ok</code>. Real output (paths shortened):</p>
-          <pre><code>detection config: preset balanced, hash 9470f9336d853f67 (default)
+          <pre><code>detection config: preset balanced, hash 1277eddc6c55a0f7 (default)
   stage pattern_scan   on
   stage canonicaliser  on
   stage entity_trace   on, en_core_web_lg@3.8.0, fallback=0.75 high=0.9 low=0.7
@@ -2537,7 +2540,7 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
 [  ok] import torch
 [  ok] spaCy model en_core_web_lg — version 3.8.0, licence MIT
 [  ok] ContextGuard model dslim/distilbert-NER@dfa2838a1273 — licence Apache-2.0
-[  ok] PIITagger model pii-tagger-dv3s-40k — ~/.cache/surrogateshield/models/pii-tagger-dv3s-40k, weights sha256:f9e5821151ac…, licence MIT
+[  ok] PIITagger model pii-tagger-dv3s-40k — huggingface.co/sherwinvishesh/surrogateshield-pii-tagger@c51cc8e09bd6, cached, weights sha256:f9e5821151ac…, licence MIT
 [  ok] storage dir ~/.surrogateshield — mode 0700
 [  ok] device key — mode 0600
 [  ok] smoke: mask hides an email and an SSN</code></pre>
@@ -2551,13 +2554,13 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
         <thead><tr><th>Model</th><th>Stage</th><th>When it is needed</th><th>Where it comes from</th><th>Licence</th></tr></thead>
         <tbody>
           <tr><td><code>en_core_web_lg</code> 3.8.0</td><td>EntityTrace (spaCy)</td><td><code>balanced</code>, <code>strict</code>, <code>classic</code></td><td><code>python -m spacy download en_core_web_lg</code></td><td>MIT</td></tr>
-          <tr><td><code>pii-tagger-dv3s-40k</code></td><td>PII tagger</td><td><code>balanced</code>, <code>fast</code>, <code>strict</code></td><td>A local folder under <code>$SURROGATESHIELD_MODELS</code>, pinned by SHA-256</td><td>MIT</td></tr>
+          <tr><td><code>pii-tagger-dv3s-40k</code></td><td>PII tagger</td><td><code>balanced</code>, <code>fast</code>, <code>strict</code></td><td>Hugging Face, <a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger">sherwinvishesh/surrogateshield-pii-tagger</a> at commit <code>c51cc8e09bd6</code>, downloaded once and pinned by SHA-256 (a folder under <code>$SURROGATESHIELD_MODELS</code> wins)</td><td>MIT</td></tr>
           <tr><td><code>dslim/distilbert-NER</code> at revision <code>dfa2838a1273</code></td><td>ContextGuard</td><td><code>strict</code>, <code>classic</code>, or <code>context_guard_enabled=True</code></td><td>Hugging Face, downloaded into the Hugging Face cache by the first scan that runs ContextGuard</td><td>Apache-2.0</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="callout tip"><strong>No tagger weights on this machine?</strong> Set <code>SURROGATESHIELD_PRESET=classic</code>. The classic preset reads names with spaCy and ContextGuard and runs without the tagger. The <code>--preset</code> flag of the command line accepts only <code>fast</code>, <code>balanced</code> and <code>strict</code>, so use the environment variable there too.</div>
-    <div class="callout"><strong>Offline.</strong> Once the models are on disk, set <code>HF_HUB_OFFLINE=1</code> and <code>TRANSFORMERS_OFFLINE=1</code> and the Hugging Face libraries load only local files. To put ContextGuard's model into the cache ahead of time, run one scan with it switched on while online, for example <code>surrogateshield scan --preset strict "warm up"</code>. <code>doctor --cold-start</code> loads only models that are already present: it is skipped when a required row fails, and a missing ContextGuard model is a required row whenever ContextGuard is on.</div>
+    <div class="callout tip"><strong>Cannot fetch the tagger on this machine?</strong> Use the classic preset: <code>config(detection="classic")</code>, <code>SURROGATESHIELD_PRESET=classic</code>, or <code>--preset classic</code> on the command line. It reads names with spaCy and ContextGuard and runs without the tagger.</div>
+    <div class="callout"><strong>Offline.</strong> Once the models are on disk, set <code>HF_HUB_OFFLINE=1</code> and <code>TRANSFORMERS_OFFLINE=1</code> and the Hugging Face libraries load only local files. To put the models into the cache ahead of time, run <code>surrogateshield download</code> while online (<code>--all</code> adds ContextGuard's model; <code>--preset strict</code> fetches what that preset uses). Offline with nothing cached, the tagger fails closed instead of downloading. <code>doctor --cold-start</code> loads only models that are already present: it is skipped when a required row fails, and a missing ContextGuard model is a required row whenever ContextGuard is on.</div>
   </section>
 
   <!-- ============================================================ -->
@@ -2713,7 +2716,7 @@ with shield.use_session(session):
 
     <h3>Module functions</h3>
 
-    <div class="fn-sig"><span class="fn-name">config</span>(*, <span class="fn-param">detailed_view</span>, <span class="fn-param">pii_mem</span>, <span class="fn-param">pii_off</span>, <span class="fn-param">service</span>, <span class="fn-param">spacy_model</span>, <span class="fn-param">context_guard_enabled</span>, <span class="fn-param">entity_trace_high_threshold</span>, <span class="fn-param">entity_trace_low_threshold</span>, <span class="fn-param">context_guard_threshold</span>, <span class="fn-param">entity_trace_fallback_threshold</span>, <span class="fn-param">fuzzy_threshold</span>, <span class="fn-param">address_mode</span>, <span class="fn-param">address_shift_range</span>, <span class="fn-param">verify_addresses</span>, <span class="fn-param">context_guard_model</span>, <span class="fn-param">context_guard_device</span>, <span class="fn-param">detection</span>) → Config</div>
+    <div class="fn-sig"><span class="fn-name">config</span>(*, <span class="fn-param">detailed_view</span>, <span class="fn-param">pii_mem</span>, <span class="fn-param">pii_off</span>, <span class="fn-param">service</span>, <span class="fn-param">spacy_model</span>, <span class="fn-param">context_guard_enabled</span>, <span class="fn-param">entity_trace_high_threshold</span>, <span class="fn-param">entity_trace_low_threshold</span>, <span class="fn-param">context_guard_threshold</span>, <span class="fn-param">entity_trace_fallback_threshold</span>, <span class="fn-param">fuzzy_threshold</span>, <span class="fn-param">address_mode</span>, <span class="fn-param">address_shift_range</span>, <span class="fn-param">verify_addresses</span>, <span class="fn-param">context_guard_model</span>, <span class="fn-param">context_guard_device</span>, <span class="fn-param">tagger_model</span>, <span class="fn-param">tagger_revision</span>, <span class="fn-param">tagger_device</span>, <span class="fn-param">detection</span>) → Config</div>
     <p class="fn-desc">Changes the settings new sessions start from, and the current context's session at once. Every argument is keyword-only and optional; only the ones you pass change. <code>shield.config()</code> with no arguments returns the current settings. Raises <code>ValueError</code> for an invalid value and <code>RuntimeError</code> when <code>pii_mem</code> changes while the current session holds mappings. Every key: <a href="#library-config">Configuration</a>.</p>
 
     <div class="fn-sig"><span class="fn-name">scan</span>(<span class="fn-param">text</span>: str, *, <span class="fn-param">as_dict</span>: bool = False) → List[Detection] | Dict[str, str]</div>
@@ -2774,7 +2777,7 @@ with shield.use_session(session):
     <div class="fn-sig">MaskResult(<span class="fn-param">text</span>: str, <span class="fn-param">detections</span>: Tuple[Detection, ...], <span class="fn-param">replacements</span>: Dict[str, str], <span class="fn-param">service_query</span>: bool)</div>
     <p class="fn-desc">What one <code>mask_result()</code> did; frozen. Property <code>unmasked</code>: the detections sent as is. Fields: <a href="#library-mask-result">MaskResult</a>.</p>
 
-    <div class="fn-sig">Config(<span class="fn-param">detailed_view</span>=False, <span class="fn-param">pii_mem</span>="temp", <span class="fn-param">pii_off</span>=[], <span class="fn-param">service</span>=True, <span class="fn-param">spacy_model</span>="en_core_web_lg", <span class="fn-param">context_guard_enabled</span>=False, <span class="fn-param">entity_trace_high_threshold</span>=0.9, <span class="fn-param">entity_trace_low_threshold</span>=0.7, <span class="fn-param">context_guard_threshold</span>=0.7, <span class="fn-param">entity_trace_fallback_threshold</span>=0.75, <span class="fn-param">fuzzy_threshold</span>=85, <span class="fn-param">address_mode</span>="auto", <span class="fn-param">address_shift_range</span>=1, <span class="fn-param">context_guard_model</span>="dslim/distilbert-NER", <span class="fn-param">context_guard_device</span>=-1, <span class="fn-param">detection</span>=None)</div>
+    <div class="fn-sig">Config(<span class="fn-param">detailed_view</span>=False, <span class="fn-param">pii_mem</span>="temp", <span class="fn-param">pii_off</span>=[], <span class="fn-param">service</span>=True, <span class="fn-param">spacy_model</span>="en_core_web_lg", <span class="fn-param">context_guard_enabled</span>=False, <span class="fn-param">entity_trace_high_threshold</span>=0.9, <span class="fn-param">entity_trace_low_threshold</span>=0.7, <span class="fn-param">context_guard_threshold</span>=0.7, <span class="fn-param">entity_trace_fallback_threshold</span>=0.75, <span class="fn-param">fuzzy_threshold</span>=85, <span class="fn-param">address_mode</span>="auto", <span class="fn-param">address_shift_range</span>=1, <span class="fn-param">context_guard_model</span>="dslim/distilbert-NER", <span class="fn-param">context_guard_device</span>=-1, <span class="fn-param">tagger_model</span>="pii-tagger-dv3s-40k", <span class="fn-param">tagger_revision</span>="sha256:f9e58…", <span class="fn-param">tagger_device</span>=-1, <span class="fn-param">detection</span>=None)</div>
     <p class="fn-desc">A session's settings, a plain dataclass. <code>config()</code> validates what you pass; a <code>Config</code> you build yourself is not validated until a session uses it.</p>
 
     <div class="fn-sig">Candidate(<span class="fn-param">start</span>: int, <span class="fn-param">end</span>: int, <span class="fn-param">type</span>: str, <span class="fn-param">score</span>: float = 1.0)</div>
@@ -2784,7 +2787,7 @@ with shield.use_session(session):
     <p class="fn-desc">The frozen detection configuration: stages, models, thresholds, type routing, per-type actions, the relation gate. Its methods: <code>with_stage</code>, <code>with_actions</code>, <code>with_sources</code>, <code>with_plugin</code>, <code>merged</code>, <code>replace</code>, <code>to_dict</code>, <code>to_json(indent=2)</code>, <code>from_dict</code>, <code>from_json</code>, <code>config_hash</code>, <code>stage</code>, <code>enabled</code>, <code>plugin_stages</code>, <code>allows</code>, <code>action_for</code>, <code>redacts</code>, <code>keeps</code>. See <a href="#detection-config">DetectionConfig</a>.</p>
 
     <h3>Exceptions and version</h3>
-    <div class="fn-sig">DetectorUnavailable(RuntimeError) &nbsp;·&nbsp; StorageError(RuntimeError) &nbsp;·&nbsp; __version__ = "2.1.0"</div>
+    <div class="fn-sig">DetectorUnavailable(RuntimeError) &nbsp;·&nbsp; StorageError(RuntimeError) &nbsp;·&nbsp; __version__ = "1.9.0"</div>
     <p class="fn-desc">See <a href="#library-errors">Errors</a>.</p>
   </section>
 
@@ -3252,6 +3255,9 @@ def turn(user_text: str) -&gt; str:
           <tr><td><code>verify_addresses</code></td><td>any</td><td>—</td><td>Deprecated and ignored; emits a <code>DeprecationWarning</code></td><td>—</td></tr>
           <tr><td><code>context_guard_model</code></td><td><code>str</code></td><td><code>"dslim/distilbert-NER"</code></td><td>ContextGuard's Hugging Face model. Another id drops the pinned revision</td><td><code>context_guard</code> model</td></tr>
           <tr><td><code>context_guard_device</code></td><td><code>int</code></td><td><code>-1</code></td><td><code>-1</code> = CPU, <code>0</code> and up = that GPU</td><td><code>context_guard</code> device</td></tr>
+          <tr><td><code>tagger_model</code></td><td><code>str</code></td><td><code>"pii-tagger-dv3s-40k"</code></td><td>The PII tagger: its name (a folder under <code>$SURROGATESHIELD_MODELS</code>, else downloaded from Hugging Face), a local folder, or another Hugging Face id. Another model drops the default's pin</td><td><code>pii_tagger</code> model</td></tr>
+          <tr><td><code>tagger_revision</code></td><td><code>str</code> or <code>None</code></td><td><code>"sha256:f9e58…"</code></td><td><code>"sha256:&lt;hex&gt;"</code> checks the weights file against that digest; any other value is the Hugging Face commit or branch to load; <code>None</code> loads the default branch unchecked</td><td><code>pii_tagger</code> revision</td></tr>
+          <tr><td><code>tagger_device</code></td><td><code>int</code> or <code>str</code></td><td><code>-1</code></td><td><code>-1</code> = CPU, <code>0</code> and up = that GPU, or a torch device string such as <code>"mps"</code></td><td><code>pii_tagger</code> <code>options.device</code></td></tr>
           <tr><td><code>detection</code></td><td>preset name, <code>DetectionConfig</code>, <code>dict</code> or <code>None</code></td><td><code>None</code></td><td>The detection configuration to start from (below)</td><td>the whole config</td></tr>
         </tbody>
       </table>
@@ -3278,7 +3284,7 @@ def turn(user_text: str) -&gt; str:
         <div class="step-num"><div class="num">3</div><div class="line"></div></div>
         <div class="step-body">
           <h3>Else balanced</h3>
-          <p><code>preset("balanced")</code>, hash <code>9470f9336d853f67</code>.</p>
+          <p><code>preset("balanced")</code>, hash <code>1277eddc6c55a0f7</code>.</p>
         </div>
       </div>
       <div class="step">
@@ -3313,6 +3319,7 @@ shield.config(detection=None)                                     # back to the 
           <tr><td><code>config(fuzzy_threshold=101)</code></td><td><code>ValueError: fuzzy_threshold must be a number in [0, 100], got 101</code></td></tr>
           <tr><td><code>config(entity_trace_low_threshold=1.5)</code></td><td><code>ValueError: entity_trace_low_threshold must be a number in [0.0, 1.0], got 1.5</code></td></tr>
           <tr><td><code>config(context_guard_device="cuda")</code></td><td><code>ValueError: context_guard_device must be an integer (-1 = CPU, &gt;=0 = GPU id), got 'cuda'</code></td></tr>
+          <tr><td><code>config(tagger_device=True)</code></td><td><code>ValueError: tagger_device must be an integer (-1 = CPU, &gt;=0 = GPU id) or a torch device string ("mps", "cuda:1"), got True</code></td></tr>
           <tr><td><code>config(pii_off=["phones"])</code></td><td><code>ValueError: Unknown pii_off entry 'phones'. Valid entries: …</code></td></tr>
           <tr><td><code>config(pii_mem="/nonexistent")</code></td><td><code>ValueError: pii_mem path does not exist or is not a directory: '/nonexistent'</code></td></tr>
           <tr><td><code>config(detection=3)</code></td><td><code>ValueError: detection must be a preset name, a DetectionConfig, a dict or None, got int</code></td></tr>
@@ -3321,7 +3328,7 @@ shield.config(detection=None)                                     # back to the 
         </tbody>
       </table>
     </div>
-    <p><code>spacy_model</code> and <code>context_guard_model</code> must be non-empty strings. A <code>DetectionConfig</code> validates itself when built: an unknown type, stage, action or threshold raises <code>ValueError</code>.</p>
+    <p><code>spacy_model</code>, <code>context_guard_model</code> and <code>tagger_model</code> must be non-empty strings, and <code>tagger_revision</code> a non-empty string or <code>None</code>. A <code>DetectionConfig</code> validates itself when built: an unknown type, stage, action or threshold raises <code>ValueError</code>.</p>
 
     <h3>Environment variables</h3>
     <div class="table-wrap">
@@ -3331,8 +3338,8 @@ shield.config(detection=None)                                     # back to the 
           <tr><td><code>SURROGATESHIELD_PRESET</code></td><td>unset (<code>balanced</code>)</td><td>The preset used when <code>detection</code> is <code>None</code></td></tr>
           <tr><td><code>SURROGATESHIELD_DETECTION_CONFIG</code></td><td>unset</td><td>A JSON file, partial or whole, merged onto that preset</td></tr>
           <tr><td><code>SURROGATESHIELD_HOME</code></td><td><code>~/.surrogateshield</code></td><td>Folder for <code>device.key</code> and the command line's <code>sessions/</code></td></tr>
-          <tr><td><code>SURROGATESHIELD_MODELS</code></td><td><code>~/.cache/surrogateshield/models</code></td><td>Folder that holds <code>pii-tagger-dv3s-40k</code></td></tr>
-          <tr><td><code>HF_HUB_OFFLINE</code>, <code>TRANSFORMERS_OFFLINE</code></td><td>unset</td><td>Read by the Hugging Face libraries: <code>1</code> loads models from local files only</td></tr>
+          <tr><td><code>SURROGATESHIELD_MODELS</code></td><td><code>~/.cache/surrogateshield/models</code></td><td>Looked in first for a folder named after the tagger; without one it comes from Hugging Face</td></tr>
+          <tr><td><code>HF_HUB_OFFLINE</code>, <code>TRANSFORMERS_OFFLINE</code></td><td>unset</td><td>Read by the Hugging Face libraries: <code>1</code> loads models from local files only. An uncached tagger then fails closed instead of downloading</td></tr>
         </tbody>
       </table>
     </div>
@@ -3437,7 +3444,7 @@ employee_ids = "acme_detectors.badges:EmployeeIds"</code></pre>
   <section class="doc-section" id="library-cli">
     <h2>Command Line</h2>
     <p>The package installs the <code>surrogateshield</code> command (also <code>python -m surrogateshield</code>): "Mask PII before text reaches an LLM."</p>
-    <pre><code>surrogateshield {scan,mask,unmask,bench,doctor} ...</code></pre>
+    <pre><code>surrogateshield {scan,mask,unmask,bench,doctor,download} ...</code></pre>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Command</th><th>What it does</th></tr></thead>
@@ -3447,6 +3454,7 @@ employee_ids = "acme_detectors.badges:EmployeeIds"</code></pre>
           <tr><td><code>unmask</code></td><td>Restore the originals in an LLM answer</td></tr>
           <tr><td><code>bench</code></td><td>Mask latency on built-in sample messages</td></tr>
           <tr><td><code>doctor</code></td><td>Check models, dependencies and key storage</td></tr>
+          <tr><td><code>download</code></td><td>Fetch the models now (the PII tagger from Hugging Face)</td></tr>
         </tbody>
       </table>
     </div>
@@ -3459,7 +3467,7 @@ employee_ids = "acme_detectors.badges:EmployeeIds"</code></pre>
           <tr><td><code>text</code></td><td>The text (<code>scan</code>, <code>mask</code>, <code>unmask</code>). Omitted or <code>-</code>: read from standard input</td></tr>
           <tr><td><code>--no-context-guard</code></td><td>Skip the distilbert-NER stage</td></tr>
           <tr><td><code>--pii-off [TYPE ...]</code></td><td>Types to send as is, e.g. <code>phone email</code>. Takes several values, so put the text before it or end the list with <code>--</code></td></tr>
-          <tr><td><code>--preset {fast,balanced,strict}</code></td><td>Detection preset. Default: <code>balanced</code>, or <code>$SURROGATESHIELD_PRESET</code>, which also accepts <code>classic</code></td></tr>
+          <tr><td><code>--preset {fast,balanced,strict,classic}</code></td><td>Detection preset. Default: <code>balanced</code>, or <code>$SURROGATESHIELD_PRESET</code></td></tr>
           <tr><td><code>--detection-config FILE</code></td><td>A DetectionConfig as JSON, partial or whole, merged onto the preset. If both name a preset and they differ: <code>surrogateshield: --preset fast and the file's preset 'strict' disagree</code>, exit 1</td></tr>
         </tbody>
       </table>
@@ -3530,14 +3538,21 @@ without ContextGuard   p50    39.1 ms   p95    43.6 ms   (8 masks)</code></pre>
 detection config: preset classic, hash 6e5419989f2b9a70 (the environment)
 ...</code></pre>
 
+    <h3>download</h3>
+    <p>Fetches the models the detection configuration loads, so later runs make no network request: the PII tagger from <a href="https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger">Hugging Face</a> at its pinned commit (checked against its SHA-256), ContextGuard's model when that stage is on, and a check that the spaCy model is installed (it is a pip package: <code>python -m spacy download en_core_web_lg</code>). It takes the same <code>--preset</code> and <code>--detection-config</code> flags as the other commands; <code>--all</code> also fetches the models of stages that are off. Each model prints an <code>[  ok]</code> or <code>[FAIL]</code> row; any <code>FAIL</code> exits 1.</p>
+    <pre><code>$ surrogateshield download
+[PIITagger] downloading sherwinvishesh/surrogateshield-pii-tagger@c51cc8e09bd6 from the Hugging Face Hub (once; cached after)
+[  ok] PIITagger model pii-tagger-dv3s-40k — ~/.cache/huggingface/hub/models--sherwinvishesh--surrogateshield-pii-tagger/snapshots/c51cc8e09bd6410503c2e004f44af2b206a1670e
+[  ok] spaCy model en_core_web_lg — installed</code></pre>
+
     <h3>Exit codes</h3>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
         <tbody>
           <tr><td><code>0</code></td><td>Success</td></tr>
-          <tr><td><code>1</code></td><td>A required <code>doctor</code> check failed; no stored session under that id; a storage error; an invalid setting, session id or detection config file</td></tr>
-          <tr><td><code>2</code></td><td>Usage error, e.g. <code>--preset classic</code>: <code>invalid choice: 'classic' (choose from fast, balanced, strict)</code></td></tr>
+          <tr><td><code>1</code></td><td>A required <code>doctor</code> check failed, or a <code>download</code> failed; no stored session under that id; a storage error; an invalid setting, session id or detection config file</td></tr>
+          <tr><td><code>2</code></td><td>Usage error, e.g. <code>--preset quick</code>: <code>invalid choice: 'quick' (choose from fast, balanced, strict, classic)</code></td></tr>
           <tr><td><code>3</code></td><td>A detector was unavailable: <code>surrogateshield: detector unavailable, nothing was masked: …</code></td></tr>
         </tbody>
       </table>
@@ -3553,7 +3568,7 @@ detection config: preset classic, hash 6e5419989f2b9a70 (the environment)
       <table>
         <thead><tr><th>Exception</th><th>Import from</th><th>Raised when</th><th>What to do</th></tr></thead>
         <tbody>
-          <tr><td><code>DetectorUnavailable</code> (a <code>RuntimeError</code>)</td><td><code>surrogateshield</code></td><td>A stage that is switched on cannot run: a model or package is missing, the tagger's weights do not match their pin, a plugin stage has no detector, or a model failed on this input. Raised by <code>scan</code>, <code>mask</code> and <code>mask_result</code>; the text is not masked</td><td>Do not send the message. Install what the message names, or switch the stage off in the configuration</td></tr>
+          <tr><td><code>DetectorUnavailable</code> (a <code>RuntimeError</code>)</td><td><code>surrogateshield</code></td><td>A stage that is switched on cannot run: a model or package is missing, the tagger cannot be downloaded or its weights do not match their pin, a plugin stage has no detector, or a model failed on this input. Raised by <code>scan</code>, <code>mask</code> and <code>mask_result</code>; the text is not masked</td><td>Do not send the message. Install what the message names, or switch the stage off in the configuration</td></tr>
           <tr><td><code>StorageError</code> (a <code>RuntimeError</code>)</td><td><code>surrogateshield</code></td><td>Base class of the two below</td><td>Catch it to handle both</td></tr>
           <tr><td><code>ShadowMapStorageError</code></td><td><code>surrogateshield.core.storage.shadow_map</code></td><td>The device key cannot be read or written, or has the wrong length</td><td>Fix the permissions or the disk under <code>$SURROGATESHIELD_HOME</code></td></tr>
           <tr><td><code>CorruptStoreError</code></td><td><code>surrogateshield.core.storage.shadow_map</code></td><td>A stored map cannot be decrypted; it has been moved to <code>&lt;id&gt;.shadowmap.corrupt-&lt;timestamp&gt;</code></td><td>Start the conversation with a new session; the old replies cannot be restored with this key</td></tr>
@@ -3565,8 +3580,8 @@ detection config: preset classic, hash 6e5419989f2b9a70 (the environment)
         </tbody>
       </table>
     </div>
-    <p>The <code>DetectorUnavailable</code> message says what to do. Without the tagger's weights:</p>
-    <pre><code>DetectorUnavailable: PIITagger: no model folder 'pii-tagger-dv3s-40k' under ~/.cache/surrogateshield/models ($SURROGATESHIELD_MODELS). Copy the trained tagger there (python -m bench.tagger.install), point $SURROGATESHIELD_MODELS at the folder that holds it, or use the 'classic' detection preset (spaCy and ContextGuard read names; no tagger).</code></pre>
+    <p>The <code>DetectorUnavailable</code> message says what to do. Offline, before the tagger was ever downloaded:</p>
+    <pre><code>DetectorUnavailable: PIITagger: sherwinvishesh/surrogateshield-pii-tagger@c51cc8e09bd6 is not downloaded yet and HF_HUB_OFFLINE is set. Run 'surrogateshield download' once with network access, or use the 'classic' detection preset.</code></pre>
     <pre><code>import surrogateshield as shield
 
 def send_safely(session, text):
@@ -3805,8 +3820,8 @@ aad = kind || b"|" || id</code></pre>
           <tr><td><strong><code>offline_eval.py</code></strong></td><td>Nothing; no API key needed.</td><td>Runs the batch runner's send path (detect, surrogates, substitute) and scores it.</td></tr>
           <tr><td><strong>Attacker Experiment</strong></td><td>Anthropic only, to <code>ATTACKER_MODEL</code>, which must differ from <code>CLAUDE_MODEL</code>. For each question it sends the text each tool sent (<code>sanitized_input</code>, and <code>presidio_sanitized_input</code> when present) with the attacker prompt. <code>--dry-run</code> prints the number of calls and sends nothing.</td><td><code>experiment/&lt;stem&gt;_Attacker_Experiment.json</code>, mode <code>0600</code>, saved every 5 questions.</td></tr>
           <tr><td><strong>Library</strong> <code>mask</code> / <code>unmask</code> / <code>scan</code></td><td>Nothing. The library makes no provider call: <code>mask</code> returns text, and your code decides where to send it.</td><td>The map, in memory by default (<code>pii_mem="temp"</code>). With <code>pii_mem</code> set to a folder it is sealed to <code>&lt;folder&gt;/&lt;session id&gt;.shadowmap</code> after every change. <code>detailed_view=True</code> prints original values to stdout; it is off by default.</td></tr>
-          <tr><td><strong>Library CLI</strong> (<code>surrogateshield mask</code>, <code>unmask</code>, <code>scan</code>, <code>bench</code>, <code>doctor</code>)</td><td>Nothing.</td><td><code>mask</code> prints the masked text on stdout and the session id on stderr, and seals the map to <code>&lt;home&gt;/sessions/</code> (<code>--store DIR</code> elsewhere, <code>--no-store</code> memory only). <code>unmask -s ID --close</code> erases the stored map afterwards.</td></tr>
-          <tr><td><strong>Model downloads</strong></td><td>Not your text. Model files are fetched from Hugging Face when a stage needs one that is not cached: ContextGuard (<code>dslim/distilbert-NER</code>, only when switched on), <code>all-MiniLM-L6-v2</code> (RAG) and <code>roberta-large</code> (BERTScore). With <code>HF_HUB_OFFLINE=1</code> nothing is fetched; a stage whose model is missing then fails closed. A cached model is loaded without a network request.</td><td>The spaCy model and the PII tagger's weights are local files you install once.</td></tr>
+          <tr><td><strong>Library CLI</strong> (<code>surrogateshield mask</code>, <code>unmask</code>, <code>scan</code>, <code>bench</code>, <code>doctor</code>, <code>download</code>)</td><td>Nothing.</td><td><code>mask</code> prints the masked text on stdout and the session id on stderr, and seals the map to <code>&lt;home&gt;/sessions/</code> (<code>--store DIR</code> elsewhere, <code>--no-store</code> memory only). <code>unmask -s ID --close</code> erases the stored map afterwards.</td></tr>
+          <tr><td><strong>Model downloads</strong></td><td>Not your text. Model files are fetched from Hugging Face when a stage needs one that is not cached: the PII tagger (<code>sherwinvishesh/surrogateshield-pii-tagger</code>, once, at a pinned commit), ContextGuard (<code>dslim/distilbert-NER</code>, only when switched on), <code>all-MiniLM-L6-v2</code> (RAG) and <code>roberta-large</code> (BERTScore). With <code>HF_HUB_OFFLINE=1</code> nothing is fetched; a stage whose model is missing then fails closed. A cached model is loaded without a network request.</td><td>The spaCy model and the PII tagger's weights are local files you install once.</td></tr>
         </tbody>
       </table>
     </div>
@@ -3860,7 +3875,8 @@ messages = api_messages                                # earlier turns, surrogat
           <tr><td><code>.env</code> (project folder)</td><td>API keys</td><td>Plain text; set it to <code>0600</code> (<code>run.sh</code> warns otherwise); git-ignored</td></tr>
           <tr><td><code>experiment/*_answers.json</code>, <code>*_Attacker_Experiment.json</code></td><td>Batch questions, maps and responses in clear text</td><td><code>0600</code>; git-ignored</td></tr>
           <tr><td><code>experiment/*_eval_results.json</code></td><td>Evaluation metrics</td><td>Written with your default file mode; git-ignored</td></tr>
-          <tr><td><code>~/.cache/surrogateshield/models/</code> (<code>$SURROGATESHIELD_MODELS</code>)</td><td>The PII tagger's weights</td><td>Model files; the SHA-256 of the weights is checked against the pin at load</td></tr>
+          <tr><td><code>~/.cache/huggingface/hub/</code> (<code>$HF_HOME</code>)</td><td>The PII tagger's weights, downloaded from Hugging Face, and ContextGuard's model</td><td>Model files; the SHA-256 of the tagger's weights is checked against the pin at load</td></tr>
+          <tr><td><code>~/.cache/surrogateshield/models/</code> (<code>$SURROGATESHIELD_MODELS</code>)</td><td>A local copy of the tagger, if you put one there (it is used before the download)</td><td>Model files, checked against the same pin</td></tr>
         </tbody>
       </table>
     </div>
@@ -3872,7 +3888,7 @@ messages = api_messages                                # earlier turns, surrogat
   <!-- ============================================================ -->
   <section class="doc-section" id="project-structure">
     <h2>Project Structure</h2>
-    <p>The tracked files of the repository, grouped by folder. The package version is <code>2.1.0</code> (<code>python-library/pyproject.toml</code> and <code>surrogateshield.__version__</code>; a test keeps the two equal).</p>
+    <p>The tracked files of the repository, grouped by folder. The package version is <code>1.9.0</code> (<code>python-library/pyproject.toml</code> and <code>surrogateshield.__version__</code>; a test keeps the two equal).</p>
     <pre><code>SurrogateShield/
 ├── main.py                  # Terminal app (Typer): dashboard, chat, list, pii-finder, add-doc, rag
 ├── pipeline.py              # One chat turn: detect, confirm borderlines, surrogates, send, restore; RAG indexing
@@ -3893,12 +3909,12 @@ messages = api_messages                                # earlier turns, surrogat
 ├── README.md  CONFIGURATION.md  CHANGELOG.md  CONTRIBUTING.md  SECURITY.md  CODE_OF_CONDUCT.md  LICENSE
 │
 ├── python-library/          # The surrogateshield package
-│   ├── pyproject.toml       # Package metadata, version 2.1.0, the surrogateshield console script
+│   ├── pyproject.toml       # Package metadata, version 1.9.0, the surrogateshield console script
 │   ├── README.md
 │   ├── surrogateshield/
 │   │   ├── __init__.py      # Public API: config, scan, mask, unmask, flush, Session, presets, plugins
 │   │   ├── session.py       # Session: one conversation, one ShadowMap
-│   │   ├── cli.py           # surrogateshield scan | mask | unmask | bench | doctor
+│   │   ├── cli.py           # surrogateshield scan | mask | unmask | bench | doctor | download
 │   │   ├── _state.py  _display.py  _response_parser.py  __main__.py  py.typed
 │   │   └── core/
 │   │       ├── detection/   # pipeline.py (SentinelLayer), pattern_scan.py, canonical.py, pii_tagger.py,
@@ -4056,12 +4072,14 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest tests python-
           <tr><td><code>EntityTrace needs the spaCy model 'en_core_web_lg', which is not installed. Run: python -m spacy download en_core_web_lg</code></td><td>Run <code>python -m spacy download en_core_web_lg</code> with the same Python that runs SurrogateShield (with <code>.venv</code> active, or <code>.venv/bin/python -m spacy download en_core_web_lg</code>).</td></tr>
           <tr><td><code>Error: spaCy model 'en_core_web_lg' is not installed.</code> (from <code>run.sh</code>)</td><td>Run the command it prints next: <code>Install it with: &lt;python&gt; -m spacy download en_core_web_lg</code>.</td></tr>
           <tr><td><code>EntityTrace needs spaCy, which is not installed. Run: pip install spacy</code></td><td><code>pip install ./python-library</code> (or <code>pip install -r requirements.txt</code> for the app) in the active environment.</td></tr>
-          <tr><td><code>PIITagger: no model folder 'pii-tagger-dv3s-40k' under &lt;models dir&gt; ($SURROGATESHIELD_MODELS). Copy the trained tagger there (python -m bench.tagger.install), point $SURROGATESHIELD_MODELS at the folder that holds it, or use the 'classic' detection preset (spaCy and ContextGuard read names; no tagger).</code></td><td>Install a trained tagger: <code>PYTHONPATH=.:python-library .venv/bin/python -m bench.tagger.install bench/tagger/build/models/dv3s-40k</code>. <code>bench/tagger/build/</code> is not in the repository; it is where <code>bench.tagger.train</code> writes. Without the weights, set <code>SURROGATESHIELD_PRESET=classic</code>. The CLI's <code>--preset</code> accepts only <code>fast</code>, <code>balanced</code> and <code>strict</code>, so use the variable.</td></tr>
-          <tr><td><code>PIITagger: '&lt;path&gt;' has no weights file (model.safetensors, pytorch_model.bin)</code></td><td>The folder exists but is incomplete. Run <code>bench.tagger.install</code> again.</td></tr>
-          <tr><td><code>PIITagger: the weights in '&lt;path&gt;' are not the pinned ones</code>, followed by the first 12 hex digits of the found and the pinned SHA-256</td><td>The folder holds other weights than the preset's pin (<code>sha256:f9e5821151ac</code> and so on, for the default). Install the matching weights, or name your model and its revision in a detection config.</td></tr>
+          <tr><td><code>PIITagger: sherwinvishesh/surrogateshield-pii-tagger@c51cc8e09bd6 is not downloaded yet and HF_HUB_OFFLINE is set. Run 'surrogateshield download' once with network access, or use the 'classic' detection preset.</code></td><td>Unset <code>HF_HUB_OFFLINE</code> and run <code>surrogateshield download</code> once; after that the tagger loads from the Hugging Face cache with no network. Without it, use the <code>classic</code> preset (<code>--preset classic</code>, <code>SURROGATESHIELD_PRESET=classic</code> or <code>config(detection="classic")</code>).</td></tr>
+          <tr><td><code>PIITagger could not download sherwinvishesh/surrogateshield-pii-tagger@c51cc8e09bd6 from the Hugging Face Hub (&lt;error&gt;). Try again with network access, or use the 'classic' detection preset.</code></td><td>Check the connection to huggingface.co (behind a proxy or mirror, set <code>HF_ENDPOINT</code>) and run <code>surrogateshield download</code>.</td></tr>
+          <tr><td><code>PIITagger: no model folder '&lt;name&gt;' (looked under &lt;models dir&gt;, $SURROGATESHIELD_MODELS), and it is not a Hugging Face model id. …</code></td><td><code>tagger_model</code> (or the stage's <code>model</code>) names neither a folder nor a hub id. Fix the name, or put the folder there; <code>python -m bench.tagger.install</code> copies a tagger trained in <code>bench/tagger/</code>.</td></tr>
+          <tr><td><code>PIITagger: '&lt;path&gt;' has no weights file (model.safetensors, pytorch_model.bin)</code></td><td>The folder or download is incomplete. Copy the folder again, or delete the snapshot under <code>~/.cache/huggingface/hub/models--sherwinvishesh--surrogateshield-pii-tagger</code> and run <code>surrogateshield download</code>.</td></tr>
+          <tr><td><code>PIITagger: the weights in '&lt;path&gt;' are not the pinned ones</code>, followed by the first 12 hex digits of the found and the pinned SHA-256</td><td>The folder or download holds other weights than the preset's pin (<code>sha256:f9e5821151ac</code> and so on, for the default). Remove the folder of that name under <code>$SURROGATESHIELD_MODELS</code> so the pinned download is used, or name your model and its revision (<code>tagger_model</code>, <code>tagger_revision</code>).</td></tr>
           <tr><td><code>PIITagger needs transformers and torch, which are not installed. Run: pip install transformers torch, or use the 'classic' detection preset.</code></td><td><code>pip install transformers torch</code>.</td></tr>
           <tr><td><code>ContextGuard needs transformers and torch, which are not installed. Run: pip install transformers torch — or switch ContextGuard off.</code></td><td><code>pip install transformers torch</code>, or turn ContextGuard off (it is off in <code>balanced</code> and <code>fast</code>).</td></tr>
-          <tr><td><code>ContextGuard could not load 'dslim/distilbert-NER' (&lt;error&gt;). Download it once with network access (HF_HUB_OFFLINE unset), or switch ContextGuard off.</code></td><td>Unset <code>HF_HUB_OFFLINE</code> once and run one scan with ContextGuard on, for example <code>surrogateshield scan --preset strict "warm up"</code>, which downloads and caches it. After that it loads from the cache without a network request.</td></tr>
+          <tr><td><code>ContextGuard could not load 'dslim/distilbert-NER' (&lt;error&gt;). Download it once with network access (HF_HUB_OFFLINE unset), or switch ContextGuard off.</code></td><td>Unset <code>HF_HUB_OFFLINE</code> once and run <code>surrogateshield download --all</code> (or <code>download --preset strict</code>), which downloads and caches it. After that it loads from the cache without a network request.</td></tr>
           <tr><td><code>no detector is registered as '&lt;name&gt;' (register_detector or an entry point in '&lt;group&gt;'); switch the stage off to run without it</code></td><td>A detection config names a plugin stage that is not registered. Call <code>register_detector</code> before masking, install the package that provides the entry point, or switch the stage off. See <code>examples/employee_id_detector.py</code>.</td></tr>
           <tr><td>Panel <strong>Detector unavailable</strong>, ending in <em>Nothing was masked and nothing was sent.</em></td><td>One of the messages above, raised during a chat turn, an <code>add-doc</code> or a batch run. Fix the cause it names and send again.</td></tr>
           <tr><td><code>surrogateshield: detector unavailable, nothing was masked: &lt;reason&gt;</code></td><td>The same, from the library CLI.</td></tr>
@@ -4156,7 +4174,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest tests python-
     <p>Detected values are replaced before the request is built, apart from the <a href="#privacy-guarantees">values sent as typed</a> on purpose. Values no stage detects go out as written. On the sealed test split of the real-data benchmark, 30 of 3,677 personal values (0.8%) reached the provider, against 9.1% for GLiNER-PII and 31.6% for Presidio (<a href="#results">Results</a>).</p>
 
     <h3>How do I install it?</h3>
-    <p>For the library: <code>pip install ./python-library</code> from the repository folder, then <code>python -m spacy download en_core_web_lg</code>, then the PII tagger's weights (or the <code>classic</code> preset). For the terminal app: <code>pip install -r requirements.txt</code>. <code>surrogateshield doctor</code> checks the result. See <a href="#installation">Installation</a>.</p>
+    <p>For the library: <code>pip install ./python-library</code> from the repository folder, then <code>python -m spacy download en_core_web_lg</code>. The PII tagger downloads itself from Hugging Face on first use (or now, with <code>surrogateshield download</code>). For the terminal app: <code>pip install -r requirements.txt</code>. <code>surrogateshield doctor</code> checks the result. See <a href="#installation">Installation</a>.</p>
 
     <h3>Does the library call an LLM?</h3>
     <p>No. <code>mask</code> returns the masked text and <code>unmask</code> restores an answer you pass in; your code makes the provider call. The <code>surrogateshield</code> CLI makes none either.</p>
@@ -4200,7 +4218,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest tests python-
 
   <div class="section-sep"></div>
 
-  <p style="color: var(--dim); font-family: var(--font-mono); font-size: 12px;">SurrogateShield v2.1.0 · Apache-2.0 · <a href="docs.md" style="color: var(--dim);">docs.md</a> · <a href="index.html" style="color: var(--dim);">Back to home</a></p>
+  <p style="color: var(--dim); font-family: var(--font-mono); font-size: 12px;">SurrogateShield v1.9.0 · Apache-2.0 · <a href="docs.md" style="color: var(--dim);">docs.md</a> · <a href="index.html" style="color: var(--dim);">Back to home</a></p>
 
 </main>
 </div>
