@@ -387,7 +387,7 @@ To disable it again, press **S → C** from the dashboard.
 
 ### Requirements
 
-- Python 3.9+
+- Python 3.10+
 - pip
 
 ### Dependencies
@@ -403,7 +403,7 @@ typer>=0.12.0               # CLI framework
 rich>=13.7.0                # Terminal UI
 chromadb>=0.4.0             # RAG vector store
 sentence-transformers>=2.7.0  # RAG embeddings
-transformers>=4.40.0        # ContextGuard (distilbert-NER)
+transformers>=5.0.0         # The PII tagger and ContextGuard (distilbert-NER)
 torch>=2.0.0                # ContextGuard inference
 bert-score>=0.3.13          # Utility preservation scoring (BERTScore comparison)
 ollama>=0.1.8               # Local LLM (optional)
@@ -423,10 +423,12 @@ presidio-anonymizer>=2.2.0  # Presidio anonymization (companion to analyzer)
 > `~/.cache/surrogateshield/models`) is used instead when there is one. If they
 > cannot be fetched (or `HF_HUB_OFFLINE` is set and they are not cached) the
 > default preset raises `DetectorUnavailable`; the `classic` preset runs
-> without them.
+> without them (it uses ContextGuard instead, which downloads the same way).
 >
 > **ContextGuard model:** `dslim/distilbert-NER` (~250 MB) is off by default
-> and is downloaded from HuggingFace Hub on first use only when it is turned on.
+> and is downloaded from HuggingFace Hub on first use only when it is turned on
+> (the `strict` and `classic` presets turn it on; `surrogateshield download --all`
+> fetches it ahead of time).
 >
 > **BERTScore:** `bert-score` and its `roberta-large` model (~1.4 GB) are only
 > needed if you enable BERTScore fields in JSON Test. The model is downloaded

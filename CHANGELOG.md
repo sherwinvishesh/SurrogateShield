@@ -1,12 +1,19 @@
 # Changelog
 
-## Unreleased — `v2` branch (library 1.9.0)
+## 1.9.0 — 2026-10-15 (`v2` branch)
 
-Not released. Nothing here is on PyPI or tagged. Audit IDs refer to the
+The first release after 1.0.0. Audit IDs refer to the
 technical audit. Measured results, with their commands, are reported
 separately and are not part of this file.
 
 ### Migration notes (from 1.0.0)
+
+**Python 3.10 or later**
+- The package requires Python 3.10 (`requires-python = ">=3.10"`) and
+  `transformers>=5.0.0`: the pinned tagger's tokenizer config loads only with
+  transformers 5, which has no 3.9 build, and spaCy 3.8 stopped shipping 3.9
+  wheels. On 3.9, `pip install surrogateshield` is refused instead of
+  installing a package that cannot load the default preset.
 
 **Sessions instead of module-global state (I9, I10)**
 - PII state lives in `surrogateshield.Session` objects, one per end-user

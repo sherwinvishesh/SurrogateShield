@@ -26,7 +26,7 @@ By participating you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Development setup
 
-Requires Python 3.9+.
+Requires Python 3.10+.
 
 ```bash
 # Fork and clone

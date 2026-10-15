@@ -80,7 +80,7 @@ The PII tagger used by the default `balanced` preset downloads once from Hugging
 surrogateshield download
 ```
 
-Its weights are checked against their SHA-256 pin, and later runs read the cache with no network. A folder of the same name under `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`) is used instead when there is one. If the weights cannot be fetched (or `HF_HUB_OFFLINE=1` is set and they are not cached), `mask()` raises `DetectorUnavailable`; the `classic` preset (`shield.config(detection="classic")`) works without them.
+Its weights are checked against their SHA-256 pin, and later runs read the cache with no network. A folder of the same name under `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`) is used instead when there is one. If the weights cannot be fetched (or `HF_HUB_OFFLINE=1` is set and they are not cached), `mask()` raises `DetectorUnavailable`; the `classic` preset (`shield.config(detection="classic")`) works without them. It uses ContextGuard instead, which downloads the same way (below); `surrogateshield download --all` fetches both models ahead of time.
 
 The HuggingFace ContextGuard model (dslim/distilbert-NER, ~250 MB) is off by default. It is downloaded on first use only when `context_guard_enabled=True` (or a preset that uses it) is set, and cached by the transformers library in your local HuggingFace cache directory. Offline without that cache, `mask()` then raises `DetectorUnavailable`.
 

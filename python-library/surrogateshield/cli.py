@@ -352,7 +352,7 @@ def cmd_doctor(args, out) -> int:
     if args.show_config:
         out.write(det.to_json() + "\n")
     cg_on, tagger_on = det.enabled("context_guard"), det.enabled("pii_tagger")
-    rows = [("python " + ".".join(map(str, sys.version_info[:3])), sys.version_info >= (3, 9), True, "")]
+    rows = [("python " + ".".join(map(str, sys.version_info[:3])), sys.version_info >= (3, 10), True, "")]
     for mod in ("faker", "cryptography", "rapidfuzz", "spacy", "transformers", "torch"):
         try:
             __import__(mod)
