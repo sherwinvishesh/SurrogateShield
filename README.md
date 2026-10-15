@@ -566,18 +566,24 @@ Press `J` in the dashboard, enter the filename, select which fields to capture, 
 | `context_guard_pii` | Entities detected by ContextGuard (distilbert-NER) |
 | `confirmed_pii` | Final combined confirmed entity list |
 | `pii_detail` | Per-entity type, score, and source |
+| `pii_spans` | Per-entity offsets, type and whether it was replaced (what the evaluator scores) |
 | `quasi_id_risks` | Quasi-identifier combination risks detected |
 | `surrogate_map` | Mapping of original → surrogate for every replaced entity |
 | `sanitized_input` | The exact text sent to the LLM |
 | `llm_response` | Raw LLM response (surrogates, before restoration) |
+| `final_output` | The LLM response with the surrogates restored to the real values |
 | `stage_timings_ms` | PatternScan / EntityTrace / ContextGuard / surrogate gen / LLM latency in ms |
-| `recognized_not_replaced` | Entities detected as PII but intentionally skipped (e.g. topical geo in service queries) |
 | `presidio_sanitized_input` | Presidio `[TYPE]`-placeholder redaction (baseline for BERTScore comparison) |
-| `presidio_found_piis` | Presidio raw detected entities: type, value, score |
-| `bertscore_ss` | BERTScore of original vs SurrogateShield sanitised input |
-| `bertscore_presidio` | BERTScore of original vs Presidio sanitised input |
+| `presidio_found_piis` | Presidio raw detected entities: type, value, offsets, score |
+| `recognized_not_replaced` | Entities detected as PII but intentionally skipped (e.g. topical geo in service queries) |
+| `presidio_llm_response` | The LLM's answer to the Presidio-redacted text (one extra API call per question) |
+| `clean_llm_response` | The LLM's answer to the original text (one extra API call per question; synthetic data only) |
+| `bertscore_ss` | BERTScore (rescaled) of the SurrogateShield arm: input fidelity, and the answer against the clean answer when one was captured |
+| `bertscore_presidio` | BERTScore (rescaled) of the same pairs for the Presidio arm |
 
-By default, `presidio_sanitized_input`, `presidio_found_piis`, `bertscore_ss`, and `bertscore_presidio` are **off**: enable them in the field selection screen to generate data for the Presidio comparison and BERTScore tables in Evaluation.
+By default, `presidio_sanitized_input`, `presidio_found_piis`, `presidio_llm_response`, `clean_llm_response`, `bertscore_ss`, and `bertscore_presidio` are **off**: enable them in the field selection screen to generate data for the Presidio comparison and BERTScore tables in Evaluation.
+
+Every row also carries `address_mode`, the address setting the row was produced under. A question whose processing failed is written as `question`, `error` and `error_type` only, and is reprocessed when the run is resumed.
 
 ### Offline detection evaluation (no LLM, no API key)
 
@@ -853,15 +859,14 @@ Street addresses in service queries receive **house-number fuzzing** (±`address
 
 ### Generating compatible answers files
 
-Enable these fields in JSON Test before running to ensure the experiment has full data:
+Enable these fields in JSON Test before running so the experiment has both arms (the prompt itself carries no type metadata; an arm whose text is missing is recorded as unavailable):
 
 | Field | Required for |
 |---|---|
-| `surrogate_map` | SS attacker: original PII values and their surrogates |
-| `sanitized_input` | SS attacker: the text to attack |
-| `pii_detail` | SS attacker: type metadata for the prompt |
-| `presidio_sanitized_input` | Presidio attacker: the placeholder-redacted text |
-| `presidio_found_piis` | Presidio attacker: type metadata for the prompt |
+| `sanitized_input` | SS arm: the text to attack |
+| `surrogate_map` | SS arm: which values were replaced, so a value still visible verbatim is scored as leak-through, not as an inference |
+| `presidio_sanitized_input` | Presidio arm: the placeholder-redacted text to attack |
+| `presidio_found_piis` | Presidio arm: which values Presidio redacted, for the same leak-through scoring |
 
 ### Test coverage (`tests/test_attacker.py`)
 

@@ -9,8 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 STUB_PY = """#!/bin/sh
-# stand-in interpreter: answers run.sh's two pre-flight checks, echoes the launch
+# stand-in interpreter: answers run.sh's three pre-flight checks, echoes the launch
 case "$2" in
+  *"import surrogateshield"*) exit ${PACKAGE_MISSING:-0} ;;
   *config.SPACY_MODEL*) echo en_core_web_lg; exit 0 ;;
   *is_package*) exit ${SPACY_MISSING:-0} ;;
 esac
@@ -70,3 +71,13 @@ def test_I24_script_never_parses_env():
     text = (ROOT / "run.sh").read_text()
     assert "export $(" not in text and "xargs" not in text
     assert "exec " in text
+
+
+def test_I24_missing_package_stops_before_launch(tmp_path):
+    """No .venv (or an unfinished install): a clear message and exit 1, not
+    the ModuleNotFoundError traceback main.py would raise."""
+    r = _run(_setup(tmp_path), PACKAGE_MISSING="1")
+    assert r.returncode == 1
+    assert "pip install -r requirements.txt" in r.stdout
+    assert "LAUNCH" not in r.stdout and "Traceback" not in r.stdout + r.stderr
+

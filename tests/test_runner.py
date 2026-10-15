@@ -184,3 +184,16 @@ def test_A8_bertscore_errors_stored_not_swallowed():
     jt._run_bertscore_batch(answers, [{"input": "Ann asked"}], True, False, None, 1, scorer=scorer)
     assert answers[0]["bertscore_ss"] is None
     assert "cuda oom" in answers[0]["bertscore_error"]
+
+
+def test_rows_hold_exactly_the_enabled_fields_plus_address_mode(exp):
+    """The README's field table is the row's whole key set, plus the
+    always-present ``address_mode``; a failed question is written as
+    ``question`` / ``error`` / ``error_type`` only."""
+    rows = _run(exp, FakeChat(fail_on="rent"))
+    enabled = {k for k, v in FIELDS.items() if v}
+    assert set(rows[0]) == enabled | {"address_mode"}
+    assert set(rows[2]) == enabled | {"address_mode"}
+    assert set(rows[1]) == {"question", "error", "error_type"}
+    assert enabled <= {k for k, _ in jt.OUTPUT_FIELDS}
+

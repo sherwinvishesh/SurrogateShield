@@ -325,4 +325,25 @@ named after its audit ID.
   speed and memory, the verdict and the Limitations line) is recomputed from
   the result file in `bench/results/` it comes from, and the commit each
   file records is the one `bench/results/README.md` names.
+- `run.sh` checks that the chosen interpreter has the `surrogateshield`
+  package before the spaCy check and the launch; without a `.venv` the
+  launcher fell back to the system `python3` and `main.py` died with a
+  `ModuleNotFoundError` traceback.
+- The README's JSON Test field table (and the copy in
+  `experiment/README.md`) lists all twenty output fields in the code's
+  order (`pii_spans`, `final_output`, `presidio_llm_response` and
+  `clean_llm_response` were missing), names the six fields that are off
+  by default, describes the BERTScore fields as the code computes them,
+  and documents the always-present `address_mode` key and the shape of an
+  error row. The attacker's "compatible answers files" table names the
+  four fields `attacker.py` reads (`pii_detail` was listed; it is never
+  read).
+- `tests/test_app_library_parity.py`, `tests/test_json_test_fields.py` and
+  new cases in `tests/test_runner.py`, `tests/test_rag_roundtrip.py`,
+  `tests/test_run_sh.py` and `tests/test_I28_dead_config.py` (pre-publish
+  audit): the app's mask and the library's mask give the same output on
+  the contract messages, the field tables are derived from the code, an
+  answers row holds exactly the enabled fields, the on-disk RAG store
+  holds no original value, the launcher stops cleanly without the
+  package, and the README's shortcut table is the dashboard's menu list.
 

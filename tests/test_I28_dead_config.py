@@ -46,3 +46,16 @@ def test_I28_dead_main_constants_removed():
 
 def test_I28_pii_finder_docstring_is_its_docstring():
     assert main._run_pii_finder.__doc__ and "sandbox" in main._run_pii_finder.__doc__
+
+
+def test_readme_shortcut_table_lists_exactly_the_menu_keys():
+    """The README's "Dashboard Keyboard Shortcuts" table is MENU_ITEMS, in order."""
+    import re
+    from pathlib import Path
+    text = (Path(__file__).resolve().parent.parent / "README.md").read_text(encoding="utf-8")
+    section = text[text.index("### Dashboard Keyboard Shortcuts"):]
+    section = section[:re.search(r"\n#{2,3} ", section[10:]).start() + 10]
+    readme = [k.replace(" ", "") for k in re.findall(r"^\| `([^`]+)` \|", section, re.M)]
+    menu = [key.replace(" ", "") for key, *_ in help_screen.MENU_ITEMS]
+    assert readme == menu
+

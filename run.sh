@@ -38,7 +38,16 @@ else
     echo -e "${DIM}To create one: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt${NC}"
 fi
 
-# ── 2. API keys ───────────────────────────────────────────────────────────
+# ── 2. The package (a missing .venv or an unfinished install) ─────────────
+# main.py imports the surrogateshield package from python-library/; without
+# it the launch ends in a ModuleNotFoundError traceback (pre-publish audit).
+if ! "$PY" -c 'import surrogateshield' 2>/dev/null; then
+    echo -e "${RED}Error: the surrogateshield package is not installed for $PY.${NC}"
+    echo -e "Install the app and its dependencies with: ${DIM}$PY -m pip install -r requirements.txt${NC}"
+    exit 1
+fi
+
+# ── 3. API keys ───────────────────────────────────────────────────────────
 # main.py loads .env itself (python-dotenv) and the selected provider reports
 # its own missing key, so Gemini / ChatGPT / Ollama users are not blocked by
 # an Anthropic check here (audit I24). The file is never parsed or printed
@@ -52,7 +61,7 @@ if [ -f ".env" ]; then
     fi
 fi
 
-# ── 3. Check the spaCy model (detection fails closed without it, audit I17) ─
+# ── 4. Check the spaCy model (detection fails closed without it, audit I17) ─
 SPACY_MODEL="$("$PY" -c 'import config; print(config.SPACY_MODEL)')"
 if ! "$PY" -c "import spacy.util, sys; sys.exit(0 if spacy.util.is_package('$SPACY_MODEL') else 1)" 2>/dev/null; then
     echo -e "${RED}Error: spaCy model '$SPACY_MODEL' is not installed.${NC}"
@@ -60,5 +69,5 @@ if ! "$PY" -c "import spacy.util, sys; sys.exit(0 if spacy.util.is_package('$SPA
     exit 1
 fi
 
-# ── 4. Launch ─────────────────────────────────────────────────────────────
+# ── 5. Launch ─────────────────────────────────────────────────────────────
 exec "$PY" main.py "$@"

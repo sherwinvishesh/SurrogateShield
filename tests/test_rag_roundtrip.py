@@ -154,3 +154,24 @@ def test_I16_forget_removes_chunks_and_orphan_mappings(env):
 def test_I16_dead_add_rag_document_removed():
     import pipeline
     assert not hasattr(pipeline.Pipeline, "add_rag_document")
+
+
+def test_I16_store_on_disk_holds_no_original_value(env, tmp_path):
+    """Pre-publish audit (Pass 6): the persisted vector store (every file
+    chromadb writes) and the document map file contain no original value;
+    the map is sealed, not plaintext JSON."""
+    pipeline, rag, _, _ = env
+    pipeline.anonymise_for_rag("Sarah Mitchell signed; Tom Okafor witnessed.", rag,
+                               source="lease.txt")
+    rag_shadow = pipeline.ShadowMap("rag_global")
+    assert {"Sarah Mitchell", "Tom Okafor"} <= set(rag_shadow.all_mappings().values())
+    files = [p for p in (tmp_path / "rag").rglob("*") if p.is_file()]
+    assert files
+    for path in files:
+        blob = path.read_bytes()
+        for name in ("Sarah Mitchell", "Tom Okafor"):
+            assert name.encode() not in blob, path
+    from storage.logic import conversations_dir
+    for path in conversations_dir().glob("rag_global*"):
+        blob = path.read_bytes()
+        assert b"Sarah Mitchell" not in blob and b"Tom Okafor" not in blob, path

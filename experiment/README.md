@@ -131,16 +131,22 @@ Each entry in `*_answers.json` can contain the following fields (depending on wh
 | `context_guard_pii` | PII found by DistilBERT context classifier |
 | `confirmed_pii` | Final combined list of all confirmed PII |
 | `pii_detail` | Per-entity type, confidence score, and detection source |
+| `pii_spans` | Per-entity offsets, type and whether it was replaced (what the evaluator scores) |
 | `quasi_id_risks` | Combination re-identification risks (e.g. Name + SSN) |
 | `surrogate_map` | Mapping of original PII → surrogate replacement |
 | `sanitized_input` | The text sent to the LLM after surrogate substitution |
-| `recognized_not_replaced` | Entities detected but intentionally not replaced (e.g. topical locations) |
 | `llm_response` | Raw response from the LLM |
+| `final_output` | The LLM response with the surrogates restored to the real values |
 | `stage_timings_ms` | Per-stage timing breakdown in milliseconds |
 | `presidio_sanitized_input` | Presidio `[TYPE]`-redacted text (baseline) |
-| `presidio_found_piis` | Raw Presidio detections with type and score |
-| `bertscore_ss` | BERTScore comparing original vs SurrogateShield sanitized input |
-| `bertscore_presidio` | BERTScore comparing original vs Presidio sanitized input |
+| `presidio_found_piis` | Raw Presidio detections with type, value, offsets and score |
+| `recognized_not_replaced` | Entities detected but intentionally not replaced (e.g. topical locations) |
+| `presidio_llm_response` | The LLM's answer to the Presidio-redacted text (one extra API call per question) |
+| `clean_llm_response` | The LLM's answer to the original text (one extra API call per question; synthetic data only) |
+| `bertscore_ss` | BERTScore (rescaled) of the SurrogateShield arm: input fidelity, and the answer against the clean answer when one was captured |
+| `bertscore_presidio` | BERTScore (rescaled) of the same pairs for the Presidio arm |
+
+Every row also carries `address_mode`, the address setting the row was produced under. A question whose processing failed is written as `question`, `error` and `error_type` only, and is reprocessed when the run is resumed.
 
 ---
 
