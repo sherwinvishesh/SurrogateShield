@@ -44,7 +44,9 @@ fi
 # an Anthropic check here (audit I24). The file is never parsed or printed
 # by this script; only its permissions are checked.
 if [ -f ".env" ]; then
-    ENV_MODE="$(stat -f '%Lp' .env 2>/dev/null || stat -c '%a' .env 2>/dev/null || echo 600)"
+    # GNU stat first: on Linux `stat -f` is the *filesystem* query and succeeds
+    # with a non-mode string, so the BSD form must only run after `-c` fails.
+    ENV_MODE="$(stat -c '%a' .env 2>/dev/null || stat -f '%Lp' .env 2>/dev/null || echo 600)"
     if [ "${ENV_MODE#?}" != "00" ]; then
         echo -e "${YELLOW}Warning: .env is readable by other users (mode $ENV_MODE). Run: chmod 600 .env${NC}"
     fi

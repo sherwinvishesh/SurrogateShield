@@ -358,8 +358,8 @@ class ShadowMap:
     def save(self) -> None:
         """Seal the mappings and atomically write them (no-op in memory mode).
 
-        Raises OSError if the write fails: a mapping that cannot be stored
-        means a later turn cannot be restored, so the caller must know.
+        Raises ShadowMapStorageError if the write fails: a mapping that cannot
+        be stored means a later turn cannot be restored, so the caller must know.
         """
         with self._lock:
             self._save_locked()
@@ -368,7 +368,10 @@ class ShadowMap:
         if not self.persistent:
             return
         plaintext = json.dumps(self._mappings).encode("utf-8")
-        write_private(self._map_path, seal(self._key, self._session_id, KIND_SHADOWMAP, plaintext))
+        try:
+            write_private(self._map_path, seal(self._key, self._session_id, KIND_SHADOWMAP, plaintext))
+        except OSError as exc:     # the README's contract: a store that cannot be written is a StorageError
+            raise ShadowMapStorageError(f"cannot write the shadow map {self._map_path}: {exc}") from exc
         if self._old_key_path.exists():
             self._old_key_path.unlink()
         logger.debug(f"[ShadowMap] Saved {len(self._mappings)} mappings → {self._map_path}")
@@ -376,7 +379,10 @@ class ShadowMap:
     def _load(self) -> None:
         if not self._map_path.exists():
             return
-        blob = self._map_path.read_bytes()
+        try:
+            blob = self._map_path.read_bytes()
+        except OSError as exc:
+            raise ShadowMapStorageError(f"cannot read the shadow map {self._map_path}: {exc}") from exc
         legacy = self._legacy_key
         if not is_sealed(blob) and self._old_key_path.exists():
             legacy = legacy_key(self._old_key_path.read_bytes(), self._session_id)

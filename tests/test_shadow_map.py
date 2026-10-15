@@ -183,8 +183,10 @@ def test_I11_atomic_write_keeps_old_file_on_failure(ss_home, tmp_path, monkeypat
     def boom(*a, **k):
         raise OSError("disk full")
     monkeypatch.setattr(store.os, "replace", boom)
-    with pytest.raises(OSError, match="disk full"):
+    # a store that cannot be written is a StorageError (the README's contract), the OSError chained
+    with pytest.raises(store.ShadowMapStorageError, match="disk full") as info:
         sm.update({"s2": "o2"})
+    assert isinstance(info.value.__cause__, OSError)
     assert (tmp_path / "atomic.shadowmap").read_bytes() == before
     assert not list(tmp_path.glob(".tmp-*"))
 

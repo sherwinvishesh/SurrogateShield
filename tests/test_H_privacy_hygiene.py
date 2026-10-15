@@ -94,9 +94,11 @@ def _tagger(model):
 
 def test_H_tagger_runtime_error_is_detector_unavailable():
     t = _tagger(_Broken(RuntimeError("cuda gone")))
-    with pytest.raises(DetectorUnavailable, match="cuda gone") as info:
+    with pytest.raises(DetectorUnavailable, match="RuntimeError") as info:
         t.detect("Ana Ruiz, 34.", None)
-    assert "Ana" not in str(info.value) and "not masked" in str(info.value)
+    # the type only: a model's own message can quote the text (pass 3); the cause is chained
+    assert "Ana" not in str(info.value) and "cuda gone" not in str(info.value)
+    assert "not masked" in str(info.value) and str(info.value.__cause__) == "cuda gone"
     with pytest.raises(DetectorUnavailable, match="IndexError"):
         _tagger(_Broken(IndexError("index out of range"))).detect_many(["Ana Ruiz", "Bo Li"])
 

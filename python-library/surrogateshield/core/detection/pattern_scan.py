@@ -221,7 +221,7 @@ def _zip_validator(m: "re.Match") -> bool:
             or _ZIP_GEO_CONTEXT.search(_after(m, 50))):
         return True
     # a bare uppercase state abbreviation right before ("IL 60611")
-    if re.search(r"\b[A-Z]{2}\s*,?\s*$", pre):
+    if re.search(r"\b[A-Z]{2}(?:\s*,\s*|\s*)$", pre):
         return True
     # ZIP+4 shape is specific enough on its own; bare 5 digits are not
     # (ZIPs inside addresses are already claimed by the address parser).
@@ -1155,7 +1155,7 @@ def _named_age_validator(m: "re.Match") -> bool:
 
 
 # "aged 7 and 10", "ages 3, 6 and 9" — the numbers after the first one
-_AGE_LIST_CONT = re.compile(r"(?:\s*,\s*|\s*,?\s*(?:and|&)\s+)(\d{1,2})\b(?![.,:]\d)")
+_AGE_LIST_CONT = re.compile(r"(?:\s*,\s*|(?:\s*,\s*|\s*)(?:and|&)\s+)(\d{1,2})\b(?![.,:]\d)")
 
 
 # ─────────────────────────────────────────────
@@ -1930,7 +1930,7 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
         results.append(DetectedEntity(text=text[s:e], start=s, end=e,
                                       type=entity_type, score=1.0, source="pattern"))
         occupied_spans.append((s, e))
-        logger.debug(f"[PatternScan] {entity_type}: {text[s:e]!r} at [{s}:{e}]")
+        logger.debug(f"[PatternScan] {entity_type} at [{s}:{e}]")
 
     # ── URLs first: a personal URL is one entity; any other URL is opaque
     # (nothing inside it is matched) except secret query parameters and
@@ -1986,7 +1986,7 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
         if not _span_free(parsed.start, parsed.end):
             continue
         if _should_skip(parsed.full_text):
-            logger.debug(f"[PatternScan] Skipping (skip_values): {parsed.full_text!r}")
+            logger.debug(f"[PatternScan] Skipping (skip_values) at [{parsed.start}:{parsed.end}]")
             continue
         entity = DetectedEntity(
             text=parsed.full_text,
@@ -2000,7 +2000,7 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
         results.append(entity)
         occupied_spans.append((parsed.start, parsed.end))
         logger.debug(
-            f"[PatternScan] address: {entity.text!r} at [{parsed.start}:{parsed.end}]"
+            f"[PatternScan] address at [{parsed.start}:{parsed.end}]"
         )
 
     def _claim_list_continuation(entity_type: str, pos: int, first: str) -> None:
@@ -2045,7 +2045,7 @@ def scan(text: str, skip_values: Optional[Set[str]] = None) -> List[DetectedEnti
             matched_text = text[start:end]
 
             if _should_skip(matched_text):
-                logger.debug(f"[PatternScan] Skipping (skip_values): {matched_text!r}")
+                logger.debug(f"[PatternScan] Skipping (skip_values) at [{start}:{end}]")
                 continue
 
             if validator is not None and not validator(match):

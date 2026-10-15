@@ -287,7 +287,7 @@ class ResolvePass:
                 result, pattern, lambda surface: match_case(surface, surrogate, original),
                 protected, accept=lambda _t, m: _case_variant_ok(m.group(0), surrogate))
             if hits:
-                logger.debug(f"[ResolvePass] Exact hit: {surrogate!r} → {original!r}")
+                logger.debug(f"[ResolvePass] Exact hit: {surrogate!r}")
             else:
                 unresolved[surrogate] = original
                 self.failures.append(ResolutionFailure(

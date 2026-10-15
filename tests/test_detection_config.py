@@ -165,8 +165,10 @@ def test_use_tagger_switches_the_stage(monkeypatch):
         raise AssertionError(f"{stage.name} was loaded")
     monkeypatch.setattr(plugins, "get_detector", loaded)
     pipeline.run_cascade(TEXT, **NO_MODELS)
-    with pytest.raises(AssertionError, match="pii_tagger was loaded"):
+    # a detector that raises fails closed (pass 3): the error is chained under DetectorUnavailable
+    with pytest.raises(DetectorUnavailable, match="'pii_tagger' detector failed") as info:
         pipeline.run_cascade(TEXT, use_entity_trace=False)
+    assert str(info.value.__cause__) == "pii_tagger was loaded"
 
 
 def test_hash_ignores_key_order_but_not_values():

@@ -57,7 +57,7 @@ _INTENT = re.compile(
 )
 # A bare search fragment ("rehab centers around Phoenix") has no verb: a
 # short message that opens with a venue counts as the intent.
-_FRAGMENT = re.compile(r"^\W*(?:[\w'-]+\s+){0,3}?(?:" + _VENUE_WORDS + r")\b", re.IGNORECASE)
+_FRAGMENT = re.compile(r"^\W*(?!['\-])(?:[\w'-]+\s+){0,3}?(?:" + _VENUE_WORDS + r")\b", re.IGNORECASE)
 _FRAGMENT_MAX_WORDS = 15
 # …unless it is a first-person statement ("My doctor in Mesa said…",
 # "Hospital in Tempe is where I work"). "near my house" is still a query.
@@ -207,7 +207,7 @@ def fuzz_addresses(
             continue
         mappings[parsed.full_text] = fuzzed
         forbidden.add(fuzzed)
-        logger.debug(f"[ServiceQuery] {parsed.full_text!r} → {fuzzed!r}")
+        logger.debug(f"[ServiceQuery] house number shifted at [{parsed.start}:{parsed.end}]")
 
     from ..entities import splice
 

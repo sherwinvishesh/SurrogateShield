@@ -422,7 +422,7 @@ def _csv(text: str, ents: Sequence[DetectedEntity]):
 # ── 5. chat-transcript speakers ──────────────────────────────────────────────
 
 _SPEAKER = re.compile(
-    r"^[ \t]*(?:\[[^\]\n]{4,40}\]|\d{1,2}[:.]\d{2}(?:\s*[AaPp][Mm])?\s*[-–]?)?[ \t]*"
+    r"^[ \t]*(?:\[[^\]\n]{4,40}\][ \t]*|\d{1,2}[:.]\d{2}(?:\s*[AaPp][Mm])?(?:\s*[-–][ \t]*|\s*))?"
     r"([^\W\d_][\w.\-]{1,29}):[ \t]",
     re.MULTILINE,
 )
@@ -581,7 +581,7 @@ _ATTACHMENT = re.compile(r"(?i)^[\[(<]\s*(?:image|photo|picture|video|sticker|gi
 # A character may be labelled by two words ("Lady Okafor:", "Old Man:") or
 # be unknown ("???:"); a chat's speaker (``_SPEAKER``) is one word.
 _FICTION_SPEAKER = re.compile(
-    r"^[ \t]*(?:\[[^\]\n]{4,40}\]|\d{1,2}[:.]\d{2}(?:\s*[AaPp][Mm])?\s*[-–]?)?[ \t]*"
+    r"^[ \t]*(?:\[[^\]\n]{4,40}\][ \t]*|\d{1,2}[:.]\d{2}(?:\s*[AaPp][Mm])?(?:\s*[-–][ \t]*|\s*))?"
     r"([^\W\d_][\w.\-]{1,29}(?:[ \t][A-ZÀ-Ý][\w.\-]{1,29})?|\?{2,3}):[ \t]",
     re.MULTILINE,
 )
@@ -900,7 +900,7 @@ _KIN_NAME = re.compile(
     r"(?i:\b(?:my|our|his|her|their|(?:a\s+|o\s+)?minha|(?:a\s+|o\s+)?meu|mi|mis|mon|ma"
     r"|mein|meine|meinem|meiner|mijn)\s+(?:(?:little|older|younger|big|baby|best|eldest"
     r"|youngest|kleine|petite|petit|mayor|menor|mais\s+nova|mais\s+velha)\s+)?"
-    + _KIN_ANY + r"s?\s*,?\s+)"
+    + _KIN_ANY + r"s?(?:\s*,\s+|\s+))"
     r"([^\W\d_][\w'’\-]{1,20})(?![\w'’\-])"
 )
 _KIN_NAME_STOP = frozenset("""
@@ -1168,7 +1168,7 @@ def _org_frames(text: str, ents: Sequence[DetectedEntity]):
         stop = re.match(r"[ \t]+[a-z]+\b", text[m.end(1):])
         if quoted or v[:1].isupper() or (stop and _lowercase_writer(text)):
             add(m.start(1), m.end(1))
-    for m in re.finditer(r"(?m)^[ \t]*([^|\n]{3,60}?)[ \t]+\|[ \t]+([^|\n]{3,60}?)[ \t]*$", text):
+    for m in re.finditer(r"(?m)^[ \t]*(?![ \t])([^|\n]{3,60}?)[ \t]+\|[ \t]+([^|\n]{3,60}?)[ \t]*$", text):
         lm = _TITLE_LINE.fullmatch(m.group(2))
         if (rg._JOB_TITLE.search(m.group(1)) and lm and not rg._JOB_TITLE.search(m.group(2))
                 and len(m.group(2).split()) >= 2):
@@ -1313,7 +1313,7 @@ _CITY_W = r"[A-ZÀ-ÝČŠŽŘĽĎŤŇ][^\W\d_][\w'’\-]*(?:[ \-][A-ZÀ-ÝČŠŽ
 # "Zwolle (8011 PK)". Only after a street on the same line, or bracketed.
 _NOT_NL_SUFFIX = r"(?!AD|BC|CE|AM|PM|OK|US|UK|EU|TV|PC|GB|MB|KB|HP|KM|MM|CM)"
 _POSTCODE_TOWN = re.compile(
-    r"[ \t]*,?[ \t]*(?:"
+    r"(?:[ \t]*,[ \t]*|[ \t]*)(?:"
     r"(?P<pc>\d{3}[ ]\d{2}|\d{4}[ ]?" + _NOT_NL_SUFFIX + r"[A-Z]{2}|\d{3,5}|[A-Z]{1,2}-?\d{4,5})[ \t]+(?P<t1>" + _CITY_W + r")"
     # a locality may sit between: "Gandhi Nagar, Almora 263601" (IN PIN)
     r"|(?:(?P<loc>" + _CITY_W + r")[ \t]*,[ \t]*)?(?P<t2>" + _CITY_W + r")[ \t]+(?P<pc2>\d{4,6})(?!\d)"
@@ -1343,7 +1343,7 @@ _LOWER_UK_STREET = re.compile(
 )
 # the town between a street and a UK postcode
 _TOWN_UK_POSTCODE = re.compile(
-    r"[ \t]*,[ \t]*([A-Za-z][a-z'’\-]+(?:[ \-][A-Za-z][a-z'’\-]+)?)[ \t]*,?[ \t]+"
+    r"[ \t]*,[ \t]*([A-Za-z][a-z'’\-]+(?:[ \-][A-Za-z][a-z'’\-]+)?)(?:[ \t]*,[ \t]+|[ \t]+)"
     r"(?=[A-Za-z]{1,2}\d[A-Za-z\d]?[ \t]?\d[A-Za-z]{2}\b)")
 # a flat or unit number in front of a street address: "flat 4, 70 Cowley Road"
 _UNIT_BEFORE = re.compile(
@@ -1351,7 +1351,7 @@ _UNIT_BEFORE = re.compile(
 # floor / door / unit after a street: "Calle Mayor 17, 3º B", "Travessa do
 # Carmo 8, 2.º Esq.", "Lindenallee 3a, 2. OG links", "Piso 4 Dpto B"
 _UNIT_AFTER = re.compile(
-    r"[ \t]*,?[ \t]*(?:"
+    r"(?:[ \t]*,[ \t]*|[ \t]*)(?:"
     r"\d{1,2}[ \t]?\.?[ \t]?[º°ª]\.?(?:[ \t]*(?:[A-H](?![\w])|Esq\.?|Dto\.?|Dta\.?|Dir\.?|Izq(?:da)?\.?"
     r"|Dcha\.?|Fte\.?|Frente|Puerta[ \t]+\w{1,3}))?"
     r"|\d{1,2}\.[ \t]*(?:OG|Stock|Etage|Obergeschoss|EG|DG|UG)(?:[ \t]+(?:links|rechts|mitte|Mitte))?"

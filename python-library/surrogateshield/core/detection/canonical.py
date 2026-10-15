@@ -222,9 +222,9 @@ _DAY = rf"(?:{_ORD_WORDS}|\d{{1,2}}(?:st|nd|rd|th))"
 _YEAR_WORDS = (rf"(?:(?:nineteen|twenty)[ \t\-]+(?:{_TEN}(?:[ \t\-]+{_ONE})?|{_TEEN}|oh[ \t\-]+{_ONE}|hundred)"
                rf"|two[ \t]+thousand(?:[ \t]+and)?(?:[ \t\-]+(?:{_TEN}(?:[ \t\-]+{_ONE})?|{_TEEN}|{_ONE}))?)")
 _YEAR = rf"(?:\d{{4}}|{_YEAR_WORDS})"
-_DAY_OF = re.compile(rf"(?i)\b(?:the[ \t]+)?(?P<d>{_DAY})[ \t]+(?:day[ \t]+)?of[ \t]+(?P<m>{_MONTH})[ \t]*,?[ \t]*"
+_DAY_OF = re.compile(rf"(?i)\b(?:the[ \t]+)?(?P<d>{_DAY})[ \t]+(?:day[ \t]+)?of[ \t]+(?P<m>{_MONTH})(?:[ \t]*,[ \t]*|[ \t]*)"
                      rf"(?:in[ \t]+)?(?P<y>{_YEAR})\b")
-_MONTH_DAY = re.compile(rf"(?i)\b(?P<m>{_MONTH})[ \t]+(?:the[ \t]+)?(?P<d>{_DAY})[ \t]*,?[ \t]*(?P<y>{_YEAR})\b")
+_MONTH_DAY = re.compile(rf"(?i)\b(?P<m>{_MONTH})[ \t]+(?:the[ \t]+)?(?P<d>{_DAY})(?:[ \t]*,[ \t]*|[ \t]*)(?P<y>{_YEAR})\b")
 
 
 def year_value(s: str) -> Optional[int]:

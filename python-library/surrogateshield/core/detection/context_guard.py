@@ -182,7 +182,7 @@ def guard(
         if ent.score >= confidence_threshold:
             confirmed.append(ent)
             logger.debug(
-                f"[ContextGuard] Verified borderline: {ent.text!r} "
+                f"[ContextGuard] Verified borderline: [{ent.start}:{ent.end}] "
                 f"({ent.type}, score={ent.score:.2f})"
             )
         else:
@@ -203,7 +203,8 @@ def guard(
     try:
         results = ner(clean)
     except Exception as exc:
-        raise DetectorUnavailable(f"ContextGuard failed on this input: {exc!r}") from exc
+        raise DetectorUnavailable(     # the model's own message could quote the text: the type only
+            f"ContextGuard failed on this input ({type(exc).__name__}); the text was not masked") from exc
 
     for r in results:
         label = r.get("entity_group", r.get("entity", ""))
@@ -219,17 +220,18 @@ def guard(
 
         if len(text) < min_len:
             logger.debug(
-                f"[ContextGuard] Skipping too-short token: {raw_word!r} → {text!r}"
+                f"[ContextGuard] Skipping too-short token ({len(text)} chars) at "
+                f"[{r.get('start')}:{r.get('end')}]"
             )
             continue
 
         if text.lower() in _CG_BLOCKLIST:
-            logger.debug(f"[ContextGuard] Skipping blocklisted token: {text!r}")
+            logger.debug(f"[ContextGuard] Skipping blocklisted token at [{r.get('start')}:{r.get('end')}]")
             continue
 
         # A real name never spans a line break
         if "\n" in text:
-            logger.debug(f"[ContextGuard] Skipping newline-spanning: {text!r}")
+            logger.debug(f"[ContextGuard] Skipping newline-spanning token at [{r.get('start')}:{r.get('end')}]")
             continue
 
         # Word-boundary alignment: word-piece aggregation sometimes emits
@@ -252,7 +254,7 @@ def guard(
             if grew:
                 text = clean[start:end].strip()
                 logger.debug(
-                    f"[ContextGuard] Expanded fragment {raw_word!r} → {text!r}"
+                    f"[ContextGuard] Expanded fragment to [{start}:{end}]"
                 )
                 if len(text) < min_len or text.lower() in _CG_BLOCKLIST:
                     continue
@@ -288,12 +290,12 @@ def guard(
         if score >= confidence_threshold:
             confirmed.append(entity)
             logger.debug(
-                f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})"
+                f"[ContextGuard] Confirmed: [{entity.start}:{entity.end}] ({entity_type}, {score:.2f})"
             )
         else:
             uncertain.append(entity)
             logger.debug(
-                f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})"
+                f"[ContextGuard] Uncertain: [{entity.start}:{entity.end}] ({entity_type}, {score:.2f})"
             )
 
     logger.info(

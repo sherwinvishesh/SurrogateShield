@@ -159,20 +159,21 @@ def trace(
         doc = nlp(text)
     except Exception as exc:
         # fail closed: an input spaCy cannot process is not "no entities"
-        raise DetectorUnavailable(f"EntityTrace failed on this input: {exc!r}") from exc
+        raise DetectorUnavailable(     # the model's own message could quote the text: the type only
+            f"EntityTrace failed on this input ({type(exc).__name__}); the text was not masked") from exc
 
     for ent in doc.ents:
         if ent.label_ not in _TARGET_LABELS:
             continue
 
         if ent.text.lower().strip() in _ENTITY_BLOCKLIST:
-            logger.debug(f"[EntityTrace] Skipping blocklisted token: {ent.text!r}")
+            logger.debug(f"[EntityTrace] Skipping blocklisted token at [{ent.start_char}:{ent.end_char}]")
             continue
 
         # A real name never spans a line break — entities that do are
         # artifacts of form-style text ("DESHAWN M\nADDRESS").
         if "\n" in ent.text:
-            logger.debug(f"[EntityTrace] Skipping newline-spanning: {ent.text!r}")
+            logger.debug(f"[EntityTrace] Skipping newline-spanning span at [{ent.start_char}:{ent.end_char}]")
             continue
 
         _TYPE_DEFAULTS = {
@@ -192,7 +193,7 @@ def trace(
             if _LOCATION_PREPS & set(context_before.split()):
                 effective_label = "GPE"
                 score = _TYPE_DEFAULTS["GPE"]
-                logger.debug(f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r}")
+                logger.debug(f"[EntityTrace] Reclassified ORG→GPE at [{ent.start_char}:{ent.end_char}]")
 
         start, end = _clean_span(text, ent.start_char, ent.end_char)
         if start >= end:
@@ -207,17 +208,17 @@ def trace(
         )
 
         if remove_span_overlap(candidate, existing):
-            logger.debug(f"[EntityTrace] Skipping '{ent.text}' — overlaps existing")
+            logger.debug(f"[EntityTrace] Skipping [{start}:{end}] — overlaps existing")
             continue
 
         if score >= high_threshold:
             confirmed.append(candidate)
-            logger.debug(f"[EntityTrace] Confirmed: '{ent.text}' ({effective_label}, {score:.2f})")
+            logger.debug(f"[EntityTrace] Confirmed: [{start}:{end}] ({effective_label}, {score:.2f})")
         elif score >= low_threshold:
             borderline.append(candidate)
-            logger.debug(f"[EntityTrace] Borderline: '{ent.text}' ({effective_label}, {score:.2f})")
+            logger.debug(f"[EntityTrace] Borderline: [{start}:{end}] ({effective_label}, {score:.2f})")
         else:
-            logger.debug(f"[EntityTrace] Discarded (low score): '{ent.text}' ({score:.2f})")
+            logger.debug(f"[EntityTrace] Discarded (low score): [{start}:{end}] ({score:.2f})")
 
     logger.info(f"[EntityTrace] confirmed={len(confirmed)}, borderline={len(borderline)}")
     return confirmed, borderline

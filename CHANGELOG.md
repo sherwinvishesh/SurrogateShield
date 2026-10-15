@@ -39,7 +39,14 @@ separately and are not part of this file.
   skipped silently. Either install what the message names, or switch the
   stage off explicitly.
 - Storage errors raise `StorageError`. A corrupt store file raises
-  `CorruptStoreError` after it is moved aside.
+  `CorruptStoreError` after it is moved aside. A shadow map that cannot be
+  written or read raises `ShadowMapStorageError` (a `StorageError`), not a
+  bare `OSError`.
+- A detector that raises on an input (the tagger, ContextGuard, spaCy, or a
+  registered plugin) also fails closed: `mask()` raises
+  `DetectorUnavailable` naming the stage and the exception type, and no
+  surrogate is issued. The message never carries the model's own error
+  text, which can quote the input; the cause is chained (`__cause__`).
 - Invalid `config()` values raise `ValueError` with the allowed values.
 - `pii_off` entries are case-insensitive: `"person"` and `"PERSON"` (and
   `"gpe"`, `"email"`, …) switch off the same type. Before, a lower-case NER
@@ -247,6 +254,28 @@ named after its audit ID.
 - Town surrogates no longer carry trailing spaces (D3).
 - Generation no longer aborts a message on a role handle or a letterless
   name (J4).
+
+### Security hardening (pre-publish audit)
+- Logs are value-free at every level. Thirty-one `DEBUG` lines that printed
+  a detected or restored value (names, organisations, addresses, surrogates
+  under reconstruction) now print offsets or counts. `INFO` and above
+  already were. A test runs the whole mask/unmask/scan/forget path, in
+  memory and on disk, with the logger at `DEBUG` and asserts that no value
+  of any type appears.
+- Patterns with nested optional whitespace and punctuation (address,
+  organisation, structural and greeting frames, the canonical spelled
+  numbers, the service-query fragment) were rewritten to equivalent forms
+  that cannot backtrack quadratically. Thirty-two sites; every pattern was
+  checked against the old one on a differential corpus with no change in
+  output. Before: `"123 Main St"` followed by 10,000 spaces took over 25 s
+  to mask, 10,000 newlines 7 s. After: 0.05–0.13 s, linear in the length.
+- The tagger's output is validated before it is decoded (a missing row, a
+  probability row that does not match the labels, an offset outside the
+  text); a malformed output is `DetectorUnavailable`, not a partial mask.
+- The tagger loader reports the exception type and the folder, not the
+  model's message.
+- `run.sh` checks the mode of `.env` with the GNU `stat` form first, so the
+  world-readable warning works on Linux as well as macOS.
 
 ### Evaluation and CI
 - The evaluator has been rebuilt on shared metrics (A1–A12):

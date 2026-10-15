@@ -43,6 +43,7 @@ from dataclasses import replace as _dc_replace
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from ..entities import DetectedEntity, mask_spans
+from ..errors import DetectorUnavailable
 from . import canonical, pattern_scan, entity_trace, context_guard, relation_gate, structural
 from . import config as dconfig
 from . import org_assembly, plugins, resolver
@@ -195,7 +196,7 @@ def _detect_structural_orgs(
             new_ents.append(ent)
             occupied.add((name_start, name_end))
             logger.debug(
-                f"[SentinelLayer] Pass A structural ORG: {name_text!r}"
+                f"[SentinelLayer] Pass A structural ORG at [{name_start}:{name_end}]"
             )
 
     return new_ents
@@ -303,7 +304,7 @@ _INTRO_WEAK = re.compile(
 
 # E2: "<name> here," self-identification at message/sentence start.
 _HERE_FRAME = re.compile(
-    rf"(?:^|[.!?\n]\s*)({_NAME_TOKEN}\s+{_NAME_TOKEN})\s+here\b",
+    rf"(?:^|[.!?\n][^\S\n]*)({_NAME_TOKEN}\s+{_NAME_TOKEN})\s+here\b",
     re.IGNORECASE,
 )
 
@@ -328,13 +329,13 @@ _FORM_LABEL_PATTERNS = [
         rf"\b{_FORM_LABEL_NAME_CORE}\s*[:=]\s*([^\n]{{2,60}})",
         re.IGNORECASE), False),
     (re.compile(
-        rf"(?:^|\n|[.:;,]\s)\s*{_FORM_LABEL_NAME_CORE}\s*[\-–]\s*([^\n]{{2,60}})",
+        rf"(?:^|\n|[.:;,]\s)[^\S\n]*{_FORM_LABEL_NAME_CORE}\s*[\-–]\s*([^\n]{{2,60}})",
         re.IGNORECASE), False),
     (re.compile(
         rf"\b{_FORM_LABEL_ROLE_CORE}\s*[:=]\s*([^\n]{{2,60}})",
         re.IGNORECASE), True),
     (re.compile(
-        rf"(?:^|\n|[.:;,]\s)\s*{_FORM_LABEL_ROLE_CORE}\s*[\-–]\s*([^\n]{{2,60}})",
+        rf"(?:^|\n|[.:;,]\s)[^\S\n]*{_FORM_LABEL_ROLE_CORE}\s*[\-–]\s*([^\n]{{2,60}})",
         re.IGNORECASE), True),
 ]
 
@@ -435,7 +436,7 @@ def _code_field(text: str, m: "re.Match") -> bool:
 # characters, headings, products and addressees as PERSON, so its reading
 # stands in only where no stage named anyone and the name is tied to a
 # person the message talks about.
-_FALLBACK_GREETING = re.compile(r"(?i)\b(?:dear|hi|hello|hey)\s*,?\s*$")
+_FALLBACK_GREETING = re.compile(r"(?i)\b(?:dear|hi|hello|hey)(?:\s*,\s*|\s*)$")
 _FALLBACK_TITLE = re.compile(r"(?i)\b(?:mr|mrs|ms|mx|dr|prof|sir|lord|lady)\.?\s*$")
 _FALLBACK_MAX_PERSONS = 3
 # "…, who works with me", "Tomasz and his wife": the name goes on as a person
@@ -878,7 +879,7 @@ def _detect_structural_persons(
             type="PERSON", score=0.82, source="pattern",
         ))
         claimed.append((start, end))
-        logger.debug(f"[SentinelLayer] Pass E structural PERSON: {span_text!r}")
+        logger.debug(f"[SentinelLayer] Pass E structural PERSON at [{start}:{end}]")
 
     return new_ents, superseded
 
@@ -958,7 +959,7 @@ def _filter_implausible_orgs(
     for ent in entities:
         if ent.type == "ORG" and not _org_is_plausible(ent, text):
             logger.debug(
-                f"[SentinelLayer] Pass F dropping implausible ORG: {ent.text!r}"
+                f"[SentinelLayer] Pass F dropping implausible ORG at [{ent.start}:{ent.end}]"
             )
             continue
         result.append(ent)
@@ -1166,7 +1167,7 @@ def _complete_person_spans(
             text=text[start:end], start=start, end=end, type="PERSON",
             score=ent.score, source=ent.source,
         ))
-        logger.debug(f"[SentinelLayer] Pass G2 completed PERSON → {text[start:end]!r}")
+        logger.debug(f"[SentinelLayer] Pass G2 completed PERSON → [{start}:{end}]")
     return out
 
 
@@ -1207,7 +1208,7 @@ def _detect_card_brand_orgs(
             score=0.88, source="pattern",
         ))
         occupied.append((s, e))
-        logger.debug(f"[SentinelLayer] Pass H card-brand ORG: {word!r}")
+        logger.debug(f"[SentinelLayer] Pass H card-brand ORG at [{s}:{e}]")
     return new_ents
 
 
@@ -1245,8 +1246,8 @@ def _reclassify_email_username_orgs(
                 if username.startswith(ent_lower):
                     ent = _dc_replace(ent, type="PERSON", score=0.88)
                     logger.debug(
-                        f"[SentinelLayer] Pass B ORG→PERSON (email prefix): "
-                        f"{ent.text!r}"
+                        f"[SentinelLayer] Pass B ORG→PERSON (email prefix) at "
+                        f"[{ent.start}:{ent.end}]"
                     )
                     break
         result.append(ent)
@@ -1284,7 +1285,7 @@ def _deduplicate_person_components(
                     to_remove.add(short.text)
                     logger.debug(
                         f"[SentinelLayer] Pass C removing component PERSON "
-                        f"{short.text!r} (subset of {long_ent.text!r})"
+                        f"[{short.start}:{short.end}] (subset of [{long_ent.start}:{long_ent.end}])"
                     )
                     break
 
@@ -1438,8 +1439,8 @@ def _filter_topical_geo_entities(
         # Capitalisation check: lowercase mid-sentence = common noun → skip
         if not _is_proper_capitalized(geo_ent.text, text):
             logger.debug(
-                f"[SentinelLayer] Pass D: lowercase geo skipped (not proper noun): "
-                f"{geo_ent.text!r}"
+                f"[SentinelLayer] Pass D: lowercase geo skipped (not proper noun) at "
+                f"[{geo_ent.start}:{geo_ent.end}]"
             )
             skipped.append(geo_ent)
             continue
@@ -1457,13 +1458,13 @@ def _filter_topical_geo_entities(
 
         if in_query and not in_personal and not anchored:
             logger.debug(
-                f"[SentinelLayer] Pass D: topical geo (query-only): {geo_ent.text!r}"
+                f"[SentinelLayer] Pass D: topical geo (query-only) at [{geo_ent.start}:{geo_ent.end}]"
             )
             skipped.append(geo_ent)
             continue
 
         logger.debug(
-            f"[SentinelLayer] Pass D: geo kept (non-query context): {geo_ent.text!r}"
+            f"[SentinelLayer] Pass D: geo kept (non-query context) at [{geo_ent.start}:{geo_ent.end}]"
         )
         result.append(geo_ent)
 
@@ -1493,7 +1494,7 @@ def _reclassify_location_orgs(
             ctx = original_text[max(0, ent.start - 50): ent.start].lower()
             if _LOCATION_PREPS & set(ctx.split()):
                 ent = _dc_replace(ent, type="GPE", score=0.85)
-                logger.debug(f"[SentinelLayer] Reclassified ORG→GPE: {ent.text!r}")
+                logger.debug(f"[SentinelLayer] Reclassified ORG→GPE at [{ent.start}:{ent.end}]")
         result.append(ent)
     return result
 
@@ -1808,7 +1809,14 @@ def run_cascade(
         pview = canonical.chain(text)
         for st in plugin_stages:
             _t_pl = _clock()
-            found = plugins.get_detector(st).detect(text, pview)
+            try:
+                found = plugins.get_detector(st).detect(text, pview)
+            except DetectorUnavailable:
+                raise
+            except Exception as exc:     # noqa: BLE001 - a crashed detector fails closed, like a missing one
+                raise DetectorUnavailable(
+                    f"the {st.name!r} detector failed ({type(exc).__name__}); the text was not masked. "
+                    "Retry, or switch the stage off.") from exc
             ents = _routed(config, plugins.candidates_to_entities(st.name, text, found), st.name)
             # a model's age must have an age's shape (V4 §3.3), as a pattern's must
             ents = [e for e in ents if dconfig.public_type(e.type) != "AGE"

@@ -218,20 +218,20 @@ _COMPOUND = rf"[{_UC}](?:[\w'’\-]|\.(?=-))*?(?i:{_words(_CMP_STRONG + _CMP_WEA
 # ─────────────────────────────────────────────────────────────────────────────
 
 _SEP = r"(?:[ \t]*,[ \t]*|[ \t]+)"
-_LINE = r"(?:[ \t]*,?[ \t]*\r?\n[ \t]*)"            # a multi-line address
-_UNITS = rf"(?P<units>(?:[ \t]*,?[ \t]*{_UNIT}){{0,3}})"
+_LINE = r"(?:(?:[ \t]*,[ \t]*|[ \t]*)\r?\n[ \t]*)"            # a multi-line address
+_UNITS = rf"(?P<units>(?:(?:[ \t]*,[ \t]*|[ \t]*){_UNIT}){{0,3}})"
 
 _TAIL = (
     # Brazil: "Campinas - SP, 48872-059"
     rf"(?:(?P<sep_br>{_SEP}|{_LINE})(?P<city_br>{_TOWN})[ \t]+[-–][ \t]+(?P<region_br>{_UF})"
-    rf"(?:[ \t]*,?[ \t]*(?:CEP:?[ \t]*)?(?P<pc_br>{_PC_BR}){_END})?(?![\w])"
+    rf"(?:(?:[ \t]*,[ \t]*|[ \t]*)(?:CEP:?[ \t]*)?(?P<pc_br>{_PC_BR}){_END})?(?![\w])"
     # postcode first: ", 40718 Mainz", "\n5901 UM Eindhoven"
     rf"|(?P<sep_pf>[ \t]*,[ \t]*|{_LINE})(?P<pc_pf>{_PC_BEFORE_TOWN})[ \t]+(?P<city_pf>{_TOWN})"
     # a town, then a region and / or a postcode: "Edmonton, AB L7K 7J3",
     # "Cairns QLD 2617", "Plymouth PH78 2DT", "Mysuru 034021", "Ponferrada (24401)"
     rf"|(?P<sep_tw>{_SEP}|{_LINE})(?P<city_tw>{_TOWN})"
-    rf"(?:{_SEP}(?P<region_tw>{_REGION})(?![\w])(?:[ \t]*,?[ \t]*\b(?P<pc_rg>{_PC_AFTER_REGION}))?"
-    rf"|[ \t]*,?[ \t]*\b(?P<pc_tw>{_PC_AFTER_TOWN})"            # not "Leeds L|S1 4AP"
+    rf"(?:{_SEP}(?P<region_tw>{_REGION})(?![\w])(?:(?:[ \t]*,[ \t]*|[ \t]*)\b(?P<pc_rg>{_PC_AFTER_REGION}))?"
+    rf"|(?:[ \t]*,[ \t]*|[ \t]*)\b(?P<pc_tw>{_PC_AFTER_TOWN})"            # not "Leeds L|S1 4AP"
     rf"|[ \t]*\((?P<pc_br2>\d{{4,5}})\))"
     r")"
 )
@@ -247,7 +247,7 @@ _TOWN_ONLY = (rf"(?P<sep_to>[ \t]*,[ \t]*|{_LINE})"
               rf"(?:(?P<county_only>{_IE_COUNTY})"
               rf"|(?P<city_to>{_TOWN}(?:(?<=Dublin)[ ]\d{{1,2}}W?(?!\w))?)"      # "Dublin 6W": a postal district
               rf"(?:(?:[ \t]*,[ \t]*|{_LINE})(?P<county_to>{_IE_COUNTY}))?)"
-              rf"(?:(?:[ \t]*,?[ \t]*|{_LINE})(?P<eir_to>{_EIRCODE}))?"
+              rf"(?:(?:[ \t]*,[ \t]*|[ \t]*|{_LINE})(?P<eir_to>{_EIRCODE}))?"
               r"(?=[ \t]*(?:[.,!?;:)\]\"'，。；：！？、]|\r?\n|$)|[ \t]+(?:[a-z]|&))")   # "…, Cork by Friday"
 
 _NAME_EN = rf"{_NOT_NAME}(?:{_CAPWORD}|{_ORDINAL})(?:[ \t]+{_NOT_NAME}(?:{_CAPWORD}|{_ORDINAL})){{0,4}}"
@@ -268,11 +268,11 @@ _EN_RE = re.compile(
 )
 _R1_RE = re.compile(      # Type Name [,] [nº] HOUSE
     rf"(?<![\w])(?P<type>{_R_TYPE})[ \t]+(?P<name>{_NAME_R})"
-    rf"(?:(?P<house_sep>[ \t]*,?[ \t]*)(?:{_NUMBER_MARK}[ \t]?)?(?P<house>{_HOUSE_R}))?"
+    rf"(?:(?P<house_sep>[ \t]*,[ \t]*|[ \t]*)(?:{_NUMBER_MARK}[ \t]?)?(?P<house>{_HOUSE_R}))?"
     rf"{_UNITS}(?:{_TAIL})?"
 )
 _R2_RE = re.compile(      # HOUSE[,] type Name  (fr)
-    rf"(?<![\w.,$#/\-])(?P<house>\d{{1,4}}(?:[ ]?(?:bis|ter))?)(?P<house_sep>[ \t]*,?[ \t]+)"
+    rf"(?<![\w.,$#/\-])(?P<house>\d{{1,4}}(?:[ ]?(?:bis|ter))?)(?P<house_sep>[ \t]*,[ \t]+|[ \t]+)"
     rf"(?P<type>{_FR_TYPE})[ \t]+(?P<name>{_NAME_R})"
     rf"{_UNITS}(?:{_TAIL})?"
 )
@@ -285,7 +285,7 @@ _CMP_RE = re.compile(     # Name+ending HOUSE
 )
 
 _YEAR = re.compile(r"(?:1[89]|20)\d\d")
-_UNIT_SPLIT = re.compile(rf"[ \t]*,?[ \t]*({_UNIT})")
+_UNIT_SPLIT = re.compile(rf"(?:[ \t]*,[ \t]*|[ \t]*)({_UNIT})")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -38,6 +38,7 @@ downstream (RelationGate, the resolver): the tagger only finds values.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import logging
 import os
@@ -215,10 +216,11 @@ class TaggerModel:
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(path)
             self.model = AutoModelForTokenClassification.from_pretrained(path, dtype=torch.float32)
-        except (OSError, ValueError) as exc:
+        except Exception as exc:     # noqa: BLE001 - garbage weights or config fail closed, like a missing model
             raise DetectorUnavailable(
-                f"PIITagger could not load {model!r} from {path} ({exc}). The folder needs the tokenizer "
-                "and config.json next to the weights; or use the 'classic' detection preset.") from exc
+                f"PIITagger could not load {model!r} from {path} ({type(exc).__name__}: {exc}). The folder "
+                "needs the tokenizer and config.json next to the weights; or use the 'classic' detection "
+                "preset.") from exc
         self._setup(torch, device, model)
         self.model.eval()
         logger.info(f"[PIITagger] loaded {model} ({len(self.labels)} labels, device={device})")
@@ -408,28 +410,42 @@ class PIITagger:
         self.batch = int(opts.get("batch", 8))
         self.merge_address = bool(opts.get("merge_address", True))
 
-    def _probs(self, texts: Sequence[str]) -> List[List[Tuple[int, int, List[float]]]]:
-        """The model's token probabilities; a model that fails on an input
-        fails closed, like the other stages (audit I17): nothing about the
-        text is in the message."""
+    @staticmethod
+    @contextlib.contextmanager
+    def _closed():
+        """A model that fails on an input fails closed, like the other stages
+        (audit I17): the model's own errors and malformed output (offsets past
+        the text, a wrong number of rows, a non-list) all surface as
+        DetectorUnavailable, and nothing about the text is in the message."""
         try:
-            return self.model.token_probs(list(texts), self.window, self.stride, self.batch)
+            yield
         except DetectorUnavailable:
             raise
         except Exception as exc:     # noqa: BLE001 - any runtime failure of the model fails closed
             raise DetectorUnavailable(
-                f"PIITagger failed on this input ({type(exc).__name__}: {exc}); the text was not masked. "
+                f"PIITagger failed on this input ({type(exc).__name__}); the text was not masked. "
                 "Retry, or use the 'classic' detection preset.") from exc
+
+    def _probs(self, texts: Sequence[str]) -> List[List[Tuple[int, int, List[float]]]]:
+        """The model's token probabilities, fail-closed."""
+        with self._closed():
+            return self.model.token_probs(list(texts), self.window, self.stride, self.batch)
 
     def detect(self, text: str, view=None) -> List[Candidate]:
         if not text.strip():
             return []
-        tokens = self._probs([text])[0]
-        return decode(text, tokens, self.model.labels, self.merge_address)
+        with self._closed():
+            tokens = self._probs([text])[0]
+            return decode(text, tokens, self.model.labels, self.merge_address)
 
     def detect_many(self, texts: Sequence[str]) -> List[List[Candidate]]:
-        all_tokens = self._probs(texts)
-        return [decode(t, toks, self.model.labels, self.merge_address) for t, toks in zip(texts, all_tokens)]
+        with self._closed():
+            all_tokens = self._probs(texts)
+            if len(all_tokens) != len(texts):     # zip would silently leave the rest unread
+                raise DetectorUnavailable(f"PIITagger returned {len(all_tokens)} results for {len(texts)} "
+                                          "texts; the texts were not masked")
+            return [decode(t, toks, self.model.labels, self.merge_address)
+                    for t, toks in zip(texts, all_tokens)]
 
 
 def factory(stage) -> PIITagger:

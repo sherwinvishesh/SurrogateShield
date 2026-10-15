@@ -98,10 +98,10 @@ _KIND = (
     r"|Clinic|Medical[ \t]+Cent(?:er|re)|Health[ \t]+Cent(?:er|re)|Surgery|Kindergarten"
 )
 _END = r"(?![\w&])"
-_TAIL = re.compile(rf"[ \t]*,?[ \t]+(?:(?P<legal>{_LEGAL})|(?P<ambig>{_AMBIG})|(?P<family>{_FAMILY})"
+_TAIL = re.compile(rf"(?:[ \t]*,[ \t]+|[ \t]+)(?:(?P<legal>{_LEGAL})|(?P<ambig>{_AMBIG})|(?P<family>{_FAMILY})"
                    rf"|(?P<kind>{_KIND})){_END}")
 _TAIL_GLUED = re.compile(rf"[ \t]*(?P<family>&[ \t]*(?:Co\.?(?![ \t]*KG)|Sons?|Partners|Associates)){_END}")
-_COORD = re.compile(r"[ \t]*,?[ \t]+(?:and|&|und|et|e|y|en|og|och)[ \t]+|[ \t]*&[ \t]*")
+_COORD = re.compile(r"(?:[ \t]*,[ \t]+|[ \t]+)(?:and|&|und|et|e|y|en|og|och)[ \t]+|[ \t]*&[ \t]*")
 _COMMA = re.compile(r"[ \t]*,[ \t]*")
 
 # capitalised words that never start a name or a piece of one
@@ -215,8 +215,8 @@ _WORK = re.compile(
 # a sign-off line: "— Ana Ruiz, …", "-- Ana Ruiz | …"
 _SIGN_OFF = re.compile(rf"^[ \t]*(?:—|–|--|-)[ \t]*(?:[{_UP}][\w'’.\-]*[ \t]+){{0,3}}[{_UP}][\w'’.\-]*"
                        r"[ \t]*[,|][ \t]*(?:[^,|\n]*[,|][ \t]*)?$|^[ \t]*(?:—|–|--)[ \t]*$")
-_PERSON_GAP = re.compile(r"[ \t]*(?:,|\||—|–|-|@)[ \t]*|[ \t]*,?[ \t]+(?:from|at|of|with)[ \t]+")
-_WORD_GAP = re.compile(r"[ \t]*,?[ \t]+(?:from|at|of|with)[ \t]+")
+_PERSON_GAP = re.compile(r"[ \t]*(?:,|\||—|–|-|@)[ \t]*|(?:[ \t]*,[ \t]+|[ \t]+)(?:from|at|of|with)[ \t]+")
+_WORD_GAP = re.compile(r"(?:[ \t]*,[ \t]+|[ \t]+)(?:from|at|of|with)[ \t]+")
 # what may sit right before a name in a link: a person or a contact detail
 _CONTACT = frozenset({"PERSON", "email", "phone_us", "phone_uk", "phone_intl", "phone"})
 _CLOSING = re.compile(
@@ -281,7 +281,7 @@ def slot(text: str, start: int, anchors: Sequence[DetectedEntity] = (),
 def has_form(name: str) -> bool:
     """"Seifert Trubin e.V.", "Freitas e Filhos": a name that ends in its
     legal form or a family-firm tail (not a bare code such as "NV")."""
-    m = re.search(rf"[ \t]*,?[ \t]+(?:{_LEGAL}|{_FAMILY}){_END}[ \t.]*$", name)
+    m = re.search(rf"(?:[ \t]*,[ \t]+|[ \t]+)(?:{_LEGAL}|{_FAMILY}){_END}[ \t.]*$", name)
     return bool(m and m.start() > 0)
 
 

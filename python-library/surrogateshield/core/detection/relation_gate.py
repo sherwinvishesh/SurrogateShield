@@ -519,7 +519,7 @@ _EPITHET = re.compile(
 )
 _PERSONAL_BEFORE_PERSON = re.compile(
     r"(?i)\b(?:my|our|his|her|their|your)\s+(?:[\w'’\-]+\s+){0,2}$"
-    r"|\b(?:named|called|dear|hi|hello|hey|dr|mr|mrs|ms|mx)\.?\s*,?\s*$"
+    r"|\b(?:named|called|dear|hi|hello|hey|dr|mr|mrs|ms|mx)\.?(?:\s*,\s*|\s*)$"
 )
 
 
@@ -584,7 +584,7 @@ def is_public_person(ent: DetectedEntity, text: str) -> bool:
 _PERSON_BEFORE = re.compile(
     r"(?i)(?:\b(?:(?<!compared\s)(?<!similar\s)(?<!next\s)(?<!close\s)(?<!equal\s)(?<!relative\s)to"
     r"|from|tell|ask|told|asked|met|meet|call|text|email|cc|thanks"
-    r"|thank\s+you|dear|hi|hey|hello|love|sincerely|regards)\s*,?\s*$|(?:^|\n)\s*[-–—~]\s*$)"
+    r"|thank\s+you|dear|hi|hey|hello|love|sincerely|regards)(?:\s*,\s*|\s*)$|(?:^|\n)\s*[-–—~]\s*$)"
 )
 _PERSON_AFTER = re.compile(
     r"(?i)^(?:'s\s+(?:mom|mum|dad|mother|father|wife|husband|partner|son|daughter"
@@ -717,7 +717,7 @@ _CLOSING = re.compile(
 _HEADER = re.compile(r"(?i)^\s*(?:from|to|cc|bcc|reply-to|sender)\s*:")
 # "<person> from|at|of|with|representing <X>", "<tied org> in <city>"
 _LINK_BETWEEN = re.compile(
-    r"(?i)\s*,?\s*(?:(?:who|a|an|the|our|is|was|works?|worked|working|now|currently"
+    r"(?i)(?:\s*,\s*|\s*)(?:(?:who|a|an|the|our|is|was|works?|worked|working|now|currently"
     r"|based|lives?|living|\w+(?:er|or|ist|ant|ent|ing))\s+){0,3}"
     r"(?:from|at|of|with|for|in|near|representing|by|out\s+of)\s+(?:the\s+)?"
 )

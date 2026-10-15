@@ -39,8 +39,10 @@ def test_I17_spacy_error_on_input_raises(no_spacy_cache):
     def broken(_text):
         raise ValueError("boom")
     et._nlp["fake"] = broken
-    with pytest.raises(DetectorUnavailable, match="boom"):
+    # the type only: a model's own message can quote the text (pass 3); the cause is chained
+    with pytest.raises(DetectorUnavailable, match="ValueError") as info:
         et.trace(TEXT, spacy_model="fake")
+    assert "boom" not in str(info.value) and str(info.value.__cause__) == "boom"
 
 
 def test_I17_context_guard_missing_model_raises(no_ner_cache, monkeypatch):
@@ -54,8 +56,9 @@ def test_I17_context_guard_inference_error_raises(no_ner_cache):
     def broken(_text):
         raise RuntimeError("cuda gone")
     cg._ner_pipelines[("fake", -1, None)] = broken
-    with pytest.raises(DetectorUnavailable, match="cuda gone"):
+    with pytest.raises(DetectorUnavailable, match="RuntimeError") as info:
         cg.guard(TEXT, [], model_name="fake", enabled=True)
+    assert "cuda gone" not in str(info.value) and str(info.value.__cause__) == "cuda gone"
 
 
 def test_I17_context_guard_disabled_needs_no_model(no_ner_cache):
