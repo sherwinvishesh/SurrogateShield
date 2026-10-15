@@ -339,10 +339,14 @@ import re, sys, types
 # Python 3.10 has no re._constants / re._parser / re._compiler and its
 # sre_constants has neither POSSESSIVE_REPEAT nor ATOMIC_GROUP (possessive
 # quantifiers and atomic groups are 3.11+).
-real = re._constants
+try:
+    real = re._constants            # 3.11+: simulate 3.10 from this module
+except AttributeError:
+    import sre_constants as real    # 3.10 itself: the real module lacks both constants already
 fake = types.ModuleType("sre_constants")
 fake.__dict__.update({k: v for k, v in vars(real).items() if k not in ("POSSESSIVE_REPEAT", "ATOMIC_GROUP")})
-del re._constants
+if hasattr(re, "_constants"):
+    del re._constants
 sys.modules["re._constants"] = None
 sys.modules["sre_constants"] = fake
 import bench.arms.ss_ablate as A

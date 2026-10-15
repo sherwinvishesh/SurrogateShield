@@ -218,4 +218,7 @@ def test_adversarial_text_stays_fast(text):
     O.assemble(text, [])
     for i in range(0, len(text), max(1, len(text) // 100)):
         O.slot(text, i)
-    assert time.perf_counter() - t0 < 0.25
+    # A backtracking blow-up on these inputs takes seconds. The slowest case
+    # takes 0.07 s on a laptop and 0.26 s on a shared CI runner (3.10 leg,
+    # 2026-10-15), which the former 0.25 s bound failed on.
+    assert time.perf_counter() - t0 < 1.0

@@ -5,7 +5,7 @@ name: Tests
 # tests themselves do not (HF offline, no provider keys).
 on:
   push:
-    branches: [v2]
+    branches: [v2, main]
   pull_request:
 
 permissions:
@@ -37,3 +37,20 @@ jobs:
         run: >
           python -m pytest tests python-library/tests -q -p no:warnings
           --cov=python-library/surrogateshield/core --cov-fail-under=85
+
+  package:
+    # The wheel and sdist build and pass twine's metadata and long-description
+    # check on every push; nothing is uploaded (the publish workflow does that
+    # on a tag, from the python-lib branch).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Build
+        run: |
+          python -m pip install --upgrade pip build twine
+          python -m build python-library --outdir dist
+      - name: twine check
+        run: twine check --strict dist/*

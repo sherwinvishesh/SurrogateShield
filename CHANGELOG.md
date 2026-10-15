@@ -387,3 +387,33 @@ named after its audit ID.
   thresholds of `balanced`, the settings `config()` gained, and the 1.0.0
   `.shadowmap` + `.key` upgrade, which `tests/test_shadow_map.py` now checks
   by building the 1.0.0 file from the primitives themselves.
+- `.github/workflows/tests.yml` (pre-publish audit, merge pass): a `package`
+  job builds the wheel and the sdist (`python -m build python-library`) and
+  runs `twine check --strict` on every push and pull request; nothing is
+  uploaded. The suite also runs on pushes to `main`, so the merge commit is
+  tested.
+- `.gitignore` ignores `*.shadowmap` everywhere, as the README's Security
+  Design table says. It covered only `conversations/*.shadowmap`, so a store
+  written with `storage_dir=` elsewhere inside a checkout could be committed.
+  A test asks `git check-ignore` about each path the table names.
+- Root files v2 changed without naming them: `conftest.py` gives every test
+  (and every legacy script run as a subprocess) a private
+  `SURROGATESHIELD_HOME` and restores the library defaults after each test;
+  `pytest.ini` deselects the `heavy` tests (they need the tagger's weights)
+  unless asked; `eval_report.py` renders an `evaluator.run_evaluation` result
+  from the result dict alone (`n/a` for a missing value, no sentence the data
+  did not compute); `help_screen.py` and the main menu render one
+  `MENU_ITEMS` list (I28); `util.py` lost the Nominatim / `requests` code;
+  `settings_manager.py` validates each setting; `json_tester.py` resolves the
+  address mode per question as `pipeline.process_turn` does and writes the
+  rows the README's field table describes.
+- The Pass 7 CI run's 3.10 leg failed two tests the arm fix had not reached:
+  the simulated-3.10 regex test read `re._constants` itself (the test, not
+  the arm, assumed 3.11; it now takes `sre_constants` on 3.10 and was run
+  under a real 3.10 interpreter), and the organisation-assembly backtracking
+  guard's 0.25 s bound, which the slowest case missed by 8 ms on the shared
+  runner (0.07 s on a laptop); the bound is 1.0 s, since a blow-up on those
+  inputs takes seconds. `tests/test_F8_ci_workflow.py` bans `twine upload`
+  and `actions-gh-pages` in the test workflow rather than the word `twine`,
+  and checks that the package job builds and checks the distribution with
+  no upload and no `continue-on-error` anywhere.

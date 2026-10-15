@@ -153,3 +153,28 @@ def test_J16_published_numbers_match_results(surface):
     assert re.search(rf"{restored['k']} ?(/|of) ?{restored['n']}", text)
     exact = load("attacker_exact_test3.json")["results"]["all"]["ss"]["exact"]
     assert re.search(rf"{exact['k']} ?(/|of) ?{exact['n']}", text)
+
+
+def test_J16_security_design_gitignore_row_is_real(tmp_path):
+    """The Security Design table says `.gitignore` covers `*.shadowmap`,
+    `conversations/`, `device.key`, `.env` and new experiment outputs. Ask
+    git, not the file's text."""
+    import shutil
+    import subprocess
+    git = shutil.which("git")
+    if git is None:
+        pytest.skip("git is not installed")
+    row = next(l for l in read("README.md").splitlines() if l.startswith("| `.gitignore` |"))
+    for claim in ("`*.shadowmap`", "`conversations/`", "`device.key`", "`.env`",
+                  "`experiment/*_answers*.json`", "`*_eval_results*.json`", "`*_Attacker_Experiment*.json`"):
+        assert claim in row, claim
+    ignored = ["a.shadowmap", "store/session-1.shadowmap", "conversations/abc.json",
+               "conversations/abc.shadowmap", ".surrogateshield/device.key", ".env",
+               "experiment/run_answers.json", "experiment/run_eval_results.json",
+               "experiment/run_Attacker_Experiment.json"]
+    tracked = ["experiment/synth_dev_key.json", "python-library/README.md"]
+    proc = subprocess.run([git, "-c", "core.excludesFile=/dev/null", "check-ignore", "--no-index",
+                           "--", *ignored, *tracked],
+                          cwd=str(ROOT), capture_output=True, text=True, timeout=30)
+    assert proc.stdout.split("\n")[:-1] == ignored, proc.stdout + proc.stderr
+

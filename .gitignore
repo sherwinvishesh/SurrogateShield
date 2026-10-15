@@ -15,7 +15,8 @@ ENV/
 .env
 
 # ── SurrogateShield runtime data ──────────────────────────────────
-# Encrypted ShadowMap files (contain derived key material)
+# Encrypted ShadowMap files, wherever a storage_dir puts them
+*.shadowmap
 conversations/*.shadowmap
 
 # Conversation history (may contain sanitised PII surrogates)

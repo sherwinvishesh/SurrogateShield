@@ -24,8 +24,23 @@ def test_F8_test_workflow_runs_suite_offline_with_coverage_gate():
 
 def test_F8_test_workflow_never_deploys_or_publishes():
     text = (WORKFLOWS / "tests.yml").read_text()
-    for word in ("gh-pages", "pypi", "twine", "secrets.", "contents: write"):
+    for word in ("gh-pages", "pypi", "twine upload", "secrets.", "contents: write", "actions-gh-pages"):
         assert word not in text
+
+
+def test_F8_test_workflow_builds_and_checks_the_package():
+    """The package job builds the wheel and the sdist and runs twine's check
+    (merge checklist); it is a plain job, so a failure fails the run."""
+    jobs = load("tests.yml")["jobs"]
+    runs = "\n".join(step.get("run", "") for step in jobs["package"]["steps"])
+    assert "python -m build python-library" in runs
+    assert "twine check --strict" in runs
+    assert "upload" not in runs
+    for job in jobs.values():
+        assert "continue-on-error" not in job
+        for step in job["steps"]:
+            assert "continue-on-error" not in step
+            assert "|| true" not in step.get("run", "")
 
 
 def test_F8_deploy_workflows_still_only_fire_from_main_or_tags():
