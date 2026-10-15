@@ -894,7 +894,7 @@ Enable these fields in JSON Test before running so the experiment has both arms 
 .venv/bin/python -m pytest tests python-library/tests -q -m heavy
 ```
 
-Always run the tests through pytest. `tests/` holds 138 pytest modules,
+Always run the tests through pytest. `tests/` holds 141 pytest modules,
 one per area (detection stages, surrogates, ShadowMap, ResolvePass,
 settings and the CLI, RAG, the attacker experiment, the benchmark code,
 the docs), plus the older check scripts that `tests/test_legacy_scripts.py`
@@ -1121,7 +1121,7 @@ SurrogateShield/
 │
 ├── tests/                   # Test suite, run with pytest (no API key required)
 │   ├── conftest.py          # Shared fixtures
-│   ├── test_*.py            # 138 pytest modules, one per area; model-loading ones are marked heavy
+│   ├── test_*.py            # 141 pytest modules, one per area; model-loading ones are marked heavy
 │   ├── test_legacy_scripts.py  # Runs the older check scripts below and fails on any failed check
 │   └── test1.py … test5.py  # Older check scripts (run only through pytest)
 │
