@@ -38,7 +38,10 @@ import re
 import sys
 import time
 from pathlib import Path
-from re import _compiler as sre_compile, _constants as C, _parser as sre_parse
+try:
+    from re import _compiler as sre_compile, _constants as C, _parser as sre_parse   # Python 3.11+
+except ImportError:                                                                # Python 3.10
+    import sre_compile, sre_constants as C, sre_parse                              # noqa: F401
 from typing import Dict, List
 
 from bench.arms.base import ROOT, Refused, check_edits, msg_seed, read_messages, rel, versions

@@ -314,4 +314,15 @@ named after its audit ID.
   coarsens the street line to "my area" and keeps the city and state, and
   no legal keyword exists); the stale "(new)" markers are gone; the
   deprecated wrapper is `fuzz_addresses`, not `verify_addresses`.
+- `bench/arms/ss_ablate.py` imports the regex compiler under its Python 3.11
+  names (`re._compiler`, `re._parser`, `re._constants`) with the 3.10 modules
+  as the fallback; `tests/test_regex_ablation.py` could not be collected on
+  3.10, so the CI leg for the documented floor had never passed.
+- `tests/test_results_readme.py` (pre-publish audit): every benchmark number
+  the README quotes (the leak, clean-prompt, odd-format and harmless-edit
+  columns, the 11× / 39× ratios and the confidence interval, the natural
+  slice, the Nemotron-PII rates and F1, answer quality, multi-turn, attacker,
+  speed and memory, the verdict and the Limitations line) is recomputed from
+  the result file in `bench/results/` it comes from, and the commit each
+  file records is the one `bench/results/README.md` names.
 
