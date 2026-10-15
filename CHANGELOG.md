@@ -292,3 +292,26 @@ named after its audit ID.
 - `.github/workflows/tests.yml` runs the offline suite with an 85 % coverage
   gate on `python-library/surrogateshield/core` (F8). The deploy and publish
   workflows are unchanged.
+- Detection contract tests (`python-library/tests/test_detection_contract.py`,
+  pre-publish audit): the README's PatternScan table, public-type map,
+  evaluator label map, quasi-identifier table and module counts are derived
+  from the code; each preset runs exactly the documented stages (`classic`
+  never constructs the tagger); the address modes, PO boxes, highway forms,
+  service queries and the sensitive-topic override behave as documented; the
+  quasi-identifier scorer triggers each combination at its level and never
+  on a ZIP alone.
+- `offline_eval.py --ablation` rows switch off what their labels say. Since
+  the tagger joined `balanced`, `pattern_only` and `PatternScan +
+  EntityTrace` had still run it.
+- `requirements.txt` pins `faker==40.15.0`, the version the real-data
+  identity pool hash was recorded at; Faker 40.43 on CI produced a different
+  pool.
+- README: the PatternScan table lists every type the scanner emits (25 regex
+  types plus the address parser) with examples the scanner finds on its own;
+  the quasi-identifier table lists all ten combinations under the code's
+  names; the sensitive-topic override is described as the code has it
+  (medical, mental-health, addiction, shelter and immigration keywords; it
+  coarsens the street line to "my area" and keeps the city and state, and
+  no legal keyword exists); the stale "(new)" markers are gone; the
+  deprecated wrapper is `fuzz_addresses`, not `verify_addresses`.
+

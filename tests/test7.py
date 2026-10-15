@@ -270,11 +270,11 @@ check("cfg.pii_mem defaults to 'temp'",                  cfg.pii_mem == "temp")
 check("cfg.pii_off defaults to []",                      cfg.pii_off == [])
 check("cfg.service defaults to True",                    cfg.service is True)
 check("cfg.spacy_model defaults to 'en_core_web_lg'",    cfg.spacy_model == "en_core_web_lg")
-check("cfg.context_guard_enabled defaults to True",      cfg.context_guard_enabled is True)
-check("cfg.entity_trace_high_threshold defaults 0.85",   cfg.entity_trace_high_threshold == 0.85)
-check("cfg.entity_trace_low_threshold defaults 0.60",    cfg.entity_trace_low_threshold == 0.60)
+check("cfg.context_guard_enabled defaults to False",     cfg.context_guard_enabled is False)   # off in balanced: the tagger reads names
+check("cfg.entity_trace_high_threshold defaults 0.90",   cfg.entity_trace_high_threshold == 0.90)
+check("cfg.entity_trace_low_threshold defaults 0.70",    cfg.entity_trace_low_threshold == 0.70)
 check("cfg.context_guard_threshold defaults to 0.70",    cfg.context_guard_threshold == 0.70)
-check("cfg.entity_trace_fallback_threshold defaults 0.65", cfg.entity_trace_fallback_threshold == 0.65)
+check("cfg.entity_trace_fallback_threshold defaults 0.75", cfg.entity_trace_fallback_threshold == 0.75)
 check("cfg.fuzzy_threshold defaults to 85",              cfg.fuzzy_threshold == 85)
 
 s1, s2 = Session(), Session()
@@ -357,6 +357,8 @@ print("\n[7] pipeline.py — threshold parameters wired through correctly")
 from unittest.mock import patch
 import surrogateshield.core.detection.entity_trace as _et_mod
 import surrogateshield.core.detection.context_guard as _cg_mod
+from surrogateshield.core.detection.config import preset as _preset
+_classic = _preset("classic")
 
 # Build a fake entity for the mock to return
 _fake_ent = DetectedEntity("Alice", 3, 8, "PERSON", score=0.75, source="ner")
@@ -377,6 +379,7 @@ with patch.object(_et_mod, "trace", side_effect=_mock_trace):
     confirmed_default, _ = run_cascade(
         "Hi Alice",
         context_guard_enabled=False,
+        config=_classic,             # classic routes a spaCy PERSON as a name; balanced takes it only as the ensemble fallback
         entity_trace_high_threshold=0.85,
         entity_trace_low_threshold=0.60,
         entity_trace_fallback_threshold=0.80,  # 0.75 < 0.80 → not promoted
@@ -387,6 +390,7 @@ with patch.object(_et_mod, "trace", side_effect=_mock_trace):
     confirmed_low_fallback, _ = run_cascade(
         "Hi Alice",
         context_guard_enabled=False,
+        config=_classic,             # classic routes a spaCy PERSON as a name; balanced takes it only as the ensemble fallback
         entity_trace_high_threshold=0.85,
         entity_trace_low_threshold=0.60,
         entity_trace_fallback_threshold=0.70,  # 0.75 > 0.70 → promoted
@@ -398,6 +402,7 @@ with patch.object(_et_mod, "trace", side_effect=_mock_trace):
     confirmed_low_high, _ = run_cascade(
         "Hi Alice",
         context_guard_enabled=False,
+        config=_classic,             # classic routes a spaCy PERSON as a name; balanced takes it only as the ensemble fallback
         entity_trace_high_threshold=0.70,   # 0.75 >= 0.70 → confirmed immediately
         entity_trace_low_threshold=0.50,
         entity_trace_fallback_threshold=0.65,

@@ -352,7 +352,7 @@ How the surrogate is built is controlled by `address_mode`:
 |------|-----------|
 | `"shift"` | Only the house number changes, by up to ±`address_shift_range` (default ±1 — roughly one building). Street, city, state, ZIP, and the original formatting are preserved **byte-for-byte**: `789 Crescent Row, Tempe, AZ 85281` → `790 Crescent Row, Tempe, AZ 85281`. Maximum answer utility. |
 | `"replace"` | A structure-preserving fake: every component is replaced by a fake of the same shape in the same slot (`789 Crescent Row, Tempe, AZ 85281` → `412 Nguyen Row, South Debra, PR 90830`). Strongest privacy — no real component reaches the LLM. |
-| `"auto"` *(default)* | Context-aware: `shift` for service queries ("find a coffee shop near …"), `replace` for everything else. A service query on a sensitive topic (medical, legal, shelter-related) keeps only the city and state: the street line becomes "my area". |
+| `"auto"` *(default)* | Context-aware: `shift` for service queries ("find a coffee shop near …"), `replace` for everything else. A service query on a sensitive topic (medical, mental-health, addiction, shelter or immigration keywords) keeps only the city and state: the street line becomes "my area". |
 
 ```python
 import surrogateshield as shield
@@ -376,8 +376,9 @@ conversation ("789 Crescent Row" and "790 Crescent Row" both present are
 shifted apart automatically), and the same original always maps to the same
 surrogate within a session.
 
-No address is sent to a geocoder. `verify_addresses` (a Nominatim existence
-check whose result never changed the output) is deprecated and has no effect.
+No address is sent to a geocoder. The `verify` flag of the deprecated
+`fuzz_addresses` wrapper (a Nominatim existence check whose result never
+changed the output) is ignored.
 
 
 ## Service query detection
@@ -392,7 +393,7 @@ answers, and drive the `shift`/`replace` decision when `address_mode="auto"`.
 shield.config(service=False)
 ```
 
-Sensitive topic override: even when a message matches the service-query pattern, if it contains keywords related to medical, legal, or social-service topics (HIV, abortion, shelter, domestic violence, rehab, etc.), full anonymization is always applied regardless.
+Sensitive topic override: even when a message matches the service-query pattern, if it contains keywords related to medical, mental-health, addiction, shelter or immigration topics (HIV, abortion, shelter, domestic violence, rehab, therapy, immigration, etc.), the street line is coarsened to "my area" and only the city and state are kept, regardless.
 
 
 ## Persistent shadow map
@@ -438,7 +439,7 @@ SurrogateShield identifies quasi-identifier combinations based on Sweeney's k-an
 
 | Combination | Risk | Basis |
 |---|---|---|
-| ZIP code + DOB + Gender | High | 87% of the US population is uniquely identified by all three (Sweeney 2000) |
+| ZIP + DOB + Gender | High | 87% of the US population is uniquely identified by all three (Sweeney 2000) |
 | Postcode + DOB | High | UK ICO guidance: sufficient for re-identification |
 | Name + SSN | High | Enables direct identity theft |
 | Name + DOB | High | Standard identity verification combination worldwide |
@@ -539,7 +540,8 @@ shield.config(
     # fuzzing instead of full surrogate replacement. The house number is
     # shifted ±1 and the rest of the address is preserved, allowing the LLM
     # to give useful location-based answers. Sensitive topics (medical,
-    # legal, shelter-related) always override this and force full replacement.
+    # mental-health, addiction, shelter, immigration) always override this:
+    # the street line becomes "my area" and only the city and state are kept.
 
     spacy_model="en_core_web_lg",
     # The spaCy model EntityTrace loads. In the default detection config

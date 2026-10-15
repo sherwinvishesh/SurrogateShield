@@ -105,24 +105,36 @@ In `balanced`, the PII tagger (a DeBERTa-v3-small token classifier, [`sherwinvis
 
 Regex-based structural detection. Runs first so structured PII is masked before any NER model sees it. Validators (Luhn, ABA checksum) reject false positives before any entity is emitted.
 
-| Pattern | Examples | Validator |
+| Internal type | Examples (each is found when scanned on its own) | Validator |
 |---|---|---|
-| Street address | `99 Cathedral Close`, `456 Innovation Plaza` | None |
-| SSN | `512-44-7810` | None |
-| Email | `user@example.com` | None |
-| Phone US | `+1-480-555-1234` | None |
-| Phone UK | `+44 7911 123456` | None |
-| Phone (international) | `+49 8234 927461` | None |
-| Credit card | `4111 1111 1111 1111` | Luhn algorithm |
-| Date of birth | `01/15/1990`, `March 14 1990` | None |
-| IPv4 | `192.168.1.100` | None |
-| API key / secret | `sk-ant-...`, `Bearer ...`, `ghp_...`, `AKIA...`, `AIzaSy...` | None |
-| Gender indicator | `gender: female`, `she/her`, `I am a man` | None |
-| UK postcode | `SW1A 1AA` | None |
-| US ZIP code | `85281`, `85281-1234` | None |
-| **Crypto wallet** *(new)* | Bitcoin P2PKH/P2SH/Bech32, Ethereum `0x...` | None |
-| **ABA routing number** *(new)* | `021000021`, `122105155` | ABA 9-digit checksum |
-| **US driver's license** *(new)* | `B7654321`, `F123456789012` | Context-gated (keyword required) |
+| `address` (the structured parser) | `99 Cathedral Close, Tempe, AZ 85281`, `PO Box 1234, Tempe, AZ 85281`, `1500 Highway 50, Carson City, NV` | Plausibility rules (suffix tiers, "3 point turn" rejected) |
+| `ssn` | `512-44-7810` | None |
+| `email` | `user@example.com` | None |
+| `phone_us` | `+1-480-555-1234`, `(480) 555-1234` | None |
+| `phone_uk` | `+44 7911 123456` | None |
+| `phone_intl` | `+49 8234 927461` | None |
+| `credit_card` | `4111 1111 1111 1111` | Luhn algorithm |
+| `dob` | `01/15/1990`, `March 14 1990`, `DOB 1990-03-14` | None |
+| `age` | `34 years old`, `7-year-old`, `age: 52` | Shape guard (an age, not a count) |
+| `ip_address` | `192.168.1.100` | None |
+| `mac_address` | `00:1A:2B:3C:4D:5E` | None |
+| `url` | `https://example.com/u/priya` | None |
+| `handle` | `username: priya_r` | Context-gated (label or `@`) |
+| `api_key` | `sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123456789`, `ghp_abcdefghijklmnopqrstuvwxyz0123456789`, `AKIAIOSFODNN7EXAMPLE`, `AIzaSyA1234567890abcdefghijklmnopqrstuv`, `Bearer eyJhbGciOiJIUzI1NiJ9.e30.abc` | None |
+| `credential` | `password: Tr0ub4dor&3`, `PIN: 4821`, `one-time code 839201` | Context-gated (keyword required) |
+| `crypto` | `1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2`, `bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq`, `0x52908400098527886E0F7030069857D2E4169EE7` | None (Bitcoin P2PKH / P2SH / Bech32, Ethereum) |
+| `iban` | `GB29 NWBK 6016 1331 9268 19`, `DE89 3704 0044 0532 0130 00` | IBAN mod-97 |
+| `us_bank_number` | `routing 021000021`, `routing number 122105155` | ABA 9-digit checksum, context-gated |
+| `us_driver_license` | `DL B7654321`, `DL F123456789012`, `driver's license number B7654321` | Context-gated (keyword required) |
+| `passport` | `passport C1234567`, `passport number 512345678` | Context-gated |
+| `license_plate` | `plate 7ABC123`, `licence plate AB12 CDE` | Context-gated |
+| `vin` | `1HGCM82633A004352` | VIN alphabet (no I, O, Q) |
+| `id_number` | `employee ID 48213977`, `patient MRN 00482913` | Context-gated |
+| `gender_indicator` | `gender: female`, `she/her`, `I am a man` | None |
+| `postcode_uk` | `SW1A 1AA` | None |
+| `zip_us` | `zip 85281`, `85281-1234` | Context-gated for the 5-digit form |
+
+The tests derive this table from `pattern_scan._PATTERNS` and scan every example (`python-library/tests/test_detection_contract.py`).
 
 Pattern order matters; patterns claim character spans; later patterns cannot overlap earlier ones. In particular: `crypto` and `us_bank_number` run before `zip_us` so that 9-digit routing numbers and long hex strings are claimed before the ZIP pattern can fragment them.
 
@@ -183,7 +195,7 @@ Identifies messages like "restaurants near 1126 E Apache Blvd, Tempe, AZ" and ap
 
 - City/state names are **not replaced**: the LLM needs them to give useful answers
 - Drives the shift-vs-replace decision when `ADDRESS_MODE="auto"`
-- A sensitive-topic override (medical, legal, shelter, immigration keywords) forces full anonymisation regardless of query structure
+- A sensitive-topic override (medical, mental-health, addiction, shelter and immigration keywords: HIV, abortion, rehab, therapy, domestic violence, homeless, immigration, …) coarsens the street line to "my area" and keeps only the city and state, regardless of query structure
 - No address is ever sent to a geocoder: v2 removed the Nominatim existence check, which sent the street to a third party and never changed the output
 
 #### Quasi-Identifier Scorer (`detection/quasi_identifier.py`)
@@ -194,8 +206,14 @@ Based on Sweeney's k-anonymity research. Detects risky entity-type combinations 
 |---|---|
 | ZIP + DOB + Gender | High: 87% of US population uniquely identifiable (Sweeney 2000) |
 | Postcode + DOB | High |
-| Name + Employer + Location | Medium |
-| IP + Location | Medium |
+| Name + SSN | High |
+| Name + DOB | High |
+| Phone + Name | High |
+| IP Address + Name | High |
+| Name + Employer + City | Medium |
+| Email + Location | Medium |
+| Phone + Location | Medium |
+| DOB + Location + Employer | Medium |
 
 
 
@@ -220,9 +238,9 @@ Generates type-consistent surrogates using [Faker](https://faker.readthedocs.io/
 | `api_key` | `sk-` + 32 random chars |
 | `GPE` / `LOC` / `ORG` / `FAC` | Faker city/company names |
 | `gender_indicator` | Grammatically valid gender expression |
-| **`crypto`** *(new)* | Bitcoin P2PKH format: `1` + Base58 chars, 26–35 chars |
-| **`us_bank_number`** *(new)* | Valid 9-digit ABA routing number (passes checksum) |
-| **`us_driver_license`** *(new)* | CA-format: letter + 7 digits (e.g. `B4923817`) |
+| `crypto` | Bitcoin P2PKH format: `1` + Base58 chars, 26–35 chars |
+| `us_bank_number` | Valid 9-digit ABA routing number (passes checksum) |
+| `us_driver_license` | CA-format: letter + 7 digits (e.g. `B4923817`) |
 
 
 
@@ -309,16 +327,6 @@ Thirteen public types; each groups the internal names the detectors report:
 | `DATE_OF_BIRTH` | `dob` |
 
 Two more labels exist: `GENDER` (`gender_indicator`) and `OTHER` (any label the map does not know, such as a plugin's own). Combination risk is scored separately: quasi-identifier sets per Sweeney k-anonymity.
-
-### New in recent release
-
-| Type | Description | Detection mechanism |
-|---|---|---|
-| `crypto` | Bitcoin P2PKH (`1…`), P2SH (`3…`), Bech32 (`bc1…`), Ethereum (`0x` + 40 hex) | Regex: highly distinctive character sets, no validator needed |
-| `us_bank_number` | US ABA routing numbers (9 digits) | Regex + ABA checksum: `(3·d₀ + 7·d₁ + d₂ + …) mod 10 = 0` |
-| `us_driver_license` | State DL numbers: letter + 7 digits (CA), letter + 12 digits (FL), etc. | Context-gated regex: fires only when preceded by a license keyword |
-
-
 
 ## Quick Start
 
@@ -641,15 +649,26 @@ The evaluator maps flexible label names to internal types:
 | `dob`, `date_of_birth` | `dob` |
 | `org`, `ORG`, `organization` | `ORG` |
 | `gpe`, `GPE`, `location` | `GPE` |
+| `loc`, `LOC` | `LOC` |
+| `fac`, `FAC` | `FAC` |
 | `credit_card` | `credit_card` |
 | `api_key` | `api_key` |
-| `ip`, `ip_address` | `ip_address` |
+| `ip_address`, `ip` | `ip_address` |
 | `zip`, `zip_us`, `postcode`, `postcode_uk` | `postal_code` |
 | `gender` | `gender_indicator` |
-| `fac`, `FAC` | `FAC` |
-| **`crypto`, `bitcoin`, `ethereum`, `wallet`** *(new)* | `crypto` |
-| **`bank_number`, `bank_account`, `us_bank_number`, `routing_number`, `routing`** *(new)* | `us_bank_number` |
-| **`driver_license`, `us_driver_license`, `drivers_license`, `dl`, `license`** *(new)* | `us_driver_license` |
+| `crypto`, `bitcoin`, `ethereum`, `wallet` | `crypto` |
+| `bank_number`, `bank_account`, `us_bank_number`, `routing_number`, `routing` | `us_bank_number` |
+| `driver_license`, `us_driver_license`, `drivers_license`, `dl`, `license` | `us_driver_license` |
+| `url` | `url` |
+| `handle`, `username` | `handle` |
+| `credential`, `password` | `credential` |
+| `age` | `age` |
+| `id_number` | `id_number` |
+| `passport` | `passport` |
+| `iban` | `iban` |
+| `vin` | `vin` |
+| `mac_address` | `mac_address` |
+| `license_plate` | `license_plate` |
 
 #### Evaluation metrics reported
 
@@ -684,9 +703,9 @@ The per-type comparison covers all types both systems can detect. Types SS detec
 | ip_address | PatternScan | Presidio regex |
 | dob *(approximate)* | PatternScan | Presidio DATE_TIME |
 | GPE *(approximate)* | EntityTrace | Presidio LOCATION |
-| **crypto** *(new)* | PatternScan | Presidio CRYPTO |
-| **us_bank_number** *(new)* | PatternScan (ABA checksum) | Presidio US_BANK_NUMBER |
-| **us_driver_license** *(new)* | PatternScan (context-gated) | Presidio US_DRIVER_LICENSE |
+| crypto | PatternScan | Presidio CRYPTO |
+| us_bank_number | PatternScan (ABA checksum) | Presidio US_BANK_NUMBER |
+| us_driver_license | PatternScan (context-gated) | Presidio US_DRIVER_LICENSE |
 
 **SS-Only types** (Presidio cannot detect these):
 
@@ -870,7 +889,7 @@ Enable these fields in JSON Test before running to ensure the experiment has ful
 .venv/bin/python -m pytest tests python-library/tests -q -m heavy
 ```
 
-Always run the tests through pytest. `tests/` holds 119 pytest modules,
+Always run the tests through pytest. `tests/` holds 138 pytest modules,
 one per area (detection stages, surrogates, ShadowMap, ResolvePass,
 settings and the CLI, RAG, the attacker experiment, the benchmark code,
 the docs), plus the older check scripts that `tests/test_legacy_scripts.py`
@@ -1097,7 +1116,7 @@ SurrogateShield/
 │
 ├── tests/                   # Test suite, run with pytest (no API key required)
 │   ├── conftest.py          # Shared fixtures
-│   ├── test_*.py            # 119 pytest modules, one per area; model-loading ones are marked heavy
+│   ├── test_*.py            # 138 pytest modules, one per area; model-loading ones are marked heavy
 │   ├── test_legacy_scripts.py  # Runs the older check scripts below and fails on any failed check
 │   └── test1.py … test5.py  # Older check scripts (run only through pytest)
 │
@@ -1116,7 +1135,7 @@ SurrogateShield/
 │           ├── entities.py              # DetectedEntity, mask_spans, remove_span_overlap
 │           ├── detection/
 │           │   ├── pipeline.py          # run_cascade(), deduplicate(), pii_off alias table
-│           │   ├── pattern_scan.py      # 17-pattern regex scanner with Luhn / ABA validators
+│           │   ├── pattern_scan.py      # regex scanner (25 regex types plus the address parser) with Luhn / ABA / IBAN validators
 │           │   ├── entity_trace.py      # spaCy NER (model-name-keyed cache)
 │           │   ├── context_guard.py     # distilbert-NER second pass (optional)
 │           │   ├── pii_tagger.py        # PII tagger (DeBERTa-v3-small) for names, organisations, places
@@ -1233,7 +1252,7 @@ hold.
 ## Privacy Guarantees
 
 - **Detected PII is replaced before any request is made.** Every entity confirmed by SentinelLayer is replaced before the HTTP request is made, and a missing detection model stops the request (fail closed).
-- **Service queries get proportional protection.** A restaurant search near your home address gets the house number shifted; the city name is preserved so the answer is useful. Sensitive topic overrides (medical, legal, shelter) force full anonymisation regardless.
+- **Service queries get proportional protection.** A restaurant search near your home address gets the house number shifted; the city name is preserved so the answer is useful. Sensitive topic overrides (medical, mental-health, addiction, shelter and immigration keywords) coarsen the street line to "my area" and keep only the city and state, regardless.
 - **Geographic generality is preserved.** US states, countries, and major cities are never replaced; they provide no meaningful re-identification risk and destroying them would break answer quality.
 - **Quasi-identifier risks are surfaced.** If your message contains combinations like ZIP+DOB+gender that are statistically re-identifying even without traditional PII, you are warned before the message is sent.
 - **RAG documents are anonymised at index time.** Detected PII is replaced before a document is indexed. Retrieval and context injection operate on the anonymised text.

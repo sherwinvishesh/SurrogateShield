@@ -202,10 +202,10 @@ def run_offline_eval(
 # shipped configuration and keeps its sign.
 ABLATION_CONFIGS = [
     ("pattern_only", "PatternScan only",
-     {"use_entity_trace": False, "use_context_guard": False}),
-    ("pattern_entity_trace", "PatternScan + EntityTrace (ContextGuard off)",
-     {"use_context_guard": False}),
-    ("no_post_passes", "All three stages, post-passes A-C/E-H off",
+     {"use_entity_trace": False, "use_context_guard": False, "use_tagger": False}),
+    ("pattern_entity_trace", "PatternScan + EntityTrace (tagger and ContextGuard off)",
+     {"use_context_guard": False, "use_tagger": False}),
+    ("no_post_passes", "Every stage, post-passes A-C/E-H off",
      {"use_post_passes": False}),
     ("full", "Full cascade (shipped)", {}),
 ]
