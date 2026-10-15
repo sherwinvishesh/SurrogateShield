@@ -93,7 +93,9 @@ def conditions(fams: List[str], seed: int) -> List[dict]:
 
 # ── perturbation on the parse tree ───────────────────────────────────────────
 
-_REPEATS = {C.MAX_REPEAT, C.MIN_REPEAT, C.POSSESSIVE_REPEAT}
+_REPEATS = {C.MAX_REPEAT, C.MIN_REPEAT}
+if hasattr(C, "POSSESSIVE_REPEAT"):      # possessive quantifiers exist from Python 3.11
+    _REPEATS.add(C.POSSESSIVE_REPEAT)
 _ASSERTS = {C.ASSERT, C.ASSERT_NOT}
 
 

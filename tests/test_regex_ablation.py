@@ -330,3 +330,35 @@ def test_test3_is_sealed_until_its_freeze_and_reads_its_own_collection(tmp_path)
     assert sorted(doc["frozen"]) == [f"test3/{DS}/labels.jsonl", f"test3/{DS}/pool.jsonl", f"test3/{DS}/test3.jsonl"]
     assert (spans / "ss_ablate" / f"test3-{DS}").is_dir()
     assert doc["command"].endswith("--split test3 --out " + S.rel(kw["out"]))
+
+
+# ── the arm imports on Python 3.10 ───────────────────────────────────────────
+
+_PY310_SIM = r"""
+import re, sys, types
+# Python 3.10 has no re._constants / re._parser / re._compiler and its
+# sre_constants has no POSSESSIVE_REPEAT (possessive quantifiers are 3.11+).
+real = re._constants
+fake = types.ModuleType("sre_constants")
+fake.__dict__.update({k: v for k, v in vars(real).items() if k != "POSSESSIVE_REPEAT"})
+del re._constants
+sys.modules["re._constants"] = None
+sys.modules["sre_constants"] = fake
+import bench.arms.ss_ablate as A
+assert A.C is fake, "the 3.10 fallback import was not taken"
+assert A._REPEATS == {fake.MAX_REPEAT, fake.MIN_REPEAT}, A._REPEATS
+print("ok")
+"""
+
+
+def test_arm_imports_without_possessive_repeat():
+    """CI's 3.10 leg could not collect this module: ss_ablate read
+    ``POSSESSIVE_REPEAT`` from a constants module that lacks it. The
+    fallback import and the repeat-node set are exercised under a
+    simulated 3.10 ``sre_constants``."""
+    import subprocess
+    import sys
+    proc = subprocess.run([sys.executable, "-W", "ignore", "-c", _PY310_SIM], cwd=str(Path(__file__).resolve().parents[1]),
+                          capture_output=True, text=True, timeout=120)
+    assert proc.returncode == 0, proc.stderr[-2000:]
+    assert proc.stdout.strip() == "ok"
