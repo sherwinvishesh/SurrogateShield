@@ -41,6 +41,12 @@ separately and are not part of this file.
 - Storage errors raise `StorageError`. A corrupt store file raises
   `CorruptStoreError` after it is moved aside.
 - Invalid `config()` values raise `ValueError` with the allowed values.
+- `pii_off` entries are case-insensitive: `"person"` and `"PERSON"` (and
+  `"gpe"`, `"email"`, …) switch off the same type. Before, a lower-case NER
+  type name was accepted and ignored. `"hostname"`, and the aliases
+  `"username"` and `"password"`, are accepted.
+- `unmask()` reads a Gemini response given as a dict (the text parts of its
+  first candidate), as it already did for the SDK object.
 
 **Defaults that changed**
 - `detailed_view` is now `False`. It printed original values to stdout.

@@ -22,7 +22,7 @@ def extract_text(response) -> str:
       and thinking blocks are skipped).
     * OpenAI: ``choices[0].message.content`` (``None`` → ``""``, e.g. a
       tool-call-only reply).
-    * Gemini: ``.text``.
+    * Gemini: ``.text``, or (a dict) the text parts of the first candidate.
 
     Raises:
         TypeError: *response* is None or no text could be found in it.
@@ -56,6 +56,15 @@ def extract_text(response) -> str:
     text = _get(response, "text")
     if isinstance(text, str):
         return text
+
+    candidates = _get(response, "candidates")
+    if isinstance(candidates, (list, tuple)):
+        if not candidates:
+            return ""
+        content = _get(candidates[0], "content")
+        parts = _get(content, "parts") if content is not None else None
+        if isinstance(parts, (list, tuple)):
+            return "".join(t for t in (_get(part, "text") for part in parts) if isinstance(t, str))
 
     raise TypeError(
         f"unmask() cannot find text in a {type(response).__name__}; pass a str or an "

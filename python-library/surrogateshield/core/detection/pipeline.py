@@ -79,7 +79,9 @@ def resolve_pii_off(pii_off) -> Set[str]:
     """Entity types switched off by *pii_off* (type names or aliases)."""
     exclude: Set[str] = set()
     for item in pii_off or ():
-        exclude.update(_PII_OFF_ALIASES.get(item.lower(), {item}))
+        key = item.lower()
+        # a type name in any case: the stages emit "PERSON", "GPE", "email", …
+        exclude.update(_PII_OFF_ALIASES.get(key, {item, key, key.upper()}))
     return exclude
 
 

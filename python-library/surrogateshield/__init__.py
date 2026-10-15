@@ -71,7 +71,7 @@ _VALID_PII_OFF = {
     "api_key", "crypto", "us_bank_number", "us_driver_license",
     "gpe", "loc", "org", "fac", "gender_indicator", "implicit_location",
     "iban", "vin", "mac_address", "passport", "id_number", "license_plate",
-    "url", "handle", "credential", "age",
+    "url", "hostname", "handle", "credential", "age",
     # aliases (resolved in the detection pipeline)
     "phone", "postal_code", "zip", "postcode", "name", "names",
     "location", "facility", "bank", "license", "username", "password",
