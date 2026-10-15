@@ -83,6 +83,7 @@ def _library_turn(text: str):
     return result.text, dict(result.replacements), restored
 
 
+@pytest.mark.heavy      # the tagger's weights: cached locally, never on CI (HF offline)
 @pytest.mark.parametrize("text", MESSAGES, ids=[f"msg{i:02d}" for i in range(len(MESSAGES))])
 def test_app_and_library_mask_identically(app_env, text):
     app_text, app_map, app_restored = _app_turn(text, app_env)
