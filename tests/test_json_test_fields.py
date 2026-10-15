@@ -59,3 +59,34 @@ def test_readmes_document_the_extra_row_keys(path):
     for key in ("`address_mode`", "`error`", "`error_type`"):
         assert key in text, (path, key)
 
+
+
+# ── Pass 7: the offline evaluator's README section is derived from the code ──
+
+def _offline_eval_source() -> str:
+    return (Path(__file__).resolve().parent.parent / "offline_eval.py").read_text(encoding="utf-8")
+
+
+def test_readme_offline_eval_commands_use_flags_the_parser_has():
+    documented = set()
+    for line in re.findall(r"^python offline_eval\.py (.+)$", README, flags=re.M):
+        documented |= set(re.findall(r"(--[a-z-]+)", line))
+    parser = set(re.findall(r'add_argument\("(--[a-z-]+)"', _offline_eval_source()))
+    assert documented and documented <= parser, documented - parser
+
+
+def test_readme_ablation_table_lists_the_evaluators_configurations():
+    """The ablation rows are the configurations offline_eval re-runs, in
+    order, each with the cascade options it switches off; the evaluation
+    screen's row names the command the Ablation panel prints."""
+    from evaluator import ABLATION_COMMAND
+    from offline_eval import ABLATION_CONFIGS
+
+    section = _section("#### Ablation study (Table 4)", "## Attacker Experiment")
+    rows = [r for r in re.findall(r"^\| (.+?) \| (.+?) \|$", section, flags=re.M)
+            if r[0] != "Configuration"]
+    expected = [(label, ", ".join(f"`{k}={v}`" for k, v in opts.items()) or "none")
+                for _name, label, opts in ABLATION_CONFIGS]
+    assert rows == expected
+    assert "--ablation" in section and "post-hoc" not in section
+    assert f"`{ABLATION_COMMAND}`" in _section("#### Evaluation metrics reported", "#### Presidio comparison table")

@@ -9,6 +9,8 @@ Paper available on arXiv: [https://arxiv.org/abs/2606.29567](https://arxiv.org/a
 On the sealed test-3 benchmark of real chat messages it let 0.8% of 3,677 personal values through, against 9.1% for GLiNER-PII and 31.6% for Microsoft Presidio; the few places it trailed are listed in one line under [Limitations](#limitations).
 
 
+**Install:** `pip install surrogateshield` (Python 3.10 or later), then `python -m spacy download en_core_web_lg`. This README describes 1.9.0; until that version is on PyPI, install from a checkout with `pip install ./python-library` (see Installation). The default preset downloads the PII tagger once from Hugging Face, at a pinned commit, and reads the local cache afterwards; `surrogateshield download` fetches it ahead of time. Detection fails closed: when a model is missing or fails, `mask()` and `scan()` raise `DetectorUnavailable` instead of sending text that was only partly checked.
+
 ## Why SurrogateShield exists
 
 When users interact with LLM-powered applications they routinely type their real names, phone numbers, email addresses, home addresses, dates of birth, and other sensitive fields without thinking about where that data goes. Most hosted LLMs log requests, use them for training, or process them on infrastructure you do not control.
@@ -615,7 +617,8 @@ shield.config(
     # SURROGATESHIELD_DETECTION_CONFIG), else "balanced". The stages, their
     # models and per-type thresholds, and which stage may report each type
     # are set there (ages: the patterns only, by default); see
-    # CONFIGURATION.md. The flat settings above apply on top of it where
+    # https://github.com/sherwinvishesh/SurrogateShield/blob/main/CONFIGURATION.md.
+    # The flat settings above apply on top of it where
     # they differ from their defaults.
 )
 ```
@@ -659,7 +662,7 @@ Ends the current session: clears its shadow map (and deletes its file in persist
 
 ## Limitations
 
-**Limitations:** it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test. Every number, with its command, is in [`bench/results/README.md`](../bench/results/README.md).
+**Limitations:** it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test. Every number, with its command, is in [`bench/results/README.md`](https://github.com/sherwinvishesh/SurrogateShield/blob/main/bench/results/README.md).
 
 ## Troubleshooting
 

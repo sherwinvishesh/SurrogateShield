@@ -475,7 +475,7 @@
 
     <h3>Requirements</h3>
     <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">
-      <li>Python 3.9 or newer (the test matrix covers 3.9 and 3.13)</li>
+      <li>Python 3.10 or newer (the test matrix covers 3.10 and 3.13)</li>
       <li>pip and a virtual environment</li>
       <li>A few GB of disk for torch, transformers, the spaCy model <code>en_core_web_lg</code> and the PII tagger (about 565 MB)</li>
       <li>About 1.4 GB of RAM while the default preset runs (measured RSS 1,348 MB)</li>
@@ -2487,7 +2487,7 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
   <!-- ============================================================ -->
   <section class="doc-section" id="library-install">
     <h2>Library Installation</h2>
-    <p>The Python library is the <code>surrogateshield</code> package in the repository's <code>python-library/</code> folder: version <code>1.9.0</code>, Apache-2.0, Python 3.9 or later. It runs entirely in your process. Detection needs model files on the machine: the spaCy model and the PII tagger's weights for the default preset (the tagger downloads itself from Hugging Face once), and distilbert-NER only when ContextGuard is switched on.</p>
+    <p>The Python library is the <code>surrogateshield</code> package in the repository's <code>python-library/</code> folder: version <code>1.9.0</code>, Apache-2.0, Python 3.10 or later. It runs entirely in your process. Detection needs model files on the machine: the spaCy model and the PII tagger's weights for the default preset (the tagger downloads itself from Hugging Face once), and distilbert-NER only when ContextGuard is switched on.</p>
 
     <div class="steps">
       <div class="step">
@@ -4022,7 +4022,7 @@ messages = api_messages                                # earlier turns, surrogat
 # the CI command: offline, with the coverage gate on the core package
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest tests python-library/tests -q -p no:warnings \
   --cov=python-library/surrogateshield/core --cov-fail-under=85</code></pre>
-    <p><code>.github/workflows/tests.yml</code> runs that last command on Python 3.9 and 3.13, with <code>HF_HUB_OFFLINE=1</code>, <code>TRANSFORMERS_OFFLINE=1</code> and <code>ANONYMIZED_TELEMETRY=False</code>.</p>
+    <p><code>.github/workflows/tests.yml</code> runs that last command on Python 3.10 and 3.13, with <code>HF_HUB_OFFLINE=1</code>, <code>TRANSFORMERS_OFFLINE=1</code> and <code>ANONYMIZED_TELEMETRY=False</code>.</p>
 
     <h3>Isolation</h3>
     <ul style="margin: 0 0 14px 20px; color: var(--muted); line-height: 1.8;">

@@ -196,7 +196,7 @@ Identifies messages like "restaurants near 1126 E Apache Blvd, Tempe, AZ" and ap
 - City/state names are **not replaced**: the LLM needs them to give useful answers
 - Drives the shift-vs-replace decision when `ADDRESS_MODE="auto"`
 - A sensitive-topic override (medical, mental-health, addiction, shelter and immigration keywords: HIV, abortion, rehab, therapy, domestic violence, homeless, immigration, …) coarsens the street line to "my area" and keeps only the city and state, regardless of query structure
-- No address is ever sent to a geocoder: v2 removed the Nominatim existence check, which sent the street to a third party and never changed the output
+- No address is ever sent to a geocoder (earlier versions ran a Nominatim existence check, which sent the street to a third party and never changed the output; `verify_addresses` is now a no-op)
 
 #### Quasi-Identifier Scorer (`detection/quasi_identifier.py`)
 
@@ -599,9 +599,11 @@ python offline_eval.py --key experiment/synth_dev_key.json
 # Protection check: gold values that reach the sent text, intended or not
 python offline_eval.py --key experiment/synth_dev_key.json --protection --json out.json
 
-# Focus on one type, cap the run, or use exact (v1-comparable) matching
+# Focus on one type or cap the run
 python offline_eval.py --key experiment/synth_dev_key.json --types address --limit 200
-python offline_eval.py --key experiment/synth_dev_key.json --strict
+
+# Ablation: re-run the cascade with stages switched off and score each
+python offline_eval.py --key experiment/synth_dev_key.json --ablation --json ablation.json
 
 # Lint a key file for corrupt ground-truth values (values absent from the
 # question, addresses that don't parse) — no models needed
@@ -621,7 +623,8 @@ see [Measured results](#measured-results) and `bench/results/README.md`.
 Default matching is span-aware: because v2 detects addresses as full spans
 (`6720 Palm Dr, Phoenix, AZ`) while the ground truth annotates components
 separately, a key value counts as found when a detected span contains it.
-`--strict` falls back to exact string equality.
+Exact-boundary matches are counted alongside (the `exact=` figure in the
+report).
 
 ### Evaluation (Precision / Recall / F1)
 
@@ -691,7 +694,7 @@ The evaluator maps flexible label names to internal types:
 | Per-entity-type breakdown | F1 / precision / recall per PII type |
 | Presidio comparison (Table 1) | SS vs Presidio side-by-side per comparable type + overall |
 | BERTScore comparison (Table 2) | Semantic utility preservation: SS vs Presidio vs no-anonymisation baseline |
-| Ablation study (Table 4) | Per-stage F1 contribution across four pipeline configurations |
+| Ablation study (Table 4) | Not computed from answers files: the panel names `python offline_eval.py --key <key file> --ablation` |
 
 #### Presidio comparison table
 
@@ -750,36 +753,29 @@ Enable the `BERTScore SS` and `BERTScore Presidio` fields in JSON Test to genera
 
 #### Ablation study (Table 4)
 
-The ablation study quantifies how much each detection stage contributes to overall F1. It is computed **post-hoc from the existing answers file**: no pipeline re-run needed. Each answer already records which stage detected each entity via the `source` field in `pii_detail`.
+The ablation measures how much each detection stage contributes. It is not
+computed from an answers file: splitting the detected entities by the stage
+that found them cannot measure how the stages interact, so the evaluation
+screen's Ablation panel only names the command. `offline_eval.py --ablation`
+re-runs the cascade on the key file once per configuration, with stages
+switched off through the cascade options, and scores protection (replaced
+spans only, span overlap):
 
-Four pipeline configurations are simulated by combining stage contributions:
-
-| Configuration | Detected set |
+| Configuration | Cascade options |
 |---|---|
-| PatternScan only | `pattern_scan_pii` |
-| PatternScan + EntityTrace | `pattern_scan_pii` ∪ `entity_trace_pii` |
-| PatternScan + ContextGuard | `pattern_scan_pii` ∪ `context_guard_pii` |
-| Full cascade (all three) | `confirmed_pii` |
+| PatternScan only | `use_entity_trace=False`, `use_context_guard=False`, `use_tagger=False` |
+| PatternScan + EntityTrace (tagger and ContextGuard off) | `use_context_guard=False`, `use_tagger=False` |
+| Every stage, post-passes A-C/E-H off | `use_post_passes=False` |
+| Full cascade (shipped) | none |
 
-For each configuration, precision / recall / F1 are computed overall **and per entity type**. The evaluation screen shows:
+For each configuration the report lists micro precision, recall and F1, the
+F1 difference against the full cascade and a 95 % bootstrap interval of that
+difference; `--json` also writes the macro scores and the options used.
+`--limit` and `--seed` apply as for the main run.
 
-- **Entity Detection Attribution panel**: how many entities each stage contributed and the percentage of cases where EntityTrace or ContextGuard were strictly necessary (i.e., PatternScan alone would have missed at least one key entity)
-- **Overall Performance by Configuration table**: precision, recall, F1, TP/FP/FN for all four configs with delta-F1 annotations showing each stage's incremental gain
-- **F1 Per Entity Type by Configuration table**: per-type breakdown with a *Key stage* column indicating which configuration first achieves ≥80% F1 for that type (PatternScan for structured types like `ssn` and `email`; EntityTrace for `PERSON`, `GPE`, `ORG`)
-- **Ablation Summary panel**: absolute F1 improvements from adding each stage
-
-To generate ablation data, enable the following fields in JSON Test before running:
-
-| Field | Required for |
-|---|---|
-| `pattern_scan_pii` | Stage 1 contribution |
-| `entity_trace_pii` | Stage 2 contribution |
-| `context_guard_pii` | Stage 3 contribution |
-| `confirmed_pii` | Full cascade (baseline) |
-
-All four are **on by default** in JSON Test. If the answers file pre-dates the ablation feature, re-run JSON Test with those fields enabled.
-
-
+```bash
+python offline_eval.py --key experiment/synth_dev_key.json --ablation --json ablation.json
+```
 
 ## Attacker Experiment
 

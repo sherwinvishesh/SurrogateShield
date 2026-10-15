@@ -80,7 +80,7 @@ The full tables and the method are in [Results](#results); the one place-by-plac
 
 ### Requirements
 
-- Python 3.9 or newer (the test matrix covers 3.9 and 3.13)
+- Python 3.10 or newer (the test matrix covers 3.10 and 3.13)
 - pip and a virtual environment
 - A few GB of disk for torch, transformers, the spaCy model `en_core_web_lg` and the PII tagger (about 565 MB)
 - About 1.4 GB of RAM while the default preset runs (measured RSS 1,348 MB)
@@ -1665,7 +1665,7 @@ cfg = preset("balanced").with_actions(**{"*": "redact"})      # placeholders for
 
 ## Library Installation
 
-The Python library is the `surrogateshield` package in the repository's `python-library/` folder: version `1.9.0`, Apache-2.0, Python 3.9 or later. It runs entirely in your process. Detection needs model files on the machine: the spaCy model and the PII tagger's weights for the default preset (the tagger downloads itself from Hugging Face once), and distilbert-NER only when ContextGuard is switched on.
+The Python library is the `surrogateshield` package in the repository's `python-library/` folder: version `1.9.0`, Apache-2.0, Python 3.10 or later. It runs entirely in your process. Detection needs model files on the machine: the spaCy model and the PII tagger's weights for the default preset (the tagger downloads itself from Hugging Face once), and distilbert-NER only when ContextGuard is switched on.
 
 ### 1. Install the package
 
@@ -3195,7 +3195,7 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m pytest tests python-
   --cov=python-library/surrogateshield/core --cov-fail-under=85
 ```
 
-`.github/workflows/tests.yml` runs that last command on Python 3.9 and 3.13, with `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1` and `ANONYMIZED_TELEMETRY=False`.
+`.github/workflows/tests.yml` runs that last command on Python 3.10 and 3.13, with `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1` and `ANONYMIZED_TELEMETRY=False`.
 
 ### Isolation
 

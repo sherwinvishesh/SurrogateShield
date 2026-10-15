@@ -337,25 +337,35 @@ def test_test3_is_sealed_until_its_freeze_and_reads_its_own_collection(tmp_path)
 _PY310_SIM = r"""
 import re, sys, types
 # Python 3.10 has no re._constants / re._parser / re._compiler and its
-# sre_constants has no POSSESSIVE_REPEAT (possessive quantifiers are 3.11+).
+# sre_constants has neither POSSESSIVE_REPEAT nor ATOMIC_GROUP (possessive
+# quantifiers and atomic groups are 3.11+).
 real = re._constants
 fake = types.ModuleType("sre_constants")
-fake.__dict__.update({k: v for k, v in vars(real).items() if k != "POSSESSIVE_REPEAT"})
+fake.__dict__.update({k: v for k, v in vars(real).items() if k not in ("POSSESSIVE_REPEAT", "ATOMIC_GROUP")})
 del re._constants
 sys.modules["re._constants"] = None
 sys.modules["sre_constants"] = fake
 import bench.arms.ss_ablate as A
 assert A.C is fake, "the 3.10 fallback import was not taken"
 assert A._REPEATS == {fake.MAX_REPEAT, fake.MIN_REPEAT}, A._REPEATS
+assert A._ATOMIC_GROUP is None
+# The walk itself ran into the missing constant on CI's 3.10 leg (nine
+# failures): perturb a pattern with a counted group, a separator class and
+# a capturing group under the simulated constants.
+sub = A.sre_parse.parse(r"\b\d{3}[-.](\d{4})\b")
+A._walk(sub, True, True)
+op, av = sub.data[1]
+assert op is fake.MAX_REPEAT and av[0] == 4, sub.data[1]
 print("ok")
 """
 
 
 def test_arm_imports_without_possessive_repeat():
-    """CI's 3.10 leg could not collect this module: ss_ablate read
-    ``POSSESSIVE_REPEAT`` from a constants module that lacks it. The
-    fallback import and the repeat-node set are exercised under a
-    simulated 3.10 ``sre_constants``."""
+    """CI's 3.10 leg could not collect this module (ss_ablate read
+    ``POSSESSIVE_REPEAT`` from a constants module that lacks it) and, once it
+    could, failed nine tests on ``ATOMIC_GROUP``. The fallback import, the
+    repeat-node set and the walk are exercised under a simulated 3.10
+    ``sre_constants``."""
     import subprocess
     import sys
     proc = subprocess.run([sys.executable, "-W", "ignore", "-c", _PY310_SIM], cwd=str(Path(__file__).resolve().parents[1]),

@@ -64,6 +64,18 @@ separately and are not part of this file.
 - `verify_addresses` has no effect and emits a `DeprecationWarning` (F3).
   The Nominatim check sent every street to a third party and never changed
   the output. The `requests` dependency is gone.
+- `context_guard_enabled` is now `False`: in `balanced` the PII tagger reads
+  names and ContextGuard is opt-in (`strict` and `classic` turn it on).
+  Code that sets it keeps working.
+- The EntityTrace thresholds of the default preset are `high` 0.90, `low`
+  0.70 and `fallback` 0.75 (1.0.0: 0.85 / 0.60 / 0.65; `classic` keeps
+  those). The flat `entity_trace_*_threshold` settings still apply on top.
+- `config()` gained `address_mode`, `address_shift_range`, `verify_addresses`,
+  `context_guard_model`, `context_guard_device`, `tagger_model`,
+  `tagger_revision`, `tagger_device` and `detection`. No setting was
+  removed or renamed, and no public name was: `config`, `scan`,
+  `pii_finder`, `mask`, `unmask` and `flush` keep their names, `mask` and
+  `unmask` their signatures; `scan` gained the keyword `as_dict`.
 
 **Storage (I11, F1, I19)**
 - Everything persistent lives under `$SURROGATESHIELD_HOME`, or
@@ -73,6 +85,11 @@ separately and are not part of this file.
 - The format is SSv1, with the kind and id bound as AAD. Pre-v1 files are
   read and upgraded on the next write. `forget()` erases one value, and
   `ShadowMap.erase()` removes a store without decrypting it.
+  A 1.0.0 library `<id>.shadowmap` (`nonce || ciphertext`, keyed from the
+  `<id>.key` file beside it) opens as before; the next save rewrites it as
+  SSv1 under the device key and removes the `.key` file. The app's earlier
+  plain-JSON conversation files load too. Both are tested
+  (`tests/test_shadow_map.py`).
 
 **Surrogates are seeded and linked (D1–D4, I7)**
 - `Session(seed=…)` makes masking deterministic: one RNG per session, and no
@@ -317,7 +334,10 @@ named after its audit ID.
 - `bench/arms/ss_ablate.py` imports the regex compiler under its Python 3.11
   names (`re._compiler`, `re._parser`, `re._constants`) with the 3.10 modules
   as the fallback; `tests/test_regex_ablation.py` could not be collected on
-  3.10, so the CI leg for the documented floor had never passed.
+  3.10, so the CI leg for the documented floor had never passed. The two
+  constants that exist only from 3.11 (`POSSESSIVE_REPEAT`, `ATOMIC_GROUP`)
+  are read only where they exist; a test runs the arm under a simulated
+  3.10 `sre_constants`.
 - `tests/test_results_readme.py` (pre-publish audit): every benchmark number
   the README quotes (the leak, clean-prompt, odd-format and harmless-edit
   columns, the 11× / 39× ratios and the confidence interval, the natural
@@ -346,4 +366,24 @@ named after its audit ID.
   answers row holds exactly the enabled fields, the on-disk RAG store
   holds no original value, the launcher stops cleanly without the
   package, and the README's shortcut table is the dashboard's menu list.
-
+- README (pre-publish audit, docs pass): the offline evaluator's section
+  matches `offline_eval.py`. The documented `--strict` flag did not exist
+  (the parser rejected it); exact-boundary matches are counted alongside the
+  span-overlap scores instead. The ablation subsection described a post-hoc
+  split of answers files into four "simulated" configurations, with panels
+  the evaluation screen never had; it now describes `--ablation`, which
+  re-runs the cascade per configuration (PatternScan only, PatternScan +
+  EntityTrace, every stage without the post-passes, the shipped cascade)
+  and reports each with its F1 difference and bootstrap interval. Tests
+  derive the table from `ABLATION_CONFIGS` and check every documented flag
+  against the parser.
+- The library README, which PyPI renders on its own, opens with the install
+  (and the version it describes), the spaCy model download, the pinned
+  tagger download and the fail-closed behaviour; its links to
+  `CONFIGURATION.md` and `bench/results/README.md` are full URLs. A test
+  rejects relative links there.
+- Website: the Python floor reads 3.10 (three pages said 3.9).
+- Migration notes: the `context_guard_enabled` default, the EntityTrace
+  thresholds of `balanced`, the settings `config()` gained, and the 1.0.0
+  `.shadowmap` + `.key` upgrade, which `tests/test_shadow_map.py` now checks
+  by building the 1.0.0 file from the primitives themselves.

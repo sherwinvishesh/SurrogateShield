@@ -212,7 +212,7 @@ ENTITY_TRACE_THRESHOLDS = {"high": 0.90, "low": 0.70, "fallback": 0.75}
 # a spaCy reading of a type the stage may not report on its own (PERSON is
 # the tagger's) stands in on a message where no stage reports that type at
 # all. A PERSON stands in only when it reads as a person's name: a personal
-# cue, a possessive or a title at it, at most two such names in the message,
+# cue, a possessive or a title at it, at most three such names in the message,
 # not in a fiction frame, not an addressee (pipeline._tied_fallback). spaCy
 # scores PERSON 0.88. Most natural names the tagger misses are plain
 # well-formed names it never proposes; this reads them back. ``{}`` turns it

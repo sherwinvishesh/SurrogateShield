@@ -79,13 +79,37 @@ def test_J16_every_result_file_has_its_command():
 
 
 def test_J16_quickstart_install_is_accurate():
-    # The spaCy model is a separate download, and PyPI has 1.0.0, not this branch.
+    # The spaCy model is a separate download, and PyPI has 1.0.0, not this
+    # branch: the root README never says "pip install surrogateshield". The
+    # library README is what PyPI renders, so its first screen may, provided
+    # it states which version it describes and gives the checkout install.
     for readme in ("README.md", "python-library/README.md"):
         text = read(readme)
         assert "installs automatically" not in text
         assert "python -m spacy download en_core_web_lg" in text
-        assert "pip install surrogateshield" not in text
-    assert "pip install ./python-library" in read("python-library/README.md")
+    assert "pip install surrogateshield" not in read("README.md")
+    lib = read("python-library/README.md")
+    version = re.search(r'^version = "([^"]+)"$', read("python-library/pyproject.toml"), re.M).group(1)
+    first_screen = lib[:lib.index("## Why SurrogateShield exists")]
+    assert f"This README describes {version}" in first_screen
+    for phrase in ("pip install surrogateshield", "pip install ./python-library",
+                   "python -m spacy download en_core_web_lg", "surrogateshield download",
+                   "DetectorUnavailable"):
+        assert phrase in first_screen, phrase
+
+
+def test_J16_library_readme_stands_alone():
+    # PyPI renders python-library/README.md by itself: a relative link or a
+    # bare reference to a repo-only file leads nowhere there.
+    lib = read("python-library/README.md")
+    targets = re.findall(r"\]\(([^)]+)\)", lib)
+    relative = [t for t in targets if not t.startswith(("http://", "https://", "#"))]
+    assert not relative, relative
+    repo = "https://github.com/sherwinvishesh/SurrogateShield/blob/main/"
+    for name in ("CONFIGURATION.md", "CHANGELOG.md", "bench/results/README.md"):
+        for m in re.finditer(re.escape(name), lib):
+            assert lib[:m.start()].endswith(repo) or lib[m.end():].startswith("`](" + repo), \
+                f"{name} without its URL"
 
 
 CLAIM_SURFACES = ["README.md", "python-library/README.md", "website/index.html",

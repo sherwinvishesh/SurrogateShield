@@ -97,6 +97,7 @@ _REPEATS = {C.MAX_REPEAT, C.MIN_REPEAT}
 if hasattr(C, "POSSESSIVE_REPEAT"):      # possessive quantifiers exist from Python 3.11
     _REPEATS.add(C.POSSESSIVE_REPEAT)
 _ASSERTS = {C.ASSERT, C.ASSERT_NOT}
+_ATOMIC_GROUP = getattr(C, "ATOMIC_GROUP", None)     # atomic groups exist from Python 3.11
 
 
 def _counted(lo: int, hi) -> bool:
@@ -138,7 +139,7 @@ def _walk(sub, lengths: bool, separators: bool, targets=None, active: bool = Tru
             av = (lo, hi, inner)
         elif op is C.SUBPATTERN:
             _walk(av[-1], lengths, separators, targets, active or (targets is not None and av[0] in targets))
-        elif op is C.ATOMIC_GROUP:
+        elif op is _ATOMIC_GROUP:
             _walk(av, lengths, separators, targets, active)
         elif op is C.BRANCH:
             for b in av[1]:

@@ -391,3 +391,29 @@ def test_I27_cli_delete_confirms(app_store):
     assert r.exit_code == 0 and "Deleted" in r.output
     r = CliRunner().invoke(main.app, ["chat", "--delete", "t-6", "--yes"])
     assert r.exit_code == 1 and "No conversation" in r.output
+
+
+def test_I11_a_1_0_0_library_shadowmap_opens(ss_home, tmp_path):
+    """The 1.0.0 library wrote ``nonce || AES-GCM(ciphertext)`` under
+    HKDF-SHA256(ikm=<id>.key, salt=id, info=b"shadowmap") with no AAD. The
+    key is derived here from the primitives, not from the store module's own
+    ``legacy_key``, so the migration note ("a 1.0.0 .shadowmap still opens")
+    is checked against the old format itself."""
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
+    session_key = os.urandom(32)
+    key = HKDF(algorithm=hashes.SHA256(), length=32, salt=b"v100", info=b"shadowmap").derive(session_key)
+    nonce = os.urandom(12)
+    (tmp_path / "v100.key").write_bytes(session_key)
+    (tmp_path / "v100.shadowmap").write_bytes(
+        nonce + AESGCM(key).encrypt(nonce, json.dumps({"Fake Co": "Real Co"}).encode(), None))
+
+    sm = LibShadowMap("v100", storage_dir=tmp_path)
+    assert sm.get_all() == {"Fake Co": "Real Co"}
+    assert sm.lookup_original("Real Co") == "Fake Co"
+    sm.save()
+    assert (tmp_path / "v100.shadowmap").read_bytes().startswith(store.MAGIC)
+    assert not (tmp_path / "v100.key").exists()
+    assert LibShadowMap("v100", storage_dir=tmp_path).get_all() == {"Fake Co": "Real Co"}
