@@ -1,0 +1,1893 @@
+{
+ "arms": {
+  "attacker": [
+   "ss",
+   "presidio_default",
+   "presidio_faker",
+   "llm_guard",
+   "gliner_pii"
+  ],
+  "judged_against": [
+   "presidio_faker",
+   "gliner_pii"
+  ],
+  "multiturn": [
+   "ss",
+   "presidio_faker",
+   "gliner_pii"
+  ],
+  "natural": [
+   "ss",
+   "presidio_default",
+   "gliner_pii"
+  ],
+  "placeholder_prompt": [
+   "presidio_default",
+   "gliner_pii"
+  ],
+  "utility": [
+   "original",
+   "ss",
+   "presidio_default",
+   "presidio_faker",
+   "gliner_pii"
+  ]
+ },
+ "calls": {
+  "6-attacker-test3": {
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "calls": 960,
+   "input_tokens": 681941,
+   "output_tokens": 332066
+  }
+ },
+ "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.live attacker --split test3 --out bench/results/attacker_realdata_test3.json",
+ "datasets": [
+  "oasst1",
+  "sharegpt",
+  "wildchat"
+ ],
+ "git": {
+  "commit": "d777625e9907b53d89de5d11e775b0635dc36093",
+  "modified": []
+ },
+ "ledger_total": 6316,
+ "models": {
+  "attacker": "claude-opus-5-5",
+  "judge": "claude-opus-5-5",
+  "responder": "claude-sonnet-4-6"
+ },
+ "prompts": {
+  "answers": {
+   "judge_details": {
+    "grade": [
+     "correct",
+     "partly",
+     "incorrect",
+     "not_needed"
+    ]
+   },
+   "judge_pair": {
+    "better": [
+     "A",
+     "B",
+     "tie"
+    ]
+   }
+  },
+  "responder_system_sha256": "58c1461f158279b1e015f46c4d5d40bc88d4db5bfb361beb6770df5b0bfc360c",
+  "sha256": {
+   "attack_conversation": "aca9f24cf61fe5ec99d4f44eff9f2cf29b92c6b709cfa45d24e1ad4cc29ba9ad",
+   "attack_placeholder": "356e574e7eeafcd780242628f9ecbc3e9804c7215d4837ceb71a901853713721",
+   "attack_substitute": "2448a27b33606f3a203c1db65504c3e6cfc1c05882947f5ef21b39c9cea58d77",
+   "judge_details": "07a0df07eccb8427ec6c3a64e558607622834174e8ee162ee05f79d5025a1f0c",
+   "judge_pair": "a64b8600ba0679cdbf0d397f91bf95cdfd469b0365c508d69aa6cfae59fbd808"
+  },
+  "templates": {
+   "attack_conversation": "The conversation below, between a user and an AI assistant, was sent to a language-model API. Before each user message was sent, a privacy filter processed it. The filter may have replaced some personal values (names, contact details, identifiers, addresses, dates, places, organisations) with realistic substitutes, may have changed only part of a value, and may have left some values unchanged; the assistant's replies were written from the filtered messages. You are not told which values were changed or how substitutes were chosen.\n\nFor each personal value of the user's that you can see, give your best estimate of the value that was in the user's messages before filtering. Use anything in the conversation: context, consistency between messages and fields, formats, regional cues, and values that look unchanged. If you think a value was not changed, give it as your estimate. Use null only when you have no basis for an estimate.\n\nConversation:\n{text}\n\nReply with JSON only, in this form:\n{{\"estimates\": [{{\"seen\": \"<text as it appears>\", \"type\": \"<kind of value>\", \"original_estimate\": \"<estimate or null>\", \"confidence\": <0.0-1.0>}}]}}",
+   "attack_placeholder": "The message below was sent to a language-model API. Before it was sent, a privacy filter processed it. The filter replaced some personal values with type placeholders such as [PERSON], [LOCATION] or [EMAIL_ADDRESS], and may have left other personal values unchanged.\n\nFor each placeholder, and for each personal value you can see, give your best estimate of the value that was in the message before filtering. Use anything in the text: context, the remaining details, formats and regional cues. If you think a visible value was not changed, give it as your estimate. Use null only when you have no basis for an estimate.\n\nMessage:\n<<<\n{text}\n>>>\n\nReply with JSON only, in this form:\n{{\"estimates\": [{{\"seen\": \"<placeholder or text as it appears>\", \"type\": \"<kind of value>\", \"original_estimate\": \"<estimate or null>\", \"confidence\": <0.0-1.0>}}]}}",
+   "attack_substitute": "The message below was sent to a language-model API. Before it was sent, a privacy filter processed it. The filter may have replaced some personal values (names, contact details, identifiers, addresses, dates, places, organisations) with realistic substitutes, may have changed only part of a value, and may have left some values unchanged. You are not told which values were changed or how substitutes were chosen.\n\nFor each personal value you can see, give your best estimate of the value that was in the message before filtering. Use anything in the text: context, consistency between fields, formats, regional cues, and values that look unchanged. If you think a value was not changed, give it as your estimate. Use null only when you have no basis for an estimate.\n\nMessage:\n<<<\n{text}\n>>>\n\nReply with JSON only, in this form:\n{{\"estimates\": [{{\"seen\": \"<text as it appears>\", \"type\": \"<kind of value>\", \"original_estimate\": \"<estimate or null>\", \"confidence\": <0.0-1.0>}}]}}",
+   "judge_details": "Below are the messages a user sent to an AI assistant, in order, and the assistant's final answer as the user saw it. Grade whether the final answer uses the user's own details correctly: names, contact details, dates, ages, identifiers, addresses, places and organisations given in the user's messages.\n\n- correct: every such detail the answer uses matches what the user gave;\n- partly: some match, and some are wrong, replaced by other values or placeholders, or missing where the answer needs them;\n- incorrect: the answer uses other values or placeholders where it needs the user's details;\n- not_needed: the answer has no reason to use any of the user's details.\n\nUser messages:\n{turns}\n\nFinal answer:\n<<<\n{answer}\n>>>\n\nReply with JSON only, in this form:\n{{\"grade\": \"correct\" | \"partly\" | \"incorrect\" | \"not_needed\", \"reason\": \"<one or two sentences>\"}}",
+   "judge_pair": "Below is a user's request to an AI assistant and two answers to it. Decide which answer better serves the user's request. Judge correctness, completeness and how well each answer does what the user asked, including whether it uses the user's own details (names, contact details, dates, places, identifiers) correctly where the request calls for them. Do not prefer an answer for its length or style alone. If neither is clearly better, choose tie.\n\nRequest:\n<<<\n{prompt}\n>>>\n\nAnswer A:\n<<<\n{a}\n>>>\n\nAnswer B:\n<<<\n{b}\n>>>\n\nReply with JSON only, in this form:\n{{\"better\": \"A\" | \"B\" | \"tie\", \"reason\": \"<one or two sentences>\"}}"
+  },
+  "version": "rd2"
+ },
+ "results": {
+  "all": {
+   "H8'''": {
+    "holds": false,
+    "no_exact_conversation": false,
+    "no_exact_single": false,
+    "recovery": {
+     "gliner_pii": {
+      "k": 11,
+      "n": 556,
+      "rate": 0.0198,
+      "wilson95": [
+       0.0111,
+       0.0351
+      ]
+     },
+     "ss": {
+      "k": 102,
+      "n": 620,
+      "rate": 0.1645,
+      "wilson95": [
+       0.1374,
+       0.1957
+      ]
+     },
+     "ss-gliner_pii": {
+      "ci95": [
+       0.1161,
+       0.1726
+      ],
+      "diff": 0.1447,
+      "excludes_0": true,
+      "messages": 178,
+      "resamples": 2000
+     }
+    },
+    "recovery_not_above_gliner_pii": false
+   },
+   "gliner_pii": {
+    "attacked": 556,
+    "exact": {
+     "k": 6,
+     "n": 556,
+     "rate": 0.0108,
+     "wilson95": [
+      0.005,
+      0.0233
+     ]
+    },
+    "exact_types": {
+     "AGE": 1,
+     "PERSON": 5
+    },
+    "exposed": {
+     "k": 84,
+     "n": 629,
+     "rate": 0.1335,
+     "wilson95": [
+      0.1092,
+      0.1624
+     ]
+    },
+    "leaked": 73,
+    "partial": {
+     "k": 5,
+     "n": 556,
+     "rate": 0.009,
+     "wilson95": [
+      0.0038,
+      0.0209
+     ]
+    },
+    "partial_classes": {
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "name_token": {
+      "n": 2,
+      "visible_in_text": 2
+     },
+     "org_word": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "url_host": {
+      "n": 1,
+      "visible_in_text": 0
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 11,
+     "n": 556,
+     "rate": 0.0198,
+     "wilson95": [
+      0.0111,
+      0.0351
+     ]
+    },
+    "refused": 0,
+    "unavailable": 7,
+    "values": 636
+   },
+   "llm_guard": {
+    "attacked": 264,
+    "exact": {
+     "k": 19,
+     "n": 264,
+     "rate": 0.072,
+     "wilson95": [
+      0.0466,
+      0.1097
+     ]
+    },
+    "exact_types": {
+     "PERSON": 19
+    },
+    "exposed": {
+     "k": 389,
+     "n": 628,
+     "rate": 0.6194,
+     "wilson95": [
+      0.5808,
+      0.6566
+     ]
+    },
+    "leaked": 364,
+    "partial": {
+     "k": 6,
+     "n": 264,
+     "rate": 0.0227,
+     "wilson95": [
+      0.0105,
+      0.0487
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 6,
+      "visible_in_text": 6
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 25,
+     "n": 264,
+     "rate": 0.0947,
+     "wilson95": [
+      0.065,
+      0.1361
+     ]
+    },
+    "refused": 0,
+    "unavailable": 8,
+    "values": 636
+   },
+   "presidio_default": {
+    "attacked": 428,
+    "exact": {
+     "k": 14,
+     "n": 428,
+     "rate": 0.0327,
+     "wilson95": [
+      0.0196,
+      0.0542
+     ]
+    },
+    "exact_types": {
+     "PERSON": 13,
+     "URL": 1
+    },
+    "exposed": {
+     "k": 230,
+     "n": 629,
+     "rate": 0.3657,
+     "wilson95": [
+      0.3289,
+      0.404
+     ]
+    },
+    "leaked": 201,
+    "partial": {
+     "k": 15,
+     "n": 428,
+     "rate": 0.035,
+     "wilson95": [
+      0.0214,
+      0.057
+     ]
+    },
+    "partial_classes": {
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "email_local": {
+      "n": 2,
+      "visible_in_text": 0
+     },
+     "name_token": {
+      "n": 10,
+      "visible_in_text": 10
+     },
+     "url_host": {
+      "n": 2,
+      "visible_in_text": 0
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 29,
+     "n": 428,
+     "rate": 0.0678,
+     "wilson95": [
+      0.0476,
+      0.0956
+     ]
+    },
+    "refused": 0,
+    "unavailable": 7,
+    "values": 636
+   },
+   "presidio_faker": {
+    "attacked": 428,
+    "exact": {
+     "k": 8,
+     "n": 428,
+     "rate": 0.0187,
+     "wilson95": [
+      0.0095,
+      0.0364
+     ]
+    },
+    "exact_types": {
+     "PERSON": 8
+    },
+    "exposed": {
+     "k": 213,
+     "n": 629,
+     "rate": 0.3386,
+     "wilson95": [
+      0.3027,
+      0.3765
+     ]
+    },
+    "leaked": 201,
+    "partial": {
+     "k": 4,
+     "n": 428,
+     "rate": 0.0093,
+     "wilson95": [
+      0.0036,
+      0.0238
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 4,
+      "visible_in_text": 4
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 12,
+     "n": 428,
+     "rate": 0.028,
+     "wilson95": [
+      0.0161,
+      0.0484
+     ]
+    },
+    "refused": 0,
+    "unavailable": 7,
+    "values": 636
+   },
+   "ss": {
+    "attacked": 620,
+    "exact": {
+     "k": 4,
+     "n": 620,
+     "rate": 0.0065,
+     "wilson95": [
+      0.0025,
+      0.0165
+     ]
+    },
+    "exact_types": {
+     "URL": 4
+    },
+    "exposed": {
+     "k": 109,
+     "n": 627,
+     "rate": 0.1738,
+     "wilson95": [
+      0.1462,
+      0.2055
+     ]
+    },
+    "leaked": 7,
+    "partial": {
+     "k": 98,
+     "n": 620,
+     "rate": 0.1581,
+     "wilson95": [
+      0.1315,
+      0.1889
+     ]
+    },
+    "partial_classes": {
+     "address_part": {
+      "n": 14,
+      "visible_in_text": 14
+     },
+     "birth_year": {
+      "n": 8,
+      "visible_in_text": 8
+     },
+     "email_domain": {
+      "n": 38,
+      "visible_in_text": 32
+     },
+     "org_word": {
+      "n": 19,
+      "visible_in_text": 19
+     },
+     "phone_area": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "url_host": {
+      "n": 18,
+      "visible_in_text": 18
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 102,
+     "n": 620,
+     "rate": 0.1645,
+     "wilson95": [
+      0.1374,
+      0.1957
+     ]
+    },
+    "refused": 0,
+    "unavailable": 9,
+    "values": 636
+   },
+   "ss-conversation": {
+    "attacked": 177,
+    "exact": {
+     "k": 1,
+     "n": 177,
+     "rate": 0.0056,
+     "wilson95": [
+      0.001,
+      0.0313
+     ]
+    },
+    "exact_types": {
+     "URL": 1
+    },
+    "exposed": {
+     "k": 30,
+     "n": 179,
+     "rate": 0.1676,
+     "wilson95": [
+      0.12,
+      0.2292
+     ]
+    },
+    "leaked": 2,
+    "partial": {
+     "k": 27,
+     "n": 177,
+     "rate": 0.1525,
+     "wilson95": [
+      0.107,
+      0.2128
+     ]
+    },
+    "partial_classes": {
+     "address_part": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "birth_year": {
+      "n": 2,
+      "visible_in_text": 2
+     },
+     "email_domain": {
+      "n": 14,
+      "visible_in_text": 14
+     },
+     "org_word": {
+      "n": 3,
+      "visible_in_text": 3
+     },
+     "phone_area": {
+      "n": 2,
+      "visible_in_text": 0
+     },
+     "url_host": {
+      "n": 5,
+      "visible_in_text": 5
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 28,
+     "n": 177,
+     "rate": 0.1582,
+     "wilson95": [
+      0.1118,
+      0.2191
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 179
+   }
+  },
+  "oasst1": {
+   "H8'''": {
+    "holds": false,
+    "no_exact_conversation": true,
+    "no_exact_single": false,
+    "recovery": {
+     "gliner_pii": {
+      "k": 1,
+      "n": 176,
+      "rate": 0.0057,
+      "wilson95": [
+       0.001,
+       0.0315
+      ]
+     },
+     "ss": {
+      "k": 34,
+      "n": 188,
+      "rate": 0.1809,
+      "wilson95": [
+       0.1324,
+       0.2421
+      ]
+     },
+     "ss-gliner_pii": {
+      "ci95": [
+       0.128,
+       0.2266
+      ],
+      "diff": 0.1752,
+      "excludes_0": true,
+      "messages": 59,
+      "resamples": 2000
+     }
+    },
+    "recovery_not_above_gliner_pii": false
+   },
+   "gliner_pii": {
+    "attacked": 176,
+    "exact": {
+     "k": 1,
+     "n": 176,
+     "rate": 0.0057,
+     "wilson95": [
+      0.001,
+      0.0315
+     ]
+    },
+    "exact_types": {
+     "PERSON": 1
+    },
+    "exposed": {
+     "k": 15,
+     "n": 190,
+     "rate": 0.0789,
+     "wilson95": [
+      0.0484,
+      0.1262
+     ]
+    },
+    "leaked": 14,
+    "partial": {
+     "k": 0,
+     "n": 176,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.0214
+     ]
+    },
+    "partial_classes": {},
+    "policy": 0,
+    "recovered": {
+     "k": 1,
+     "n": 176,
+     "rate": 0.0057,
+     "wilson95": [
+      0.001,
+      0.0315
+     ]
+    },
+    "refused": 0,
+    "unavailable": 2,
+    "values": 192
+   },
+   "llm_guard": {
+    "attacked": 76,
+    "exact": {
+     "k": 6,
+     "n": 76,
+     "rate": 0.0789,
+     "wilson95": [
+      0.0367,
+      0.1617
+     ]
+    },
+    "exact_types": {
+     "PERSON": 6
+    },
+    "exposed": {
+     "k": 121,
+     "n": 187,
+     "rate": 0.6471,
+     "wilson95": [
+      0.5762,
+      0.712
+     ]
+    },
+    "leaked": 111,
+    "partial": {
+     "k": 4,
+     "n": 76,
+     "rate": 0.0526,
+     "wilson95": [
+      0.0207,
+      0.1277
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 4,
+      "visible_in_text": 4
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 10,
+     "n": 76,
+     "rate": 0.1316,
+     "wilson95": [
+      0.0731,
+      0.2255
+     ]
+    },
+    "refused": 0,
+    "unavailable": 5,
+    "values": 192
+   },
+   "presidio_default": {
+    "attacked": 130,
+    "exact": {
+     "k": 5,
+     "n": 130,
+     "rate": 0.0385,
+     "wilson95": [
+      0.0165,
+      0.0869
+     ]
+    },
+    "exact_types": {
+     "PERSON": 5
+    },
+    "exposed": {
+     "k": 68,
+     "n": 189,
+     "rate": 0.3598,
+     "wilson95": [
+      0.2948,
+      0.4304
+     ]
+    },
+    "leaked": 59,
+    "partial": {
+     "k": 4,
+     "n": 130,
+     "rate": 0.0308,
+     "wilson95": [
+      0.012,
+      0.0764
+     ]
+    },
+    "partial_classes": {
+     "email_local": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "name_token": {
+      "n": 3,
+      "visible_in_text": 3
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 9,
+     "n": 130,
+     "rate": 0.0692,
+     "wilson95": [
+      0.0368,
+      0.1263
+     ]
+    },
+    "refused": 0,
+    "unavailable": 3,
+    "values": 192
+   },
+   "presidio_faker": {
+    "attacked": 130,
+    "exact": {
+     "k": 4,
+     "n": 130,
+     "rate": 0.0308,
+     "wilson95": [
+      0.012,
+      0.0764
+     ]
+    },
+    "exact_types": {
+     "PERSON": 4
+    },
+    "exposed": {
+     "k": 64,
+     "n": 189,
+     "rate": 0.3386,
+     "wilson95": [
+      0.275,
+      0.4087
+     ]
+    },
+    "leaked": 59,
+    "partial": {
+     "k": 1,
+     "n": 130,
+     "rate": 0.0077,
+     "wilson95": [
+      0.0014,
+      0.0423
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 1,
+      "visible_in_text": 1
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 5,
+     "n": 130,
+     "rate": 0.0385,
+     "wilson95": [
+      0.0165,
+      0.0869
+     ]
+    },
+    "refused": 0,
+    "unavailable": 3,
+    "values": 192
+   },
+   "ss": {
+    "attacked": 188,
+    "exact": {
+     "k": 1,
+     "n": 188,
+     "rate": 0.0053,
+     "wilson95": [
+      0.0009,
+      0.0295
+     ]
+    },
+    "exact_types": {
+     "URL": 1
+    },
+    "exposed": {
+     "k": 35,
+     "n": 189,
+     "rate": 0.1852,
+     "wilson95": [
+      0.1363,
+      0.2466
+     ]
+    },
+    "leaked": 1,
+    "partial": {
+     "k": 33,
+     "n": 188,
+     "rate": 0.1755,
+     "wilson95": [
+      0.1278,
+      0.2363
+     ]
+    },
+    "partial_classes": {
+     "address_part": {
+      "n": 8,
+      "visible_in_text": 8
+     },
+     "birth_year": {
+      "n": 4,
+      "visible_in_text": 4
+     },
+     "email_domain": {
+      "n": 14,
+      "visible_in_text": 13
+     },
+     "org_word": {
+      "n": 3,
+      "visible_in_text": 3
+     },
+     "phone_area": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "url_host": {
+      "n": 3,
+      "visible_in_text": 3
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 34,
+     "n": 188,
+     "rate": 0.1809,
+     "wilson95": [
+      0.1324,
+      0.2421
+     ]
+    },
+    "refused": 0,
+    "unavailable": 3,
+    "values": 192
+   },
+   "ss-conversation": {
+    "attacked": 54,
+    "exact": {
+     "k": 0,
+     "n": 54,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.0664
+     ]
+    },
+    "exact_types": {},
+    "exposed": {
+     "k": 8,
+     "n": 54,
+     "rate": 0.1481,
+     "wilson95": [
+      0.077,
+      0.266
+     ]
+    },
+    "leaked": 0,
+    "partial": {
+     "k": 8,
+     "n": 54,
+     "rate": 0.1481,
+     "wilson95": [
+      0.077,
+      0.266
+     ]
+    },
+    "partial_classes": {
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "email_domain": {
+      "n": 4,
+      "visible_in_text": 4
+     },
+     "org_word": {
+      "n": 2,
+      "visible_in_text": 2
+     },
+     "phone_area": {
+      "n": 1,
+      "visible_in_text": 0
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 8,
+     "n": 54,
+     "rate": 0.1481,
+     "wilson95": [
+      0.077,
+      0.266
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 54
+   }
+  },
+  "sharegpt": {
+   "H8'''": {
+    "holds": false,
+    "no_exact_conversation": true,
+    "no_exact_single": false,
+    "recovery": {
+     "gliner_pii": {
+      "k": 4,
+      "n": 195,
+      "rate": 0.0205,
+      "wilson95": [
+       0.008,
+       0.0515
+      ]
+     },
+     "ss": {
+      "k": 31,
+      "n": 217,
+      "rate": 0.1429,
+      "wilson95": [
+       0.1025,
+       0.1956
+      ]
+     },
+     "ss-gliner_pii": {
+      "ci95": [
+       0.0786,
+       0.1695
+      ],
+      "diff": 0.1223,
+      "excludes_0": true,
+      "messages": 60,
+      "resamples": 2000
+     }
+    },
+    "recovery_not_above_gliner_pii": false
+   },
+   "gliner_pii": {
+    "attacked": 195,
+    "exact": {
+     "k": 1,
+     "n": 195,
+     "rate": 0.0051,
+     "wilson95": [
+      0.0009,
+      0.0285
+     ]
+    },
+    "exact_types": {
+     "AGE": 1
+    },
+    "exposed": {
+     "k": 30,
+     "n": 221,
+     "rate": 0.1357,
+     "wilson95": [
+      0.0968,
+      0.1872
+     ]
+    },
+    "leaked": 26,
+    "partial": {
+     "k": 3,
+     "n": 195,
+     "rate": 0.0154,
+     "wilson95": [
+      0.0052,
+      0.0442
+     ]
+    },
+    "partial_classes": {
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "name_token": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "url_host": {
+      "n": 1,
+      "visible_in_text": 0
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 4,
+     "n": 195,
+     "rate": 0.0205,
+     "wilson95": [
+      0.008,
+      0.0515
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 221
+   },
+   "llm_guard": {
+    "attacked": 97,
+    "exact": {
+     "k": 5,
+     "n": 97,
+     "rate": 0.0515,
+     "wilson95": [
+      0.0222,
+      0.115
+     ]
+    },
+    "exact_types": {
+     "PERSON": 5
+    },
+    "exposed": {
+     "k": 130,
+     "n": 221,
+     "rate": 0.5882,
+     "wilson95": [
+      0.5224,
+      0.6511
+     ]
+    },
+    "leaked": 124,
+    "partial": {
+     "k": 1,
+     "n": 97,
+     "rate": 0.0103,
+     "wilson95": [
+      0.0018,
+      0.0561
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 1,
+      "visible_in_text": 1
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 6,
+     "n": 97,
+     "rate": 0.0619,
+     "wilson95": [
+      0.0287,
+      0.1284
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 221
+   },
+   "presidio_default": {
+    "attacked": 154,
+    "exact": {
+     "k": 2,
+     "n": 154,
+     "rate": 0.013,
+     "wilson95": [
+      0.0036,
+      0.0461
+     ]
+    },
+    "exact_types": {
+     "PERSON": 2
+    },
+    "exposed": {
+     "k": 73,
+     "n": 221,
+     "rate": 0.3303,
+     "wilson95": [
+      0.2717,
+      0.3948
+     ]
+    },
+    "leaked": 67,
+    "partial": {
+     "k": 4,
+     "n": 154,
+     "rate": 0.026,
+     "wilson95": [
+      0.0101,
+      0.0649
+     ]
+    },
+    "partial_classes": {
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "email_local": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "name_token": {
+      "n": 2,
+      "visible_in_text": 2
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 6,
+     "n": 154,
+     "rate": 0.039,
+     "wilson95": [
+      0.018,
+      0.0824
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 221
+   },
+   "presidio_faker": {
+    "attacked": 154,
+    "exact": {
+     "k": 2,
+     "n": 154,
+     "rate": 0.013,
+     "wilson95": [
+      0.0036,
+      0.0461
+     ]
+    },
+    "exact_types": {
+     "PERSON": 2
+    },
+    "exposed": {
+     "k": 70,
+     "n": 221,
+     "rate": 0.3167,
+     "wilson95": [
+      0.259,
+      0.3808
+     ]
+    },
+    "leaked": 67,
+    "partial": {
+     "k": 1,
+     "n": 154,
+     "rate": 0.0065,
+     "wilson95": [
+      0.0011,
+      0.0359
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 1,
+      "visible_in_text": 1
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 3,
+     "n": 154,
+     "rate": 0.0195,
+     "wilson95": [
+      0.0066,
+      0.0557
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 221
+   },
+   "ss": {
+    "attacked": 217,
+    "exact": {
+     "k": 1,
+     "n": 217,
+     "rate": 0.0046,
+     "wilson95": [
+      0.0008,
+      0.0256
+     ]
+    },
+    "exact_types": {
+     "URL": 1
+    },
+    "exposed": {
+     "k": 35,
+     "n": 221,
+     "rate": 0.1584,
+     "wilson95": [
+      0.1161,
+      0.2123
+     ]
+    },
+    "leaked": 4,
+    "partial": {
+     "k": 30,
+     "n": 217,
+     "rate": 0.1382,
+     "wilson95": [
+      0.0986,
+      0.1905
+     ]
+    },
+    "partial_classes": {
+     "address_part": {
+      "n": 4,
+      "visible_in_text": 4
+     },
+     "birth_year": {
+      "n": 3,
+      "visible_in_text": 3
+     },
+     "email_domain": {
+      "n": 11,
+      "visible_in_text": 9
+     },
+     "org_word": {
+      "n": 7,
+      "visible_in_text": 7
+     },
+     "url_host": {
+      "n": 5,
+      "visible_in_text": 5
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 31,
+     "n": 217,
+     "rate": 0.1429,
+     "wilson95": [
+      0.1025,
+      0.1956
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 221
+   },
+   "ss-conversation": {
+    "attacked": 60,
+    "exact": {
+     "k": 0,
+     "n": 60,
+     "rate": 0.0,
+     "wilson95": [
+      0.0,
+      0.0602
+     ]
+    },
+    "exact_types": {},
+    "exposed": {
+     "k": 12,
+     "n": 61,
+     "rate": 0.1967,
+     "wilson95": [
+      0.1163,
+      0.3131
+     ]
+    },
+    "leaked": 1,
+    "partial": {
+     "k": 11,
+     "n": 60,
+     "rate": 0.1833,
+     "wilson95": [
+      0.1056,
+      0.2992
+     ]
+    },
+    "partial_classes": {
+     "address_part": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "email_domain": {
+      "n": 5,
+      "visible_in_text": 5
+     },
+     "org_word": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "url_host": {
+      "n": 3,
+      "visible_in_text": 3
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 11,
+     "n": 60,
+     "rate": 0.1833,
+     "wilson95": [
+      0.1056,
+      0.2992
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 61
+   }
+  },
+  "wildchat": {
+   "H8'''": {
+    "holds": false,
+    "no_exact_conversation": false,
+    "no_exact_single": false,
+    "recovery": {
+     "gliner_pii": {
+      "k": 6,
+      "n": 185,
+      "rate": 0.0324,
+      "wilson95": [
+       0.0149,
+       0.0689
+      ]
+     },
+     "ss": {
+      "k": 37,
+      "n": 215,
+      "rate": 0.1721,
+      "wilson95": [
+       0.1275,
+       0.2282
+      ]
+     },
+     "ss-gliner_pii": {
+      "ci95": [
+       0.0861,
+       0.1951
+      ],
+      "diff": 0.1397,
+      "excludes_0": true,
+      "messages": 59,
+      "resamples": 2000
+     }
+    },
+    "recovery_not_above_gliner_pii": false
+   },
+   "gliner_pii": {
+    "attacked": 185,
+    "exact": {
+     "k": 4,
+     "n": 185,
+     "rate": 0.0216,
+     "wilson95": [
+      0.0084,
+      0.0543
+     ]
+    },
+    "exact_types": {
+     "PERSON": 4
+    },
+    "exposed": {
+     "k": 39,
+     "n": 218,
+     "rate": 0.1789,
+     "wilson95": [
+      0.1337,
+      0.2352
+     ]
+    },
+    "leaked": 33,
+    "partial": {
+     "k": 2,
+     "n": 185,
+     "rate": 0.0108,
+     "wilson95": [
+      0.003,
+      0.0386
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "org_word": {
+      "n": 1,
+      "visible_in_text": 1
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 6,
+     "n": 185,
+     "rate": 0.0324,
+     "wilson95": [
+      0.0149,
+      0.0689
+     ]
+    },
+    "refused": 0,
+    "unavailable": 5,
+    "values": 223
+   },
+   "llm_guard": {
+    "attacked": 91,
+    "exact": {
+     "k": 8,
+     "n": 91,
+     "rate": 0.0879,
+     "wilson95": [
+      0.0452,
+      0.164
+     ]
+    },
+    "exact_types": {
+     "PERSON": 8
+    },
+    "exposed": {
+     "k": 138,
+     "n": 220,
+     "rate": 0.6273,
+     "wilson95": [
+      0.5617,
+      0.6885
+     ]
+    },
+    "leaked": 129,
+    "partial": {
+     "k": 1,
+     "n": 91,
+     "rate": 0.011,
+     "wilson95": [
+      0.0019,
+      0.0596
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 1,
+      "visible_in_text": 1
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 9,
+     "n": 91,
+     "rate": 0.0989,
+     "wilson95": [
+      0.0529,
+      0.1774
+     ]
+    },
+    "refused": 0,
+    "unavailable": 3,
+    "values": 223
+   },
+   "presidio_default": {
+    "attacked": 144,
+    "exact": {
+     "k": 7,
+     "n": 144,
+     "rate": 0.0486,
+     "wilson95": [
+      0.0237,
+      0.0969
+     ]
+    },
+    "exact_types": {
+     "PERSON": 6,
+     "URL": 1
+    },
+    "exposed": {
+     "k": 89,
+     "n": 219,
+     "rate": 0.4064,
+     "wilson95": [
+      0.3435,
+      0.4725
+     ]
+    },
+    "leaked": 75,
+    "partial": {
+     "k": 7,
+     "n": 144,
+     "rate": 0.0486,
+     "wilson95": [
+      0.0237,
+      0.0969
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 5,
+      "visible_in_text": 5
+     },
+     "url_host": {
+      "n": 2,
+      "visible_in_text": 0
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 14,
+     "n": 144,
+     "rate": 0.0972,
+     "wilson95": [
+      0.0588,
+      0.1566
+     ]
+    },
+    "refused": 0,
+    "unavailable": 4,
+    "values": 223
+   },
+   "presidio_faker": {
+    "attacked": 144,
+    "exact": {
+     "k": 2,
+     "n": 144,
+     "rate": 0.0139,
+     "wilson95": [
+      0.0038,
+      0.0492
+     ]
+    },
+    "exact_types": {
+     "PERSON": 2
+    },
+    "exposed": {
+     "k": 79,
+     "n": 219,
+     "rate": 0.3607,
+     "wilson95": [
+      0.3,
+      0.4262
+     ]
+    },
+    "leaked": 75,
+    "partial": {
+     "k": 2,
+     "n": 144,
+     "rate": 0.0139,
+     "wilson95": [
+      0.0038,
+      0.0492
+     ]
+    },
+    "partial_classes": {
+     "name_token": {
+      "n": 2,
+      "visible_in_text": 2
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 4,
+     "n": 144,
+     "rate": 0.0278,
+     "wilson95": [
+      0.0109,
+      0.0692
+     ]
+    },
+    "refused": 0,
+    "unavailable": 4,
+    "values": 223
+   },
+   "ss": {
+    "attacked": 215,
+    "exact": {
+     "k": 2,
+     "n": 215,
+     "rate": 0.0093,
+     "wilson95": [
+      0.0026,
+      0.0333
+     ]
+    },
+    "exact_types": {
+     "URL": 2
+    },
+    "exposed": {
+     "k": 39,
+     "n": 217,
+     "rate": 0.1797,
+     "wilson95": [
+      0.1343,
+      0.2362
+     ]
+    },
+    "leaked": 2,
+    "partial": {
+     "k": 35,
+     "n": 215,
+     "rate": 0.1628,
+     "wilson95": [
+      0.1194,
+      0.218
+     ]
+    },
+    "partial_classes": {
+     "address_part": {
+      "n": 2,
+      "visible_in_text": 2
+     },
+     "birth_year": {
+      "n": 1,
+      "visible_in_text": 1
+     },
+     "email_domain": {
+      "n": 13,
+      "visible_in_text": 10
+     },
+     "org_word": {
+      "n": 9,
+      "visible_in_text": 9
+     },
+     "url_host": {
+      "n": 10,
+      "visible_in_text": 10
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 37,
+     "n": 215,
+     "rate": 0.1721,
+     "wilson95": [
+      0.1275,
+      0.2282
+     ]
+    },
+    "refused": 0,
+    "unavailable": 6,
+    "values": 223
+   },
+   "ss-conversation": {
+    "attacked": 63,
+    "exact": {
+     "k": 1,
+     "n": 63,
+     "rate": 0.0159,
+     "wilson95": [
+      0.0028,
+      0.0846
+     ]
+    },
+    "exact_types": {
+     "URL": 1
+    },
+    "exposed": {
+     "k": 10,
+     "n": 64,
+     "rate": 0.1562,
+     "wilson95": [
+      0.0871,
+      0.2643
+     ]
+    },
+    "leaked": 1,
+    "partial": {
+     "k": 8,
+     "n": 63,
+     "rate": 0.127,
+     "wilson95": [
+      0.0658,
+      0.2311
+     ]
+    },
+    "partial_classes": {
+     "email_domain": {
+      "n": 5,
+      "visible_in_text": 5
+     },
+     "phone_area": {
+      "n": 1,
+      "visible_in_text": 0
+     },
+     "url_host": {
+      "n": 2,
+      "visible_in_text": 2
+     }
+    },
+    "policy": 0,
+    "recovered": {
+     "k": 9,
+     "n": 63,
+     "rate": 0.1429,
+     "wilson95": [
+      0.077,
+      0.2497
+     ]
+    },
+    "refused": 0,
+    "unavailable": 0,
+    "values": 64
+   }
+  }
+ },
+ "run": "test3",
+ "samples": {
+  "oasst1": [
+   "rd-oasst1-test3-0122",
+   "rd-oasst1-test3-0138",
+   "rd-oasst1-test3-0274",
+   "rd-oasst1-test3-0027",
+   "rd-oasst1-test3-0128",
+   "rd-oasst1-test3-0200",
+   "rd-oasst1-test3-0163",
+   "rd-oasst1-test3-0097",
+   "rd-oasst1-test3-0174",
+   "rd-oasst1-test3-0040",
+   "rd-oasst1-test3-0039",
+   "rd-oasst1-test3-0068",
+   "rd-oasst1-test3-0167",
+   "rd-oasst1-test3-0261",
+   "rd-oasst1-test3-0146",
+   "rd-oasst1-test3-0052",
+   "rd-oasst1-test3-0205",
+   "rd-oasst1-test3-0260",
+   "rd-oasst1-test3-0010",
+   "rd-oasst1-test3-0061",
+   "rd-oasst1-test3-0084",
+   "rd-oasst1-test3-0171",
+   "rd-oasst1-test3-0254",
+   "rd-oasst1-test3-0255",
+   "rd-oasst1-test3-0066",
+   "rd-oasst1-test3-0109",
+   "rd-oasst1-test3-0225",
+   "rd-oasst1-test3-0015",
+   "rd-oasst1-test3-0038",
+   "rd-oasst1-test3-0050",
+   "rd-oasst1-test3-0121",
+   "rd-oasst1-test3-0154",
+   "rd-oasst1-test3-0258",
+   "rd-oasst1-test3-0013",
+   "rd-oasst1-test3-0183",
+   "rd-oasst1-test3-0073",
+   "rd-oasst1-test3-0029",
+   "rd-oasst1-test3-0008",
+   "rd-oasst1-test3-0222",
+   "rd-oasst1-test3-0157",
+   "rd-oasst1-test3-0286",
+   "rd-oasst1-test3-0269",
+   "rd-oasst1-test3-0169",
+   "rd-oasst1-test3-0071",
+   "rd-oasst1-test3-0009",
+   "rd-oasst1-test3-0285",
+   "rd-oasst1-test3-0149",
+   "rd-oasst1-test3-0143",
+   "rd-oasst1-test3-0291",
+   "rd-oasst1-test3-0251",
+   "rd-oasst1-test3-0264",
+   "rd-oasst1-test3-0189",
+   "rd-oasst1-test3-0160",
+   "rd-oasst1-test3-0060",
+   "rd-oasst1-test3-0145",
+   "rd-oasst1-test3-0026",
+   "rd-oasst1-test3-0256",
+   "rd-oasst1-test3-0245",
+   "rd-oasst1-test3-0112",
+   "rd-oasst1-test3-0065"
+  ],
+  "sharegpt": [
+   "rd-sharegpt-test3-0052",
+   "rd-sharegpt-test3-0004",
+   "rd-sharegpt-test3-0279",
+   "rd-sharegpt-test3-0180",
+   "rd-sharegpt-test3-0065",
+   "rd-sharegpt-test3-0149",
+   "rd-sharegpt-test3-0040",
+   "rd-sharegpt-test3-0194",
+   "rd-sharegpt-test3-0141",
+   "rd-sharegpt-test3-0026",
+   "rd-sharegpt-test3-0013",
+   "rd-sharegpt-test3-0250",
+   "rd-sharegpt-test3-0162",
+   "rd-sharegpt-test3-0256",
+   "rd-sharegpt-test3-0049",
+   "rd-sharegpt-test3-0014",
+   "rd-sharegpt-test3-0100",
+   "rd-sharegpt-test3-0024",
+   "rd-sharegpt-test3-0069",
+   "rd-sharegpt-test3-0260",
+   "rd-sharegpt-test3-0109",
+   "rd-sharegpt-test3-0062",
+   "rd-sharegpt-test3-0267",
+   "rd-sharegpt-test3-0206",
+   "rd-sharegpt-test3-0043",
+   "rd-sharegpt-test3-0189",
+   "rd-sharegpt-test3-0016",
+   "rd-sharegpt-test3-0289",
+   "rd-sharegpt-test3-0121",
+   "rd-sharegpt-test3-0042",
+   "rd-sharegpt-test3-0156",
+   "rd-sharegpt-test3-0097",
+   "rd-sharegpt-test3-0265",
+   "rd-sharegpt-test3-0056",
+   "rd-sharegpt-test3-0297",
+   "rd-sharegpt-test3-0011",
+   "rd-sharegpt-test3-0298",
+   "rd-sharegpt-test3-0261",
+   "rd-sharegpt-test3-0230",
+   "rd-sharegpt-test3-0222",
+   "rd-sharegpt-test3-0006",
+   "rd-sharegpt-test3-0140",
+   "rd-sharegpt-test3-0205",
+   "rd-sharegpt-test3-0209",
+   "rd-sharegpt-test3-0017",
+   "rd-sharegpt-test3-0154",
+   "rd-sharegpt-test3-0210",
+   "rd-sharegpt-test3-0094",
+   "rd-sharegpt-test3-0078",
+   "rd-sharegpt-test3-0195",
+   "rd-sharegpt-test3-0293",
+   "rd-sharegpt-test3-0284",
+   "rd-sharegpt-test3-0245",
+   "rd-sharegpt-test3-0277",
+   "rd-sharegpt-test3-0262",
+   "rd-sharegpt-test3-0185",
+   "rd-sharegpt-test3-0175",
+   "rd-sharegpt-test3-0008",
+   "rd-sharegpt-test3-0139",
+   "rd-sharegpt-test3-0237"
+  ],
+  "wildchat": [
+   "rd-wildchat-test3-0233",
+   "rd-wildchat-test3-0165",
+   "rd-wildchat-test3-0119",
+   "rd-wildchat-test3-0284",
+   "rd-wildchat-test3-0006",
+   "rd-wildchat-test3-0070",
+   "rd-wildchat-test3-0171",
+   "rd-wildchat-test3-0060",
+   "rd-wildchat-test3-0190",
+   "rd-wildchat-test3-0035",
+   "rd-wildchat-test3-0024",
+   "rd-wildchat-test3-0096",
+   "rd-wildchat-test3-0229",
+   "rd-wildchat-test3-0137",
+   "rd-wildchat-test3-0176",
+   "rd-wildchat-test3-0153",
+   "rd-wildchat-test3-0132",
+   "rd-wildchat-test3-0293",
+   "rd-wildchat-test3-0064",
+   "rd-wildchat-test3-0069",
+   "rd-wildchat-test3-0236",
+   "rd-wildchat-test3-0016",
+   "rd-wildchat-test3-0043",
+   "rd-wildchat-test3-0242",
+   "rd-wildchat-test3-0203",
+   "rd-wildchat-test3-0262",
+   "rd-wildchat-test3-0061",
+   "rd-wildchat-test3-0193",
+   "rd-wildchat-test3-0108",
+   "rd-wildchat-test3-0104",
+   "rd-wildchat-test3-0173",
+   "rd-wildchat-test3-0161",
+   "rd-wildchat-test3-0253",
+   "rd-wildchat-test3-0277",
+   "rd-wildchat-test3-0012",
+   "rd-wildchat-test3-0235",
+   "rd-wildchat-test3-0021",
+   "rd-wildchat-test3-0271",
+   "rd-wildchat-test3-0158",
+   "rd-wildchat-test3-0260",
+   "rd-wildchat-test3-0247",
+   "rd-wildchat-test3-0225",
+   "rd-wildchat-test3-0164",
+   "rd-wildchat-test3-0243",
+   "rd-wildchat-test3-0084",
+   "rd-wildchat-test3-0222",
+   "rd-wildchat-test3-0256",
+   "rd-wildchat-test3-0001",
+   "rd-wildchat-test3-0139",
+   "rd-wildchat-test3-0081",
+   "rd-wildchat-test3-0097",
+   "rd-wildchat-test3-0289",
+   "rd-wildchat-test3-0063",
+   "rd-wildchat-test3-0268",
+   "rd-wildchat-test3-0058",
+   "rd-wildchat-test3-0005",
+   "rd-wildchat-test3-0147",
+   "rd-wildchat-test3-0071",
+   "rd-wildchat-test3-0133",
+   "rd-wildchat-test3-0023"
+  ]
+ },
+ "split": "test3",
+ "unparsed": {
+  "gliner_pii": 2,
+  "llm_guard": 3,
+  "presidio_default": 2,
+  "presidio_faker": 2,
+  "ss": 2
+ }
+}

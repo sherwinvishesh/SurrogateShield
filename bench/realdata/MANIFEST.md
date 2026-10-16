@@ -1,0 +1,1511 @@
+# Real-data benchmark — manifest
+
+Generated from `bench/realdata/manifest.json` by `bench/realdata/manifest.py`; do not edit by hand.
+
+## Sources
+
+| dataset | Hugging Face repo | revision | files | licence |
+|---|---|---|---|---|
+| oasst1 | `OpenAssistant/oasst1` | `fdf72ae0827c1cda404aff25b6603abec9e3399b` | `data/train-00000-of-00001-b42a775f407cee45.parquet`, `data/validation-00000-of-00001-134b8fd0c89408b6.parquet` | Apache-2.0 |
+| sharegpt | `RyokoAI/ShareGPT52K` | `6f9b78cc1dd15dbb51d3c51ccc219c558962fd77` | `sg_90k_part1.json` | CC0-1.0 |
+| wildchat | `allenai/WildChat-1M` | `7d6490e462285cf85d91eabea0f9a954fbddcd1f` | `data/train-00004-of-00014.parquet`, `data/train-00008-of-00014.parquet` | ODC-BY-1.0 |
+
+Files were fetched with `huggingface_hub.hf_hub_download(repo, file, revision=<sha>)` into the
+git-ignored `bench/realdata/raw/`. WildChat-1M has 14 shards; two were used, drawn with
+`sorted(random.Random(20261005).sample(range(14), 2))` = [4, 8]. WildChat-1M is the non-toxic release,
+so `toxic == True` excludes nothing in it (counted below); conversations the publishers marked
+`redacted` (PII they found was scrubbed) are kept and flagged in `meta.redacted`.
+
+## Redistribution and what is committed
+
+- **oasst1**: Apache-2.0 permits redistribution with attribution.
+- **sharegpt**: CC0-1.0 as declared by the uploader; the underlying conversations were shared by ShareGPT users, so the provenance of individual texts is not verifiable.
+- **wildchat**: ODC-BY-1.0 permits redistribution with attribution; AI2's terms ask users not to attempt re-identification.
+
+Real prompts can carry real personal data even after the publishers' scrubbing, so no natural-slice
+text is committed, whatever the licence allows. `<dataset>/pool.jsonl` holds the source id, the
+references that locate each user turn in the pinned files, the SHA-256 and word count of each turn,
+and the split. `python -m bench.realdata.build` rebuilds the text into the git-ignored
+`bench/realdata/build/` and checks every hash. Injected rows (a PII-free base plus our fake values)
+are committed in full.
+
+## Filters and sampling
+
+Fixed in `bench/realdata/pull.py` before any system ran. Single-turn prompt = the first user turn;
+multi-turn = the first ≤ 3 user turns of a conversation with ≥ 2 (OASST1: along the best-ranked
+reply chain from the root). First turns: 15–400 words, not only code (< 8 alphabetic words once code
+fences, URLs and code-like lines are removed: `common._CODE_LINE`), not only a URL (< 5 words besides
+URLs), no jailbreak template. Later turns: ≤ 400 words, English when ≥ 5 words,
+no jailbreak template. ShareGPT has no language field: English = ≥ 90 % ASCII letters and ≥ 12 % English
+function words (`common.is_english`). Exact duplicates (lower-cased, punctuation-stripped,
+whitespace-collapsed) collapse to the smallest source id; near duplicates (rapidfuzz ratio ≥ 95 on the
+normalised first turn) are rejected during the seeded draw. Multi-turn conversations are drawn first;
+single-turn prompts come from the remaining conversations. Split 20 % dev / 80 % test by a seeded draw.
+
+Jailbreak / prompt-injection keyword pattern (case-insensitive): `\b(do anything now|jailbr(?:eak|oken)|ignore (?:all )?(?:the )?(?:previous|prior|above) (?:instructions|prompts?)|developer mode|DAN mode|act as DAN|you are DAN|unfiltered and amoral|without any (?:moral|ethical) (?:restrictions|guidelines)|no (?:ethical|moral) (?:restrictions|guidelines)|uncensored (?:ai|model|assistant)|opposite mode|evil confidant)\b`
+
+Check of the English heuristic against WildChat's own language label (`python -m
+bench.realdata.pull --english-check`; first user turns of 15–400 words in a seeded sample of 20,000
+WildChat conversations) is under sharegpt below.
+
+### oasst1
+
+| step | count |
+|---|---|
+| `source_roots` | 10,364 |
+| `drop_deleted` | 1 |
+| `drop_not_english` | 6,693 |
+| `drop_first_turn_too_short` | 1,775 |
+| `drop_first_turn_too_long` | 6 |
+| `drop_first_turn_only_code` | 2 |
+| `drop_first_turn_jailbreak` | 3 |
+| `first_turn_kept` | 1,884 |
+| `single_exact_duplicates` | 1 |
+| `drawn_single` | 500 |
+| `multi_candidates` | 1,399 |
+| `drop_multi_later_turn_too_long` | 1 |
+| `multi_kept` | 1,398 |
+| `multi_exact_duplicates` | 0 |
+| `drawn_multi` | 100 |
+
+Drawn: multi_dev = 20, multi_test = 80, single_dev = 100, single_test = 400
+
+Seeds (`common.derive_seed(dataset, *key)`): multi = 8297385324506450750, multi/split = 51635376429254779, single = 4200958982437220154, single/split = 149393221693701657
+
+Raw file SHA-256:
+
+- `data/train-00000-of-00001-b42a775f407cee45.parquet` `bbfadf5ed1278ba2208c837fdcad865adf65f5df55d80abadab2745db13fcb5e`
+- `data/validation-00000-of-00001-134b8fd0c89408b6.parquet` `24002597bb13a7edd42d92f773762f25e285f72c31a70449393d0ded1dc7b416`
+
+### sharegpt
+
+| step | count |
+|---|---|
+| `source_conversations` | 45,332 |
+| `drop_not_starting_with_user` | 1,673 |
+| `drop_first_turn_empty` | 5 |
+| `drop_first_turn_not_english` | 14,651 |
+| `drop_first_turn_too_short` | 9,369 |
+| `drop_first_turn_too_long` | 1,929 |
+| `drop_first_turn_only_code` | 106 |
+| `drop_first_turn_jailbreak` | 286 |
+| `first_turn_kept` | 17,313 |
+| `single_exact_duplicates` | 2,158 |
+| `single_near_duplicates_skipped` | 2 |
+| `drawn_single` | 500 |
+| `multi_candidates` | 12,464 |
+| `drop_multi_later_turn_empty` | 1 |
+| `drop_multi_later_turn_too_long` | 421 |
+| `drop_multi_later_turn_not_english` | 859 |
+| `drop_multi_later_turn_jailbreak` | 4 |
+| `multi_kept` | 11,179 |
+| `multi_exact_duplicates` | 1,445 |
+| `drawn_multi` | 100 |
+
+Drawn: multi_dev = 20, multi_test = 80, single_dev = 100, single_test = 400
+
+Seeds (`common.derive_seed(dataset, *key)`): multi = 7337422658528046808, multi/split = 2737957914994815187, single = 1727909325923492305, single/split = 6632606893631942324
+
+Raw file SHA-256:
+
+- `sg_90k_part1.json` `ed0e3af68ed968aed86aafd3796dacdb6fc2bb91f82edec880086ffcb7280f56`
+
+**english_heuristic_vs_wildchat_label**
+
+```
+{
+ "false_neg": 291,
+ "false_pos": 117,
+ "n": 8518,
+ "precision": 0.9808,
+ "recall": 0.9535,
+ "true_neg": 2140,
+ "true_pos": 5970
+}
+```
+
+### wildchat
+
+| step | count |
+|---|---|
+| `source_conversations` | 119,713 |
+| `drop_duplicate_hash` | 1,428 |
+| `drop_not_english` | 51,104 |
+| `drop_first_turn_empty` | 204 |
+| `drop_first_turn_too_short` | 16,212 |
+| `drop_first_turn_too_long` | 13,276 |
+| `drop_first_turn_only_code` | 601 |
+| `drop_first_turn_jailbreak` | 148 |
+| `first_turn_kept` | 36,740 |
+| `single_exact_duplicates` | 6,271 |
+| `single_near_duplicates_skipped` | 11 |
+| `drawn_single` | 500 |
+| `multi_candidates` | 10,678 |
+| `drop_multi_later_turn_empty` | 301 |
+| `drop_multi_later_turn_too_long` | 299 |
+| `drop_multi_later_turn_jailbreak` | 3 |
+| `multi_kept` | 10,075 |
+| `multi_exact_duplicates` | 706 |
+| `drawn_multi` | 100 |
+
+Drawn: multi_dev = 20, multi_test = 80, single_dev = 100, single_test = 400
+
+Seeds (`common.derive_seed(dataset, *key)`): multi = 8004489117543738831, multi/split = 8872168885709066928, single = 8280196155434402060, single/split = 6786772035386712793
+
+Raw file SHA-256:
+
+- `data/train-00004-of-00014.parquet` `08c7e0c31edc120606d67cfa82486471d82945a7a414761501ea44b1ab0cd804`
+- `data/train-00008-of-00014.parquet` `a69578183dde5de1aa94134da2d7c2d13f00d88a577ef91140a492fbbbf10792`
+
+## Collection `test2`
+
+The sealed second test (PROMPT_FOR_OPUS_V3 §5.2): drawn by `python -m bench.realdata.pull
+--collection test2` from sources the first draw never touched (its ids skipped, its first turns
+seeding the near-duplicate check), one split, files under
+`bench/realdata/test2/<dataset>/`.
+
+### test2 / oasst1
+
+| step | count |
+|---|---|
+| `source_roots` | 10,364 |
+| `drop_deleted` | 1 |
+| `drop_not_english` | 6,693 |
+| `drop_first_turn_too_short` | 1,775 |
+| `drop_first_turn_too_long` | 6 |
+| `drop_first_turn_only_code` | 2 |
+| `drop_first_turn_jailbreak` | 3 |
+| `first_turn_kept` | 1,884 |
+| `single_exact_duplicates` | 1 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 1,399 |
+| `drop_multi_later_turn_too_long` | 1 |
+| `multi_kept` | 1,398 |
+| `multi_exact_duplicates` | 0 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+
+Drawn: multi_test2 = 120, single_test2 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 6100473939742772187, single = 5516664046704425191
+
+### test2 / sharegpt
+
+| step | count |
+|---|---|
+| `source_conversations` | 45,332 |
+| `drop_not_starting_with_user` | 1,673 |
+| `drop_first_turn_empty` | 5 |
+| `drop_first_turn_not_english` | 14,651 |
+| `drop_first_turn_too_short` | 9,369 |
+| `drop_first_turn_too_long` | 1,929 |
+| `drop_first_turn_only_code` | 106 |
+| `drop_first_turn_jailbreak` | 286 |
+| `first_turn_kept` | 17,313 |
+| `single_exact_duplicates` | 2,158 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 12,464 |
+| `drop_multi_later_turn_empty` | 1 |
+| `drop_multi_later_turn_too_long` | 421 |
+| `drop_multi_later_turn_not_english` | 859 |
+| `drop_multi_later_turn_jailbreak` | 4 |
+| `multi_kept` | 11,179 |
+| `multi_exact_duplicates` | 1,445 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+
+Drawn: multi_test2 = 120, single_test2 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 1486538153402145689, single = 3896618106654812218
+
+### test2 / wildchat
+
+| step | count |
+|---|---|
+| `source_conversations` | 119,713 |
+| `drop_duplicate_hash` | 1,428 |
+| `drop_not_english` | 51,104 |
+| `drop_first_turn_empty` | 204 |
+| `drop_first_turn_too_short` | 16,212 |
+| `drop_first_turn_too_long` | 13,276 |
+| `drop_first_turn_only_code` | 601 |
+| `drop_first_turn_jailbreak` | 148 |
+| `first_turn_kept` | 36,740 |
+| `single_exact_duplicates` | 6,271 |
+| `single_near_duplicates_skipped` | 27 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 10,678 |
+| `drop_multi_later_turn_empty` | 301 |
+| `drop_multi_later_turn_too_long` | 299 |
+| `drop_multi_later_turn_jailbreak` | 3 |
+| `multi_kept` | 10,075 |
+| `multi_exact_duplicates` | 706 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+
+Drawn: multi_test2 = 120, single_test2 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test2")`): multi = 2817525755150603185, single = 4631120071886413785
+
+**test2 injection**
+
+```
+{
+ "faker": "40.15.0",
+ "identity_pool": "eval",
+ "placer": "claude-sonnet-4-6",
+ "pool_key": "surrogateshield-identity-pool-v1",
+ "prompt_version": "9d5a86e933bd6fef"
+}
+```
+
+**test2 labels**
+
+```
+{
+ "annotator": "claude-sonnet-4-6",
+ "literal_rule_arms": [
+  "ss",
+  "presidio_default",
+  "gliner_pii"
+ ],
+ "pooled_arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "prompt_version": "bebc6e281801fa74"
+}
+```
+
+## Collection `test3`
+
+The sealed third test (PROMPT_FOR_OPUS_V4, `HYPOTHESES_TEST3.md`): drawn by
+`python -m bench.realdata.pull --collection test3` from sources neither earlier draw touched
+(test1's and test2's ids skipped, their first turns seeding the near-duplicate check), one split,
+files under
+`bench/realdata/test3/<dataset>/`.
+
+### test3 / oasst1
+
+| step | count |
+|---|---|
+| `source_roots` | 10,364 |
+| `drop_deleted` | 1 |
+| `drop_not_english` | 6,693 |
+| `drop_first_turn_too_short` | 1,775 |
+| `drop_first_turn_too_long` | 6 |
+| `drop_first_turn_only_code` | 2 |
+| `drop_first_turn_jailbreak` | 3 |
+| `first_turn_kept` | 1,884 |
+| `single_exact_duplicates` | 1 |
+| `single_near_duplicates_skipped` | 2 |
+| `drawn_single` | 441 |
+| `multi_candidates` | 1,399 |
+| `drop_multi_later_turn_too_long` | 1 |
+| `multi_kept` | 1,398 |
+| `multi_exact_duplicates` | 0 |
+| `drawn_multi` | 120 |
+| `single_floor` | 400 |
+| `single_target` | 600 |
+| `taken_by_test1` | 600 |
+| `taken_by_test2` | 720 |
+
+Drawn: multi_test3 = 120, single_test3 = 441
+
+Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 5192946058356430922, single = 4762911692612335318
+
+### test3 / sharegpt
+
+| step | count |
+|---|---|
+| `source_conversations` | 45,332 |
+| `drop_not_starting_with_user` | 1,673 |
+| `drop_first_turn_empty` | 5 |
+| `drop_first_turn_not_english` | 14,651 |
+| `drop_first_turn_too_short` | 9,369 |
+| `drop_first_turn_too_long` | 1,929 |
+| `drop_first_turn_only_code` | 106 |
+| `drop_first_turn_jailbreak` | 286 |
+| `first_turn_kept` | 17,313 |
+| `single_exact_duplicates` | 2,158 |
+| `single_near_duplicates_skipped` | 5 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 12,464 |
+| `drop_multi_later_turn_empty` | 1 |
+| `drop_multi_later_turn_too_long` | 421 |
+| `drop_multi_later_turn_not_english` | 859 |
+| `drop_multi_later_turn_jailbreak` | 4 |
+| `multi_kept` | 11,179 |
+| `multi_exact_duplicates` | 1,445 |
+| `multi_near_duplicates_skipped` | 2 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+| `taken_by_test2` | 720 |
+
+Drawn: multi_test3 = 120, single_test3 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 7657607999476220337, single = 1073398702621200168
+
+### test3 / wildchat
+
+| step | count |
+|---|---|
+| `source_conversations` | 119,713 |
+| `drop_duplicate_hash` | 1,428 |
+| `drop_not_english` | 51,104 |
+| `drop_first_turn_empty` | 204 |
+| `drop_first_turn_too_short` | 16,212 |
+| `drop_first_turn_too_long` | 13,276 |
+| `drop_first_turn_only_code` | 601 |
+| `drop_first_turn_jailbreak` | 148 |
+| `first_turn_kept` | 36,740 |
+| `single_exact_duplicates` | 6,271 |
+| `single_near_duplicates_skipped` | 34 |
+| `drawn_single` | 600 |
+| `multi_candidates` | 10,678 |
+| `drop_multi_later_turn_empty` | 301 |
+| `drop_multi_later_turn_too_long` | 299 |
+| `drop_multi_later_turn_jailbreak` | 3 |
+| `multi_kept` | 10,075 |
+| `multi_exact_duplicates` | 706 |
+| `multi_near_duplicates_skipped` | 2 |
+| `drawn_multi` | 120 |
+| `taken_by_test1` | 600 |
+| `taken_by_test2` | 720 |
+
+Drawn: multi_test3 = 120, single_test3 = 600
+
+Seeds (`common.derive_seed(dataset, kind, "test3")`): multi = 4521544721967241027, single = 3609028807091034370
+
+**test3 injection**
+
+```
+{
+ "faker": "40.15.0",
+ "identity_pool": "eval",
+ "placer": "claude-sonnet-4-6",
+ "pool_key": "surrogateshield-identity-pool-v1",
+ "prompt_version": "9d5a86e933bd6fef"
+}
+```
+
+**test3 labels**
+
+```
+{
+ "annotator": "claude-sonnet-4-6",
+ "literal_rule_arms": [
+  "ss",
+  "presidio_default",
+  "gliner_pii"
+ ],
+ "pooled_arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "prompt_version": "bebc6e281801fa74"
+}
+```
+
+**test3 pooling**
+
+```
+{
+ "arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "clean": false,
+ "commit": "a07f845836a8660d36e42a15395752b9976651db",
+ "ss_detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b"
+}
+```
+
+## Systems under test
+
+Recorded by `python -m bench.arms.run` from each arm's meta sidecar
+(`bench/results/spans/<arm>/*.meta.json`); every arm runs offline.
+
+### gliner_pii
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "backbone_revision": {
+  "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+ },
+ "flat_ner": true,
+ "labels": [
+  "person",
+  "organization",
+  "email",
+  "phone number",
+  "address",
+  "location",
+  "date of birth",
+  "age",
+  "passport number",
+  "social security number",
+  "credit card number",
+  "bank account number",
+  "iban",
+  "driver's license number",
+  "national id number",
+  "tax identification number",
+  "health insurance id number",
+  "ip address",
+  "url",
+  "username",
+  "password",
+  "api key"
+ ],
+ "model": "urchade/gliner_multi_pii-v1",
+ "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+ "overlap_words": 30,
+ "replacement": "[LABEL] placeholder",
+ "threshold": 0.5,
+ "versions": {
+  "gliner": "0.2.29",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ },
+ "window_words": 200
+}
+```
+
+### gliner_pii_tuned
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "backbone_revision": {
+  "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+ },
+ "chosen_by": "bench/results/gliner_sweep_dev.json (lowest pooled dev injected leak)",
+ "flat_ner": true,
+ "label_set": "published",
+ "labels": [
+  "person",
+  "organization",
+  "email",
+  "phone number",
+  "address",
+  "location",
+  "date of birth",
+  "age",
+  "passport number",
+  "social security number",
+  "credit card number",
+  "bank account number",
+  "iban",
+  "driver's license number",
+  "national id number",
+  "tax identification number",
+  "health insurance id number",
+  "ip address",
+  "url",
+  "username",
+  "password",
+  "api key"
+ ],
+ "model": "urchade/gliner_multi_pii-v1",
+ "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+ "overlap_words": 30,
+ "replacement": "[LABEL] placeholder",
+ "threshold": 0.3,
+ "versions": {
+  "gliner": "0.2.29",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ },
+ "window_words": 200
+}
+```
+
+### llm_guard
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "device": "cpu (pinned; LLM Guard would pick mps or cuda)",
+ "entity_types": [
+  "CREDIT_CARD",
+  "CRYPTO",
+  "EMAIL_ADDRESS",
+  "IBAN_CODE",
+  "IP_ADDRESS",
+  "PERSON",
+  "PHONE_NUMBER",
+  "US_SSN",
+  "US_BANK_NUMBER",
+  "CREDIT_CARD_RE",
+  "UUID",
+  "EMAIL_ADDRESS_RE",
+  "US_SSN_RE"
+ ],
+ "faker": "module Faker re-seeded per message (seed_instance)",
+ "faker_arity_shim": "one-argument lambdas in _entity_faker_map called with a dummy argument (0.3.16 bug)",
+ "model": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2",
+ "model_revision": "9ea992753ab2686be4a8f64605ccc7be197ad794",
+ "recognizer_conf": "DEBERTA_AI4PRIVACY_v2_CONF",
+ "scanner": "llm_guard.input_scanners.Anonymize(Vault(), use_faker=True)",
+ "threshold": 0.5,
+ "versions": {
+  "faker": "37.12.0",
+  "llm-guard": "0.3.16",
+  "presidio-analyzer": "2.2.358",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ }
+}
+```
+
+Historical span files (`natural-oasst1`, `natural-sharegpt`, `natural-wildchat`): made on mps before fc4ab21 pinned LLM Guard to the CPU; test-1's silver-label candidates were drawn from them.
+
+```
+{
+ "entity_types": [
+  "CREDIT_CARD",
+  "CRYPTO",
+  "EMAIL_ADDRESS",
+  "IBAN_CODE",
+  "IP_ADDRESS",
+  "PERSON",
+  "PHONE_NUMBER",
+  "US_SSN",
+  "US_BANK_NUMBER",
+  "CREDIT_CARD_RE",
+  "UUID",
+  "EMAIL_ADDRESS_RE",
+  "US_SSN_RE"
+ ],
+ "faker": "module Faker re-seeded per message (seed_instance)",
+ "faker_arity_shim": "one-argument lambdas in _entity_faker_map called with a dummy argument (0.3.16 bug)",
+ "model": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2",
+ "model_revision": "9ea992753ab2686be4a8f64605ccc7be197ad794",
+ "recognizer_conf": "DEBERTA_AI4PRIVACY_v2_CONF",
+ "scanner": "llm_guard.input_scanners.Anonymize(Vault(), use_faker=True)",
+ "threshold": 0.5,
+ "versions": {
+  "faker": "37.12.0",
+  "llm-guard": "0.3.16",
+  "presidio-analyzer": "2.2.358",
+  "python": "3.12.9",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ }
+}
+```
+
+### presidio_default
+
+Interpreter `.venv/bin/python`, seed 20261005.
+
+```
+{
+ "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+ "overlap_resolution": "longest span, then highest score",
+ "presidio_analyzer_version": "2.2.362",
+ "replacement": "[ENTITY_TYPE] placeholder (presidio/redact.py)",
+ "score_threshold": 0.4
+}
+```
+
+### presidio_faker
+
+Interpreter `.venv/bin/python`, seed 20261005.
+
+```
+{
+ "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+ "faker_types": [
+  "CREDIT_CARD",
+  "DATE_TIME",
+  "EMAIL_ADDRESS",
+  "IBAN_CODE",
+  "IP_ADDRESS",
+  "LOCATION",
+  "NRP",
+  "ORGANIZATION",
+  "PERSON",
+  "PHONE_NUMBER",
+  "URL",
+  "US_BANK_NUMBER",
+  "US_SSN"
+ ],
+ "merge": "AnonymizerEngine default: same-type entities separated only by spaces become one",
+ "overlap_resolution": "longest span, then highest score",
+ "presidio_analyzer_version": "2.2.362",
+ "replacement": "presidio_anonymizer custom operator: Faker('en_US') seeded per message, per-message (type, value) memo; types without a Faker provider keep their shape (digit\u2192digit, letter\u2192letter)",
+ "score_threshold": 0.4,
+ "versions": {
+  "faker": "40.15.0",
+  "presidio-anonymizer": "2.2.362",
+  "python": "3.13.2"
+ }
+}
+```
+
+### presidio_transformers
+
+Interpreter `.venv-baselines/bin/python`, seed 20261005.
+
+```
+{
+ "model_revision": "78f2152eb93ddd817290ce8dbe46f1a6685e09fc",
+ "nlp_configuration": {
+  "models": [
+   {
+    "lang_code": "en",
+    "model_name": {
+     "spacy": "en_core_web_sm",
+     "transformers": "obi/deid_roberta_i2b2"
+    }
+   }
+  ],
+  "ner_model_configuration": {
+   "aggregation_strategy": "max",
+   "alignment_mode": "expand",
+   "labels_to_ignore": [
+    "O"
+   ],
+   "low_confidence_score_multiplier": 0.4,
+   "low_score_entity_names": [
+    "ID"
+   ],
+   "model_to_presidio_entity_mapping": {
+    "AGE": "AGE",
+    "DATE": "DATE_TIME",
+    "EMAIL": "EMAIL",
+    "FACILITY": "LOCATION",
+    "GPE": "LOCATION",
+    "HCW": "PERSON",
+    "HOSP": "ORGANIZATION",
+    "HOSPITAL": "LOCATION",
+    "ID": "ID",
+    "LOC": "LOCATION",
+    "LOCATION": "LOCATION",
+    "NORP": "NRP",
+    "ORG": "ORGANIZATION",
+    "ORGANIZATION": "ORGANIZATION",
+    "PATIENT": "PERSON",
+    "PATORG": "ORGANIZATION",
+    "PER": "PERSON",
+    "PERSON": "PERSON",
+    "PHONE": "PHONE_NUMBER",
+    "STAFF": "PERSON",
+    "TIME": "DATE_TIME",
+    "VENDOR": "ORGANIZATION"
+   },
+   "stride": 16
+  },
+  "nlp_engine_name": "transformers"
+ },
+ "overlap_resolution": "longest span, then highest score",
+ "replacement": "[ENTITY_TYPE] placeholder",
+ "score_threshold": 0.4,
+ "versions": {
+  "presidio-analyzer": "2.2.358",
+  "python": "3.12.9",
+  "spacy": "3.8.16",
+  "spacy-huggingface-pipelines": "0.0.4",
+  "torch": "2.14.1",
+  "transformers": "4.51.3"
+ }
+}
+```
+
+### ss
+
+Interpreter `.venv/bin/python`, seed 20261005.
+
+```
+{
+ "ADDRESS_MODE": "replace",
+ "ADDRESS_MODE_product": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "pii-tagger-dv3s-40k",
+    "name": "pii_tagger",
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    "stride": null,
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "LOCATION": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`natural-oasst1`, `natural-sharegpt`, `natural-wildchat`, `test-oasst1`, `test-sharegpt`, `test-wildchat`, `test2-natural-oasst1`, `test2-natural-sharegpt`, `test2-natural-wildchat`): the pre-V3 SS (before the detection config); test-1's test scores (realdata_test) and the silver-label candidates of test-1's and test-2's natural pools were made from them.
+
+```
+{
+ "ADDRESS_MODE": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`test2-oasst1`, `test2-sharegpt`, `test2-wildchat`): the frozen test-2 SS (FREEZE.json, e2c8fa5); test-2's scores (realdata_test2.json) were made from them.
+
+```
+{
+ "ADDRESS_MODE": "replace",
+ "ADDRESS_MODE_product": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "pii-tagger-dv3s-40k",
+    "name": "pii_tagger",
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    "stride": null,
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "LOCATION": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+Historical span files (`test3-natural-oasst1`, `test3-natural-sharegpt`, `test3-natural-wildchat`): the frozen test-2 SS (FREEZE.json, e2c8fa5); the silver-label candidates of test-3's natural pools were made from them.
+
+```
+{
+ "ADDRESS_MODE": "replace",
+ "ADDRESS_MODE_product": "auto",
+ "SERVICE_QUERY_DETECTION_ENABLED": true,
+ "detection_config": {
+  "address_shift_range": 1,
+  "detectors": [
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "pattern_scan",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "canonicaliser",
+    "options": {
+     "views": [
+      "worded",
+      "spelled",
+      "dates",
+      "folded",
+      "joined"
+     ]
+    },
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "en_core_web_lg",
+    "name": "entity_trace",
+    "options": {},
+    "revision": "3.8.0",
+    "stride": null,
+    "thresholds": {
+     "fallback": 0.75,
+     "high": 0.9,
+     "low": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": false,
+    "max_latency_ms": null,
+    "model": "dslim/distilbert-NER",
+    "name": "context_guard",
+    "options": {},
+    "revision": "dfa2838a127384aabb82ed7719e16dab84c42a2a",
+    "stride": null,
+    "thresholds": {
+     "accept": 0.7
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": "pii-tagger-dv3s-40k",
+    "name": "pii_tagger",
+    "options": {
+     "gate_above": 0.97
+    },
+    "revision": "sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    "stride": null,
+    "thresholds": {
+     "ADDRESS": 0.9,
+     "CREDENTIAL": 0.97,
+     "HANDLE": 0.95,
+     "ID": 0.95,
+     "LOCATION": 0.7,
+     "ORG": 0.7,
+     "PERSON": 0.7,
+     "PHONE": 0.95
+    },
+    "window": null
+   },
+   {
+    "device": -1,
+    "enabled": true,
+    "max_latency_ms": null,
+    "model": null,
+    "name": "structural",
+    "options": {},
+    "revision": null,
+    "stride": null,
+    "thresholds": {},
+    "window": null
+   }
+  ],
+  "gate": true,
+  "gate_bypass": [],
+  "preset": "balanced",
+  "service_queries": true,
+  "source_priority": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger",
+   "context_guard",
+   "entity_trace"
+  ],
+  "type_actions": {
+   "ADDRESS": "replace"
+  },
+  "type_conflicts": {
+   "LOCATION|ORG": "score",
+   "LOCATION|PERSON": "score",
+   "ORG|PERSON": "score"
+  },
+  "type_sources": {
+   "ADDRESS": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "AGE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "CREDENTIAL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "DATE_OF_BIRTH": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "EMAIL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "GENDER": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "HANDLE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "ID": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "LOCATION": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard",
+    "entity_trace"
+   ],
+   "NETWORK": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ],
+   "ORG": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "OTHER": [
+    "*"
+   ],
+   "PERSON": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger",
+    "context_guard"
+   ],
+   "PHONE": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural",
+    "pii_tagger"
+   ],
+   "URL": [
+    "pattern_scan",
+    "canonicaliser",
+    "structural"
+   ]
+  }
+ },
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+ "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+ "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed), config=benchmark())",
+ "versions": {
+  "faker": "40.15.0",
+  "python": "3.13.2",
+  "spacy": "3.8.14",
+  "surrogateshield": "2.1.0",
+  "torch": "2.12.0",
+  "transformers": "5.8.1"
+ }
+}
+```
+
+## Silver labels
+
+```
+{
+ "annotator": "claude-sonnet-4-6",
+ "literal_rule_arms": [
+  "ss",
+  "presidio_default",
+  "gliner_pii"
+ ],
+ "pooled_arms": [
+  "ss",
+  "presidio_default",
+  "presidio_faker",
+  "presidio_transformers",
+  "llm_guard",
+  "gliner_pii"
+ ],
+ "prompt_version": "bebc6e281801fa74"
+}
+```
+
+## Frozen files (SHA-256)
+
+| file | SHA-256 |
+|---|---|
+| `bench/realdata/oasst1/dev.jsonl` | `b6983c89543fcb84309df906b167791dd0d82bac0bf057870ae64e6875ad252a` |
+| `bench/realdata/oasst1/labels.jsonl` | `cd9fa676fc0aa67b3d1f080be0b675d73f55d55bed7f506b435650dba4c66216` |
+| `bench/realdata/oasst1/pii_free.json` | `67ba6132db47b73ee2a04c9b99148f368f3a8a1c4967eddd2ae4de55c9bc7456` |
+| `bench/realdata/oasst1/pool.jsonl` | `0573dfdfdc2ace6524d3979b5cbe16f0f528892472cf505cbcbb01b127482dc0` |
+| `bench/realdata/oasst1/test.jsonl` | `5eba0434b501f533a11a2768d318aa146a70b7791d58b3d477a2b5836ef02200` |
+| `bench/realdata/sharegpt/dev.jsonl` | `3171698ba811046e2cc5303fbd98b9e333125f5e502abce5442bcad70e0eb108` |
+| `bench/realdata/sharegpt/labels.jsonl` | `4490f4d3a7cc39a8ccbb4d638fad2cdb06fe0092759cde1b61bea3361357e060` |
+| `bench/realdata/sharegpt/pii_free.json` | `2207dd6db4f83e3e2d705bb7d5c83aee61ea2ecbe3c2122e09fff851ea37691b` |
+| `bench/realdata/sharegpt/pool.jsonl` | `f9d7636ffeb99beba8487fdbf3bf39d94f877823f86c42aa945723798dc2564d` |
+| `bench/realdata/sharegpt/test.jsonl` | `7686a2a4e2117aafd99071786d8ffa7022e1408b8f56ce087f37af5f8fdac37f` |
+| `bench/realdata/test2/oasst1/labels.jsonl` | `88fd8cc643fbc6c64982e90d5e876e941ba41e0486f5888e9b4ca4162f1884bf` |
+| `bench/realdata/test2/oasst1/pii_free.json` | `5b61fddc18bda7e0a0cc069ec0d79e7aa64d61bd9d5b0efc1ef8910cfcfddf51` |
+| `bench/realdata/test2/oasst1/pool.jsonl` | `6d832cbb932734f3d48823adbbe818ebb47618de151fc89d007f2d5ddf229e33` |
+| `bench/realdata/test2/oasst1/test2.jsonl` | `e109eb543ee4451c3d24f4f8fbd91a9a21e2da56038399ec41260edf840eec4b` |
+| `bench/realdata/test2/sharegpt/labels.jsonl` | `08eeaa2905030a649c99063c697ca8e6355368778f9c4f60334b87e66f49166c` |
+| `bench/realdata/test2/sharegpt/pii_free.json` | `a16ca7a880da4def1f906a80ba09b2baa33beed6d24bfd1c78de093239cf8cb2` |
+| `bench/realdata/test2/sharegpt/pool.jsonl` | `9c5ee4a77d2cee6aaf9e4071ce5073131fd845802e1e2174ef997685c1adc8f8` |
+| `bench/realdata/test2/sharegpt/test2.jsonl` | `1c4a08f66cfc0eeceadc404103899896026f7e122f72058d3b7a2d7161a64704` |
+| `bench/realdata/test2/wildchat/labels.jsonl` | `3e5adb6498c67a9c46d82970d57db3424c84ef46f13611b2aa225724e526036f` |
+| `bench/realdata/test2/wildchat/pii_free.json` | `130cef94435b569f819ba772f8bbd14772e701f6c4f473d1a50fe7f34c344a15` |
+| `bench/realdata/test2/wildchat/pool.jsonl` | `620fa2417c307affab9c3a52ef15eb095ea1db78be5ef4b9a3c9216fcd863359` |
+| `bench/realdata/test2/wildchat/test2.jsonl` | `83556c7767e357603fbd0ba985ee5da451105671c30f8cc0340a4a9e4d91eb2c` |
+| `bench/realdata/test3/oasst1/labels.jsonl` | `2f9d0ee11bfbee97dceaa4cb94c68018b6b1e40083c3470315f7e2e7f5aafcbb` |
+| `bench/realdata/test3/oasst1/pii_free.json` | `80099824dc3f6ccdc959dbbedcf8ab3f5f43c25809b893fb12fcdafa95fd6172` |
+| `bench/realdata/test3/oasst1/pool.jsonl` | `1eb00411379bc4b3794c121ae75205df81c63319e5d987ea8bc4f744ae87d4ce` |
+| `bench/realdata/test3/oasst1/test3.jsonl` | `8d5871c3ab81cfbab574e61160b3cef59d9e63819990ba290f647ca4eb98c7bb` |
+| `bench/realdata/test3/sharegpt/labels.jsonl` | `19a52f18c29ade3f3b024ad001bc3a5ab0e5e33e6c82608922a1a54f1c6144f7` |
+| `bench/realdata/test3/sharegpt/pii_free.json` | `305542a2ceeb4b84e0e3d9d68c509210a12152daacabaa35f83a0d13b715a003` |
+| `bench/realdata/test3/sharegpt/pool.jsonl` | `d38ec67639652254e1f3f4974ea2a0c50aa07a7ad65e29288497c52764c1a3ba` |
+| `bench/realdata/test3/sharegpt/test3.jsonl` | `0d0f23056e7d8a24f4374bb8f86b85ab6692a20175ab5e74b701d86387e58c6e` |
+| `bench/realdata/test3/wildchat/labels.jsonl` | `ce95981fc75a904251e8eb6289b69d818c0b774d48c21308080c52a464515021` |
+| `bench/realdata/test3/wildchat/pii_free.json` | `59c824825e3aea9c0890bae6504da49f1da55ae699884b03903e91034d7f336f` |
+| `bench/realdata/test3/wildchat/pool.jsonl` | `c55106aeb663df3159e94bcc72c3cfa24d4df7a0c4b171379a82e6208e3d7434` |
+| `bench/realdata/test3/wildchat/test3.jsonl` | `aea379679357bc2bec769a95422bb2fbc1d7a4dc840fa0cb64514ccf66e2e682` |
+| `bench/realdata/wildchat/dev.jsonl` | `de853c7174b008199bd8fd6b7bd05a5654908b99b71a6f94f9b0c638c43a91cf` |
+| `bench/realdata/wildchat/labels.jsonl` | `8e2669d041deb6e91de36e49a1b44cb112cf9853c0b5b5682320bfa4974b628f` |
+| `bench/realdata/wildchat/pii_free.json` | `fd096fe8325d5dd1a54dab3c14dc512069e7772790f2914d56efb1ea190b124d` |
+| `bench/realdata/wildchat/pool.jsonl` | `912b55e509227bdf0a2c6442352ac668d44153febd369d3930489c0154843c9f` |
+| `bench/realdata/wildchat/test.jsonl` | `e6b6ca5cdb74eb4fd481fe80e770e86e980cc83559a14d2024d44db0d2bc9049` |

@@ -8,8 +8,30 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.rule import Rule
 from rich.text import Text
-from rich import box
-from rich.table import Table
+
+# Dashboard actions: (key, name, description, shown only with saved conversations).
+# The main menu and the help screen both render this list (audit I28).
+MENU_ITEMS = [
+    ("N",       "New conversation",       "Start a fresh chat with PII protection active", False),
+    ("R",       "New conversation + RAG", "Chat grounded in your indexed documents", False),
+    ("P",       "PII Finder",             "Test detection on any text — zero API calls", False),
+    ("1 – 9",   "Open conversation",      "Resume a saved conversation by number", True),
+    ("D1 – D9", "Delete conversation",    "Permanently remove a saved conversation", True),
+    ("J",       "JSON Test",              "Batch-process a JSON file of questions through the pipeline", False),
+    ("E",       "Evaluation",             "Score pipeline quality against a ground-truth key file", False),
+    ("A",       "Attacker Experiment",    "Ask a second model to recover the originals from sent text", False),
+    ("S",       "Settings",               "Configure LLM provider, detailed view, Presidio comparison", False),
+    ("H",       "Help",                   "Show this screen", False),
+    ("Q",       "Quit",                   "Exit SurrogateShield", False),
+]
+
+NER_TYPES = "PERSON · ORG · GPE · LOC · FAC"
+PATTERN_TYPES = (
+    "email · phone (US, UK, international) · SSN · address · ZIP / UK postcode · "
+    "date of birth · age · credit card · IBAN · bank routing number · passport · "
+    "driver licence · ID and account numbers · licence plate · VIN · IP / MAC address · "
+    "crypto wallet · API key · password / PIN / code · handle · personal URL · hostname"
+)
 
 
 def print_help(console: Console) -> None:
@@ -23,7 +45,8 @@ def print_help(console: Console) -> None:
                 "real values are restored in the response. ",
                 "dim",
             ),
-            ("Your data never leaves your device.", "bold white"),
+            ("On real chat text it let 0.8% of personal values through (GLiNER-PII 9.1%, Presidio 31.6%); "
+             "where it trailed is one line under Limitations in the README.", "bold white"),
         ),
         border_style="blue",
         padding=(1, 2),
@@ -35,11 +58,12 @@ def print_help(console: Console) -> None:
     console.print()
     stages = [
         ("PatternScan",    "Regex — SSNs, emails, phones, credit cards, API keys"),
-        ("EntityTrace",    "spaCy NER — names, places, organisations"),
-        ("ContextGuard",   "DistilBERT NER — borderline / ambiguous entities"),
+        ("EntityTrace",    "spaCy NER — places (names too in the classic preset)"),
+        ("ContextGuard",   "DistilBERT NER — off by default; on in strict and classic"),
+        ("PIITagger",      "DeBERTa tagger — names, organisations, places; from Hugging Face"),
         ("MimicGen",       "Generates realistic fake values via Faker"),
         ("ShadowMap",      "AES-256-GCM encrypted surrogate map — stays on device"),
-        ("LLM API",        "Receives surrogates only — real values never transmitted"),
+        ("LLM API",        "Receives surrogates for every detected value"),
         ("ResolvePass",    "Swaps surrogate values back to real values in the response"),
     ]
     for i, (name, desc) in enumerate(stages, 1):
@@ -55,19 +79,7 @@ def print_help(console: Console) -> None:
     # ── Menu options ──────────────────────────────────────────────────────────
     console.print(Rule("[bold blue]Menu Options[/bold blue]", style="blue"))
     console.print()
-    menu_items = [
-        ("N",      "New conversation",               "Start a fresh chat with PII protection active"),
-        ("R",      "New conversation + RAG",          "Chat grounded in your indexed documents"),
-        ("P",      "PII Finder",                      "Test detection on any text — zero API calls"),
-        ("1 – 9",  "Open conversation",               "Resume a saved conversation by number"),
-        ("D1 – D9","Delete conversation",             "Permanently remove a saved conversation"),
-        ("J",      "JSON Test",                       "Batch-process a JSON file of questions through the pipeline"),
-        ("E",      "Evaluation",                      "Score pipeline quality against a ground-truth key file"),
-        ("S",      "Settings",                        "Configure LLM provider, detailed view, Presidio comparison"),
-        ("H",      "Help",                            "Show this screen"),
-        ("Q",      "Quit",                            "Exit SurrogateShield"),
-    ]
-    for key, name, desc in menu_items:
+    for key, name, desc, _ in MENU_ITEMS:
         console.print(
             f"  [bold blue]{key:<8}[/bold blue]"
             f"  [white]{name:<26}[/white]"
@@ -78,10 +90,8 @@ def print_help(console: Console) -> None:
     # ── PII types ─────────────────────────────────────────────────────────────
     console.print(Rule("[bold blue]PII Types Detected[/bold blue]", style="blue"))
     console.print()
-    ner_types     = "PERSON · ORG · GPE · LOC · FAC"
-    pattern_types = "email · phone · SSN · address · date-of-birth · credit card · IP · API key · postal code"
-    console.print(f"  [white]NER (spaCy / DistilBERT)[/white]   [dim]{ner_types}[/dim]")
-    console.print(f"  [white]Pattern (regex)          [/white]   [dim]{pattern_types}[/dim]")
+    console.print(f"  [white]NER (PIITagger / spaCy)  [/white]   [dim]{NER_TYPES}[/dim]")
+    console.print(f"  [white]Pattern and structural   [/white]   [dim]{PATTERN_TYPES}[/dim]")
     console.print()
 
     # ── RAG & JSON testing ────────────────────────────────────────────────────

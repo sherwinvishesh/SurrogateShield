@@ -1,0 +1,19 @@
+{
+ "arm": "presidio_default",
+ "command": ".venv/bin/python -m bench.arms.presidio_default --in bench/realdata/build/score/dev/sharegpt.jsonl --out bench/realdata/build/spans/presidio_default/dev-sharegpt.jsonl",
+ "config": {
+  "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+  "overlap_resolution": "longest span, then highest score",
+  "presidio_analyzer_version": "2.2.362",
+  "replacement": "[ENTITY_TYPE] placeholder (presidio/redact.py)",
+  "score_threshold": 0.4
+ },
+ "edits": 487,
+ "input": "bench/realdata/build/score/dev/sharegpt.jsonl",
+ "input_sha256": "b0267999596895278df73195feb3bb6c2b3cf3b2b8631972ceec919fde3f2db8",
+ "load_seconds": 0.0,
+ "messages": 229,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

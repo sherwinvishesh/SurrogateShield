@@ -8,17 +8,35 @@ __pycache__/
 
 # ── Virtual environments ───────────────────────────────────────────
 .venv/
+.venv-baselines/
 venv/
 env/
 ENV/
 .env
 
 # ── SurrogateShield runtime data ──────────────────────────────────
-# Encrypted ShadowMap files (contain derived key material)
+# Encrypted ShadowMap files, wherever a storage_dir puts them
+*.shadowmap
 conversations/*.shadowmap
 
 # Conversation history (may contain sanitised PII surrogates)
-conversations/*.json
+conversations/
+
+# Experiment outputs: answers files hold the ORIGINAL questions, surrogate
+# maps (original → surrogate) and responses in clear text (audit I25). The
+# synthetic artefacts shipped with the paper stay tracked; new runs are not.
+experiment/*_answers*.json
+experiment/*_eval_results*.json
+experiment/*_Attacker_Experiment*.json
+experiment/*.tmp
+experiment/phase8/
+# Real-data run (PROMPT_FOR_OPUS_NEW): raw downloads and rebuilt natural-slice
+# text hold real people's prompts; live outputs hold prompts and answers.
+bench/realdata/raw/
+bench/realdata/build/
+experiment/realdata/
+bench/realdata/human_check*.jsonl
+*.json.tmp
 
 # Device secret — NEVER commit this
 ~/.surrogateshield/

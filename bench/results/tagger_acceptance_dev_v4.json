@@ -1,0 +1,440 @@
+{
+ "acceptance": {
+  "by_type": {
+   "ADDRESS": {
+    "bound": 0.0619,
+    "ok": true,
+    "rate": 0.0
+   },
+   "AGE": {
+    "bound": 0.02,
+    "ok": true,
+    "rate": 0.0101
+   },
+   "CREDENTIAL": {
+    "bound": 0.0874,
+    "ok": true,
+    "rate": 0.0
+   },
+   "DATE_OF_BIRTH": {
+    "bound": 0.0588,
+    "ok": true,
+    "rate": 0.0
+   },
+   "EMAIL": {
+    "bound": 0.0265,
+    "ok": true,
+    "rate": 0.0
+   },
+   "HANDLE": {
+    "bound": 0.0291,
+    "ok": true,
+    "rate": 0.0
+   },
+   "ID": {
+    "bound": 0.2815,
+    "ok": true,
+    "rate": 0.0
+   },
+   "LOCATION": {
+    "bound": 0.02,
+    "ok": true,
+    "rate": 0.0086
+   },
+   "NETWORK": {
+    "bound": 0.0982,
+    "ok": true,
+    "rate": 0.0
+   },
+   "ORG": {
+    "bound": 0.0909,
+    "ok": true,
+    "rate": 0.042
+   },
+   "PERSON": {
+    "bound": 0.02,
+    "ok": true,
+    "rate": 0.0126
+   },
+   "PHONE": {
+    "bound": 0.02,
+    "ok": true,
+    "rate": 0.0078
+   },
+   "URL": {
+    "bound": 0.4685,
+    "ok": true,
+    "rate": 0.009
+   }
+  },
+  "checks": {
+   "pooled": true,
+   "spurious": true,
+   "types": true
+  },
+  "ok": true
+ },
+ "command": "... -m bench.tagger.accept bench/tagger/build/eval/dv3s-40k-dev-v4.json bench/tagger/build/eval/dv3s-40k-devlarge-val-v4.json --out bench/results/tagger_acceptance_dev_v4.json",
+ "config": {
+  "as_configured": true,
+  "code": "c4e3e9d4d87d57a6cac5a3d545fa2e4ccdea7e884f4dc293c059168b405c1b88",
+  "extra": {},
+  "file": "bench/tagger/build/eval/dv3s-40k/ss-dev-v4.config.json",
+  "hash": "a1abaa92142b0db9",
+  "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+  "thresholds": {},
+  "variant": "v4"
+ },
+ "inputs": [
+  {
+   "acceptance": {
+    "by_type": {
+     "ADDRESS": {
+      "bound": 0.1,
+      "ok": true,
+      "rate": 0.0
+     },
+     "AGE": {
+      "bound": 0.02,
+      "ok": false,
+      "rate": 0.0303
+     },
+     "CREDENTIAL": {
+      "bound": 0.0938,
+      "ok": true,
+      "rate": 0.0
+     },
+     "DATE_OF_BIRTH": {
+      "bound": 0.0857,
+      "ok": true,
+      "rate": 0.0
+     },
+     "EMAIL": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0
+     },
+     "HANDLE": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0
+     },
+     "ID": {
+      "bound": 0.2453,
+      "ok": true,
+      "rate": 0.0
+     },
+     "LOCATION": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0
+     },
+     "NETWORK": {
+      "bound": 0.1081,
+      "ok": true,
+      "rate": 0.0
+     },
+     "ORG": {
+      "bound": 0.1364,
+      "ok": true,
+      "rate": 0.0682
+     },
+     "PERSON": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0197
+     },
+     "PHONE": {
+      "bound": 0.02,
+      "ok": false,
+      "rate": 0.0213
+     },
+     "URL": {
+      "bound": 0.375,
+      "ok": true,
+      "rate": 0.025
+     }
+    },
+    "checks": {
+     "pooled": true,
+     "spurious": true,
+     "types": false
+    },
+    "ok": false
+   },
+   "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3s-40k --split dev --ss --variant v4 --as-configured --out bench/tagger/build/eval/dv3s-40k-dev-v4.json",
+   "file": "bench/tagger/build/eval/dv3s-40k-dev-v4.json",
+   "git": {
+    "commit": "91e1ff68d99d17f0135074d19737bfc0fe5847ca",
+    "modified": []
+   },
+   "split": "dev"
+  },
+  {
+   "acceptance": {
+    "by_type": {
+     "ADDRESS": {
+      "bound": 0.0448,
+      "ok": true,
+      "rate": 0.0
+     },
+     "AGE": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0
+     },
+     "CREDENTIAL": {
+      "bound": 0.0845,
+      "ok": true,
+      "rate": 0.0
+     },
+     "DATE_OF_BIRTH": {
+      "bound": 0.0448,
+      "ok": true,
+      "rate": 0.0
+     },
+     "EMAIL": {
+      "bound": 0.0312,
+      "ok": true,
+      "rate": 0.0
+     },
+     "HANDLE": {
+      "bound": 0.0455,
+      "ok": true,
+      "rate": 0.0
+     },
+     "ID": {
+      "bound": 0.3049,
+      "ok": true,
+      "rate": 0.0
+     },
+     "LOCATION": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0119
+     },
+     "NETWORK": {
+      "bound": 0.0933,
+      "ok": true,
+      "rate": 0.0
+     },
+     "ORG": {
+      "bound": 0.0707,
+      "ok": true,
+      "rate": 0.0303
+     },
+     "PERSON": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0093
+     },
+     "PHONE": {
+      "bound": 0.02,
+      "ok": true,
+      "rate": 0.0
+     },
+     "URL": {
+      "bound": 0.5211,
+      "ok": true,
+      "rate": 0.0
+     }
+    },
+    "checks": {
+     "pooled": true,
+     "spurious": true,
+     "types": true
+    },
+    "ok": true
+   },
+   "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3s-40k --split devlarge --half val --ss --variant v4 --as-configured --out bench/tagger/build/eval/dv3s-40k-devlarge-val-v4.json",
+   "file": "bench/tagger/build/eval/dv3s-40k-devlarge-val-v4.json",
+   "git": {
+    "commit": "91e1ff68d99d17f0135074d19737bfc0fe5847ca",
+    "modified": []
+   },
+   "split": "devlarge-val"
+  }
+ ],
+ "model": {
+  "data_sha256": "45385de32536c41bd4ab2c4c2523997c66febcf2af5179c429e83b6ad614d046",
+  "encoder": "deberta-v3-small",
+  "licence": "MIT",
+  "path": "bench/tagger/build/models/dv3s-40k",
+  "revision": "a36c739020e01763fe789b4b85e2df55d6180012",
+  "weights_sha256": "f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173"
+ },
+ "pooled": {
+  "gliner_pii": {
+   "leak": {
+    "k": 185,
+    "n": 1876,
+    "rate": 0.0986,
+    "wilson95": [
+     0.0859,
+     0.1129
+    ]
+   },
+   "leaked_by_type": {
+    "ADDRESS": 7,
+    "AGE": 0,
+    "CREDENTIAL": 12,
+    "DATE_OF_BIRTH": 7,
+    "EMAIL": 5,
+    "HANDLE": 11,
+    "ID": 45,
+    "LOCATION": 4,
+    "NETWORK": 18,
+    "ORG": 19,
+    "PERSON": 4,
+    "PHONE": 0,
+    "URL": 53
+   },
+   "natural_edits": 3639,
+   "natural_spurious": 3244,
+   "values_by_type": {
+    "ADDRESS": 97,
+    "AGE": 99,
+    "CREDENTIAL": 103,
+    "DATE_OF_BIRTH": 102,
+    "EMAIL": 151,
+    "HANDLE": 103,
+    "ID": 135,
+    "LOCATION": 116,
+    "NETWORK": 112,
+    "ORG": 143,
+    "PERSON": 476,
+    "PHONE": 128,
+    "URL": 111
+   }
+  },
+  "gliner_pii_tuned": {
+   "leak": {
+    "k": 144,
+    "n": 1876,
+    "rate": 0.0768,
+    "wilson95": [
+     0.0656,
+     0.0897
+    ]
+   },
+   "leaked_by_type": {
+    "ADDRESS": 6,
+    "AGE": 0,
+    "CREDENTIAL": 9,
+    "DATE_OF_BIRTH": 6,
+    "EMAIL": 4,
+    "HANDLE": 3,
+    "ID": 38,
+    "LOCATION": 1,
+    "NETWORK": 11,
+    "ORG": 13,
+    "PERSON": 1,
+    "PHONE": 0,
+    "URL": 52
+   },
+   "natural_edits": 4589,
+   "natural_spurious": 4180,
+   "values_by_type": {
+    "ADDRESS": 97,
+    "AGE": 99,
+    "CREDENTIAL": 103,
+    "DATE_OF_BIRTH": 102,
+    "EMAIL": 151,
+    "HANDLE": 103,
+    "ID": 135,
+    "LOCATION": 116,
+    "NETWORK": 112,
+    "ORG": 143,
+    "PERSON": 476,
+    "PHONE": 128,
+    "URL": 111
+   }
+  },
+  "ss": {
+   "leak": {
+    "k": 39,
+    "n": 1876,
+    "rate": 0.0208,
+    "wilson95": [
+     0.0152,
+     0.0283
+    ]
+   },
+   "leaked_by_type": {
+    "ADDRESS": 0,
+    "AGE": 1,
+    "CREDENTIAL": 2,
+    "DATE_OF_BIRTH": 0,
+    "EMAIL": 0,
+    "HANDLE": 4,
+    "ID": 5,
+    "LOCATION": 4,
+    "NETWORK": 0,
+    "ORG": 7,
+    "PERSON": 13,
+    "PHONE": 2,
+    "URL": 1
+   },
+   "natural_edits": 1547,
+   "natural_spurious": 1237,
+   "values_by_type": {
+    "ADDRESS": 97,
+    "AGE": 99,
+    "CREDENTIAL": 103,
+    "DATE_OF_BIRTH": 102,
+    "EMAIL": 151,
+    "HANDLE": 103,
+    "ID": 135,
+    "LOCATION": 116,
+    "NETWORK": 112,
+    "ORG": 143,
+    "PERSON": 476,
+    "PHONE": 128,
+    "URL": 111
+   }
+  },
+  "ss_tagger": {
+   "leak": {
+    "k": 16,
+    "n": 1876,
+    "rate": 0.0085,
+    "wilson95": [
+     0.0053,
+     0.0138
+    ]
+   },
+   "leaked_by_type": {
+    "ADDRESS": 0,
+    "AGE": 1,
+    "CREDENTIAL": 0,
+    "DATE_OF_BIRTH": 0,
+    "EMAIL": 0,
+    "HANDLE": 0,
+    "ID": 0,
+    "LOCATION": 1,
+    "NETWORK": 0,
+    "ORG": 6,
+    "PERSON": 6,
+    "PHONE": 1,
+    "URL": 1
+   },
+   "natural_edits": 744,
+   "natural_spurious": 550,
+   "values_by_type": {
+    "ADDRESS": 97,
+    "AGE": 99,
+    "CREDENTIAL": 103,
+    "DATE_OF_BIRTH": 102,
+    "EMAIL": 151,
+    "HANDLE": 103,
+    "ID": 135,
+    "LOCATION": 116,
+    "NETWORK": 112,
+    "ORG": 143,
+    "PERSON": 476,
+    "PHONE": 128,
+    "URL": 111
+   }
+  }
+ }
+}

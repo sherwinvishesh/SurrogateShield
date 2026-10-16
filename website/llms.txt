@@ -1,0 +1,7 @@
+# SurrogateShield
+
+> A privacy proxy for LLMs. It replaces the personal values in a message with realistic surrogates before the message reaches the model, and puts the real values back in the answer.
+
+## Docs
+
+- [Full documentation (Markdown)](docs.md): everything on docs.html in one file: install, quick start, the Python library API, the dashboard, configuration, how it works, and the benchmark results.

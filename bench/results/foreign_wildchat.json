@@ -1,0 +1,558 @@
+{
+ "command": "python -m bench.realdata.foreign --out bench/results/foreign_wildchat.json",
+ "detection_config_hash": "a1abaa92142b0db91ad9578a953b2ffb5218023e18eaf7e60c651d269cb4d96b",
+ "filters": {
+  "excluded_collections": [
+   "test1",
+   "test2",
+   "test3"
+  ],
+  "first_hash_only": true,
+  "toxic": false,
+  "words": [
+   15,
+   400
+  ]
+ },
+ "git": {
+  "commit": "45754af15364451c727dcd5e8b60a332640d3e56",
+  "modified": []
+ },
+ "results": {
+  "Dutch": {
+   "edited_messages": {
+    "k": 15,
+    "n": 92,
+    "rate": 0.163,
+    "wilson95": [
+     0.1014,
+     0.2517
+    ]
+   },
+   "edits": 31,
+   "edits_per_message": 0.337,
+   "entities_by_source": {
+    "ner": 2,
+    "pattern": 8,
+    "pii_tagger": 17,
+    "structural": 2
+   },
+   "entities_by_source_script": {
+    "ner/latin": 2,
+    "pattern/latin": 7,
+    "pattern/other": 1,
+    "pii_tagger/latin": 16,
+    "pii_tagger/other": 1,
+    "structural/latin": 2
+   },
+   "entities_by_type": {
+    "GPE": 4,
+    "ORG": 2,
+    "PERSON": 13,
+    "address": 4,
+    "age": 1,
+    "handle": 5
+   },
+   "foreign_fragment_drops": 3,
+   "gate_guess": {
+    "fr": 1,
+    "nl": 81,
+    "none": 10
+   },
+   "gate_guess_right": {
+    "k": 81,
+    "n": 92,
+    "rate": 0.8804,
+    "wilson95": [
+     0.7985,
+     0.9319
+    ]
+   },
+   "gate_reads": "nl",
+   "messages": 92,
+   "messages_with_foreign_fragment_drop": {
+    "k": 3,
+    "n": 92,
+    "rate": 0.0326,
+    "wilson95": [
+     0.0112,
+     0.0915
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 4,
+    "untied": 29
+   },
+   "refused": 0
+  },
+  "English": {
+   "edited_messages": {
+    "k": 23,
+    "n": 100,
+    "rate": 0.23,
+    "wilson95": [
+     0.1584,
+     0.3215
+    ]
+   },
+   "edits": 147,
+   "edits_per_message": 1.47,
+   "entities_by_source": {
+    "ner": 8,
+    "pattern": 9,
+    "pii_tagger": 21,
+    "structural": 13
+   },
+   "entities_by_source_script": {
+    "ner/latin": 8,
+    "pattern/latin": 9,
+    "pii_tagger/latin": 21,
+    "structural/latin": 13
+   },
+   "entities_by_type": {
+    "GPE": 11,
+    "ORG": 8,
+    "PERSON": 25,
+    "age": 1,
+    "credential": 1,
+    "dob": 1,
+    "handle": 3,
+    "hostname": 1
+   },
+   "foreign_fragment_drops": 0,
+   "gate_guess": {
+    "fr": 1,
+    "none": 99
+   },
+   "gate_guess_right": {
+    "k": 99,
+    "n": 100,
+    "rate": 0.99,
+    "wilson95": [
+     0.9455,
+     0.9982
+    ]
+   },
+   "gate_reads": null,
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 0,
+    "n": 100,
+    "rate": 0.0,
+    "wilson95": [
+     0.0,
+     0.037
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 12,
+    "public_org": 1,
+    "untied": 27
+   },
+   "refused": 0
+  },
+  "French": {
+   "edited_messages": {
+    "k": 13,
+    "n": 100,
+    "rate": 0.13,
+    "wilson95": [
+     0.0776,
+     0.2098
+    ]
+   },
+   "edits": 34,
+   "edits_per_message": 0.34,
+   "entities_by_source": {
+    "ner": 2,
+    "pattern": 12,
+    "pii_tagger": 13,
+    "structural": 5
+   },
+   "entities_by_source_script": {
+    "ner/latin": 2,
+    "pattern/latin": 12,
+    "pii_tagger/latin": 13,
+    "structural/latin": 5
+   },
+   "entities_by_type": {
+    "GPE": 3,
+    "ORG": 3,
+    "PERSON": 15,
+    "age": 5,
+    "credential": 1,
+    "dob": 1,
+    "handle": 3,
+    "postcode_uk": 1
+   },
+   "foreign_fragment_drops": 4,
+   "gate_guess": {
+    "fr": 94,
+    "none": 6
+   },
+   "gate_guess_right": {
+    "k": 94,
+    "n": 100,
+    "rate": 0.94,
+    "wilson95": [
+     0.8752,
+     0.9722
+    ]
+   },
+   "gate_reads": "fr",
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 4,
+    "n": 100,
+    "rate": 0.04,
+    "wilson95": [
+     0.0157,
+     0.0984
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 6,
+    "untied": 16
+   },
+   "refused": 0
+  },
+  "German": {
+   "edited_messages": {
+    "k": 26,
+    "n": 100,
+    "rate": 0.26,
+    "wilson95": [
+     0.184,
+     0.3537
+    ]
+   },
+   "edits": 76,
+   "edits_per_message": 0.76,
+   "entities_by_source": {
+    "ner": 15,
+    "pattern": 21,
+    "pii_tagger": 22,
+    "structural": 12
+   },
+   "entities_by_source_script": {
+    "ner/latin": 15,
+    "pattern/latin": 18,
+    "pattern/none": 3,
+    "pii_tagger/latin": 22,
+    "structural/latin": 12
+   },
+   "entities_by_type": {
+    "GPE": 18,
+    "ORG": 3,
+    "PERSON": 39,
+    "credential": 7,
+    "dob": 3
+   },
+   "foreign_fragment_drops": 37,
+   "gate_guess": {
+    "de": 79,
+    "none": 21
+   },
+   "gate_guess_right": {
+    "k": 79,
+    "n": 100,
+    "rate": 0.79,
+    "wilson95": [
+     0.7002,
+     0.8583
+    ]
+   },
+   "gate_reads": "de",
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 25,
+    "n": 100,
+    "rate": 0.25,
+    "wilson95": [
+     0.1755,
+     0.343
+    ]
+   },
+   "model_drops_by_rule": {
+    "common_noun": 119,
+    "junk": 43,
+    "untied": 89
+   },
+   "refused": 0
+  },
+  "Italian": {
+   "edited_messages": {
+    "k": 7,
+    "n": 100,
+    "rate": 0.07,
+    "wilson95": [
+     0.0343,
+     0.1375
+    ]
+   },
+   "edits": 18,
+   "edits_per_message": 0.18,
+   "entities_by_source": {
+    "ner": 1,
+    "pattern": 2,
+    "pii_tagger": 8,
+    "structural": 2
+   },
+   "entities_by_source_script": {
+    "ner/latin": 1,
+    "pattern/latin": 1,
+    "pattern/none": 1,
+    "pii_tagger/latin": 8,
+    "structural/latin": 2
+   },
+   "entities_by_type": {
+    "GPE": 2,
+    "ORG": 4,
+    "PERSON": 6,
+    "dob": 1
+   },
+   "foreign_fragment_drops": 17,
+   "gate_guess": {
+    "es": 1,
+    "it": 94,
+    "none": 5
+   },
+   "gate_guess_right": {
+    "k": 94,
+    "n": 100,
+    "rate": 0.94,
+    "wilson95": [
+     0.8752,
+     0.9722
+    ]
+   },
+   "gate_reads": "it",
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 12,
+    "n": 100,
+    "rate": 0.12,
+    "wilson95": [
+     0.07,
+     0.1981
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 21,
+    "public_org": 1,
+    "untied": 25
+   },
+   "refused": 0
+  },
+  "Portuguese": {
+   "edited_messages": {
+    "k": 20,
+    "n": 100,
+    "rate": 0.2,
+    "wilson95": [
+     0.1334,
+     0.2888
+    ]
+   },
+   "edits": 44,
+   "edits_per_message": 0.44,
+   "entities_by_source": {
+    "ner": 5,
+    "pattern": 8,
+    "pii_tagger": 20,
+    "structural": 3
+   },
+   "entities_by_source_script": {
+    "ner/latin": 5,
+    "pattern/latin": 7,
+    "pattern/none": 1,
+    "pii_tagger/latin": 19,
+    "pii_tagger/none": 1,
+    "structural/latin": 3
+   },
+   "entities_by_type": {
+    "GPE": 6,
+    "ORG": 5,
+    "PERSON": 12,
+    "address": 3,
+    "age": 6,
+    "id_number": 3,
+    "ip_address": 1
+   },
+   "foreign_fragment_drops": 4,
+   "gate_guess": {
+    "es": 1,
+    "nl": 1,
+    "none": 8,
+    "pt": 90
+   },
+   "gate_guess_right": {
+    "k": 90,
+    "n": 100,
+    "rate": 0.9,
+    "wilson95": [
+     0.8256,
+     0.9448
+    ]
+   },
+   "gate_reads": "pt",
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 4,
+    "n": 100,
+    "rate": 0.04,
+    "wilson95": [
+     0.0157,
+     0.0984
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 4,
+    "public_person": 1,
+    "untied": 21
+   },
+   "refused": 0
+  },
+  "Russian": {
+   "edited_messages": {
+    "k": 18,
+    "n": 100,
+    "rate": 0.18,
+    "wilson95": [
+     0.117,
+     0.2667
+    ]
+   },
+   "edits": 75,
+   "edits_per_message": 0.75,
+   "entities_by_source": {
+    "ner": 11,
+    "pattern": 8,
+    "pii_tagger": 35,
+    "structural": 7
+   },
+   "entities_by_source_script": {
+    "ner/cyrillic": 11,
+    "pattern/latin": 4,
+    "pattern/none": 4,
+    "pii_tagger/cyrillic": 29,
+    "pii_tagger/latin": 5,
+    "pii_tagger/mixed": 1,
+    "structural/cyrillic": 5,
+    "structural/latin": 2
+   },
+   "entities_by_type": {
+    "GPE": 19,
+    "ORG": 7,
+    "PERSON": 28,
+    "address": 1,
+    "dob": 4,
+    "handle": 2
+   },
+   "foreign_fragment_drops": 0,
+   "gate_guess": {
+    "none": 100
+   },
+   "gate_guess_right": {
+    "k": 100,
+    "n": 100,
+    "rate": 1.0,
+    "wilson95": [
+     0.963,
+     1.0
+    ]
+   },
+   "gate_reads": null,
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 0,
+    "n": 100,
+    "rate": 0.0,
+    "wilson95": [
+     0.0,
+     0.037
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 1,
+    "untied": 59
+   },
+   "refused": 0
+  },
+  "Spanish": {
+   "edited_messages": {
+    "k": 17,
+    "n": 100,
+    "rate": 0.17,
+    "wilson95": [
+     0.1089,
+     0.2555
+    ]
+   },
+   "edits": 34,
+   "edits_per_message": 0.34,
+   "entities_by_source": {
+    "ner": 8,
+    "pattern": 8,
+    "pii_tagger": 14,
+    "structural": 3
+   },
+   "entities_by_source_script": {
+    "ner/latin": 8,
+    "pattern/latin": 8,
+    "pii_tagger/latin": 14,
+    "structural/latin": 3
+   },
+   "entities_by_type": {
+    "GPE": 9,
+    "ORG": 4,
+    "PERSON": 10,
+    "age": 5,
+    "credential": 2,
+    "handle": 1,
+    "url": 2
+   },
+   "foreign_fragment_drops": 8,
+   "gate_guess": {
+    "es": 91,
+    "fr": 2,
+    "none": 7
+   },
+   "gate_guess_right": {
+    "k": 91,
+    "n": 100,
+    "rate": 0.91,
+    "wilson95": [
+     0.8377,
+     0.9519
+    ]
+   },
+   "gate_reads": "es",
+   "messages": 100,
+   "messages_with_foreign_fragment_drop": {
+    "k": 8,
+    "n": 100,
+    "rate": 0.08,
+    "wilson95": [
+     0.0411,
+     0.15
+    ]
+   },
+   "model_drops_by_rule": {
+    "junk": 8,
+    "untied": 25
+   },
+   "refused": 0
+  }
+ },
+ "sample_sha256": {
+  "Dutch": "7224bda1664e6a598c9f5200408004b9acc002349f91415962514e5511aa90ca",
+  "English": "29e87c9c949953c61afc16cfd587fc9a0ab7e191b7d682039b03928be41b6729",
+  "French": "cbf66f0501770170aeaafde154a0bdcd89c212428b4653cd94f684d198c05848",
+  "German": "3bf00233ca568b63f2ad721ec680556937999d2083c0ff7bf00c590b2a5fda14",
+  "Italian": "d90ce95ba6518079c8e6177dbdc34560c76d33a0915d7c48a5c08cc6771f3e9a",
+  "Portuguese": "c7c59897b0d391e518eb5925a9f33c3e6bc037fec99f7209aada28b7cbb161bd",
+  "Russian": "0b7a60bc444c6df4b93be063f8f9efd89ed1ccffd03137f472f7188c00e41527",
+  "Spanish": "ae22a05c501956d2107b4880e28d3aaedeabbca26c597ad757c838e8adc6bb80"
+ }
+}

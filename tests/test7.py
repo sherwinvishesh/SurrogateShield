@@ -11,7 +11,7 @@ Covers:
   2.  ShadowMap memory mode — update / get_all / flush with no disk I/O
   3.  ShadowMap persistent  — AES-256-GCM encrypt / decrypt round-trip
   4.  Response parser       — extract_text() for all four response formats
-  5.  State singletons      — cfg defaults, session reset, lazy initialisation
+  5.  Settings and sessions — cfg defaults, Session isolation
   6.  pipeline pii_off      — alias resolution and type-exclusion filtering
   7.  pipeline thresholds   — threshold parameters wired through correctly
   8.  Library ResolvePass   — fuzzy_threshold param, simplified interface
@@ -140,7 +140,9 @@ with tempfile.TemporaryDirectory() as tmpdir:
     map_path = os.path.join(tmpdir, f"{session_id}.shadowmap")
     key_path = os.path.join(tmpdir, f"{session_id}.key")
     check("Persistent mode creates .shadowmap file", os.path.exists(map_path))
-    check("Persistent mode creates .key file",       os.path.exists(key_path))
+    # audit I11: the key is the device secret under SURROGATESHIELD_HOME,
+    # never a file beside the ciphertext
+    check("Persistent mode writes no key beside the map", not os.path.exists(key_path))
 
     # File must be binary (encrypted), not plain JSON
     with open(map_path, "rb") as f:
@@ -148,10 +150,13 @@ with tempfile.TemporaryDirectory() as tmpdir:
     check("Shadowmap file is not plain JSON (encrypted)",
           b"SurrogatePerson" not in raw_bytes)
 
-    # Key file must be exactly 32 bytes, owner-only permissions
-    key_stat = os.stat(key_path)
-    check("Session key file is 32 bytes", key_stat.st_size == 32)
-    check("Session key file has 0o600 permissions",
+    # Map file is owner-only; device secret is 32 bytes, owner-only
+    from surrogateshield.core.storage.shadow_map import home as _ss_home
+    check("Shadowmap file has 0o600 permissions",
+          oct(os.stat(map_path).st_mode)[-3:] == "600")
+    key_stat = os.stat(_ss_home() / "device.key")
+    check("Device secret is 32 bytes", key_stat.st_size == 32)
+    check("Device secret has 0o600 permissions",
           oct(key_stat.st_mode)[-3:] == "600")
 
     # Round-trip: load from disk into fresh ShadowMap instance
@@ -167,7 +172,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
     sm2.flush()
     check("flush() clears in-memory mappings",      len(sm2) == 0)
     check("flush() deletes .shadowmap file",         not os.path.exists(map_path))
-    check("flush() deletes .key file",               not os.path.exists(key_path))
+    check("flush() leaves no key file",              not os.path.exists(key_path))
 
     # A fresh load after delete starts empty (graceful)
     sm3 = ShadowMap(session_id=session_id, storage_dir=tmpdir)
@@ -209,9 +214,8 @@ check("Anthropic-style response: content[0].text extracted",
 # Anthropic with empty content list → falls through gracefully
 class _AnthropicEmpty:
     content = []
-result_empty_content = extract_text(_AnthropicEmpty())
-check("Anthropic-style with empty content does not crash",
-      isinstance(result_empty_content, str))
+check("Anthropic-style with empty content gives ''",
+      extract_text(_AnthropicEmpty()) == "")
 
 # OpenAI style: .choices[0].message.content
 class _OAIMessage:
@@ -230,12 +234,16 @@ class _GeminiResponse:
 check("Gemini-style response: .text extracted",
       extract_text(_GeminiResponse()) == "Gemini says hello")
 
-# Fallback: unknown object with __str__
+# Unknown object / None → TypeError, never str(response) (audit I10)
 class _UnknownResponse:
     def __str__(self):
         return "unknown response text"
-check("Unknown response type falls back to str()",
-      extract_text(_UnknownResponse()) == "unknown response text")
+for _bad, _label in ((_UnknownResponse(), "Unknown response type"), (None, "None")):
+    try:
+        extract_text(_bad)
+        check(f"{_label} raises TypeError", False)
+    except TypeError:
+        check(f"{_label} raises TypeError", True)
 
 # Anthropic takes precedence over Gemini (both have .text via content block)
 # Verify Anthropic path fires when .content is a list
@@ -249,58 +257,33 @@ check("Anthropic path takes precedence over Gemini when .content is a list",
 
 
 # ─────────────────────────────────────────────────────────────
-# 5. STATE SINGLETONS — cfg and session
+# 5. SETTINGS AND SESSIONS — _state.cfg, Session
 # ─────────────────────────────────────────────────────────────
-print("\n[5] State singletons (_state.py)")
+print("\n[5] Settings (_state.py) and Session objects (session.py)")
 
-from surrogateshield._state import cfg, session, _Config, _Session
+from surrogateshield._state import cfg, Config
+from surrogateshield.session import Session
 
 # cfg defaults
-check("cfg.detailed_view defaults to True",              cfg.detailed_view is True)
+check("cfg.detailed_view defaults to False",             cfg.detailed_view is False)
 check("cfg.pii_mem defaults to 'temp'",                  cfg.pii_mem == "temp")
 check("cfg.pii_off defaults to []",                      cfg.pii_off == [])
 check("cfg.service defaults to True",                    cfg.service is True)
 check("cfg.spacy_model defaults to 'en_core_web_lg'",    cfg.spacy_model == "en_core_web_lg")
-check("cfg.context_guard_enabled defaults to True",      cfg.context_guard_enabled is True)
-check("cfg.entity_trace_high_threshold defaults 0.85",   cfg.entity_trace_high_threshold == 0.85)
-check("cfg.entity_trace_low_threshold defaults 0.60",    cfg.entity_trace_low_threshold == 0.60)
+check("cfg.context_guard_enabled defaults to False",     cfg.context_guard_enabled is False)   # off in balanced: the tagger reads names
+check("cfg.entity_trace_high_threshold defaults 0.90",   cfg.entity_trace_high_threshold == 0.90)
+check("cfg.entity_trace_low_threshold defaults 0.70",    cfg.entity_trace_low_threshold == 0.70)
 check("cfg.context_guard_threshold defaults to 0.70",    cfg.context_guard_threshold == 0.70)
-check("cfg.entity_trace_fallback_threshold defaults 0.65", cfg.entity_trace_fallback_threshold == 0.65)
+check("cfg.entity_trace_fallback_threshold defaults 0.75", cfg.entity_trace_fallback_threshold == 0.75)
 check("cfg.fuzzy_threshold defaults to 85",              cfg.fuzzy_threshold == 85)
 
-# session defaults
-import uuid
-check("session.id is a valid UUID4",
-      len(session.id) == 36 and session.id.count("-") == 4)
-
-# session.reset() generates a new id
-old_id = session.id
-session.reset()
-check("session.reset() generates a new session ID", session.id != old_id)
-check("New session ID is also a valid UUID4",
-      len(session.id) == 36 and session.id.count("-") == 4)
-
-# get_mimic() lazy initialisation
-mimic_first  = session.get_mimic()
-mimic_second = session.get_mimic()
-check("get_mimic() returns same instance on repeated calls", mimic_first is mimic_second)
-
-# After reset(), get_mimic() returns a NEW instance
-session.reset()
-mimic_after_reset = session.get_mimic()
-check("get_mimic() returns new instance after reset()", mimic_after_reset is not mimic_first)
-
-# get_shadow_map() lazy initialisation (memory mode since cfg.pii_mem='temp')
-sm_first  = session.get_shadow_map()
-sm_second = session.get_shadow_map()
-check("get_shadow_map() returns same instance on repeated calls", sm_first is sm_second)
-
-# reset() clears the shadow map data
-sm_first.update({"fake": "real"})
-session.reset()
-sm_new = session.get_shadow_map()
-check("Shadow map is fresh (empty) after reset()", sm_new.get_all() == {})
-check("get_shadow_map() after reset returns new instance", sm_new is not sm_first)
+s1, s2 = Session(), Session()
+check("Each Session gets its own id",                    s1.id != s2.id)
+check("A Session copies the settings (not shared)",      s1.config is not cfg and s1.config == cfg)
+s1._shadow.update({"fake": "real"})
+check("Sessions do not share mappings",                  s2.mappings == {})
+s1.close()
+check("close() clears the mappings",                     s1._shadow.get_all() == {})
 
 
 # ─────────────────────────────────────────────────────────────
@@ -374,6 +357,8 @@ print("\n[7] pipeline.py — threshold parameters wired through correctly")
 from unittest.mock import patch
 import surrogateshield.core.detection.entity_trace as _et_mod
 import surrogateshield.core.detection.context_guard as _cg_mod
+from surrogateshield.core.detection.config import preset as _preset
+_classic = _preset("classic")
 
 # Build a fake entity for the mock to return
 _fake_ent = DetectedEntity("Alice", 3, 8, "PERSON", score=0.75, source="ner")
@@ -394,6 +379,7 @@ with patch.object(_et_mod, "trace", side_effect=_mock_trace):
     confirmed_default, _ = run_cascade(
         "Hi Alice",
         context_guard_enabled=False,
+        config=_classic,             # classic routes a spaCy PERSON as a name; balanced takes it only as the ensemble fallback
         entity_trace_high_threshold=0.85,
         entity_trace_low_threshold=0.60,
         entity_trace_fallback_threshold=0.80,  # 0.75 < 0.80 → not promoted
@@ -404,6 +390,7 @@ with patch.object(_et_mod, "trace", side_effect=_mock_trace):
     confirmed_low_fallback, _ = run_cascade(
         "Hi Alice",
         context_guard_enabled=False,
+        config=_classic,             # classic routes a spaCy PERSON as a name; balanced takes it only as the ensemble fallback
         entity_trace_high_threshold=0.85,
         entity_trace_low_threshold=0.60,
         entity_trace_fallback_threshold=0.70,  # 0.75 > 0.70 → promoted
@@ -415,6 +402,7 @@ with patch.object(_et_mod, "trace", side_effect=_mock_trace):
     confirmed_low_high, _ = run_cascade(
         "Hi Alice",
         context_guard_enabled=False,
+        config=_classic,             # classic routes a spaCy PERSON as a name; balanced takes it only as the ensemble fallback
         entity_trace_high_threshold=0.70,   # 0.75 >= 0.70 → confirmed immediately
         entity_trace_low_threshold=0.50,
         entity_trace_fallback_threshold=0.65,
@@ -477,11 +465,11 @@ restored_strict = rp_strict.resolve(response_absent, shadow_strict, fuzzy_thresh
 check("fuzzy_threshold=100 does not restore absent surrogate",
       "RealPerson" not in restored_strict)
 
-# Library ResolvePass does NOT have a 'failures' attribute (simplified version)
-check("Library ResolvePass has no .failures attribute",
-      not hasattr(rp, "failures"))
-check("Library ResolvePass has no get_failure_summary() method",
-      not hasattr(rp, "get_failure_summary"))
+# One ResolvePass for app and library (audit F4): failure taxonomy included
+check("Library ResolvePass records failures",
+      isinstance(rp.failures, list))
+check("Library ResolvePass get_failure_summary() has the three kinds",
+      set(rp.get_failure_summary()) == {"exact_miss", "fuzzy_miss", "fuzzy_hit"})
 
 # Component matching: multi-word surrogate where model used only first name
 rp_comp = ResolvePass()
@@ -503,9 +491,9 @@ import surrogateshield as ss
 ss.flush()
 ss.config(detailed_view=False)  # silence output for all remaining tests
 
-# Default values applied
+# config() with no arguments changes nothing
 ss.config()
-check("config() detailed_view default is True",             ss._state.cfg.detailed_view is True)
+check("config() detailed_view default is False",            ss._state.cfg.detailed_view is False)
 ss.config(detailed_view=False)
 check("config() detailed_view=False applied correctly",     ss._state.cfg.detailed_view is False)
 
@@ -569,22 +557,26 @@ ss.flush()
 
 # scan() return type
 result = ss.scan("Contact alice@corp.com, SSN 123-45-6789.")
-check("scan() returns a dict",                  isinstance(result, dict))
+check("scan() returns a list of Detection",    all(isinstance(d, ss.Detection) for d in result))
+check("scan() detections carry offsets",
+      all("Contact alice@corp.com, SSN 123-45-6789."[d.start:d.end] == d.text for d in result))
+result = ss.scan("Contact alice@corp.com, SSN 123-45-6789.", as_dict=True)
+check("scan(as_dict=True) returns a dict",      isinstance(result, dict))
 check("scan() dict: email value detected",      "alice@corp.com" in result)
 check("scan() dict: SSN value detected",        "123-45-6789" in result)
 check("scan() dict: email mapped to 'email'",   result.get("alice@corp.com") == "email")
 check("scan() dict: SSN mapped to 'ssn'",       result.get("123-45-6789") == "ssn")
 
-# scan() is comprehensive: ignores pii_off
+# scan() still reports pii_off types, marked masked=False
 ss.config(pii_off=["email"])
 result_with_off = ss.scan("Contact alice@corp.com, SSN 123-45-6789.")
 check("scan() detects email even when pii_off=['email']",
-      "alice@corp.com" in result_with_off)
+      any(d.text == "alice@corp.com" and not d.masked for d in result_with_off))
 ss.config(pii_off=[])   # restore
 
 # scan() with no PII returns empty dict
 empty_result = ss.scan("The weather is nice today.")
-check("scan() returns empty dict for PII-free text",   empty_result == {})
+check("scan() returns empty list for PII-free text",   empty_result == [])
 
 # pii_finder is the same function object
 check("pii_finder is an alias for scan()",
@@ -597,9 +589,9 @@ check("pii_finder() returns same result as scan()",   pii_finder_result == scan_
 
 # scan() does not update the session shadow map
 ss.flush()
-shadow_before = ss._state.session.get_shadow_map().get_all()
+shadow_before = ss.current_session().mappings
 ss.scan("My email is scan@test.com")
-shadow_after = ss._state.session.get_shadow_map().get_all()
+shadow_after = ss.current_session().mappings
 check("scan() does not update the session shadow map",
       shadow_before == shadow_after)
 
@@ -624,7 +616,7 @@ check("Sanitised text retains non-PII words",
       "Hi" in sanitized and "my" in sanitized)
 
 # Shadow map was populated after mask()
-shadow = ss._state.session.get_shadow_map().get_all()
+shadow = ss.current_session().mappings
 check("Shadow map non-empty after mask()",          len(shadow) > 0)
 check("Shadow map values are the original PII",
       "carol@example.com" in shadow.values() or
@@ -665,7 +657,7 @@ msg = "My email is diana@work.com and my phone is +1-555-999-1234."
 sanitized = ss.mask(msg)
 
 # Identify the surrogate values used
-shadow_map = ss._state.session.get_shadow_map().get_all()
+shadow_map = ss.current_session().mappings
 email_surrogate = next((k for k, v in shadow_map.items() if v == "diana@work.com"), None)
 phone_surrogate = next((k for k, v in shadow_map.items() if v == "+1-555-999-1234"), None)
 
@@ -731,21 +723,21 @@ ss.config(detailed_view=False)
 # Populate session state
 ss.flush()
 ss.mask("My email is test@test.com and SSN 111-22-3333")
-id_before = ss._state.session.id
-map_before = ss._state.session.get_shadow_map().get_all()
+id_before = ss.current_session().id
+map_before = ss.current_session().mappings
 
 check("Shadow map non-empty before flush()",    len(map_before) > 0)
 check("Session ID exists before flush()",       len(id_before) > 0)
 
 ss.flush()
 
-id_after  = ss._state.session.id
-map_after = ss._state.session.get_shadow_map().get_all()
+id_after  = ss.current_session().id
+map_after = ss.current_session().mappings
 
 check("flush() generates new session ID",       id_after != id_before)
 check("flush() clears the shadow map",          map_after == {})
-check("New session ID is a valid UUID4",
-      len(id_after) == 36 and id_after.count("-") == 4)
+check("New session ID is a 32-char hex id",
+      len(id_after) == 32 and all(c in "0123456789abcdef" for c in id_after))
 
 # After flush, unmask() can no longer resolve old surrogates
 # (shadow map is empty, so surrogate strings pass through unchanged)

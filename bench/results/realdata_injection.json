@@ -1,0 +1,426 @@
+{
+ "command": "python -m bench.realdata.inject --run --write --out bench/results/realdata_injection.json",
+ "datasets": {
+  "oasst1": {
+   "drop_problem_kinds": {
+    "turn N has no edit referring back to the details in turn N": 1,
+    "turn N repeats <text>": 1,
+    "turn N repeats part of a detail (<text>)": 2
+   },
+   "formats_shift": {
+    "card-spaced": 7,
+    "dots": 4,
+    "iban-spaced": 1,
+    "ipv4": 6,
+    "ipv6": 1,
+    "lower": 9,
+    "mac": 1,
+    "month-ordinal": 1,
+    "ordinal-of": 3,
+    "password": 6,
+    "plain": 41,
+    "secret": 4,
+    "ssn-nodash": 2,
+    "surname-first": 15,
+    "upper": 11,
+    "words": 9,
+    "zqk": 1
+   },
+   "layouts": {
+    "form": 74,
+    "inline": 65,
+    "intro": 77,
+    "json": 13,
+    "signature": 69
+   },
+   "multi": {
+    "acceptance": 0.96,
+    "accepted_round1": 42,
+    "accepted_round2": 6,
+    "dropped": 2,
+    "planned": 50
+   },
+   "round1_problem_kinds": {
+    "<text> is not in turn N exactly as given": 7,
+    "turn N has no edit referring back to the details in turn N": 1,
+    "turn N repeats <text>": 2,
+    "turn N repeats part of a detail (<text>)": 2,
+    "turn N, edit N: find is not an exact substring of the turn": 3,
+    "turn N, edits N and N overlap": 1,
+    "turn N: N words added besides the values (at most N)": 6,
+    "turn N: added text <text> reads as personal data to N detectors (gliner_pii: person, presidio_default: PERSON, ss: PERSON); add nothing but the given values": 2,
+    "turn N: only N of the user's words are kept (at least N); change less of the user's text": 2
+   },
+   "shift": {
+    "acceptance": 1.0,
+    "accepted_round1": 39,
+    "accepted_round2": 1,
+    "dropped": 0,
+    "planned": 40
+   },
+   "single": {
+    "acceptance": 1.0,
+    "accepted_round1": 241,
+    "accepted_round2": 9,
+    "dropped": 0,
+    "planned": 250
+   },
+   "split": {
+    "dev": 60,
+    "test": 238
+   },
+   "turn1_kept_share": {
+    "median": 1.0,
+    "min": 0.8571
+   },
+   "types_multi": {
+    "rows": {
+     "ADDRESS": 1,
+     "AGE": 5,
+     "CREDENTIAL": 7,
+     "DATE_OF_BIRTH": 4,
+     "EMAIL": 9,
+     "HANDLE": 5,
+     "ID": 8,
+     "LOCATION": 12,
+     "NETWORK": 4,
+     "ORG": 14,
+     "PERSON": 44,
+     "PHONE": 9,
+     "URL": 5
+    },
+    "values": {
+     "ADDRESS": 1,
+     "AGE": 5,
+     "CREDENTIAL": 7,
+     "DATE_OF_BIRTH": 4,
+     "EMAIL": 9,
+     "HANDLE": 5,
+     "ID": 9,
+     "LOCATION": 12,
+     "NETWORK": 4,
+     "ORG": 14,
+     "PERSON": 44,
+     "PHONE": 9,
+     "URL": 5
+    }
+   },
+   "types_single": {
+    "rows": {
+     "ADDRESS": 50,
+     "AGE": 50,
+     "CREDENTIAL": 50,
+     "DATE_OF_BIRTH": 50,
+     "EMAIL": 60,
+     "HANDLE": 50,
+     "ID": 50,
+     "LOCATION": 50,
+     "NETWORK": 50,
+     "ORG": 50,
+     "PERSON": 191,
+     "PHONE": 50,
+     "URL": 50
+    },
+    "values": {
+     "ADDRESS": 50,
+     "AGE": 50,
+     "CREDENTIAL": 50,
+     "DATE_OF_BIRTH": 50,
+     "EMAIL": 60,
+     "HANDLE": 50,
+     "ID": 69,
+     "LOCATION": 50,
+     "NETWORK": 50,
+     "ORG": 50,
+     "PERSON": 191,
+     "PHONE": 50,
+     "URL": 50
+    }
+   }
+  },
+  "sharegpt": {
+   "drop_problem_kinds": {
+    "turn N, edit N: find is not an exact substring of the turn": 6,
+    "turn N, edit N: find occurs more than once in the turn": 1
+   },
+   "formats_shift": {
+    "card-spaced": 5,
+    "dots": 8,
+    "hex": 1,
+    "iban-spaced": 4,
+    "ipv4": 4,
+    "lower": 13,
+    "mac": 2,
+    "month-ordinal": 3,
+    "ordinal-of": 6,
+    "password": 3,
+    "plain": 47,
+    "secret": 1,
+    "spelled": 5,
+    "ssn-nodash": 1,
+    "surname-first": 13,
+    "upper": 11,
+    "words": 3,
+    "zqk": 3
+   },
+   "layouts": {
+    "form": 64,
+    "inline": 68,
+    "intro": 75,
+    "json": 13,
+    "signature": 74
+   },
+   "multi": {
+    "acceptance": 0.96,
+    "accepted_round1": 46,
+    "accepted_round2": 2,
+    "dropped": 2,
+    "planned": 50
+   },
+   "round1_problem_kinds": {
+    "no place_values call in the answer": 10,
+    "turn N repeats <text>": 4,
+    "turn N repeats part of a detail (<text>)": 3,
+    "turn N, edit N: find is not an exact substring of the turn": 5,
+    "turn N, edits N and N overlap": 3,
+    "turn N: added text <text> reads as personal data to N detectors (gliner_pii: age, presidio_default: DATE_TIME, ss: age); add nothing but the given values": 1
+   },
+   "shift": {
+    "acceptance": 0.95,
+    "accepted_round1": 35,
+    "accepted_round2": 3,
+    "dropped": 2,
+    "planned": 40
+   },
+   "single": {
+    "acceptance": 0.984,
+    "accepted_round1": 234,
+    "accepted_round2": 12,
+    "dropped": 4,
+    "planned": 250
+   },
+   "split": {
+    "dev": 59,
+    "test": 235
+   },
+   "turn1_kept_share": {
+    "median": 1.0,
+    "min": 0.9375
+   },
+   "types_multi": {
+    "rows": {
+     "ADDRESS": 6,
+     "AGE": 7,
+     "CREDENTIAL": 5,
+     "DATE_OF_BIRTH": 3,
+     "EMAIL": 11,
+     "HANDLE": 9,
+     "ID": 11,
+     "LOCATION": 6,
+     "NETWORK": 7,
+     "ORG": 14,
+     "PERSON": 44,
+     "PHONE": 14,
+     "URL": 10
+    },
+    "values": {
+     "ADDRESS": 6,
+     "AGE": 7,
+     "CREDENTIAL": 5,
+     "DATE_OF_BIRTH": 3,
+     "EMAIL": 11,
+     "HANDLE": 9,
+     "ID": 13,
+     "LOCATION": 6,
+     "NETWORK": 7,
+     "ORG": 14,
+     "PERSON": 44,
+     "PHONE": 14,
+     "URL": 10
+    }
+   },
+   "types_single": {
+    "rows": {
+     "ADDRESS": 50,
+     "AGE": 49,
+     "CREDENTIAL": 48,
+     "DATE_OF_BIRTH": 50,
+     "EMAIL": 79,
+     "HANDLE": 47,
+     "ID": 50,
+     "LOCATION": 50,
+     "NETWORK": 48,
+     "ORG": 60,
+     "PERSON": 227,
+     "PHONE": 63,
+     "URL": 47
+    },
+    "values": {
+     "ADDRESS": 50,
+     "AGE": 49,
+     "CREDENTIAL": 48,
+     "DATE_OF_BIRTH": 50,
+     "EMAIL": 79,
+     "HANDLE": 47,
+     "ID": 64,
+     "LOCATION": 50,
+     "NETWORK": 48,
+     "ORG": 60,
+     "PERSON": 227,
+     "PHONE": 63,
+     "URL": 47
+    }
+   }
+  },
+  "wildchat": {
+   "drop_problem_kinds": {
+    "<text> is not in turn N exactly as given": 1,
+    "turn N repeats <text>": 1,
+    "turn N, edit N: find is not an exact substring of the turn": 14
+   },
+   "formats_shift": {
+    "card-spaced": 6,
+    "dots": 7,
+    "hex": 2,
+    "iban-spaced": 2,
+    "ipv4": 3,
+    "lower": 10,
+    "mac": 4,
+    "month-ordinal": 2,
+    "ordinal-of": 3,
+    "password": 1,
+    "plain": 49,
+    "secret": 2,
+    "spelled": 7,
+    "surname-first": 11,
+    "upper": 7,
+    "words": 9,
+    "zqk": 2
+   },
+   "layouts": {
+    "form": 63,
+    "inline": 69,
+    "intro": 70,
+    "json": 12,
+    "signature": 72
+   },
+   "multi": {
+    "acceptance": 0.88,
+    "accepted_round1": 34,
+    "accepted_round2": 10,
+    "dropped": 6,
+    "planned": 50
+   },
+   "round1_problem_kinds": {
+    "<text> is not in turn N exactly as given": 1,
+    "no place_values call in the answer": 5,
+    "turn N repeats <text>": 1,
+    "turn N, edit N: find is not an exact substring of the turn": 19,
+    "turn N, edit N: find occurs more than once in the turn": 2,
+    "turn N, edits N and N overlap": 1,
+    "turn N: added text <text> reads as personal data to N detectors (presidio_default: DATE_TIME, ss: age); add nothing but the given values": 1,
+    "turn N: added text <text> reads as personal data to N detectors (presidio_default: PERSON, ss: PERSON); add nothing but the given values": 1
+   },
+   "shift": {
+    "acceptance": 0.975,
+    "accepted_round1": 39,
+    "accepted_round2": 0,
+    "dropped": 1,
+    "planned": 40
+   },
+   "single": {
+    "acceptance": 0.968,
+    "accepted_round1": 239,
+    "accepted_round2": 3,
+    "dropped": 8,
+    "planned": 250
+   },
+   "split": {
+    "dev": 57,
+    "test": 229
+   },
+   "turn1_kept_share": {
+    "median": 1.0,
+    "min": 1.0
+   },
+   "types_multi": {
+    "rows": {
+     "ADDRESS": 9,
+     "AGE": 6,
+     "CREDENTIAL": 5,
+     "DATE_OF_BIRTH": 7,
+     "EMAIL": 13,
+     "HANDLE": 7,
+     "ID": 6,
+     "LOCATION": 4,
+     "NETWORK": 2,
+     "ORG": 15,
+     "PERSON": 39,
+     "PHONE": 11,
+     "URL": 6
+    },
+    "values": {
+     "ADDRESS": 9,
+     "AGE": 6,
+     "CREDENTIAL": 5,
+     "DATE_OF_BIRTH": 7,
+     "EMAIL": 13,
+     "HANDLE": 7,
+     "ID": 7,
+     "LOCATION": 4,
+     "NETWORK": 2,
+     "ORG": 15,
+     "PERSON": 39,
+     "PHONE": 11,
+     "URL": 6
+    }
+   },
+   "types_single": {
+    "rows": {
+     "ADDRESS": 49,
+     "AGE": 50,
+     "CREDENTIAL": 48,
+     "DATE_OF_BIRTH": 48,
+     "EMAIL": 88,
+     "HANDLE": 46,
+     "ID": 47,
+     "LOCATION": 52,
+     "NETWORK": 48,
+     "ORG": 70,
+     "PERSON": 206,
+     "PHONE": 66,
+     "URL": 49
+    },
+    "values": {
+     "ADDRESS": 49,
+     "AGE": 50,
+     "CREDENTIAL": 48,
+     "DATE_OF_BIRTH": 48,
+     "EMAIL": 88,
+     "HANDLE": 46,
+     "ID": 65,
+     "LOCATION": 52,
+     "NETWORK": 48,
+     "ORG": 70,
+     "PERSON": 206,
+     "PHONE": 66,
+     "URL": 49
+    }
+   }
+  }
+ },
+ "placer": "claude-sonnet-4-6",
+ "prompt_version": "9d5a86e933bd6fef",
+ "rules": {
+  "detector_arms": [
+   "ss",
+   "presidio_default",
+   "gliner_pii"
+  ],
+  "detector_quorum": 2,
+  "frame_per_value": 8,
+  "frame_slack": 4,
+  "keep_min": 0.65,
+  "later_frame": 15
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "arm": "gliner_pii_tuned",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii_tuned --in bench/realdata/build/external/nemotron_pii/input.jsonl --out bench/realdata/build/spans/gliner_pii_tuned/external-nemotron_pii.jsonl",
+ "config": {
+  "backbone_revision": {
+   "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+  },
+  "chosen_by": "bench/results/gliner_sweep_dev.json (lowest pooled dev injected leak)",
+  "flat_ner": true,
+  "label_set": "published",
+  "labels": [
+   "person",
+   "organization",
+   "email",
+   "phone number",
+   "address",
+   "location",
+   "date of birth",
+   "age",
+   "passport number",
+   "social security number",
+   "credit card number",
+   "bank account number",
+   "iban",
+   "driver's license number",
+   "national id number",
+   "tax identification number",
+   "health insurance id number",
+   "ip address",
+   "url",
+   "username",
+   "password",
+   "api key"
+  ],
+  "model": "urchade/gliner_multi_pii-v1",
+  "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+  "overlap_words": 30,
+  "replacement": "[LABEL] placeholder",
+  "threshold": 0.3,
+  "versions": {
+   "gliner": "0.2.29",
+   "python": "3.12.9",
+   "torch": "2.14.1",
+   "transformers": "4.51.3"
+  },
+  "window_words": 200
+ },
+ "edits": 6297,
+ "input": "bench/realdata/build/external/nemotron_pii/input.jsonl",
+ "input_sha256": "855f4822425bb9f5549adc76593b780aa7b47d1cb1451452bbfaf0e1f163bf1c",
+ "load_seconds": 11.2,
+ "messages": 1000,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

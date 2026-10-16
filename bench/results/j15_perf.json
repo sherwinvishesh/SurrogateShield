@@ -1,0 +1,50 @@
+{
+  "command": "python bench/perf.py --json bench/results/j15_perf.json",
+  "environment": {
+    "python": "3.13.2",
+    "platform": "macOS-26.3-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "cpus": 10,
+    "torch": "2.12.0",
+    "torch_threads": 6
+  },
+  "tokens": {
+    "min": 190,
+    "median": 197.5,
+    "max": 208
+  },
+  "warm": [
+    {
+      "context_guard": false,
+      "masks": 60,
+      "p50_ms": 45.8,
+      "p95_ms": 50.5,
+      "max_ms": 51.8,
+      "gate_ms": 50.0,
+      "pass": true
+    },
+    {
+      "context_guard": true,
+      "masks": 60,
+      "p50_ms": 74.0,
+      "p95_ms": 77.7,
+      "max_ms": 79.1,
+      "gate_ms": 150.0,
+      "pass": true
+    }
+  ],
+  "cold": [
+    {
+      "context_guard": false,
+      "import_s": 0.14,
+      "first_mask_s": 2.06,
+      "peak_rss_mb": 672
+    },
+    {
+      "context_guard": true,
+      "import_s": 0.13,
+      "first_mask_s": 4.53,
+      "peak_rss_mb": 992
+    }
+  ]
+}

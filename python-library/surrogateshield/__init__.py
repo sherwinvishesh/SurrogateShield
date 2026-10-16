@@ -8,257 +8,356 @@ Public API
 ──────────
     import surrogateshield as shield
 
-    shield.config(pii_off=["phone", "location"])
-    sanitized = shield.mask(user_text)
-    response  = llm.chat(sanitized)
-    restored  = shield.unmask(response)
+    with shield.Session() as s:              # one per end-user conversation
+        sanitized = s.mask(user_text)
+        response  = llm.chat(sanitized)
+        restored  = s.unmask(response)
+
+    async with shield.Session() as s:        # asyncio: models run in a worker thread
+        sanitized = await s.amask(user_text)
+        restored  = await s.aunmask(await llm.achat(sanitized))
+
+    # Module-level shortcuts use the current context's session:
+    shield.config(pii_off=["phone"])
+    shield.unmask(llm.chat(shield.mask(user_text)))
     shield.flush()
 """
 
 from __future__ import annotations
 
+import logging
 import os
-from typing import Dict, List, Optional
+import warnings
+from typing import Dict, List, Union
 
-from ._state import cfg, session
-from . import _display, _response_parser
-from .core.detection import pipeline as _pipeline
-from .core.detection import service_query as _service_query
-from .core.reconstruction.resolve import ResolvePass as _ResolvePass
+# A library logs to its own logger and installs no handler of its own: the
+# application decides where (and whether) its warnings go. Without this,
+# Python's last-resort handler prints them to stderr.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-__version__ = "0.1.0"
-__all__ = ["config", "scan", "pii_finder", "mask", "unmask", "flush"]
+from ._state import Config, cfg  # noqa: E402
+from .core.detection.config import DetectionConfig, from_partial, preset
+from .core.detection.plugins import Candidate, register_detector
+from .core.errors import DetectorUnavailable
+from .core.storage.shadow_map import StorageError
+from .session import (
+    Detection,
+    MaskResult,
+    Session,
+    current_session,
+    use_session,
+)
+
+__version__ = "1.9.0"   # keep equal to pyproject.toml (tests/test_public_api.py)
+
+__all__ = [
+    "config", "scan", "pii_finder", "mask", "mask_result", "unmask", "forget", "flush",
+    "Session", "Config", "Detection", "MaskResult", "current_session", "use_session",
+    "DetectorUnavailable", "StorageError", "__version__",
+    "DetectionConfig", "preset", "register_detector", "Candidate",
+]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Config validation
+# ─────────────────────────────────────────────────────────────────────────────
+
+_VALID_ADDRESS_MODES = ("shift", "replace", "auto")
+
+# Concrete entity types plus the aliases accepted by pii_off.
+_VALID_PII_OFF = {
+    "email", "ssn", "phone_us", "phone_uk", "phone_intl", "address",
+    "person", "credit_card", "dob", "ip_address", "zip_us", "postcode_uk",
+    "api_key", "crypto", "us_bank_number", "us_driver_license",
+    "gpe", "loc", "org", "fac", "gender_indicator", "implicit_location",
+    "iban", "vin", "mac_address", "passport", "id_number", "license_plate",
+    "url", "hostname", "handle", "credential", "age",
+    # aliases (resolved in the detection pipeline)
+    "phone", "postal_code", "zip", "postcode", "name", "names",
+    "location", "facility", "bank", "license", "username", "password",
+}
+
+
+def _detection(value):
+    """A ``detection`` setting as a DetectionConfig (or None)."""
+    if value is None or isinstance(value, DetectionConfig):
+        return value
+    if isinstance(value, str):
+        return preset(value)
+    if isinstance(value, dict):
+        return from_partial(value)
+    raise ValueError(f"detection must be a preset name, a DetectionConfig, a dict or None, "
+                     f"got {type(value).__name__}")
+
+
+def _validate_config(**kwargs) -> None:
+    """Raise ValueError with an actionable message on any invalid setting."""
+    mode = kwargs["address_mode"]
+    if mode not in _VALID_ADDRESS_MODES:
+        raise ValueError(
+            f"address_mode must be one of {_VALID_ADDRESS_MODES}, got {mode!r}"
+        )
+
+    shift_range = kwargs["address_shift_range"]
+    if not isinstance(shift_range, int) or isinstance(shift_range, bool) or shift_range < 1:
+        raise ValueError(
+            f"address_shift_range must be an integer >= 1, got {shift_range!r}"
+        )
+
+    fuzzy = kwargs["fuzzy_threshold"]
+    if not isinstance(fuzzy, (int, float)) or isinstance(fuzzy, bool) or not (0 <= fuzzy <= 100):
+        raise ValueError(
+            f"fuzzy_threshold must be a number in [0, 100], got {fuzzy!r}"
+        )
+
+    for name in (
+        "entity_trace_high_threshold",
+        "entity_trace_low_threshold",
+        "context_guard_threshold",
+        "entity_trace_fallback_threshold",
+    ):
+        value = kwargs[name]
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or not (0.0 <= value <= 1.0):
+            raise ValueError(f"{name} must be a number in [0.0, 1.0], got {value!r}")
+
+    for name in ("spacy_model", "context_guard_model"):
+        value = kwargs[name]
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{name} must be a non-empty string, got {value!r}")
+
+    if not isinstance(kwargs["context_guard_device"], int) or isinstance(
+        kwargs["context_guard_device"], bool
+    ):
+        raise ValueError(
+            f"context_guard_device must be an integer (-1 = CPU, >=0 = GPU id), "
+            f"got {kwargs['context_guard_device']!r}"
+        )
+
+    if not isinstance(kwargs["tagger_model"], str) or not kwargs["tagger_model"].strip():
+        raise ValueError(f"tagger_model must be a non-empty string, got {kwargs['tagger_model']!r}")
+    revision = kwargs["tagger_revision"]
+    if revision is not None and (not isinstance(revision, str) or not revision.strip()):
+        raise ValueError(f"tagger_revision must be None or a non-empty string, got {revision!r}")
+    device = kwargs["tagger_device"]
+    if isinstance(device, bool) or not (isinstance(device, int) or (isinstance(device, str) and device.strip())):
+        raise ValueError(
+            f"tagger_device must be an integer (-1 = CPU, >=0 = GPU id) or a torch device "
+            f"string (\"mps\", \"cuda:1\"), got {device!r}"
+        )
+
+    for item in kwargs["pii_off"]:
+        if not isinstance(item, str) or item.lower() not in _VALID_PII_OFF:
+            raise ValueError(
+                f"Unknown pii_off entry {item!r}. Valid entries: "
+                f"{', '.join(sorted(_VALID_PII_OFF))}"
+            )
+
+    pii_mem = kwargs["pii_mem"]
+    if pii_mem != "temp" and not os.path.isdir(pii_mem):
+        raise ValueError(
+            f"pii_mem path does not exist or is not a directory: {pii_mem!r}"
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # config()
 # ─────────────────────────────────────────────────────────────────────────────
 
+_UNSET = object()
+
+
 def config(
-    detailed_view: bool = True,
-    pii_mem: str = "temp",
-    pii_off=None,
-    service: bool = True,
-    spacy_model: str = "en_core_web_lg",
-    context_guard_enabled: bool = True,
-    entity_trace_high_threshold: float = 0.85,
-    entity_trace_low_threshold: float = 0.60,
-    context_guard_threshold: float = 0.70,
-    entity_trace_fallback_threshold: float = 0.65,
-    fuzzy_threshold: int = 85,
-) -> None:
+    *,
+    detailed_view=_UNSET,
+    pii_mem=_UNSET,
+    pii_off=_UNSET,
+    service=_UNSET,
+    spacy_model=_UNSET,
+    context_guard_enabled=_UNSET,
+    entity_trace_high_threshold=_UNSET,
+    entity_trace_low_threshold=_UNSET,
+    context_guard_threshold=_UNSET,
+    entity_trace_fallback_threshold=_UNSET,
+    fuzzy_threshold=_UNSET,
+    address_mode=_UNSET,
+    address_shift_range=_UNSET,
+    verify_addresses=_UNSET,
+    context_guard_model=_UNSET,
+    context_guard_device=_UNSET,
+    tagger_model=_UNSET,
+    tagger_revision=_UNSET,
+    tagger_device=_UNSET,
+    detection=_UNSET,
+) -> Config:
     """
-    Configure SurrogateShield.
+    Change the settings that sessions use. Only the arguments you pass
+    change; the rest keep their current values. Returns the settings.
+
+    New sessions start from these settings, and the current context's
+    session (if any) picks the change up immediately.
 
     Args:
         detailed_view:                  Print detection/masking tables to stdout.
+                                        Shows ORIGINAL values — off by default.
         pii_mem:                        "temp" for in-memory session (default), or
                                         a directory path for encrypted persistent storage.
+                                        Cannot change once the current session has
+                                        mappings (use a new Session).
         pii_off:                        PII types to detect but NOT replace.
                                         Accepts type names or aliases:
                                         "phone", "name", "location", "org", "email",
                                         "ssn", "dob", "address", "zip", "postcode",
                                         "credit_card", "ip_address", "api_key",
                                         "crypto", "bank", "license", "gender_indicator".
-        service:                        Enable service-query detection (address fuzzing
-                                        instead of full replacement for map queries).
+                                        Reported in ``mask_result().unmasked``.
+        service:                        Enable service-query detection (suppresses
+                                        standalone city/state replacement for map
+                                        queries; also drives address_mode="auto").
         spacy_model:                    spaCy model name for named entity recognition.
-        context_guard_enabled:          Enable the HuggingFace NER second-pass.
+        context_guard_enabled:          Enable the HuggingFace NER second-pass (off by default).
         entity_trace_high_threshold:    spaCy score ≥ this → confirmed entity.
         entity_trace_low_threshold:     spaCy score ≥ this → borderline entity.
         context_guard_threshold:        ContextGuard score ≥ this → confirmed.
         entity_trace_fallback_threshold: Promotion threshold when ContextGuard is off.
         fuzzy_threshold:                rapidfuzz partial_ratio threshold for unmask().
+        address_mode:                   How detected addresses are surrogated:
+                                        "auto"    — shift for non-sensitive service
+                                                    queries, replace for everything
+                                                    else (default);
+                                        "shift"   — house number shifted by up to
+                                                    ±address_shift_range for EVERY
+                                                    address; street, city, state, ZIP
+                                                    and formatting are sent unchanged;
+                                        "replace" — structure-preserving fake address
+                                                    (every component faked, same shape).
+        address_shift_range:            Max house-number delta for shift mode (>= 1).
+        verify_addresses:               Deprecated, no effect. The Nominatim check sent
+                                        each street to a third party and never changed
+                                        the output (audit F3).
+        context_guard_model:            HuggingFace model for ContextGuard.
+        context_guard_device:           Device for ContextGuard (-1 = CPU, >= 0 = GPU id).
+        tagger_model:                   The PII tagger: a folder, a folder name under
+                                        $SURROGATESHIELD_MODELS, or a Hugging Face hub id.
+                                        The default, "pii-tagger-dv3s-40k", is downloaded
+                                        once from huggingface.co/sherwinvishesh/
+                                        surrogateshield-pii-tagger.
+        tagger_revision:                "sha256:<hex>" of the weights file (checked at
+                                        load), or a hub commit / branch; None pins
+                                        nothing. A new tagger_model drops the default's.
+        tagger_device:                  Device for the tagger: -1 = CPU, >= 0 = GPU id,
+                                        or a torch device string ("mps", "cuda:1").
+        detection:                      The detection config: a preset name ("fast",
+                                        "balanced", "strict", "classic"), a DetectionConfig, a
+                                        dict of one (DetectionConfig.to_dict()), or
+                                        None for the environment's / "balanced".
+                                        The flat settings above that differ from
+                                        their defaults apply on top of it. See
+                                        CONFIGURATION.md.
 
     Raises:
-        ValueError: If pii_mem is not "temp" and the path does not exist or is
-                    not a directory.
+        ValueError:   On any invalid setting (unknown address_mode, threshold out
+                      of range, unknown pii_off entry, bad pii_mem path, …).
+        RuntimeError: pii_mem changed while the current session holds mappings.
     """
-    if pii_off is None:
-        pii_off = []
+    changes = {k: v for k, v in locals().items() if v is not _UNSET}
+    if changes.pop("verify_addresses", None) is not None:
+        warnings.warn("config(verify_addresses=...) has no effect and will be removed "
+                      "(audit F3: the Nominatim check never changed the output)",
+                      DeprecationWarning, stacklevel=2)
+    if "pii_off" in changes:
+        changes["pii_off"] = list(changes["pii_off"] or [])
+    if "detection" in changes:
+        changes["detection"] = _detection(changes["detection"])
+    merged = {f: getattr(cfg, f) for f in Config.__dataclass_fields__}
+    merged.update(changes)
+    _validate_config(**merged)
 
-    if pii_mem != "temp":
-        if not os.path.isdir(pii_mem):
-            raise ValueError(
-                f"pii_mem path does not exist or is not a directory: {pii_mem!r}"
+    current = current_session(create=False)
+    if current is not None and "pii_mem" in changes and changes["pii_mem"] != current.config.pii_mem:
+        if current.mappings:
+            raise RuntimeError(
+                "pii_mem cannot change while the current session holds mappings; "
+                "call flush() first or create a new Session"
             )
+        current.close()                   # the next call opens one with the new storage
+        current = None
 
-    cfg.detailed_view = detailed_view
-    cfg.pii_mem = pii_mem
-    cfg.pii_off = list(pii_off)
-    cfg.service = service
-    cfg.spacy_model = spacy_model
-    cfg.context_guard_enabled = context_guard_enabled
-    cfg.entity_trace_high_threshold = entity_trace_high_threshold
-    cfg.entity_trace_low_threshold = entity_trace_low_threshold
-    cfg.context_guard_threshold = context_guard_threshold
-    cfg.entity_trace_fallback_threshold = entity_trace_fallback_threshold
-    cfg.fuzzy_threshold = fuzzy_threshold
+    for name, value in changes.items():
+        setattr(cfg, name, value)
+        if current is not None:
+            setattr(current.config, name, value)
+    return cfg
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# scan()  /  pii_finder
+# Module-level shortcuts — all act on current_session()
 # ─────────────────────────────────────────────────────────────────────────────
 
-def scan(text: str) -> Dict[str, str]:
+def scan(text: str, *, as_dict: bool = False) -> Union[List[Detection], Dict[str, str]]:
     """
-    Detect all PII in *text* without modifying anything.
-
-    Runs the full detection cascade (PatternScan → EntityTrace → ContextGuard)
-    and returns every detected entity regardless of pii_off settings.
-    Does NOT update the session shadow map.
-
-    Args:
-        text: Any string to scan for PII.
+    Detect PII in *text* without modifying anything, with the same settings
+    (service-query handling, pii_off) as :func:`mask`.
 
     Returns:
-        Dict mapping detected_value → pii_type_string.
-        Example: {"john@example.com": "email", "John Smith": "PERSON"}
+        A list of :class:`Detection` (text, type, start, end, score, source,
+        masked). ``as_dict=True`` returns the old ``{text: type}`` mapping.
+
+    Raises:
+        DetectorUnavailable: a detection model is missing or failed (fail
+            closed, audit I17).
     """
-    confirmed, _ = _pipeline.run_cascade(
-        text=text,
-        skip_values=None,
-        skip_location_entities=False,
-        pii_off=None,  # scan is always comprehensive
-        spacy_model=cfg.spacy_model,
-        context_guard_enabled=cfg.context_guard_enabled,
-        entity_trace_high_threshold=cfg.entity_trace_high_threshold,
-        entity_trace_low_threshold=cfg.entity_trace_low_threshold,
-        context_guard_threshold=cfg.context_guard_threshold,
-        entity_trace_fallback_threshold=cfg.entity_trace_fallback_threshold,
-    )
-
-    if cfg.detailed_view:
-        _display.show_scan_results(confirmed, cfg.pii_off)
-
-    return {ent.text: ent.type for ent in confirmed}
+    detections = current_session().scan(text)
+    if as_dict:
+        return {d.text: d.type for d in detections}
+    return detections
 
 
 # Alias
 pii_finder = scan
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# mask()
-# ─────────────────────────────────────────────────────────────────────────────
-
 def mask(text: str) -> str:
     """
     Replace all PII in *text* with realistic fake surrogates.
 
-    The original→surrogate mapping is stored in the session shadow map so
-    that unmask() can restore the real values from the LLM response.
+    The original→surrogate mapping is stored in the current session so that
+    :func:`unmask` can restore the real values from the LLM response.
 
-    Args:
-        text: The text to sanitize before sending to an LLM.
-
-    Returns:
-        Sanitized text with PII replaced by surrogates.
+    Raises:
+        DetectorUnavailable: a detection model is missing or failed; the
+            text is not masked (fail closed, audit I17).
+        TypeError: *text* is not a str.
     """
-    skip_values = None
-    skip_location_entities = False
-
-    # Service-query detection: fuzz addresses, suppress location entities
-    if cfg.service and _service_query.is_service_query(text):
-        text, fuzz_map = _service_query.fuzz_addresses(text, verify=True)
-        skip_location_entities = True
-        skip_values = set(fuzz_map.values())
-
-    # Run detection cascade
-    confirmed, _ = _pipeline.run_cascade(
-        text=text,
-        skip_values=skip_values,
-        skip_location_entities=skip_location_entities,
-        pii_off=cfg.pii_off,
-        spacy_model=cfg.spacy_model,
-        context_guard_enabled=cfg.context_guard_enabled,
-        entity_trace_high_threshold=cfg.entity_trace_high_threshold,
-        entity_trace_low_threshold=cfg.entity_trace_low_threshold,
-        context_guard_threshold=cfg.context_guard_threshold,
-        entity_trace_fallback_threshold=cfg.entity_trace_fallback_threshold,
-    )
-
-    # Deduplicate
-    confirmed = _pipeline.deduplicate(confirmed)
-
-    if not confirmed:
-        if cfg.detailed_view:
-            _display.show_mask_results([], {})
-        return text
-
-    # Reuse surrogates for originals already seen in this session
-    existing_shadow = session.get_shadow_map().get_all()  # {surrogate: original}
-    original_to_surrogate = {v: k for k, v in existing_shadow.items()}
-
-    already_mapped = [e for e in confirmed if e.text in original_to_surrogate]
-    new_entities   = [e for e in confirmed if e.text not in original_to_surrogate]
-
-    surrogate_map = {e.text: original_to_surrogate[e.text] for e in already_mapped}
-    if new_entities:
-        surrogate_map.update(session.get_mimic().generate_all(new_entities))
-
-    # Apply substitutions (longest match first to avoid substring collisions)
-    sanitized = text
-    for original, surrogate in sorted(surrogate_map.items(), key=lambda x: len(x[0]), reverse=True):
-        sanitized = sanitized.replace(original, surrogate)
-
-    # Store inverted map (surrogate → original) in session shadow map
-    inverted = {v: k for k, v in surrogate_map.items()}
-    session.get_shadow_map().update(inverted)
-
-    if cfg.detailed_view:
-        _display.show_mask_results(confirmed, surrogate_map)
-
-    return sanitized
+    return current_session().mask(text)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# unmask()
-# ─────────────────────────────────────────────────────────────────────────────
+def mask_result(text: str) -> MaskResult:
+    """Like :func:`mask`, but also return the detections (including the
+    ``pii_off`` ones sent verbatim) and the replacements made."""
+    return current_session().mask_result(text)
+
 
 def unmask(response) -> str:
     """
-    Restore original PII values in the LLM *response*.
+    Restore original PII values in the LLM *response* (a str, or an
+    Anthropic / OpenAI / Gemini response object or dict).
 
-    Extracts text from any major LLM SDK response object (Anthropic, OpenAI,
-    Gemini) or accepts a plain string, then replaces surrogates with the
-    originals stored in the session shadow map.
-
-    Args:
-        response: An LLM SDK response object or a plain string.
-
-    Returns:
-        Response text with surrogates replaced by the original PII values.
+    Raises:
+        TypeError: *response* is None or has no text content.
     """
-    text = _response_parser.extract_text(response)
-    shadow_map = session.get_shadow_map().get_all()
-
-    resolver = _ResolvePass()
-    restored = resolver.resolve(
-        response_text=text,
-        shadow_map=shadow_map,
-        fuzzy_threshold=cfg.fuzzy_threshold,
-    )
-
-    if cfg.detailed_view:
-        # Count how many surrogates were actually replaced
-        replaced_count = sum(1 for s in shadow_map if s not in restored or s not in text)
-        _display.show_unmask_results(len(shadow_map))
-
-    return restored
+    return current_session().unmask(response)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# flush()
-# ─────────────────────────────────────────────────────────────────────────────
+def forget(original: str) -> int:
+    """Erase every mapping for *original* from the current session."""
+    return current_session().forget(original)
+
 
 def flush() -> None:
     """
-    Clear the session: discard all surrogate mappings and reset the session id.
-
-    Call this after a conversation ends to ensure surrogate mappings from
-    one session cannot bleed into the next.
+    End the current session: discard its mappings (and its persistent file).
+    The next call in this context starts a new session.
     """
-    session.reset()
-    if cfg.detailed_view:
-        _display.show_flush()
+    current = current_session(create=False)
+    if current is not None:
+        current.close()

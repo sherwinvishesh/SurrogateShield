@@ -1,0 +1,54 @@
+{
+ "arm": "gliner_pii",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii --in bench/realdata/build/test3/wildchat/messages.jsonl --out bench/realdata/build/spans/gliner_pii/test3-natural-wildchat.jsonl",
+ "config": {
+  "backbone_revision": {
+   "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+  },
+  "flat_ner": true,
+  "labels": [
+   "person",
+   "organization",
+   "email",
+   "phone number",
+   "address",
+   "location",
+   "date of birth",
+   "age",
+   "passport number",
+   "social security number",
+   "credit card number",
+   "bank account number",
+   "iban",
+   "driver's license number",
+   "national id number",
+   "tax identification number",
+   "health insurance id number",
+   "ip address",
+   "url",
+   "username",
+   "password",
+   "api key"
+  ],
+  "model": "urchade/gliner_multi_pii-v1",
+  "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+  "overlap_words": 30,
+  "replacement": "[LABEL] placeholder",
+  "threshold": 0.5,
+  "versions": {
+   "gliner": "0.2.29",
+   "python": "3.12.9",
+   "torch": "2.14.1",
+   "transformers": "4.51.3"
+  },
+  "window_words": 200
+ },
+ "edits": 3098,
+ "input": "bench/realdata/build/test3/wildchat/messages.jsonl",
+ "input_sha256": "ffcd3e68f169bcf7256687d35641f5b4cce1977d813b032bca47e182570d1c5b",
+ "load_seconds": 10.6,
+ "messages": 911,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

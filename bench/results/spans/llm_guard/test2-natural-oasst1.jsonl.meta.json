@@ -1,0 +1,45 @@
+{
+ "arm": "llm_guard",
+ "command": ".venv-baselines/bin/python -m bench.arms.llm_guard --in bench/realdata/build/test2/oasst1/messages.jsonl --out bench/realdata/build/spans/llm_guard/test2-natural-oasst1.jsonl",
+ "config": {
+  "device": "cpu (pinned; LLM Guard would pick mps or cuda)",
+  "entity_types": [
+   "CREDIT_CARD",
+   "CRYPTO",
+   "EMAIL_ADDRESS",
+   "IBAN_CODE",
+   "IP_ADDRESS",
+   "PERSON",
+   "PHONE_NUMBER",
+   "US_SSN",
+   "US_BANK_NUMBER",
+   "CREDIT_CARD_RE",
+   "UUID",
+   "EMAIL_ADDRESS_RE",
+   "US_SSN_RE"
+  ],
+  "faker": "module Faker re-seeded per message (seed_instance)",
+  "faker_arity_shim": "one-argument lambdas in _entity_faker_map called with a dummy argument (0.3.16 bug)",
+  "model": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2",
+  "model_revision": "9ea992753ab2686be4a8f64605ccc7be197ad794",
+  "recognizer_conf": "DEBERTA_AI4PRIVACY_v2_CONF",
+  "scanner": "llm_guard.input_scanners.Anonymize(Vault(), use_faker=True)",
+  "threshold": 0.5,
+  "versions": {
+   "faker": "37.12.0",
+   "llm-guard": "0.3.16",
+   "presidio-analyzer": "2.2.358",
+   "python": "3.12.9",
+   "torch": "2.14.1",
+   "transformers": "4.51.3"
+  }
+ },
+ "edits": 165,
+ "input": "bench/realdata/build/test2/oasst1/messages.jsonl",
+ "input_sha256": "90e732ed08baad5134d51dc4098b88ec056a77d962dc8950667a69c820754d14",
+ "load_seconds": 1.1,
+ "messages": 852,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

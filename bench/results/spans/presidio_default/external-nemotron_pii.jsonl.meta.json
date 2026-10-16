@@ -1,0 +1,19 @@
+{
+ "arm": "presidio_default",
+ "command": ".venv/bin/python -m bench.arms.presidio_default --in bench/realdata/build/external/nemotron_pii/input.jsonl --out bench/realdata/build/spans/presidio_default/external-nemotron_pii.jsonl",
+ "config": {
+  "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+  "overlap_resolution": "longest span, then highest score",
+  "presidio_analyzer_version": "2.2.362",
+  "replacement": "[ENTITY_TYPE] placeholder (presidio/redact.py)",
+  "score_threshold": 0.4
+ },
+ "edits": 5488,
+ "input": "bench/realdata/build/external/nemotron_pii/input.jsonl",
+ "input_sha256": "855f4822425bb9f5549adc76593b780aa7b47d1cb1451452bbfaf0e1f163bf1c",
+ "load_seconds": 0.0,
+ "messages": 1000,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

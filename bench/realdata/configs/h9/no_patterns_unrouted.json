@@ -1,0 +1,16 @@
+{
+ "preset": "balanced",
+ "type_actions": {
+  "ADDRESS": "replace"
+ },
+ "detectors": [
+  {
+   "name": "pattern_scan",
+   "enabled": false
+  },
+  {
+   "name": "canonicaliser",
+   "enabled": false
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "preset": "balanced",
+ "type_actions": {
+  "ADDRESS": "replace"
+ },
+ "detectors": [
+  {
+   "name": "pii_tagger",
+   "thresholds": {
+    "PERSON": 0.2,
+    "ORG": 0.2,
+    "LOCATION": 0.2,
+    "PHONE": 0.6,
+    "ID": 0.6,
+    "ADDRESS": 0.5,
+    "HANDLE": 0.6,
+    "CREDENTIAL": 0.7
+   },
+   "options": {
+    "gate_above": 0.5
+   }
+  },
+  {
+   "name": "entity_trace",
+   "thresholds": {
+    "high": 0.75,
+    "low": 0.45,
+    "fallback": 0.5
+   }
+  }
+ ]
+}

@@ -1,0 +1,5204 @@
+{
+ "choice": {
+  "passing": [],
+  "threshold": null
+ },
+ "code": "370c18c0f9fc68060c504c6f6eea18f0a9450745bb53aec0b593ada07380ea5f",
+ "command": "... -m bench.tagger.age_sweep --model bench/tagger/build/models/dv3s-40k-v4 --out bench/results/age_sweep_dev.json",
+ "git": {
+  "commit": "f8cacaee044cd88442b2ebf0aae6a4db0d79f3cc",
+  "modified": []
+ },
+ "gliner_pii": {
+  "dev": {
+   "all": {
+    "leak": {
+     "k": 59,
+     "n": 627,
+     "rate": 0.0941,
+     "wilson95": [
+      0.0737,
+      0.1195
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 3,
+     "AGE": 0,
+     "CREDENTIAL": 3,
+     "DATE_OF_BIRTH": 3,
+     "EMAIL": 1,
+     "HANDLE": 4,
+     "ID": 15,
+     "LOCATION": 0,
+     "NETWORK": 6,
+     "ORG": 7,
+     "PERSON": 1,
+     "PHONE": 0,
+     "URL": 16
+    },
+    "natural_age_edits": {
+     "age": 26
+    },
+    "natural_spurious": 1069,
+    "negatives_untouched": {
+     "k": 115,
+     "n": 431,
+     "rate": 0.2668,
+     "wilson95": [
+      0.2273,
+      0.3105
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 30,
+     "AGE": 33,
+     "CREDENTIAL": 32,
+     "DATE_OF_BIRTH": 35,
+     "EMAIL": 55,
+     "HANDLE": 37,
+     "ID": 53,
+     "LOCATION": 32,
+     "NETWORK": 37,
+     "ORG": 44,
+     "PERSON": 152,
+     "PHONE": 47,
+     "URL": 40
+    }
+   },
+   "oasst1": {
+    "leak": {
+     "k": 27,
+     "n": 210,
+     "rate": 0.1286,
+     "wilson95": [
+      0.0899,
+      0.1806
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 2,
+     "AGE": 0,
+     "CREDENTIAL": 0,
+     "DATE_OF_BIRTH": 1,
+     "EMAIL": 0,
+     "HANDLE": 2,
+     "ID": 8,
+     "LOCATION": 0,
+     "NETWORK": 3,
+     "ORG": 3,
+     "PERSON": 1,
+     "PHONE": 0,
+     "URL": 7
+    },
+    "natural_age_edits": {
+     "age": 15
+    },
+    "natural_spurious": 286,
+    "negatives_untouched": {
+     "k": 38,
+     "n": 142,
+     "rate": 0.2676,
+     "wilson95": [
+      0.2016,
+      0.3458
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 13,
+     "AGE": 7,
+     "CREDENTIAL": 14,
+     "DATE_OF_BIRTH": 13,
+     "EMAIL": 13,
+     "HANDLE": 11,
+     "ID": 19,
+     "LOCATION": 11,
+     "NETWORK": 18,
+     "ORG": 13,
+     "PERSON": 50,
+     "PHONE": 14,
+     "URL": 14
+    }
+   },
+   "sharegpt": {
+    "leak": {
+     "k": 13,
+     "n": 208,
+     "rate": 0.0625,
+     "wilson95": [
+      0.0369,
+      0.104
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 0,
+     "AGE": 0,
+     "CREDENTIAL": 1,
+     "DATE_OF_BIRTH": 2,
+     "EMAIL": 0,
+     "HANDLE": 1,
+     "ID": 3,
+     "LOCATION": 0,
+     "NETWORK": 1,
+     "ORG": 2,
+     "PERSON": 0,
+     "PHONE": 0,
+     "URL": 3
+    },
+    "natural_age_edits": {
+     "age": 6
+    },
+    "natural_spurious": 397,
+    "negatives_untouched": {
+     "k": 37,
+     "n": 149,
+     "rate": 0.2483,
+     "wilson95": [
+      0.1859,
+      0.3234
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 6,
+     "AGE": 15,
+     "CREDENTIAL": 9,
+     "DATE_OF_BIRTH": 9,
+     "EMAIL": 22,
+     "HANDLE": 14,
+     "ID": 14,
+     "LOCATION": 11,
+     "NETWORK": 10,
+     "ORG": 16,
+     "PERSON": 54,
+     "PHONE": 17,
+     "URL": 11
+    }
+   },
+   "wildchat": {
+    "leak": {
+     "k": 19,
+     "n": 209,
+     "rate": 0.0909,
+     "wilson95": [
+      0.059,
+      0.1376
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 1,
+     "AGE": 0,
+     "CREDENTIAL": 2,
+     "DATE_OF_BIRTH": 0,
+     "EMAIL": 1,
+     "HANDLE": 1,
+     "ID": 4,
+     "LOCATION": 0,
+     "NETWORK": 2,
+     "ORG": 2,
+     "PERSON": 0,
+     "PHONE": 0,
+     "URL": 6
+    },
+    "natural_age_edits": {
+     "age": 5
+    },
+    "natural_spurious": 386,
+    "negatives_untouched": {
+     "k": 40,
+     "n": 140,
+     "rate": 0.2857,
+     "wilson95": [
+      0.2174,
+      0.3655
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 11,
+     "AGE": 11,
+     "CREDENTIAL": 9,
+     "DATE_OF_BIRTH": 13,
+     "EMAIL": 20,
+     "HANDLE": 12,
+     "ID": 20,
+     "LOCATION": 10,
+     "NETWORK": 9,
+     "ORG": 15,
+     "PERSON": 48,
+     "PHONE": 16,
+     "URL": 15
+    }
+   }
+  },
+  "devlarge-calib": {
+   "all": {
+    "leak": {
+     "k": 109,
+     "n": 1119,
+     "rate": 0.0974,
+     "wilson95": [
+      0.0814,
+      0.1162
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 5,
+     "AGE": 1,
+     "CREDENTIAL": 7,
+     "DATE_OF_BIRTH": 4,
+     "EMAIL": 3,
+     "HANDLE": 2,
+     "ID": 35,
+     "LOCATION": 1,
+     "NETWORK": 9,
+     "ORG": 10,
+     "PERSON": 2,
+     "PHONE": 3,
+     "URL": 27
+    },
+    "natural_age_edits": {
+     "age": 25
+    },
+    "natural_spurious": 2032,
+    "negatives_untouched": {
+     "k": 201,
+     "n": 793,
+     "rate": 0.2535,
+     "wilson95": [
+      0.2244,
+      0.2849
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 68,
+     "AGE": 68,
+     "CREDENTIAL": 60,
+     "DATE_OF_BIRTH": 60,
+     "EMAIL": 109,
+     "HANDLE": 61,
+     "ID": 92,
+     "LOCATION": 58,
+     "NETWORK": 47,
+     "ORG": 80,
+     "PERSON": 275,
+     "PHONE": 85,
+     "URL": 56
+    }
+   },
+   "oasst1": {
+    "leak": {
+     "k": 29,
+     "n": 331,
+     "rate": 0.0876,
+     "wilson95": [
+      0.0617,
+      0.123
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 1,
+     "AGE": 0,
+     "CREDENTIAL": 1,
+     "DATE_OF_BIRTH": 1,
+     "EMAIL": 0,
+     "HANDLE": 1,
+     "ID": 8,
+     "LOCATION": 0,
+     "NETWORK": 2,
+     "ORG": 3,
+     "PERSON": 0,
+     "PHONE": 0,
+     "URL": 12
+    },
+    "natural_age_edits": {
+     "age": 5
+    },
+    "natural_spurious": 463,
+    "negatives_untouched": {
+     "k": 73,
+     "n": 248,
+     "rate": 0.2944,
+     "wilson95": [
+      0.2411,
+      0.3539
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 22,
+     "AGE": 23,
+     "CREDENTIAL": 22,
+     "DATE_OF_BIRTH": 24,
+     "EMAIL": 24,
+     "HANDLE": 23,
+     "ID": 31,
+     "LOCATION": 17,
+     "NETWORK": 14,
+     "ORG": 18,
+     "PERSON": 76,
+     "PHONE": 19,
+     "URL": 18
+    }
+   },
+   "sharegpt": {
+    "leak": {
+     "k": 40,
+     "n": 386,
+     "rate": 0.1036,
+     "wilson95": [
+      0.077,
+      0.138
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 3,
+     "AGE": 0,
+     "CREDENTIAL": 3,
+     "DATE_OF_BIRTH": 1,
+     "EMAIL": 1,
+     "HANDLE": 0,
+     "ID": 13,
+     "LOCATION": 1,
+     "NETWORK": 5,
+     "ORG": 2,
+     "PERSON": 2,
+     "PHONE": 2,
+     "URL": 7
+    },
+    "natural_age_edits": {
+     "age": 10
+    },
+    "natural_spurious": 760,
+    "negatives_untouched": {
+     "k": 61,
+     "n": 284,
+     "rate": 0.2148,
+     "wilson95": [
+      0.171,
+      0.2662
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 24,
+     "AGE": 22,
+     "CREDENTIAL": 15,
+     "DATE_OF_BIRTH": 17,
+     "EMAIL": 43,
+     "HANDLE": 20,
+     "ID": 30,
+     "LOCATION": 21,
+     "NETWORK": 16,
+     "ORG": 27,
+     "PERSON": 105,
+     "PHONE": 27,
+     "URL": 19
+    }
+   },
+   "wildchat": {
+    "leak": {
+     "k": 40,
+     "n": 402,
+     "rate": 0.0995,
+     "wilson95": [
+      0.0739,
+      0.1327
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 1,
+     "AGE": 1,
+     "CREDENTIAL": 3,
+     "DATE_OF_BIRTH": 2,
+     "EMAIL": 2,
+     "HANDLE": 1,
+     "ID": 14,
+     "LOCATION": 0,
+     "NETWORK": 2,
+     "ORG": 5,
+     "PERSON": 0,
+     "PHONE": 1,
+     "URL": 8
+    },
+    "natural_age_edits": {
+     "age": 10
+    },
+    "natural_spurious": 809,
+    "negatives_untouched": {
+     "k": 67,
+     "n": 261,
+     "rate": 0.2567,
+     "wilson95": [
+      0.2075,
+      0.313
+     ]
+    },
+    "values_by_type": {
+     "ADDRESS": 22,
+     "AGE": 23,
+     "CREDENTIAL": 23,
+     "DATE_OF_BIRTH": 19,
+     "EMAIL": 42,
+     "HANDLE": 18,
+     "ID": 31,
+     "LOCATION": 20,
+     "NETWORK": 17,
+     "ORG": 35,
+     "PERSON": 94,
+     "PHONE": 39,
+     "URL": 19
+    }
+   }
+  }
+ },
+ "model": {
+  "path": "bench/tagger/build/models/dv3s-40k-v4",
+  "weights_sha256": "dc75ed07f2a01e848ab296680cad7cd0c44afcd4e99e79ce6f8c2952fc38f8b3"
+ },
+ "reference": {
+  "config_hash": "a1abaa92142b0db9",
+  "model": "dv3s-40k",
+  "parts": {
+   "dev": {
+    "all": {
+     "leak": {
+      "k": 9,
+      "n": 627,
+      "rate": 0.0144,
+      "wilson95": [
+       0.0076,
+       0.0271
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 3,
+      "PERSON": 3,
+      "PHONE": 1,
+      "URL": 1
+     },
+     "natural_age_edits": {
+      "age": 17
+     },
+     "natural_spurious": 133,
+     "negatives_untouched": {
+      "k": 377,
+      "n": 431,
+      "rate": 0.8747,
+      "wilson95": [
+       0.8401,
+       0.9027
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 30,
+      "AGE": 33,
+      "CREDENTIAL": 32,
+      "DATE_OF_BIRTH": 35,
+      "EMAIL": 55,
+      "HANDLE": 37,
+      "ID": 53,
+      "LOCATION": 32,
+      "NETWORK": 37,
+      "ORG": 44,
+      "PERSON": 152,
+      "PHONE": 47,
+      "URL": 40
+     }
+    },
+    "oasst1": {
+     "leak": {
+      "k": 1,
+      "n": 210,
+      "rate": 0.0048,
+      "wilson95": [
+       0.0008,
+       0.0265
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_age_edits": {
+      "age": 9
+     },
+     "natural_spurious": 23,
+     "negatives_untouched": {
+      "k": 130,
+      "n": 142,
+      "rate": 0.9155,
+      "wilson95": [
+       0.8581,
+       0.951
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 13,
+      "AGE": 7,
+      "CREDENTIAL": 14,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 13,
+      "HANDLE": 11,
+      "ID": 19,
+      "LOCATION": 11,
+      "NETWORK": 18,
+      "ORG": 13,
+      "PERSON": 50,
+      "PHONE": 14,
+      "URL": 14
+     }
+    },
+    "sharegpt": {
+     "leak": {
+      "k": 6,
+      "n": 208,
+      "rate": 0.0288,
+      "wilson95": [
+       0.0133,
+       0.0615
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 2,
+      "PERSON": 2,
+      "PHONE": 0,
+      "URL": 1
+     },
+     "natural_age_edits": {
+      "age": 7
+     },
+     "natural_spurious": 38,
+     "negatives_untouched": {
+      "k": 129,
+      "n": 149,
+      "rate": 0.8658,
+      "wilson95": [
+       0.8018,
+       0.9114
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 6,
+      "AGE": 15,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 9,
+      "EMAIL": 22,
+      "HANDLE": 14,
+      "ID": 14,
+      "LOCATION": 11,
+      "NETWORK": 10,
+      "ORG": 16,
+      "PERSON": 54,
+      "PHONE": 17,
+      "URL": 11
+     }
+    },
+    "wildchat": {
+     "leak": {
+      "k": 2,
+      "n": 209,
+      "rate": 0.0096,
+      "wilson95": [
+       0.0026,
+       0.0342
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 1,
+      "PERSON": 0,
+      "PHONE": 1,
+      "URL": 0
+     },
+     "natural_age_edits": {
+      "age": 1
+     },
+     "natural_spurious": 72,
+     "negatives_untouched": {
+      "k": 118,
+      "n": 140,
+      "rate": 0.8429,
+      "wilson95": [
+       0.7735,
+       0.8939
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 11,
+      "AGE": 11,
+      "CREDENTIAL": 9,
+      "DATE_OF_BIRTH": 13,
+      "EMAIL": 20,
+      "HANDLE": 12,
+      "ID": 20,
+      "LOCATION": 10,
+      "NETWORK": 9,
+      "ORG": 15,
+      "PERSON": 48,
+      "PHONE": 16,
+      "URL": 15
+     }
+    }
+   },
+   "devlarge-calib": {
+    "all": {
+     "leak": {
+      "k": 4,
+      "n": 1119,
+      "rate": 0.0036,
+      "wilson95": [
+       0.0014,
+       0.0092
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 3,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_age_edits": {
+      "age": 17,
+      "age:worded": 1
+     },
+     "natural_spurious": 315,
+     "negatives_untouched": {
+      "k": 680,
+      "n": 793,
+      "rate": 0.8575,
+      "wilson95": [
+       0.8314,
+       0.8801
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 68,
+      "AGE": 68,
+      "CREDENTIAL": 60,
+      "DATE_OF_BIRTH": 60,
+      "EMAIL": 109,
+      "HANDLE": 61,
+      "ID": 92,
+      "LOCATION": 58,
+      "NETWORK": 47,
+      "ORG": 80,
+      "PERSON": 275,
+      "PHONE": 85,
+      "URL": 56
+     }
+    },
+    "oasst1": {
+     "leak": {
+      "k": 0,
+      "n": 331,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0115
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_age_edits": {
+      "age": 2,
+      "age:worded": 1
+     },
+     "natural_spurious": 32,
+     "negatives_untouched": {
+      "k": 233,
+      "n": 248,
+      "rate": 0.9395,
+      "wilson95": [
+       0.9026,
+       0.963
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 22,
+      "AGE": 23,
+      "CREDENTIAL": 22,
+      "DATE_OF_BIRTH": 24,
+      "EMAIL": 24,
+      "HANDLE": 23,
+      "ID": 31,
+      "LOCATION": 17,
+      "NETWORK": 14,
+      "ORG": 18,
+      "PERSON": 76,
+      "PHONE": 19,
+      "URL": 18
+     }
+    },
+    "sharegpt": {
+     "leak": {
+      "k": 0,
+      "n": 386,
+      "rate": 0.0,
+      "wilson95": [
+       0.0,
+       0.0099
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 0,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_age_edits": {
+      "age": 3
+     },
+     "natural_spurious": 125,
+     "negatives_untouched": {
+      "k": 237,
+      "n": 284,
+      "rate": 0.8345,
+      "wilson95": [
+       0.7869,
+       0.8732
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 24,
+      "AGE": 22,
+      "CREDENTIAL": 15,
+      "DATE_OF_BIRTH": 17,
+      "EMAIL": 43,
+      "HANDLE": 20,
+      "ID": 30,
+      "LOCATION": 21,
+      "NETWORK": 16,
+      "ORG": 27,
+      "PERSON": 105,
+      "PHONE": 27,
+      "URL": 19
+     }
+    },
+    "wildchat": {
+     "leak": {
+      "k": 4,
+      "n": 402,
+      "rate": 0.01,
+      "wilson95": [
+       0.0039,
+       0.0253
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 3,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_age_edits": {
+      "age": 12
+     },
+     "natural_spurious": 158,
+     "negatives_untouched": {
+      "k": 210,
+      "n": 261,
+      "rate": 0.8046,
+      "wilson95": [
+       0.7522,
+       0.8481
+      ]
+     },
+     "values_by_type": {
+      "ADDRESS": 22,
+      "AGE": 23,
+      "CREDENTIAL": 23,
+      "DATE_OF_BIRTH": 19,
+      "EMAIL": 42,
+      "HANDLE": 18,
+      "ID": 31,
+      "LOCATION": 20,
+      "NETWORK": 17,
+      "ORG": 35,
+      "PERSON": 94,
+      "PHONE": 39,
+      "URL": 19
+     }
+    }
+   }
+  },
+  "variant": "balanced"
+ },
+ "sweep": {
+  "0.5": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        670
+       ],
+       "sharegpt": [
+        237,
+        235
+       ],
+       "wildchat": [
+        210,
+        202
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       387
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.5
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 36,
+       "age:worded": 1
+      },
+      "natural_spurious": 387,
+      "negatives_untouched": {
+       "k": 670,
+       "n": 793,
+       "rate": 0.8449,
+       "wilson95": [
+        0.818,
+        0.8684
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 15
+      },
+      "natural_spurious": 152,
+      "negatives_untouched": {
+       "k": 235,
+       "n": 284,
+       "rate": 0.8275,
+       "wilson95": [
+        0.7792,
+        0.867
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 19
+      },
+      "natural_spurious": 198,
+      "negatives_untouched": {
+       "k": 202,
+       "n": 261,
+       "rate": 0.7739,
+       "wilson95": [
+        0.7194,
+        0.8205
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age50"
+  },
+  "0.6": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        672
+       ],
+       "sharegpt": [
+        237,
+        235
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       384
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.6
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 33,
+       "age:worded": 1
+      },
+      "natural_spurious": 384,
+      "negatives_untouched": {
+       "k": 672,
+       "n": 793,
+       "rate": 0.8474,
+       "wilson95": [
+        0.8207,
+        0.8708
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 15
+      },
+      "natural_spurious": 152,
+      "negatives_untouched": {
+       "k": 235,
+       "n": 284,
+       "rate": 0.8275,
+       "wilson95": [
+        0.7792,
+        0.867
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 16
+      },
+      "natural_spurious": 195,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age60"
+  },
+  "0.7": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        672
+       ],
+       "sharegpt": [
+        237,
+        235
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       383
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.7
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 32,
+       "age:worded": 1
+      },
+      "natural_spurious": 383,
+      "negatives_untouched": {
+       "k": 672,
+       "n": 793,
+       "rate": 0.8474,
+       "wilson95": [
+        0.8207,
+        0.8708
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 14
+      },
+      "natural_spurious": 151,
+      "negatives_untouched": {
+       "k": 235,
+       "n": 284,
+       "rate": 0.8275,
+       "wilson95": [
+        0.7792,
+        0.867
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 16
+      },
+      "natural_spurious": 195,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age70"
+  },
+  "0.8": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        672
+       ],
+       "sharegpt": [
+        237,
+        235
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       378
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.8
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 27,
+       "age:worded": 1
+      },
+      "natural_spurious": 378,
+      "negatives_untouched": {
+       "k": 672,
+       "n": 793,
+       "rate": 0.8474,
+       "wilson95": [
+        0.8207,
+        0.8708
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 146,
+      "negatives_untouched": {
+       "k": 235,
+       "n": 284,
+       "rate": 0.8275,
+       "wilson95": [
+        0.7792,
+        0.867
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 16
+      },
+      "natural_spurious": 195,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age80"
+  },
+  "0.85": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        672
+       ],
+       "sharegpt": [
+        237,
+        235
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       378
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.85
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 27,
+       "age:worded": 1
+      },
+      "natural_spurious": 378,
+      "negatives_untouched": {
+       "k": 672,
+       "n": 793,
+       "rate": 0.8474,
+       "wilson95": [
+        0.8207,
+        0.8708
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 146,
+      "negatives_untouched": {
+       "k": 235,
+       "n": 284,
+       "rate": 0.8275,
+       "wilson95": [
+        0.7792,
+        0.867
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 16
+      },
+      "natural_spurious": 195,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age85"
+  },
+  "0.9": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        672
+       ],
+       "sharegpt": [
+        237,
+        235
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       375
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.9
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 24,
+       "age:worded": 1
+      },
+      "natural_spurious": 375,
+      "negatives_untouched": {
+       "k": 672,
+       "n": 793,
+       "rate": 0.8474,
+       "wilson95": [
+        0.8207,
+        0.8708
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 146,
+      "negatives_untouched": {
+       "k": 235,
+       "n": 284,
+       "rate": 0.8275,
+       "wilson95": [
+        0.7792,
+        0.867
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 13
+      },
+      "natural_spurious": 192,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age90"
+  },
+  "0.95": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       0,
+       33
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        374
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       162
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        673
+       ],
+       "sharegpt": [
+        237,
+        236
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       371
+      ]
+     }
+    }
+   },
+   "extra": {
+    "detectors": [
+     {
+      "name": "pii_tagger",
+      "thresholds": {
+       "AGE": 0.95
+      }
+     }
+    ],
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural",
+      "pii_tagger"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 8,
+       "n": 627,
+       "rate": 0.0128,
+       "wilson95": [
+        0.0065,
+        0.025
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 22
+      },
+      "natural_spurious": 162,
+      "negatives_untouched": {
+       "k": 374,
+       "n": 431,
+       "rate": 0.8677,
+       "wilson95": [
+        0.8325,
+        0.8965
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 5,
+       "n": 208,
+       "rate": 0.024,
+       "wilson95": [
+        0.0103,
+        0.055
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 43,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 149,
+       "rate": 0.8725,
+       "wilson95": [
+        0.8094,
+        0.9168
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 4
+      },
+      "natural_spurious": 94,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 22,
+       "age:worded": 1
+      },
+      "natural_spurious": 371,
+      "negatives_untouched": {
+       "k": 673,
+       "n": 793,
+       "rate": 0.8487,
+       "wilson95": [
+        0.8221,
+        0.8719
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 7
+      },
+      "natural_spurious": 142,
+      "negatives_untouched": {
+       "k": 236,
+       "n": 284,
+       "rate": 0.831,
+       "wilson95": [
+        0.783,
+        0.8701
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 13
+      },
+      "natural_spurious": 192,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age95"
+  },
+  "off": {
+   "checks": {
+    "dev": {
+     "G1": {
+      "age": [
+       1,
+       33
+      ],
+      "bound": 0.02,
+      "ok": false
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "ORG": [
+        3,
+        4
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        377,
+        375
+       ],
+       "wildchat": [
+        118,
+        114
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       133,
+       158
+      ]
+     }
+    },
+    "devlarge-calib": {
+     "G1": {
+      "age": [
+       0,
+       68
+      ],
+      "bound": 0.02,
+      "ok": true
+     },
+     "G2": {
+      "ok": false,
+      "risen": {
+       "PERSON": [
+        0,
+        1
+       ]
+      }
+     },
+     "G3": {
+      "negatives_fallen": {
+       "all": [
+        680,
+        673
+       ],
+       "sharegpt": [
+        237,
+        236
+       ],
+       "wildchat": [
+        210,
+        204
+       ]
+      },
+      "ok": false,
+      "spurious": [
+       315,
+       366
+      ]
+     }
+    }
+   },
+   "extra": {
+    "type_sources": {
+     "AGE": [
+      "pattern_scan",
+      "canonicaliser",
+      "structural"
+     ]
+    }
+   },
+   "parts": {
+    "dev": {
+     "all": {
+      "leak": {
+       "k": 9,
+       "n": 627,
+       "rate": 0.0144,
+       "wilson95": [
+        0.0076,
+        0.0271
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 17
+      },
+      "natural_spurious": 158,
+      "negatives_untouched": {
+       "k": 375,
+       "n": 431,
+       "rate": 0.8701,
+       "wilson95": [
+        0.835,
+        0.8986
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 30,
+       "AGE": 33,
+       "CREDENTIAL": 32,
+       "DATE_OF_BIRTH": 35,
+       "EMAIL": 55,
+       "HANDLE": 37,
+       "ID": 53,
+       "LOCATION": 32,
+       "NETWORK": 37,
+       "ORG": 44,
+       "PERSON": 152,
+       "PHONE": 47,
+       "URL": 40
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 1,
+       "n": 210,
+       "rate": 0.0048,
+       "wilson95": [
+        0.0008,
+        0.0265
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 9
+      },
+      "natural_spurious": 25,
+      "negatives_untouched": {
+       "k": 130,
+       "n": 142,
+       "rate": 0.9155,
+       "wilson95": [
+        0.8581,
+        0.951
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 13,
+       "AGE": 7,
+       "CREDENTIAL": 14,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 13,
+       "HANDLE": 11,
+       "ID": 19,
+       "LOCATION": 11,
+       "NETWORK": 18,
+       "ORG": 13,
+       "PERSON": 50,
+       "PHONE": 14,
+       "URL": 14
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 6,
+       "n": 208,
+       "rate": 0.0288,
+       "wilson95": [
+        0.0133,
+        0.0615
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 1
+      },
+      "natural_age_edits": {
+       "age": 7
+      },
+      "natural_spurious": 41,
+      "negatives_untouched": {
+       "k": 131,
+       "n": 149,
+       "rate": 0.8792,
+       "wilson95": [
+        0.8171,
+        0.9222
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 6,
+       "AGE": 15,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 9,
+       "EMAIL": 22,
+       "HANDLE": 14,
+       "ID": 14,
+       "LOCATION": 11,
+       "NETWORK": 10,
+       "ORG": 16,
+       "PERSON": 54,
+       "PHONE": 17,
+       "URL": 11
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 2,
+       "n": 209,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0026,
+        0.0342
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 1
+      },
+      "natural_spurious": 92,
+      "negatives_untouched": {
+       "k": 114,
+       "n": 140,
+       "rate": 0.8143,
+       "wilson95": [
+        0.7418,
+        0.87
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 11,
+       "AGE": 11,
+       "CREDENTIAL": 9,
+       "DATE_OF_BIRTH": 13,
+       "EMAIL": 20,
+       "HANDLE": 12,
+       "ID": 20,
+       "LOCATION": 10,
+       "NETWORK": 9,
+       "ORG": 15,
+       "PERSON": 48,
+       "PHONE": 16,
+       "URL": 15
+      }
+     }
+    },
+    "devlarge-calib": {
+     "all": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 17,
+       "age:worded": 1
+      },
+      "natural_spurious": 366,
+      "negatives_untouched": {
+       "k": 673,
+       "n": 793,
+       "rate": 0.8487,
+       "wilson95": [
+        0.8221,
+        0.8719
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 68,
+       "AGE": 68,
+       "CREDENTIAL": 60,
+       "DATE_OF_BIRTH": 60,
+       "EMAIL": 109,
+       "HANDLE": 61,
+       "ID": 92,
+       "LOCATION": 58,
+       "NETWORK": 47,
+       "ORG": 80,
+       "PERSON": 275,
+       "PHONE": 85,
+       "URL": 56
+      }
+     },
+     "oasst1": {
+      "leak": {
+       "k": 0,
+       "n": 331,
+       "rate": 0.0,
+       "wilson95": [
+        0.0,
+        0.0115
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 2,
+       "age:worded": 1
+      },
+      "natural_spurious": 37,
+      "negatives_untouched": {
+       "k": 233,
+       "n": 248,
+       "rate": 0.9395,
+       "wilson95": [
+        0.9026,
+        0.963
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 22,
+       "DATE_OF_BIRTH": 24,
+       "EMAIL": 24,
+       "HANDLE": 23,
+       "ID": 31,
+       "LOCATION": 17,
+       "NETWORK": 14,
+       "ORG": 18,
+       "PERSON": 76,
+       "PHONE": 19,
+       "URL": 18
+      }
+     },
+     "sharegpt": {
+      "leak": {
+       "k": 1,
+       "n": 386,
+       "rate": 0.0026,
+       "wilson95": [
+        0.0005,
+        0.0145
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 3
+      },
+      "natural_spurious": 138,
+      "negatives_untouched": {
+       "k": 236,
+       "n": 284,
+       "rate": 0.831,
+       "wilson95": [
+        0.783,
+        0.8701
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 24,
+       "AGE": 22,
+       "CREDENTIAL": 15,
+       "DATE_OF_BIRTH": 17,
+       "EMAIL": 43,
+       "HANDLE": 20,
+       "ID": 30,
+       "LOCATION": 21,
+       "NETWORK": 16,
+       "ORG": 27,
+       "PERSON": 105,
+       "PHONE": 27,
+       "URL": 19
+      }
+     },
+     "wildchat": {
+      "leak": {
+       "k": 4,
+       "n": 402,
+       "rate": 0.01,
+       "wilson95": [
+        0.0039,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 1,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_age_edits": {
+       "age": 12
+      },
+      "natural_spurious": 191,
+      "negatives_untouched": {
+       "k": 204,
+       "n": 261,
+       "rate": 0.7816,
+       "wilson95": [
+        0.7276,
+        0.8275
+       ]
+      },
+      "values_by_type": {
+       "ADDRESS": 22,
+       "AGE": 23,
+       "CREDENTIAL": 23,
+       "DATE_OF_BIRTH": 19,
+       "EMAIL": 42,
+       "HANDLE": 18,
+       "ID": 31,
+       "LOCATION": 20,
+       "NETWORK": 17,
+       "ORG": 35,
+       "PERSON": 94,
+       "PHONE": 39,
+       "URL": 19
+      }
+     }
+    }
+   },
+   "variant": "age-off"
+  }
+ }
+}

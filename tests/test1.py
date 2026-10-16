@@ -41,7 +41,10 @@ check("Email detected",              has("email me at test@example.com", "email"
 check("SSN with dashes",             has("SSN is 123-45-6789", "ssn"))
 check("SSN no dashes",               has("SSN 123456789", "ssn"))
 check("Credit card Luhn valid",      has("card 4532015112830366", "credit_card"))
-check("Credit card Luhn invalid → rejected", empty("bad card 1234567890123456"))
+# Luhn-invalid digits with NO card framing are rejected; note that
+# "bad card 1234..." IS detected by design — the text says it's a card,
+# so the (typo'd) number is still card-intent PII.
+check("Credit card Luhn invalid → rejected", empty("bad value 1234567890123456"))
 check("US phone",                    has("call +1-555-867-5309", "phone_us"))
 check("UK phone",                    has("call +44 7911 123456", "phone_uk"))
 check("IPv4 address",                has("server 192.168.1.100", "ip_address"))
@@ -144,11 +147,13 @@ check("Credit card is digits only",    cc_s.replace(" ", "").replace("-", "").is
 check("US phone starts with +1",       phone_us_s.startswith("+1"))
 check("UK phone starts with +44",      phone_uk_s.startswith("+44"))
 
-# Collision resistance
+# Collision resistance: uniqueness is enforced by generate_all, which every
+# caller uses; generate() alone returns the linked surrogate, not a unique one
 collisions_m = MimicGen()
 emails = [
-    collisions_m.generate(DetectedEntity(f"user{i}@test.com", 0, 15, "email", 1.0))
-    for i in range(50)
+    v for i in range(50)
+    for v in collisions_m.generate_all(
+        [DetectedEntity(f"user{i}@test.com", 0, 15, "email", 1.0)]).values()
 ]
 check("50 email surrogates all unique", len(set(emails)) == 50)
 

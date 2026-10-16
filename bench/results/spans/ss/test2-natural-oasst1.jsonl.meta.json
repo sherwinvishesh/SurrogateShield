@@ -1,0 +1,26 @@
+{
+ "arm": "ss",
+ "command": ".venv/bin/python -m bench.arms.ss --in bench/realdata/build/test2/oasst1/messages.jsonl --out bench/realdata/build/spans/ss/test2-natural-oasst1.jsonl",
+ "config": {
+  "ADDRESS_MODE": "auto",
+  "SERVICE_QUERY_DETECTION_ENABLED": true,
+  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
+  "versions": {
+   "faker": "40.15.0",
+   "python": "3.13.2",
+   "spacy": "3.8.14",
+   "surrogateshield": "2.1.0",
+   "torch": "2.12.0",
+   "transformers": "5.8.1"
+  }
+ },
+ "edits": 240,
+ "input": "bench/realdata/build/test2/oasst1/messages.jsonl",
+ "input_sha256": "90e732ed08baad5134d51dc4098b88ec056a77d962dc8950667a69c820754d14",
+ "load_seconds": 0.2,
+ "messages": 852,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

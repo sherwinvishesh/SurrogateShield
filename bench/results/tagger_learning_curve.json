@@ -1,0 +1,1150 @@
+{
+ "code": "f99067bdaa84927a75f4d472ceca05ed0241abdb05afce56b8399e672344a710",
+ "command": "... -m bench.tagger.select --curve --models dv3xs-c10k dv3xs-c20k dv3xs-c40k dv3xs-c80k --out bench/results/tagger_learning_curve.json",
+ "curve": {
+  "calib_leak": [
+   3,
+   2,
+   3,
+   3
+  ],
+  "calib_spurious": [
+   737,
+   342,
+   409,
+   474
+  ],
+  "dev_leak": [
+   11,
+   8,
+   10,
+   8
+  ],
+  "plateau": true,
+  "windows": [
+   10000,
+   20000,
+   40000,
+   80000
+  ]
+ },
+ "git": {
+  "commit": "30698482b75ebc3e0cb917decd6992319642b02c",
+  "modified": []
+ },
+ "models": [
+  {
+   "calib": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": true
+     },
+     "failing_types": [],
+     "ok": true
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 5,
+       "n": 1119,
+       "rate": 0.0045,
+       "wilson95": [
+        0.0019,
+        0.0104
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 632,
+      "natural_spurious": 561
+     },
+     "0.9": {
+      "leak": {
+       "k": 18,
+       "n": 1119,
+       "rate": 0.0161,
+       "wilson95": [
+        0.0102,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 2,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 4,
+       "LOCATION": 2,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 4,
+       "PHONE": 2,
+       "URL": 0
+      },
+      "natural_edits": 252,
+      "natural_spurious": 197
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 3,
+      "n": 1119,
+      "rate": 0.0027,
+      "wilson95": [
+       0.0009,
+       0.0079
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 2,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_edits": 851,
+     "natural_spurious": 737
+    }
+   },
+   "dev": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": false
+     },
+     "failing_types": [
+      "AGE"
+     ],
+     "ok": false
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 11,
+       "n": 627,
+       "rate": 0.0175,
+       "wilson95": [
+        0.0098,
+        0.0311
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 2,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 4,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 226,
+      "natural_spurious": 192
+     },
+     "0.9": {
+      "leak": {
+       "k": 19,
+       "n": 627,
+       "rate": 0.0303,
+       "wilson95": [
+        0.0195,
+        0.0468
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 2,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 1,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 6,
+       "LOCATION": 2,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 4,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 116,
+      "natural_spurious": 89
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 11,
+      "n": 627,
+      "rate": 0.0175,
+      "wilson95": [
+       0.0098,
+       0.0311
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 5,
+      "PERSON": 3,
+      "PHONE": 0,
+      "URL": 1
+     },
+     "natural_edits": 227,
+     "natural_spurious": 170
+    }
+   },
+   "encoder": "deberta-v3-xsmall",
+   "hub_id": "microsoft/deberta-v3-xsmall",
+   "licence": "MIT",
+   "name": "dv3xs-c10k",
+   "revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+   "runs": {
+    "dev": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c10k --split dev --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c10k-dev-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c10k-dev-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "168b4a054f91f15c74aeb2be39e941f4eb5498d3",
+      "modified": []
+     }
+    },
+    "devlarge-calib": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c10k --split devlarge --half calib --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c10k-devlarge-calib-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c10k-devlarge-calib-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "168b4a054f91f15c74aeb2be39e941f4eb5498d3",
+      "modified": []
+     }
+    }
+   },
+   "training": {
+    "batch": 16,
+    "best_val_f1": 0.9922,
+    "data_sha256": "70686d6d374c14c00257e01cbfc65d400859160b9ce4c49ccd795db79cc73a51",
+    "device": "mps",
+    "epochs": 3,
+    "lr": 0.0001,
+    "minutes": 12.0,
+    "seed": 1,
+    "windows": 10000
+   },
+   "weights_bytes": 282803644,
+   "weights_sha256": "b94afd03b86a3b27d97c8f6b89759d7fe774ab38aec5954cb60ad550e111a2f7"
+  },
+  {
+   "calib": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": true
+     },
+     "failing_types": [],
+     "ok": true
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 6,
+       "n": 1119,
+       "rate": 0.0054,
+       "wilson95": [
+        0.0025,
+        0.0116
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 3,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 534,
+      "natural_spurious": 442
+     },
+     "0.9": {
+      "leak": {
+       "k": 13,
+       "n": 1119,
+       "rate": 0.0116,
+       "wilson95": [
+        0.0068,
+        0.0198
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 1,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 6,
+       "LOCATION": 2,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 0,
+       "PHONE": 1,
+       "URL": 0
+      },
+      "natural_edits": 215,
+      "natural_spurious": 151
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 2,
+      "n": 1119,
+      "rate": 0.0018,
+      "wilson95": [
+       0.0005,
+       0.0065
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 1,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_edits": 461,
+     "natural_spurious": 342
+    }
+   },
+   "dev": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": false
+     },
+     "failing_types": [
+      "AGE"
+     ],
+     "ok": false
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 6,
+       "n": 627,
+       "rate": 0.0096,
+       "wilson95": [
+        0.0044,
+        0.0207
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 241,
+      "natural_spurious": 207
+     },
+     "0.9": {
+      "leak": {
+       "k": 14,
+       "n": 627,
+       "rate": 0.0223,
+       "wilson95": [
+        0.0133,
+        0.0371
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 1,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 4,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 3,
+       "PERSON": 4,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 104,
+      "natural_spurious": 79
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 8,
+      "n": 627,
+      "rate": 0.0128,
+      "wilson95": [
+       0.0065,
+       0.025
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 3,
+      "PERSON": 3,
+      "PHONE": 0,
+      "URL": 1
+     },
+     "natural_edits": 220,
+     "natural_spurious": 165
+    }
+   },
+   "encoder": "deberta-v3-xsmall",
+   "hub_id": "microsoft/deberta-v3-xsmall",
+   "licence": "MIT",
+   "name": "dv3xs-c20k",
+   "revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+   "runs": {
+    "dev": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c20k --split dev --ss --variant sel3ga9-spacyloc --extra bench/tagger/build/variants/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c20k-dev-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c20k-dev-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "69540ee9b52a01da3f8ca0a7918052ad7abeccf4",
+      "modified": []
+     }
+    },
+    "devlarge-calib": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c20k --split devlarge --half calib --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c20k-devlarge-calib-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c20k-devlarge-calib-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "168b4a054f91f15c74aeb2be39e941f4eb5498d3",
+      "modified": []
+     }
+    }
+   },
+   "training": {
+    "batch": 16,
+    "best_val_f1": 0.9954,
+    "data_sha256": "70686d6d374c14c00257e01cbfc65d400859160b9ce4c49ccd795db79cc73a51",
+    "device": "mps",
+    "epochs": 3,
+    "lr": 0.0001,
+    "minutes": 23.7,
+    "seed": 1,
+    "windows": 20000
+   },
+   "weights_bytes": 282803644,
+   "weights_sha256": "fb70938cb06bd7ced17570c67fc803cd3352cec18cc62d44888d8b49bc3d146a"
+  },
+  {
+   "calib": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": true
+     },
+     "failing_types": [],
+     "ok": true
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 6,
+       "n": 1119,
+       "rate": 0.0054,
+       "wilson95": [
+        0.0025,
+        0.0116
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 2,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 0,
+       "PHONE": 1,
+       "URL": 0
+      },
+      "natural_edits": 604,
+      "natural_spurious": 518
+     },
+     "0.9": {
+      "leak": {
+       "k": 19,
+       "n": 1119,
+       "rate": 0.017,
+       "wilson95": [
+        0.0109,
+        0.0264
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 1,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 3,
+       "LOCATION": 5,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 2,
+       "PHONE": 3,
+       "URL": 0
+      },
+      "natural_edits": 301,
+      "natural_spurious": 237
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 3,
+      "n": 1119,
+      "rate": 0.0027,
+      "wilson95": [
+       0.0009,
+       0.0079
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 2,
+      "PERSON": 0,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_edits": 550,
+     "natural_spurious": 409
+    }
+   },
+   "dev": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": false
+     },
+     "failing_types": [
+      "AGE",
+      "PHONE"
+     ],
+     "ok": false
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 7,
+       "n": 627,
+       "rate": 0.0112,
+       "wilson95": [
+        0.0054,
+        0.0229
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 0,
+       "NETWORK": 0,
+       "ORG": 4,
+       "PERSON": 2,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 350,
+      "natural_spurious": 314
+     },
+     "0.9": {
+      "leak": {
+       "k": 13,
+       "n": 627,
+       "rate": 0.0207,
+       "wilson95": [
+        0.0122,
+        0.0351
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 3,
+       "NETWORK": 0,
+       "ORG": 5,
+       "PERSON": 2,
+       "PHONE": 2,
+       "URL": 0
+      },
+      "natural_edits": 172,
+      "natural_spurious": 143
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 10,
+      "n": 627,
+      "rate": 0.0159,
+      "wilson95": [
+       0.0087,
+       0.0291
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 5,
+      "PERSON": 2,
+      "PHONE": 1,
+      "URL": 1
+     },
+     "natural_edits": 269,
+     "natural_spurious": 214
+    }
+   },
+   "encoder": "deberta-v3-xsmall",
+   "hub_id": "microsoft/deberta-v3-xsmall",
+   "licence": "MIT",
+   "name": "dv3xs-c40k",
+   "revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+   "runs": {
+    "dev": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c40k --split dev --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c40k-dev-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c40k-dev-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "225b5753e5fd709e4dd0ae78000ffcf7cf9e6a9b",
+      "modified": []
+     }
+    },
+    "devlarge-calib": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c40k --split devlarge --half calib --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c40k-devlarge-calib-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c40k-devlarge-calib-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "225b5753e5fd709e4dd0ae78000ffcf7cf9e6a9b",
+      "modified": []
+     }
+    }
+   },
+   "training": {
+    "batch": 16,
+    "best_val_f1": 0.9978,
+    "data_sha256": "70686d6d374c14c00257e01cbfc65d400859160b9ce4c49ccd795db79cc73a51",
+    "device": "mps",
+    "epochs": 3,
+    "lr": 0.0001,
+    "minutes": 47.3,
+    "seed": 1,
+    "windows": 40000
+   },
+   "weights_bytes": 282803644,
+   "weights_sha256": "f1e5ee104dc40d76a4f8a8ec55df848dd9bae63578f3c2ebf8d6b53f451f8c50"
+  },
+  {
+   "calib": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": true
+     },
+     "failing_types": [],
+     "ok": true
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 8,
+       "n": 1119,
+       "rate": 0.0071,
+       "wilson95": [
+        0.0036,
+        0.014
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 1,
+       "HANDLE": 0,
+       "ID": 1,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 3,
+       "PHONE": 1,
+       "URL": 0
+      },
+      "natural_edits": 580,
+      "natural_spurious": 470
+     },
+     "0.9": {
+      "leak": {
+       "k": 18,
+       "n": 1119,
+       "rate": 0.0161,
+       "wilson95": [
+        0.0102,
+        0.0253
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 0,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 1,
+       "HANDLE": 0,
+       "ID": 2,
+       "LOCATION": 5,
+       "NETWORK": 0,
+       "ORG": 2,
+       "PERSON": 7,
+       "PHONE": 1,
+       "URL": 0
+      },
+      "natural_edits": 331,
+      "natural_spurious": 246
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 3,
+      "n": 1119,
+      "rate": 0.0027,
+      "wilson95": [
+       0.0009,
+       0.0079
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 0,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 1,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 1,
+      "PERSON": 1,
+      "PHONE": 0,
+      "URL": 0
+     },
+     "natural_edits": 691,
+     "natural_spurious": 474
+    }
+   },
+   "dev": {
+    "acceptance": {
+     "checks": {
+      "pooled": true,
+      "spurious": true,
+      "types": false
+     },
+     "failing_types": [
+      "AGE",
+      "PHONE"
+     ],
+     "ok": false
+    },
+    "raw_tagger": {
+     "0.5": {
+      "leak": {
+       "k": 5,
+       "n": 627,
+       "rate": 0.008,
+       "wilson95": [
+        0.0034,
+        0.0185
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 1,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 1,
+       "NETWORK": 0,
+       "ORG": 0,
+       "PERSON": 3,
+       "PHONE": 0,
+       "URL": 0
+      },
+      "natural_edits": 322,
+      "natural_spurious": 273
+     },
+     "0.9": {
+      "leak": {
+       "k": 12,
+       "n": 627,
+       "rate": 0.0191,
+       "wilson95": [
+        0.011,
+        0.0332
+       ]
+      },
+      "leaked_by_type": {
+       "ADDRESS": 0,
+       "AGE": 2,
+       "CREDENTIAL": 0,
+       "DATE_OF_BIRTH": 0,
+       "EMAIL": 0,
+       "HANDLE": 0,
+       "ID": 0,
+       "LOCATION": 3,
+       "NETWORK": 0,
+       "ORG": 1,
+       "PERSON": 4,
+       "PHONE": 2,
+       "URL": 0
+      },
+      "natural_edits": 182,
+      "natural_spurious": 146
+     }
+    },
+    "ss_tagger": {
+     "leak": {
+      "k": 8,
+      "n": 627,
+      "rate": 0.0128,
+      "wilson95": [
+       0.0065,
+       0.025
+      ]
+     },
+     "leaked_by_type": {
+      "ADDRESS": 0,
+      "AGE": 1,
+      "CREDENTIAL": 0,
+      "DATE_OF_BIRTH": 0,
+      "EMAIL": 0,
+      "HANDLE": 0,
+      "ID": 0,
+      "LOCATION": 0,
+      "NETWORK": 0,
+      "ORG": 2,
+      "PERSON": 3,
+      "PHONE": 1,
+      "URL": 1
+     },
+     "natural_edits": 300,
+     "natural_spurious": 222
+    }
+   },
+   "encoder": "deberta-v3-xsmall",
+   "hub_id": "microsoft/deberta-v3-xsmall",
+   "licence": "MIT",
+   "name": "dv3xs-c80k",
+   "revision": "4b419818330868dff6a60ad3e6b1c730f8b8c0c6",
+   "runs": {
+    "dev": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c80k --split dev --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c80k-dev-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c80k-dev-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "225b5753e5fd709e4dd0ae78000ffcf7cf9e6a9b",
+      "modified": []
+     }
+    },
+    "devlarge-calib": {
+     "command": "... -m bench.tagger.evaluate --model bench/tagger/build/models/dv3xs-c80k --split devlarge --half calib --ss --variant sel3ga9-spacyloc --extra bench/tagger/configs/sel3ga9-spacyloc.json --out bench/tagger/build/eval/dv3xs-c80k-devlarge-calib-sel3ga9-spacyloc.json",
+     "file": "bench/tagger/build/eval/dv3xs-c80k-devlarge-calib-sel3ga9-spacyloc.json",
+     "git": {
+      "commit": "225b5753e5fd709e4dd0ae78000ffcf7cf9e6a9b",
+      "modified": []
+     }
+    }
+   },
+   "training": {
+    "batch": 16,
+    "best_val_f1": 0.9996,
+    "data_sha256": "70686d6d374c14c00257e01cbfc65d400859160b9ce4c49ccd795db79cc73a51",
+    "device": "mps",
+    "epochs": 3,
+    "lr": 0.0001,
+    "minutes": 87.8,
+    "seed": 1,
+    "windows": 80000
+   },
+   "weights_bytes": 282803644,
+   "weights_sha256": "068e744933fc2d533ef0f37a8fbf55aea33d091888fffcb02abfeac3038c07d0"
+  }
+ ],
+ "reference": {
+  "dev": {
+   "gliner_pii": {
+    "leak": {
+     "k": 59,
+     "n": 627,
+     "rate": 0.0941,
+     "wilson95": [
+      0.0737,
+      0.1195
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 3,
+     "AGE": 0,
+     "CREDENTIAL": 3,
+     "DATE_OF_BIRTH": 3,
+     "EMAIL": 1,
+     "HANDLE": 4,
+     "ID": 15,
+     "LOCATION": 0,
+     "NETWORK": 6,
+     "ORG": 7,
+     "PERSON": 1,
+     "PHONE": 0,
+     "URL": 16
+    },
+    "natural_edits": 1208,
+    "natural_spurious": 1069
+   },
+   "gliner_pii_tuned": {
+    "leak": {
+     "k": 49,
+     "n": 627,
+     "rate": 0.0781,
+     "wilson95": [
+      0.0596,
+      0.1018
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 3,
+     "AGE": 0,
+     "CREDENTIAL": 3,
+     "DATE_OF_BIRTH": 3,
+     "EMAIL": 1,
+     "HANDLE": 0,
+     "ID": 13,
+     "LOCATION": 0,
+     "NETWORK": 4,
+     "ORG": 6,
+     "PERSON": 1,
+     "PHONE": 0,
+     "URL": 15
+    },
+    "natural_edits": 1530,
+    "natural_spurious": 1390
+   },
+   "ss": {
+    "leak": {
+     "k": 16,
+     "n": 627,
+     "rate": 0.0255,
+     "wilson95": [
+      0.0158,
+      0.041
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 0,
+     "AGE": 1,
+     "CREDENTIAL": 0,
+     "DATE_OF_BIRTH": 0,
+     "EMAIL": 0,
+     "HANDLE": 0,
+     "ID": 4,
+     "LOCATION": 1,
+     "NETWORK": 0,
+     "ORG": 5,
+     "PERSON": 3,
+     "PHONE": 1,
+     "URL": 1
+    },
+    "natural_edits": 495,
+    "natural_spurious": 390
+   }
+  },
+  "devlarge-calib": {
+   "gliner_pii": {
+    "leak": {
+     "k": 109,
+     "n": 1119,
+     "rate": 0.0974,
+     "wilson95": [
+      0.0814,
+      0.1162
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 5,
+     "AGE": 1,
+     "CREDENTIAL": 7,
+     "DATE_OF_BIRTH": 4,
+     "EMAIL": 3,
+     "HANDLE": 2,
+     "ID": 35,
+     "LOCATION": 1,
+     "NETWORK": 9,
+     "ORG": 10,
+     "PERSON": 2,
+     "PHONE": 3,
+     "URL": 27
+    },
+    "natural_edits": 2341,
+    "natural_spurious": 2032
+   },
+   "gliner_pii_tuned": {
+    "leak": {
+     "k": 84,
+     "n": 1119,
+     "rate": 0.0751,
+     "wilson95": [
+      0.061,
+      0.092
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 5,
+     "AGE": 1,
+     "CREDENTIAL": 5,
+     "DATE_OF_BIRTH": 4,
+     "EMAIL": 2,
+     "HANDLE": 1,
+     "ID": 23,
+     "LOCATION": 0,
+     "NETWORK": 7,
+     "ORG": 7,
+     "PERSON": 2,
+     "PHONE": 1,
+     "URL": 26
+    },
+    "natural_edits": 2928,
+    "natural_spurious": 2615
+   },
+   "ss": {
+    "leak": {
+     "k": 15,
+     "n": 1119,
+     "rate": 0.0134,
+     "wilson95": [
+      0.0081,
+      0.022
+     ]
+    },
+    "leaked_by_type": {
+     "ADDRESS": 0,
+     "AGE": 0,
+     "CREDENTIAL": 2,
+     "DATE_OF_BIRTH": 0,
+     "EMAIL": 0,
+     "HANDLE": 1,
+     "ID": 3,
+     "LOCATION": 1,
+     "NETWORK": 0,
+     "ORG": 1,
+     "PERSON": 6,
+     "PHONE": 1,
+     "URL": 0
+    },
+    "natural_edits": 1091,
+    "natural_spurious": 794
+   }
+  }
+ },
+ "variant": "sel3ga9-spacyloc"
+}

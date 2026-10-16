@@ -10,46 +10,75 @@ entities. Skips any span already covered by PatternScan results.
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Dict, List, Optional, Tuple
 
+from ..consistency import strip_clitic
 from ..entities import DetectedEntity, remove_span_overlap
+from ..errors import DetectorUnavailable
 
 logger = logging.getLogger(__name__)
 
-# Cache loaded models by model name string
+# Cache loaded models (or the reason loading failed) by model name
 _nlp: Dict[str, object] = {}
+_nlp_lock = threading.Lock()
 
 
 def _get_nlp(model_name: str = "en_core_web_lg"):
-    global _nlp
-    if model_name in _nlp:
-        return _nlp[model_name]
+    """Return the loaded spaCy model; raise DetectorUnavailable if it cannot
+    be loaded (audit I17: never skip the NER stage silently)."""
+    cached = _nlp.get(model_name)
+    if cached is None:
+        with _nlp_lock:
+            cached = _nlp.get(model_name)
+            if cached is None:
+                cached = _nlp[model_name] = _load_nlp(model_name)
+    if isinstance(cached, DetectorUnavailable):
+        raise cached
+    return cached
+
+
+def _load_nlp(model_name: str):
     try:
         import spacy
-        try:
-            model = spacy.load(model_name)
-        except OSError:
-            # Model not installed — download it on first use (~750 MB, cached after)
-            logger.info(
-                f"[EntityTrace] spaCy model '{model_name}' not found. "
-                "Downloading — this happens once and is cached locally."
-            )
-            from spacy.cli import download as _spacy_download
-            _spacy_download(model_name)
-            model = spacy.load(model_name)
-        _nlp[model_name] = model
-        logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
     except ImportError:
-        logger.error(
-            "[EntityTrace] spaCy is not installed. Run: pip install spacy"
+        return DetectorUnavailable(
+            "EntityTrace needs spaCy, which is not installed. Run: pip install spacy"
         )
-        _nlp[model_name] = None
+    try:
+        nlp = spacy.load(model_name, exclude=["vectors"])
+    except OSError:
+        # Never download from library code (audit I10): tell the user how.
+        return DetectorUnavailable(
+            f"EntityTrace needs the spaCy model {model_name!r}, which is not "
+            f"installed. Run: python -m spacy download {model_name}"
+        )
+    try:
+        _map_vectors(nlp)
     except Exception as exc:
-        logger.error(
-            f"[EntityTrace] Failed to load or download spaCy model '{model_name}': {exc}"
-        )
-        _nlp[model_name] = None
-    return _nlp[model_name]
+        logger.info(f"[EntityTrace] Word vectors of {model_name} not mapped ({exc!r}); reading them whole")
+        nlp = spacy.load(model_name)
+    logger.info(f"[EntityTrace] Loaded spaCy model: {model_name}")
+    return nlp
+
+
+def _map_vectors(nlp) -> None:
+    """Attach the model's word-vector table read-only from its file (a numpy
+    memory map) instead of reading it into memory. en_core_web_lg's table is
+    411 MB and NER reads only the rows of the words it sees, so most of it
+    never becomes resident. The values are the file's, so the entities are
+    the same as with spacy.load's in-memory copy."""
+    import numpy
+    from pathlib import Path
+
+    vocab = Path(nlp.path) / "vocab"
+    vectors = nlp.vocab.vectors
+    vectors.from_disk(vocab, exclude=["strings", "vectors"])    # key2row, keys, vectors.cfg
+    if vectors.mode != "default":
+        raise ValueError(f"vectors mode {vectors.mode!r}")
+    if (vocab / "vectors").exists():
+        vectors.data = numpy.load(str(vocab / "vectors"), mmap_mode="r")
+        vectors._sync_unset()
 
 
 _TARGET_LABELS = {"PERSON", "GPE", "LOC", "ORG", "FAC"}
@@ -59,10 +88,20 @@ _ENTITY_BLOCKLIST = {
     "address", "zip", "postcode", "passport", "iban", "bic",
     "cvv", "cvc", "expiry",
     "mr", "mrs", "ms", "dr", "prof", "jr", "sr",
-    "mon", "tue", "wed", "thu", "fri", "sat", "sun",
+    "mon", "tue", "wed", "thu", "fri", "sat",
+    # "sun" intentionally NOT here — it's a real surname ("Dr. Sun")
     "jan", "feb", "mar", "apr", "jun", "jul", "aug",
     "sep", "oct", "nov", "dec",
     "am", "pm", "gmt", "utc", "est", "pst",
+    # generic tech/domain acronyms spaCy mislabels as ORG/GPE.
+    # (ssh/ux/sql are intentionally NOT here — they occur as real ORG names.)
+    "api", "ip", "url", "http", "https", "sti", "std", "faq",
+    "crm", "pdf", "dns", "vpn", "cpu", "gpu", "html", "css",
+    "bearer", "bear", "token", "auth",
+    # contact-channel labels ("Mobile +91…", "Cell: …") — never entities
+    "mobile", "cell", "tel",
+    # document-field labels NER mistakes for entities ("VIN 1HGB…")
+    "vin", "mrn", "ktn", "er", "agi",
 }
 
 _LOCATION_PREPS = {
@@ -73,6 +112,22 @@ _LOCATION_PREPS = {
     "residing", "reside",
     "hometown", "birthplace", "based",
 }
+
+
+# Clause punctuation never belongs to a name; an English model run on CJK
+# text otherwise returns spans such as "…收件人：李娜，邮箱：" (audit I4).
+_EDGE_PUNCT = set(" \t,;:!?\"“”«»()[]{}，。：；！？、（）「」『』《》【】")
+
+
+def _clean_span(text: str, start: int, end: int) -> Tuple[int, int]:
+    """Trim edge punctuation and a possessive clitic ("Mia Lopez's" →
+    "Mia Lopez", "Jennings'" → "Jennings") from an NER span (audit I4)."""
+    while start < end and text[start] in _EDGE_PUNCT:
+        start += 1
+    while end > start and text[end - 1] in _EDGE_PUNCT:
+        end -= 1
+    end = start + len(strip_clitic(text[start:end]))
+    return start, end
 
 
 def trace(
@@ -100,22 +155,25 @@ def trace(
     borderline: List[DetectedEntity] = []
 
     nlp = _get_nlp(spacy_model)
-    if nlp is None:
-        logger.warning("[EntityTrace] spaCy unavailable — skipping NER stage")
-        return confirmed, borderline
-
     try:
         doc = nlp(text)
     except Exception as exc:
-        logger.error(f"[EntityTrace] spaCy processing failed: {exc}")
-        return confirmed, borderline
+        # fail closed: an input spaCy cannot process is not "no entities"
+        raise DetectorUnavailable(     # the model's own message could quote the text: the type only
+            f"EntityTrace failed on this input ({type(exc).__name__}); the text was not masked") from exc
 
     for ent in doc.ents:
         if ent.label_ not in _TARGET_LABELS:
             continue
 
         if ent.text.lower().strip() in _ENTITY_BLOCKLIST:
-            logger.debug(f"[EntityTrace] Skipping blocklisted token: {ent.text!r}")
+            logger.debug(f"[EntityTrace] Skipping blocklisted token at [{ent.start_char}:{ent.end_char}]")
+            continue
+
+        # A real name never spans a line break — entities that do are
+        # artifacts of form-style text ("DESHAWN M\nADDRESS").
+        if "\n" in ent.text:
+            logger.debug(f"[EntityTrace] Skipping newline-spanning span at [{ent.start_char}:{ent.end_char}]")
             continue
 
         _TYPE_DEFAULTS = {
@@ -135,29 +193,32 @@ def trace(
             if _LOCATION_PREPS & set(context_before.split()):
                 effective_label = "GPE"
                 score = _TYPE_DEFAULTS["GPE"]
-                logger.debug(f"[EntityTrace] Reclassified ORG→GPE: {ent.text!r}")
+                logger.debug(f"[EntityTrace] Reclassified ORG→GPE at [{ent.start_char}:{ent.end_char}]")
 
+        start, end = _clean_span(text, ent.start_char, ent.end_char)
+        if start >= end:
+            continue
         candidate = DetectedEntity(
-            text=ent.text,
-            start=ent.start_char,
-            end=ent.end_char,
+            text=text[start:end],
+            start=start,
+            end=end,
             type=effective_label,
             score=score,
             source="ner",
         )
 
         if remove_span_overlap(candidate, existing):
-            logger.debug(f"[EntityTrace] Skipping '{ent.text}' — overlaps existing")
+            logger.debug(f"[EntityTrace] Skipping [{start}:{end}] — overlaps existing")
             continue
 
         if score >= high_threshold:
             confirmed.append(candidate)
-            logger.debug(f"[EntityTrace] Confirmed: '{ent.text}' ({effective_label}, {score:.2f})")
+            logger.debug(f"[EntityTrace] Confirmed: [{start}:{end}] ({effective_label}, {score:.2f})")
         elif score >= low_threshold:
             borderline.append(candidate)
-            logger.debug(f"[EntityTrace] Borderline: '{ent.text}' ({effective_label}, {score:.2f})")
+            logger.debug(f"[EntityTrace] Borderline: [{start}:{end}] ({effective_label}, {score:.2f})")
         else:
-            logger.debug(f"[EntityTrace] Discarded (low score): '{ent.text}' ({score:.2f})")
+            logger.debug(f"[EntityTrace] Discarded (low score): [{start}:{end}] ({score:.2f})")
 
     logger.info(f"[EntityTrace] confirmed={len(confirmed)}, borderline={len(borderline)}")
     return confirmed, borderline

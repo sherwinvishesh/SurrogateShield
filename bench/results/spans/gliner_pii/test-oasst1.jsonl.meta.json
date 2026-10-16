@@ -1,0 +1,54 @@
+{
+ "arm": "gliner_pii",
+ "command": ".venv-baselines/bin/python -m bench.arms.gliner_pii --in bench/realdata/build/score/test/oasst1.jsonl --out bench/realdata/build/spans/gliner_pii/test-oasst1.jsonl",
+ "config": {
+  "backbone_revision": {
+   "microsoft/mdeberta-v3-base": "a0484667b22365f84929a935b5e50a51f71f159d"
+  },
+  "flat_ner": true,
+  "labels": [
+   "person",
+   "organization",
+   "email",
+   "phone number",
+   "address",
+   "location",
+   "date of birth",
+   "age",
+   "passport number",
+   "social security number",
+   "credit card number",
+   "bank account number",
+   "iban",
+   "driver's license number",
+   "national id number",
+   "tax identification number",
+   "health insurance id number",
+   "ip address",
+   "url",
+   "username",
+   "password",
+   "api key"
+  ],
+  "model": "urchade/gliner_multi_pii-v1",
+  "model_revision": "1fcf13e85f4eef5394e1fcd406cf2ca9ea82351d",
+  "overlap_words": 30,
+  "replacement": "[LABEL] placeholder",
+  "threshold": 0.5,
+  "versions": {
+   "gliner": "0.2.29",
+   "python": "3.12.9",
+   "torch": "2.14.1",
+   "transformers": "4.51.3"
+  },
+  "window_words": 200
+ },
+ "edits": 2045,
+ "input": "bench/realdata/build/score/test/oasst1.jsonl",
+ "input_sha256": "2a89e2d98e3e797a684c70982166e5e60d3c63f6de605b9222670774dec5afe1",
+ "load_seconds": 10.4,
+ "messages": 848,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

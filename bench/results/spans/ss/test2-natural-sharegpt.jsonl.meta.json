@@ -1,0 +1,26 @@
+{
+ "arm": "ss",
+ "command": ".venv/bin/python -m bench.arms.ss --in bench/realdata/build/test2/sharegpt/messages.jsonl --out bench/realdata/build/spans/ss/test2-natural-sharegpt.jsonl",
+ "config": {
+  "ADDRESS_MODE": "auto",
+  "SERVICE_QUERY_DETECTION_ENABLED": true,
+  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
+  "versions": {
+   "faker": "40.15.0",
+   "python": "3.13.2",
+   "spacy": "3.8.14",
+   "surrogateshield": "2.1.0",
+   "torch": "2.12.0",
+   "transformers": "5.8.1"
+  }
+ },
+ "edits": 986,
+ "input": "bench/realdata/build/test2/sharegpt/messages.jsonl",
+ "input_sha256": "ea414f9918f723a9f513e4e2d5d62138c3bc2dbe413ec634f223985cd82b2775",
+ "load_seconds": 0.2,
+ "messages": 938,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

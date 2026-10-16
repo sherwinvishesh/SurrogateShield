@@ -1,0 +1,60 @@
+{
+ "type_sources": {
+  "PHONE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "ID": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "ADDRESS": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "HANDLE": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ],
+  "CREDENTIAL": [
+   "pattern_scan",
+   "canonicaliser",
+   "structural",
+   "pii_tagger"
+  ]
+ },
+ "detectors": [
+  {
+   "name": "pii_tagger",
+   "thresholds": {
+    "PERSON": 0.5,
+    "ORG": 0.5,
+    "LOCATION": 0.5,
+    "PHONE": 0.9,
+    "ID": 0.9,
+    "ADDRESS": 0.8,
+    "HANDLE": 0.9,
+    "CREDENTIAL": 0.95
+   },
+   "options": {
+    "gate_above": 0.9
+   }
+  },
+  {
+   "name": "entity_trace",
+   "enabled": false
+  },
+  {
+   "name": "context_guard",
+   "enabled": false
+  }
+ ]
+}

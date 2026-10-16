@@ -1,0 +1,167 @@
+{
+ "arms": [
+  {
+   "arm": "ss",
+   "cold_start_runs_s": [
+    7.9,
+    7.2,
+    7.1
+   ],
+   "cold_start_s": 7.2,
+   "edits": 269,
+   "max_ms": 392.4,
+   "mean_ms": 65.9,
+   "messages": 200,
+   "model_load_s": 0.0,
+   "p50_ms": 43.5,
+   "p95_ms": 204.4,
+   "peak_rss_mb": 1348.2,
+   "process_wall_s": 22.2,
+   "refused": 0,
+   "venv": ".venv"
+  },
+  {
+   "arm": "presidio_default",
+   "cold_start_runs_s": [
+    4.7,
+    4.6,
+    5.3
+   ],
+   "cold_start_s": 4.7,
+   "edits": 467,
+   "max_ms": 71.6,
+   "mean_ms": 13.8,
+   "messages": 200,
+   "model_load_s": 0.0,
+   "p50_ms": 8.2,
+   "p95_ms": 49.5,
+   "peak_rss_mb": 1083.7,
+   "process_wall_s": 7.7,
+   "refused": 0,
+   "venv": ".venv"
+  },
+  {
+   "arm": "presidio_faker",
+   "cold_start_runs_s": [
+    4.8,
+    4.8,
+    4.9
+   ],
+   "cold_start_s": 4.8,
+   "edits": 467,
+   "max_ms": 72.7,
+   "mean_ms": 14.1,
+   "messages": 200,
+   "model_load_s": 3.6,
+   "p50_ms": 8.4,
+   "p95_ms": 50.3,
+   "peak_rss_mb": 1009.6,
+   "process_wall_s": 7.9,
+   "refused": 0,
+   "venv": ".venv"
+  },
+  {
+   "arm": "presidio_transformers",
+   "cold_start_runs_s": [
+    5.9,
+    3.9,
+    3.6
+   ],
+   "cold_start_s": 3.9,
+   "edits": 363,
+   "max_ms": 857.3,
+   "mean_ms": 120.5,
+   "messages": 200,
+   "model_load_s": 0.5,
+   "p50_ms": 83.5,
+   "p95_ms": 259.5,
+   "peak_rss_mb": 1610.7,
+   "process_wall_s": 34.0,
+   "refused": 0,
+   "venv": ".venv-baselines"
+  },
+  {
+   "arm": "llm_guard",
+   "cold_start_runs_s": [
+    5.1,
+    4.2,
+    4.2
+   ],
+   "cold_start_s": 4.2,
+   "edits": 259,
+   "max_ms": 517.3,
+   "mean_ms": 78.4,
+   "messages": 200,
+   "model_load_s": 1.0,
+   "p50_ms": 58.0,
+   "p95_ms": 198.9,
+   "peak_rss_mb": 1564.8,
+   "process_wall_s": 21.3,
+   "refused": 0,
+   "venv": ".venv-baselines"
+  },
+  {
+   "arm": "gliner_pii",
+   "cold_start_runs_s": [
+    11.8,
+    11.0,
+    11.0
+   ],
+   "cold_start_s": 11.0,
+   "edits": 657,
+   "max_ms": 540.2,
+   "mean_ms": 113.8,
+   "messages": 200,
+   "model_load_s": 10.2,
+   "p50_ms": 82.1,
+   "p95_ms": 340.9,
+   "peak_rss_mb": 2318.5,
+   "process_wall_s": 33.8,
+   "refused": 0,
+   "venv": ".venv-baselines"
+  },
+  {
+   "arm": "gliner_pii_tuned",
+   "cold_start_runs_s": [
+    11.5,
+    11.2,
+    11.3
+   ],
+   "cold_start_s": 11.3,
+   "edits": 790,
+   "max_ms": 532.3,
+   "mean_ms": 109.9,
+   "messages": 200,
+   "model_load_s": 10.3,
+   "p50_ms": 79.9,
+   "p95_ms": 342.1,
+   "peak_rss_mb": 2332.7,
+   "process_wall_s": 33.1,
+   "refused": 0,
+   "venv": ".venv-baselines"
+  }
+ ],
+ "cold_runs": 3,
+ "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.perf_arms --out bench/results/perf_arms_v4.json",
+ "detection_config": null,
+ "git": {
+  "commit": "b173311badad27998bd1aef4df62764d93118515",
+  "modified": []
+ },
+ "input_sha256": "e37355a87ade5c3767e7e71a39d0eac79f0a8d8847d8e6797cfa36c924490326",
+ "machine": {
+  "cpus": 10,
+  "machine": "arm64",
+  "memory_gb": 16.0,
+  "platform": "macOS-26.3-arm64-arm-64bit-Mach-O",
+  "processor": "arm",
+  "python": "3.13.2"
+ },
+ "messages": 200,
+ "p95": "sorted value at index floor(0.95 n), as bench/perf.py",
+ "per_dataset": {
+  "oasst1": 67,
+  "sharegpt": 67,
+  "wildchat": 66
+ }
+}

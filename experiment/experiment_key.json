@@ -68,9 +68,7 @@
   },
   {
     "Question": "Add this international supplier contact: Name - Katarzyna Wojciechowska, direct line - +49 30 8765 4321.",
-    "Answer-Key": {
-      "org": "Name"
-    }
+    "Answer-Key": {}
   },
   {
     "Question": "Help me write a polite email response from Takashi Sato confirming his attendance at an upcoming corporate strategic planning session.",
@@ -110,7 +108,6 @@
   {
     "Question": "Can you find a hardware store near 9916 Willow Lane, Eugene, OR that is open on Sundays?",
     "Answer-Key": {
-      "address": "9915 Willow Lane",
       "name": "Eugene"
     }
   },
@@ -138,8 +135,7 @@
   {
     "Question": "For internal network environment troubleshooting, can you explain why packets cleanly route to 172.16.254.1 but fail to establish a standard secure shell session?",
     "Answer-Key": {
-      "ip_address": "172.16.254.2",
-      "address": "1 but fail to establish a standard"
+      "ip_address": "172.16.254.1"
     }
   },
   {
@@ -387,7 +383,6 @@
     "Question": "Why does my Node microservice cluster return an authentication error code whenever I present the verification Bearer token ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2 from a container instance bound to internal IP address 10.0.5.22?",
     "Answer-Key": {
       "api_key": "ghp_Z9Y8X7W6V5U4T3S2R1Q0P9O8N7M6L5K4J3H2",
-      "org": "IP",
       "ip_address": "10.0.5.22"
     }
   },
@@ -578,7 +573,7 @@
     }
   },
   {
-    "Question": "I'm debugging our Stripe integration at DataPulse Inc and accidentally logged the key sk-stripe-RqWxMnBvCkJhYtPpLsOaUiEd9F7G3H2 \u2014 how do I scrub it?",
+    "Question": "I'm debugging our Stripe integration at DataPulse Inc and accidentally logged the key sk-stripe-RqWxMnBvCkJhYtPpLsOaUiEd9F7G3H2 — how do I scrub it?",
     "Answer-Key": {
       "org": "DataPulse Inc",
       "api_key": "sk-stripe-RqWxMnBvCkJhYtPpLsOaUiEd9F7G3H2"

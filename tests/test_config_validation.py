@@ -1,0 +1,132 @@
+"""Config knobs: defaults, validation errors, both trees."""
+
+import pytest
+
+import surrogateshield as ss
+from surrogateshield._state import cfg
+
+
+@pytest.fixture(autouse=True)
+def _reset_config():
+    yield
+    ss.config(detailed_view=False)  # restore defaults after each test
+
+
+# ── Defaults (the high-accuracy path out of the box) ──────────────────────────
+
+def test_library_defaults():
+    ss.config(detailed_view=False)
+    assert cfg.address_mode == "auto"   # I22: shift only under the service-query policy
+    assert cfg.address_shift_range == 1
+    assert cfg.fuzzy_threshold == 85
+    assert cfg.spacy_model == "en_core_web_lg"
+    assert cfg.context_guard_enabled is False      # V3: the tagger reads names; ContextGuard is opt-in
+    assert cfg.context_guard_model == "dslim/distilbert-NER"
+    assert cfg.context_guard_device == -1
+    from surrogateshield.core.detection import config as C
+    assert (cfg.tagger_model, cfg.tagger_revision, cfg.tagger_device) == (C.PII_TAGGER_MODEL, C.PII_TAGGER_REVISION, -1)
+    assert cfg.entity_trace_high_threshold == 0.90     # balanced's spaCy type gates
+    assert cfg.entity_trace_low_threshold == 0.70
+    assert cfg.context_guard_threshold == 0.70
+    assert cfg.entity_trace_fallback_threshold == 0.75
+    assert cfg.service is True
+    assert cfg.pii_off == []
+    assert cfg.pii_mem == "temp"
+
+
+def test_root_config_defaults_and_validation():
+    import config as root_config
+    assert root_config.ADDRESS_MODE == "auto"
+    assert root_config.ADDRESS_SHIFT_RANGE == 1
+    assert root_config.FUZZY_MATCH_THRESHOLD == 85
+    assert root_config.CONTEXT_GUARD_DEVICE == -1
+    assert root_config.VERSION == "1.9.0"
+    root_config.validate_config()  # must not raise on shipped defaults
+
+
+# ── Valid customization round-trips ───────────────────────────────────────────
+
+def test_custom_values_accepted():
+    ss.config(
+        detailed_view=False,
+        address_mode="auto",
+        address_shift_range=4,
+        fuzzy_threshold=70,
+        pii_off=["phone", "name", "location"],
+        context_guard_model="dslim/bert-base-NER",
+        context_guard_device=0,
+    )
+    assert cfg.address_mode == "auto"
+    assert cfg.address_shift_range == 4
+    assert cfg.fuzzy_threshold == 70
+    assert cfg.pii_off == ["phone", "name", "location"]
+    assert cfg.context_guard_model == "dslim/bert-base-NER"
+    assert cfg.context_guard_device == 0
+
+
+def test_tagger_settings_reach_the_detection_config():
+    from surrogateshield._state import Config, effective_detection
+    from surrogateshield.core.detection import config as C
+    d = Config()
+    try:
+        ss.config(tagger_model="org/tagger", tagger_device="mps")
+        st = effective_detection(cfg).stage("pii_tagger")
+        assert (st.model, st.revision, st.options["device"]) == ("org/tagger", None, "mps")
+        ss.config(tagger_model=d.tagger_model, tagger_revision="sha256:" + "a" * 64, tagger_device=0)
+        st = effective_detection(cfg).stage("pii_tagger")
+        assert (st.model, st.revision, st.options["device"]) == (C.PII_TAGGER_MODEL, "sha256:" + "a" * 64, "cuda:0")
+    finally:
+        ss.config(tagger_model=d.tagger_model, tagger_revision=d.tagger_revision, tagger_device=d.tagger_device)
+
+
+@pytest.mark.parametrize("mode", ["shift", "replace", "auto"])
+def test_all_address_modes_accepted(mode):
+    ss.config(detailed_view=False, address_mode=mode)
+    assert cfg.address_mode == mode
+
+
+# ── Invalid values raise ValueError with actionable messages ──────────────────
+
+@pytest.mark.parametrize("kwargs, fragment", [
+    (dict(address_mode="wobble"), "address_mode"),
+    (dict(address_mode="SHIFT"), "address_mode"),
+    (dict(address_shift_range=0), "address_shift_range"),
+    (dict(address_shift_range=-2), "address_shift_range"),
+    (dict(address_shift_range=1.5), "address_shift_range"),
+    (dict(address_shift_range=True), "address_shift_range"),
+    (dict(fuzzy_threshold=101), "fuzzy_threshold"),
+    (dict(fuzzy_threshold=-1), "fuzzy_threshold"),
+    (dict(entity_trace_high_threshold=1.5), "entity_trace_high_threshold"),
+    (dict(entity_trace_low_threshold=-0.1), "entity_trace_low_threshold"),
+    (dict(context_guard_threshold=2), "context_guard_threshold"),
+    (dict(entity_trace_fallback_threshold=7), "entity_trace_fallback_threshold"),
+    (dict(spacy_model=""), "spacy_model"),
+    (dict(context_guard_model="  "), "context_guard_model"),
+    (dict(context_guard_device="gpu"), "context_guard_device"),
+    (dict(tagger_model=""), "tagger_model"),
+    (dict(tagger_revision=""), "tagger_revision"),
+    (dict(tagger_device=True), "tagger_device"),
+    (dict(tagger_device=" "), "tagger_device"),
+    (dict(pii_off=["nonsense_type"]), "pii_off"),
+    (dict(pii_mem="/definitely/not/a/real/dir"), "pii_mem"),
+])
+def test_invalid_values_rejected(kwargs, fragment):
+    with pytest.raises(ValueError, match=fragment.replace("/", ".")):
+        ss.config(detailed_view=False, **kwargs)
+
+
+def test_invalid_config_leaves_previous_state_intact():
+    ss.config(detailed_view=False, address_mode="replace")
+    with pytest.raises(ValueError):
+        ss.config(detailed_view=False, address_mode="bogus")
+    assert cfg.address_mode == "replace"  # validation happens before mutation
+
+
+@pytest.mark.parametrize("alias", [
+    "phone", "name", "names", "location", "org", "email", "ssn", "dob",
+    "address", "zip", "postcode", "credit_card", "ip_address", "api_key",
+    "crypto", "bank", "license", "gender_indicator",
+])
+def test_documented_pii_off_aliases_accepted(alias):
+    ss.config(detailed_view=False, pii_off=[alias])
+    assert cfg.pii_off == [alias]

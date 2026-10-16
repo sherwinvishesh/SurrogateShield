@@ -1,0 +1,53 @@
+{
+ "command": "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 .venv/bin/python -m bench.realdata.resolver_effect --split dev devlarge --out bench/results/resolver_effect.json",
+ "config_hash": "8e463c3c6b7562fd6ae3070109edd178a248cd7e5ab350168aeb122bd4c81c15",
+ "git": {
+  "commit": "2c1e88dfb554cd3349b78b459d8cf7f0238ccacf",
+  "modified": []
+ },
+ "source_priority": [
+  "pattern_scan",
+  "canonicaliser",
+  "structural",
+  "pii_tagger",
+  "context_guard",
+  "entity_trace"
+ ],
+ "splits": {
+  "dev": {
+   "injected": {
+    "changed, source or occurrence only: PERSON/entity_trace -> PERSON/context_guard": 2,
+    "groups": 56,
+    "same winner": 54
+   },
+   "natural": {
+    "changed, public type: ORG/entity_trace -> PERSON/structural": 1,
+    "changed, source or occurrence only: PERSON/context_guard -> PERSON/structural": 1,
+    "changed, source or occurrence only: PERSON/entity_trace -> PERSON/context_guard": 1,
+    "groups": 74,
+    "same winner": 71
+   }
+  },
+  "devlarge": {
+   "injected": {
+    "changed, public type: ORG/entity_trace -> PERSON/structural": 1,
+    "changed, source or occurrence only: PERSON/entity_trace -> PERSON/context_guard": 3,
+    "groups": 208,
+    "same winner": 204
+   },
+   "natural": {
+    "changed, internal type: LOCATION/entity_trace -> LOCATION/context_guard": 1,
+    "changed, public type: ORG/entity_trace -> PERSON/structural": 2,
+    "changed, public type: PERSON/entity_trace -> ORG/context_guard": 1,
+    "changed, source or occurrence only: PERSON/entity_trace -> PERSON/context_guard": 8,
+    "groups": 307,
+    "same winner": 295
+   }
+  }
+ },
+ "type_conflicts": {
+  "LOCATION|ORG": "score",
+  "LOCATION|PERSON": "score",
+  "ORG|PERSON": "score"
+ }
+}

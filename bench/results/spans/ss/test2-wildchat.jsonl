@@ -1,0 +1,1323 @@
+{"id": "rd-wildchat-test2-0001", "ms": 96.12, "edits": [[35, 50, "PERSON", 19, 0], [58, 74, "phone_intl", 16, 0], [85, 90, "ORG", 4, 0], [101, 147, "url", 50, 0], [156, 171, "handle", 19, 0]]}
+{"id": "rd-wildchat-test2-0002", "ms": 50.99, "edits": [[4, 19, "PERSON", 17, 0], [21, 27, "age", 6, 0], [40, 46, "ORG", 7, 0]]}
+{"id": "rd-wildchat-test2-0003", "ms": 44.24, "edits": [[4, 21, "PERSON", 14, 0], [28, 38, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0004", "ms": 51.16, "edits": [[157, 177, "age:worded", 19, 0], [192, 206, "phone_intl", 14, 0], [225, 240, "handle", 10, 0]]}
+{"id": "rd-wildchat-test2-0005", "ms": 70.28, "edits": [[325, 339, "PERSON", 15, 0], [346, 372, "dob:dates", 30, 0], [381, 395, "ip_address", 13, 0], [397, 410, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0006", "ms": 72.83, "edits": [[4, 15, "PERSON", 11, 0], [17, 40, "email", 23, 0], [42, 53, "phone_us:joined", 11, 0]]}
+{"id": "rd-wildchat-test2-0007", "ms": 215.21, "edits": [[4, 24, "PERSON", 14, 0], [26, 32, "age", 6, 0], [39, 76, "address", 38, 0], [89, 97, "ORG", 11, 0], [99, 128, "email", 23, 0], [150, 158, "PERSON", 7, 0], [189, 200, "GPE", 8, 0], [202, 212, "GPE", 9, 0], [244, 251, "PERSON", 7, 0], [256, 261, "PERSON", 6, 0], [327, 341, "PERSON", 15, 0], [361, 369, "GPE", 9, 0], [371, 379, "GPE", 11, 0], [496, 504, "PERSON", 7, 0], [552, 558, "PERSON", 7, 0], [724, 732, "PERSON", 7, 0], [744, 750, "PERSON", 7, 0], [795, 803, "PERSON", 7, 0], [808, 814, "PERSON", 7, 0], [853, 861, "PERSON", 7, 0], [896, 914, "ORG", 16, 0], [930, 937, "PERSON", 7, 0], [948, 956, "PERSON", 7, 0], [1045, 1050, "PERSON", 6, 0], [1098, 1106, "PERSON", 7, 0], [1226, 1232, "PERSON", 7, 0], [1254, 1260, "PERSON", 7, 0], [1296, 1302, "PERSON", 7, 0], [1307, 1315, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-0008", "ms": 91.76, "edits": [[415, 440, "ORG", 24, 0], [448, 463, "dob", 15, 0], [476, 485, "passport", 9, 0], [488, 507, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0009", "ms": 96.82, "edits": [[4, 20, "PERSON", 10, 0], [26, 51, "ORG", 24, 0], [53, 97, "address", 41, 0]]}
+{"id": "rd-wildchat-test2-0010", "ms": 97.87, "edits": [[59, 69, "PERSON", 12, 0], [70, 77, "postcode_uk", 7, 0], [347, 362, "credential", 15, 0], [411, 424, "PERSON", 16, 0], [426, 432, "age", 6, 0], [435, 477, "address", 41, 0], [489, 502, "id_number", 13, 0]]}
+{"id": "rd-wildchat-test2-0011", "ms": 204.03, "edits": [[8, 24, "PERSON", 12, 0], [28, 39, "age", 11, 0], [51, 73, "ORG", 27, 0], [77, 84, "GPE", 6, 0], [98, 130, "email", 28, 0], [147, 157, "phone_us", 10, 0], [174, 188, "credential", 14, 0], [654, 660, "ORG", 10, 0], [665, 672, "ORG", 7, 0]]}
+{"id": "rd-wildchat-test2-0012", "ms": 150.7, "edits": [[6, 16, "PERSON", 12, 0], [26, 66, "address", 42, 0], [74, 89, "phone_intl", 15, 0], [105, 115, "dob", 10, 0], [120, 135, "ip_address", 15, 0], [187, 192, "PERSON", 3, 0], [283, 288, "PERSON", 3, 0], [329, 334, "PERSON", 6, 0], [429, 434, "PERSON", 3, 0], [482, 487, "PERSON", 3, 0], [561, 566, "PERSON", 6, 0], [691, 696, "PERSON", 3, 0], [729, 734, "PERSON", 6, 0], [764, 769, "PERSON", 6, 0], [806, 811, "PERSON", 3, 0], [839, 844, "PERSON", 6, 0], [912, 917, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-0013", "ms": 109.23, "edits": [[10, 26, "PERSON", 22, 0], [37, 47, "age:worded", 11, 0], [96, 117, "GPE", 4, 0], [144, 165, "GPE", 4, 0]]}
+{"id": "rd-wildchat-test2-0014", "ms": 203.33, "edits": [[6, 21, "PERSON", 15, 0], [28, 33, "GPE", 8, 0], [41, 72, "email", 28, 0], [91, 103, "id_number", 12, 0], [117, 136, "credit_card", 19, 0], [149, 175, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0015", "ms": 42.48, "edits": [[4, 16, "PERSON", 12, 0], [29, 56, "ORG", 27, 0]]}
+{"id": "rd-wildchat-test2-0016", "ms": 72.39, "edits": [[8, 21, "PERSON", 13, 0], [23, 39, "phone_intl", 16, 0], [88, 101, "PERSON", 13, 0], [168, 173, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0017", "ms": 94.2, "edits": [[5, 18, "PERSON", 12, 0], [20, 36, "email", 16, 0], [38, 53, "phone_intl", 15, 0], [55, 107, "address", 52, 0]]}
+{"id": "rd-wildchat-test2-0018", "ms": 82.38, "edits": [[6, 22, "PERSON", 16, 0], [28, 38, "dob", 10, 0], [48, 79, "address", 36, 0], [90, 104, "ORG", 15, 0], [113, 126, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0019", "ms": 79.38, "edits": [[418, 428, "PERSON", 12, 0], [430, 439, "ORG", 12, 0], [442, 457, "phone_uk", 15, 0], [460, 497, "url", 39, 0], [500, 518, "credential", 18, 0]]}
+{"id": "rd-wildchat-test2-0020", "ms": 42.36, "edits": [[86, 98, "PERSON", 16, 0], [101, 113, "handle", 16, 0]]}
+{"id": "rd-wildchat-test2-0021", "ms": 88.07, "edits": [[11, 28, "PERSON", 17, 0], [40, 50, "ORG", 11, 0], [68, 96, "email", 28, 0], [128, 141, "id_number", 13, 0], [171, 188, "mac_address", 17, 0]]}
+{"id": "rd-wildchat-test2-0022", "ms": 247.14, "edits": [[5, 13, "PERSON", 12, 0], [24, 29, "GPE", 5, 0], [54, 67, "ip_address", 12, 0], [407, 410, "ip_address", 3, 0], [502, 505, "ip_address", 3, 0], [1485, 1498, "PERSON", 12, 0], [1553, 1559, "PERSON", 6, 0], [1560, 1566, "PERSON", 5, 0], [1566, 1569, "ip_address", 3, 0], [1703, 1706, "ip_address", 3, 0], [1763, 1776, "PERSON", 12, 0], [1776, 1779, "ip_address", 3, 0], [1923, 1926, "ip_address", 3, 0]]}
+{"id": "rd-wildchat-test2-0023", "ms": 73.05, "edits": [[6, 15, "PERSON", 17, 0], [22, 29, "GPE", 9, 0], [45, 61, "dob", 12, 0], [73, 105, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0024", "ms": 42.98, "edits": [[6, 19, "PERSON", 13, 0], [29, 39, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-0025", "ms": 89.02, "edits": [[4, 16, "age", 12, 0], [28, 53, "ORG", 24, 0], [71, 103, "email", 25, 0]]}
+{"id": "rd-wildchat-test2-0026", "ms": 67.51, "edits": [[8, 24, "PERSON", 11, 0], [29, 64, "address", 33, 0], [72, 94, "email", 18, 0], [102, 114, "phone_uk", 12, 0]]}
+{"id": "rd-wildchat-test2-0027", "ms": 202.49, "edits": [[18, 37, "PERSON", 16, 0], [50, 90, "email:spelled", 37, 0], [101, 129, "dob:dates", 26, 0], [141, 160, "credit_card", 19, 0], [172, 199, "iban", 27, 0], [213, 233, "handle", 17, 0], [939, 947, "ORG", 8, 0]]}
+{"id": "rd-wildchat-test2-0028", "ms": 79.46, "edits": [[4, 23, "PERSON", 18, 0], [25, 53, "email", 27, 0], [66, 83, "mac_address", 17, 0], [94, 141, "url", 46, 0]]}
+{"id": "rd-wildchat-test2-0029", "ms": 98.0, "edits": [[6, 20, "PERSON", 15, 0], [28, 42, "phone_us", 14, 0], [54, 86, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0030", "ms": 49.86, "edits": [[8, 22, "PERSON", 18, 0], [24, 35, "handle", 15, 0]]}
+{"id": "rd-wildchat-test2-0031", "ms": 84.88, "edits": [[4, 21, "PERSON", 11, 0], [27, 33, "GPE", 7, 0], [41, 70, "email", 23, 0], [75, 114, "ip_address", 39, 0], [123, 141, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0032", "ms": 96.45, "edits": [[27, 33, "PERSON", 5, 0], [46, 52, "PERSON", 5, 0], [184, 190, "PERSON", 5, 0], [505, 512, "GPE", 6, 0], [518, 529, "PERSON", 13, 0], [531, 537, "age", 6, 0], [539, 543, "GPE", 7, 0], [544, 564, "email", 22, 0]]}
+{"id": "rd-wildchat-test2-0033", "ms": 267.31, "edits": [[2017, 2037, "email", 21, 0], [2043, 2053, "dob", 10, 0], [2055, 2070, "id_number", 15, 0], [2080, 2093, "id_number", 13, 0]]}
+{"id": "rd-wildchat-test2-0034", "ms": 220.89, "edits": [[6, 21, "PERSON", 12, 0], [31, 79, "address", 47, 0], [87, 97, "phone_us", 10, 0], [102, 117, "ip_address", 12, 0]]}
+{"id": "rd-wildchat-test2-0035", "ms": 78.13, "edits": [[4, 23, "PERSON", 17, 0], [38, 66, "ORG", 24, 0], [68, 98, "address", 29, 0]]}
+{"id": "rd-wildchat-test2-0036", "ms": 91.15, "edits": [[12, 39, "email", 25, 0], [45, 55, "dob", 10, 0], [78, 91, "ip_address", 13, 0]]}
+{"id": "rd-wildchat-test2-0037", "ms": 126.55, "edits": [[4, 18, "PERSON", 16, 0], [29, 35, "GPE", 7, 0], [51, 63, "ORG", 9, 0]]}
+{"id": "rd-wildchat-test2-0038", "ms": 75.68, "edits": [[46, 62, "ORG", 16, 0], [162, 166, "GPE", 7, 0], [329, 336, "GPE", 7, 0], [341, 345, "GPE", 7, 0], [350, 359, "PERSON", 13, 0], [361, 367, "age", 6, 0], [369, 378, "handle", 12, 0], [380, 412, "ORG", 29, 0]]}
+{"id": "rd-wildchat-test2-0039", "ms": 91.58, "edits": [[74, 89, "PERSON", 16, 0], [97, 124, "email", 19, 0], [148, 165, "ORG", 7, 0]]}
+{"id": "rd-wildchat-test2-0040", "ms": 211.7, "edits": [[1026, 1039, "ORG", 15, 0], [1096, 1115, "ORG", 16, 0], [1285, 1297, "PERSON", 14, 0], [1298, 1320, "ORG", 27, 0], [1321, 1336, "phone_us", 15, 0], [1342, 1352, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0041", "ms": 165.54, "edits": [[6, 21, "PERSON", 15, 0], [22, 29, "age", 7, 0], [39, 91, "address", 42, 0]]}
+{"id": "rd-wildchat-test2-0042", "ms": 70.62, "edits": [[6, 18, "PERSON", 13, 0], [27, 39, "handle", 13, 0], [50, 66, "credential", 16, 0]]}
+{"id": "rd-wildchat-test2-0043", "ms": 56.98, "edits": [[4, 18, "PERSON", 14, 0], [20, 37, "phone_intl", 17, 0], [39, 48, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0044", "ms": 89.59, "edits": [[6, 25, "PERSON", 18, 0], [33, 50, "email", 18, 0], [51, 58, "age", 7, 0]]}
+{"id": "rd-wildchat-test2-0045", "ms": 544.76, "edits": [[3069, 3089, "PERSON", 18, 0], [3090, 3121, "address", 32, 0], [3136, 3153, "mac_address", 17, 0], [3161, 3193, "credential", 32, 0], [3194, 3240, "url", 42, 0], [3241, 3257, "handle", 15, 0]]}
+{"id": "rd-wildchat-test2-0046", "ms": 121.38, "edits": [[333, 347, "PERSON", 14, 0], [353, 363, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0047", "ms": 51.11, "edits": [[12, 39, "email", 23, 0], [56, 70, "phone_intl", 14, 0]]}
+{"id": "rd-wildchat-test2-0048", "ms": 92.8, "edits": [[8, 23, "PERSON", 11, 0], [29, 36, "ORG", 8, 0], [38, 55, "email", 15, 0], [57, 71, "phone_intl", 14, 0], [78, 95, "mac_address", 17, 0], [248, 261, "GPE", 7, 0], [473, 486, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0049", "ms": 48.98, "edits": [[6, 23, "PERSON", 12, 0], [31, 60, "email", 24, 0]]}
+{"id": "rd-wildchat-test2-0050", "ms": 94.95, "edits": [[4, 12, "PERSON", 14, 0], [27, 57, "ORG", 32, 0], [69, 77, "passport", 8, 0], [90, 102, "ip_address", 12, 0], [630, 633, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-0051", "ms": 80.24, "edits": [[336, 357, "PERSON", 14, 0], [360, 375, "ORG", 12, 0], [378, 419, "address", 44, 0], [422, 452, "email", 23, 0], [455, 467, "handle", 9, 0]]}
+{"id": "rd-wildchat-test2-0052", "ms": 40.58, "edits": [[139, 153, "PERSON", 13, 0], [156, 162, "ORG", 5, 0], [165, 180, "handle", 14, 0]]}
+{"id": "rd-wildchat-test2-0053", "ms": 60.66, "edits": [[8, 17, "PERSON", 13, 0], [19, 28, "handle", 11, 0], [49, 65, "credential", 16, 0]]}
+{"id": "rd-wildchat-test2-0054", "ms": 81.62, "edits": [[6, 19, "PERSON", 14, 0], [27, 51, "email", 25, 0], [59, 76, "phone_intl", 17, 0]]}
+{"id": "rd-wildchat-test2-0055", "ms": 60.98, "edits": [[166, 180, "PERSON", 16, 0], [193, 200, "id_number", 7, 0], [225, 238, "ip_address", 13, 0], [258, 277, "credit_card", 19, 0]]}
+{"id": "rd-wildchat-test2-0056", "ms": 79.38, "edits": [[6, 28, "PERSON", 14, 0], [39, 68, "ORG", 27, 0], [78, 112, "address", 30, 0], [120, 136, "phone_intl", 16, 0], [141, 150, "id_number", 9, 0]]}
+{"id": "rd-wildchat-test2-0057", "ms": 66.75, "edits": [[15, 32, "PERSON", 14, 0], [34, 40, "age", 6, 0], [42, 57, "phone_uk", 15, 0], [59, 87, "address", 31, 0]]}
+{"id": "rd-wildchat-test2-0058", "ms": 57.23, "edits": [[9, 18, "GPE", 10, 0], [37, 79, "url", 42, 0], [100, 119, "credit_card", 19, 0]]}
+{"id": "rd-wildchat-test2-0059", "ms": 61.24, "edits": [[4, 18, "PERSON", 15, 0], [25, 35, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0060", "ms": 88.6, "edits": [[433, 447, "PERSON", 11, 0], [453, 463, "dob", 10, 0], [475, 485, "ORG", 11, 0], [497, 532, "address", 36, 0], [550, 576, "email", 23, 0]]}
+{"id": "rd-wildchat-test2-0061", "ms": 80.74, "edits": [[52, 59, "GPE", 9, 0], [91, 98, "GPE", 9, 0], [241, 248, "GPE", 9, 0], [428, 445, "PERSON", 17, 0], [451, 461, "dob", 10, 0], [463, 478, "ORG", 5, 0], [481, 518, "url", 37, 0], [525, 540, "credential", 15, 0]]}
+{"id": "rd-wildchat-test2-0062", "ms": 102.02, "edits": [[4, 22, "PERSON", 12, 0], [29, 41, "dob", 11, 0], [49, 81, "email", 26, 0], [90, 109, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0063", "ms": 117.57, "edits": [[997, 1009, "PERSON", 12, 0], [1015, 1017, "age", 2, 0], [1031, 1056, "email", 25, 0], [1074, 1089, "phone_uk", 15, 0]]}
+{"id": "rd-wildchat-test2-0064", "ms": 83.06, "edits": [[12, 28, "PERSON", 12, 0], [40, 48, "GPE", 8, 0], [66, 93, "email", 23, 0], [101, 117, "phone_uk", 16, 0]]}
+{"id": "rd-wildchat-test2-0065", "ms": 58.69, "edits": [[4, 17, "PERSON", 14, 0], [24, 34, "dob", 10, 0], [46, 84, "address", 39, 0], [111, 119, "GPE", 4, 0], [151, 168, "GPE", 7, 0], [267, 283, "GPE", 12, 0]]}
+{"id": "rd-wildchat-test2-0066", "ms": 72.72, "edits": [[359, 391, "ORG", 34, 0], [392, 407, "phone_intl", 15, 0], [408, 453, "url", 43, 0]]}
+{"id": "rd-wildchat-test2-0067", "ms": 60.3, "edits": [[10, 25, "PERSON", 13, 0], [40, 69, "address", 31, 0], [84, 119, "url", 33, 0]]}
+{"id": "rd-wildchat-test2-0068", "ms": 73.78, "edits": [[4, 16, "PERSON", 12, 0], [28, 40, "ORG", 10, 0], [54, 70, "email", 17, 0], [148, 159, "GPE", 4, 0], [174, 183, "GPE", 9, 0], [187, 198, "PERSON", 14, 0], [211, 222, "GPE", 4, 0]]}
+{"id": "rd-wildchat-test2-0069", "ms": 61.74, "edits": [[18, 30, "PERSON", 15, 0], [45, 80, "address", 42, 0], [95, 135, "url", 43, 0]]}
+{"id": "rd-wildchat-test2-0070", "ms": 50.38, "edits": [[6, 18, "PERSON", 16, 0], [29, 44, "ORG", 17, 0], [54, 102, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0071", "ms": 383.65, "edits": [[3431, 3444, "PERSON", 14, 0], [3447, 3456, "GPE", 6, 0], [3459, 3474, "ORG", 17, 0], [3483, 3502, "credit_card", 19, 0], [3509, 3521, "ip_address", 13, 0], [3524, 3564, "url", 41, 0], [3579, 3605, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0072", "ms": 61.0, "edits": [[6, 22, "PERSON", 16, 0], [31, 49, "ORG", 17, 0], [59, 92, "address", 37, 0]]}
+{"id": "rd-wildchat-test2-0073", "ms": 81.92, "edits": [[408, 420, "PERSON", 18, 0], [425, 457, "address", 34, 0], [458, 499, "url", 47, 0]]}
+{"id": "rd-wildchat-test2-0074", "ms": 57.67, "edits": [[4, 18, "PERSON", 15, 0], [20, 52, "email:spelled", 32, 0], [54, 63, "age:worded", 14, 0], [192, 204, "GPE", 10, 0]]}
+{"id": "rd-wildchat-test2-0075", "ms": 62.68, "edits": [[318, 332, "PERSON", 13, 0], [337, 365, "email", 27, 0], [366, 377, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0076", "ms": 41.56, "edits": [[6, 18, "PERSON", 12, 0], [27, 48, "ORG", 19, 0], [54, 64, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0077", "ms": 81.01, "edits": [[491, 506, "PERSON", 17, 0], [511, 535, "email", 26, 0], [536, 571, "url", 37, 0]]}
+{"id": "rd-wildchat-test2-0078", "ms": 174.96, "edits": [[8, 18, "PERSON", 13, 0], [20, 26, "age", 6, 0], [38, 94, "address", 38, 0]]}
+{"id": "rd-wildchat-test2-0079", "ms": 99.79, "edits": [[6, 23, "PERSON", 14, 0], [39, 49, "dob", 10, 0], [60, 73, "ORG", 15, 0], [83, 119, "url", 26, 0], [122, 136, "age:worded", 20, 0], [253, 258, "PERSON", 6, 0], [455, 460, "PERSON", 6, 0], [472, 480, "PERSON", 7, 0], [544, 552, "PERSON", 7, 0], [577, 582, "PERSON", 6, 0], [602, 607, "PERSON", 6, 0], [700, 705, "PERSON", 6, 0], [733, 741, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-0080", "ms": 78.93, "edits": [[4, 22, "PERSON", 13, 0], [29, 39, "GPE", 10, 0], [48, 68, "handle", 14, 0], [78, 110, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0081", "ms": 86.56, "edits": [[4, 15, "PERSON", 11, 0], [26, 35, "GPE", 7, 0], [43, 68, "email", 25, 0], [76, 125, "phone_us:worded", 50, 0], [127, 130, "id_number", 3, 0], [131, 140, "ssn", 9, 0]]}
+{"id": "rd-wildchat-test2-0082", "ms": 62.14, "edits": [[316, 329, "PERSON", 13, 0], [331, 337, "age", 6, 0], [339, 347, "GPE", 7, 0], [359, 375, "credential", 16, 0]]}
+{"id": "rd-wildchat-test2-0083", "ms": 95.49, "edits": [[8, 19, "PERSON", 13, 0], [22, 49, "address", 33, 0], [52, 67, "phone_intl", 15, 0], [70, 89, "credit_card", 19, 0], [92, 114, "url", 24, 0]]}
+{"id": "rd-wildchat-test2-0084", "ms": 59.09, "edits": [[4, 20, "PERSON", 13, 0], [22, 58, "url", 33, 0], [60, 76, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0085", "ms": 77.68, "edits": [[0, 12, "PERSON", 10, 0], [20, 33, "phone_uk", 13, 0], [44, 52, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-0086", "ms": 65.85, "edits": [[4, 22, "PERSON", 15, 0], [29, 39, "dob", 10, 0], [51, 83, "address", 33, 0]]}
+{"id": "rd-wildchat-test2-0087", "ms": 55.04, "edits": [[15, 23, "id_number", 8, 0], [37, 60, "email", 21, 0]]}
+{"id": "rd-wildchat-test2-0088", "ms": 54.74, "edits": [[29, 47, "PERSON", 18, 0], [55, 69, "phone_intl", 14, 0], [85, 95, "dob", 10, 0], [112, 115, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-0089", "ms": 72.27, "edits": [[271, 286, "PERSON", 19, 0], [287, 304, "phone_intl", 17, 0], [309, 316, "id_number", 7, 0]]}
+{"id": "rd-wildchat-test2-0090", "ms": 93.71, "edits": [[29, 44, "PERSON", 14, 0], [45, 61, "age:worded", 15, 0], [246, 254, "GPE", 8, 0], [546, 554, "GPE", 8, 0], [685, 713, "ORG", 13, 0]]}
+{"id": "rd-wildchat-test2-0091", "ms": 86.06, "edits": [[27, 36, "PERSON", 12, 0], [43, 76, "dob:dates", 31, 0], [89, 101, "ORG", 10, 0], [109, 122, "phone_intl", 13, 0], [135, 164, "url", 32, 0]]}
+{"id": "rd-wildchat-test2-0092", "ms": 63.75, "edits": [[10, 25, "PERSON", 11, 0], [36, 45, "ssn", 9, 0], [57, 99, "url", 38, 0]]}
+{"id": "rd-wildchat-test2-0093", "ms": 71.39, "edits": [[7, 21, "phone_intl", 14, 0], [27, 38, "dob", 11, 0], [45, 64, "credit_card", 19, 0], [70, 87, "mac_address", 17, 0]]}
+{"id": "rd-wildchat-test2-0094", "ms": 45.25, "edits": [[6, 19, "PERSON", 12, 0], [26, 45, "credit_card", 19, 0]]}
+{"id": "rd-wildchat-test2-0095", "ms": 46.0, "edits": [[4, 21, "PERSON", 17, 0], [23, 35, "phone_us", 12, 0]]}
+{"id": "rd-wildchat-test2-0096", "ms": 87.74, "edits": [[30, 45, "PERSON", 13, 0], [61, 71, "ORG", 12, 0], [82, 91, "age:worded", 10, 0], [160, 165, "GPE", 7, 0], [255, 261, "GPE", 6, 0]]}
+{"id": "rd-wildchat-test2-0097", "ms": 58.9, "edits": [[195, 221, "address", 28, 0], [227, 238, "dob", 16, 0]]}
+{"id": "rd-wildchat-test2-0098", "ms": 60.77, "edits": [[68, 85, "PERSON", 13, 0], [92, 100, "GPE", 10, 0]]}
+{"id": "rd-wildchat-test2-0099", "ms": 159.27, "edits": [[825, 836, "PERSON", 10, 0], [839, 855, "email", 16, 0], [866, 904, "ip_address", 38, 0], [907, 978, "url", 70, 0], [986, 1012, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0100", "ms": 186.1, "edits": [[6, 24, "PERSON", 17, 0], [32, 57, "email", 24, 0], [73, 83, "dob", 10, 0], [400, 421, "ORG", 22, 0], [740, 761, "ORG", 22, 0]]}
+{"id": "rd-wildchat-test2-0101", "ms": 113.7, "edits": [[10, 21, "PERSON", 18, 0], [32, 42, "age:worded", 11, 0], [57, 119, "address", 65, 0], [185, 193, "GPE", 6, 0], [454, 462, "GPE", 6, 0], [601, 609, "GPE", 6, 0]]}
+{"id": "rd-wildchat-test2-0102", "ms": 78.59, "edits": [[4, 18, "PERSON", 12, 0], [24, 33, "GPE", 6, 0], [44, 76, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0103", "ms": 80.32, "edits": [[302, 315, "PERSON", 12, 0], [326, 351, "dob:dates", 28, 0], [367, 387, "ORG", 20, 0], [402, 450, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0104", "ms": 121.77, "edits": [[652, 677, "ORG", 24, 0], [678, 735, "address", 56, 0], [741, 771, "dob:dates", 31, 0], [778, 797, "credit_card", 19, 0], [798, 832, "url", 35, 0], [845, 871, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0105", "ms": 83.85, "edits": [[8, 24, "PERSON", 17, 0], [30, 39, "GPE", 11, 0], [53, 78, "email", 26, 0], [90, 103, "handle", 11, 0], [124, 140, "credential", 16, 0], [267, 299, "ORG", 26, 0]]}
+{"id": "rd-wildchat-test2-0106", "ms": 60.52, "edits": [[8, 30, "PERSON", 13, 0], [44, 57, "phone_intl", 13, 0], [79, 121, "url", 33, 0], [144, 153, "GPE", 7, 0], [224, 233, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0107", "ms": 64.78, "edits": [[8, 24, "PERSON", 15, 0], [30, 36, "GPE", 4, 0], [58, 101, "url", 42, 0]]}
+{"id": "rd-wildchat-test2-0108", "ms": 44.57, "edits": [[107, 124, "PERSON", 11, 0], [126, 142, "ORG", 12, 0]]}
+{"id": "rd-wildchat-test2-0109", "ms": 54.66, "edits": [[6, 21, "PERSON", 12, 0], [22, 29, "age", 7, 0], [36, 42, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0110", "ms": 121.98, "edits": [[50, 58, "GPE", 7, 0], [865, 879, "PERSON", 18, 0], [882, 891, "ORG", 11, 0], [899, 912, "dob", 15, 0], [924, 937, "id_number", 13, 0], [945, 961, "phone_uk", 16, 0]]}
+{"id": "rd-wildchat-test2-0111", "ms": 84.81, "edits": [[56, 67, "PERSON", 19, 0], [83, 103, "ORG", 20, 0], [116, 132, "phone_intl", 16, 0], [143, 168, "dob:dates", 28, 0]]}
+{"id": "rd-wildchat-test2-0112", "ms": 50.7, "edits": [[6, 18, "PERSON", 13, 0], [25, 30, "GPE", 9, 0], [36, 53, "mac_address", 17, 0]]}
+{"id": "rd-wildchat-test2-0113", "ms": 44.93, "edits": [[58, 99, "address", 41, 0], [130, 139, "PERSON", 16, 0]]}
+{"id": "rd-wildchat-test2-0114", "ms": 69.57, "edits": [[8, 20, "PERSON", 15, 0], [22, 52, "address", 32, 0], [54, 95, "url", 45, 0]]}
+{"id": "rd-wildchat-test2-0115", "ms": 60.7, "edits": [[6, 17, "PERSON", 14, 0], [25, 40, "phone_intl", 15, 0], [41, 59, "age:worded", 11, 0], [64, 78, "ip_address", 13, 0], [293, 300, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-0116", "ms": 86.0, "edits": [[6, 20, "PERSON", 14, 0], [30, 61, "address", 30, 0], [69, 83, "phone_intl", 14, 0], [90, 115, "url", 25, 0], [124, 131, "handle", 7, 0]]}
+{"id": "rd-wildchat-test2-0117", "ms": 56.67, "edits": [[10, 21, "ORG", 13, 0], [33, 48, "ip_address", 15, 0], [57, 78, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0118", "ms": 252.95, "edits": [[6, 22, "PERSON", 8, 0], [32, 69, "address", 38, 0], [74, 82, "id_number", 8, 0], [95, 121, "credential", 26, 0], [209, 220, "PERSON", 12, 0], [252, 257, "PERSON", 4, 0], [601, 618, "PERSON", 15, 0], [1051, 1064, "PERSON", 16, 0], [1315, 1321, "PERSON", 7, 0], [1637, 1652, "PERSON", 13, 0], [1887, 1895, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-0119", "ms": 63.75, "edits": [[6, 16, "PERSON", 12, 0], [24, 48, "email", 26, 0], [57, 70, "ORG", 9, 0], [76, 93, "mac_address", 17, 0]]}
+{"id": "rd-wildchat-test2-0120", "ms": 71.75, "edits": [[6, 14, "PERSON", 9, 0], [21, 31, "GPE", 7, 0], [39, 62, "email", 24, 0]]}
+{"id": "rd-wildchat-test2-0121", "ms": 44.62, "edits": [[11, 22, "PERSON", 12, 0], [45, 64, "credit_card", 19, 0]]}
+{"id": "rd-wildchat-test2-0122", "ms": 113.44, "edits": [[4, 19, "PERSON", 13, 0], [31, 40, "passport", 9, 0], [87, 110, "GPE", 13, 0], [193, 203, "GPE", 6, 0], [639, 646, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-0123", "ms": 69.4, "edits": [[4, 16, "PERSON", 13, 0], [32, 68, "address", 37, 0], [76, 90, "email", 12, 0]]}
+{"id": "rd-wildchat-test2-0124", "ms": 47.12, "edits": [[4, 22, "PERSON", 12, 0], [24, 46, "email", 18, 0], [53, 85, "ORG", 30, 0], [93, 95, "GPE", 2, 0]]}
+{"id": "rd-wildchat-test2-0125", "ms": 225.97, "edits": [[2, 16, "PERSON", 14, 0], [19, 30, "ORG", 9, 0], [33, 76, "url", 43, 0], [79, 91, "handle", 12, 0], [99, 116, "mac_address", 17, 0], [128, 160, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0126", "ms": 118.68, "edits": [[11, 21, "PERSON", 15, 0], [35, 66, "email:spelled", 36, 0], [85, 95, "handle", 11, 0]]}
+{"id": "rd-wildchat-test2-0127", "ms": 74.76, "edits": [[6, 22, "PERSON", 13, 0], [29, 36, "GPE", 8, 0], [46, 78, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0128", "ms": 99.6, "edits": [[10, 24, "ORG", 13, 0], [40, 87, "address", 49, 0], [99, 110, "ssn", 11, 0], [138, 147, "passport", 9, 0]]}
+{"id": "rd-wildchat-test2-0129", "ms": 54.0, "edits": [[138, 155, "PERSON", 13, 0], [156, 169, "phone_uk", 13, 0]]}
+{"id": "rd-wildchat-test2-0130", "ms": 81.32, "edits": [[7, 30, "email", 25, 0], [44, 60, "credit_card", 16, 0], [73, 99, "credential", 26, 0], [119, 132, "GPE", 8, 0], [325, 344, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0131", "ms": 85.1, "edits": [[4, 27, "PERSON", 20, 0], [29, 57, "email", 25, 0], [59, 73, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0132", "ms": 94.71, "edits": [[12, 27, "phone_intl", 15, 0], [62, 75, "id_number", 13, 0]]}
+{"id": "rd-wildchat-test2-0133", "ms": 113.84, "edits": [[10, 24, "PERSON", 13, 0], [37, 63, "email:spelled", 23, 0], [78, 112, "url", 33, 0], [431, 442, "PERSON", 11, 0], [489, 500, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-0134", "ms": 292.38, "edits": [], "refused": 1}
+{"id": "rd-wildchat-test2-0135", "ms": 49.53, "edits": [[10, 26, "PERSON", 16, 0], [42, 60, "ORG", 16, 0]]}
+{"id": "rd-wildchat-test2-0136", "ms": 172.14, "edits": [[32, 46, "PERSON", 10, 0], [54, 74, "email", 19, 0], [80, 95, "dob", 15, 0], [113, 121, "id_number", 8, 0], [128, 144, "credit_card", 16, 0], [149, 188, "ip_address", 39, 0], [195, 236, "url", 40, 0]]}
+{"id": "rd-wildchat-test2-0137", "ms": 128.17, "edits": [[790, 800, "PERSON", 9, 0], [803, 843, "url", 39, 0], [846, 856, "handle", 9, 0], [863, 876, "ip_address", 11, 0], [884, 910, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0138", "ms": 73.39, "edits": [[6, 19, "PERSON", 13, 0], [20, 27, "age", 7, 0]]}
+{"id": "rd-wildchat-test2-0139", "ms": 236.57, "edits": [[6, 17, "PERSON", 11, 0], [23, 40, "mac_address", 17, 0], [47, 85, "url", 38, 0], [94, 106, "handle", 12, 0], [118, 150, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0140", "ms": 63.7, "edits": [[6, 22, "PERSON", 13, 0], [30, 59, "email", 26, 0], [66, 71, "GPE", 5, 0]]}
+{"id": "rd-wildchat-test2-0141", "ms": 119.9, "edits": [[28, 39, "PERSON", 12, 0], [41, 81, "url", 41, 0], [83, 91, "handle", 9, 0], [104, 115, "PERSON", 15, 0], [121, 129, "GPE", 4, 0]]}
+{"id": "rd-wildchat-test2-0142", "ms": 191.8, "edits": [[109, 127, "PERSON", 12, 0], [145, 156, "PERSON", 9, 0], [158, 188, "ORG", 26, 0], [1010, 1024, "PERSON", 15, 0], [1061, 1075, "PERSON", 13, 0], [1097, 1115, "PERSON", 15, 0], [1116, 1127, "age:worded", 14, 0], [1138, 1141, "GPE", 9, 0], [1149, 1178, "email", 25, 0], [1186, 1202, "phone_intl", 16, 0], [1214, 1246, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0143", "ms": 52.01, "edits": [[6, 23, "PERSON", 17, 0], [35, 49, "ip_address", 15, 0], [56, 90, "url", 34, 0]]}
+{"id": "rd-wildchat-test2-0144", "ms": 64.37, "edits": [[19, 37, "PERSON", 17, 0], [39, 55, "phone_intl", 16, 0]]}
+{"id": "rd-wildchat-test2-0145", "ms": 75.39, "edits": [[6, 21, "PERSON", 15, 0], [29, 53, "email", 24, 0], [60, 86, "url", 26, 0]]}
+{"id": "rd-wildchat-test2-0146", "ms": 59.57, "edits": [[6, 20, "PERSON", 9, 0], [31, 43, "ORG", 8, 0], [59, 80, "dob:dates", 20, 0]]}
+{"id": "rd-wildchat-test2-0147", "ms": 108.62, "edits": [[4, 20, "PERSON", 10, 0], [22, 28, "age", 6, 0], [39, 45, "GPE", 7, 0], [58, 86, "ORG", 26, 0], [104, 118, "ip_address", 13, 0], [138, 154, "credential", 16, 0], [376, 382, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-0148", "ms": 47.73, "edits": [[81, 96, "email", 18, 0], [108, 123, "credential", 15, 0]]}
+{"id": "rd-wildchat-test2-0149", "ms": 92.5, "edits": [[4, 15, "PERSON", 12, 0], [27, 65, "address", 42, 0], [74, 89, "phone_intl", 15, 0], [99, 108, "handle", 10, 0], [121, 153, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0150", "ms": 85.51, "edits": [[348, 375, "ORG", 30, 0], [376, 391, "phone_intl", 15, 0], [397, 407, "dob", 10, 0], [417, 465, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0151", "ms": 76.42, "edits": [[6, 26, "PERSON", 18, 0], [44, 64, "ORG", 19, 0], [72, 84, "phone_us", 12, 0], [98, 114, "credit_card", 16, 0]]}
+{"id": "rd-wildchat-test2-0152", "ms": 83.12, "edits": [[4, 17, "PERSON", 16, 0], [23, 40, "ORG", 6, 0], [49, 60, "handle", 14, 0], [73, 99, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0153", "ms": 67.87, "edits": [[73, 76, "PERSON", 5, 0], [205, 218, "PERSON", 11, 0], [219, 242, "email", 21, 0], [243, 276, "address", 32, 0]]}
+{"id": "rd-wildchat-test2-0154", "ms": 72.24, "edits": [[4, 17, "PERSON", 15, 0], [23, 31, "ORG", 4, 0], [35, 45, "GPE", 8, 0]]}
+{"id": "rd-wildchat-test2-0155", "ms": 89.29, "edits": [[4, 20, "PERSON", 17, 0], [27, 55, "dob:dates", 25, 0], [68, 74, "ORG", 8, 0], [96, 109, "ip_address", 14, 0]]}
+{"id": "rd-wildchat-test2-0156", "ms": 119.06, "edits": [[18, 30, "PERSON", 16, 0], [41, 58, "mac_address", 17, 0], [70, 141, "url", 70, 0], [158, 190, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0157", "ms": 50.47, "edits": [[6, 21, "PERSON", 14, 0], [31, 70, "address", 36, 0]]}
+{"id": "rd-wildchat-test2-0158", "ms": 63.92, "edits": [[4, 15, "PERSON", 11, 0], [17, 23, "age", 6, 0], [34, 43, "passport", 9, 0], [50, 72, "iban", 22, 0]]}
+{"id": "rd-wildchat-test2-0159", "ms": 72.5, "edits": [[369, 383, "PERSON", 19, 0], [385, 400, "age:worded", 14, 0], [402, 410, "GPE", 7, 0], [413, 446, "email:spelled", 38, 0]]}
+{"id": "rd-wildchat-test2-0160", "ms": 325.48, "edits": [[25, 57, "dob:dates", 30, 0], [71, 80, "ORG", 8, 0], [93, 120, "iban", 27, 0], [147, 154, "PERSON", 6, 0], [197, 204, "PERSON", 6, 0], [267, 274, "PERSON", 6, 0], [317, 324, "PERSON", 6, 0], [481, 488, "PERSON", 6, 0], [569, 576, "PERSON", 6, 0], [771, 778, "PERSON", 6, 0], [909, 916, "PERSON", 6, 0], [1081, 1088, "PERSON", 6, 0], [1139, 1146, "PERSON", 6, 0], [1361, 1365, "PERSON", 8, 0], [1440, 1444, "PERSON", 8, 0], [1649, 1653, "PERSON", 8, 0], [1768, 1772, "PERSON", 8, 0], [1866, 1870, "PERSON", 8, 0], [2029, 2033, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-0161", "ms": 61.24, "edits": [[4, 16, "age", 12, 0], [26, 34, "GPE", 10, 0], [49, 80, "ORG", 28, 0]]}
+{"id": "rd-wildchat-test2-0162", "ms": 53.99, "edits": [[4, 15, "PERSON", 15, 0], [22, 33, "dob", 15, 0], [54, 69, "credential", 15, 0]]}
+{"id": "rd-wildchat-test2-0163", "ms": 43.6, "edits": [[4, 19, "PERSON", 13, 0], [31, 40, "passport", 9, 0]]}
+{"id": "rd-wildchat-test2-0164", "ms": 95.29, "edits": [[6, 22, "PERSON", 16, 0], [32, 65, "address", 39, 0], [73, 88, "phone_intl", 15, 0], [94, 104, "dob", 10, 0], [115, 124, "passport", 9, 0]]}
+{"id": "rd-wildchat-test2-0165", "ms": 71.41, "edits": [[21, 34, "PERSON", 12, 0], [44, 79, "address", 29, 0], [84, 95, "ip_address", 14, 0]]}
+{"id": "rd-wildchat-test2-0166", "ms": 51.13, "edits": [[169, 178, "PERSON", 9, 0], [179, 191, "ORG", 5, 0], [192, 230, "address", 39, 0]]}
+{"id": "rd-wildchat-test2-0167", "ms": 146.52, "edits": [[11, 24, "PERSON", 12, 0], [31, 51, "ORG", 18, 0], [65, 79, "phone_intl", 14, 0], [95, 105, "dob", 10, 0], [644, 649, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-0168", "ms": 89.08, "edits": [[6, 35, "address", 31, 0], [46, 52, "ORG", 5, 0], [60, 74, "phone_intl", 14, 0], [75, 82, "age", 7, 0], [87, 99, "ip_address", 12, 0]]}
+{"id": "rd-wildchat-test2-0169", "ms": 84.34, "edits": [[367, 382, "PERSON", 16, 0], [384, 415, "ORG", 28, 0], [422, 434, "phone_us", 12, 0], [441, 458, "mac_address", 17, 0], [467, 499, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0170", "ms": 203.51, "edits": [[170, 174, "PERSON", 5, 0], [212, 222, "PERSON", 6, 0], [236, 240, "PERSON", 5, 0], [243, 253, "PERSON", 6, 0], [271, 281, "PERSON", 6, 0], [363, 367, "PERSON", 5, 0], [383, 393, "PERSON", 6, 0], [459, 463, "PERSON", 5, 0], [567, 577, "PERSON", 6, 0], [651, 661, "PERSON", 6, 0], [1195, 1209, "PERSON", 12, 0], [1212, 1219, "GPE", 9, 0], [1222, 1238, "phone_uk", 16, 0], [1246, 1262, "dob", 15, 0], [1265, 1278, "ip_address", 14, 0], [1281, 1306, "url", 23, 0], [1309, 1324, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0171", "ms": 97.83, "edits": [[8, 26, "PERSON", 18, 0], [28, 57, "email", 29, 0], [70, 102, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0172", "ms": 42.46, "edits": [[87, 100, "PERSON", 10, 0], [102, 112, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-0173", "ms": 73.1, "edits": [[45, 52, "PERSON", 6, 0], [338, 353, "PERSON", 14, 0], [356, 366, "id_number", 10, 0], [369, 396, "email", 26, 0], [399, 414, "phone_intl", 15, 0]]}
+{"id": "rd-wildchat-test2-0174", "ms": 39.31, "edits": [[8, 20, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-0175", "ms": 48.87, "edits": [[26, 42, "PERSON", 16, 0], [54, 89, "address", 31, 0]]}
+{"id": "rd-wildchat-test2-0176", "ms": 103.74, "edits": [[6, 21, "PERSON", 14, 0], [31, 89, "address", 61, 0], [100, 109, "passport", 9, 0], [128, 140, "id_number", 12, 0], [147, 173, "url", 25, 0], [185, 217, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0177", "ms": 71.36, "edits": [[6, 24, "PERSON", 15, 0], [32, 60, "email", 25, 0], [67, 73, "GPE", 4, 0], [243, 250, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0178", "ms": 97.03, "edits": [[4, 11, "PERSON", 14, 0], [18, 28, "dob", 10, 0], [39, 71, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0179", "ms": 88.94, "edits": [[4, 21, "PERSON", 12, 0], [28, 38, "dob", 10, 0], [47, 59, "phone_us", 12, 0], [67, 110, "url", 38, 0]]}
+{"id": "rd-wildchat-test2-0180", "ms": 127.43, "edits": [[622, 639, "PERSON", 19, 0], [641, 647, "age", 6, 0], [650, 677, "address", 30, 0], [680, 694, "phone_intl", 14, 0], [697, 714, "handle", 19, 0]]}
+{"id": "rd-wildchat-test2-0181", "ms": 98.73, "edits": [[468, 485, "PERSON", 13, 0], [486, 496, "age:worded", 17, 0], [507, 514, "ORG", 5, 0], [523, 543, "handle", 16, 0], [555, 587, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0182", "ms": 192.85, "edits": [[1308, 1327, "email", 17, 0], [1330, 1345, "phone_intl", 15, 0], [1348, 1354, "age", 6, 0], [1362, 1379, "mac_address", 17, 0], [1382, 1416, "url", 31, 0]]}
+{"id": "rd-wildchat-test2-0183", "ms": 77.86, "edits": [[4, 18, "PERSON", 16, 0], [33, 51, "ORG", 17, 0], [55, 61, "GPE", 6, 0], [63, 91, "email", 30, 0]]}
+{"id": "rd-wildchat-test2-0184", "ms": 106.38, "edits": [[869, 884, "PERSON", 17, 0], [885, 906, "email", 23, 0]]}
+{"id": "rd-wildchat-test2-0185", "ms": 86.19, "edits": [[4, 16, "PERSON", 13, 0], [18, 24, "age", 6, 0], [37, 67, "ORG", 23, 0], [81, 93, "handle", 6, 0], [120, 126, "PERSON", 9, 0], [209, 215, "PERSON", 9, 0], [471, 477, "PERSON", 9, 0]]}
+{"id": "rd-wildchat-test2-0186", "ms": 47.44, "edits": [[6, 20, "PERSON", 13, 0], [21, 28, "age", 7, 0]]}
+{"id": "rd-wildchat-test2-0187", "ms": 50.34, "edits": [[6, 21, "PERSON", 11, 0], [29, 44, "phone_intl", 15, 0], [55, 71, "credential", 16, 0], [195, 207, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-0188", "ms": 66.34, "edits": [[4, 22, "PERSON", 17, 0], [25, 54, "email", 28, 0], [56, 68, "phone_us", 12, 0]]}
+{"id": "rd-wildchat-test2-0189", "ms": 81.35, "edits": [[412, 426, "PERSON", 12, 0], [438, 455, "handle", 15, 0], [471, 488, "phone_intl", 17, 0]]}
+{"id": "rd-wildchat-test2-0190", "ms": 55.78, "edits": [[4, 23, "PERSON", 13, 0], [25, 45, "handle", 14, 0], [57, 63, "GPE", 9, 0], [208, 215, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-0191", "ms": 70.66, "edits": [[4, 18, "PERSON", 14, 0], [20, 65, "url", 45, 0], [102, 119, "credential", 17, 0]]}
+{"id": "rd-wildchat-test2-0192", "ms": 206.64, "edits": [[4, 15, "PERSON", 14, 0], [22, 32, "dob", 10, 0], [45, 58, "ip_address", 14, 0]]}
+{"id": "rd-wildchat-test2-0193", "ms": 175.88, "edits": [[53, 66, "PERSON", 9, 0], [70, 79, "ORG", 8, 0], [81, 112, "address", 31, 0], [124, 139, "ip_address", 14, 0], [141, 183, "url", 38, 0], [194, 208, "credential", 14, 0], [238, 261, "ORG", 29, 0]]}
+{"id": "rd-wildchat-test2-0194", "ms": 42.44, "edits": [[4, 16, "PERSON", 11, 0], [33, 48, "ORG", 10, 0]]}
+{"id": "rd-wildchat-test2-0195", "ms": 78.62, "edits": [[4, 22, "PERSON", 17, 0], [24, 30, "age", 6, 0], [38, 52, "phone_intl", 14, 0], [59, 81, "iban", 22, 0]]}
+{"id": "rd-wildchat-test2-0196", "ms": 126.33, "edits": [[11, 21, "PERSON", 14, 0], [35, 48, "phone_uk", 13, 0], [79, 96, "mac_address", 17, 0], [899, 903, "GPE", 4, 0]]}
+{"id": "rd-wildchat-test2-0197", "ms": 83.42, "edits": [[4, 18, "PERSON", 12, 0], [24, 36, "ORG", 9, 0]]}
+{"id": "rd-wildchat-test2-0198", "ms": 111.47, "edits": [[459, 473, "PERSON", 12, 0], [474, 484, "ORG", 7, 0], [485, 524, "address", 43, 0], [525, 543, "age:worded", 17, 0], [550, 569, "credit_card", 19, 0], [579, 627, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0199", "ms": 51.84, "edits": [[117, 133, "PERSON", 13, 0], [136, 152, "handle", 13, 0], [155, 166, "ip_address", 14, 0]]}
+{"id": "rd-wildchat-test2-0200", "ms": 95.09, "edits": [[6, 22, "PERSON", 19, 0], [29, 40, "GPE", 10, 0], [46, 56, "dob", 10, 0], [63, 134, "url", 71, 0]]}
+{"id": "rd-wildchat-test2-0201", "ms": 84.85, "edits": [[324, 338, "PERSON", 13, 0], [341, 366, "ORG", 27, 0], [379, 388, "passport", 9, 0], [391, 436, "url", 44, 0]]}
+{"id": "rd-wildchat-test2-0202", "ms": 115.69, "edits": [[11, 26, "PERSON", 12, 0], [33, 44, "dob", 16, 0], [55, 105, "address", 47, 0], [117, 125, "id_number", 8, 0], [138, 151, "ip_address", 10, 0], [164, 196, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0203", "ms": 90.7, "edits": [[6, 20, "PERSON", 12, 0], [27, 31, "GPE", 4, 0], [42, 51, "ORG", 9, 0]]}
+{"id": "rd-wildchat-test2-0204", "ms": 54.14, "edits": [[8, 21, "PERSON", 14, 0], [23, 35, "age", 12, 0]]}
+{"id": "rd-wildchat-test2-0205", "ms": 92.52, "edits": [[6, 17, "PERSON", 11, 0], [25, 48, "email", 23, 0], [60, 99, "ip_address", 39, 0], [109, 149, "url", 40, 0]]}
+{"id": "rd-wildchat-test2-0206", "ms": 102.2, "edits": [[6, 18, "PERSON", 13, 0], [27, 42, "ORG", 14, 0], [50, 62, "phone_us", 12, 0], [68, 78, "dob", 10, 0], [90, 122, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0207", "ms": 50.95, "edits": [[101, 115, "PERSON", 18, 0], [116, 122, "GPE", 5, 0]]}
+{"id": "rd-wildchat-test2-0208", "ms": 81.03, "edits": [[6, 18, "PERSON", 14, 0], [23, 30, "id_number", 7, 0], [41, 50, "passport", 9, 0], [61, 75, "credential", 14, 0]]}
+{"id": "rd-wildchat-test2-0209", "ms": 95.09, "edits": [[424, 436, "PERSON", 9, 0], [445, 466, "email", 18, 0], [473, 483, "dob", 10, 0], [491, 514, "url", 20, 0]]}
+{"id": "rd-wildchat-test2-0210", "ms": 100.78, "edits": [[418, 420, "age", 2, 0], [432, 441, "GPE", 9, 0], [454, 460, "ORG", 5, 0], [469, 498, "email", 29, 0], [511, 550, "ip_address", 39, 0]]}
+{"id": "rd-wildchat-test2-0211", "ms": 92.57, "edits": [[0, 13, "PERSON", 14, 0], [36, 51, "PERSON", 16, 0], [58, 68, "dob", 10, 0], [83, 97, "phone_intl", 14, 0], [110, 129, "ORG", 20, 0], [142, 159, "mac_address", 17, 0], [281, 290, "GPE", 5, 0], [292, 305, "GPE", 6, 0], [373, 385, "PERSON", 13, 0]]}
+{"id": "rd-wildchat-test2-0212", "ms": 106.04, "edits": [[4, 16, "PERSON", 14, 0], [22, 28, "GPE", 7, 0], [30, 38, "handle", 11, 0]]}
+{"id": "rd-wildchat-test2-0213", "ms": 465.01, "edits": [[4, 17, "PERSON", 9, 0], [21, 35, "ORG", 14, 0], [37, 62, "email", 23, 0], [64, 77, "handle", 9, 0], [79, 112, "url", 29, 0], [122, 161, "ip_address", 39, 0], [168, 194, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0214", "ms": 161.7, "edits": [[1024, 1037, "PERSON", 12, 0], [1040, 1067, "email", 26, 0], [1070, 1103, "url", 32, 0], [1106, 1119, "handle", 12, 0], [1122, 1136, "ORG", 6, 0], [1139, 1154, "ip_address", 14, 0], [1157, 1183, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0215", "ms": 69.08, "edits": [[69, 85, "PERSON", 5, 0], [129, 145, "PERSON", 13, 0], [157, 185, "address", 35, 0], [192, 211, "credit_card", 19, 0]]}
+{"id": "rd-wildchat-test2-0216", "ms": 144.6, "edits": [[4, 22, "PERSON", 18, 0], [24, 30, "age", 6, 0], [32, 40, "id_number", 8, 0], [41, 50, "passport", 9, 0], [57, 88, "address", 34, 0], [101, 113, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-0217", "ms": 94.54, "edits": [[8, 22, "PERSON", 12, 0], [49, 62, "ORG", 10, 0], [93, 103, "dob", 10, 0], [271, 280, "GPE", 8, 0], [580, 595, "PERSON", 12, 0], [675, 710, "ORG", 44, 0]]}
+{"id": "rd-wildchat-test2-0218", "ms": 86.33, "edits": [[7, 58, "address", 50, 0], [66, 93, "email", 30, 0], [101, 113, "phone_us", 12, 0], [119, 129, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0219", "ms": 61.43, "edits": [[29, 46, "PERSON", 15, 0], [53, 65, "dob", 13, 0], [77, 82, "GPE", 8, 0], [99, 107, "ORG", 9, 0]]}
+{"id": "rd-wildchat-test2-0220", "ms": 73.68, "edits": [[323, 345, "PERSON", 16, 0], [353, 363, "dob", 10, 0], [366, 404, "url", 27, 0], [407, 421, "handle", 9, 0]]}
+{"id": "rd-wildchat-test2-0221", "ms": 52.29, "edits": [[4, 17, "PERSON", 13, 0], [21, 32, "age", 11, 0], [38, 42, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0222", "ms": 85.68, "edits": [[4, 18, "PERSON", 12, 0], [20, 26, "age", 6, 0], [28, 69, "url", 39, 0]]}
+{"id": "rd-wildchat-test2-0223", "ms": 160.55, "edits": [[6, 19, "PERSON", 11, 0], [27, 41, "phone_intl", 14, 0], [53, 67, "ip_address", 13, 0], [74, 145, "url", 70, 0], [156, 171, "credential", 15, 0], [231, 239, "PERSON", 5, 0], [808, 817, "handle", 8, 0]]}
+{"id": "rd-wildchat-test2-0224", "ms": 79.72, "edits": [[8, 23, "PERSON", 14, 0], [48, 53, "GPE", 7, 0], [74, 84, "handle", 9, 0], [107, 122, "ip_address", 13, 0]]}
+{"id": "rd-wildchat-test2-0225", "ms": 49.9, "edits": [[4, 14, "PERSON", 11, 0], [21, 37, "dob", 16, 0], [49, 59, "GPE", 6, 0]]}
+{"id": "rd-wildchat-test2-0226", "ms": 114.93, "edits": [[10, 23, "PERSON", 15, 0], [36, 70, "email:spelled", 36, 0], [82, 111, "iban", 29, 0], [123, 142, "credit_card", 19, 0], [153, 170, "mac_address", 17, 0], [184, 198, "handle", 16, 0]]}
+{"id": "rd-wildchat-test2-0227", "ms": 71.51, "edits": [[6, 18, "PERSON", 9, 0], [25, 34, "GPE", 9, 0], [35, 42, "age", 7, 0], [51, 62, "handle", 10, 0]]}
+{"id": "rd-wildchat-test2-0228", "ms": 299.92, "edits": [[2044, 2060, "PERSON", 12, 0], [2063, 2077, "handle", 9, 0], [2080, 2116, "url", 32, 0], [2128, 2141, "ip_address", 14, 0], [2153, 2201, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0229", "ms": 157.92, "edits": [[44, 60, "PERSON", 17, 0], [62, 76, "handle", 12, 0], [79, 143, "address", 62, 0], [266, 277, "PERSON", 19, 0], [282, 289, "ORG", 9, 0], [965, 976, "GPE", 7, 0], [978, 983, "GPE", 6, 0], [989, 1002, "GPE", 7, 0], [1008, 1022, "GPE", 5, 0], [1024, 1030, "GPE", 8, 0], [1032, 1041, "GPE", 5, 0], [1051, 1062, "GPE", 11, 0]]}
+{"id": "rd-wildchat-test2-0230", "ms": 69.16, "edits": [[269, 282, "PERSON", 14, 0], [284, 290, "age", 6, 0], [299, 311, "ip_address", 14, 0], [321, 353, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0231", "ms": 46.69, "edits": [[6, 18, "PERSON", 17, 0], [26, 40, "phone_intl", 14, 0]]}
+{"id": "rd-wildchat-test2-0232", "ms": 65.79, "edits": [[172, 182, "dob", 10, 0], [194, 235, "url", 41, 0], [245, 277, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0233", "ms": 43.88, "edits": [[39, 48, "GPE", 7, 0], [134, 151, "PERSON", 15, 0]]}
+{"id": "rd-wildchat-test2-0234", "ms": 75.15, "edits": [[400, 411, "PERSON", 11, 0], [413, 420, "GPE", 9, 0], [423, 440, "email", 16, 0], [443, 456, "ip_address", 13, 0]]}
+{"id": "rd-wildchat-test2-0235", "ms": 86.28, "edits": [[375, 396, "email", 21, 0], [399, 412, "ip_address", 15, 0], [415, 446, "url", 35, 0], [449, 460, "handle", 16, 0]]}
+{"id": "rd-wildchat-test2-0236", "ms": 122.15, "edits": [[6, 21, "PERSON", 15, 0], [31, 64, "address", 36, 0], [65, 72, "age", 7, 0], [84, 97, "id_number", 13, 0], [103, 120, "mac_address", 17, 0], [181, 189, "GPE", 10, 0]]}
+{"id": "rd-wildchat-test2-0237", "ms": 83.12, "edits": [[651, 665, "PERSON", 14, 0], [667, 673, "age", 6, 0], [674, 699, "email", 25, 0]]}
+{"id": "rd-wildchat-test2-0238", "ms": 66.73, "edits": [[6, 22, "PERSON", 14, 0], [32, 85, "address", 53, 0], [91, 108, "mac_address", 17, 0]]}
+{"id": "rd-wildchat-test2-0239", "ms": 47.19, "edits": [[11, 25, "PERSON", 10, 0], [31, 41, "dob", 10, 0], [59, 68, "passport", 9, 0], [90, 97, "GPE", 9, 0], [104, 110, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0240", "ms": 87.8, "edits": [[10, 25, "PERSON", 18, 0], [41, 51, "ORG", 13, 0], [64, 76, "phone_us", 12, 0], [87, 111, "dob:dates", 27, 0], [125, 140, "handle", 18, 0]]}
+{"id": "rd-wildchat-test2-0241", "ms": 93.16, "edits": [[4, 17, "PERSON", 11, 0], [24, 40, "dob", 14, 0], [47, 65, "ORG", 18, 0], [76, 105, "address", 35, 0], [118, 157, "ip_address", 39, 0], [166, 177, "handle", 10, 0]]}
+{"id": "rd-wildchat-test2-0242", "ms": 71.27, "edits": [[6, 20, "PERSON", 14, 0], [31, 63, "ORG", 17, 0], [73, 98, "url", 25, 0], [134, 140, "GPE", 8, 0], [208, 214, "GPE", 8, 0]]}
+{"id": "rd-wildchat-test2-0243", "ms": 302.94, "edits": [[6, 18, "PERSON", 12, 0], [26, 48, "email", 22, 0], [56, 72, "phone_uk", 16, 0], [81, 88, "handle", 10, 0], [2306, 2313, "PERSON", 7, 0], [2317, 2324, "PERSON", 7, 0], [2327, 2345, "GPE", 9, 0], [2350, 2357, "PERSON", 7, 0], [2434, 2441, "PERSON", 7, 0], [2444, 2462, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-0244", "ms": 115.77, "edits": [[4, 13, "PERSON", 11, 0], [17, 28, "age", 11, 0], [34, 41, "GPE", 10, 0], [53, 66, "ORG", 10, 0], [79, 101, "email", 22, 0], [119, 127, "handle", 8, 0], [143, 175, "credential", 32, 0]]}
+{"id": "rd-wildchat-test2-0245", "ms": 93.52, "edits": [[4, 19, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-0246", "ms": 145.48, "edits": [[4, 24, "PERSON", 13, 0], [26, 32, "age", 6, 0], [39, 65, "address", 28, 0], [80, 119, "email", 23, 0], [123, 139, "phone_intl", 16, 0], [155, 169, "ORG", 6, 0]]}
+{"id": "rd-wildchat-test2-0247", "ms": 95.02, "edits": [[6, 24, "PERSON", 15, 0], [31, 38, "GPE", 11, 0], [46, 58, "phone_us", 12, 0], [69, 78, "passport", 9, 0], [96, 104, "id_number", 8, 0], [115, 161, "url", 43, 0]]}
+{"id": "rd-wildchat-test2-0248", "ms": 58.05, "edits": [[12, 38, "email", 23, 0], [51, 73, "iban", 22, 0], [97, 113, "credit_card", 16, 0]]}
+{"id": "rd-wildchat-test2-0249", "ms": 67.54, "edits": [[281, 288, "GPE", 7, 0], [289, 312, "email", 25, 0], [330, 343, "id_number", 13, 0]]}
+{"id": "rd-wildchat-test2-0250", "ms": 111.76, "edits": [[3, 18, "PERSON", 11, 0], [538, 564, "email", 22, 0], [568, 583, "phone_intl", 15, 0], [595, 614, "ORG", 20, 0], [634, 682, "address", 51, 0], [699, 745, "url", 42, 0]]}
+{"id": "rd-wildchat-test2-0251", "ms": 75.15, "edits": [[10, 27, "PERSON", 13, 0], [41, 57, "ORG", 16, 0], [68, 76, "age:worded", 10, 0]]}
+{"id": "rd-wildchat-test2-0252", "ms": 47.79, "edits": [[40, 55, "PERSON", 9, 0], [61, 67, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0253", "ms": 82.64, "edits": [[375, 401, "ORG", 22, 0], [402, 430, "email", 28, 0], [431, 438, "age", 7, 0], [449, 457, "id_number", 8, 0]]}
+{"id": "rd-wildchat-test2-0254", "ms": 185.37, "edits": [[45, 55, "ip_address", 14, 0], [66, 114, "credential", 48, 0], [1161, 1177, "PERSON", 17, 0], [1178, 1211, "url", 34, 0], [1214, 1226, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0255", "ms": 89.21, "edits": [[47, 58, "PERSON", 12, 0], [66, 76, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0256", "ms": 61.72, "edits": [[68, 79, "PERSON", 13, 0], [98, 111, "id_number", 13, 0], [121, 151, "url", 32, 0]]}
+{"id": "rd-wildchat-test2-0257", "ms": 75.63, "edits": [[53, 76, "age:worded", 21, 0], [88, 101, "ip_address", 14, 0], [361, 378, "PERSON", 18, 0]]}
+{"id": "rd-wildchat-test2-0258", "ms": 58.76, "edits": [[6, 18, "PERSON", 12, 0], [28, 65, "address", 44, 0], [73, 83, "phone_us", 10, 0]]}
+{"id": "rd-wildchat-test2-0259", "ms": 49.53, "edits": [[119, 132, "PERSON", 12, 0], [133, 152, "email", 17, 0], [153, 159, "GPE", 8, 0]]}
+{"id": "rd-wildchat-test2-0260", "ms": 41.94, "edits": [[97, 111, "PERSON", 11, 0], [112, 124, "phone_intl", 12, 0]]}
+{"id": "rd-wildchat-test2-0261", "ms": 110.41, "edits": [[391, 409, "GPE", 8, 0], [637, 654, "PERSON", 16, 0], [655, 682, "email", 29, 0], [683, 705, "ORG", 29, 0]]}
+{"id": "rd-wildchat-test2-0262", "ms": 91.89, "edits": [[6, 23, "PERSON", 12, 0], [30, 33, "GPE", 7, 0], [95, 103, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-0263", "ms": 47.94, "edits": [[6, 25, "PERSON", 19, 0], [33, 56, "email", 18, 0]]}
+{"id": "rd-wildchat-test2-0264", "ms": 63.44, "edits": [[6, 20, "PERSON", 12, 0], [21, 28, "age", 7, 0], [35, 42, "GPE", 7, 0], [53, 62, "ORG", 13, 0]]}
+{"id": "rd-wildchat-test2-0265", "ms": 110.14, "edits": [[12, 32, "GPE", 7, 0], [132, 152, "GPE", 7, 0], [795, 825, "PERSON", 23, 0]]}
+{"id": "rd-wildchat-test2-0266", "ms": 115.12, "edits": [[4, 16, "PERSON", 13, 0], [22, 32, "dob", 10, 0], [37, 45, "id_number", 8, 0], [52, 65, "ORG", 13, 0], [164, 178, "GPE", 10, 0], [204, 212, "GPE", 6, 0], [244, 252, "GPE", 6, 0], [292, 301, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-0267", "ms": 49.92, "edits": [[124, 146, "address", 50, 0], [148, 163, "phone_intl", 15, 0]]}
+{"id": "rd-wildchat-test2-0268", "ms": 43.9, "edits": [[4, 19, "PERSON", 12, 0], [31, 47, "credential", 16, 0]]}
+{"id": "rd-wildchat-test2-0269", "ms": 89.81, "edits": [[4, 24, "PERSON", 18, 0], [39, 69, "ORG", 29, 0], [91, 107, "phone_intl", 16, 0]]}
+{"id": "rd-wildchat-test2-0270", "ms": 55.92, "edits": [[55, 68, "GPE", 7, 0], [111, 123, "GPE", 11, 0], [178, 198, "PERSON", 16, 0], [199, 228, "email", 23, 0], [229, 235, "ORG", 6, 0]]}
+{"id": "rd-wildchat-test2-0271", "ms": 103.21, "edits": [[6, 53, "address", 48, 0], [61, 73, "phone_intl", 12, 0], [79, 89, "dob", 10, 0], [101, 133, "credential", 32, 0], [278, 282, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-0272", "ms": 76.62, "edits": [[4, 16, "PERSON", 18, 0], [18, 33, "phone_intl", 15, 0]]}
+{"id": "rd-wildchat-test2-0273", "ms": 186.95, "edits": [[4, 17, "PERSON", 10, 0], [19, 35, "email", 14, 0], [37, 61, "url", 21, 0], [69, 85, "credit_card", 16, 0], [95, 107, "id_number", 12, 0], [114, 131, "mac_address", 17, 0], [142, 174, "credential", 32, 0], [186, 192, "GPE", 14, 0], [293, 316, "ORG", 26, 0]]}
+{"id": "rd-wildchat-test2-0274", "ms": 88.97, "edits": [[40, 57, "PERSON", 12, 0], [59, 65, "age", 6, 0], [72, 79, "GPE", 10, 0], [92, 101, "passport", 9, 0], [104, 116, "handle", 9, 0]]}
+{"id": "rd-wildchat-test2-0275", "ms": 67.13, "edits": [[6, 25, "PERSON", 11, 0], [36, 45, "ORG", 10, 0], [64, 75, "id_number", 11, 0], [84, 104, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-0276", "ms": 48.77, "edits": [[6, 18, "PERSON", 12, 0], [28, 75, "address", 48, 0], [139, 146, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-0277", "ms": 104.47, "edits": [[6, 19, "PERSON", 12, 0], [27, 52, "email", 22, 0], [53, 60, "age", 7, 0], [69, 92, "ORG", 22, 0], [102, 134, "address", 28, 0]]}
+{"id": "rd-wildchat-test2-0278", "ms": 90.54, "edits": [[6, 18, "PERSON", 14, 0], [26, 41, "email", 18, 0], [42, 57, "age:worded", 15, 0], [68, 81, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-0279", "ms": 75.1, "edits": [[4, 19, "PERSON", 16, 0], [26, 43, "dob", 15, 0], [55, 63, "GPE", 6, 0]]}
+{"id": "rd-wildchat-test2-0280", "ms": 98.63, "edits": [[22, 37, "PERSON", 16, 0], [50, 70, "email", 21, 0], [80, 82, "age", 2, 0], [99, 125, "credential", 26, 0], [231, 244, "GPE", 4, 0], [376, 389, "GPE", 4, 0], [441, 456, "PERSON", 13, 0], [483, 488, "GPE", 6, 0], [569, 574, "GPE", 6, 0]]}
+{"id": "rd-wildchat-test2-0281", "ms": 48.09, "edits": [[6, 18, "PERSON", 13, 0], [25, 57, "url", 26, 0]]}
+{"id": "rd-wildchat-test2-0282", "ms": 91.45, "edits": [[71, 87, "PERSON", 14, 0], [100, 136, "email:spelled", 33, 0], [147, 159, "age:worded", 13, 0], [173, 187, "handle", 15, 0], [254, 259, "GPE", 13, 0]]}
+{"id": "rd-wildchat-test2-0283", "ms": 63.01, "edits": [[201, 219, "PERSON", 15, 0], [222, 230, "ORG", 8, 0], [239, 255, "credit_card", 16, 0], [268, 277, "passport", 9, 0]]}
+{"id": "rd-wildchat-test2-0284", "ms": 81.24, "edits": [[6, 18, "PERSON", 16, 0], [26, 47, "email", 28, 0]]}
+{"id": "rd-wildchat-test2-0285", "ms": 39.87, "edits": [[4, 17, "PERSON", 16, 0], [19, 43, "url", 27, 0]]}
+{"id": "rd-wildchat-test2-0286", "ms": 63.05, "edits": [[6, 12, "GPE", 10, 0], [20, 34, "phone_intl", 14, 0]]}
+{"id": "rd-wildchat-test2-0287", "ms": 62.45, "edits": [[6, 18, "PERSON", 17, 0]]}
+{"id": "rd-wildchat-test2-0288", "ms": 54.72, "edits": [[4, 21, "PERSON", 15, 0], [32, 39, "GPE", 8, 0], [49, 62, "ip_address", 15, 0]]}
+{"id": "rd-wildchat-test2-0289", "ms": 40.38, "edits": [[23, 42, "PERSON", 15, 0], [48, 58, "ORG", 14, 0]]}
+{"id": "rd-wildchat-test2-0290", "ms": 67.54, "edits": [[11, 21, "PERSON", 17, 0], [35, 52, "email", 21, 0], [66, 80, "phone_intl", 14, 0], [103, 126, "ORG", 21, 0]]}
+{"id": "rd-wildchat-test2-0291", "ms": 39.2, "edits": [[4, 19, "PERSON", 14, 0], [36, 51, "phone_intl", 15, 0]]}
+{"id": "rd-wildchat-test2-0292", "ms": 72.55, "edits": [[8, 22, "PERSON", 13, 0], [36, 74, "ip_address", 38, 0], [89, 115, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0293", "ms": 89.75, "edits": [[4, 22, "PERSON", 17, 0], [24, 49, "email", 24, 0], [56, 66, "dob", 10, 0], [76, 88, "id_number", 12, 0], [99, 134, "url", 34, 0], [141, 167, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0294#t0", "ms": 44.48, "edits": [[15, 30, "PERSON", 14, 0], [61, 77, "credit_card", 16, 0]]}
+{"id": "rd-wildchat-test2-0294#t1", "ms": 98.31, "edits": []}
+{"id": "rd-wildchat-test2-0294#t2", "ms": 71.54, "edits": []}
+{"id": "rd-wildchat-test2-0295#t0", "ms": 38.24, "edits": [[44, 53, "PERSON", 12, 0], [62, 72, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0295#t1", "ms": 35.17, "edits": [[53, 59, "ORG", 5, 0]]}
+{"id": "rd-wildchat-test2-0295#t2", "ms": 35.87, "edits": [[78, 82, "handle", 6, 0]]}
+{"id": "rd-wildchat-test2-0296#t0", "ms": 37.32, "edits": [[42, 49, "PERSON", 13, 0], [58, 70, "id_number", 12, 0]]}
+{"id": "rd-wildchat-test2-0296#t1", "ms": 183.23, "edits": []}
+{"id": "rd-wildchat-test2-0296#t2", "ms": 56.85, "edits": []}
+{"id": "rd-wildchat-test2-0297#t0", "ms": 76.83, "edits": [[0, 15, "PERSON", 15, 0], [16, 54, "address", 40, 0], [104, 115, "age", 11, 0]]}
+{"id": "rd-wildchat-test2-0297#t1", "ms": 63.64, "edits": [[74, 85, "age", 11, 0]]}
+{"id": "rd-wildchat-test2-0297#t2", "ms": 66.96, "edits": [[86, 90, "PERSON", 8, 0], [94, 105, "age", 11, 0], [147, 151, "PERSON", 8, 0], [211, 215, "PERSON", 8, 0], [300, 304, "PERSON", 8, 0], [379, 383, "PERSON", 8, 0], [449, 453, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-0298#t0", "ms": 45.06, "edits": [[4, 25, "PERSON", 23, 0], [27, 33, "age", 6, 0], [46, 58, "ORG", 14, 0]]}
+{"id": "rd-wildchat-test2-0298#t1", "ms": 40.26, "edits": []}
+{"id": "rd-wildchat-test2-0298#t2", "ms": 42.78, "edits": []}
+{"id": "rd-wildchat-test2-0299#t0", "ms": 58.23, "edits": [[62, 90, "email", 19, 0], [96, 111, "PERSON", 13, 0], [117, 127, "ORG", 4, 0]]}
+{"id": "rd-wildchat-test2-0299#t1", "ms": 48.0, "edits": []}
+{"id": "rd-wildchat-test2-0299#t2", "ms": 43.07, "edits": []}
+{"id": "rd-wildchat-test2-0300#t0", "ms": 51.85, "edits": [[138, 151, "PERSON", 13, 0], [158, 173, "dob", 16, 0], [185, 227, "address", 44, 0]]}
+{"id": "rd-wildchat-test2-0300#t1", "ms": 49.05, "edits": []}
+{"id": "rd-wildchat-test2-0300#t2", "ms": 43.96, "edits": []}
+{"id": "rd-wildchat-test2-0301#t0", "ms": 102.49, "edits": [[72, 84, "PERSON", 12, 0], [87, 94, "age", 7, 0], [97, 108, "id_number", 11, 0], [117, 136, "credit_card", 19, 0], [147, 167, "ORG", 17, 0], [176, 183, "GPE", 6, 0], [234, 239, "GPE", 10, 0], [241, 247, "GPE", 24, 0], [249, 256, "GPE", 11, 0], [262, 269, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-0301#t1", "ms": 74.21, "edits": []}
+{"id": "rd-wildchat-test2-0301#t2", "ms": 47.76, "edits": []}
+{"id": "rd-wildchat-test2-0302#t0", "ms": 94.27, "edits": [[8, 23, "PERSON", 14, 0], [35, 69, "address", 32, 0], [91, 118, "email", 26, 0], [122, 134, "phone_intl", 12, 0], [153, 179, "credential", 26, 0]]}
+{"id": "rd-wildchat-test2-0302#t1", "ms": 41.97, "edits": []}
+{"id": "rd-wildchat-test2-0302#t2", "ms": 42.04, "edits": []}
+{"id": "rd-wildchat-test2-0303#t0", "ms": 72.8, "edits": [[11, 24, "PERSON", 14, 0], [30, 42, "age", 12, 0], [60, 75, "phone_intl", 15, 0], [92, 108, "credential", 16, 0]]}
+{"id": "rd-wildchat-test2-0303#t1", "ms": 69.12, "edits": []}
+{"id": "rd-wildchat-test2-0303#t2", "ms": 40.55, "edits": []}
+{"id": "rd-wildchat-test2-0304#t0", "ms": 355.7, "edits": [[6, 17, "PERSON", 13, 0], [25, 49, "email", 26, 0], [60, 71, "ORG", 10, 0], [90, 103, "id_number", 13, 0], [113, 161, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0304#t1", "ms": 70.22, "edits": []}
+{"id": "rd-wildchat-test2-0305#t0", "ms": 68.05, "edits": [[32, 46, "PERSON", 18, 0], [48, 59, "handle", 14, 0], [61, 85, "url", 17, 0], [425, 441, "GPE", 13, 0]]}
+{"id": "rd-wildchat-test2-0305#t1", "ms": 71.43, "edits": []}
+{"id": "rd-wildchat-test2-0305#t2", "ms": 63.4, "edits": []}
+{"id": "rd-wildchat-test2-0306#t0", "ms": 788.0, "edits": [[3, 15, "PERSON", 14, 0], [19, 35, "email", 16, 0], [43, 56, "ip_address", 14, 0], [62, 94, "url", 34, 0]]}
+{"id": "rd-wildchat-test2-0306#t1", "ms": 136.43, "edits": []}
+{"id": "rd-wildchat-test2-0307#t0", "ms": 86.24, "edits": [[8, 20, "PERSON", 14, 0], [26, 37, "id_number", 11, 0], [39, 82, "url", 45, 0]]}
+{"id": "rd-wildchat-test2-0307#t1", "ms": 56.97, "edits": []}
+{"id": "rd-wildchat-test2-0307#t2", "ms": 51.1, "edits": []}
+{"id": "rd-wildchat-test2-0308#t0", "ms": 47.0, "edits": [[6, 20, "PERSON", 21, 0], [34, 53, "credit_card", 19, 0]]}
+{"id": "rd-wildchat-test2-0308#t1", "ms": 43.08, "edits": []}
+{"id": "rd-wildchat-test2-0308#t2", "ms": 41.56, "edits": []}
+{"id": "rd-wildchat-test2-0309#t0", "ms": 91.15, "edits": [[40, 57, "PERSON", 16, 0], [79, 94, "phone_us", 15, 0], [110, 157, "address", 45, 0], [327, 332, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-0309#t1", "ms": 48.69, "edits": []}
+{"id": "rd-wildchat-test2-0310#t0", "ms": 49.06, "edits": [[6, 22, "PERSON", 15, 0], [38, 48, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0310#t1", "ms": 42.72, "edits": []}
+{"id": "rd-wildchat-test2-0310#t2", "ms": 41.91, "edits": []}
+{"id": "rd-wildchat-test2-0311#t0", "ms": 57.36, "edits": [[4, 25, "PERSON", 18, 0], [27, 47, "email", 15, 0], [74, 87, "ip_address", 14, 0]]}
+{"id": "rd-wildchat-test2-0311#t1", "ms": 41.69, "edits": []}
+{"id": "rd-wildchat-test2-0311#t2", "ms": 44.07, "edits": []}
+{"id": "rd-wildchat-test2-0312#t0", "ms": 336.06, "edits": [[2880, 2900, "PERSON", 14, 0], [2903, 2914, "ORG", 13, 0], [2917, 2932, "handle", 11, 0], [2935, 2981, "url", 39, 0]]}
+{"id": "rd-wildchat-test2-0312#t1", "ms": 41.63, "edits": []}
+{"id": "rd-wildchat-test2-0312#t2", "ms": 47.27, "edits": []}
+{"id": "rd-wildchat-test2-0313#t0", "ms": 52.68, "edits": [[6, 18, "PERSON", 12, 0], [27, 58, "ORG", 30, 0], [66, 78, "phone_uk", 12, 0], [104, 109, "age", 5, 0]]}
+{"id": "rd-wildchat-test2-0313#t1", "ms": 44.96, "edits": [[59, 64, "age", 5, 0]]}
+{"id": "rd-wildchat-test2-0314#t0", "ms": 81.96, "edits": [[4, 16, "PERSON", 10, 0], [22, 32, "dob", 10, 0], [44, 83, "address", 41, 0]]}
+{"id": "rd-wildchat-test2-0314#t1", "ms": 67.28, "edits": []}
+{"id": "rd-wildchat-test2-0314#t2", "ms": 68.43, "edits": []}
+{"id": "rd-wildchat-test2-0315#t0", "ms": 72.26, "edits": [[458, 468, "PERSON", 15, 0], [469, 475, "ORG", 6, 0], [476, 493, "phone_intl", 17, 0]]}
+{"id": "rd-wildchat-test2-0315#t1", "ms": 44.39, "edits": []}
+{"id": "rd-wildchat-test2-0316#t0", "ms": 50.5, "edits": [[6, 17, "PERSON", 17, 0], [18, 25, "age", 7, 0], [34, 48, "handle", 20, 0]]}
+{"id": "rd-wildchat-test2-0316#t1", "ms": 62.83, "edits": []}
+{"id": "rd-wildchat-test2-0317#t0", "ms": 76.92, "edits": [[6, 18, "PERSON", 17, 0], [26, 50, "email", 29, 0], [60, 108, "credential", 48, 0]]}
+{"id": "rd-wildchat-test2-0317#t1", "ms": 44.5, "edits": []}
+{"id": "rd-wildchat-test2-0318#t0", "ms": 66.93, "edits": [[137, 150, "ORG", 13, 0], [157, 170, "ORG", 13, 0], [188, 201, "ORG", 13, 0], [252, 265, "ORG", 13, 0], [291, 304, "ORG", 13, 0], [313, 330, "ORG", 19, 0], [375, 388, "ORG", 13, 0], [423, 438, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-0318#t1", "ms": 60.56, "edits": []}
+{"id": "rd-wildchat-test2-0318#t2", "ms": 49.83, "edits": []}
+{"id": "rd-wildchat-test2-0319#t0", "ms": 35.22, "edits": [[99, 111, "PERSON", 13, 0], [113, 127, "phone_intl", 14, 0]]}
+{"id": "rd-wildchat-test2-0319#t1", "ms": 32.5, "edits": []}
+{"id": "rd-wildchat-test2-0320#t0", "ms": 78.16, "edits": [[2, 20, "PERSON", 15, 0], [23, 46, "email", 20, 0], [49, 64, "handle", 12, 0], [67, 77, "ORG", 11, 0], [121, 131, "handle", 8, 0], [132, 139, "GPE", 5, 0], [165, 176, "handle", 11, 0], [214, 221, "GPE", 5, 0], [263, 270, "GPE", 5, 0], [271, 282, "handle", 11, 0], [365, 372, "GPE", 5, 0], [404, 411, "GPE", 5, 0], [449, 456, "GPE", 5, 0]]}
+{"id": "rd-wildchat-test2-0320#t1", "ms": 65.07, "edits": [[0, 10, "handle", 8, 0], [11, 18, "GPE", 10, 0], [19, 30, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0321#t0", "ms": 1206.52, "edits": [[6, 21, "PERSON", 14, 0], [29, 44, "phone_us", 15, 0], [55, 64, "passport", 9, 0]]}
+{"id": "rd-wildchat-test2-0321#t1", "ms": 35.95, "edits": []}
+{"id": "rd-wildchat-test2-0322#t0", "ms": 110.11, "edits": [[57, 69, "PERSON", 10, 0], [71, 106, "address", 29, 0], [108, 133, "email", 19, 0], [135, 148, "phone_intl", 13, 0]]}
+{"id": "rd-wildchat-test2-0322#t1", "ms": 32.14, "edits": []}
+{"id": "rd-wildchat-test2-0322#t2", "ms": 33.96, "edits": []}
+{"id": "rd-wildchat-test2-0323#t0", "ms": 37.58, "edits": [[8, 19, "PERSON", 12, 0], [34, 56, "ORG", 27, 0]]}
+{"id": "rd-wildchat-test2-0323#t1", "ms": 35.25, "edits": []}
+{"id": "rd-wildchat-test2-0323#t2", "ms": 58.9, "edits": []}
+{"id": "rd-wildchat-test2-0324#t0", "ms": 322.43, "edits": [[4, 13, "PERSON", 16, 0], [19, 43, "ORG", 25, 0], [47, 55, "GPE", 9, 0], [81, 102, "email", 32, 0], [104, 116, "phone_us", 12, 0], [121, 130, "handle", 16, 0]]}
+{"id": "rd-wildchat-test2-0324#t1", "ms": 36.17, "edits": []}
+{"id": "rd-wildchat-test2-0324#t2", "ms": 31.96, "edits": []}
+{"id": "rd-wildchat-test2-0325#t0", "ms": 39.93, "edits": [[128, 146, "GPE", 5, 0], [147, 177, "email", 23, 0]]}
+{"id": "rd-wildchat-test2-0325#t1", "ms": 38.11, "edits": []}
+{"id": "rd-wildchat-test2-0325#t2", "ms": 36.25, "edits": []}
+{"id": "rd-wildchat-test2-0326#t0", "ms": 39.17, "edits": [[20, 32, "phone_us", 12, 0], [35, 47, "handle", 11, 0]]}
+{"id": "rd-wildchat-test2-0326#t1", "ms": 57.14, "edits": []}
+{"id": "rd-wildchat-test2-0327#t0", "ms": 159.18, "edits": [[58, 69, "PERSON", 14, 0]]}
+{"id": "rd-wildchat-test2-0327#t1", "ms": 149.67, "edits": []}
+{"id": "rd-wildchat-test2-0328#t0", "ms": 96.19, "edits": [[6, 26, "PERSON", 17, 0], [34, 65, "email", 31, 0], [73, 89, "phone_intl", 16, 0], [105, 122, "dob", 14, 0]]}
+{"id": "rd-wildchat-test2-0328#t1", "ms": 43.51, "edits": []}
+{"id": "rd-wildchat-test2-0329#t0", "ms": 36.57, "edits": [[6, 22, "PERSON", 16, 0], [23, 30, "age", 7, 0]]}
+{"id": "rd-wildchat-test2-0329#t1", "ms": 31.36, "edits": []}
+{"id": "rd-wildchat-test2-0329#t2", "ms": 34.66, "edits": []}
+{"id": "rd-wildchat-test2-0330#t0", "ms": 38.64, "edits": [[4, 18, "PERSON", 14, 0], [20, 32, "handle", 16, 0]]}
+{"id": "rd-wildchat-test2-0330#t1", "ms": 50.4, "edits": []}
+{"id": "rd-wildchat-test2-0330#t2", "ms": 31.5, "edits": []}
+{"id": "rd-wildchat-test2-0331#t0", "ms": 42.54, "edits": [[192, 204, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-0331#t1", "ms": 37.45, "edits": []}
+{"id": "rd-wildchat-test2-0331#t2", "ms": 62.16, "edits": []}
+{"id": "rd-wildchat-test2-0332#t0", "ms": 43.52, "edits": [[275, 287, "PERSON", 9, 0], [288, 301, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-0332#t1", "ms": 37.8, "edits": []}
+{"id": "rd-wildchat-test2-0332#t2", "ms": 36.25, "edits": []}
+{"id": "rd-wildchat-test2-0333#t0", "ms": 38.88, "edits": [[6, 22, "PERSON", 13, 0], [30, 56, "email", 23, 0]]}
+{"id": "rd-wildchat-test2-0333#t1", "ms": 31.3, "edits": []}
+{"id": "rd-wildchat-test2-0334#t0", "ms": 53.38, "edits": [[30, 46, "PERSON", 16, 0], [49, 73, "url", 24, 0], [76, 89, "handle", 13, 0]]}
+{"id": "rd-wildchat-test2-0334#t1", "ms": 32.39, "edits": []}
+{"id": "rd-wildchat-test2-0334#t2", "ms": 171.2, "edits": [[90, 96, "age", 6, 0]]}
+{"id": "rd-wildchat-test2-0335#t0", "ms": 244.44, "edits": [[4, 16, "age", 12, 0], [33, 59, "email", 25, 0], [254, 266, "ORG", 10, 0], [275, 285, "PERSON", 7, 0], [383, 394, "PERSON", 11, 0], [488, 500, "ORG", 10, 0], [589, 603, "ORG", 12, 0], [815, 822, "PERSON", 4, 0], [945, 952, "PERSON", 4, 0], [981, 995, "ORG", 12, 0], [1474, 1481, "PERSON", 4, 0], [1730, 1737, "PERSON", 4, 0], [1837, 1849, "ORG", 10, 0], [1969, 1976, "PERSON", 4, 0], [2277, 2303, "PERSON", 22, 0]]}
+{"id": "rd-wildchat-test2-0335#t1", "ms": 226.6, "edits": [[147, 158, "PERSON", 14, 0], [168, 178, "PERSON", 7, 0], [276, 288, "ORG", 10, 0], [381, 393, "ORG", 10, 0], [482, 496, "ORG", 15, 0], [531, 538, "PERSON", 6, 0], [708, 715, "PERSON", 6, 0], [838, 845, "PERSON", 6, 0], [874, 888, "ORG", 15, 0], [1367, 1374, "PERSON", 6, 0], [1625, 1632, "PERSON", 6, 0], [1732, 1744, "ORG", 10, 0], [1862, 1869, "PERSON", 6, 0], [2170, 2196, "PERSON", 19, 0]]}
+{"id": "rd-wildchat-test2-0335#t2", "ms": 167.8, "edits": [[169, 189, "PERSON", 20, 0], [191, 205, "ORG", 22, 0], [836, 841, "GPE", 6, 0], [859, 863, "PERSON", 6, 0], [1122, 1129, "PERSON", 5, 0], [1253, 1257, "PERSON", 6, 0], [1321, 1335, "ORG", 22, 0]]}
+{"id": "rd-wildchat-test2-0336#t0", "ms": 41.45, "edits": [[4, 21, "PERSON", 15, 0], [48, 66, "credential", 18, 0]]}
+{"id": "rd-wildchat-test2-0336#t1", "ms": 35.77, "edits": []}
+{"id": "rd-wildchat-test2-0336#t2", "ms": 33.42, "edits": []}
+{"id": "rd-wildchat-test2-0337#t0", "ms": 84.97, "edits": [[4, 24, "PERSON", 17, 0], [38, 67, "email", 26, 0], [83, 96, "GPE", 4, 0], [551, 559, "GPE", 6, 0]]}
+{"id": "rd-wildchat-test2-0337#t1", "ms": 44.3, "edits": [[192, 204, "ORG", 12, 0]]}
+{"id": "rd-wildchat-test2-0337#t2", "ms": 42.26, "edits": []}
+{"id": "rd-wildchat-test2-0338#t0", "ms": 42.88, "edits": [[124, 141, "PERSON", 15, 0], [144, 168, "email", 22, 0], [176, 186, "dob", 10, 0]]}
+{"id": "rd-wildchat-test2-0338#t1", "ms": 38.83, "edits": []}
+{"id": "rd-wildchat-test2-0338#t2", "ms": 41.28, "edits": []}
+{"id": "rd-wildchat-test2-0339#t0", "ms": 59.3, "edits": [[6, 19, "PERSON", 14, 0], [20, 27, "age", 7, 0], [36, 50, "ORG", 17, 0], [57, 63, "GPE", 10, 0]]}
+{"id": "rd-wildchat-test2-0339#t1", "ms": 42.41, "edits": []}
+{"id": "rd-wildchat-test2-0339#t2", "ms": 46.61, "edits": [[231, 251, "ORG", 21, 0]]}
+{"id": "rd-wildchat-test2-0340#t0", "ms": 649.1, "edits": [[54, 70, "PERSON", 18, 0], [78, 104, "email", 27, 0], [113, 147, "url", 35, 0], [156, 170, "handle", 15, 0], [181, 197, "credential", 16, 0], [507, 531, "ORG", 21, 0], [915, 926, "PERSON", 11, 0], [1445, 1453, "ORG", 6, 0], [2452, 2473, "PERSON", 13, 0], [3925, 3931, "GPE", 8, 0], [4948, 4956, "ORG", 6, 0]]}
+{"id": "rd-wildchat-test2-0340#t1", "ms": 43.75, "edits": []}
+{"id": "rd-wildchat-test2-0341#t0", "ms": 44.42, "edits": [[6, 18, "PERSON", 11, 0], [19, 26, "age", 7, 0]]}
+{"id": "rd-wildchat-test2-0341#t1", "ms": 41.21, "edits": []}
+{"id": "rd-wildchat-test2-0341#t2", "ms": 41.19, "edits": []}
+{"id": "rd-wildchat-test2-0342#t0", "ms": 48.0, "edits": [[53, 66, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-0342#t1", "ms": 42.49, "edits": []}
+{"id": "rd-wildchat-test2-0343#t0", "ms": 192.69, "edits": [[906, 912, "PERSON", 5, 0], [1858, 1872, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-0343#t1", "ms": 205.71, "edits": [[351, 358, "PERSON", 5, 0], [759, 800, "ORG", 41, 0], [805, 820, "PERSON", 13, 0]]}
+{"id": "rd-wildchat-test2-0344#t0", "ms": 84.27, "edits": [[6, 27, "PERSON", 20, 0], [37, 74, "address", 34, 0], [92, 101, "passport", 9, 0], [126, 135, "us_driver_license", 9, 0]]}
+{"id": "rd-wildchat-test2-0344#t1", "ms": 50.49, "edits": []}
+{"id": "rd-wildchat-test2-0345#t0", "ms": 313.74, "edits": [[2, 14, "PERSON", 10, 0], [22, 32, "dob", 10, 0], [35, 61, "email", 24, 0], [64, 76, "phone_us", 12, 0], [79, 98, "ORG", 13, 0], [101, 140, "url", 37, 0], [143, 156, "handle", 11, 0]]}
+{"id": "rd-wildchat-test2-0345#t1", "ms": 40.12, "edits": []}
+{"id": "rd-wildchat-test2-0345#t2", "ms": 38.22, "edits": []}
+{"id": "rd-wildchat-test2-0346#t0", "ms": 64.85, "edits": [[4, 6, "age", 2, 0], [13, 21, "GPE", 10, 0], [39, 55, "phone_intl", 16, 0]]}
+{"id": "rd-wildchat-test2-0346#t1", "ms": 60.59, "edits": []}
+{"id": "rd-wildchat-test2-0346#t2", "ms": 55.54, "edits": []}
+{"id": "rd-wildchat-test2-0347#t0", "ms": 68.21, "edits": [[350, 399, "address", 49, 0]]}
+{"id": "rd-wildchat-test2-0347#t1", "ms": 48.6, "edits": []}
+{"id": "rd-wildchat-test2-0347#t2", "ms": 51.78, "edits": []}
+{"id": "rd-wildchat-test2-1001", "ms": 59.82, "edits": []}
+{"id": "rd-wildchat-test2-1002", "ms": 73.03, "edits": []}
+{"id": "rd-wildchat-test2-1003", "ms": 128.91, "edits": [[177, 192, "PERSON", 11, 0], [237, 252, "PERSON", 18, 0], [296, 311, "PERSON", 16, 0], [355, 373, "PERSON", 13, 0], [420, 434, "PERSON", 11, 0], [477, 495, "PERSON", 15, 0], [542, 557, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-1004", "ms": 51.09, "edits": []}
+{"id": "rd-wildchat-test2-1005", "ms": 45.37, "edits": []}
+{"id": "rd-wildchat-test2-1006", "ms": 49.98, "edits": []}
+{"id": "rd-wildchat-test2-1007", "ms": 50.06, "edits": []}
+{"id": "rd-wildchat-test2-1008", "ms": 49.95, "edits": []}
+{"id": "rd-wildchat-test2-1009", "ms": 57.23, "edits": []}
+{"id": "rd-wildchat-test2-1010", "ms": 73.85, "edits": [[121, 126, "PERSON", 5, 0], [181, 186, "PERSON", 5, 0], [199, 204, "PERSON", 5, 0], [243, 248, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1011", "ms": 67.17, "edits": []}
+{"id": "rd-wildchat-test2-1012", "ms": 221.1, "edits": []}
+{"id": "rd-wildchat-test2-1013", "ms": 43.83, "edits": []}
+{"id": "rd-wildchat-test2-1014", "ms": 120.46, "edits": [[19, 27, "PERSON", 5, 0], [58, 69, "GPE", 11, 0], [71, 81, "GPE", 7, 0], [113, 120, "PERSON", 5, 0], [125, 130, "PERSON", 5, 0], [196, 210, "PERSON", 14, 0], [230, 238, "GPE", 9, 0], [240, 248, "GPE", 7, 0], [365, 373, "PERSON", 5, 0], [421, 427, "PERSON", 7, 0], [593, 601, "PERSON", 5, 0], [613, 619, "PERSON", 7, 0], [664, 672, "PERSON", 5, 0], [677, 683, "PERSON", 7, 0], [722, 730, "PERSON", 5, 0], [765, 783, "ORG", 17, 0], [799, 806, "PERSON", 5, 0], [817, 825, "PERSON", 5, 0], [914, 919, "PERSON", 5, 0], [967, 975, "PERSON", 5, 0], [1095, 1101, "PERSON", 7, 0], [1123, 1129, "PERSON", 6, 0], [1165, 1171, "PERSON", 7, 0], [1176, 1184, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1015", "ms": 58.38, "edits": []}
+{"id": "rd-wildchat-test2-1017", "ms": 64.94, "edits": []}
+{"id": "rd-wildchat-test2-1018", "ms": 41.43, "edits": []}
+{"id": "rd-wildchat-test2-1019", "ms": 65.81, "edits": []}
+{"id": "rd-wildchat-test2-1020", "ms": 63.6, "edits": [[59, 69, "PERSON", 13, 0], [70, 77, "postcode_uk", 7, 0], [347, 362, "credential", 15, 0]]}
+{"id": "rd-wildchat-test2-1021", "ms": 43.16, "edits": []}
+{"id": "rd-wildchat-test2-1022", "ms": 172.69, "edits": [[3, 14, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-1023", "ms": 69.06, "edits": []}
+{"id": "rd-wildchat-test2-1024", "ms": 54.63, "edits": [[82, 93, "age", 10, 0], [115, 130, "PERSON", 21, 0], [140, 151, "age", 11, 0], [160, 170, "PERSON", 13, 0], [197, 202, "PERSON", 5, 0], [233, 243, "PERSON", 13, 0]]}
+{"id": "rd-wildchat-test2-1025", "ms": 150.68, "edits": []}
+{"id": "rd-wildchat-test2-1026", "ms": 96.9, "edits": [[50, 55, "PERSON", 4, 0], [146, 151, "PERSON", 4, 0], [192, 197, "PERSON", 6, 0], [292, 297, "PERSON", 4, 0], [345, 350, "PERSON", 4, 0], [424, 429, "PERSON", 6, 0], [554, 559, "PERSON", 4, 0], [592, 597, "PERSON", 6, 0], [627, 632, "PERSON", 6, 0], [669, 674, "PERSON", 4, 0], [702, 707, "PERSON", 6, 0], [775, 780, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1027", "ms": 86.96, "edits": []}
+{"id": "rd-wildchat-test2-1028", "ms": 102.15, "edits": []}
+{"id": "rd-wildchat-test2-1029", "ms": 43.24, "edits": []}
+{"id": "rd-wildchat-test2-1030", "ms": 40.07, "edits": []}
+{"id": "rd-wildchat-test2-1031", "ms": 88.59, "edits": []}
+{"id": "rd-wildchat-test2-1032", "ms": 98.33, "edits": []}
+{"id": "rd-wildchat-test2-1033", "ms": 32.53, "edits": []}
+{"id": "rd-wildchat-test2-1034", "ms": 60.58, "edits": [[48, 74, "PERSON", 17, 0], [142, 147, "GPE", 5, 0]]}
+{"id": "rd-wildchat-test2-1035", "ms": 58.34, "edits": []}
+{"id": "rd-wildchat-test2-1036", "ms": 66.04, "edits": []}
+{"id": "rd-wildchat-test2-1037", "ms": 59.14, "edits": []}
+{"id": "rd-wildchat-test2-1038", "ms": 68.11, "edits": []}
+{"id": "rd-wildchat-test2-1039", "ms": 56.16, "edits": []}
+{"id": "rd-wildchat-test2-1040", "ms": 55.28, "edits": [[6, 12, "PERSON", 7, 0], [345, 351, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1041", "ms": 34.23, "edits": []}
+{"id": "rd-wildchat-test2-1042", "ms": 55.69, "edits": []}
+{"id": "rd-wildchat-test2-1043", "ms": 33.79, "edits": []}
+{"id": "rd-wildchat-test2-1044", "ms": 52.54, "edits": [[18, 29, "PERSON", 14, 0]]}
+{"id": "rd-wildchat-test2-1045", "ms": 33.91, "edits": []}
+{"id": "rd-wildchat-test2-1046", "ms": 166.2, "edits": [[338, 341, "ip_address", 3, 0], [433, 436, "ip_address", 3, 0], [1416, 1429, "PERSON", 11, 0], [1484, 1490, "PERSON", 5, 0], [1491, 1497, "PERSON", 5, 0], [1497, 1500, "ip_address", 3, 0], [1634, 1637, "ip_address", 3, 0], [1694, 1707, "PERSON", 11, 0], [1707, 1710, "ip_address", 3, 0], [1854, 1857, "ip_address", 3, 0]]}
+{"id": "rd-wildchat-test2-1047", "ms": 51.94, "edits": []}
+{"id": "rd-wildchat-test2-1048", "ms": 117.36, "edits": []}
+{"id": "rd-wildchat-test2-1049", "ms": 34.89, "edits": []}
+{"id": "rd-wildchat-test2-1050", "ms": 64.85, "edits": []}
+{"id": "rd-wildchat-test2-1051", "ms": 38.03, "edits": []}
+{"id": "rd-wildchat-test2-1052", "ms": 36.79, "edits": []}
+{"id": "rd-wildchat-test2-1053", "ms": 150.95, "edits": []}
+{"id": "rd-wildchat-test2-1054", "ms": 108.74, "edits": [[710, 718, "ORG", 6, 0]]}
+{"id": "rd-wildchat-test2-1055", "ms": 47.58, "edits": []}
+{"id": "rd-wildchat-test2-1056", "ms": 155.85, "edits": [[1, 8, "PERSON", 7, 0], [46, 56, "age", 10, 0], [70, 77, "PERSON", 7, 0], [247, 254, "PERSON", 7, 0], [269, 275, "PERSON", 9, 0], [328, 338, "age", 10, 0], [344, 347, "PERSON", 5, 0], [361, 364, "PERSON", 5, 0], [367, 379, "PERSON", 14, 0], [412, 418, "PERSON", 9, 0], [483, 486, "PERSON", 5, 0], [507, 513, "PERSON", 9, 0], [516, 519, "PERSON", 5, 0], [601, 608, "PERSON", 7, 0], [636, 643, "PERSON", 7, 0], [651, 657, "PERSON", 9, 0], [725, 732, "PERSON", 7, 0], [735, 741, "PERSON", 9, 0], [794, 800, "PERSON", 9, 0], [835, 842, "PERSON", 7, 0], [846, 853, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1057", "ms": 60.52, "edits": []}
+{"id": "rd-wildchat-test2-1058", "ms": 56.97, "edits": []}
+{"id": "rd-wildchat-test2-1059", "ms": 36.95, "edits": []}
+{"id": "rd-wildchat-test2-1060", "ms": 81.6, "edits": []}
+{"id": "rd-wildchat-test2-1061", "ms": 62.25, "edits": []}
+{"id": "rd-wildchat-test2-1062", "ms": 54.93, "edits": []}
+{"id": "rd-wildchat-test2-1063", "ms": 57.06, "edits": []}
+{"id": "rd-wildchat-test2-1064", "ms": 72.14, "edits": [[27, 33, "PERSON", 9, 0], [46, 52, "PERSON", 9, 0], [184, 190, "PERSON", 9, 0]]}
+{"id": "rd-wildchat-test2-1065", "ms": 171.7, "edits": []}
+{"id": "rd-wildchat-test2-1066", "ms": 36.9, "edits": []}
+{"id": "rd-wildchat-test2-1067", "ms": 33.68, "edits": []}
+{"id": "rd-wildchat-test2-1068", "ms": 40.82, "edits": []}
+{"id": "rd-wildchat-test2-1070", "ms": 61.05, "edits": []}
+{"id": "rd-wildchat-test2-1071", "ms": 82.89, "edits": [[24, 30, "PERSON", 9, 0], [113, 119, "PERSON", 9, 0], [375, 381, "PERSON", 9, 0]]}
+{"id": "rd-wildchat-test2-1072", "ms": 33.72, "edits": []}
+{"id": "rd-wildchat-test2-1073", "ms": 52.87, "edits": []}
+{"id": "rd-wildchat-test2-1074", "ms": 95.28, "edits": []}
+{"id": "rd-wildchat-test2-1075", "ms": 57.18, "edits": []}
+{"id": "rd-wildchat-test2-1076", "ms": 52.27, "edits": [[46, 62, "ORG", 17, 0]]}
+{"id": "rd-wildchat-test2-1077", "ms": 64.16, "edits": []}
+{"id": "rd-wildchat-test2-1078", "ms": 144.34, "edits": [[1026, 1039, "ORG", 13, 0]]}
+{"id": "rd-wildchat-test2-1079", "ms": 65.73, "edits": []}
+{"id": "rd-wildchat-test2-1080", "ms": 42.39, "edits": []}
+{"id": "rd-wildchat-test2-1081", "ms": 32.89, "edits": []}
+{"id": "rd-wildchat-test2-1082", "ms": 98.91, "edits": [[118, 133, "PERSON", 15, 0], [272, 285, "GPE", 8, 0], [291, 299, "GPE", 5, 0], [502, 517, "PERSON", 15, 0], [614, 622, "GPE", 5, 0]]}
+{"id": "rd-wildchat-test2-1083", "ms": 262.8, "edits": []}
+{"id": "rd-wildchat-test2-1084", "ms": 44.78, "edits": []}
+{"id": "rd-wildchat-test2-1085", "ms": 32.41, "edits": []}
+{"id": "rd-wildchat-test2-1086", "ms": 60.98, "edits": []}
+{"id": "rd-wildchat-test2-1087", "ms": 47.81, "edits": [[65, 76, "age", 11, 0], [90, 101, "age", 11, 0], [128, 139, "age", 11, 0], [161, 171, "PERSON", 13, 0], [198, 203, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-1088", "ms": 88.36, "edits": [[152, 158, "PERSON", 5, 0], [346, 360, "age:worded", 13, 0], [425, 429, "PERSON", 7, 0], [503, 507, "PERSON", 7, 0], [634, 638, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1089", "ms": 39.9, "edits": []}
+{"id": "rd-wildchat-test2-1090", "ms": 38.21, "edits": []}
+{"id": "rd-wildchat-test2-1091", "ms": 37.73, "edits": []}
+{"id": "rd-wildchat-test2-1092", "ms": 56.9, "edits": []}
+{"id": "rd-wildchat-test2-1093", "ms": 92.36, "edits": []}
+{"id": "rd-wildchat-test2-1094", "ms": 32.81, "edits": []}
+{"id": "rd-wildchat-test2-1095", "ms": 53.26, "edits": []}
+{"id": "rd-wildchat-test2-1096", "ms": 400.45, "edits": []}
+{"id": "rd-wildchat-test2-1097", "ms": 117.23, "edits": []}
+{"id": "rd-wildchat-test2-1099", "ms": 43.64, "edits": []}
+{"id": "rd-wildchat-test2-1100", "ms": 60.73, "edits": []}
+{"id": "rd-wildchat-test2-1101", "ms": 44.9, "edits": []}
+{"id": "rd-wildchat-test2-1102", "ms": 31.8, "edits": []}
+{"id": "rd-wildchat-test2-1103", "ms": 162.9, "edits": []}
+{"id": "rd-wildchat-test2-1105", "ms": 64.29, "edits": []}
+{"id": "rd-wildchat-test2-1106", "ms": 73.31, "edits": [[349, 376, "ORG", 22, 0]]}
+{"id": "rd-wildchat-test2-1107", "ms": 41.69, "edits": []}
+{"id": "rd-wildchat-test2-1108", "ms": 76.59, "edits": [[525, 528, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1109", "ms": 59.75, "edits": []}
+{"id": "rd-wildchat-test2-1110", "ms": 66.16, "edits": []}
+{"id": "rd-wildchat-test2-1111", "ms": 71.24, "edits": []}
+{"id": "rd-wildchat-test2-1112", "ms": 42.38, "edits": []}
+{"id": "rd-wildchat-test2-1113", "ms": 49.42, "edits": []}
+{"id": "rd-wildchat-test2-1114", "ms": 57.71, "edits": []}
+{"id": "rd-wildchat-test2-1115", "ms": 71.92, "edits": []}
+{"id": "rd-wildchat-test2-1116", "ms": 42.26, "edits": []}
+{"id": "rd-wildchat-test2-1117", "ms": 60.26, "edits": []}
+{"id": "rd-wildchat-test2-1118", "ms": 42.42, "edits": []}
+{"id": "rd-wildchat-test2-1119", "ms": 51.03, "edits": []}
+{"id": "rd-wildchat-test2-1120", "ms": 42.64, "edits": []}
+{"id": "rd-wildchat-test2-1121", "ms": 63.97, "edits": []}
+{"id": "rd-wildchat-test2-1122", "ms": 59.98, "edits": []}
+{"id": "rd-wildchat-test2-1123", "ms": 64.9, "edits": []}
+{"id": "rd-wildchat-test2-1124", "ms": 61.39, "edits": []}
+{"id": "rd-wildchat-test2-1125", "ms": 46.32, "edits": []}
+{"id": "rd-wildchat-test2-1126", "ms": 41.5, "edits": []}
+{"id": "rd-wildchat-test2-1127", "ms": 78.63, "edits": []}
+{"id": "rd-wildchat-test2-1128", "ms": 79.3, "edits": [[0, 6, "PERSON", 8, 0], [234, 240, "PERSON", 8, 0], [427, 433, "PERSON", 8, 0], [479, 483, "PERSON", 8, 0], [566, 570, "PERSON", 8, 0], [608, 614, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-1129", "ms": 95.1, "edits": []}
+{"id": "rd-wildchat-test2-1130", "ms": 64.48, "edits": []}
+{"id": "rd-wildchat-test2-1131", "ms": 42.25, "edits": []}
+{"id": "rd-wildchat-test2-1132", "ms": 96.91, "edits": [[77, 107, "credential", 30, 0], [273, 303, "credential", 30, 0]]}
+{"id": "rd-wildchat-test2-1133", "ms": 45.44, "edits": []}
+{"id": "rd-wildchat-test2-1134", "ms": 58.62, "edits": []}
+{"id": "rd-wildchat-test2-1135", "ms": 58.27, "edits": []}
+{"id": "rd-wildchat-test2-1136", "ms": 41.64, "edits": []}
+{"id": "rd-wildchat-test2-1137", "ms": 57.32, "edits": []}
+{"id": "rd-wildchat-test2-1138", "ms": 42.77, "edits": []}
+{"id": "rd-wildchat-test2-1139", "ms": 67.54, "edits": [[75, 86, "GPE", 7, 0], [101, 110, "GPE", 11, 0], [114, 125, "PERSON", 12, 0], [138, 149, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-1140", "ms": 55.02, "edits": []}
+{"id": "rd-wildchat-test2-1141", "ms": 173.27, "edits": [[504, 511, "id_number", 7, 0]]}
+{"id": "rd-wildchat-test2-1142", "ms": 77.55, "edits": []}
+{"id": "rd-wildchat-test2-1143", "ms": 183.01, "edits": [[2045, 2050, "PERSON", 7, 0], [2102, 2107, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1144", "ms": 42.21, "edits": []}
+{"id": "rd-wildchat-test2-1145", "ms": 73.68, "edits": [[361, 367, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1146", "ms": 43.72, "edits": []}
+{"id": "rd-wildchat-test2-1147", "ms": 41.7, "edits": []}
+{"id": "rd-wildchat-test2-1148", "ms": 43.21, "edits": []}
+{"id": "rd-wildchat-test2-1149", "ms": 322.41, "edits": []}
+{"id": "rd-wildchat-test2-1150", "ms": 47.82, "edits": []}
+{"id": "rd-wildchat-test2-1151", "ms": 62.01, "edits": [[251, 257, "PERSON", 7, 0], [339, 345, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1152", "ms": 75.31, "edits": []}
+{"id": "rd-wildchat-test2-1153", "ms": 62.07, "edits": []}
+{"id": "rd-wildchat-test2-1154", "ms": 102.69, "edits": [[52, 57, "PERSON", 8, 0], [148, 153, "PERSON", 8, 0], [173, 178, "PERSON", 5, 0], [269, 274, "PERSON", 8, 0], [322, 327, "PERSON", 8, 0], [350, 355, "PERSON", 5, 0], [510, 515, "PERSON", 8, 0], [624, 629, "PERSON", 8, 0], [662, 667, "PERSON", 5, 0], [683, 688, "PERSON", 8, 0], [726, 731, "PERSON", 5, 0], [788, 793, "PERSON", 5, 0], [940, 945, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1155", "ms": 43.9, "edits": []}
+{"id": "rd-wildchat-test2-1156", "ms": 51.46, "edits": [[189, 196, "PERSON", 8, 0], [234, 240, "GPE", 10, 0]]}
+{"id": "rd-wildchat-test2-1157", "ms": 102.97, "edits": []}
+{"id": "rd-wildchat-test2-1158", "ms": 81.26, "edits": []}
+{"id": "rd-wildchat-test2-1159", "ms": 43.46, "edits": []}
+{"id": "rd-wildchat-test2-1160", "ms": 43.81, "edits": []}
+{"id": "rd-wildchat-test2-1161", "ms": 43.3, "edits": []}
+{"id": "rd-wildchat-test2-1162", "ms": 50.33, "edits": []}
+{"id": "rd-wildchat-test2-1163", "ms": 43.54, "edits": []}
+{"id": "rd-wildchat-test2-1164", "ms": 65.75, "edits": []}
+{"id": "rd-wildchat-test2-1165", "ms": 147.95, "edits": []}
+{"id": "rd-wildchat-test2-1166", "ms": 79.0, "edits": [[1, 15, "age:worded", 19, 0], [132, 137, "PERSON", 6, 0], [334, 339, "PERSON", 6, 0], [351, 359, "PERSON", 5, 0], [423, 431, "PERSON", 5, 0], [456, 461, "PERSON", 6, 0], [481, 486, "PERSON", 6, 0], [579, 584, "PERSON", 6, 0], [612, 620, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1167", "ms": 61.17, "edits": []}
+{"id": "rd-wildchat-test2-1168", "ms": 64.26, "edits": []}
+{"id": "rd-wildchat-test2-1169", "ms": 56.99, "edits": []}
+{"id": "rd-wildchat-test2-1170", "ms": 43.47, "edits": []}
+{"id": "rd-wildchat-test2-1171", "ms": 53.25, "edits": [[6, 15, "age", 9, 0]]}
+{"id": "rd-wildchat-test2-1172", "ms": 66.89, "edits": []}
+{"id": "rd-wildchat-test2-1173", "ms": 44.51, "edits": []}
+{"id": "rd-wildchat-test2-1174", "ms": 40.35, "edits": []}
+{"id": "rd-wildchat-test2-1175", "ms": 64.98, "edits": []}
+{"id": "rd-wildchat-test2-1176", "ms": 65.91, "edits": []}
+{"id": "rd-wildchat-test2-1177", "ms": 65.95, "edits": [[58, 77, "PERSON", 14, 0], [119, 138, "PERSON", 14, 0], [280, 289, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1178", "ms": 44.22, "edits": []}
+{"id": "rd-wildchat-test2-1179", "ms": 54.61, "edits": []}
+{"id": "rd-wildchat-test2-1180", "ms": 100.68, "edits": [[6, 12, "PERSON", 6, 0], [164, 169, "PERSON", 5, 0], [681, 707, "PERSON", 22, 0]]}
+{"id": "rd-wildchat-test2-1181", "ms": 56.56, "edits": []}
+{"id": "rd-wildchat-test2-1182", "ms": 60.68, "edits": []}
+{"id": "rd-wildchat-test2-1183", "ms": 69.74, "edits": []}
+{"id": "rd-wildchat-test2-1184", "ms": 46.49, "edits": []}
+{"id": "rd-wildchat-test2-1185", "ms": 35.38, "edits": []}
+{"id": "rd-wildchat-test2-1186", "ms": 41.43, "edits": []}
+{"id": "rd-wildchat-test2-1187", "ms": 49.03, "edits": []}
+{"id": "rd-wildchat-test2-1188", "ms": 32.73, "edits": []}
+{"id": "rd-wildchat-test2-1189", "ms": 45.89, "edits": []}
+{"id": "rd-wildchat-test2-1190", "ms": 36.52, "edits": []}
+{"id": "rd-wildchat-test2-1191", "ms": 37.59, "edits": [[38, 41, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1192", "ms": 63.4, "edits": []}
+{"id": "rd-wildchat-test2-1193", "ms": 58.88, "edits": []}
+{"id": "rd-wildchat-test2-1194", "ms": 74.07, "edits": [[206, 214, "GPE", 10, 0], [506, 514, "GPE", 10, 0], [645, 673, "ORG", 11, 0]]}
+{"id": "rd-wildchat-test2-1195", "ms": 62.43, "edits": []}
+{"id": "rd-wildchat-test2-1197", "ms": 52.89, "edits": []}
+{"id": "rd-wildchat-test2-1198", "ms": 32.07, "edits": []}
+{"id": "rd-wildchat-test2-1199", "ms": 43.99, "edits": []}
+{"id": "rd-wildchat-test2-1200", "ms": 45.79, "edits": []}
+{"id": "rd-wildchat-test2-1201", "ms": 49.69, "edits": []}
+{"id": "rd-wildchat-test2-1202", "ms": 30.71, "edits": []}
+{"id": "rd-wildchat-test2-1203", "ms": 52.1, "edits": []}
+{"id": "rd-wildchat-test2-1204", "ms": 31.37, "edits": []}
+{"id": "rd-wildchat-test2-1205", "ms": 33.72, "edits": []}
+{"id": "rd-wildchat-test2-1206", "ms": 32.75, "edits": []}
+{"id": "rd-wildchat-test2-1207", "ms": 37.03, "edits": []}
+{"id": "rd-wildchat-test2-1208", "ms": 63.23, "edits": []}
+{"id": "rd-wildchat-test2-1209", "ms": 46.46, "edits": []}
+{"id": "rd-wildchat-test2-1210", "ms": 50.91, "edits": []}
+{"id": "rd-wildchat-test2-1211", "ms": 95.75, "edits": []}
+{"id": "rd-wildchat-test2-1212", "ms": 169.0, "edits": [[315, 336, "ORG", 20, 0], [655, 676, "ORG", 20, 0]]}
+{"id": "rd-wildchat-test2-1213", "ms": 41.64, "edits": []}
+{"id": "rd-wildchat-test2-1214", "ms": 73.53, "edits": []}
+{"id": "rd-wildchat-test2-1215", "ms": 61.62, "edits": []}
+{"id": "rd-wildchat-test2-1216", "ms": 33.58, "edits": []}
+{"id": "rd-wildchat-test2-1217", "ms": 41.48, "edits": []}
+{"id": "rd-wildchat-test2-1218", "ms": 48.71, "edits": []}
+{"id": "rd-wildchat-test2-1219", "ms": 43.71, "edits": []}
+{"id": "rd-wildchat-test2-1220", "ms": 67.49, "edits": []}
+{"id": "rd-wildchat-test2-1221", "ms": 58.58, "edits": []}
+{"id": "rd-wildchat-test2-1223", "ms": 56.96, "edits": [[124, 156, "ORG", 26, 0]]}
+{"id": "rd-wildchat-test2-1224", "ms": 77.92, "edits": [[45, 49, "PERSON", 8, 0], [309, 313, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-1225", "ms": 32.07, "edits": []}
+{"id": "rd-wildchat-test2-1226", "ms": 57.37, "edits": []}
+{"id": "rd-wildchat-test2-1227", "ms": 173.95, "edits": []}
+{"id": "rd-wildchat-test2-1228", "ms": 38.02, "edits": []}
+{"id": "rd-wildchat-test2-1229", "ms": 31.36, "edits": []}
+{"id": "rd-wildchat-test2-1230", "ms": 109.07, "edits": []}
+{"id": "rd-wildchat-test2-1231", "ms": 35.03, "edits": []}
+{"id": "rd-wildchat-test2-1232", "ms": 156.65, "edits": []}
+{"id": "rd-wildchat-test2-1233", "ms": 44.92, "edits": []}
+{"id": "rd-wildchat-test2-1234", "ms": 90.65, "edits": []}
+{"id": "rd-wildchat-test2-1235", "ms": 38.22, "edits": []}
+{"id": "rd-wildchat-test2-1236", "ms": 50.03, "edits": []}
+{"id": "rd-wildchat-test2-1237", "ms": 59.07, "edits": []}
+{"id": "rd-wildchat-test2-1238", "ms": 32.41, "edits": []}
+{"id": "rd-wildchat-test2-1239", "ms": 30.53, "edits": []}
+{"id": "rd-wildchat-test2-1240", "ms": 54.76, "edits": []}
+{"id": "rd-wildchat-test2-1241", "ms": 65.7, "edits": []}
+{"id": "rd-wildchat-test2-1242", "ms": 83.0, "edits": []}
+{"id": "rd-wildchat-test2-1243", "ms": 33.12, "edits": [[59, 68, "PERSON", 21, 0]]}
+{"id": "rd-wildchat-test2-1244", "ms": 91.72, "edits": [[270, 274, "GPE", 9, 0], [312, 316, "GPE", 9, 0], [384, 388, "GPE", 9, 0], [447, 451, "GPE", 9, 0], [560, 564, "GPE", 9, 0], [589, 593, "GPE", 9, 0], [703, 707, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-1245", "ms": 41.94, "edits": []}
+{"id": "rd-wildchat-test2-1246", "ms": 82.09, "edits": []}
+{"id": "rd-wildchat-test2-1248", "ms": 39.88, "edits": [[213, 220, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1249", "ms": 172.02, "edits": [[110, 114, "PERSON", 6, 0], [220, 224, "PERSON", 6, 0], [264, 268, "PERSON", 6, 0], [331, 335, "PERSON", 6, 0], [495, 499, "PERSON", 6, 0], [582, 587, "PERSON", 4, 0], [592, 596, "PERSON", 6, 0], [713, 717, "PERSON", 6, 0], [775, 779, "PERSON", 6, 0], [897, 902, "PERSON", 4, 0], [926, 931, "PERSON", 4, 0], [952, 956, "PERSON", 6, 0], [1076, 1080, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1250", "ms": 58.77, "edits": []}
+{"id": "rd-wildchat-test2-1251", "ms": 79.1, "edits": []}
+{"id": "rd-wildchat-test2-1252", "ms": 71.66, "edits": [[176, 182, "PERSON", 5, 0], [232, 248, "handle", 19, 0]]}
+{"id": "rd-wildchat-test2-1253", "ms": 52.51, "edits": []}
+{"id": "rd-wildchat-test2-1254", "ms": 202.6, "edits": [[928, 941, "PERSON", 11, 0], [1192, 1198, "PERSON", 4, 0], [1514, 1529, "PERSON", 12, 0], [1764, 1772, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1255", "ms": 79.74, "edits": []}
+{"id": "rd-wildchat-test2-1256", "ms": 47.52, "edits": []}
+{"id": "rd-wildchat-test2-1257", "ms": 46.24, "edits": []}
+{"id": "rd-wildchat-test2-1258", "ms": 71.24, "edits": []}
+{"id": "rd-wildchat-test2-1260", "ms": 45.57, "edits": []}
+{"id": "rd-wildchat-test2-1261", "ms": 46.07, "edits": []}
+{"id": "rd-wildchat-test2-1262", "ms": 69.86, "edits": []}
+{"id": "rd-wildchat-test2-1263", "ms": 39.84, "edits": []}
+{"id": "rd-wildchat-test2-1264", "ms": 45.76, "edits": []}
+{"id": "rd-wildchat-test2-1265", "ms": 119.09, "edits": [[44, 67, "GPE", 10, 0], [150, 160, "GPE", 10, 0], [596, 603, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1266", "ms": 66.09, "edits": []}
+{"id": "rd-wildchat-test2-1267", "ms": 40.57, "edits": [[6, 8, "GPE", 2, 0]]}
+{"id": "rd-wildchat-test2-1268", "ms": 175.65, "edits": []}
+{"id": "rd-wildchat-test2-1269", "ms": 53.04, "edits": []}
+{"id": "rd-wildchat-test2-1270", "ms": 152.63, "edits": [[1, 14, "PERSON", 11, 0], [101, 107, "PERSON", 5, 0], [108, 114, "PERSON", 5, 0], [119, 130, "age", 11, 0], [190, 205, "ORG", 11, 0], [565, 571, "PERSON", 5, 0], [733, 739, "PERSON", 5, 0], [1013, 1019, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1271", "ms": 55.4, "edits": []}
+{"id": "rd-wildchat-test2-1272", "ms": 105.24, "edits": [[136, 141, "GPE", 5, 0], [647, 652, "GPE", 5, 0], [659, 672, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-1273", "ms": 82.8, "edits": []}
+{"id": "rd-wildchat-test2-1274", "ms": 99.16, "edits": []}
+{"id": "rd-wildchat-test2-1275", "ms": 71.03, "edits": []}
+{"id": "rd-wildchat-test2-1276", "ms": 119.94, "edits": [[68, 74, "PERSON", 4, 0], [240, 243, "PERSON", 4, 0], [270, 276, "PERSON", 4, 0], [332, 335, "PERSON", 4, 0], [412, 418, "PERSON", 4, 0], [439, 446, "PERSON", 9, 0], [499, 502, "PERSON", 4, 0], [512, 519, "PERSON", 9, 0], [552, 559, "PERSON", 9, 0]]}
+{"id": "rd-wildchat-test2-1277", "ms": 49.82, "edits": []}
+{"id": "rd-wildchat-test2-1278", "ms": 54.05, "edits": []}
+{"id": "rd-wildchat-test2-1279", "ms": 70.71, "edits": []}
+{"id": "rd-wildchat-test2-1280", "ms": 82.67, "edits": []}
+{"id": "rd-wildchat-test2-1281", "ms": 70.97, "edits": []}
+{"id": "rd-wildchat-test2-1282", "ms": 79.28, "edits": []}
+{"id": "rd-wildchat-test2-1283", "ms": 79.7, "edits": [[315, 326, "PERSON", 11, 0], [373, 384, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-1284", "ms": 73.51, "edits": []}
+{"id": "rd-wildchat-test2-1285", "ms": 192.12, "edits": [], "refused": 1}
+{"id": "rd-wildchat-test2-1286", "ms": 51.41, "edits": []}
+{"id": "rd-wildchat-test2-1287", "ms": 66.71, "edits": []}
+{"id": "rd-wildchat-test2-1288", "ms": 110.8, "edits": []}
+{"id": "rd-wildchat-test2-1289", "ms": 78.8, "edits": []}
+{"id": "rd-wildchat-test2-1290", "ms": 54.07, "edits": []}
+{"id": "rd-wildchat-test2-1291", "ms": 93.1, "edits": []}
+{"id": "rd-wildchat-test2-1292", "ms": 80.56, "edits": []}
+{"id": "rd-wildchat-test2-1293", "ms": 71.94, "edits": []}
+{"id": "rd-wildchat-test2-1294", "ms": 170.22, "edits": []}
+{"id": "rd-wildchat-test2-1295", "ms": 66.98, "edits": []}
+{"id": "rd-wildchat-test2-1296", "ms": 97.07, "edits": []}
+{"id": "rd-wildchat-test2-1297", "ms": 53.71, "edits": []}
+{"id": "rd-wildchat-test2-1298", "ms": 100.98, "edits": []}
+{"id": "rd-wildchat-test2-1299", "ms": 70.91, "edits": []}
+{"id": "rd-wildchat-test2-1300", "ms": 124.38, "edits": [[109, 127, "PERSON", 13, 0], [145, 156, "PERSON", 15, 0], [158, 188, "ORG", 37, 0], [1010, 1024, "PERSON", 17, 0], [1061, 1075, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-1301", "ms": 48.8, "edits": []}
+{"id": "rd-wildchat-test2-1302", "ms": 52.23, "edits": []}
+{"id": "rd-wildchat-test2-1304", "ms": 61.04, "edits": []}
+{"id": "rd-wildchat-test2-1305", "ms": 65.72, "edits": []}
+{"id": "rd-wildchat-test2-1306", "ms": 49.52, "edits": []}
+{"id": "rd-wildchat-test2-1307", "ms": 66.76, "edits": []}
+{"id": "rd-wildchat-test2-1308", "ms": 289.15, "edits": []}
+{"id": "rd-wildchat-test2-1309", "ms": 49.44, "edits": []}
+{"id": "rd-wildchat-test2-1310", "ms": 68.5, "edits": []}
+{"id": "rd-wildchat-test2-1311", "ms": 91.67, "edits": [[220, 226, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1312", "ms": 47.16, "edits": []}
+{"id": "rd-wildchat-test2-1313", "ms": 46.13, "edits": []}
+{"id": "rd-wildchat-test2-1315", "ms": 125.51, "edits": [[72, 76, "PERSON", 6, 0], [81, 85, "PERSON", 6, 0], [156, 160, "PERSON", 6, 0], [171, 175, "PERSON", 6, 0], [179, 183, "PERSON", 6, 0], [202, 206, "PERSON", 6, 0], [210, 222, "age", 12, 0], [224, 228, "PERSON", 6, 0], [232, 244, "age", 12, 0], [266, 270, "PERSON", 6, 0], [326, 330, "PERSON", 6, 0], [343, 347, "PERSON", 6, 0], [376, 380, "PERSON", 6, 0], [496, 500, "PERSON", 6, 0], [505, 509, "PERSON", 6, 0], [607, 611, "PERSON", 6, 0], [713, 717, "PERSON", 6, 0], [722, 726, "PERSON", 6, 0], [843, 847, "PERSON", 6, 0], [871, 875, "PERSON", 6, 0], [877, 881, "PERSON", 6, 0], [950, 954, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1316", "ms": 73.9, "edits": []}
+{"id": "rd-wildchat-test2-1317", "ms": 54.9, "edits": []}
+{"id": "rd-wildchat-test2-1318", "ms": 71.51, "edits": []}
+{"id": "rd-wildchat-test2-1319", "ms": 68.51, "edits": []}
+{"id": "rd-wildchat-test2-1320", "ms": 74.35, "edits": []}
+{"id": "rd-wildchat-test2-1321", "ms": 48.05, "edits": [[73, 76, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1322", "ms": 49.08, "edits": []}
+{"id": "rd-wildchat-test2-1323", "ms": 73.21, "edits": []}
+{"id": "rd-wildchat-test2-1324", "ms": 81.63, "edits": []}
+{"id": "rd-wildchat-test2-1325", "ms": 71.46, "edits": []}
+{"id": "rd-wildchat-test2-1326", "ms": 47.17, "edits": []}
+{"id": "rd-wildchat-test2-1327", "ms": 97.42, "edits": []}
+{"id": "rd-wildchat-test2-1328", "ms": 73.17, "edits": []}
+{"id": "rd-wildchat-test2-1329", "ms": 50.11, "edits": []}
+{"id": "rd-wildchat-test2-1330", "ms": 54.15, "edits": [[144, 154, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-1331", "ms": 45.96, "edits": [[0, 14, "PERSON", 22, 0]]}
+{"id": "rd-wildchat-test2-1332", "ms": 77.75, "edits": []}
+{"id": "rd-wildchat-test2-1333", "ms": 56.73, "edits": []}
+{"id": "rd-wildchat-test2-1334", "ms": 65.41, "edits": []}
+{"id": "rd-wildchat-test2-1341", "ms": 67.06, "edits": []}
+{"id": "rd-wildchat-test2-1342", "ms": 269.44, "edits": [[24, 31, "PERSON", 7, 0], [74, 81, "PERSON", 7, 0], [144, 151, "PERSON", 7, 0], [194, 201, "PERSON", 7, 0], [358, 365, "PERSON", 7, 0], [446, 453, "PERSON", 7, 0], [648, 655, "PERSON", 7, 0], [786, 793, "PERSON", 7, 0], [958, 965, "PERSON", 7, 0], [1016, 1023, "PERSON", 7, 0], [1238, 1242, "PERSON", 4, 0], [1317, 1321, "PERSON", 4, 0], [1526, 1530, "PERSON", 4, 0], [1645, 1649, "PERSON", 4, 0], [1743, 1747, "PERSON", 4, 0], [1906, 1910, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1343", "ms": 49.07, "edits": []}
+{"id": "rd-wildchat-test2-1344", "ms": 86.56, "edits": []}
+{"id": "rd-wildchat-test2-1345", "ms": 74.9, "edits": []}
+{"id": "rd-wildchat-test2-1346", "ms": 74.25, "edits": []}
+{"id": "rd-wildchat-test2-1347", "ms": 44.64, "edits": []}
+{"id": "rd-wildchat-test2-1348", "ms": 76.72, "edits": [[4, 11, "PERSON", 5, 0], [24, 31, "PERSON", 5, 0], [99, 106, "PERSON", 6, 0], [145, 152, "PERSON", 5, 0], [214, 221, "PERSON", 6, 0], [259, 266, "PERSON", 5, 0], [282, 289, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1349", "ms": 185.68, "edits": [[34, 46, "age", 12, 0], [391, 394, "PERSON", 6, 0], [452, 455, "PERSON", 6, 0], [541, 544, "PERSON", 6, 0], [673, 676, "PERSON", 6, 0], [929, 932, "PERSON", 6, 0], [1136, 1139, "PERSON", 6, 0], [1289, 1292, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1350", "ms": 42.02, "edits": []}
+{"id": "rd-wildchat-test2-1351", "ms": 75.42, "edits": []}
+{"id": "rd-wildchat-test2-1352", "ms": 53.96, "edits": []}
+{"id": "rd-wildchat-test2-1353", "ms": 46.17, "edits": []}
+{"id": "rd-wildchat-test2-1354", "ms": 48.45, "edits": []}
+{"id": "rd-wildchat-test2-1355", "ms": 40.86, "edits": []}
+{"id": "rd-wildchat-test2-1356", "ms": 70.62, "edits": []}
+{"id": "rd-wildchat-test2-1358", "ms": 105.61, "edits": [[537, 542, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1359", "ms": 84.71, "edits": []}
+{"id": "rd-wildchat-test2-1361", "ms": 71.24, "edits": []}
+{"id": "rd-wildchat-test2-1362", "ms": 49.67, "edits": []}
+{"id": "rd-wildchat-test2-1363", "ms": 66.53, "edits": []}
+{"id": "rd-wildchat-test2-1364", "ms": 46.23, "edits": []}
+{"id": "rd-wildchat-test2-1365", "ms": 62.92, "edits": []}
+{"id": "rd-wildchat-test2-1366", "ms": 173.67, "edits": [[170, 174, "PERSON", 5, 0], [212, 222, "PERSON", 7, 0], [236, 240, "PERSON", 5, 0], [243, 253, "PERSON", 7, 0], [271, 281, "PERSON", 7, 0], [363, 367, "PERSON", 5, 0], [383, 393, "PERSON", 7, 0], [459, 463, "PERSON", 5, 0], [567, 577, "PERSON", 7, 0], [651, 661, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1367", "ms": 124.87, "edits": []}
+{"id": "rd-wildchat-test2-1368", "ms": 66.78, "edits": []}
+{"id": "rd-wildchat-test2-1369", "ms": 74.24, "edits": []}
+{"id": "rd-wildchat-test2-1371", "ms": 42.41, "edits": []}
+{"id": "rd-wildchat-test2-1373", "ms": 44.01, "edits": []}
+{"id": "rd-wildchat-test2-1374", "ms": 45.29, "edits": []}
+{"id": "rd-wildchat-test2-1375", "ms": 145.64, "edits": [[659, 662, "handle", 6, 0], [716, 725, "PERSON", 12, 0], [746, 750, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1376", "ms": 53.54, "edits": []}
+{"id": "rd-wildchat-test2-1377", "ms": 49.28, "edits": [[45, 52, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1378", "ms": 40.18, "edits": []}
+{"id": "rd-wildchat-test2-1379", "ms": 42.0, "edits": []}
+{"id": "rd-wildchat-test2-1380", "ms": 72.62, "edits": []}
+{"id": "rd-wildchat-test2-1381", "ms": 84.2, "edits": []}
+{"id": "rd-wildchat-test2-1382", "ms": 40.46, "edits": []}
+{"id": "rd-wildchat-test2-1383", "ms": 60.49, "edits": []}
+{"id": "rd-wildchat-test2-1384", "ms": 62.54, "edits": []}
+{"id": "rd-wildchat-test2-1385", "ms": 51.15, "edits": []}
+{"id": "rd-wildchat-test2-1386", "ms": 68.05, "edits": []}
+{"id": "rd-wildchat-test2-1387", "ms": 190.43, "edits": [[1402, 1405, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1388", "ms": 68.22, "edits": []}
+{"id": "rd-wildchat-test2-1389", "ms": 43.71, "edits": []}
+{"id": "rd-wildchat-test2-1390", "ms": 66.02, "edits": []}
+{"id": "rd-wildchat-test2-1391", "ms": 66.03, "edits": []}
+{"id": "rd-wildchat-test2-1392", "ms": 105.42, "edits": []}
+{"id": "rd-wildchat-test2-1393", "ms": 70.66, "edits": []}
+{"id": "rd-wildchat-test2-1394", "ms": 164.12, "edits": []}
+{"id": "rd-wildchat-test2-1395", "ms": 67.35, "edits": []}
+{"id": "rd-wildchat-test2-1397", "ms": 42.38, "edits": []}
+{"id": "rd-wildchat-test2-1398", "ms": 37.78, "edits": []}
+{"id": "rd-wildchat-test2-1399", "ms": 253.71, "edits": []}
+{"id": "rd-wildchat-test2-1400", "ms": 42.29, "edits": [[6, 32, "PERSON", 22, 0]]}
+{"id": "rd-wildchat-test2-1401", "ms": 59.71, "edits": []}
+{"id": "rd-wildchat-test2-1402", "ms": 39.35, "edits": []}
+{"id": "rd-wildchat-test2-1403", "ms": 50.38, "edits": []}
+{"id": "rd-wildchat-test2-1404", "ms": 81.36, "edits": []}
+{"id": "rd-wildchat-test2-1405", "ms": 67.9, "edits": [[24, 30, "PERSON", 6, 0], [113, 119, "PERSON", 6, 0], [375, 381, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1406", "ms": 56.71, "edits": []}
+{"id": "rd-wildchat-test2-1407", "ms": 31.21, "edits": []}
+{"id": "rd-wildchat-test2-1408", "ms": 33.64, "edits": []}
+{"id": "rd-wildchat-test2-1409", "ms": 30.31, "edits": []}
+{"id": "rd-wildchat-test2-1410", "ms": 31.87, "edits": []}
+{"id": "rd-wildchat-test2-1412", "ms": 62.74, "edits": [[60, 65, "PERSON", 7, 0], [75, 83, "PERSON", 6, 0], [105, 110, "PERSON", 5, 0], [117, 122, "PERSON", 7, 0], [187, 192, "PERSON", 5, 0], [213, 218, "PERSON", 7, 0], [263, 271, "PERSON", 6, 0], [334, 339, "PERSON", 7, 0], [380, 388, "PERSON", 6, 0], [414, 419, "PERSON", 7, 0], [478, 486, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1413", "ms": 40.8, "edits": []}
+{"id": "rd-wildchat-test2-1414", "ms": 47.44, "edits": [[26, 30, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1415", "ms": 57.9, "edits": []}
+{"id": "rd-wildchat-test2-1416", "ms": 35.84, "edits": []}
+{"id": "rd-wildchat-test2-1417", "ms": 286.49, "edits": []}
+{"id": "rd-wildchat-test2-1418", "ms": 94.13, "edits": []}
+{"id": "rd-wildchat-test2-1419", "ms": 49.55, "edits": []}
+{"id": "rd-wildchat-test2-1420", "ms": 186.26, "edits": []}
+{"id": "rd-wildchat-test2-1421", "ms": 44.62, "edits": []}
+{"id": "rd-wildchat-test2-1422", "ms": 97.57, "edits": [[73, 96, "ORG", 25, 0]]}
+{"id": "rd-wildchat-test2-1423", "ms": 40.37, "edits": []}
+{"id": "rd-wildchat-test2-1424", "ms": 55.05, "edits": []}
+{"id": "rd-wildchat-test2-1425", "ms": 80.31, "edits": []}
+{"id": "rd-wildchat-test2-1426", "ms": 149.8, "edits": []}
+{"id": "rd-wildchat-test2-1427", "ms": 92.43, "edits": []}
+{"id": "rd-wildchat-test2-1428", "ms": 65.02, "edits": []}
+{"id": "rd-wildchat-test2-1429", "ms": 64.26, "edits": []}
+{"id": "rd-wildchat-test2-1430", "ms": 60.25, "edits": []}
+{"id": "rd-wildchat-test2-1431", "ms": 42.44, "edits": []}
+{"id": "rd-wildchat-test2-1432", "ms": 66.11, "edits": []}
+{"id": "rd-wildchat-test2-1433", "ms": 61.44, "edits": []}
+{"id": "rd-wildchat-test2-1434", "ms": 57.02, "edits": []}
+{"id": "rd-wildchat-test2-1435", "ms": 45.83, "edits": []}
+{"id": "rd-wildchat-test2-1436", "ms": 67.82, "edits": []}
+{"id": "rd-wildchat-test2-1437", "ms": 47.16, "edits": []}
+{"id": "rd-wildchat-test2-1438", "ms": 66.55, "edits": []}
+{"id": "rd-wildchat-test2-1439", "ms": 74.27, "edits": []}
+{"id": "rd-wildchat-test2-1440", "ms": 65.4, "edits": []}
+{"id": "rd-wildchat-test2-1441", "ms": 67.5, "edits": []}
+{"id": "rd-wildchat-test2-1442", "ms": 70.57, "edits": []}
+{"id": "rd-wildchat-test2-1443", "ms": 41.68, "edits": []}
+{"id": "rd-wildchat-test2-1444", "ms": 45.92, "edits": []}
+{"id": "rd-wildchat-test2-1445", "ms": 50.28, "edits": [[205, 211, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-1446", "ms": 65.55, "edits": []}
+{"id": "rd-wildchat-test2-1447", "ms": 64.12, "edits": []}
+{"id": "rd-wildchat-test2-1448", "ms": 43.12, "edits": []}
+{"id": "rd-wildchat-test2-1449", "ms": 42.42, "edits": []}
+{"id": "rd-wildchat-test2-1450", "ms": 65.16, "edits": []}
+{"id": "rd-wildchat-test2-1451", "ms": 150.96, "edits": [[225, 228, "PERSON", 5, 0], [239, 242, "PERSON", 5, 0], [333, 336, "PERSON", 5, 0], [373, 376, "PERSON", 5, 0], [439, 443, "PERSON", 5, 0], [445, 448, "PERSON", 5, 0], [576, 579, "PERSON", 5, 0], [581, 584, "PERSON", 5, 0], [609, 612, "PERSON", 5, 0], [614, 617, "PERSON", 5, 0], [723, 726, "PERSON", 5, 0], [875, 878, "PERSON", 5, 0], [1110, 1113, "PERSON", 5, 0], [1149, 1153, "PERSON", 5, 0], [1155, 1158, "PERSON", 5, 0], [1192, 1195, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1452", "ms": 48.64, "edits": []}
+{"id": "rd-wildchat-test2-1453", "ms": 40.86, "edits": []}
+{"id": "rd-wildchat-test2-1454", "ms": 52.78, "edits": []}
+{"id": "rd-wildchat-test2-1455", "ms": 62.36, "edits": []}
+{"id": "rd-wildchat-test2-1456", "ms": 64.45, "edits": []}
+{"id": "rd-wildchat-test2-1457", "ms": 64.75, "edits": []}
+{"id": "rd-wildchat-test2-1458", "ms": 133.88, "edits": []}
+{"id": "rd-wildchat-test2-1459", "ms": 61.43, "edits": [[149, 158, "GPE", 7, 0], [160, 173, "GPE", 7, 0], [241, 253, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-1460", "ms": 79.62, "edits": []}
+{"id": "rd-wildchat-test2-1461", "ms": 59.28, "edits": []}
+{"id": "rd-wildchat-test2-1462", "ms": 414.15, "edits": []}
+{"id": "rd-wildchat-test2-1464", "ms": 42.04, "edits": [[28, 33, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1465", "ms": 43.93, "edits": []}
+{"id": "rd-wildchat-test2-1466", "ms": 141.31, "edits": []}
+{"id": "rd-wildchat-test2-1467", "ms": 94.6, "edits": [[69, 85, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1468", "ms": 87.46, "edits": []}
+{"id": "rd-wildchat-test2-1469", "ms": 121.33, "edits": []}
+{"id": "rd-wildchat-test2-1470", "ms": 52.32, "edits": []}
+{"id": "rd-wildchat-test2-1471", "ms": 97.32, "edits": [[224, 233, "GPE", 6, 0], [533, 548, "PERSON", 12, 0], [628, 663, "ORG", 42, 0]]}
+{"id": "rd-wildchat-test2-1472", "ms": 77.15, "edits": []}
+{"id": "rd-wildchat-test2-1473", "ms": 52.33, "edits": []}
+{"id": "rd-wildchat-test2-1474", "ms": 59.44, "edits": []}
+{"id": "rd-wildchat-test2-1475", "ms": 205.37, "edits": []}
+{"id": "rd-wildchat-test2-1476", "ms": 42.07, "edits": []}
+{"id": "rd-wildchat-test2-1477", "ms": 84.28, "edits": []}
+{"id": "rd-wildchat-test2-1478", "ms": 72.12, "edits": []}
+{"id": "rd-wildchat-test2-1479", "ms": 48.5, "edits": []}
+{"id": "rd-wildchat-test2-1480", "ms": 44.39, "edits": [[92, 103, "GPE", 4, 0]]}
+{"id": "rd-wildchat-test2-1481", "ms": 150.95, "edits": []}
+{"id": "rd-wildchat-test2-1482", "ms": 65.87, "edits": []}
+{"id": "rd-wildchat-test2-1483", "ms": 42.03, "edits": []}
+{"id": "rd-wildchat-test2-1484", "ms": 72.1, "edits": []}
+{"id": "rd-wildchat-test2-1485", "ms": 38.11, "edits": []}
+{"id": "rd-wildchat-test2-1486", "ms": 65.08, "edits": []}
+{"id": "rd-wildchat-test2-1487", "ms": 63.03, "edits": []}
+{"id": "rd-wildchat-test2-1488", "ms": 61.28, "edits": []}
+{"id": "rd-wildchat-test2-1489", "ms": 64.19, "edits": []}
+{"id": "rd-wildchat-test2-1490", "ms": 56.49, "edits": []}
+{"id": "rd-wildchat-test2-1491", "ms": 65.94, "edits": []}
+{"id": "rd-wildchat-test2-1492", "ms": 71.24, "edits": []}
+{"id": "rd-wildchat-test2-1493", "ms": 269.29, "edits": []}
+{"id": "rd-wildchat-test2-1494", "ms": 60.45, "edits": []}
+{"id": "rd-wildchat-test2-1495", "ms": 41.99, "edits": [[17, 24, "PERSON", 5, 0], [143, 148, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1496", "ms": 110.54, "edits": [[159, 170, "PERSON", 20, 0], [175, 182, "ORG", 9, 0], [858, 869, "GPE", 7, 0], [871, 876, "GPE", 7, 0], [882, 895, "GPE", 6, 0], [901, 915, "GPE", 6, 0], [917, 923, "GPE", 7, 0], [925, 934, "GPE", 7, 0], [944, 955, "GPE", 13, 0]]}
+{"id": "rd-wildchat-test2-1497", "ms": 45.3, "edits": []}
+{"id": "rd-wildchat-test2-1498", "ms": 37.01, "edits": []}
+{"id": "rd-wildchat-test2-1499", "ms": 62.54, "edits": [[14, 21, "PERSON", 7, 0], [88, 103, "GPE", 18, 0]]}
+{"id": "rd-wildchat-test2-1500", "ms": 192.6, "edits": [[30, 38, "PERSON", 4, 0], [72, 89, "ORG", 14, 0], [95, 101, "GPE", 8, 0], [487, 495, "PERSON", 4, 0], [544, 561, "ORG", 14, 0], [567, 573, "GPE", 8, 0], [1227, 1236, "ORG", 6, 0], [1347, 1354, "PERSON", 4, 0], [1740, 1744, "PERSON", 11, 0]]}
+{"id": "rd-wildchat-test2-1501", "ms": 38.3, "edits": []}
+{"id": "rd-wildchat-test2-1502", "ms": 109.38, "edits": []}
+{"id": "rd-wildchat-test2-1503", "ms": 35.42, "edits": []}
+{"id": "rd-wildchat-test2-1504", "ms": 107.21, "edits": []}
+{"id": "rd-wildchat-test2-1505", "ms": 63.04, "edits": []}
+{"id": "rd-wildchat-test2-1506", "ms": 71.01, "edits": []}
+{"id": "rd-wildchat-test2-1507", "ms": 68.16, "edits": []}
+{"id": "rd-wildchat-test2-1508", "ms": 107.61, "edits": []}
+{"id": "rd-wildchat-test2-1510", "ms": 40.49, "edits": []}
+{"id": "rd-wildchat-test2-1511", "ms": 77.33, "edits": []}
+{"id": "rd-wildchat-test2-1512", "ms": 44.19, "edits": []}
+{"id": "rd-wildchat-test2-1513", "ms": 39.47, "edits": []}
+{"id": "rd-wildchat-test2-1514", "ms": 54.57, "edits": []}
+{"id": "rd-wildchat-test2-1515", "ms": 67.14, "edits": []}
+{"id": "rd-wildchat-test2-1516", "ms": 67.9, "edits": []}
+{"id": "rd-wildchat-test2-1517", "ms": 67.18, "edits": []}
+{"id": "rd-wildchat-test2-1518", "ms": 62.72, "edits": [[34, 40, "GPE", 5, 0], [108, 114, "GPE", 5, 0]]}
+{"id": "rd-wildchat-test2-1519", "ms": 161.15, "edits": [[6, 14, "PERSON", 14, 0], [911, 930, "PERSON", 14, 0], [947, 966, "PERSON", 14, 0], [1057, 1076, "PERSON", 14, 0], [1077, 1083, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1520", "ms": 266.26, "edits": [[2216, 2223, "PERSON", 4, 0], [2227, 2234, "PERSON", 4, 0], [2260, 2267, "PERSON", 4, 0], [2344, 2351, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1521", "ms": 80.14, "edits": []}
+{"id": "rd-wildchat-test2-1522", "ms": 99.06, "edits": [[173, 182, "PERSON", 6, 0], [234, 240, "GPE", 12, 0], [329, 344, "PERSON", 12, 0], [354, 363, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1523", "ms": 71.86, "edits": []}
+{"id": "rd-wildchat-test2-1524", "ms": 64.74, "edits": []}
+{"id": "rd-wildchat-test2-1525", "ms": 78.33, "edits": []}
+{"id": "rd-wildchat-test2-1526", "ms": 270.86, "edits": []}
+{"id": "rd-wildchat-test2-1527", "ms": 108.36, "edits": []}
+{"id": "rd-wildchat-test2-1528", "ms": 59.86, "edits": []}
+{"id": "rd-wildchat-test2-1529", "ms": 39.43, "edits": []}
+{"id": "rd-wildchat-test2-1531", "ms": 56.08, "edits": []}
+{"id": "rd-wildchat-test2-1532", "ms": 29.81, "edits": []}
+{"id": "rd-wildchat-test2-1533", "ms": 40.23, "edits": []}
+{"id": "rd-wildchat-test2-1534", "ms": 52.61, "edits": []}
+{"id": "rd-wildchat-test2-1535", "ms": 55.31, "edits": []}
+{"id": "rd-wildchat-test2-1536", "ms": 49.76, "edits": []}
+{"id": "rd-wildchat-test2-1537", "ms": 31.65, "edits": []}
+{"id": "rd-wildchat-test2-1538", "ms": 52.06, "edits": []}
+{"id": "rd-wildchat-test2-1539", "ms": 54.29, "edits": []}
+{"id": "rd-wildchat-test2-1540", "ms": 138.86, "edits": []}
+{"id": "rd-wildchat-test2-1541", "ms": 70.48, "edits": []}
+{"id": "rd-wildchat-test2-1542", "ms": 31.48, "edits": []}
+{"id": "rd-wildchat-test2-1543", "ms": 57.94, "edits": []}
+{"id": "rd-wildchat-test2-1544", "ms": 113.75, "edits": []}
+{"id": "rd-wildchat-test2-1545", "ms": 49.96, "edits": []}
+{"id": "rd-wildchat-test2-1546", "ms": 40.74, "edits": []}
+{"id": "rd-wildchat-test2-1548", "ms": 40.45, "edits": []}
+{"id": "rd-wildchat-test2-1549", "ms": 38.39, "edits": []}
+{"id": "rd-wildchat-test2-1551", "ms": 57.27, "edits": []}
+{"id": "rd-wildchat-test2-1552", "ms": 39.49, "edits": []}
+{"id": "rd-wildchat-test2-1553", "ms": 73.71, "edits": []}
+{"id": "rd-wildchat-test2-1554", "ms": 78.9, "edits": []}
+{"id": "rd-wildchat-test2-1555", "ms": 73.47, "edits": []}
+{"id": "rd-wildchat-test2-1556", "ms": 40.65, "edits": []}
+{"id": "rd-wildchat-test2-1558", "ms": 41.46, "edits": []}
+{"id": "rd-wildchat-test2-1559", "ms": 45.58, "edits": []}
+{"id": "rd-wildchat-test2-1560", "ms": 81.74, "edits": []}
+{"id": "rd-wildchat-test2-1561", "ms": 63.69, "edits": [[96, 110, "GPE", 8, 0], [224, 238, "GPE", 8, 0]]}
+{"id": "rd-wildchat-test2-1562", "ms": 39.19, "edits": []}
+{"id": "rd-wildchat-test2-1563", "ms": 39.6, "edits": []}
+{"id": "rd-wildchat-test2-1564", "ms": 42.32, "edits": []}
+{"id": "rd-wildchat-test2-1565", "ms": 66.68, "edits": []}
+{"id": "rd-wildchat-test2-1566", "ms": 42.84, "edits": [[111, 123, "GPE", 13, 0]]}
+{"id": "rd-wildchat-test2-1567", "ms": 65.41, "edits": [[143, 147, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1568", "ms": 48.77, "edits": []}
+{"id": "rd-wildchat-test2-1569", "ms": 55.11, "edits": []}
+{"id": "rd-wildchat-test2-1570", "ms": 58.19, "edits": []}
+{"id": "rd-wildchat-test2-1571", "ms": 113.19, "edits": [[368, 374, "GPE", 24, 0], [530, 532, "age", 2, 0], [635, 647, "age", 12, 0], [906, 911, "handle", 5, 0]]}
+{"id": "rd-wildchat-test2-1572", "ms": 80.4, "edits": [[58, 63, "PERSON", 5, 0], [124, 129, "PERSON", 5, 0], [411, 416, "PERSON", 5, 0], [449, 454, "PERSON", 5, 0], [495, 505, "PERSON", 6, 0], [546, 554, "PERSON", 5, 0], [665, 670, "PERSON", 5, 0], [783, 788, "PERSON", 5, 0], [821, 826, "PERSON", 5, 0], [834, 839, "PERSON", 5, 0], [862, 872, "PERSON", 6, 0], [913, 921, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1573", "ms": 110.09, "edits": [[99, 122, "ORG", 27, 0]]}
+{"id": "rd-wildchat-test2-1574", "ms": 70.73, "edits": []}
+{"id": "rd-wildchat-test2-1575", "ms": 47.11, "edits": []}
+{"id": "rd-wildchat-test2-1576", "ms": 40.1, "edits": []}
+{"id": "rd-wildchat-test2-1577", "ms": 41.96, "edits": [[62, 69, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1578", "ms": 67.36, "edits": []}
+{"id": "rd-wildchat-test2-1579", "ms": 70.95, "edits": []}
+{"id": "rd-wildchat-test2-1580", "ms": 67.65, "edits": []}
+{"id": "rd-wildchat-test2-1581", "ms": 60.02, "edits": []}
+{"id": "rd-wildchat-test2-1582", "ms": 63.02, "edits": [[102, 115, "GPE", 8, 0], [247, 260, "GPE", 8, 0], [312, 327, "PERSON", 18, 0], [354, 359, "GPE", 9, 0], [440, 445, "GPE", 9, 0]]}
+{"id": "rd-wildchat-test2-1583", "ms": 55.85, "edits": []}
+{"id": "rd-wildchat-test2-1584", "ms": 42.66, "edits": []}
+{"id": "rd-wildchat-test2-1585", "ms": 117.29, "edits": []}
+{"id": "rd-wildchat-test2-1586", "ms": 61.29, "edits": []}
+{"id": "rd-wildchat-test2-1587", "ms": 81.63, "edits": [[279, 296, "handle", 16, 0], [324, 341, "handle", 17, 0]]}
+{"id": "rd-wildchat-test2-1588", "ms": 40.43, "edits": []}
+{"id": "rd-wildchat-test2-1589", "ms": 62.69, "edits": []}
+{"id": "rd-wildchat-test2-1590", "ms": 162.35, "edits": [[170, 174, "PERSON", 6, 0], [212, 222, "PERSON", 5, 0], [236, 240, "PERSON", 6, 0], [243, 253, "PERSON", 5, 0], [271, 281, "PERSON", 5, 0], [363, 367, "PERSON", 6, 0], [383, 393, "PERSON", 5, 0], [459, 463, "PERSON", 6, 0], [578, 588, "PERSON", 5, 0], [609, 616, "PERSON", 5, 0], [675, 685, "PERSON", 5, 0], [697, 704, "PERSON", 5, 0], [741, 748, "PERSON", 5, 0], [759, 769, "PERSON", 5, 0], [1203, 1210, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1591", "ms": 42.9, "edits": []}
+{"id": "rd-wildchat-test2-1592", "ms": 61.91, "edits": []}
+{"id": "rd-wildchat-test2-1593", "ms": 64.5, "edits": []}
+{"id": "rd-wildchat-test2-1594", "ms": 48.52, "edits": []}
+{"id": "rd-wildchat-test2-1595", "ms": 44.52, "edits": []}
+{"id": "rd-wildchat-test2-1596", "ms": 69.57, "edits": [[1, 8, "PERSON", 5, 0], [140, 150, "age", 10, 0], [191, 198, "PERSON", 5, 0], [217, 224, "PERSON", 5, 0], [316, 323, "PERSON", 5, 0], [376, 383, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1597", "ms": 53.3, "edits": []}
+{"id": "rd-wildchat-test2-1598", "ms": 41.75, "edits": []}
+{"id": "rd-wildchat-test2-1599", "ms": 56.64, "edits": []}
+{"id": "rd-wildchat-test2-1600", "ms": 61.34, "edits": []}
+{"id": "rd-wildchat-test2-1601#t1", "ms": 41.02, "edits": []}
+{"id": "rd-wildchat-test2-1601#t2", "ms": 42.35, "edits": []}
+{"id": "rd-wildchat-test2-1602#t0", "ms": 41.42, "edits": []}
+{"id": "rd-wildchat-test2-1602#t1", "ms": 85.88, "edits": []}
+{"id": "rd-wildchat-test2-1602#t2", "ms": 67.58, "edits": []}
+{"id": "rd-wildchat-test2-1603#t0", "ms": 42.4, "edits": []}
+{"id": "rd-wildchat-test2-1603#t1", "ms": 36.99, "edits": []}
+{"id": "rd-wildchat-test2-1603#t2", "ms": 38.82, "edits": []}
+{"id": "rd-wildchat-test2-1604#t0", "ms": 39.85, "edits": []}
+{"id": "rd-wildchat-test2-1604#t1", "ms": 40.67, "edits": [[29, 35, "ORG", 6, 0]]}
+{"id": "rd-wildchat-test2-1604#t2", "ms": 41.22, "edits": []}
+{"id": "rd-wildchat-test2-1605#t0", "ms": 44.01, "edits": []}
+{"id": "rd-wildchat-test2-1605#t1", "ms": 41.85, "edits": []}
+{"id": "rd-wildchat-test2-1605#t2", "ms": 47.63, "edits": []}
+{"id": "rd-wildchat-test2-1606#t0", "ms": 39.88, "edits": []}
+{"id": "rd-wildchat-test2-1606#t1", "ms": 162.13, "edits": []}
+{"id": "rd-wildchat-test2-1606#t2", "ms": 54.9, "edits": []}
+{"id": "rd-wildchat-test2-1607#t0", "ms": 57.85, "edits": [[62, 67, "PERSON", 6, 0], [112, 117, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1607#t1", "ms": 56.27, "edits": [[0, 5, "PERSON", 5, 0], [95, 100, "PERSON", 5, 0], [145, 150, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1608#t1", "ms": 36.03, "edits": []}
+{"id": "rd-wildchat-test2-1608#t2", "ms": 45.71, "edits": []}
+{"id": "rd-wildchat-test2-1609#t0", "ms": 66.95, "edits": [[48, 59, "age", 11, 0]]}
+{"id": "rd-wildchat-test2-1609#t1", "ms": 65.32, "edits": [[48, 59, "age", 11, 0]]}
+{"id": "rd-wildchat-test2-1609#t2", "ms": 65.78, "edits": [[48, 59, "age", 11, 0]]}
+{"id": "rd-wildchat-test2-1610#t0", "ms": 47.88, "edits": []}
+{"id": "rd-wildchat-test2-1610#t1", "ms": 44.11, "edits": []}
+{"id": "rd-wildchat-test2-1610#t2", "ms": 58.95, "edits": []}
+{"id": "rd-wildchat-test2-1611#t0", "ms": 44.14, "edits": []}
+{"id": "rd-wildchat-test2-1611#t1", "ms": 39.94, "edits": []}
+{"id": "rd-wildchat-test2-1611#t2", "ms": 40.24, "edits": []}
+{"id": "rd-wildchat-test2-1612#t0", "ms": 66.74, "edits": []}
+{"id": "rd-wildchat-test2-1612#t1", "ms": 61.44, "edits": []}
+{"id": "rd-wildchat-test2-1612#t2", "ms": 168.06, "edits": []}
+{"id": "rd-wildchat-test2-1613#t0", "ms": 180.31, "edits": []}
+{"id": "rd-wildchat-test2-1613#t1", "ms": 33.01, "edits": []}
+{"id": "rd-wildchat-test2-1613#t2", "ms": 32.28, "edits": []}
+{"id": "rd-wildchat-test2-1614#t0", "ms": 38.72, "edits": []}
+{"id": "rd-wildchat-test2-1614#t1", "ms": 40.65, "edits": []}
+{"id": "rd-wildchat-test2-1614#t2", "ms": 37.27, "edits": []}
+{"id": "rd-wildchat-test2-1615#t0", "ms": 36.13, "edits": []}
+{"id": "rd-wildchat-test2-1615#t2", "ms": 54.44, "edits": []}
+{"id": "rd-wildchat-test2-1616#t0", "ms": 31.63, "edits": []}
+{"id": "rd-wildchat-test2-1616#t1", "ms": 37.62, "edits": []}
+{"id": "rd-wildchat-test2-1616#t2", "ms": 39.18, "edits": []}
+{"id": "rd-wildchat-test2-1617#t0", "ms": 71.75, "edits": []}
+{"id": "rd-wildchat-test2-1617#t1", "ms": 61.19, "edits": []}
+{"id": "rd-wildchat-test2-1617#t2", "ms": 35.5, "edits": []}
+{"id": "rd-wildchat-test2-1618#t0", "ms": 56.61, "edits": []}
+{"id": "rd-wildchat-test2-1618#t1", "ms": 33.76, "edits": []}
+{"id": "rd-wildchat-test2-1618#t2", "ms": 32.91, "edits": []}
+{"id": "rd-wildchat-test2-1619#t0", "ms": 49.64, "edits": []}
+{"id": "rd-wildchat-test2-1619#t1", "ms": 59.08, "edits": []}
+{"id": "rd-wildchat-test2-1619#t2", "ms": 32.79, "edits": []}
+{"id": "rd-wildchat-test2-1620#t0", "ms": 87.68, "edits": []}
+{"id": "rd-wildchat-test2-1620#t1", "ms": 84.59, "edits": []}
+{"id": "rd-wildchat-test2-1620#t2", "ms": 32.32, "edits": []}
+{"id": "rd-wildchat-test2-1621#t0", "ms": 41.06, "edits": [[4, 11, "PERSON", 8, 0], [51, 59, "GPE", 4, 0], [66, 69, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1621#t1", "ms": 32.84, "edits": []}
+{"id": "rd-wildchat-test2-1621#t2", "ms": 32.19, "edits": []}
+{"id": "rd-wildchat-test2-1622#t0", "ms": 66.95, "edits": []}
+{"id": "rd-wildchat-test2-1622#t1", "ms": 33.1, "edits": []}
+{"id": "rd-wildchat-test2-1622#t2", "ms": 56.41, "edits": [[88, 142, "ORG", 47, 0], [182, 206, "ORG", 15, 0]]}
+{"id": "rd-wildchat-test2-1623#t0", "ms": 321.91, "edits": []}
+{"id": "rd-wildchat-test2-1623#t1", "ms": 60.84, "edits": []}
+{"id": "rd-wildchat-test2-1624#t0", "ms": 33.36, "edits": []}
+{"id": "rd-wildchat-test2-1624#t1", "ms": 32.13, "edits": []}
+{"id": "rd-wildchat-test2-1624#t2", "ms": 33.46, "edits": []}
+{"id": "rd-wildchat-test2-1625#t0", "ms": 56.94, "edits": []}
+{"id": "rd-wildchat-test2-1625#t1", "ms": 79.6, "edits": [[22, 28, "PERSON", 6, 0], [186, 192, "PERSON", 6, 0], [305, 315, "GPE", 6, 0], [402, 414, "PERSON", 13, 0], [501, 511, "GPE", 6, 0], [519, 527, "PERSON", 11, 0], [541, 547, "PERSON", 6, 0], [559, 568, "PERSON", 13, 0], [601, 613, "PERSON", 12, 0], [631, 640, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-1625#t2", "ms": 48.78, "edits": []}
+{"id": "rd-wildchat-test2-1626#t0", "ms": 33.85, "edits": []}
+{"id": "rd-wildchat-test2-1626#t1", "ms": 32.57, "edits": []}
+{"id": "rd-wildchat-test2-1626#t2", "ms": 32.45, "edits": []}
+{"id": "rd-wildchat-test2-1627#t0", "ms": 33.04, "edits": []}
+{"id": "rd-wildchat-test2-1627#t1", "ms": 34.48, "edits": []}
+{"id": "rd-wildchat-test2-1627#t2", "ms": 36.54, "edits": []}
+{"id": "rd-wildchat-test2-1628#t0", "ms": 50.8, "edits": []}
+{"id": "rd-wildchat-test2-1628#t1", "ms": 62.79, "edits": []}
+{"id": "rd-wildchat-test2-1628#t2", "ms": 56.62, "edits": []}
+{"id": "rd-wildchat-test2-1629#t0", "ms": 119.26, "edits": [[22, 30, "PERSON", 7, 0], [247, 255, "PERSON", 7, 0], [298, 309, "age", 11, 0], [487, 494, "GPE", 10, 0], [496, 504, "GPE", 6, 0], [524, 533, "GPE", 4, 0], [590, 602, "PERSON", 11, 0], [613, 633, "PERSON", 18, 0], [651, 662, "age", 11, 0], [732, 739, "PERSON", 6, 0], [791, 797, "PERSON", 5, 0], [799, 804, "PERSON", 5, 0], [964, 979, "PERSON", 16, 0]]}
+{"id": "rd-wildchat-test2-1629#t1", "ms": 41.84, "edits": [[215, 227, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-1630#t0", "ms": 756.49, "edits": []}
+{"id": "rd-wildchat-test2-1630#t1", "ms": 153.38, "edits": []}
+{"id": "rd-wildchat-test2-1631#t0", "ms": 78.48, "edits": [[558, 561, "PERSON", 6, 0]]}
+{"id": "rd-wildchat-test2-1631#t1", "ms": 37.58, "edits": []}
+{"id": "rd-wildchat-test2-1632#t0", "ms": 61.6, "edits": []}
+{"id": "rd-wildchat-test2-1632#t1", "ms": 44.15, "edits": []}
+{"id": "rd-wildchat-test2-1632#t2", "ms": 46.62, "edits": []}
+{"id": "rd-wildchat-test2-1633#t0", "ms": 120.99, "edits": []}
+{"id": "rd-wildchat-test2-1633#t1", "ms": 43.16, "edits": []}
+{"id": "rd-wildchat-test2-1633#t2", "ms": 44.94, "edits": []}
+{"id": "rd-wildchat-test2-1634#t0", "ms": 40.59, "edits": []}
+{"id": "rd-wildchat-test2-1634#t1", "ms": 39.37, "edits": []}
+{"id": "rd-wildchat-test2-1634#t2", "ms": 38.6, "edits": []}
+{"id": "rd-wildchat-test2-1635#t0", "ms": 42.65, "edits": []}
+{"id": "rd-wildchat-test2-1635#t1", "ms": 40.61, "edits": []}
+{"id": "rd-wildchat-test2-1635#t2", "ms": 43.06, "edits": []}
+{"id": "rd-wildchat-test2-1636#t0", "ms": 95.99, "edits": []}
+{"id": "rd-wildchat-test2-1636#t1", "ms": 42.95, "edits": []}
+{"id": "rd-wildchat-test2-1637#t0", "ms": 39.39, "edits": []}
+{"id": "rd-wildchat-test2-1637#t1", "ms": 36.16, "edits": []}
+{"id": "rd-wildchat-test2-1637#t2", "ms": 124.99, "edits": []}
+{"id": "rd-wildchat-test2-1638#t0", "ms": 72.91, "edits": [[201, 206, "PERSON", 8, 0]]}
+{"id": "rd-wildchat-test2-1638#t1", "ms": 48.36, "edits": []}
+{"id": "rd-wildchat-test2-1639#t0", "ms": 46.1, "edits": []}
+{"id": "rd-wildchat-test2-1639#t1", "ms": 46.14, "edits": []}
+{"id": "rd-wildchat-test2-1639#t2", "ms": 46.62, "edits": []}
+{"id": "rd-wildchat-test2-1640#t0", "ms": 83.96, "edits": []}
+{"id": "rd-wildchat-test2-1640#t1", "ms": 40.98, "edits": []}
+{"id": "rd-wildchat-test2-1640#t2", "ms": 121.42, "edits": []}
+{"id": "rd-wildchat-test2-1641#t0", "ms": 200.39, "edits": []}
+{"id": "rd-wildchat-test2-1641#t1", "ms": 51.08, "edits": []}
+{"id": "rd-wildchat-test2-1641#t2", "ms": 53.37, "edits": []}
+{"id": "rd-wildchat-test2-1642#t0", "ms": 124.25, "edits": [[616, 631, "PERSON", 15, 0]]}
+{"id": "rd-wildchat-test2-1642#t1", "ms": 42.67, "edits": []}
+{"id": "rd-wildchat-test2-1642#t2", "ms": 138.35, "edits": [[739, 754, "PERSON", 12, 0]]}
+{"id": "rd-wildchat-test2-1643#t0", "ms": 65.05, "edits": [[33, 38, "PERSON", 7, 0], [48, 57, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1643#t1", "ms": 48.29, "edits": []}
+{"id": "rd-wildchat-test2-1644#t0", "ms": 43.82, "edits": []}
+{"id": "rd-wildchat-test2-1644#t1", "ms": 40.8, "edits": []}
+{"id": "rd-wildchat-test2-1645#t0", "ms": 45.42, "edits": []}
+{"id": "rd-wildchat-test2-1645#t1", "ms": 41.86, "edits": []}
+{"id": "rd-wildchat-test2-1645#t2", "ms": 47.64, "edits": []}
+{"id": "rd-wildchat-test2-1646#t0", "ms": 327.66, "edits": []}
+{"id": "rd-wildchat-test2-1646#t1", "ms": 41.73, "edits": []}
+{"id": "rd-wildchat-test2-1646#t2", "ms": 41.01, "edits": []}
+{"id": "rd-wildchat-test2-1647#t0", "ms": 49.14, "edits": [[24, 29, "age", 6, 0]]}
+{"id": "rd-wildchat-test2-1647#t1", "ms": 47.9, "edits": [[24, 29, "age", 5, 0]]}
+{"id": "rd-wildchat-test2-1648#t0", "ms": 77.48, "edits": []}
+{"id": "rd-wildchat-test2-1648#t1", "ms": 72.69, "edits": []}
+{"id": "rd-wildchat-test2-1648#t2", "ms": 71.79, "edits": []}
+{"id": "rd-wildchat-test2-1649#t0", "ms": 165.13, "edits": []}
+{"id": "rd-wildchat-test2-1649#t2", "ms": 49.18, "edits": []}
+{"id": "rd-wildchat-test2-1650#t0", "ms": 52.97, "edits": []}
+{"id": "rd-wildchat-test2-1650#t1", "ms": 42.1, "edits": []}
+{"id": "rd-wildchat-test2-1651#t0", "ms": 75.42, "edits": []}
+{"id": "rd-wildchat-test2-1651#t1", "ms": 51.67, "edits": []}
+{"id": "rd-wildchat-test2-1652#t0", "ms": 69.53, "edits": []}
+{"id": "rd-wildchat-test2-1652#t1", "ms": 66.69, "edits": []}
+{"id": "rd-wildchat-test2-1652#t2", "ms": 65.34, "edits": []}
+{"id": "rd-wildchat-test2-1653#t0", "ms": 47.02, "edits": []}
+{"id": "rd-wildchat-test2-1653#t1", "ms": 57.24, "edits": []}
+{"id": "rd-wildchat-test2-1654#t0", "ms": 69.39, "edits": []}
+{"id": "rd-wildchat-test2-1654#t1", "ms": 45.15, "edits": []}
+{"id": "rd-wildchat-test2-1655#t0", "ms": 78.76, "edits": []}
+{"id": "rd-wildchat-test2-1655#t1", "ms": 42.11, "edits": []}
+{"id": "rd-wildchat-test2-1655#t2", "ms": 40.34, "edits": []}
+{"id": "rd-wildchat-test2-1656#t0", "ms": 47.56, "edits": []}
+{"id": "rd-wildchat-test2-1656#t1", "ms": 42.62, "edits": []}
+{"id": "rd-wildchat-test2-1656#t2", "ms": 41.75, "edits": []}
+{"id": "rd-wildchat-test2-1657#t0", "ms": 218.04, "edits": []}
+{"id": "rd-wildchat-test2-1657#t1", "ms": 135.57, "edits": []}
+{"id": "rd-wildchat-test2-1657#t2", "ms": 41.36, "edits": []}
+{"id": "rd-wildchat-test2-1658#t0", "ms": 62.0, "edits": []}
+{"id": "rd-wildchat-test2-1658#t1", "ms": 59.98, "edits": []}
+{"id": "rd-wildchat-test2-1658#t2", "ms": 39.43, "edits": []}
+{"id": "rd-wildchat-test2-1659#t0", "ms": 43.53, "edits": []}
+{"id": "rd-wildchat-test2-1659#t1", "ms": 45.67, "edits": []}
+{"id": "rd-wildchat-test2-1659#t2", "ms": 41.42, "edits": []}
+{"id": "rd-wildchat-test2-1660#t0", "ms": 43.82, "edits": [[40, 54, "GPE", 10, 0], [100, 106, "credential", 6, 0]]}
+{"id": "rd-wildchat-test2-1660#t1", "ms": 47.05, "edits": []}
+{"id": "rd-wildchat-test2-1660#t2", "ms": 42.19, "edits": []}
+{"id": "rd-wildchat-test2-1661#t0", "ms": 41.31, "edits": []}
+{"id": "rd-wildchat-test2-1661#t1", "ms": 42.37, "edits": []}
+{"id": "rd-wildchat-test2-1662#t0", "ms": 41.68, "edits": []}
+{"id": "rd-wildchat-test2-1662#t1", "ms": 180.74, "edits": []}
+{"id": "rd-wildchat-test2-1663#t0", "ms": 69.82, "edits": [[43, 53, "handle", 10, 0], [54, 61, "GPE", 4, 0], [87, 98, "handle", 12, 0], [136, 143, "GPE", 4, 0], [185, 192, "GPE", 4, 0], [193, 204, "handle", 12, 0], [287, 294, "GPE", 4, 0], [326, 333, "GPE", 4, 0], [371, 378, "GPE", 4, 0]]}
+{"id": "rd-wildchat-test2-1663#t1", "ms": 66.37, "edits": [[0, 10, "handle", 10, 0], [11, 18, "GPE", 8, 0], [19, 30, "handle", 12, 0]]}
+{"id": "rd-wildchat-test2-1664#t0", "ms": 1172.88, "edits": []}
+{"id": "rd-wildchat-test2-1664#t1", "ms": 34.25, "edits": []}
+{"id": "rd-wildchat-test2-1665#t0", "ms": 47.12, "edits": []}
+{"id": "rd-wildchat-test2-1665#t1", "ms": 46.55, "edits": []}
+{"id": "rd-wildchat-test2-1665#t2", "ms": 53.3, "edits": []}
+{"id": "rd-wildchat-test2-1666#t0", "ms": 85.25, "edits": []}
+{"id": "rd-wildchat-test2-1666#t1", "ms": 32.93, "edits": []}
+{"id": "rd-wildchat-test2-1666#t2", "ms": 32.14, "edits": []}
+{"id": "rd-wildchat-test2-1667#t0", "ms": 31.92, "edits": []}
+{"id": "rd-wildchat-test2-1667#t1", "ms": 31.74, "edits": []}
+{"id": "rd-wildchat-test2-1667#t2", "ms": 58.12, "edits": []}
+{"id": "rd-wildchat-test2-1668#t0", "ms": 290.0, "edits": []}
+{"id": "rd-wildchat-test2-1668#t1", "ms": 33.18, "edits": []}
+{"id": "rd-wildchat-test2-1668#t2", "ms": 31.11, "edits": []}
+{"id": "rd-wildchat-test2-1669#t0", "ms": 70.88, "edits": []}
+{"id": "rd-wildchat-test2-1669#t1", "ms": 33.1, "edits": []}
+{"id": "rd-wildchat-test2-1669#t2", "ms": 31.3, "edits": []}
+{"id": "rd-wildchat-test2-1670#t0", "ms": 33.0, "edits": []}
+{"id": "rd-wildchat-test2-1670#t1", "ms": 31.06, "edits": []}
+{"id": "rd-wildchat-test2-1670#t2", "ms": 33.27, "edits": []}
+{"id": "rd-wildchat-test2-1671#t0", "ms": 33.2, "edits": []}
+{"id": "rd-wildchat-test2-1671#t1", "ms": 35.28, "edits": []}
+{"id": "rd-wildchat-test2-1672#t0", "ms": 36.81, "edits": []}
+{"id": "rd-wildchat-test2-1672#t1", "ms": 29.75, "edits": []}
+{"id": "rd-wildchat-test2-1673#t0", "ms": 30.74, "edits": []}
+{"id": "rd-wildchat-test2-1673#t1", "ms": 52.13, "edits": []}
+{"id": "rd-wildchat-test2-1674#t0", "ms": 34.15, "edits": []}
+{"id": "rd-wildchat-test2-1674#t1", "ms": 53.49, "edits": []}
+{"id": "rd-wildchat-test2-1674#t2", "ms": 48.05, "edits": []}
+{"id": "rd-wildchat-test2-1675#t1", "ms": 178.76, "edits": []}
+{"id": "rd-wildchat-test2-1676#t0", "ms": 175.94, "edits": []}
+{"id": "rd-wildchat-test2-1676#t1", "ms": 34.76, "edits": []}
+{"id": "rd-wildchat-test2-1677#t0", "ms": 53.16, "edits": []}
+{"id": "rd-wildchat-test2-1677#t1", "ms": 51.3, "edits": []}
+{"id": "rd-wildchat-test2-1677#t2", "ms": 32.93, "edits": []}
+{"id": "rd-wildchat-test2-1678#t0", "ms": 147.65, "edits": []}
+{"id": "rd-wildchat-test2-1678#t1", "ms": 146.72, "edits": []}
+{"id": "rd-wildchat-test2-1679#t0", "ms": 68.9, "edits": []}
+{"id": "rd-wildchat-test2-1679#t1", "ms": 43.14, "edits": []}
+{"id": "rd-wildchat-test2-1680#t0", "ms": 85.18, "edits": []}
+{"id": "rd-wildchat-test2-1680#t1", "ms": 39.8, "edits": []}
+{"id": "rd-wildchat-test2-1680#t2", "ms": 34.21, "edits": []}
+{"id": "rd-wildchat-test2-1681#t0", "ms": 59.09, "edits": []}
+{"id": "rd-wildchat-test2-1681#t1", "ms": 152.21, "edits": []}
+{"id": "rd-wildchat-test2-1681#t2", "ms": 118.07, "edits": []}
+{"id": "rd-wildchat-test2-1682#t0", "ms": 37.56, "edits": []}
+{"id": "rd-wildchat-test2-1682#t1", "ms": 33.38, "edits": []}
+{"id": "rd-wildchat-test2-1683#t0", "ms": 29.73, "edits": []}
+{"id": "rd-wildchat-test2-1683#t1", "ms": 33.4, "edits": []}
+{"id": "rd-wildchat-test2-1683#t2", "ms": 30.72, "edits": []}
+{"id": "rd-wildchat-test2-1684#t0", "ms": 32.81, "edits": []}
+{"id": "rd-wildchat-test2-1684#t1", "ms": 44.68, "edits": []}
+{"id": "rd-wildchat-test2-1684#t2", "ms": 33.53, "edits": []}
+{"id": "rd-wildchat-test2-1685#t0", "ms": 39.85, "edits": []}
+{"id": "rd-wildchat-test2-1685#t1", "ms": 36.77, "edits": []}
+{"id": "rd-wildchat-test2-1685#t2", "ms": 60.35, "edits": []}
+{"id": "rd-wildchat-test2-1686#t0", "ms": 36.96, "edits": []}
+{"id": "rd-wildchat-test2-1686#t1", "ms": 37.45, "edits": []}
+{"id": "rd-wildchat-test2-1686#t2", "ms": 35.97, "edits": []}
+{"id": "rd-wildchat-test2-1687#t0", "ms": 33.49, "edits": []}
+{"id": "rd-wildchat-test2-1687#t1", "ms": 33.62, "edits": []}
+{"id": "rd-wildchat-test2-1688#t1", "ms": 80.88, "edits": []}
+{"id": "rd-wildchat-test2-1688#t2", "ms": 38.88, "edits": []}
+{"id": "rd-wildchat-test2-1689#t0", "ms": 37.4, "edits": []}
+{"id": "rd-wildchat-test2-1689#t1", "ms": 32.47, "edits": []}
+{"id": "rd-wildchat-test2-1689#t2", "ms": 116.06, "edits": []}
+{"id": "rd-wildchat-test2-1690#t0", "ms": 230.37, "edits": [[60, 64, "PERSON", 4, 0], [193, 205, "ORG", 8, 0], [214, 224, "PERSON", 4, 0], [322, 333, "PERSON", 14, 0], [427, 439, "ORG", 11, 0], [528, 542, "ORG", 12, 0], [754, 761, "PERSON", 6, 0], [884, 891, "PERSON", 6, 0], [920, 934, "ORG", 12, 0], [1413, 1420, "PERSON", 6, 0], [1669, 1676, "PERSON", 6, 0], [1776, 1788, "ORG", 11, 0], [1908, 1915, "PERSON", 6, 0], [2216, 2242, "PERSON", 15, 0]]}
+{"id": "rd-wildchat-test2-1690#t1", "ms": 175.1, "edits": [[94, 105, "PERSON", 14, 0], [115, 125, "PERSON", 5, 0], [223, 235, "ORG", 13, 0], [328, 340, "ORG", 13, 0], [429, 443, "ORG", 14, 0], [478, 485, "PERSON", 5, 0], [655, 662, "PERSON", 5, 0], [785, 792, "PERSON", 5, 0], [821, 835, "ORG", 14, 0], [1314, 1321, "PERSON", 5, 0], [1572, 1579, "PERSON", 5, 0], [1679, 1691, "ORG", 13, 0], [1809, 1816, "PERSON", 5, 0], [2117, 2143, "PERSON", 19, 0]]}
+{"id": "rd-wildchat-test2-1690#t2", "ms": 157.15, "edits": [[116, 136, "PERSON", 22, 0], [138, 152, "ORG", 19, 0], [783, 788, "GPE", 4, 0], [806, 810, "PERSON", 8, 0], [1069, 1076, "PERSON", 5, 0], [1200, 1204, "PERSON", 8, 0], [1268, 1282, "ORG", 19, 0]]}
+{"id": "rd-wildchat-test2-1691#t0", "ms": 43.35, "edits": []}
+{"id": "rd-wildchat-test2-1691#t1", "ms": 38.53, "edits": []}
+{"id": "rd-wildchat-test2-1691#t2", "ms": 38.41, "edits": []}
+{"id": "rd-wildchat-test2-1692#t0", "ms": 41.09, "edits": []}
+{"id": "rd-wildchat-test2-1692#t1", "ms": 40.24, "edits": []}
+{"id": "rd-wildchat-test2-1692#t2", "ms": 38.22, "edits": []}
+{"id": "rd-wildchat-test2-1693#t0", "ms": 47.78, "edits": []}
+{"id": "rd-wildchat-test2-1693#t1", "ms": 37.39, "edits": []}
+{"id": "rd-wildchat-test2-1693#t2", "ms": 44.71, "edits": []}
+{"id": "rd-wildchat-test2-1694#t0", "ms": 43.8, "edits": []}
+{"id": "rd-wildchat-test2-1694#t1", "ms": 42.46, "edits": []}
+{"id": "rd-wildchat-test2-1695#t0", "ms": 51.49, "edits": []}
+{"id": "rd-wildchat-test2-1695#t1", "ms": 37.59, "edits": []}
+{"id": "rd-wildchat-test2-1695#t2", "ms": 46.04, "edits": []}
+{"id": "rd-wildchat-test2-1696#t0", "ms": 73.45, "edits": [[453, 461, "GPE", 10, 0]]}
+{"id": "rd-wildchat-test2-1696#t1", "ms": 42.9, "edits": [[144, 156, "ORG", 12, 0]]}
+{"id": "rd-wildchat-test2-1696#t2", "ms": 44.74, "edits": []}
+{"id": "rd-wildchat-test2-1697#t0", "ms": 42.14, "edits": []}
+{"id": "rd-wildchat-test2-1697#t1", "ms": 40.29, "edits": []}
+{"id": "rd-wildchat-test2-1698#t0", "ms": 97.39, "edits": [[438, 449, "PERSON", 16, 0], [472, 483, "age", 11, 0], [591, 593, "age", 2, 0]]}
+{"id": "rd-wildchat-test2-1698#t1", "ms": 38.38, "edits": []}
+{"id": "rd-wildchat-test2-1698#t2", "ms": 37.65, "edits": []}
+{"id": "rd-wildchat-test2-1699#t0", "ms": 41.89, "edits": []}
+{"id": "rd-wildchat-test2-1699#t1", "ms": 40.51, "edits": []}
+{"id": "rd-wildchat-test2-1699#t2", "ms": 39.65, "edits": []}
+{"id": "rd-wildchat-test2-1700#t0", "ms": 48.71, "edits": []}
+{"id": "rd-wildchat-test2-1700#t1", "ms": 41.92, "edits": []}
+{"id": "rd-wildchat-test2-1700#t2", "ms": 43.39, "edits": [[181, 201, "ORG", 21, 0]]}
+{"id": "rd-wildchat-test2-1701#t0", "ms": 78.75, "edits": []}
+{"id": "rd-wildchat-test2-1701#t1", "ms": 72.9, "edits": []}
+{"id": "rd-wildchat-test2-1702#t0", "ms": 595.64, "edits": [[351, 375, "ORG", 22, 0], [759, 770, "PERSON", 15, 0], [1141, 1146, "GPE", 11, 0], [1289, 1297, "ORG", 7, 0], [2296, 2317, "PERSON", 13, 0], [3769, 3775, "GPE", 7, 0], [4721, 4726, "GPE", 11, 0], [4792, 4800, "ORG", 7, 0]]}
+{"id": "rd-wildchat-test2-1702#t1", "ms": 43.13, "edits": []}
+{"id": "rd-wildchat-test2-1703#t0", "ms": 103.07, "edits": []}
+{"id": "rd-wildchat-test2-1703#t1", "ms": 120.65, "edits": []}
+{"id": "rd-wildchat-test2-1704#t0", "ms": 49.45, "edits": []}
+{"id": "rd-wildchat-test2-1704#t1", "ms": 47.85, "edits": []}
+{"id": "rd-wildchat-test2-1705#t0", "ms": 170.65, "edits": [[787, 798, "PERSON", 13, 0]]}
+{"id": "rd-wildchat-test2-1705#t1", "ms": 77.04, "edits": [[327, 338, "PERSON", 14, 0], [343, 353, "phone_us", 10, 0]]}
+{"id": "rd-wildchat-test2-1705#t2", "ms": 43.07, "edits": []}
+{"id": "rd-wildchat-test2-1706#t0", "ms": 111.52, "edits": []}
+{"id": "rd-wildchat-test2-1706#t1", "ms": 53.11, "edits": [[22, 32, "GPE", 2, 0], [32, 43, "credential", 11, 0]]}
+{"id": "rd-wildchat-test2-1707#t0", "ms": 70.45, "edits": []}
+{"id": "rd-wildchat-test2-1707#t1", "ms": 71.15, "edits": []}
+{"id": "rd-wildchat-test2-1708#t0", "ms": 49.34, "edits": []}
+{"id": "rd-wildchat-test2-1708#t1", "ms": 43.77, "edits": []}
+{"id": "rd-wildchat-test2-1708#t2", "ms": 50.58, "edits": []}
+{"id": "rd-wildchat-test2-1709#t0", "ms": 50.6, "edits": []}
+{"id": "rd-wildchat-test2-1709#t1", "ms": 52.9, "edits": []}
+{"id": "rd-wildchat-test2-1710#t0", "ms": 192.54, "edits": [[906, 912, "PERSON", 5, 0]]}
+{"id": "rd-wildchat-test2-1710#t1", "ms": 187.99, "edits": [[351, 358, "PERSON", 5, 0], [759, 800, "ORG", 48, 0], [805, 820, "PERSON", 10, 0]]}
+{"id": "rd-wildchat-test2-1711#t0", "ms": 81.0, "edits": [[0, 12, "PERSON", 14, 0], [14, 20, "age", 6, 0], [106, 118, "PERSON", 10, 0]]}
+{"id": "rd-wildchat-test2-1711#t1", "ms": 89.31, "edits": [[17, 22, "PERSON", 7, 0], [125, 130, "PERSON", 7, 0], [200, 205, "PERSON", 7, 0], [233, 245, "GPE", 7, 0], [441, 446, "PERSON", 7, 0]]}
+{"id": "rd-wildchat-test2-1711#t2", "ms": 101.73, "edits": [[22, 27, "PERSON", 4, 0], [74, 85, "age", 11, 0], [304, 315, "age", 11, 0], [371, 383, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-1712#t0", "ms": 136.21, "edits": [[14, 19, "PERSON", 6, 0], [557, 564, "GPE", 8, 0], [1174, 1194, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-1712#t1", "ms": 97.99, "edits": [[14, 19, "PERSON", 5, 0], [557, 564, "GPE", 7, 0]]}
+{"id": "rd-wildchat-test2-1712#t2", "ms": 49.31, "edits": [[14, 19, "PERSON", 4, 0]]}
+{"id": "rd-wildchat-test2-1713#t0", "ms": 209.76, "edits": []}
+{"id": "rd-wildchat-test2-1713#t1", "ms": 190.57, "edits": []}
+{"id": "rd-wildchat-test2-1714#t0", "ms": 48.11, "edits": []}
+{"id": "rd-wildchat-test2-1714#t1", "ms": 45.49, "edits": []}
+{"id": "rd-wildchat-test2-1715#t0", "ms": 57.08, "edits": []}
+{"id": "rd-wildchat-test2-1715#t1", "ms": 53.99, "edits": []}
+{"id": "rd-wildchat-test2-1716#t0", "ms": 54.82, "edits": []}
+{"id": "rd-wildchat-test2-1716#t1", "ms": 46.55, "edits": []}
+{"id": "rd-wildchat-test2-1716#t2", "ms": 48.68, "edits": []}
+{"id": "rd-wildchat-test2-1717#t0", "ms": 268.31, "edits": []}
+{"id": "rd-wildchat-test2-1717#t1", "ms": 33.64, "edits": []}
+{"id": "rd-wildchat-test2-1717#t2", "ms": 29.54, "edits": []}
+{"id": "rd-wildchat-test2-1718#t0", "ms": 48.63, "edits": []}
+{"id": "rd-wildchat-test2-1718#t1", "ms": 49.81, "edits": []}
+{"id": "rd-wildchat-test2-1718#t2", "ms": 48.67, "edits": []}
+{"id": "rd-wildchat-test2-1719#t0", "ms": 32.62, "edits": []}
+{"id": "rd-wildchat-test2-1719#t1", "ms": 31.68, "edits": []}
+{"id": "rd-wildchat-test2-1719#t2", "ms": 32.04, "edits": []}
+{"id": "rd-wildchat-test2-1720#t0", "ms": 51.83, "edits": []}
+{"id": "rd-wildchat-test2-1720#t1", "ms": 40.71, "edits": []}
+{"id": "rd-wildchat-test2-1720#t2", "ms": 43.77, "edits": []}

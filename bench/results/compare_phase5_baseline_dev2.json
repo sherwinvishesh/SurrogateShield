@@ -1,0 +1,146 @@
+{
+ "command": "python bench/compare.py --synth none --realworld dev2 --json bench/results/compare_phase5_baseline_dev2.json",
+ "realworld": {
+  "dataset": "bench/realworld/dev2.jsonl",
+  "messages": 240,
+  "presidio": {
+   "presidio_analyzer_version": "2.2.362",
+   "config": "AnalyzerEngineProvider() shipped defaults (default_analyzer.yaml, spacy.yaml, default_recognizers.yaml)",
+   "score_threshold": 0.4,
+   "overlap_resolution": "longest span, then highest score"
+  },
+  "J2": "FAIL",
+  "ss": {
+   "leak_rate": 0.1977,
+   "leaked": 86,
+   "policy": 21,
+   "protect_values": 456,
+   "spurious_rate": 0.1512,
+   "spurious": 67,
+   "edits": 443,
+   "negatives_untouched": 67,
+   "negatives": 85,
+   "leak_by_type": {
+    "ADDRESS": {
+     "values": 35,
+     "leaked": 5
+    },
+    "AGE": {
+     "values": 21,
+     "leaked": 4
+    },
+    "CREDENTIAL": {
+     "values": 13,
+     "leaked": 6
+    },
+    "DATE_OF_BIRTH": {
+     "values": 8,
+     "leaked": 0
+    },
+    "EMAIL": {
+     "values": 19,
+     "leaked": 0
+    },
+    "HANDLE": {
+     "values": 14,
+     "leaked": 5
+    },
+    "ID": {
+     "values": 47,
+     "leaked": 20
+    },
+    "LOCATION": {
+     "values": 92,
+     "leaked": 15
+    },
+    "NETWORK": {
+     "values": 7,
+     "leaked": 0
+    },
+    "ORG": {
+     "values": 26,
+     "leaked": 7
+    },
+    "PERSON": {
+     "values": 145,
+     "leaked": 18
+    },
+    "PHONE": {
+     "values": 23,
+     "leaked": 3
+    },
+    "URL": {
+     "values": 6,
+     "leaked": 3
+    }
+   },
+   "latency_ms_p50": 24.7
+  },
+  "presidio_result": {
+   "leak_rate": 0.3932,
+   "leaked": 173,
+   "policy": 16,
+   "protect_values": 456,
+   "spurious_rate": 0.3444,
+   "spurious": 176,
+   "edits": 511,
+   "negatives_untouched": 30,
+   "negatives": 85,
+   "leak_by_type": {
+    "ADDRESS": {
+     "values": 35,
+     "leaked": 19
+    },
+    "AGE": {
+     "values": 21,
+     "leaked": 10
+    },
+    "CREDENTIAL": {
+     "values": 13,
+     "leaked": 12
+    },
+    "DATE_OF_BIRTH": {
+     "values": 8,
+     "leaked": 0
+    },
+    "EMAIL": {
+     "values": 19,
+     "leaked": 0
+    },
+    "HANDLE": {
+     "values": 14,
+     "leaked": 13
+    },
+    "ID": {
+     "values": 47,
+     "leaked": 28
+    },
+    "LOCATION": {
+     "values": 92,
+     "leaked": 30
+    },
+    "NETWORK": {
+     "values": 7,
+     "leaked": 2
+    },
+    "ORG": {
+     "values": 26,
+     "leaked": 20
+    },
+    "PERSON": {
+     "values": 145,
+     "leaked": 36
+    },
+    "PHONE": {
+     "values": 23,
+     "leaked": 2
+    },
+    "URL": {
+     "values": 6,
+     "leaked": 1
+    }
+   },
+   "latency_ms_p50": 5.5
+  }
+ }
+}

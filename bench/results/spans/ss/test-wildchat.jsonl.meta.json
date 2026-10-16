@@ -1,0 +1,26 @@
+{
+ "arm": "ss",
+ "command": ".venv/bin/python -m bench.arms.ss --in bench/realdata/build/score/test/wildchat.jsonl --out bench/realdata/build/spans/ss/test-wildchat.jsonl",
+ "config": {
+  "ADDRESS_MODE": "auto",
+  "SERVICE_QUERY_DETECTION_ENABLED": true,
+  "refusal": "RuntimeError('could not generate a surrogate ...') from MimicGen.generate_all -> refused row",
+  "send_path": "json_tester.prepare_send(text, MimicGen(seed=msg_seed))",
+  "versions": {
+   "faker": "40.15.0",
+   "python": "3.13.2",
+   "spacy": "3.8.14",
+   "surrogateshield": "2.1.0",
+   "torch": "2.12.0",
+   "transformers": "5.8.1"
+  }
+ },
+ "edits": 3009,
+ "input": "bench/realdata/build/score/test/wildchat.jsonl",
+ "input_sha256": "67b2df52060b8741acf2e553237f52eff6e902137fb24dff0cf5cd115ca8804e",
+ "load_seconds": 0.2,
+ "messages": 870,
+ "offline": true,
+ "refused": 0,
+ "seed": 20261005
+}

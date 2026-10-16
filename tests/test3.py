@@ -189,16 +189,18 @@ print("\n[4] ContextGuard — distilbert-NER (detection/context_guard.py)")
 import detection.context_guard as cg
 from detection.context_guard import guard
 
-# ── 4a: Graceful degradation when NER pipeline is unavailable ─────────────
-# Patch _get_ner to return None, simulating missing transformers install
-with patch.object(cg, "_get_ner", return_value=None):
-    confirmed_deg, uncertain_deg = guard("Alice Johnson visited Paris.", [])
+# ── 4a: Fail closed when the NER pipeline is unavailable (audit I17) ──────
+# Simulate a missing transformers install: the stage must raise, not
+# return "no entities".
+from surrogateshield.core.errors import DetectorUnavailable
+with patch.object(cg, "_get_ner", side_effect=DetectorUnavailable("no transformers")):
+    try:
+        guard("Alice Johnson visited Paris.", [])
+        _raised = False
+    except DetectorUnavailable:
+        _raised = True
 
-check(
-    "Graceful degradation: returns empty lists when NER unavailable",
-    confirmed_deg == [] and uncertain_deg == [],
-    f"confirmed={confirmed_deg}, uncertain={uncertain_deg}"
-)
+check("Fail closed: DetectorUnavailable when NER unavailable", _raised)
 
 # ── 4b: Borderline entity verification ────────────────────────────────────
 from util import DetectedEntity
@@ -231,7 +233,10 @@ check(
 )
 
 # ── 4c: Live NER detection (skipped gracefully if model not available) ────
-ner_available = cg._get_ner() is not None
+try:
+    ner_available = cg._get_ner() is not None
+except DetectorUnavailable:
+    ner_available = False
 
 if ner_available:
     confirmed_person, _ = guard("John Smith is the CEO.", [])
@@ -277,7 +282,7 @@ else:
 # ─────────────────────────────────────────────────────────────
 print("\n[5] ServiceQueryDetector (detection/service_query.py)")
 
-from detection.service_query import is_service_query, fuzz_addresses
+from detection.service_query import classify, is_service_query, fuzz_addresses
 
 # ── 5a: is_service_query classification ──────────────────────────────────
 check(
@@ -288,9 +293,11 @@ check(
     "'What is my SSN?' → is_service_query False (no service pattern)",
     not is_service_query("What is my SSN?"),
 )
+# Audit I6: a sensitive service query is still a service query (the city is
+# kept so the answer is useful) but its street line is coarsened.
 check(
-    "HIV clinic query → is_service_query False (sensitive override)",
-    not is_service_query("Find an HIV clinic near 1126 E Apache Blvd, Tempe, AZ"),
+    "HIV clinic query → service_coarse (sensitive: street coarsened)",
+    classify("Find an HIV clinic near 1126 E Apache Blvd, Tempe, AZ") == "service_coarse",
 )
 check(
     "Directions query → is_service_query True",
@@ -301,8 +308,8 @@ check(
     not is_service_query("What is the capital of France?"),
 )
 check(
-    "Rehab/mental-health override → is_service_query False",
-    not is_service_query("Find a rehab centre near 500 Main St, Chicago, IL"),
+    "Rehab/mental-health query → service_coarse",
+    classify("Find a rehab centre near 500 Main St, Chicago, IL") == "service_coarse",
 )
 
 # ── 5b: fuzz_addresses — address with full city+state ────────────────────

@@ -15,43 +15,83 @@ Tokenization artefact handling:
 
 from __future__ import annotations
 
+import os
 import logging
 import re
-from typing import Dict, List, Tuple
+import threading
+from typing import Dict, List, Mapping, Optional, Tuple
 
 from ..entities import DetectedEntity
+from ..errors import DetectorUnavailable
+from .config import GENERATOR_TYPE
 
 logger = logging.getLogger(__name__)
 
-# Cache pipelines keyed by model name
-_ner_pipelines: Dict[str, object] = {}
+# Cache pipelines (or the reason loading failed) keyed by (model, device, revision)
+_ner_pipelines: Dict[object, object] = {}
+_ner_lock = threading.Lock()
 
 
-def _get_ner(model_name: str = "dslim/distilbert-NER"):
-    """Lazy-load and cache the HuggingFace NER pipeline by model name."""
-    global _ner_pipelines
-    if model_name in _ner_pipelines:
-        return _ner_pipelines[model_name]
+def _get_ner(model_name: str = "dslim/distilbert-NER", device: int = -1,
+             revision: Optional[str] = None):
+    """Lazy-load and cache the HuggingFace NER pipeline by (model, device,
+    revision).
+
+    Raises DetectorUnavailable if it cannot be loaded (audit I17): an
+    enabled stage is never skipped silently.
+    """
+    cache_key = (model_name, device, revision)
+    cached = _ner_pipelines.get(cache_key)
+    if cached is None:
+        with _ner_lock:
+            cached = _ner_pipelines.get(cache_key)
+            if cached is None:
+                cached = _ner_pipelines[cache_key] = _load_ner(model_name, device, revision)
+    if isinstance(cached, DetectorUnavailable):
+        raise cached
+    return cached
+
+
+def _local_model(model_name: str, revision: Optional[str] = None) -> str:
+    """The cached copy of *model_name* (at *revision*, a commit or branch;
+    None is the default branch), so a load makes no network request (audit
+    N7). Only a model that is not cached yet is fetched, once."""
+    if os.path.isdir(model_name):
+        return model_name
+    try:
+        from huggingface_hub import snapshot_download
+    except ImportError:
+        return model_name
+    try:
+        return snapshot_download(model_name, revision=revision, local_files_only=True)
+    except OSError:         # not cached: LocalEntryNotFoundError
+        if os.environ.get("HF_HUB_OFFLINE", "").lower() in ("1", "true", "yes", "on"):
+            return model_name   # the pipeline raises; _load_ner reports it
+        return snapshot_download(model_name, revision=revision)
+
+
+def _load_ner(model_name: str, device: int, revision: Optional[str] = None):
     try:
         from transformers import pipeline as hf_pipeline
+    except ImportError:
+        return DetectorUnavailable(
+            "ContextGuard needs transformers and torch, which are not installed. "
+            "Run: pip install transformers torch — or switch ContextGuard off."
+        )
+    try:
         pipeline = hf_pipeline(
             "ner",
-            model=model_name,
+            model=_local_model(model_name, revision),
             aggregation_strategy="simple",
-            device=-1,
+            device=device,
         )
-        _ner_pipelines[model_name] = pipeline
-        logger.info(f"[ContextGuard] Loaded NER model: {model_name}")
-    except ImportError:
-        logger.warning(
-            "[ContextGuard] transformers not installed — skipping. "
-            "Run: pip install transformers torch"
+    except (OSError, ValueError) as exc:
+        return DetectorUnavailable(
+            f"ContextGuard could not load {model_name!r} ({exc}). Download it once "
+            "with network access (HF_HUB_OFFLINE unset), or switch ContextGuard off."
         )
-        _ner_pipelines[model_name] = None
-    except Exception as exc:
-        logger.warning(f"[ContextGuard] Failed to load NER model: {exc}")
-        _ner_pipelines[model_name] = None
-    return _ner_pipelines[model_name]
+    logger.info(f"[ContextGuard] Loaded NER model: {model_name} (device={device})")
+    return pipeline
 
 
 _LABEL_MAP = {
@@ -64,11 +104,39 @@ _LABEL_MAP = {
 }
 
 _KEEP_LABELS = {"PER", "PERSON", "ORG", "LOC", "GPE"}
+# A name shorter than this is a fragment; a mapped AGE ("34") or PIN is not.
+_NAME_TYPES = frozenset({"PERSON", "ORG", "LOC", "GPE"})
+_MIN_NAME_LEN = 3
+
+
+def label_types(labels: Optional[Mapping[str, str]] = None) -> Dict[str, str]:
+    """Model label -> the type its entities get. None: the CoNLL / OntoNotes
+    names (``PER``, ``ORG``, ``LOC``, ``GPE``) as before. A stage's
+    ``labels`` option maps another model's labels onto public types
+    (``"FIRSTNAME": "PERSON"``, ``"CITY": "LOCATION"``) or internal ones; a
+    label it does not name is dropped."""
+    if labels is None:
+        return {k: _LABEL_MAP.get(k, k) for k in _KEEP_LABELS}
+    return {k: GENERATOR_TYPE.get(v, v) for k, v in labels.items()}
+
 
 _CG_BLOCKLIST: frozenset = frozenset({
     "dr", "mr", "mrs", "ms", "prof", "professor", "rev", "sr", "jr",
     "sir", "lord", "dame", "capt", "lt", "sgt", "col", "gen",
     "de", "le", "la", "el", "al", "van", "von",
+    # generic tech/domain acronyms the NER model mistakes for ORGs.
+    # (ssh/ux/sql intentionally excluded — they occur as real ORG names.)
+    "api", "ip", "sti", "std", "url", "http", "https",
+    "faq", "crm", "pdf", "dns", "vpn", "bear", "bearer",
+    # contact-channel labels ("Mobile +91…", "Cell: …") — never entities
+    "mobile", "cell", "tel", "fax",
+    # document-field labels NER mistakes for entities ("VIN 1HGB…")
+    "vin", "mrn", "ktn", "er", "agi",
+    # role nouns fragment-expansion can surface ("Client", "Batch", "Median")
+    "client", "customer", "vendor", "supplier", "contact", "batch", "median",
+    "user", "patient", "member",
+    # form-field labels ("Name - X, Email - Y" intake rows)
+    "email", "phone", "name", "dob", "ssn", "address",
 })
 
 
@@ -85,6 +153,9 @@ def guard(
     model_name: str = "dslim/distilbert-NER",
     enabled: bool = True,
     confidence_threshold: float = 0.70,
+    device: int = -1,
+    revision: Optional[str] = None,
+    labels: Optional[Mapping[str, str]] = None,
 ) -> Tuple[List[DetectedEntity], List[DetectedEntity]]:
     """
     Run NER on remaining_text and verify borderline_entities.
@@ -95,6 +166,10 @@ def guard(
         model_name:          HuggingFace model to use for NER inference.
         enabled:             If False, skip NER inference entirely.
         confidence_threshold: Minimum score to promote a borderline entity.
+        revision:            Model revision (commit) to load; None is the
+                             default branch.
+        labels:              Model label -> type (``label_types``); None
+                             keeps the CoNLL / OntoNotes names.
 
     Returns:
         Tuple of (confirmed_entities, uncertain_entities).
@@ -107,7 +182,7 @@ def guard(
         if ent.score >= confidence_threshold:
             confirmed.append(ent)
             logger.debug(
-                f"[ContextGuard] Verified borderline: {ent.text!r} "
+                f"[ContextGuard] Verified borderline: [{ent.start}:{ent.end}] "
                 f"({ent.type}, score={ent.score:.2f})"
             )
         else:
@@ -116,46 +191,97 @@ def guard(
     if not enabled:
         return confirmed, uncertain
 
-    # Run NER on remaining text
-    clean = remaining_text.replace("█", " ").strip()
-    if not clean:
+    # Run NER on remaining text.  █ placeholders become spaces; the text is
+    # deliberately NOT stripped so model offsets stay aligned with
+    # remaining_text (stripping used to shift every span left).
+    clean = remaining_text.replace("█", " ")
+    if not clean.strip():
         return confirmed, uncertain
 
-    ner = _get_ner(model_name)
-    if ner is None:
-        return confirmed, uncertain
-
+    keep = label_types(labels)
+    ner = _get_ner(model_name, device, revision)
     try:
         results = ner(clean)
     except Exception as exc:
-        logger.warning(f"[ContextGuard] NER inference failed: {exc}")
-        return confirmed, uncertain
+        raise DetectorUnavailable(     # the model's own message could quote the text: the type only
+            f"ContextGuard failed on this input ({type(exc).__name__}); the text was not masked") from exc
 
     for r in results:
         label = r.get("entity_group", r.get("entity", ""))
-        if label not in _KEEP_LABELS:
+        if label not in keep:
             continue
 
-        entity_type = _LABEL_MAP.get(label, label)
+        entity_type = keep[label]
+        min_len = _MIN_NAME_LEN if entity_type in _NAME_TYPES else 1
         score = float(r.get("score", 0.0))
 
         raw_word = r.get("word", "")
         text = _clean_token(raw_word)
 
-        if len(text) < 3:
+        if len(text) < min_len:
             logger.debug(
-                f"[ContextGuard] Skipping too-short token: {raw_word!r} → {text!r}"
+                f"[ContextGuard] Skipping too-short token ({len(text)} chars) at "
+                f"[{r.get('start')}:{r.get('end')}]"
             )
             continue
 
         if text.lower() in _CG_BLOCKLIST:
-            logger.debug(f"[ContextGuard] Skipping blocklisted token: {text!r}")
+            logger.debug(f"[ContextGuard] Skipping blocklisted token at [{r.get('start')}:{r.get('end')}]")
             continue
+
+        # A real name never spans a line break
+        if "\n" in text:
+            logger.debug(f"[ContextGuard] Skipping newline-spanning token at [{r.get('start')}:{r.get('end')}]")
+            continue
+
+        # Word-boundary alignment: word-piece aggregation sometimes emits
+        # fragments of longer words ("ri Nkosi" from "Zuberi Nkosi",
+        # "lient" from "Client").  A fragment is real signal with wrong
+        # boundaries — EXPAND it to the enclosing words, then re-screen.
+        start = int(r.get("start", 0))
+        end   = int(r.get("end", len(text)))
+        idx = clean.find(text, max(0, start - 2), end + 2)
+        if idx != -1:
+            start, end = idx, idx + len(text)
+            grew = False
+            while start > 0 and clean[start - 1].isalnum() and (idx - start) < 12:
+                start -= 1
+                grew = True
+            while (end < len(clean) and clean[end].isalnum()
+                   and (end - (idx + len(text))) < 12):
+                end += 1
+                grew = True
+            if grew:
+                text = clean[start:end].strip()
+                logger.debug(
+                    f"[ContextGuard] Expanded fragment to [{start}:{end}]"
+                )
+                if len(text) < min_len or text.lower() in _CG_BLOCKLIST:
+                    continue
+        else:
+            # The word is not in the text near its offsets (an [UNK] piece, a
+            # normalised character): the offsets are the authority, so the
+            # entity's text is what an edit at those offsets would replace.
+            # A span across a line break ("Bartholomew Ekwueme\nCell") keeps
+            # the line with most letters: an entity never spans a break.
+            if not 0 <= start < end <= len(clean):
+                continue
+            lines = [(sum(c.isalpha() for c in m.group()), start + m.start(), start + m.end())
+                     for m in re.finditer(r"[^\n]+", clean[start:end])]
+            if not lines:
+                continue
+            _, start, end = max(lines, key=lambda x: x[0])
+            span = clean[start:end]
+            start += len(span) - len(span.lstrip())
+            end = start + len(span.strip())
+            text = clean[start:end]
+            if len(text) < min_len or text.lower() in _CG_BLOCKLIST:
+                continue
 
         entity = DetectedEntity(
             text=text,
-            start=r.get("start", 0),
-            end=r.get("end", len(text)),
+            start=start,
+            end=end,
             type=entity_type,
             score=score,
             source="slm",
@@ -164,12 +290,12 @@ def guard(
         if score >= confidence_threshold:
             confirmed.append(entity)
             logger.debug(
-                f"[ContextGuard] Confirmed: {text!r} ({entity_type}, {score:.2f})"
+                f"[ContextGuard] Confirmed: [{entity.start}:{entity.end}] ({entity_type}, {score:.2f})"
             )
         else:
             uncertain.append(entity)
             logger.debug(
-                f"[ContextGuard] Uncertain: {text!r} ({entity_type}, {score:.2f})"
+                f"[ContextGuard] Uncertain: [{entity.start}:{entity.end}] ({entity_type}, {score:.2f})"
             )
 
     logger.info(

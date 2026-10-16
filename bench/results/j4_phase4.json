@@ -1,0 +1,20 @@
+{
+  "turns": 250,
+  "messages": 220,
+  "corrupted": 0,
+  "first_corrupted_turn": null,
+  "map_size": 398,
+  "originals_with_several_surrogates": 0,
+  "low_entropy_with_several_surrogates": 0,
+  "surrogate_equals_original": [],
+  "later_original_equals_earlier_surrogate": [
+    "ANN ARBOR",
+    "Ann Arbor"
+  ],
+  "low_entropy_reused_as_value": [
+    "gender: male",
+    "gender: non-binary"
+  ],
+  "latency_ms_p50": 43.6,
+  "J4": "PASS"
+}

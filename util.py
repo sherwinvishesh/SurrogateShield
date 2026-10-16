@@ -3,8 +3,8 @@
 """
 util.py — SurrogateShield Shared Utilities
 
-Logging setup, shared dataclasses (DetectedEntity, Conversation),
-text utilities, and Rich console helpers used across the project.
+Logging setup, the Conversation dataclasses and Rich console helpers.
+DetectedEntity and the span helpers are re-exported from the package.
 
 Note: logging.basicConfig() is intentionally NOT called here.
 It is called once at startup in main.py. Modules that call
@@ -17,12 +17,23 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
-from typing import List, Optional
+from datetime import datetime, timezone
+from typing import List
 
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
+
+# Entity type and span helpers live in the package (single implementation,
+# audit F4); re-exported here for the app.
+from surrogateshield.core.entities import (  # noqa: F401
+    DetectedEntity,
+    apply_entity_surrogates,
+    mask_spans,
+    plan_substitutions,
+    remove_span_overlap,
+    splice,
+)
 
 # ─────────────────────────────────────────────
 # Rich console — shared singleton
@@ -59,36 +70,11 @@ def get_logger(name: str) -> logging.Logger:
 # ─────────────────────────────────────────────
 
 @dataclass
-class DetectedEntity:
-    """
-    Represents a single piece of detected PII.
-
-    Attributes:
-        text:   The original text snippet detected as PII.
-        start:  Character start index in the source string.
-        end:    Character end index in the source string.
-        type:   PII type label (e.g. 'email', 'PERSON', 'implicit_location').
-        score:  Confidence score in [0.0, 1.0]. PatternScan always yields 1.0.
-        source: Which detector produced this entity ('pattern', 'ner', 'slm').
-    """
-    text: str
-    start: int
-    end: int
-    type: str
-    score: float = 1.0
-    source: str = "pattern"
-
-    def overlaps(self, other: "DetectedEntity") -> bool:
-        """Return True if this entity's span overlaps with another entity's span."""
-        return not (self.end <= other.start or self.start >= other.end)
-
-
-@dataclass
 class ConversationMessage:
     """A single turn in a conversation."""
     role: str        # 'user' or 'assistant'
     content: str     # Final content (real values restored)
-    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 @dataclass
@@ -114,7 +100,7 @@ class Conversation:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     messages: List[ConversationMessage] = field(default_factory=list)
     api_messages: List[ConversationMessage] = field(default_factory=list)
-    created: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    created: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     rag_mode: bool = False
 
     def to_api_history(self) -> list:
@@ -127,50 +113,6 @@ class Conversation:
             List of dicts with 'role' and 'content' keys.
         """
         return [{"role": m.role, "content": m.content} for m in self.api_messages]
-
-
-# ─────────────────────────────────────────────
-# Text utilities
-# ─────────────────────────────────────────────
-
-def mask_spans(text: str, entities: List[DetectedEntity], placeholder: str = "█") -> str:
-    """
-    Replace all entity spans in *text* with a placeholder character.
-
-    Used to remove already-detected spans from the text before passing
-    the remainder to the next detection stage.
-
-    Args:
-        text:        Original text string.
-        entities:    Entities whose spans should be masked.
-        placeholder: Single character to fill masked spans.
-
-    Returns:
-        New string with entity spans replaced by placeholder characters.
-    """
-    if not entities:
-        return text
-    chars = list(text)
-    for ent in entities:
-        for i in range(ent.start, min(ent.end, len(chars))):
-            chars[i] = placeholder
-    return "".join(chars)
-
-
-def remove_span_overlap(candidate: DetectedEntity, existing: List[DetectedEntity]) -> bool:
-    """
-    Return True if *candidate* overlaps with any entity in *existing*.
-
-    Used by EntityTrace to skip spans already covered by PatternScan.
-
-    Args:
-        candidate: The entity being tested.
-        existing:  Already-confirmed entities.
-
-    Returns:
-        True if there is an overlap (candidate should be skipped).
-    """
-    return any(candidate.overlaps(e) for e in existing)
 
 
 def new_conversation_id() -> str:

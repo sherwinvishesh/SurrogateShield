@@ -1,0 +1,251 @@
+{
+ "annotator": "claude-sonnet-4-6",
+ "command": "python -m bench.realdata.label --collection test2 --run --write --out bench/results/realdata_prevalence_test2.json",
+ "datasets": {
+  "oasst1": {
+   "by_kind": {
+    "multi": {
+     "messages": 248,
+     "with_pii": 2
+    },
+    "single": {
+     "messages": 597,
+     "with_pii": 9
+    }
+   },
+   "by_task": {
+    "advice": {
+     "messages": 125,
+     "with_pii": 4
+    },
+    "business": {
+     "messages": 9,
+     "with_pii": 0
+    },
+    "coding": {
+     "messages": 117,
+     "with_pii": 1
+    },
+    "other": {
+     "messages": 31,
+     "with_pii": 2
+    },
+    "qa": {
+     "messages": 374,
+     "with_pii": 1
+    },
+    "roleplay": {
+     "messages": 38,
+     "with_pii": 0
+    },
+    "translation": {
+     "messages": 1,
+     "with_pii": 0
+    },
+    "writing": {
+     "messages": 150,
+     "with_pii": 3
+    }
+   },
+   "failed": 7,
+   "labelled": 845,
+   "messages": 852,
+   "messages_with_type": {
+    "EMAIL": 1,
+    "ETHNICITY": 1,
+    "HEALTH": 6,
+    "PERSON": 6
+   },
+   "pii_free_sources": {
+    "multi": {
+     "adjudicated": 115,
+     "literal": 16
+    },
+    "single": {
+     "adjudicated": 588,
+     "literal": 111
+    }
+   },
+   "service_query": 1,
+   "values_by_type": {
+    "EMAIL": 2,
+    "ETHNICITY": 1,
+    "HEALTH": 8,
+    "PERSON": 7
+   },
+   "with_pii": 11,
+   "with_protect": 6,
+   "with_sensitive": 6
+  },
+  "sharegpt": {
+   "by_kind": {
+    "multi": {
+     "messages": 327,
+     "with_pii": 5
+    },
+    "single": {
+     "messages": 583,
+     "with_pii": 12
+    }
+   },
+   "by_task": {
+    "advice": {
+     "messages": 82,
+     "with_pii": 2
+    },
+    "business": {
+     "messages": 62,
+     "with_pii": 1
+    },
+    "coding": {
+     "messages": 210,
+     "with_pii": 2
+    },
+    "other": {
+     "messages": 37,
+     "with_pii": 3
+    },
+    "qa": {
+     "messages": 217,
+     "with_pii": 0
+    },
+    "roleplay": {
+     "messages": 67,
+     "with_pii": 2
+    },
+    "translation": {
+     "messages": 10,
+     "with_pii": 0
+    },
+    "writing": {
+     "messages": 225,
+     "with_pii": 7
+    }
+   },
+   "failed": 28,
+   "labelled": 910,
+   "messages": 938,
+   "messages_with_type": {
+    "AGE": 3,
+    "CREDENTIAL": 1,
+    "ETHNICITY": 2,
+    "HEALTH": 2,
+    "LOCATION": 2,
+    "ORG": 1,
+    "ORIENTATION": 1,
+    "PERSON": 9,
+    "POLITICAL": 1,
+    "RELIGION": 4
+   },
+   "pii_free_sources": {
+    "multi": {
+     "adjudicated": 106,
+     "literal": 7
+    },
+    "single": {
+     "adjudicated": 571,
+     "literal": 65
+    }
+   },
+   "service_query": 0,
+   "values_by_type": {
+    "AGE": 3,
+    "CREDENTIAL": 1,
+    "ETHNICITY": 2,
+    "HEALTH": 4,
+    "LOCATION": 2,
+    "ORG": 1,
+    "ORIENTATION": 1,
+    "PERSON": 11,
+    "POLITICAL": 1,
+    "RELIGION": 7
+   },
+   "with_pii": 17,
+   "with_protect": 12,
+   "with_sensitive": 10
+  },
+  "wildchat": {
+   "by_kind": {
+    "multi": {
+     "messages": 314,
+     "with_pii": 6
+    },
+    "single": {
+     "messages": 572,
+     "with_pii": 15
+    }
+   },
+   "by_task": {
+    "advice": {
+     "messages": 17,
+     "with_pii": 2
+    },
+    "business": {
+     "messages": 12,
+     "with_pii": 0
+    },
+    "coding": {
+     "messages": 121,
+     "with_pii": 0
+    },
+    "other": {
+     "messages": 20,
+     "with_pii": 0
+    },
+    "qa": {
+     "messages": 185,
+     "with_pii": 0
+    },
+    "roleplay": {
+     "messages": 38,
+     "with_pii": 2
+    },
+    "translation": {
+     "messages": 14,
+     "with_pii": 0
+    },
+    "writing": {
+     "messages": 479,
+     "with_pii": 17
+    }
+   },
+   "failed": 36,
+   "labelled": 886,
+   "messages": 922,
+   "messages_with_type": {
+    "AGE": 1,
+    "EMAIL": 1,
+    "ETHNICITY": 5,
+    "HANDLE": 1,
+    "HEALTH": 2,
+    "PERSON": 15,
+    "PHONE": 2
+   },
+   "pii_free_sources": {
+    "multi": {
+     "adjudicated": 109,
+     "literal": 8
+    },
+    "single": {
+     "adjudicated": 557,
+     "literal": 87
+    }
+   },
+   "service_query": 0,
+   "values_by_type": {
+    "AGE": 1,
+    "EMAIL": 1,
+    "ETHNICITY": 5,
+    "HANDLE": 1,
+    "HEALTH": 3,
+    "PERSON": 21,
+    "PHONE": 2
+   },
+   "with_pii": 21,
+   "with_protect": 16,
+   "with_sensitive": 7
+  }
+ },
+ "per_call": 10,
+ "prompt_version": "bebc6e281801fa74"
+}

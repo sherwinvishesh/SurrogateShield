@@ -1,0 +1,388 @@
+# Configuring detection
+
+Everything the detector does is set by one `DetectionConfig`
+(`python-library/surrogateshield/core/detection/config.py`). That covers
+which stages run, the model and revision each stage loads, thresholds, which
+stage may report which type, what happens to each type, and the relation
+gate. A config is a frozen dataclass. It serialises to JSON and has a stable
+hash (`config_hash()`, SHA-256 of the canonical JSON), so a result can name
+the exact config that produced it.
+
+## Choosing a config
+
+| where | how |
+|---|---|
+| library | `ss.config(detection="strict")`, or `Session(config=Config(detection=...))` with a preset name, a `DetectionConfig` or a dict |
+| environment | `SURROGATESHIELD_PRESET=fast`; `SURROGATESHIELD_DETECTION_CONFIG=/path/det.json` (merged onto the preset) |
+| command line | `surrogateshield scan --preset strict …`, `--detection-config det.json` (scan, mask, unmask, bench, doctor, download) |
+| code | `preset("balanced").with_stage("context_guard", thresholds={"accept": 0.6}).with_actions(PHONE="redact")` |
+
+A dict or JSON file may be **partial**. It is merged onto the preset it names
+(`"preset": "strict"`), or else onto `balanced`:
+
+- `detectors` merge by stage name (a stage's `thresholds` and `options` merge by key);
+- `type_sources`, `type_actions` and `type_conflicts` merge by key;
+- any other field is replaced.
+
+A whole config (the output of `to_dict()`) comes back unchanged.
+`from_partial(d)` does this in code.
+
+```json
+{"preset": "balanced",
+ "detectors": [{"name": "context_guard", "thresholds": {"accept": 0.6}, "device": 0}],
+ "type_actions": {"PHONE": "redact", "GENDER": "keep"},
+ "gate_bypass": ["EMAIL"]}
+```
+
+### Precedence
+
+1. **Library sessions.**
+   - `Config.detection` wins when set.
+   - If it is not set, the environment's preset or file applies.
+   - Otherwise `balanced`.
+   - On top of that, every flat setting in `Config` that differs from its default is applied: `spacy_model`, `context_guard_enabled`, the four thresholds, `context_guard_model` / `_device`, `tagger_model` / `_revision` / `_device`, `address_mode`, `address_shift_range`, `service`. So existing code that sets `context_guard_enabled` keeps working. Its default is now `False`: in `balanced` the PII tagger reads names, and ContextGuard is opt-in.
+   - `Session(...).detection_config` shows the result.
+2. **`run_cascade(text, config=...)`.**
+   - The `config` argument wins.
+   - If no `config` is passed, the environment applies, else `balanced`.
+   - Flat keyword arguments that are passed explicitly (`use_tagger=False`, `use_context_guard=True`, `canonical_views=()`, …) are applied on top.
+3. **The application (`main.py`, `pipeline.py`, `json_tester.py`).**
+   - These read the root `config.py` unless `SURROGATESHIELD_PRESET` or `SURROGATESHIELD_DETECTION_CONFIG` is set.
+   - When either is set, the environment config is used as is.
+   - The defaults in `config.py` are the `balanced` preset (a test checks this).
+4. **CLI.**
+   - `--preset` replaces the session's config.
+   - `--detection-config` is merged onto it.
+   - A file that names a different preset from `--preset` is an error.
+
+## Presets
+
+| preset | what changes from `balanced` | hash (first 16 hex) |
+|---|---|---|
+| `balanced` | the default, at the benchmark settings: PatternScan, the canonicaliser, the PII tagger (names, organisations, places, and phones, IDs, addresses, handles and credentials beside the patterns), spaCy for places, and for a name only as the ensemble fallback (`options.ensemble`: where no stage named anyone and the name is tied to a person), the structural passes; ContextGuard off | `1277eddc6c55a0f7` |
+| `fast` | no spaCy: the tagger reads places too, from 0.4, its other thresholds those `balanced` had until the operating-curve move (PERSON / ORG 0.5, ADDRESS 0.8, PHONE / ID / HANDLE 0.9, CREDENTIAL 0.95, `gate_above` 0.9) | `2c41977891a20c88` |
+| `strict` | every model stage for every type it reads: spaCy and ContextGuard back on names, EntityTrace thresholds high 0.70 / low 0.40 / fallback 0.45, ContextGuard accept 0.50, the tagger from 0.3; every type bypasses the relation gate | `d3afc88e9e1c94c5` |
+| `classic` | the detector before the tagger: no tagger, spaCy and ContextGuard read names, organisations and places. EntityTrace at its earlier type gates (high 0.85 / low 0.60 / fallback 0.65). For a machine without the tagger's weights | `6e5419989f2b9a70` |
+
+There are also five ablations, each with one component off, used by the
+benchmark only:
+
+| ablation | hash (first 16 hex) |
+|---|---|
+| `no_tagger` | `32d7b81891cac54a` |
+| `no_canonicaliser` | `bf17aef0cb0f7b84` |
+| `no_gate` | `0ff2a0e0ba7530d7` |
+| `no_models` | `a752b44211b0090a` |
+| `no_structural` | `96531ae8fd6d8666` |
+
+`no_tagger` leaves names to the structural passes, because `balanced` no
+longer routes them to spaCy; `classic` is the usable config without the
+tagger.
+
+`benchmark()` is the config of the real-data benchmark: `balanced` with
+`type_actions["ADDRESS"] = "replace"` (hash `19baf5415a894c80`; `a1abaa92142b0db9` before the ensemble fallback, the hash the test-2 and test-3 results carry; `82c6c21dcc740c1a` at the thresholds now in `bench/realdata/configs/curve/op3.json`, `7d524abba90c7696` with the deberta-v3-xsmall tagger; before the
+tagger joined `balanced` it was `8e463c3c6b7562fd`, which
+`bench/tagger/configs/ss-v2.json` restores). The product
+default `auto` keeps street and town inside a service query ("is there a
+pharmacy near …"), and a leak scorer cannot tell that apart from a miss, so
+the benchmark redraws every address. The SS arm writes `detection_config` and
+`detection_config_hash` into every `.meta.json`. `bench/realdata/score.py`
+records them per arm under `config_hashes`, and a run whose arm mixes two
+hashes fails. `tests/test_detection_config.py` pins both hashes. Once test-2
+is scored, it also checks that the hash in `realdata_test2.json` is
+`benchmark()`'s.
+
+## Stages (`detectors`)
+
+The built-in stages always run in this order, and each one reads the text
+with what the earlier ones found already masked:
+
+| stage | does | model (revision, licence) | own thresholds |
+|---|---|---|---|
+| `pattern_scan` | regexes with checksums and context cues (email, phone, ID, card, IBAN, IP, credential, DOB, age, …) | — | — |
+| `canonicaliser` | the same patterns on rewritten views of the text: `worded` (number words to digits), `spelled` (`dot`/`at` in e-mail shapes), `dates`, `folded` (full-width forms, look-alikes, zero-width), `joined` (spaced digit groups); `options.views` picks them | — | — |
+| `entity_trace` | spaCy NER | `en_core_web_lg` (3.8.0, MIT) | `high` 0.90, `low` 0.70, `fallback` 0.75. spaCy gives no per-entity score: EntityTrace scores PERSON 0.88, GPE / ORG 0.85, LOC 0.74, FAC 0.70, so these are type gates (here PERSON, GPE and ORG pass at the fallback; LOC and FAC do not). `options.ensemble` (`{"PERSON": 0.88}`): in a message where no stage named anyone, a spaCy PERSON at or above that score stands in when the name is tied to a person (a personal cue before or after it, ", who" or "and his" after it, a possessive, a title; not an addressee, not in a fiction-shaped exchange, at most three such names; a dash opening the line only when the name ends it; never a single word right after "my", "our", ...); `{}` turns it off |
+| `context_guard` | transformer NER over the masked text | `dslim/distilbert-NER` (`dfa2838a127384aabb82ed7719e16dab84c42a2a`, Apache-2.0) | `accept` 0.70 |
+| `pii_tagger` | the PII tagger: a token classifier trained on generated text (`bench/tagger/`), resolved through the detector registry like a plugin (a registered `pii_tagger` detector replaces it) | `pii-tagger-dv3s-40k`, from [`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger) at commit `c51cc8e09bd6`, pinned by its weights' SHA-256 (DeBERTa-v3-small, MIT) | one per type: PERSON / ORG / LOCATION 0.7, ADDRESS 0.9, PHONE / ID / HANDLE 0.95, CREDENTIAL 0.97; `options.gate_above` 0.97 |
+| `structural` | the layout passes: addresses read part by part, organisation names read whole, names after titles and greetings, host names, Pass S | — | — |
+
+Every `Stage` has these fields:
+
+- `enabled`
+- `model` and `revision` (a Hugging Face model loads at its pinned
+  revision; for spaCy the revision is the package version, and `doctor`
+  warns if the installed one differs)
+- `device` (-1 = CPU, else a GPU index)
+- `thresholds`: the stage's own keys above, and/or a **public type** mapped to the lowest score kept for that type, e.g. `{"PERSON": 0.8}`
+- `window`, `stride`
+- `max_latency_ms`
+- `options`: `views` for the canonicaliser, `gate_above` for the tagger,
+  `labels` for ContextGuard, `ensemble` for EntityTrace
+
+### The tagger's weights
+
+The default tagger is on Hugging Face:
+[`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger)
+(MIT, ~565 MB). `model` is its name, `pii-tagger-dv3s-40k`, and `revision`
+is `sha256:` plus the SHA-256 of its weights file. The config names the
+model, not where it comes from, so its hash is the same on every machine.
+The model is looked up in this order:
+
+1. a folder of that name under `$SURROGATESHIELD_MODELS` (default
+   `~/.cache/surrogateshield/models`), or `model` itself when it is a path;
+2. the Hugging Face cache (`~/.cache/huggingface/hub`), read with no
+   network;
+3. otherwise a download, once, from the repo above at commit
+   `c51cc8e09bd6410503c2e004f44af2b206a1670e`.
+
+Whichever it is, the weights must match the `sha256:` pin, so other weights
+under the same name fail closed. To fetch them ahead of time (a container
+build, a machine about to go offline):
+
+```
+surrogateshield download
+```
+
+With `HF_HUB_OFFLINE=1` and no cached copy, `balanced`, `fast` and `strict`
+fail closed with `DetectorUnavailable` instead of downloading, and `doctor`
+says so. `classic` (or `use_tagger=False` together with routing names to
+spaCy) runs without the tagger.
+
+Another tagger is chosen with the flat settings or the stage:
+
+```python
+shield.config(tagger_model="/models/my-tagger")                # a local folder, unpinned
+shield.config(tagger_model="org/pii-model", tagger_revision="3f1c…")   # a hub id at a commit
+shield.config(tagger_revision="sha256:…", tagger_device="mps")  # the default model, another pin, Apple GPU
+```
+
+A `model` with a `/` is a Hugging Face id; a `revision` of the form
+`sha256:<hex>` checks the weights file against that digest, and any other
+revision is the commit or branch to load. A different `tagger_model` drops
+the default's pin unless `tagger_revision` gives one. `tagger_device` is
+-1 (CPU), a GPU index or a torch device string. A model trained in
+`bench/tagger/` can be put under `$SURROGATESHIELD_MODELS` with
+`python -m bench.tagger.install <folder>`.
+
+A stage that runs past `max_latency_ms` is logged and reported in the timings
+as `<stage>_over_budget_ms`. Its candidates are kept, because dropping them
+after the time is already spent would only lose detections.
+
+A stage whose name is not built in is a plugin (see below). Plugins run
+after `context_guard`, in list order.
+
+## Types
+
+Detections carry internal names (`phone_uk`, `ssn`, `GPE`, …). Every setting
+keyed by type accepts the **public type**. `type_actions` also accepts an
+internal name, and the internal name wins.
+
+| public | internal |
+|---|---|
+| PERSON | PERSON, person |
+| ORG | ORG |
+| LOCATION | GPE, LOC, FAC, implicit_location |
+| ADDRESS | address, zip_us, postcode_uk |
+| EMAIL | email |
+| PHONE | phone_us, phone_uk, phone_intl |
+| URL | url, hostname |
+| HANDLE | handle |
+| ID | id_number, ssn, passport, us_driver_license, license_plate, vin, credit_card, iban, us_bank_number, crypto |
+| CREDENTIAL | credential, api_key |
+| NETWORK | ip_address, mac_address |
+| AGE | age |
+| DATE_OF_BIRTH | dob |
+| GENDER | gender_indicator |
+| OTHER | any other label (spaCy's MISC, a plugin's own) |
+
+## What may report a type (`type_sources`)
+
+`type_sources` maps each public type to the stages allowed to report it:
+
+- Structured types (EMAIL, PHONE, ID, …) default to `pattern_scan`,
+  `canonicaliser` and `structural`. A model's guess at a phone number is
+  therefore ignored unless you allow it. The tagger is allowed for PHONE,
+  ID, ADDRESS, HANDLE and CREDENTIAL (at its high thresholds).
+- PERSON and ORG default to those stages plus `pii_tagger` and
+  `context_guard`; LOCATION adds `entity_trace` (spaCy). On the dev split,
+  spaCy's names and organisations added far more harmless edits than leaks
+  caught, so `balanced` uses it for places only; a spaCy name comes in
+  through the ensemble fallback alone (`options.ensemble`), where no stage
+  named anyone and the name is tied to a person.
+- AGE defaults to the patterns alone (`pattern_scan`, `canonicaliser`,
+  `structural`): an age with a cue (`I'm 34`, `aged 63`, `34yo`, `29F`),
+  a worded one (`thirty-four`), and a number after a name at the end of a
+  line (`Marta Kowalczyk, 41`). The tagger reads ages too, but `balanced`,
+  `fast` and `classic` do not route them to it: on the development data,
+  routing them to the tagger at 0.95 caught the one age the patterns
+  missed on dev and added spurious edits on dev-large (1 on its
+  calibration half, 5 on its validation half;
+  `bench/results/age_sweep_dev_guard.md` and its row in
+  `bench/results/README.md`). `strict` routes AGE to the
+  tagger at the tagger's own choice (no AGE threshold). Wherever the
+  tagger or a plugin reports AGE, it is kept only in an age's shape: a
+  number from 1 to 120, in digits or words, with at most an age cue
+  (`aged`, `years old`, `yo`, `F`, `M`) and no unit or count after it
+  (`45 minutes` is not an age).
+- OTHER defaults to `"*"`, meaning every stage; `strict` and `classic` set
+  PERSON, ORG and LOCATION to `"*"` too.
+- A plugin added with `with_plugin(name, types=...)` is listed as a source
+  of those types; one added with `with_stage` reports only types set to
+  `"*"`.
+
+```python
+cfg = preset("balanced").with_sources(ID=("pattern_scan", "canonicaliser", "pii_tagger"))
+```
+
+## What happens to a type (`type_actions`)
+
+| action | effect |
+|---|---|
+| `replace` (default) | a realistic surrogate of the same kind, restored in the answer |
+| `shift` | ADDRESS only: a nearby real-looking address (`address_shift_range` blocks away) |
+| `auto` | ADDRESS only, the default: `shift` inside a service query, `replace` otherwise |
+| `redact` | a placeholder such as `[PHONE_1]`, unique in the message and the session, restored in the answer |
+| `keep` | detected and reported (`masked=False` in `scan`), sent as typed |
+
+`"*"` sets the action for every type not listed. `service_queries` turns
+service-query detection (the `auto` rule) on or off.
+
+## The relation gate (`gate`, `gate_bypass`)
+
+The gate keeps a name as typed when the message does not tie it to a person:
+
+- an organisation or place that is only the topic of a question ("How far
+  is Tempe from Phoenix?");
+- a public figure;
+- an acronym or code token.
+
+A place tied to someone ("we live near Reno") is masked. Pattern hits other
+than PERSON never pass through the gate.
+
+- `gate=False` turns it off.
+- `gate_bypass=("PERSON",)` masks every PERSON whatever the gate says.
+- `("*",)` bypasses it for every type, as in `strict`.
+
+## Conflicts (`source_priority`, `type_conflicts`)
+
+Several stages can report the same value: spaCy and distilbert both read
+"Mercy General", or PatternScan and a plugin both read an ID. A value gets
+one surrogate, so the resolver (`core/detection/resolver.py`) keeps one
+candidate for it:
+
+1. **source rank.** `source_priority` lists the stages, best first. The
+   default is `pattern_scan`, `canonicaliser`, `structural`, `pii_tagger`,
+   `context_guard`, `entity_trace`. Stages not listed (plugins, unless you
+   add them) share the last rank.
+2. **type table.** If the best-ranked candidates read the value as
+   different public types, `type_conflicts` decides. It is keyed by the
+   sorted pair (`"ORG|PERSON"`), and its value is the type that stands or
+   `"score"` (no preference).
+3. **score.** The highest score wins, then the first reported.
+
+`source_priority=()` together with every pair set to `"score"` gives the
+score-only rule used before the resolver.
+
+Every pair in the default table is `"score"`. On the dev and devlarge
+splits, the resolver picked a different candidate from the score rule in
+6 of 264 injected groups and 15 of 381 natural ones, and none of those
+changes moved an injected value to another public type. So no evidence
+favours one type over another
+(`bench/realdata/resolver_effect.py`, `bench/results/resolver_effect.json`).
+
+Spans of different values that overlap are replaced longest first. The
+shorter value still gets its surrogate wherever it appears on its own.
+
+## Plugins
+
+A detector is any object with `detect(text, view) -> list[Candidate]`:
+
+- `text` is the message.
+- `view` is the canonicalised view of it (look-alikes folded, spelled
+  digits written as digits), with `view.original(s, e)` mapping a span back.
+  It is None when nothing needed rewriting.
+- `Candidate(start, end, type, score)` uses offsets into `text`. The type is
+  a public type or an internal name.
+
+```python
+import re
+import surrogateshield as ss
+from surrogateshield import Candidate, register_detector, preset
+
+PATTERN = re.compile(r"\bEMP-\d{6}\b")
+
+class EmployeeIds:
+    def detect(self, text, view):
+        return [Candidate(m.start(), m.end(), "ID", 0.99) for m in PATTERN.finditer(text)]
+
+register_detector("employee_ids", lambda stage: EmployeeIds())
+ss.config(detection=preset("balanced").with_plugin("employee_ids", types=["ID"],
+                                                   thresholds={"ID": 0.9}))
+```
+
+The factory receives the plugin's `Stage` (`model`, `thresholds`, `options`).
+A plugin's candidates get everything a model's do:
+
+- type routing;
+- per-type thresholds;
+- nothing inside a URL;
+- the relation gate;
+- the type's action.
+
+If a config lists a plugin that is not registered, detection fails closed
+with `DetectorUnavailable`.
+
+A package can register its detector through an entry point instead, which
+is loaded the first time a config lists the stage:
+
+```toml
+[project.entry-points."surrogateshield.detectors"]
+employee_ids = "mypkg.detectors:factory"
+```
+
+`examples/employee_id_detector.py` is a complete plugin, tested in
+`tests/test_detection_config.py`.
+
+## `surrogateshield doctor`
+
+`doctor` prints:
+
+- the effective config: preset, hash and source, each stage with its model,
+  revision, thresholds and budget, the actions and the gate;
+- one row per model that an enabled stage loads, showing whether it is
+  installed or cached at its revision, and its licence.
+
+`surrogateshield download` fetches those models now (`--all`: the models of
+the stages that are off too), so later runs make no network request.
+
+Flags:
+
+- `--cold-start` loads each model and times it;
+- `--show-config` prints the whole config as JSON;
+- `--preset` / `--detection-config` check another config;
+- `--smoke` masks one sample message.
+
+```
+$ surrogateshield doctor
+detection config: preset balanced, hash 1277eddc6c55a0f7 (default)
+  stage pattern_scan   on
+  stage canonicaliser  on
+  stage entity_trace   on, en_core_web_lg@3.8.0, fallback=0.75 high=0.9 low=0.7
+  stage context_guard  off, dslim/distilbert-NER@dfa2838a1273, accept=0.7
+  stage pii_tagger     on, pii-tagger-dv3s-40k@sha256:f9e58, ADDRESS=0.9 CREDENTIAL=0.97 HANDLE=0.95 ID=0.95 LOCATION=0.7 ORG=0.7 PERSON=0.7 PHONE=0.95
+  stage structural     on
+  actions        ADDRESS auto (others replace)
+  relation gate  on
+[  ok] spaCy model en_core_web_lg — version 3.8.0, licence MIT
+[  ok] ContextGuard model dslim/distilbert-NER@dfa2838a1273 — licence Apache-2.0
+[  ok] PIITagger model pii-tagger-dv3s-40k — huggingface.co/sherwinvishesh/surrogateshield-pii-tagger@c51cc8e09bd6, cached, weights sha256:f9e5821151ac…, licence MIT
+…
+```
+
+A disabled stage's model is listed but not required. Before the tagger is
+downloaded its row is a warning, `[warn] … not downloaded yet: the first scan
+downloads it from huggingface.co/sherwinvishesh/surrogateshield-pii-tagger;
+'surrogateshield download' does it now`. With `HF_HUB_OFFLINE` set it is a
+`[FAIL]`, as are weights that do not match the pin, and doctor exits
+non-zero.
+
