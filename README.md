@@ -1,80 +1,107 @@
 # SurrogateShield
 
-SurrogateShield is a Python library that acts as a privacy-preserving proxy between your application and any large language model. Before your text reaches the LLM it intercepts every piece of personally identifiable information, replaces each one with a realistic-looking fake value called a surrogate, and after the model responds it swaps the surrogates back to the real values; so the output your users see contains their own data, but the model never processed it.
+SurrogateShield is a Python library that acts as a privacy-preserving proxy between your application and any large language model. Before your text reaches the LLM it intercepts every piece of personally identifiable information, replaces each one with a realistic-looking fake value called a surrogate, and after the model responds it swaps the surrogates back to the real values; so the output your users see contains their own data, while the model worked with surrogates for every value that was detected.
 
 The library is self-contained, requires no external API, and works with any LLM provider: Anthropic Claude, OpenAI, Google Gemini, or a locally-hosted model.
 
 Paper available on arXiv: [https://arxiv.org/abs/2606.29567](https://arxiv.org/abs/2606.29567)
 
+On the sealed test-3 benchmark of real chat messages it let 0.8% of 3,677 personal values through, against 9.1% for GLiNER-PII and 31.6% for Microsoft Presidio; the few places it trailed are listed in one line under [Limitations](#limitations).
+
+
+**Install:** `pip install surrogateshield` (Python 3.10 or later), then `python -m spacy download en_core_web_lg`. This README describes 1.9.0; until that version is on PyPI, install from a checkout with `pip install ./python-library` (see Installation). The default preset downloads the PII tagger once from Hugging Face, at a pinned commit, and reads the local cache afterwards; `surrogateshield download` fetches it ahead of time. Detection fails closed: when a model is missing or fails, `mask()` and `scan()` raise `DetectorUnavailable` instead of sending text that was only partly checked.
 
 ## Why SurrogateShield exists
 
 When users interact with LLM-powered applications they routinely type their real names, phone numbers, email addresses, home addresses, dates of birth, and other sensitive fields without thinking about where that data goes. Most hosted LLMs log requests, use them for training, or process them on infrastructure you do not control.
 
-SurrogateShield solves this at the application layer. Rather than asking users to sanitize their own inputs, the library does it automatically and transparently. The user types real data, the model sees fake data, and the final answer is presented with the real data restored. From the user's perspective nothing changes; from a privacy perspective the model never had access to the sensitive fields.
+SurrogateShield solves this at the application layer. Rather than asking users to sanitize their own inputs, the library does it automatically and transparently. The user types real data, the model sees fake data, and the final answer is presented with the real data restored. From the user's perspective nothing changes; from a privacy perspective the model works with surrogates for the values that were detected.
 
 This approach is grounded in k-anonymity research (Sweeney 2000) and is designed to be useful in practice: it handles the common combinations of fields that can re-identify individuals even without any single obviously-sensitive field present, such as ZIP code + date of birth + gender.
 
 
 ## How it works
 
-SurrogateShield runs a three-stage detection cascade on every piece of text before it is sent to the LLM.
+SurrogateShield runs a layered detection pipeline on every piece of text before it is sent to the LLM. Which stages run is set by the detection preset: `balanced` (the default), `strict`, `fast` or `classic`.
 
-**Stage 1; PatternScan** uses regular expressions to detect structurally identifiable PII: email addresses, phone numbers, SSNs, credit card numbers, street addresses, IP addresses, API keys, dates, postal codes, and cryptocurrency wallet addresses. Pattern matching is done first so that these spans are masked before the NER models see the text.
+**PatternScan and the canonicaliser** use regular expressions to detect structurally identifiable PII: email addresses, phone numbers, SSNs and other IDs, credit card numbers, street addresses, IP addresses, URLs, handles, API keys and other credentials, dates, ages, postal codes, and cryptocurrency wallet addresses. The canonicaliser rewrites the text into extra views first ("priya dot raman at northwind dot io", spelled-out digits, full-width characters) so the same patterns also find values written the way people speak them. Pattern matching is done first so that these spans are masked before the models see the text.
 
-**Stage 2; EntityTrace** loads a spaCy NER model (en_core_web_lg by default) and extracts named entities: PERSON, GPE (geopolitical entity), LOC, ORG, and FAC. It skips any span already found by PatternScan. Entities above a high confidence threshold are confirmed immediately; entities in a middle band are passed to Stage 3 for a second opinion.
+**The PII tagger** (a DeBERTa-v3-small token classifier) reads names, organisations and places, and adds to the patterns on phones, IDs, addresses, handles and credentials. It lives on Hugging Face as [`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger) (MIT, ~565 MB): the first time it is needed it downloads once, at a fixed commit, and its weights are checked against the SHA-256 pin in the detection config.
 
-**Stage 3; ContextGuard** runs a HuggingFace transformer model (dslim/distilbert-NER, ~250 MB, downloaded once and cached) over the text that PatternScan and EntityTrace have not yet claimed. It also makes the final call on borderline entities from EntityTrace.
+**EntityTrace** loads a spaCy NER model (en_core_web_lg by default). In the `balanced` preset it reads places, and its names stand in only where no stage named anyone and the name is tied to a person (`options.ensemble`); in `classic` it reads names and organisations outright. It skips any span already found by PatternScan.
 
-After the three detection stages, four post-processing passes refine the entity list:
+**ContextGuard** runs a HuggingFace transformer model (dslim/distilbert-NER, ~250 MB) as an extra pass. It is off by default and is used by the `strict` and `classic` presets.
 
-- **Pass A** applies a structural regex to find company names followed by organizational suffixes (corporation, LLC, holdings, etc.) that the NER models might miss.
-- **Pass B** reclassifies any ORG entity whose text is a prefix of a detected email username, since spaCy sometimes labels standalone first names as ORG when the email address has already been masked.
-- **Pass C** deduplicates PERSON entities by word-component containment: if both "Mitchell" and "Sarah Mitchell" are detected, the shorter one is removed and the reconstruction pass handles any standalone occurrence using the full-name surrogate.
+After the detection stages, structural passes refine the entity list:
+
+- **Pass A** applies a structural regex to find company names followed by organizational suffixes (corporation, LLC, holdings, etc.) that the models might miss.
+- **Pass B** reclassifies any ORG entity whose text is a prefix of a detected email username, since a model sometimes labels standalone first names as ORG when the email address has already been masked.
+- **Pass C** deduplicates PERSON entities by word-component containment: if both "Raman" and "Priya Raman" are detected, the shorter one is removed and the reconstruction pass handles any standalone occurrence using the full-name surrogate.
 - **Pass D** is the topical geo-entity filter. GPE and LOC entities that appear only inside question sub-clauses ("what restaurants are near London?") are dropped because they are the topic of the query, not personal information. A geo entity that appears in any non-query clause is kept.
+
+A relation gate then keeps names that nothing in the text ties to the user, such as public figures, brands and authors, and a resolver keeps one candidate when several stages report the same value.
 
 The library also scores every detected entity set for quasi-identifier combination risk using the Sweeney k-anonymity model. Combinations like ZIP code + date of birth, name + SSN, or name + employer + city are flagged internally even when each individual field seems innocuous.
 
 Once detection is complete, MimicGen creates a realistic surrogate for each detected value using the Faker library; a fake email for a real email, a Luhn-valid credit card number for a real one, a properly formatted SSN, and so on. The surrogates are type-consistent and unique within a session.
 
-The original → surrogate mapping is inverted (surrogate → original) and stored in an in-memory ShadowMap. After the LLM responds, ResolvePass runs three passes to restore the original values: exact string replacement, component-word matching for multi-word surrogates the model may have split, and rapidfuzz fuzzy matching for cases where the model slightly reformatted a surrogate.
+The original → surrogate mapping is inverted (surrogate → original) and stored in an in-memory ShadowMap. After the LLM responds, ResolvePass runs four passes to restore the original values: exact string replacement, component-word matching for multi-word surrogates the model may have split, rapidfuzz fuzzy matching for cases where the model slightly reformatted a surrogate, and given-name / surname matching for a person the model calls by one name.
 
 
 ## Installation
 
-Install the package from PyPI:
+This README describes version 1.9.0. Install it from the repository root:
 
 ```bash
-pip install surrogateshield
+pip install ./python-library
 ```
 
-The spaCy language model (`en_core_web_lg`) downloads automatically on the first call to `mask()` or `scan()`; a one-time ~750 MB download that is cached locally. No manual step needed.
+or, from inside `python-library/`:
+
+```bash
+pip install .
+```
+
+Then install the spaCy language model once (~600 MB):
+
+```bash
+python -m spacy download en_core_web_lg
+```
+
+Detection fails closed: if a model is missing or fails, `mask()` and `scan()` raise `surrogateshield.DetectorUnavailable` (with the install command in the message) instead of sending text that was only partly checked.
 
 If you want the Rich terminal output (colour tables showing detected PII and surrogates), install the optional display dependency:
 
 ```bash
-pip install "surrogateshield[display]"
+pip install "./python-library[display]"
 ```
 
-The HuggingFace ContextGuard model (dslim/distilbert-NER, ~250 MB) is downloaded automatically on the first call to `mask()` and cached by the transformers library in your local HuggingFace cache directory. No manual step is required.
+The PII tagger used by the default `balanced` preset downloads once from Hugging Face ([`sherwinvishesh/surrogateshield-pii-tagger`](https://huggingface.co/sherwinvishesh/surrogateshield-pii-tagger), ~565 MB) on the first `mask()` or `scan()`, into the Hugging Face cache (`~/.cache/huggingface/hub`). To fetch it now instead, for example before going offline or in a container build:
+
+```bash
+surrogateshield download
+```
+
+Its weights are checked against their SHA-256 pin, and later runs read the cache with no network. A folder of the same name under `$SURROGATESHIELD_MODELS` (default `~/.cache/surrogateshield/models`) is used instead when there is one. If the weights cannot be fetched (or `HF_HUB_OFFLINE=1` is set and they are not cached), `mask()` raises `DetectorUnavailable`; the `classic` preset (`shield.config(detection="classic")`) works without them. It uses ContextGuard instead, which downloads the same way (below); `surrogateshield download --all` fetches both models ahead of time.
+
+The HuggingFace ContextGuard model (dslim/distilbert-NER, ~250 MB) is off by default. It is downloaded on first use only when `context_guard_enabled=True` (or a preset that uses it) is set, and cached by the transformers library in your local HuggingFace cache directory. Offline without that cache, `mask()` then raises `DetectorUnavailable`.
 
 
 ## Dependencies
 
-The core package installs the following automatically:
+Installing the package also installs the following:
 
 | Package | Purpose |
 |---|---|
 | `faker` | Generates realistic fake values for each PII type |
 | `cryptography` | AES-256-GCM encryption for the persistent shadow map |
 | `rapidfuzz` | Fuzzy string matching in the reconstruction pass |
-| `requests` | Address verification via OpenStreetMap Nominatim |
-| `spacy` | Named-entity recognition (Stage 2) |
-| `en-core-web-lg` | spaCy English NER model: downloaded automatically on first use (~750 MB, cached) |
-| `transformers` | HuggingFace NER pipeline (Stage 3 ContextGuard) |
+| `spacy` | Named-entity recognition (EntityTrace) |
+| `transformers` | The PII tagger and the optional ContextGuard pass |
+| `huggingface_hub` | Downloads the PII tagger once, at its pinned commit |
 | `torch` | Required backend for the transformers pipeline |
 
-Rich is optional (`pip install "surrogateshield[display]"`) and only affects terminal output formatting.
+The spaCy model `en_core_web_lg` is installed separately with `python -m spacy download en_core_web_lg`. Rich is optional (`pip install "./python-library[display]"`) and only affects terminal output formatting.
 
 
 ## Quick start: Claude (Anthropic)
@@ -86,18 +113,18 @@ import surrogateshield as shield
 client = anthropic.Anthropic()
 
 user_message = (
-    "Hi, I'm Sarah Mitchell. My email is sarah.mitchell@gmail.com, "
-    "my SSN is 123-45-6789, and I was born on 04/12/1990."
+    "Hi, I'm Priya Raman. My email is priya.raman@northwind.io, "
+    "my SSN is 512-44-7810, and I was born on 04/12/1990."
 )
 
-# shield.mask() runs the full detection cascade and replaces every detected PII
-# field with a realistic fake. The returned string is safe to send to any LLM.
-# With detailed_view=True (default) it also prints a colour table showing
-# what was detected and what surrogate replaced it.
+# shield.mask() runs the full detection pipeline and replaces every detected PII
+# field with a realistic fake. Send the returned string to the LLM.
+# With detailed_view=True (off by default) it also prints a colour table
+# showing what was detected and what surrogate replaced it.
 sanitized = shield.mask(user_message)
 # sanitized might look like:
-# "Hi, I'm Rachel Torres. My email is torresrachel@yahoo.com,
-#  my SSN is 876-32-1045, and I was born on 09/27/1983."
+# "Hi, I'm Yashica Ahluwalia. My email is yashica.ahluwalia@weaver.io,
+#  my SSN is 856-14-3146, and I was born on 01/07/1992."
 
 response = client.messages.create(
     model="claude-sonnet-4-6",
@@ -109,13 +136,36 @@ response = client.messages.create(
 # It extracts the text, looks up every surrogate in the session shadow map,
 # and returns the response with original values restored.
 restored = shield.unmask(response)
-# restored contains "Sarah Mitchell", "sarah.mitchell@gmail.com", etc.
+# restored contains "Priya Raman", "priya.raman@northwind.io", etc.
 print(restored)
 
-# shield.flush() clears the session: discards the shadow map and generates a
-# new session ID. Call it when a conversation or request lifecycle ends.
+# shield.flush() ends the session: discards the shadow map; the next call
+# starts a new session. Call it when a conversation or request lifecycle ends.
 shield.flush()
 ```
+
+
+## Sessions: one per conversation
+
+Every mapping lives in a `Session`. The module-level `mask()` / `unmask()` / `scan()` / `flush()` use the *current* session: one bound with `use_session()`, otherwise one created on first use by the calling thread or asyncio task. A session is never shared between threads or tasks implicitly, so two users of a web server cannot restore each other's values.
+
+In a server, make the session explicit, one per end-user conversation:
+
+```python
+import surrogateshield as shield
+
+session = shield.Session()                 # or Session("conv-42", storage_dir=...) to resume
+sanitized = session.mask(user_text)
+restored = session.unmask(llm_response)
+
+# or bind it for code that calls the module-level functions:
+with shield.use_session(session):
+    shield.unmask(shield.mask(user_text))
+
+session.close()                            # discard the mappings; a closed session raises on use
+```
+
+A `Session` is thread-safe (one lock per session). `Session.mask_result(text)` returns the sanitized text together with every detection and the replacements made; `Session.forget(value)` erases one value's mappings.
 
 
 ## Multi-turn conversation: OpenAI
@@ -151,7 +201,7 @@ def chat(user_input: str) -> str:
     restored_reply = shield.unmask(response)
 
     # Store the surrogate version in the API history so future turns
-    # are consistent — the model never sees real PII in any turn
+    # stay consistent and use the same surrogates
     api_history.append({"role": "assistant", "content": raw_reply})
     display_history.append({"role": "assistant", "content": restored_reply})
 
@@ -176,18 +226,17 @@ shield.flush()
 ## Google Gemini
 
 ```python
-import google.generativeai as genai
+from google import genai          # pip install google-genai
 import surrogateshield as shield
 
-genai.configure(api_key="YOUR_API_KEY")
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client()            # reads GEMINI_API_KEY
 
 user_message = "My credit card number is 4532015112830366 and my IP is 192.168.1.100."
 
 sanitized = shield.mask(user_message)
 # Credit card (Luhn-validated) and IP address are replaced with fakes
 
-response = model.generate_content(sanitized)
+response = client.models.generate_content(model="gemini-2.5-flash", contents=sanitized)
 
 # shield.unmask() accepts Gemini response objects directly via response.text
 restored = shield.unmask(response)
@@ -225,7 +274,7 @@ shield.flush()
 
 ## scan(): detect PII without changing anything
 
-`scan()` runs the full detection cascade and returns a dict mapping each detected value to its PII type. It does not generate surrogates, does not update the shadow map, and does not modify the text. Use it when you want to inspect what SurrogateShield would find before committing to masking.
+`scan()` runs the full detection cascade, with the same settings as `mask()`, and returns a list of `Detection` objects (`text`, `type`, `start`, `end`, `score`, `source`, `masked`), one per occurrence, in text order. `masked` is `False` for types in `pii_off`. It does not generate surrogates, does not update the shadow map, and does not modify the text. `scan(text, as_dict=True)` returns the old `{value: type}` dict.
 
 ```python
 import surrogateshield as shield
@@ -236,16 +285,8 @@ text = (
     "or write to 99 Market Street, San Francisco, CA 94105."
 )
 
-found = shield.scan(text)
-# {
-#   "alice.nguyen@company.org": "email",
-#   "Alice Nguyen": "PERSON",
-#   "+1-415-555-0198": "phone_us",
-#   "99 Market Street": "address",
-# }
-
-for value, pii_type in found.items():
-    print(f"{pii_type:20s}  {value}")
+for d in shield.scan(text):
+    print(f"{d.type:20s} {d.start:>4}-{d.end:<4} {d.text}")
 ```
 
 `pii_finder` is an alias for `scan()` provided for readability in data-pipeline contexts:
@@ -257,7 +298,7 @@ found = shield.pii_finder(text)
 
 ## pii_off: detect but do not replace specific types
 
-Sometimes you want SurrogateShield to detect every PII type for awareness but only replace a subset. `pii_off` accepts a list of type names or short aliases. Detected entities whose type matches an entry in `pii_off` are identified in the scan results but are not substituted in the output.
+Sometimes you want SurrogateShield to detect every PII type for awareness but only replace a subset. `pii_off` accepts a list of type names or short aliases. Detected entities whose type matches an entry in `pii_off` are not substituted in the output; they are reported with `masked=False` by `scan()` and in `shield.mask_result(text).unmasked`.
 
 ```python
 import surrogateshield as shield
@@ -292,29 +333,69 @@ Available aliases and what they expand to:
 | `crypto` | `crypto` |
 | `bank` | `us_bank_number` |
 | `license` | `us_driver_license` |
+| `username` | `handle` |
+| `password` | `credential` |
 
-You can also pass raw type strings directly, e.g. `pii_off=["email", "dob", "ssn"]`.
+You can also pass raw type strings directly, e.g. `pii_off=["email", "dob", "ssn"]`. Entries are case-insensitive: `person` and `PERSON` switch off the same type.
 
 
-## Service query detection
+## Address handling (v2)
 
-When a user asks a location-based question such as "find a coffee shop near 99 Market Street", replacing the address with a completely different fake address would make the LLM's answer useless. SurrogateShield detects these service queries and applies minimal address fuzzing instead: the house number is shifted by exactly ±1 (maximum real-world displacement ~20 metres) while the street name, city, and state are preserved verbatim.
+Addresses are parsed by a canonical structured parser that captures the FULL
+address — house number, directionals, street, apartment/suite/unit, city,
+state, and ZIP — as one unit. Numbered streets ("123 5th Ave"), PO boxes,
+ZIP+4, multi-line mailing blocks, comma-free formats, and highway forms
+("1500 Highway 50") are all recognized, and the components are never
+surrogated independently (the v1 "garbled address" failure mode).
+
+How the surrogate is built is controlled by `address_mode`:
+
+| Mode | Behaviour |
+|------|-----------|
+| `"shift"` | Only the house number changes, by up to ±`address_shift_range` (default ±1 — roughly one building). Street, city, state, ZIP, and the original formatting are preserved **byte-for-byte**: `789 Crescent Row, Tempe, AZ 85281` → `790 Crescent Row, Tempe, AZ 85281`. Maximum answer utility. |
+| `"replace"` | A structure-preserving fake: every component is replaced by a fake of the same shape in the same slot (`789 Crescent Row, Tempe, AZ 85281` → `412 Nguyen Row, South Debra, PR 90830`). Strongest privacy — no real component reaches the LLM. |
+| `"auto"` *(default)* | Context-aware: `shift` for service queries ("find a coffee shop near …"), `replace` for everything else. A service query on a sensitive topic (medical, mental-health, addiction, shelter or immigration keywords) keeps only the city and state: the street line becomes "my area". |
 
 ```python
 import surrogateshield as shield
 
-# Service query detection is on by default (service=True)
-text = "Find a parking space near 42 Baker Street, London."
-sanitized = shield.mask(text)
-# Address becomes "43 Baker Street, London" or "41 Baker Street, London"
-# The model can still answer usefully about that neighbourhood
-print(sanitized)
+# default: auto (a service query like this one is shifted)
+sanitized = shield.mask("Find parking near 42 Baker Street, London.")
+# → "Find parking near 43 Baker Street, London." (or 41)
 
-# To disable service query detection and always apply full surrogates:
+# strongest privacy: full structure-preserving replacement
+shield.config(address_mode="replace")
+
+# shift every address, service query or not
+shield.config(address_mode="shift")
+
+# widen the shift window to ±4
+shield.config(address_mode="shift", address_shift_range=4)
+```
+
+A shifted address never collides with another real address in the
+conversation ("789 Crescent Row" and "790 Crescent Row" both present are
+shifted apart automatically), and the same original always maps to the same
+surrogate within a session.
+
+No address is sent to a geocoder. The `verify` flag of the deprecated
+`fuzz_addresses` wrapper (a Nominatim existence check whose result never
+changed the output) is ignored.
+
+
+## Service query detection
+
+Service queries ("find a coffee shop near …", directions, weather) suppress
+replacement of standalone city/state names so the LLM can give useful local
+answers, and drive the `shift`/`replace` decision when `address_mode="auto"`.
+
+```python
+# Service query detection is on by default (service=True)
+# To disable it and always treat messages uniformly:
 shield.config(service=False)
 ```
 
-Sensitive topic override: even when a message matches the service-query pattern, if it contains keywords related to medical, legal, or social-service topics (HIV, abortion, shelter, domestic violence, rehab, etc.), full anonymization is always applied regardless.
+Sensitive topic override: even when a message matches the service-query pattern, if it contains keywords related to medical, mental-health, addiction, shelter or immigration topics (HIV, abortion, shelter, domestic violence, rehab, therapy, immigration, etc.), the street line is coarsened to "my area" and only the city and state are kept, regardless.
 
 
 ## Persistent shadow map
@@ -330,9 +411,8 @@ os.makedirs("/var/app/shadowmaps", exist_ok=True)
 
 shield.config(pii_mem="/var/app/shadowmaps")
 
-# Now every call to mask() writes an encrypted .shadowmap file
-# and a per-session .key file (owner-read-only, 0o600 permissions).
-# shield.flush() deletes both files and resets the session.
+# Now every call to mask() atomically writes an encrypted .shadowmap file
+# (owner-only, 0o600). shield.flush() deletes it and resets the session.
 sanitized = shield.mask("My name is Clara Oswald and my phone is 555-123-4567.")
 response_text = "Thanks Clara, I've noted your phone."
 restored = shield.unmask(response_text)
@@ -341,21 +421,17 @@ print(restored)
 shield.flush()
 ```
 
-The encryption scheme: a 32-byte random session key is generated per session and stored at `storage_dir/session_id.key` with owner-only permissions. An AES-256-GCM key is derived from the session key using HKDF-SHA256 with the session ID as salt. The shadow map file stores a fresh 12-byte nonce followed by the ciphertext. The nonce is regenerated on every save.
+The encryption scheme: a 32-byte device secret is generated once at `~/.surrogateshield/device.key` (`$SURROGATESHIELD_HOME` overrides the directory; file `0o600`, directory `0o700`). No key is stored next to the data. The AES-256-GCM key for a session is derived with HKDF-SHA256 (device secret as input, session ID as salt, `shadowmap-v1` as info), and the session ID is bound into the ciphertext as associated data. The file is `"SSv1"`, a fresh 12-byte nonce, then the ciphertext. A file that cannot be decrypted raises `CorruptStoreError` (it is moved aside, not deleted); a device secret that cannot be stored raises `ShadowMapStorageError`. Files written by 0.x (with a `<session>.key` beside them) are still read and are upgraded on the next save.
 
 
-## Turning off detailed output
+## Detailed output
 
-By default SurrogateShield prints a table to stdout after each `scan()`, `mask()`, and `unmask()` call. In production or when integrating into an API backend you will want to disable this:
+SurrogateShield prints nothing by default. For debugging, `detailed_view=True` prints a table after each `scan()`, `mask()` and `unmask()` call. The tables show the ORIGINAL values, so never enable it where stdout is logged:
 
 ```python
 import surrogateshield as shield
 
-shield.config(detailed_view=False)
-
-# All operations now run silently
-sanitized = shield.mask("Contact Bob at bob@example.com.")
-restored = shield.unmask("Thanks for reaching out, Bob.")
+shield.config(detailed_view=True)
 ```
 
 
@@ -365,7 +441,7 @@ SurrogateShield identifies quasi-identifier combinations based on Sweeney's k-an
 
 | Combination | Risk | Basis |
 |---|---|---|
-| ZIP code + DOB + Gender | High | 87% of the US population is uniquely identified by all three (Sweeney 2000) |
+| ZIP + DOB + Gender | High | 87% of the US population is uniquely identified by all three (Sweeney 2000) |
 | Postcode + DOB | High | UK ICO guidance: sufficient for re-identification |
 | Name + SSN | High | Enables direct identity theft |
 | Name + DOB | High | Standard identity verification combination worldwide |
@@ -381,70 +457,71 @@ When a quasi-identifier combination is detected in your text, SurrogateShield lo
 
 ## All detectable PII types
 
-| Type string | Detection method | Notes |
+Detections are reported under the internal type names below; each belongs to one of 13 public types used by the detection config and the benchmark.
+
+| Public type | Internal type strings | Detected by |
 |---|---|---|
-| `email` | Regex | Standard email format |
-| `ssn` | Regex + checksum | Formatted (123-45-6789) and bare 9-digit; disambiguated from ABA routing numbers |
-| `phone_us` | Regex | US format with optional country code |
-| `phone_uk` | Regex | UK format with +44 or leading 0 |
-| `phone_intl` | Regex | All other international formats |
-| `address` | Regex | Street number + name + type suffix; detected before NER so addresses are always protected |
-| `credit_card` | Regex + Luhn | 16-digit numbers; invalid Luhn checksums are rejected |
-| `dob` | Regex | ISO dates, slash/dash formats, written month names |
-| `ip_address` | Regex | IPv4 only |
-| `api_key` | Regex | OpenAI sk-, Anthropic ant-api-, AWS AKIA, GitHub ghp_/gho_, Google AIzaSy, Bearer tokens |
-| `gender_indicator` | Regex | "gender: female", "I am a man", he/him, she/her, they/them |
-| `postcode_uk` | Regex | Full UK postcode format |
-| `zip_us` | Regex | 5-digit and ZIP+4 |
-| `crypto` | Regex | Bitcoin P2PKH (1...), P2SH (3...), Bech32 (bc1...), Ethereum (0x...) |
-| `us_bank_number` | Regex + ABA checksum | 9-digit ABA routing numbers; validated by the standard checksum |
-| `us_driver_license` | Regex (context-gated) | Fires only when preceded by "driver's license", "DL", etc. |
-| `PERSON` | spaCy NER + HuggingFace NER | Personal names; two-model consensus for accuracy |
-| `ORG` | spaCy NER + structural regex | Organisation names; structural suffix detection catches names the NER models miss |
-| `GPE` | spaCy NER | Geopolitical entities (towns, regions); major cities, countries, and US states are on a whitelist and are never replaced |
-| `LOC` | spaCy NER | Other location references |
-| `FAC` | spaCy NER | Facilities: buildings, airports, stadiums |
+| `PERSON` | `PERSON`, `person` | PII tagger (spaCy and ContextGuard in `classic`) |
+| `ORG` | `ORG` | PII tagger + structural regex for legal suffixes |
+| `LOCATION` | `GPE`, `LOC`, `FAC`, `implicit_location` | PII tagger + spaCy; major cities, countries and US states are on a whitelist and are never replaced |
+| `ADDRESS` | `address`, `zip_us`, `postcode_uk` | Structured address parser + regex (US ZIP and ZIP+4, UK postcodes, PO boxes, multi-line blocks) + PII tagger |
+| `EMAIL` | `email` | Regex, including spoken forms ("at … dot …") |
+| `PHONE` | `phone_us`, `phone_uk`, `phone_intl` | Regex, including spelled-out digits + PII tagger |
+| `URL` | `url`, `hostname` | Regex |
+| `HANDLE` | `handle` | Regex (@handles and labelled usernames) + PII tagger |
+| `ID` | `id_number`, `ssn`, `passport`, `us_driver_license`, `license_plate`, `vin`, `credit_card`, `iban`, `us_bank_number`, `crypto` | Regex with validators (Luhn for cards, the ABA checksum for routing numbers, a keyword for driver's licenses) + PII tagger |
+| `CREDENTIAL` | `credential`, `api_key` | Regex (sk-, ghp_/gho_, AKIA, AIzaSy, Bearer tokens; labelled passwords, PINs and one-time codes) + PII tagger |
+| `NETWORK` | `ip_address`, `mac_address` | Regex |
+| `AGE` | `age` | Regex |
+| `DATE_OF_BIRTH` | `dob` | Regex (ISO dates, slash/dash formats, written month names) |
+
+Two more labels exist: `GENDER` (`gender_indicator`: "gender: female", "I am a man", pronoun statements) and `OTHER` (a label the map does not know, such as a plugin's own).
 
 The geographic whitelist covers all 50 US states, major countries, and cities with population above ~500 000. These are never replaced because they are not personally identifying on their own and replacing them would destroy answer quality.
 
 
 ## Surrogate generation
 
-Each PII type has a dedicated generator inside MimicGen that produces a realistic fake:
+Each PII type has a dedicated generator inside MimicGen. A surrogate keeps what an answer may depend on and nothing that identifies:
 
-- Email addresses are generated by Faker and look like real email addresses.
-- SSNs follow the 3-2-4 formatted pattern.
-- Phone numbers are formatted correctly for their region.
-- Credit card numbers pass the Luhn checksum.
-- ABA routing numbers pass the ABA checksum.
-- Dates of birth are drawn from the range of 18–80 year olds.
-- Street addresses are real Faker addresses reformatted to a single line.
-- Cryptocurrency addresses follow the correct character-set and length rules for each format.
-- Driver's license numbers use the California format (letter + 7 digits) as the most common template.
-- Names, company names, and city names come from Faker's locale-aware generators.
+- Names come from locale-aware name pools: one surrogate person per real person, of the same gender, script and form ("Rahul Verma" gets an Indian name, "Dr. Lopez" a title and a surname). A later first name, surname or e-mail address of that person maps to the same surrogate person.
+- Email addresses belong to the surrogate person: the local part follows the original's pattern (`first.last`, `flast`, …), free-mail domains (gmail.com, outlook.com, …) are kept and every other domain gets one fake domain for the whole session.
+- SSNs are valid (area 001–899 except 666, non-zero group and serial) and keep the original's layout: dashes, spaces or nine bare digits.
+- Phone numbers keep their country code, trunk prefix, grouping and any extension; only the subscriber digits change.
+- Credit card numbers keep the length, separators and network prefix of the original and pass the Luhn checksum. ABA routing numbers pass the ABA checksum. IBANs keep their country code and length and pass the mod-97 check.
+- Dates of birth move by 30 days to two years, never into the future, in the original's exact format (field order, separators, zero padding, month-name style, two-digit year).
+- Street addresses follow `address_mode` (see above): only the house number changes in `shift` mode; every component is replaced by a fake of the same shape in the same slot in `replace` mode.
+- Cities, regions and landmarks become a real place of the same kind and country; major cities, countries and US states are never masked in the first place.
+- Organisations keep their legal and industry words ("… Holdings LLC", "… Hospital") around a new name.
+- Cryptocurrency addresses keep the prefix, length and character set of their format (Bitcoin legacy, bech32, Ethereum, …).
+- Driver's licence numbers, licence plates, VINs, passports and other identifiers keep the character shape of the original: a digit for every digit, a letter of the same case for every letter, separators in place.
+- API keys keep their vendor prefix (`sk-`, `ghp_`, `AKIA`, …) and length; an IP address keeps its version, its private or public range and any port or CIDR suffix; a MAC address keeps its shape.
 
-All surrogates are unique within a session. If the same real value appears multiple times in a conversation, it always maps to the same surrogate.
+Every surrogate differs from, and is never a substring of, every original in the conversation, and no two values share a surrogate within a session. The only exception is a low-entropy value (an age, a gender word, a one- or two-character value), which is restored only within its own turn. If the same real value appears several times in a conversation it always maps to the same surrogate.
 
 
 ## Reconstruction passes
 
-After the LLM responds, `unmask()` runs three passes to restore original values:
+After the LLM responds, `unmask()` runs four passes to restore original values. Every pass matches whole values only, and a span one pass rewrote is protected from the later ones:
 
 **Pass 1; Exact replacement** replaces every surrogate in the shadow map that appears verbatim in the response. This handles the majority of cases.
 
-**Pass 2; Component matching** handles multi-word surrogates that the LLM used only partially. For example if the surrogate was "Rachel Torres" but the model wrote only "Rachel", the first-name component is matched and replaced with the original first name. This pass only runs on surrogates that Pass 1 did not find, to prevent partial matches from corrupting unrelated text.
+**Pass 2; Component matching** handles multi-word surrogates that the LLM used only partially. For example if the surrogate was "790 Crescent Row, Tempe, AZ" but the model wrote only "790 Crescent Row", that part is matched and replaced with the matching part of the original. This pass only runs on surrogates that Pass 1 did not find, to prevent partial matches from corrupting unrelated text.
 
-**Pass 3; Fuzzy matching** uses rapidfuzz `partial_ratio` to find surrogates that the model slightly reformatted (changed capitalisation, added punctuation, etc.). The threshold defaults to 85 out of 100.
+**Pass 3; Fuzzy matching** uses rapidfuzz `partial_ratio` to find multi-word surrogates that the model slightly reformatted (added punctuation, etc.); never numbers or single words. The threshold defaults to 85 out of 100.
+
+**Pass 4; Given name / surname** restores a person the model calls by one name: if the surrogate was "Yashica Ahluwalia" and the model wrote "Thanks, Yashica", the original first name is put back. A surname alone is restored only after a title ("Dr. Ahluwalia").
 
 
 ## config(): all parameters
 
 ```python
+# config() changes only the arguments you pass; the others keep their values.
 shield.config(
-    detailed_view=True,
+    detailed_view=False,
     # When True, prints Rich-formatted tables to stdout showing what was
-    # detected, what surrogates were assigned, and how many values were
-    # restored. Set to False for silent / production operation.
+    # detected (original values!), what surrogates were assigned, and how
+    # many values were restored. Off by default.
 
     pii_mem="temp",
     # Controls where the session shadow map is stored.
@@ -465,70 +542,133 @@ shield.config(
     # fuzzing instead of full surrogate replacement. The house number is
     # shifted ±1 and the rest of the address is preserved, allowing the LLM
     # to give useful location-based answers. Sensitive topics (medical,
-    # legal, shelter-related) always override this and force full replacement.
+    # mental-health, addiction, shelter, immigration) always override this:
+    # the street line becomes "my area" and only the city and state are kept.
 
     spacy_model="en_core_web_lg",
-    # The spaCy model used by EntityTrace for named-entity recognition.
-    # en_core_web_lg installs automatically with pip install surrogateshield.
-    # You can substitute a smaller model such as en_core_web_sm for faster
-    # inference at the cost of NER accuracy.
+    # The spaCy model EntityTrace loads. In the default detection config
+    # ("balanced") spaCy reads places, and stands in on a name only where no
+    # stage named anyone; the PII tagger reads names and organisations.
+    # Install it once with python -m spacy download en_core_web_lg.
 
-    context_guard_enabled=True,
-    # When True, a second NER pass using dslim/distilbert-NER (~250 MB) is
-    # run over text not already claimed by PatternScan or EntityTrace. It
-    # also makes the final call on borderline EntityTrace entities.
-    # Set to False to use spaCy only; this is faster but has lower recall
-    # for edge-case names and organisations.
+    context_guard_enabled=False,
+    # ContextGuard, a second NER pass with dslim/distilbert-NER (~250 MB),
+    # is off by default: the PII tagger reads names. True turns it back on.
 
-    entity_trace_high_threshold=0.85,
-    # spaCy entities with a confidence score at or above this value are
-    # confirmed immediately without passing to ContextGuard.
-
-    entity_trace_low_threshold=0.60,
-    # spaCy entities with a score at or above this value but below the high
-    # threshold are treated as borderline and sent to ContextGuard for
-    # verification. Entities below this value are discarded.
+    entity_trace_high_threshold=0.90,
+    entity_trace_low_threshold=0.70,
+    entity_trace_fallback_threshold=0.75,
+    # spaCy gives no per-entity score: EntityTrace scores PERSON 0.88,
+    # GPE / ORG 0.85, LOC 0.74, FAC 0.70, so these act as type gates.
+    # At or above high: kept. Between low and high: sent to ContextGuard
+    # when it is on, else kept at or above fallback. Below low: dropped.
 
     context_guard_threshold=0.70,
-    # The HuggingFace NER confidence score at or above which a borderline
-    # entity or a new ContextGuard-detected entity is promoted to confirmed.
-
-    entity_trace_fallback_threshold=0.65,
-    # Used only when context_guard_enabled=False. Borderline EntityTrace
-    # entities with a score at or above this value are promoted to confirmed
-    # directly, since there is no ContextGuard to consult.
+    # The ContextGuard score at or above which its entity is kept.
 
     fuzzy_threshold=85,
-    # The rapidfuzz partial_ratio score (0–100) used in the third
-    # reconstruction pass of unmask(). Lowering this value recovers more
-    # surrogates that the model reformatted, at the cost of a higher chance
-    # of incorrect replacements. 85 is a conservative default.
+    # The rapidfuzz score (0–100) used in the fuzzy reconstruction pass of
+    # unmask(). Lowering this value recovers more surrogates that the model
+    # reformatted, at the cost of a higher chance of incorrect replacements.
+    # 85 is a conservative default.
+
+    address_mode="auto",
+    # How detected addresses are surrogated:
+    #   "auto"    — shift for service queries, replace for everything else
+    #               (default).
+    #   "shift"   — house number shifted by up to ±address_shift_range;
+    #               street, city, state, ZIP, and formatting preserved
+    #               byte-for-byte.
+    #   "replace" — structure-preserving fake address (every component
+    #               faked, same shape, one unit).
+    # Raises ValueError for any other value.
+
+    address_shift_range=1,
+    # Maximum house-number delta for shift mode. Must be an integer >= 1.
+    # ±1 keeps the geographic error to roughly one building.
+
+    context_guard_model="dslim/distilbert-NER",
+    # The HuggingFace model used by ContextGuard. Any token-classification
+    # model id works, e.g. "dslim/bert-base-NER" for higher recall at the
+    # cost of speed.
+
+    context_guard_device=-1,
+    # Device for ContextGuard inference: -1 = CPU (default), 0+ = GPU id.
+
+    tagger_model="pii-tagger-dv3s-40k",
+    # The PII tagger: its name (a folder under $SURROGATESHIELD_MODELS, else
+    # downloaded from sherwinvishesh/surrogateshield-pii-tagger), a local
+    # folder holding a trained token classifier, or another Hugging Face
+    # model id ("org/name"). A model other than the default drops its pin.
+
+    tagger_revision="sha256:f9e5821151ac59ad6871bf53ffc91ab370a6f8704659a2d3007adf67a920a173",
+    # "sha256:<hex>" checks the weights file against that digest; any other
+    # value is a Hugging Face commit or branch to load; None loads the
+    # model's default branch unchecked.
+
+    tagger_device=-1,
+    # Device for the tagger: -1 = CPU (default), 0+ = GPU id, or a torch
+    # device string ("mps", "cuda:1").
+
+    detection=None,
+    # The detection config: a preset name ("balanced", "fast", "strict",
+    # "classic"), a DetectionConfig, or a dict of one. None: the config the
+    # environment names (SURROGATESHIELD_PRESET or
+    # SURROGATESHIELD_DETECTION_CONFIG), else "balanced". The stages, their
+    # models and per-type thresholds, and which stage may report each type
+    # are set there (ages: the patterns only, by default); see
+    # https://github.com/sherwinvishesh/SurrogateShield/blob/main/CONFIGURATION.md.
+    # The flat settings above apply on top of it where
+    # they differ from their defaults.
 )
 ```
+
+Every parameter is validated: an unknown `address_mode`, a threshold outside
+its range, or an unrecognized `pii_off` entry raises `ValueError` with an
+actionable message instead of failing silently later.
 
 
 ## Full API reference
 
-**`shield.config(**kwargs)`**
-Updates the global configuration object. All keyword arguments are optional; unspecified parameters retain their current values. Raises `ValueError` if `pii_mem` is not `"temp"` and the specified path does not exist or is not a directory.
+**`shield.config(**kwargs) -> Config`**
+Changes the settings new sessions start from, and the current session's settings. Only the arguments you pass change; the rest keep their current values. Raises `ValueError` on any invalid setting, and `RuntimeError` if `pii_mem` changes while the current session holds mappings.
 
-**`shield.scan(text: str) -> dict`**
-Runs the full detection cascade on `text` and returns `{detected_value: pii_type}`. Does not modify the text, does not generate surrogates, and does not update the shadow map. Always returns all detected PII regardless of `pii_off` settings. If `detailed_view=True`, prints a scan results table to stdout.
+**`shield.Session(session_id=None, *, config=None, storage_dir=None, seed=None)`**
+The masking state of one conversation, thread-safe. `session_id` must match `[A-Za-z0-9_-]{1,64}` (a random one is generated when omitted); `config` is a snapshot taken at construction, so later `shield.config()` calls do not change an explicit Session; `seed` makes the surrogates reproducible. Methods: `mask(text) -> str`, `mask_result(text) -> MaskResult`, `scan(text) -> list[Detection]`, `unmask(response) -> str`, `forget(value) -> int`, `close()`; property `mappings` (a copy of surrogate → original). Usable as a context manager (closes on exit). With `storage_dir`, the same `session_id` reopens the same encrypted map.
+
+**`shield.use_session(session)` / `shield.current_session()`**
+Bind a session for a `with` block (inherited by asyncio tasks and `asyncio.to_thread` started inside it) / return the session the module-level functions use.
+
+**`shield.scan(text: str, *, as_dict=False) -> list[Detection]`**
+Runs the detection cascade with the same settings as `mask()` and returns one `Detection(text, type, start, end, score, source, masked)` per occurrence. Does not modify the text, generate surrogates, or update the shadow map. Detections of `pii_off` types have `masked=False`. `as_dict=True` returns `{value: type}`.
 
 **`shield.pii_finder`**
 An alias for `shield.scan`. Provided for readability in data-pipeline contexts.
 
-**`shield.mask(text: str) -> str`**
-Runs detection, generates surrogates, applies substitutions, and updates the session shadow map. Respects `pii_off` settings; types in that list are detected but not replaced. Returns the sanitized string safe to send to an LLM. If `detailed_view=True`, prints a masking results table.
+**`shield.mask(text: str) -> str`** / **`shield.mask_result(text: str) -> MaskResult`**
+Runs detection, generates surrogates, applies substitutions, and updates the session shadow map. Types in `pii_off` are detected but not replaced; `mask_result()` reports them in `.unmasked`, together with `.detections` and `.replacements`. Raises `DetectorUnavailable` if a model is missing (nothing is masked) and `TypeError` if `text` is not a str.
 
 **`shield.unmask(response) -> str`**
-Accepts any LLM SDK response object or a plain string. Extracts the text content, looks up every surrogate in the session shadow map, and returns the response with original values restored. Tries Anthropic, OpenAI, and Gemini response formats automatically before falling back to `str(response)`. If `detailed_view=True`, prints a one-line restore confirmation.
+Accepts a plain string or an Anthropic / OpenAI / Gemini response (SDK object or dict). Anthropic responses: every text block is concatenated, so a reply made only of tool-use blocks gives `""`; an OpenAI tool-call reply with no content gives `""`; a Gemini response gives its `.text`, or the text parts of its first candidate when passed as a dict. Raises `TypeError` for `None` or an object with no text. Returns the text with original values restored.
+
+**`shield.forget(value) -> int`**
+Erases every mapping for one original value from the current session.
 
 **`shield.flush()`**
-Resets the session: clears the shadow map (and deletes disk files if in persistent mode), discards the MimicGen instance, and generates a new session ID. Call this at the end of every conversation or request lifecycle to prevent surrogate mappings from one session bleeding into the next. If `detailed_view=True`, prints a confirmation line.
+Ends the current session: clears its shadow map (and deletes its file in persistent mode). The next call starts a new session. Call this at the end of every conversation or request lifecycle.
 
+**Exceptions:** `DetectorUnavailable` (a detection model is missing or failed), `StorageError` (the persistent store cannot be read or written), `TypeError`, `ValueError`.
+
+
+## Limitations
+
+**Limitations:** it trailed on the 96 real values in natural text (29 leaked; GLiNER-PII 16–20, Presidio 27), on some single types (3 of 13 on test-3, 8 of 13 on Nemotron-PII, URL most of all) and on speed and memory (plain Presidio is about 5× faster and lighter); it came out ahead on every other test. Every number, with its command, is in [`bench/results/README.md`](https://github.com/sherwinvishesh/SurrogateShield/blob/main/bench/results/README.md).
 
 ## Troubleshooting
+
+**PII tagger download on first run**
+
+The first `mask()` or `scan()` with the default preset downloads the tagger (~565 MB) from Hugging Face and logs one line saying so. It is cached in `~/.cache/huggingface/hub` and checked against its pin; later runs read it from there with no network. `surrogateshield download` does this ahead of time, and `surrogateshield doctor` reports whether it is cached. Behind a proxy or mirror, the usual `HF_ENDPOINT` and `HF_HOME` variables apply.
 
 **ContextGuard model download on first run**
 
@@ -536,13 +676,13 @@ The first call to `mask()` with `context_guard_enabled=True` will download dslim
 
 **Slow first call**
 
-Both spaCy and the HuggingFace model are loaded lazily on the first call. Subsequent calls are fast. If you want to pre-warm the models at application startup:
+The PII tagger and spaCy (and ContextGuard, when it is on) are loaded lazily on the first call. Subsequent calls are fast. If you want to pre-warm the models at application startup:
 
 ```python
 import surrogateshield as shield
 
-# Pre-warm by scanning an empty string — loads the models now
-shield.scan("")
+# Pre-warm by scanning a short text — loads the models now
+shield.Session().scan("warm up")
 ```
 
 **Disabling ContextGuard for faster inference**
@@ -551,7 +691,7 @@ shield.scan("")
 shield.config(context_guard_enabled=False)
 ```
 
-This skips the HuggingFace model entirely. spaCy alone handles NER with slightly lower recall.
+This is the default: the distilbert pass is skipped and the PII tagger reads names. Use it to switch ContextGuard off again after a preset or an earlier call turned it on.
 
 **Silent operation in production**
 
